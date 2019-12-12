@@ -20,16 +20,9 @@ class GameVariantTU1Data {
    // bloom, which is to spec).
    //
    constructor(stream) { // sizeof == 0xB
-      if (stream) {
-         this.flags = TU1Flags.make(stream.readUInt32()); // 00
-         this.precisionBloom            = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 04
-         this.armorLockDamageDrain      = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 05
-         this.armorLockDamageDrainLimit = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 06
-         this.activeCamoEnergyBonus     = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 07
-         this.activeCamoEnergy          = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 08
-         this.magnumDamage              = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 09
-         this.magnumFireRate            = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 0A
-      } else {
+      if (stream)
+         this.parse(stream);
+      else {
          //
          // Vanilla settings:
          //
@@ -43,5 +36,15 @@ class GameVariantTU1Data {
          this.magnumFireRate            = 0.6102362204724409;
          this.precisionBloom            = 0.7677165354330708;
       }
+   }
+   parse(stream) {
+      this.flags = TU1Flags.make(stream.readUInt32()); // 00
+      this.precisionBloom            = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 04
+      this.armorLockDamageDrain      = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 05
+      this.armorLockDamageDrainLimit = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 06
+      this.activeCamoEnergyBonus     = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 07
+      this.activeCamoEnergy          = stream.readCompressedFloat(8, 0.0,  2.0, false, true); // 08
+      this.magnumDamage              = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 09
+      this.magnumFireRate            = stream.readCompressedFloat(8, 0.0, 10.0, false, true); // 0A
    }
 }

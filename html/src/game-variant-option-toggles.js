@@ -1,14 +1,18 @@
 class GameVariantOptionToggleList {
    constructor(size, stream) {
       this.options = [];
-      if (!stream) {
+      this.size    = size;
+      if (!stream)
          this.options = new Array(size);
-         return;
-      }
+      else
+         this.parse(stream);
+   }
+   parse(stream) {
+      this.options = [];
       //
       // word count: (bits + 15) / 16
       //
-      let wordCount = Math.floor((size + 15) / 16);
+      let wordCount = Math.floor((this.size + 15) / 16);
       for(let i = 0; i < wordCount; i++) {
          let word = stream.readUInt16({ endianness: ENDIAN_LITTLE });
          //
@@ -20,7 +24,7 @@ class GameVariantOptionToggleList {
          //
          for(let j = 0; j < 16; j++) {
             let index = (i * 16) + j;
-            if (index >= size)
+            if (index >= this.size)
                break;
             this.options[index] = (word & (1 << j)) != 0;
          }

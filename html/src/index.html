@@ -41,6 +41,15 @@ document.getElementById("read").onclick = async function() {
    blocks["chdr"] = new GameVariantContentHeader(stream);
    blocks["mpvr"] = new GameVariantMultiplayerData(stream);
    console.log(blocks);
+   //
+   let variant = new ReachGameVariant();
+   stream.backToStart();
+   try {
+      variant.parse(stream);
+   } catch (e) {
+      console.error(e);
+   }
+   console.log(variant);
 };
       </script>
    </body>

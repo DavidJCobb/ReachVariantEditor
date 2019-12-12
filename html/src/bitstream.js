@@ -24,6 +24,9 @@ class Bitstream {
    reportOffset(t) {
       console.log(`${t ? t + " - " : ""}Bitstream is currently at 0x${this.getBytePos().toString(16)}+${this.getBitOffset()}b.`);
    }
+   backToStart() {
+      this.offset = 0;
+   }
    skipBits(count) {
       if (count <= 0)
          return;
