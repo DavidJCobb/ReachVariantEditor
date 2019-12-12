@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <type_traits>
 #include "bitstream.h"
+#include "type_traits.h"
 
 namespace cobb {
    enum class bitnumber_no_presence_bit {};
@@ -86,15 +88,20 @@ namespace cobb {
       bool       swap         = false, // whether to bitswap the value after loading it as bits
       int        offset       = 0, // offset added to the file before saving; must be subtracted when loaded
       typename   presence_bit = bitnumber_no_presence_bit, // if std::true_type or std::false_type, then the game writes a bit indicating whether the value is present; if the bit equals the specified type, the value is present
-      underlying if_absent    = 0 // if the bitnumber has a presence bit, this value is assigned when the bit indicates absence
+      underlying if_absent    = underlying() // if the bitnumber has a presence bit, this value is assigned when the bit indicates absence
    > class bitnumber {
       public:
          using underlying_type = underlying;
+         using underlying_int  = cobb::enum_or_int_to_int_t<underlying_type>; // int type if (underlying_type) is an enum
          static constexpr int  bitcount        = bitcount;
          static constexpr bool bitswap_on_read = swap;
          static constexpr int  value_offset    = offset;
          //
-         underlying_type value = underlying(0);
+         underlying_type value = underlying_type();
+         //
+         bitnumber() {};
+         bitnumber(int v) : value(underlying_type(v)) {};
+         bitnumber(underlying_type v) : value(v) {};
          //
       protected:
          static constexpr uint32_t read_flags = (bitswap_on_read ? bitstream_read_flags::swap : 0);
@@ -103,7 +110,7 @@ namespace cobb {
             bool bit = stream.read_bits(1);
             if (bit == presence_bit::value)
                return true;
-            this->value = if_absent;
+            this->value = underlying_type(if_absent);
             return false;
          }
          template<> bool _is_present<bitnumber_no_presence_bit>(cobb::bitstream& stream) {
@@ -113,27 +120,20 @@ namespace cobb {
          void read(cobb::bitstream& stream) noexcept {
             if (!this->_is_present<presence_bit>(stream))
                return;
-            this->value = stream.read_bits<underlying_type>(bitcount, read_flags) - value_offset;
+            this->value = underlying_type(stream.read_bits<underlying_int>(bitcount, read_flags) - value_offset);
             if (std::is_signed_v<underlying_type>)
                //
                // We have to apply the sign bit ourselves, or (offset) will break some signed 
                // values. Main example is mpvr::activity, which is incremented by 1 before 
                // saving (in case its value is -1) and then serialized as a 3-bit number.
                //
-               this->value = cobb::apply_sign_bit(this->value, bitcount);
+               this->value = underlying_type(cobb::apply_sign_bit((underlying_int)this->value, bitcount));
          }
          void read(cobb::bytestream& stream) noexcept {
             stream.read(this->value);
          }
          //
          // Operators:
-         //
-         bool operator==(const underlying_type& other) const noexcept { return this->value == other; };
-         bool operator!=(const underlying_type& other) const noexcept { return this->value != other; };
-         bool operator>=(const underlying_type& other) const noexcept { return this->value >= other; };
-         bool operator<=(const underlying_type& other) const noexcept { return this->value <= other; };
-         bool operator> (const underlying_type& other) const noexcept { return this->value > other; };
-         bool operator< (const underlying_type& other) const noexcept { return this->value < other; };
          //
          bitnumber& operator=(const underlying_type& other) noexcept {
             this->value = other;
@@ -159,6 +159,8 @@ namespace cobb {
             this->value %= other;
             return *this;
          }
+         //
+         operator underlying_int() const noexcept { return (underlying_int)this->value; }; // this cast is used implicitly for conversion operators, so we don't need to define overloads for those
    };
    class bitbool {
       public:
@@ -171,6 +173,9 @@ namespace cobb {
          static constexpr underlying_type if_absent = false;
          //
          underlying_type value = false;
+         //
+         bitbool() {};
+         bitbool(bool v) : value(v) {};
          //
          void read(cobb::bitstream& stream) noexcept {
             this->value = stream.read_bits<int>(1);

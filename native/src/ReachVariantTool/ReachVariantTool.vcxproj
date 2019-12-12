@@ -146,19 +146,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="formats\block.h" />
     <ClInclude Include="formats\content_author.h" />
     <ClInclude Include="formats\game_variant.h" />
     <ClInclude Include="game_variants\base.h" />
+    <ClInclude Include="game_variants\player_traits.h" />
     <ClInclude Include="helpers\bitnumber.h" />
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
+    <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -166,6 +165,7 @@
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="game_variants\base.cpp" />
+    <ClCompile Include="game_variants\player_traits.cpp" />
     <ClCompile Include="helpers\bitstream.cpp" />
     <ClCompile Include="helpers\files.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />

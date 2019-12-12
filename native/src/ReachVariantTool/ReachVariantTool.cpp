@@ -19,7 +19,7 @@ int main() {
    printf("Header desc: %S\n", variant->contentHeader.data.description);
    printf("Embedded name: %S\n", variant->multiplayer.variantHeader.title);
    printf("Embedded desc: %S\n", variant->multiplayer.variantHeader.description);
-   printf("Loadout camera time: %d\n", variant->multiplayer.options.respawn.loadoutCamTime);
+   printf("Loadout camera time: %d\n", (int)variant->multiplayer.options.respawn.loadoutCamTime);
 
 
    return 0;

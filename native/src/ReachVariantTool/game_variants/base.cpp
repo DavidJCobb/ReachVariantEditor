@@ -87,16 +87,16 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       m.suddenDeathTime.read(stream);
       m.gracePeriod.read(stream);
       //
-      r.flags = stream.read_bits(4);
-      r.livesPerRound = stream.read_bits(6);
-      r.teamLivesPerRound = stream.read_bits(7);
-      stream.read(r.respawnTime);
-      stream.read(r.suicidePenalty);
-      stream.read(r.betrayalPenalty);
-      r.respawnGrowth = stream.read_bits(4);
-      r.loadoutCamTime = stream.read_bits(4);
-      r.traitsDuration = stream.read_bits(6);
-      // TODO: traits
+      r.flags.read(stream);
+      r.livesPerRound.read(stream);
+      r.teamLivesPerRound.read(stream);
+      r.respawnTime.read(stream);
+      r.suicidePenalty.read(stream);
+      r.betrayalPenalty.read(stream);
+      r.respawnGrowth.read(stream);
+      r.loadoutCamTime.read(stream);
+      r.traitsDuration.read(stream);
+      r.traits.read(stream);
    }
    return true;
 }

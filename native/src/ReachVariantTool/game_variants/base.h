@@ -5,6 +5,7 @@
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/files.h"
+#include "player_traits.h"
 
 class BlamHeader {
    public:
@@ -77,16 +78,16 @@ class ReachBlockMPVR {
             cobb::bitnumber<5, uint8_t> gracePeriod;
          } misc;
          struct {
-            uint8_t flags; // 4 bits
-            uint8_t livesPerRound; // 6 bits
-            uint8_t teamLivesPerRound; // 7 bits
-            uint8_t respawnTime = 5;
-            uint8_t suicidePenalty = 5;
-            uint8_t betrayalPenalty = 5;
-            uint8_t respawnGrowth; // 4 bits
-            uint8_t loadoutCamTime = 10; // 4 bits
-            uint8_t traitsDuration; // 6 bits
-            // TODO: traits
+            cobb::bitnumber<4, uint8_t> flags;
+            cobb::bitnumber<6, uint8_t> livesPerRound;
+            cobb::bitnumber<7, uint8_t> teamLivesPerRound;
+            cobb::bytenumber<uint8_t> respawnTime = 5;
+            cobb::bytenumber<uint8_t> suicidePenalty = 5;
+            cobb::bytenumber<uint8_t> betrayalPenalty = 5;
+            cobb::bitnumber<4, uint8_t> respawnGrowth;
+            cobb::bitnumber<4, uint8_t> loadoutCamTime = 10;
+            cobb::bitnumber<6, uint8_t> traitsDuration;
+            ReachPlayerTraits traits;
          } respawn;
       } options;
       //
