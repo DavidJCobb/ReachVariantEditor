@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+   <head>
+      <title>Reach Game Variant Reader</title>
+   </head>
+   <body>
+      <input type="file" id="gvar-file" />
+      <input type="button" id="read" value="Read" />
+      <script src="third-party/pako/pako.js"></script>
+      <script src="utils.js"></script>
+      <script src="enums-and-flags.js"></script>
+      <script src="bitstream.js"></script>
+      <script src="bitnumber.js"></script>
+      <script src="variant-content-author.js"></script>
+      <script src="localized-string-table.js"></script>
+      <script src="game-variant-loadout.js"></script>
+      <script src="game-variant-map-permissions.js"></script>
+      <script src="game-variant-option-toggles.js"></script>
+      <script src="game-variant-player-rating-params.js"></script>
+      <script src="game-variant-player-traits.js"></script>
+      <script src="game-variant-team.js"></script>
+      <script src="game-variant-tu1-options.js"></script>
+      <script src="reach-game-variant.js"></script>
+      <script src="raw/megalo-option.js"></script>
+      <script src="raw/game_variant_blam.js"></script>
+      <script src="raw/game_variant_chdr.js"></script>
+      <script src="raw/game_variant_mpvr.js"></script>
+      <script>
+document.getElementById("read").onclick = async function() {
+   let node = document.getElementById("gvar-file");
+   let file = node.files[0];
+   if (!file) {
+      console.warn("No file selected.");
+      return;
+   }
+   let buffer = await file.arrayBuffer();
+   //
+   let stream = new Bitstream(buffer);
+   let blocks = {};
+   blocks["_blf"] = new GameVariantBlamHeader(stream);
+   blocks["chdr"] = new GameVariantContentHeader(stream);
+   blocks["mpvr"] = new GameVariantMultiplayerData(stream);
+   console.log(blocks);
+};
+      </script>
+   </body>
+</html>
