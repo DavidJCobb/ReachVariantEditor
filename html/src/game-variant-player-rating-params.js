@@ -11,6 +11,9 @@ class GameVariantPlayerRatingParams {
    parse(stream) {
       this.unknownFloats = [];
       for(let i = 0; i < 15; i++)
+         //
+         // TODO: JavaScript is using the wrong endianness here; C++ on x86 apparently isn't
+         //
          this.unknownFloats[i] = stream.readFloat();
       this.unknownFlag = stream.readBits(1) != 0;
    }

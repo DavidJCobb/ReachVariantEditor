@@ -9,8 +9,12 @@
 #include "../helpers/bitnumber.h"
 #include "../helpers/files.h"
 #include "loadouts.h"
+#include "map_permissions.h"
 #include "megalo_options.h"
+#include "option_toggles.h"
+#include "player_rating_params.h"
 #include "player_traits.h"
+#include "tu1_options.h"
 
 class BlamHeader {
    public:
@@ -146,6 +150,38 @@ class ReachBlockMPVR {
          std::vector<ReachMegaloOption> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
+      MegaloStringIndex stringTableIndexPointer;
+      ReachStringTable localizedName = ReachStringTable(1, 0x180);
+      ReachStringTable localizedDesc = ReachStringTable(1, 0xC00);
+      ReachStringTable localizedCategory = ReachStringTable(1, 0x180);
+      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, false, 1> engineIcon;
+      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, false, 1> engineCategory;
+      ReachMapPermissions mapPermissions;
+      ReachPlayerRatingParams playerRatingParams;
+      cobb::bytenumber<uint16_t> scoreToWin;
+      cobb::bitbool unkF7A6;
+      cobb::bitbool unkF7A7;
+      struct {
+         struct {
+            ReachGameVariantEngineOptionToggles disabled;
+            ReachGameVariantEngineOptionToggles hidden;
+         } engine;
+         struct {
+            ReachGameVariantMegaloOptionToggles disabled;
+            ReachGameVariantMegaloOptionToggles hidden;
+         } megalo;
+      } optionToggles;
+      //
+      // KSoft.Tool code suggests that megalo data goes here, but if 
+      // that's true, then how come we seem to be getting perfect TU 
+      // data as-is? A non-TU variant had 0.76 bloom, a TU variant 
+      // had 0.65, and that makes the TU variant 85% of the other.
+      //
+      // TODO: Return to the JavaScript-based prototype for now: 
+      // write code to load Megalo data in full, try loading it from 
+      // this spot in the file, and see what happens.
+      //
+      ReachGameVariantTU1Options titleUpdateData;
       //
       bool read(cobb::bitstream&) noexcept;
 };

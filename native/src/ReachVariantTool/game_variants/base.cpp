@@ -155,5 +155,30 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       //
       sd.strings.read(stream);
    }
+   this->stringTableIndexPointer.read(stream);
+   this->localizedName.read(stream);
+   this->localizedDesc.read(stream);
+   this->localizedCategory.read(stream);
+   this->engineIcon.read(stream);
+   this->engineCategory.read(stream);
+   this->mapPermissions.read(stream);
+   this->playerRatingParams.read(stream);
+   this->scoreToWin.read(stream);
+   this->unkF7A6.read(stream);
+   this->unkF7A7.read(stream);
+   {
+      auto& ot = this->optionToggles;
+      auto& e = ot.engine;
+      auto& m = ot.megalo;
+      //
+      e.disabled.read(stream);
+      e.hidden.read(stream);
+      //
+      m.disabled.read(stream);
+      m.hidden.read(stream);
+   }
+   if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
+      this->titleUpdateData.read(stream);
+
    return true;
 }

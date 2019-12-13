@@ -86,9 +86,19 @@ namespace cobb {
             for (int i = 0; i < std::extent<T>::value; i++)
                out[i] = this->read_bits<decltype(out[i])>(cobb::bits_in<T>, std::is_signed_v<T> ? read_flags::is_signed : 0);
          };
+         template<int = 0> void read(float& out) noexcept {
+            union {
+               uint32_t i;
+               float    f;
+            } value;
+            value.i = this->read_bits<uint32_t>(32);
+            out = value.f;
+         }
          template<int = 0> void read(bool& out) noexcept {
             out = this->read_bits(1) != 0;
          }
+         //
+         float read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept;
          //
          inline void pad(int bytes) {
             return;

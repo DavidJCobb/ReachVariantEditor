@@ -304,7 +304,6 @@ let traits = {
          meters_025: 3,
          // 4
          meters_075: 5,
-         // 6
          meters_150: 6,
       },
       directional_damage_indicator: {

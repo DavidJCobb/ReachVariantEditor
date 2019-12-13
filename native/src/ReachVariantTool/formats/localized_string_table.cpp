@@ -66,7 +66,7 @@ void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
 void ReachStringTable::read(cobb::bitstream& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    this->strings.resize(count);
-   for (int i = 0; i < count; i++)
+   for (size_t i = 0; i < count; i++)
       this->strings[i].read_offsets(stream, *this);
    if (count) {
       auto buffer = this->_make_buffer(stream);

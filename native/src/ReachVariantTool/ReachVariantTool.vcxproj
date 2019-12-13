@@ -147,14 +147,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="formats\block.h" />
+    <ClInclude Include="formats\compressed_float.h" />
     <ClInclude Include="formats\content_author.h" />
     <ClInclude Include="formats\game_variant.h" />
     <ClInclude Include="formats\localized_string_table.h" />
     <ClInclude Include="game_variants\base.h" />
     <ClInclude Include="game_variants\loadouts.h" />
+    <ClInclude Include="game_variants\map_permissions.h" />
     <ClInclude Include="game_variants\megalo_options.h" />
+    <ClInclude Include="game_variants\option_toggles.h" />
+    <ClInclude Include="game_variants\player_rating_params.h" />
     <ClInclude Include="game_variants\player_traits.h" />
+    <ClInclude Include="game_variants\tu1_options.h" />
     <ClInclude Include="helpers\bitnumber.h" />
+    <ClInclude Include="helpers\bitset.h" />
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
     <ClInclude Include="helpers\files.h" />
