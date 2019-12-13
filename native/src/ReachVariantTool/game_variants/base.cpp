@@ -66,13 +66,7 @@ bool GameVariantHeader::read(cobb::bytestream& stream) noexcept {
 
 void ReachTeamData::read(cobb::bitstream& stream) noexcept {
    this->flags.read(stream);
-   //
-   #if _DEBUG
-      printf("Parsing of team data is not implemented! We need code for string tables.\n");
-   #else
-      static_assert(false, "NOT IMPLEMENTED");
-   #endif
-   //
+   this->name.read(stream);
    this->initialDesignator.read(stream);
    this->spartanOrElite.read(stream);
    this->colorPrimary.read(stream);

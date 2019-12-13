@@ -86,5 +86,8 @@
     <ClCompile Include="game_variants\player_traits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="formats\localized_string_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

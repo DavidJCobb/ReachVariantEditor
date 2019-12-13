@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReachVariantTool", "ReachVariantTool\ReachVariantTool.vcxproj", "{4309CC76-1E1D-4A23-B8C9-4CA61E035069}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{8415ABA1-0327-40B4-B9EF-8C813969224A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,19 @@ Global
 		{4309CC76-1E1D-4A23-B8C9-4CA61E035069}.Release|x64.Build.0 = Release|x64
 		{4309CC76-1E1D-4A23-B8C9-4CA61E035069}.Release|x86.ActiveCfg = Release|Win32
 		{4309CC76-1E1D-4A23-B8C9-4CA61E035069}.Release|x86.Build.0 = Release|Win32
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Debug|x64.ActiveCfg = Debug|x64
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Debug|x64.Build.0 = Debug|x64
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Debug|x86.ActiveCfg = Debug|Win32
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Debug|x86.Build.0 = Debug|Win32
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Release|x64.ActiveCfg = Release|x64
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Release|x64.Build.0 = Release|x64
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Release|x86.ActiveCfg = Release|Win32
+		{8415ABA1-0327-40B4-B9EF-8C813969224A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {242193A1-E07B-4FC5-A690-CE684559C901}
 	EndGlobalSection
 EndGlobal

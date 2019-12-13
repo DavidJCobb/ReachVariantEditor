@@ -69,7 +69,7 @@ class ReachPowerupData {
 class ReachTeamData {
    public:
       cobb::bitnumber<4, uint8_t> flags = 0;
-      ReachStringTable name;
+      ReachStringTable name = ReachStringTable(1, 0x20, 5, 6);
       cobb::bitnumber<4, uint8_t> initialDesignator;
       cobb::bitnumber<1, uint8_t> spartanOrElite;
       cobb::bytenumber<int32_t>   colorPrimary;
