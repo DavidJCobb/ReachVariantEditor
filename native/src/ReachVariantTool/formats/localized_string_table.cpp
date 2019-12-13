@@ -32,15 +32,32 @@ void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
    for (uint32_t i = 0; i < size; i++)
       *(uint8_t*)((std::uintptr_t)buffer + i) = stream.read_bits<uint8_t>(8);
    if (is_compressed) {
+      //
+      // The buffer has four bytes indicating the length of the decompressed data, which is 
+      // redundant. We'll read those four bytes just as a sanity check, but we need to skip 
+      // them -- zlib needs to receive (buffer + 4) as its input.
+      //
       uint32_t uncompressed_size_2 = *(uint32_t*)(buffer);
       if (uncompressed_size_2 != uncompressed_size)
          if (_byteswap_ulong(uncompressed_size_2) != uncompressed_size)
             printf("WARNING: String table sizes don't match: Bungie 0x%08X versus zlib 0x%08X.", uncompressed_size, uncompressed_size_2);
       void* final = malloc(uncompressed_size);
       //
-      // TODO: We need to use -15 window bits; this indicates that there is no header.
+      // It's normally pointless to check that an allocation succeeded because if it didn't, 
+      // that means you're out of memory and there's basically nothing you can do about that 
+      // anyway. However, if we screwed up and misread the size, then we may try to allocate 
+      // a stupidly huge amount of memory. In that case, allocation will (hopefully) fail and 
+      // (final) will be nullptr, and that's worth handling.
       //
-      uncompress((Bytef*)final, (uLongf*)&uncompressed_size_2, (Bytef*)buffer, size);
+      if (final) {
+         Bytef* input = (Bytef*)((std::uintptr_t)buffer + sizeof(uncompressed_size_2));
+         int resultCode = uncompress((Bytef*)final, (uLongf*)&uncompressed_size_2, input, size - sizeof(uncompressed_size_2));
+         if (Z_OK != resultCode) {
+            free(final);
+            final = nullptr;
+            printf("Failed to decompress zlib stream. Failure code was %d.\n", resultCode);
+         }
+      }
       free(buffer);
       buffer = final;
    }
