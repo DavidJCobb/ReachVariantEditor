@@ -37,6 +37,9 @@ void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
          if (_byteswap_ulong(uncompressed_size_2) != uncompressed_size)
             printf("WARNING: String table sizes don't match: Bungie 0x%08X versus zlib 0x%08X.", uncompressed_size, uncompressed_size_2);
       void* final = malloc(uncompressed_size);
+      //
+      // TODO: We need to use -15 window bits; this indicates that there is no header.
+      //
       uncompress((Bytef*)final, (uLongf*)&uncompressed_size_2, (Bytef*)buffer, size);
       free(buffer);
       buffer = final;
@@ -44,7 +47,7 @@ void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
    return buffer;
 }
 void ReachStringTable::read(cobb::bitstream& stream) noexcept {
-   int count = stream.read_bits(this->count_bitlength);
+   size_t count = stream.read_bits(this->count_bitlength);
    this->strings.resize(count);
    for (int i = 0; i < count; i++)
       this->strings[i].read_offsets(stream, *this);

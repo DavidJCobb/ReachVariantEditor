@@ -1,11 +1,15 @@
 #pragma once
+#include <array>
 #include <cstdint>
+#include <vector>
 #include "../formats/block.h"
 #include "../formats/content_author.h"
 #include "../formats/localized_string_table.h"
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/files.h"
+#include "loadouts.h"
+#include "megalo_options.h"
 #include "player_traits.h"
 
 class BlamHeader {
@@ -132,7 +136,16 @@ class ReachBlockMPVR {
             cobb::bitnumber<2, uint8_t> designatorSwitchType;
             ReachTeamData teams[8];
          } team;
+         struct {
+            cobb::bitnumber<2, uint8_t> flags;
+            std::array<ReachLoadoutPalette, 6> palettes; // indices: reach::loadout_palette
+         } loadouts;
       } options;
+      struct {
+         std::vector<ReachMegaloPlayerTraits> traits;
+         std::vector<ReachMegaloOption> options;
+         ReachStringTable strings = ReachStringTable(112, 0x4C00);
+      } scriptData;
       //
       bool read(cobb::bitstream&) noexcept;
 };

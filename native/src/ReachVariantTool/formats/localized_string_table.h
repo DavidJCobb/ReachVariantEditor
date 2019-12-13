@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include "../helpers/bitwise.h"
+#include "../helpers/bitnumber.h"
 #include "../helpers/bitstream.h"
 
 namespace reach {
@@ -21,6 +22,8 @@ namespace reach {
    };
    constexpr int language_count = (int)language::polish + 1;
 };
+
+using MegaloStringIndex = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
 
 class ReachStringTable;
 

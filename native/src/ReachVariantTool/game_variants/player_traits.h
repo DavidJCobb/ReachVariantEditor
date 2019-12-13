@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
+#include "../formats/localized_string_table.h"
 
 namespace reach {
    //
@@ -294,4 +295,13 @@ class ReachPlayerTraits {
 };
 
 class ReachMegaloPlayerTraits : public ReachPlayerTraits {
+   public:
+      MegaloStringIndex nameIndex;
+      MegaloStringIndex descIndex;
+      //
+      void read(cobb::bitstream& stream) noexcept {
+         this->nameIndex.read(stream);
+         this->descIndex.read(stream);
+         ReachPlayerTraits::read(stream);
+      }
 };

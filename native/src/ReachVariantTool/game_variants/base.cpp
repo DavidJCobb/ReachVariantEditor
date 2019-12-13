@@ -92,6 +92,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       auto& s = o.social;
       auto& a = o.map;
       auto& t = o.team;
+      auto& l = o.loadouts;
       //
       m.flags.read(stream);
       m.timeLimit.read(stream);
@@ -132,6 +133,27 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
          t.teams[i].read(stream);
       //
+      l.flags.read(stream);
+      for (size_t i = 0; i < l.palettes.size(); i++)
+         l.palettes[i].read(stream);
+   }
+   {
+      auto& sd = this->scriptData;
+      auto& t = sd.traits;
+      auto& o = sd.options;
+      int count;
+      //
+      count = stream.read_bits(cobb::bitcount(16));
+      t.resize(count);
+      for (int i = 0; i < count; i++)
+         t[i].read(stream);
+      //
+      count = stream.read_bits(cobb::bitcount(16));
+      o.resize(count);
+      for (int i = 0; i < count; i++)
+         o[i].read(stream);
+      //
+      sd.strings.read(stream);
    }
    return true;
 }

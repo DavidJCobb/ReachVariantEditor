@@ -183,6 +183,8 @@ namespace cobb {
          void read(cobb::bytestream& stream) noexcept {
             stream.read(this->value);
          }
+         //
+         operator underlying_type() const noexcept { return this->value; };
    };
 
    // bytenumber
