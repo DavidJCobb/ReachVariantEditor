@@ -4,6 +4,12 @@
 #include "../helpers/bitnumber.h"
 
 namespace reach {
+   //
+   // TODO: A lot of these enums have values that aren't ever exposed in the UI; we should 
+   // try to determine those values' function through testing. Additionally, some enums are 
+   // able to hold bits past the last known value; we should see if the game engine uses 
+   // those bits, or if they're valid in general.
+   //
    enum class ability : int8_t {
       // -4: random?
       unchanged        = -3,
@@ -31,6 +37,21 @@ namespace reach {
       unchanged = 0,
       disabled  = 1,
       enabled   = 2,
+   };
+   enum class damage_multiplier : uint8_t {
+      unchanged =  0,
+      value_000 =  1,
+      value_025 =  2,
+      value_050 =  3,
+      value_075 =  4,
+      value_090 =  5,
+      value_100 =  6,
+      value_110 =  7,
+      value_125 =  8,
+      value_150 =  9,
+      value_200 = 10,
+      value_300 = 11,
+      // bitfield can hold 12, 13, 14, and 15, though they're likely not valid
    };
    enum class damage_resist : uint8_t {
       unchanged    =  0,
@@ -82,11 +103,53 @@ namespace reach {
       each_4      = 14,
       // bitfield can hold 15, though it's likely not valid
    };
+   enum class health_rate : uint8_t {
+      unchanged = 0,
+      // 1 (possibly decay)
+      // 2 (possibly decay)
+      // 3 (possibly decay)
+      value_000 = 4,
+      value_050 = 5,
+      value_090 = 6,
+      value_100 = 7,
+      value_110 = 8,
+      value_200 = 9,
+   };
    enum class infinite_ammo : uint8_t {
       unchanged  = 0,
       disabled   = 1,
       enabled    = 2,
       bottomless = 3,
+   };
+   enum class movement_speed : uint8_t {
+      unchanged =  0,
+      value_000 =  1,
+      value_025 =  2,
+      value_050 =  3,
+      value_075 =  4,
+      value_090 =  5,
+      value_100 =  6,
+      value_110 =  7,
+      value_120 =  8,
+      //  9 == 130?
+      // 10 == 140?
+      value_150 = 11,
+      // 12 == 160?
+      // 13 == 170?
+      // 14 == 180?
+      // 15 == 190?
+      value_200 = 16,
+      value_300 = 17,
+      // bitfield can hold up to 31, though values past the known end likely aren't valid
+   };
+   enum class player_gravity : uint8_t {
+      unchanged = 0,
+      value_050 = 1,
+      value_075 = 2,
+      value_100 = 3,
+      value_150 = 4,
+      value_200 = 5,
+      // bitfield can hold up to 15, though values past the known end likely aren't valid
    };
    enum class radar_range : uint8_t {
       unchanged  = 0,
@@ -105,6 +168,33 @@ namespace reach {
       normal    = 3,
       enhanced  = 4,
       // bitfield can hold 5, 6, and 7, though they're likely not valid
+   };
+   enum class shield_multiplier : uint8_t {
+      unchanged = 0,
+      value_000 = 1,
+      value_100 = 2,
+      value_150 = 3,
+      value_200 = 4,
+      value_300 = 5,
+      value_400 = 6,
+      // bitfield can hold 7, but that's probably not a valid value
+   };
+   enum class shield_rate : uint8_t {
+      unchanged =  0,
+      // 1 (possibly decay)
+      // 2 (possibly decay)
+      // 3 (possibly decay)
+      value_000 =  4,
+      value_010 =  5,
+      value_025 =  6,
+      value_050 =  7,
+      value_075 =  8,
+      value_090 =  9,
+      value_100 = 10,
+      value_110 = 11,
+      value_125 = 12,
+      value_150 = 13,
+      value_200 = 14,
    };
    enum class vehicle_usage : uint8_t {
       unchanged      = 0,
@@ -157,9 +247,9 @@ class ReachPlayerTraits {
       struct {
          cobb::bitnumber<4, reach::damage_resist> damageResist = reach::damage_resist::unchanged;
          cobb::bitnumber<3, uint8_t> healthMult;
-         cobb::bitnumber<4, uint8_t> healthRate;
-         cobb::bitnumber<3, uint8_t> shieldMult;
-         cobb::bitnumber<4, uint8_t> shieldRate;
+         cobb::bitnumber<4, reach::health_rate> healthRate = reach::health_rate::unchanged;
+         cobb::bitnumber<3, reach::shield_multiplier> shieldMult = reach::shield_multiplier::unchanged;
+         cobb::bitnumber<4, reach::shield_rate> shieldRate = reach::shield_rate::unchanged;
          cobb::bitnumber<4, uint8_t> shieldDelay;
          cobb::bitnumber<2, reach::bool_trait> headshotImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<3, uint8_t> vampirism;
@@ -167,8 +257,8 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, uint8_t> unk09;
       } defense;
       struct {
-         cobb::bitnumber<4, uint8_t> damageMult;
-         cobb::bitnumber<4, uint8_t> meleeMult;
+         cobb::bitnumber<4, reach::damage_multiplier> damageMult = reach::damage_multiplier::unchanged;
+         cobb::bitnumber<4, reach::damage_multiplier> meleeMult  = reach::damage_multiplier::unchanged;
          cobb::bitnumber<8, reach::weapon> weaponPrimary   = reach::weapon::unchanged;
          cobb::bitnumber<8, reach::weapon> weaponSecondary = reach::weapon::unchanged;
          cobb::bitnumber<4, reach::grenade_count> grenadeCount = reach::grenade_count::unchanged;
@@ -181,8 +271,8 @@ class ReachPlayerTraits {
          cobb::bitnumber<8, reach::ability> ability = reach::ability::unchanged;
       } offense;
       struct {
-         cobb::bitnumber<5, uint8_t> speed;
-         cobb::bitnumber<4, uint8_t> gravity;
+         cobb::bitnumber<5, reach::movement_speed> speed = reach::movement_speed::unchanged;
+         cobb::bitnumber<4, reach::player_gravity> gravity = reach::player_gravity::unchanged;
          cobb::bitnumber<4, reach::vehicle_usage> vehicleUsage = reach::vehicle_usage::unchanged;
          cobb::bitnumber<2, uint8_t> unknown;
          cobb::bitnumber<9, int16_t, false, 0, std::true_type, -1> jumpHeight = -1;

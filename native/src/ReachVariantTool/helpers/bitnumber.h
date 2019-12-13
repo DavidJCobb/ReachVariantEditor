@@ -101,7 +101,7 @@ namespace cobb {
          //
          bitnumber() {};
          bitnumber(int v) : value(underlying_type(v)) {};
-         bitnumber(underlying_type v) : value(v) {};
+         template<typename = std::enable_if_t<!std::is_same_v<int, underlying_type>>> bitnumber(underlying_type v) : value(v) {};
          //
       protected:
          static constexpr uint32_t read_flags = (bitswap_on_read ? bitstream_read_flags::swap : 0);

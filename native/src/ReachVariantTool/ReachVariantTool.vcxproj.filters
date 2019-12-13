@@ -57,6 +57,9 @@
     <ClInclude Include="helpers\type_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="formats\localized_string_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

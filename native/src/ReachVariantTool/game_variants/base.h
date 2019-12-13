@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "../formats/block.h"
 #include "../formats/content_author.h"
+#include "../formats/localized_string_table.h"
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/files.h"
@@ -59,6 +60,26 @@ class ReachBlockCHDR {
          return false;
       }
 };
+
+class ReachPowerupData {
+   public:
+      ReachPlayerTraits traits;
+      cobb::bitnumber<7, uint8_t> duration;
+};
+class ReachTeamData {
+   public:
+      cobb::bitnumber<4, uint8_t> flags = 0;
+      ReachStringTable name;
+      cobb::bitnumber<4, uint8_t> initialDesignator;
+      cobb::bitnumber<1, uint8_t> spartanOrElite;
+      cobb::bytenumber<int32_t>   colorPrimary;
+      cobb::bytenumber<int32_t>   colorSecondary;
+      cobb::bytenumber<int32_t>   colorText;
+      cobb::bitnumber<5, uint8_t> fireteamCount = 1;
+      //
+      void read(cobb::bitstream&) noexcept;
+};
+
 class ReachBlockMPVR {
    public:
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
@@ -89,6 +110,28 @@ class ReachBlockMPVR {
             cobb::bitnumber<6, uint8_t> traitsDuration;
             ReachPlayerTraits traits;
          } respawn;
+         struct {
+            cobb::bitbool observers = false;
+            cobb::bitnumber<2, uint8_t> teamChanges;
+            cobb::bitnumber<5, uint8_t> flags;
+         } social;
+         struct {
+            cobb::bitnumber<6, uint8_t> flags;
+            ReachPlayerTraits baseTraits;
+            cobb::bytenumber<int8_t> weaponSet;
+            cobb::bytenumber<int8_t> vehicleSet;
+            struct {
+               ReachPowerupData red;
+               ReachPowerupData blue;
+               ReachPowerupData yellow;
+            } powerups;
+         } map;
+         struct {
+            cobb::bitnumber<3, uint8_t> scoring;
+            cobb::bitnumber<3, uint8_t> species;
+            cobb::bitnumber<2, uint8_t> designatorSwitchType;
+            ReachTeamData teams[8];
+         } team;
       } options;
       //
       bool read(cobb::bitstream&) noexcept;

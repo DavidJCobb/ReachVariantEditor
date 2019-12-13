@@ -64,6 +64,22 @@ bool GameVariantHeader::read(cobb::bytestream& stream) noexcept {
    return true;
 }
 
+void ReachTeamData::read(cobb::bitstream& stream) noexcept {
+   this->flags.read(stream);
+   //
+   #if _DEBUG
+      printf("Parsing of team data is not implemented! We need code for string tables.\n");
+   #else
+      static_assert(false, "NOT IMPLEMENTED");
+   #endif
+   //
+   this->initialDesignator.read(stream);
+   this->spartanOrElite.read(stream);
+   this->colorPrimary.read(stream);
+   this->colorSecondary.read(stream);
+   this->colorText.read(stream);
+   this->fireteamCount.read(stream);
+}
 
 bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
@@ -79,6 +95,9 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       auto& o = this->options;
       auto& m = o.misc;
       auto& r = o.respawn;
+      auto& s = o.social;
+      auto& a = o.map;
+      auto& t = o.team;
       //
       m.flags.read(stream);
       m.timeLimit.read(stream);
@@ -97,6 +116,28 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       r.loadoutCamTime.read(stream);
       r.traitsDuration.read(stream);
       r.traits.read(stream);
+      //
+      s.observers.read(stream);
+      s.teamChanges.read(stream);
+      s.flags.read(stream);
+      //
+      a.flags.read(stream);
+      a.baseTraits.read(stream);
+      a.weaponSet.read(stream);
+      a.vehicleSet.read(stream);
+      a.powerups.red.traits.read(stream);
+      a.powerups.blue.traits.read(stream);
+      a.powerups.yellow.traits.read(stream);
+      a.powerups.red.duration.read(stream);
+      a.powerups.blue.duration.read(stream);
+      a.powerups.yellow.duration.read(stream);
+      //
+      t.scoring.read(stream);
+      t.species.read(stream);
+      t.designatorSwitchType.read(stream);
+      for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
+         t.teams[i].read(stream);
+      //
    }
    return true;
 }

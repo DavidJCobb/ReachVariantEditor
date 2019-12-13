@@ -149,6 +149,7 @@
     <ClInclude Include="formats\block.h" />
     <ClInclude Include="formats\content_author.h" />
     <ClInclude Include="formats\game_variant.h" />
+    <ClInclude Include="formats\localized_string_table.h" />
     <ClInclude Include="game_variants\base.h" />
     <ClInclude Include="game_variants\player_traits.h" />
     <ClInclude Include="helpers\bitnumber.h" />
