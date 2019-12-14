@@ -111,7 +111,7 @@ namespace {
          using _enum = reach::megalo_value_enums::object;
          //
          if (value >= (uint32_t)_enum::global_object_0 && value <= (uint32_t)_enum::global_object_15) {
-            cobb::sprintf(out, "Global.Object[%d]", value - (uint32_t)_enum::global_object_0 + '0');
+            cobb::sprintf(out, "Global.Object[%d]", value - (uint32_t)_enum::global_object_0);
             return;
          }
          //
@@ -153,11 +153,11 @@ namespace {
          using _enum = reach::megalo_value_enums::player;
          //
          if (value >= (uint32_t)_enum::global_player_0 && value <= (uint32_t)_enum::global_player_7) {
-            cobb::sprintf(out, "Global.Player[%d]", value - (uint32_t)_enum::global_player_0 + '0');
+            cobb::sprintf(out, "Global.Player[%d]", value - (uint32_t)_enum::global_player_0);
             return;
          }
          if (value >= (uint32_t)_enum::player_0 && value <= (uint32_t)_enum::player_15) {
-            cobb::sprintf(out, "Player %d", value - (uint32_t)_enum::player_0 + '1');
+            cobb::sprintf(out, "Player %d", value - (uint32_t)_enum::player_0 + 1);
             return;
          }
          switch ((_enum)value) {
@@ -183,11 +183,11 @@ namespace {
          using _enum = reach::megalo_value_enums::team;
          //
          if (value >= (uint32_t)_enum::global_team_0 && value <= (uint32_t)_enum::global_team_7) {
-            cobb::sprintf(out, "Global.Team[%d]", value - (uint32_t)_enum::global_team_0 + '0');
+            cobb::sprintf(out, "Global.Team[%d]", value - (uint32_t)_enum::global_team_0);
             return;
          }
          if (value >= (uint32_t)_enum::team_0 && value <= (uint32_t)_enum::team_7) {
-            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team_0 + '1');
+            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team_0 + 1);
             return;
          }
          switch ((_enum)value) {
@@ -227,7 +227,7 @@ namespace {
                return;
          }
          if (value >= (uint32_t)_enum::team3 && value <= (uint32_t)_enum::team8) {
-            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team3 + '3');
+            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team3 + 3);
             return;
          }
          cobb::sprintf(out, "unknown:%u", value);
@@ -662,9 +662,9 @@ void ComplexValue::to_string(std::string& out) const noexcept {
       }
       auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
       if (func) {
-         func(this->constant, out);
+         func(this->enum_value, out);
       } else {
-         cobb::sprintf(out, "%u", this->constant);
+         cobb::sprintf(out, "%u", this->enum_value);
       }
    } else if (subtype->has_constant()) {
       cobb::sprintf(out, "const %d", this->constant);

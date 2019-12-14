@@ -588,7 +588,7 @@ namespace reach {
          // the value isn't a script-specified constant (i.e. a read-only game state value).
          //
          extern std::array<ComplexValueSubtype, 43> scalar;
-         extern std::array<ComplexValueSubtype,  4> player;
+         extern std::array<ComplexValueSubtype,  4> player; // 2 bits to identify the subtype
          extern std::array<ComplexValueSubtype,  8> object;
          extern std::array<ComplexValueSubtype,  6> team;
          extern std::array<ComplexValueSubtype,  7> timer;
