@@ -1,4 +1,65 @@
 #include "value_types.h"
+#include "../../helpers/strings.h"
+
+namespace reach {
+   namespace megalo {
+      extern int bits_for_index_type(MegaloValueIndexType it) {
+         switch (it) {
+            // icon - unknown
+            case MegaloValueIndexType::incident:        return cobb::bitcount(reach::megalo::max_incident_types - 1);
+            case MegaloValueIndexType::loadout_palette: return cobb::bitcount(6 - 1);
+            case MegaloValueIndexType::name:            return cobb::bitcount(reach::megalo::max_string_ids - 1);
+            case MegaloValueIndexType::object_filter:   return cobb::bitcount(reach::megalo::max_script_labels - 1);
+            case MegaloValueIndexType::object_type:     return cobb::bitcount(reach::megalo::max_object_types - 1);
+            case MegaloValueIndexType::option:          return cobb::bitcount(reach::megalo::max_script_options - 1);
+            case MegaloValueIndexType::player_traits:   return cobb::bitcount(reach::megalo::max_script_traits - 1);
+            case MegaloValueIndexType::sound:           return cobb::bitcount(reach::megalo::max_engine_sounds - 1);
+            case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats);
+            case MegaloValueIndexType::string:          return cobb::bitcount(reach::megalo::max_variant_strings - 1);
+            case MegaloValueIndexType::trigger:         return cobb::bitcount(reach::megalo::max_triggers - 1);
+            case MegaloValueIndexType::widget:          return cobb::bitcount(reach::megalo::max_script_widgets - 1);
+         }
+         return 0;
+      }
+      extern int bits_for_enum(MegaloValueEnum st) {
+         switch (st) {
+            case MegaloValueEnum::add_weapon_mode:   return 2;
+            case MegaloValueEnum::c_hud_destination: return 1;
+            case MegaloValueEnum::compare_operator:  return 3;
+            case MegaloValueEnum::drop_weapon_mode:  return 1;
+            case MegaloValueEnum::grenade_type:      return 1;
+            case MegaloValueEnum::math_operator:     return 5;
+            case MegaloValueEnum::object:            return 5;
+            case MegaloValueEnum::pickup_priority:   return 2;
+            case MegaloValueEnum::player:            return 5;
+            case MegaloValueEnum::team:              return 5;
+            case MegaloValueEnum::team_designator:   return 4;
+            case MegaloValueEnum::team_disposition:  return 2;
+            case MegaloValueEnum::waypoint_icon:     return 5;
+            case MegaloValueEnum::waypoint_priority: return 2;
+         }
+         return 0;
+      }
+      extern int offset_for_enum(MegaloValueEnum st) {
+         switch (st) {
+            case MegaloValueEnum::team_designator:
+            case MegaloValueEnum::waypoint_icon:
+            case MegaloValueEnum::team:
+               return 1;
+         }
+         return 0;
+      }
+      //
+      extern int bits_for_flags(MegaloValueFlagsMask fm) {
+         switch (fm) {
+            case MegaloValueFlagsMask::create_object_flags: return 2;
+            case MegaloValueFlagsMask::killer_type: return 3;
+            case MegaloValueFlagsMask::player_unused_mode_flags: return 2;
+         }
+         return 0;
+      }
+   }
+}
 
 namespace {
    using _MST = MegaloScopeType;    // just a shorthand
@@ -7,7 +68,7 @@ namespace {
 namespace reach {
    namespace megalo {
       namespace complex_values {
-         extern std::array<ComplexValueSubtype, 43> c_scalar = {
+         extern std::array<ComplexValueSubtype, 43> scalar = {
             ComplexValueSubtype::constant<int16_t>("Int16"),
             ComplexValueSubtype::variable<_MST::player,  _MVT::number>("Player.Number"),
             ComplexValueSubtype::variable<_MST::team,    _MVT::number>("Team.Number"),
@@ -52,13 +113,13 @@ namespace reach {
             ComplexValueSubtype("Powerup Duration, Yellow", true),
             ComplexValueSubtype("Death Event Damage Type", true), // byte
          };
-         extern std::array<ComplexValueSubtype, 4> player = {
+         extern std::array<ComplexValueSubtype,  4> player = {
             ComplexValueSubtype("Player (Explicit)", MegaloValueEnum::player),
             ComplexValueSubtype::variable<_MST::player, _MVT::player>("Player.Player"),
             ComplexValueSubtype::variable<_MST::object, _MVT::player>("Object.Player"),
             ComplexValueSubtype::variable<_MST::team,   _MVT::player>("Team.Player"),
          };
-         extern std::array<ComplexValueSubtype, 8> object = {
+         extern std::array<ComplexValueSubtype,  8> object = {
             ComplexValueSubtype("Object (Explicit)", MegaloValueEnum::object),
             ComplexValueSubtype::variable<_MST::player, _MVT::object>("Player.Object"),
             ComplexValueSubtype::variable<_MST::object, _MVT::object>("Object.Object"),
@@ -68,7 +129,7 @@ namespace reach {
             ComplexValueSubtype::variable<_MST::object, _MVT::player>("Object.Player.Slave"),
             ComplexValueSubtype::variable<_MST::team,   _MVT::player>("Team.Player.Slave"),
          };
-         extern std::array<ComplexValueSubtype, 6> team = {
+         extern std::array<ComplexValueSubtype,  6> team = {
             ComplexValueSubtype("Team (Explicit)", MegaloValueEnum::team),
             ComplexValueSubtype::variable<_MST::player, _MVT::team>("Player.Team"),
             ComplexValueSubtype::variable<_MST::object, _MVT::team>("Object.Team"),
@@ -76,7 +137,7 @@ namespace reach {
             ComplexValueSubtype("Player.OwnerTeam", MegaloValueEnum::player),
             ComplexValueSubtype("Object.OwnerTeam", MegaloValueEnum::object),
          };
-         extern std::array<ComplexValueSubtype, 7> timer = {
+         extern std::array<ComplexValueSubtype,  7> timer = {
             ComplexValueSubtype::variable<_MST::globals, _MVT::timer>("Global.Timer"),
             ComplexValueSubtype::variable<_MST::player,  _MVT::timer>("Player.Timer"),
             ComplexValueSubtype::variable<_MST::team,    _MVT::timer>("Team.Timer"),
@@ -89,37 +150,88 @@ namespace reach {
    }
 };
 
-bool SimpleValue::read(cobb::bitstream& stream) noexcept {
+void SimpleValue::to_string(std::string& out) const noexcept {
+   out.clear();
+   auto underlying = this->type->simple_type;
+   switch (underlying) {
+      case SimpleValueType::integer_8_signed:
+      case SimpleValueType::integer_16_signed:
+         cobb::sprintf(out, "%d", this->value.integer_signed);
+         return;
+      case SimpleValueType::integer_8_unsigned:
+         cobb::sprintf(out, "%u", this->value.integer_unsigned);
+         return;
+      case SimpleValueType::boolean:
+         out = this->value.boolean ? "true" : "false";
+         return;
+      case SimpleValueType::enumeration:
+         cobb::sprintf(out, "enum:%d", this->value.integer_signed); // for now
+         return;
+      case SimpleValueType::flags:
+         cobb::sprintf(out, "flags:%08X", this->value.integer_unsigned); // for now
+         return;
+      case SimpleValueType::index:
+         cobb::sprintf(out, "index:%u", this->value.integer_unsigned); // for now
+         break;
+      case SimpleValueType::vector3:
+         cobb::sprintf(out, "(%d, %d, %d)", this->value.vector3.x, this->value.vector3.y, this->value.vector3.z);
+         return;
+   }
+}
+void SimpleValue::read(cobb::bitstream& stream) noexcept {
    int  bitcount  = 0;
    bool is_signed = false;
-   switch (this->type) {
+   switch (this->type->simple_type) {
+      case SimpleValueType::integer_8_signed:
+         is_signed = true;
+         // and fall through:
       case SimpleValueType::integer_8_unsigned:
          bitcount = 8;
-         break;
-      case SimpleValueType::integer_8_signed:
-         bitcount  = 8;
-         is_signed = true;
          break;
       case SimpleValueType::integer_16_signed:
          bitcount  = 16;
          is_signed = true;
          break;
    }
-   switch (this->type) {
+   switch (this->type->simple_type) {
       case SimpleValueType::boolean:
          stream.read(this->value.boolean);
          break;
       case SimpleValueType::enumeration:
-         bitcount = reach::megalo::bits_for_enum(this->enumeration);
-         this->value.integer_unsigned = stream.read_bits(bitcount) - reach::megalo::offset_for_enum(this->enumeration);
+         bitcount = reach::megalo::bits_for_enum(this->type->enumeration);
+         assert(bitcount && "Unknown enumeration; add it to reach::megalo::bits_for_enum.");
+         this->value.integer_signed = stream.read_bits<int32_t>(bitcount) - reach::megalo::offset_for_enum(this->type->enumeration);
          break;
       case SimpleValueType::flags:
-         this->value.integer_unsigned = stream.read_bits(reach::megalo::bits_for_flags(this->flags_mask));
+         bitcount = reach::megalo::bits_for_flags(this->type->flags_mask);
+         assert(bitcount && "Unknown flags mask; add it to reach::megalo::bits_for_flags.");
+         this->value.integer_unsigned = stream.read_bits(bitcount);
+         break;
+      case SimpleValueType::index:
+         {
+            auto iq = this->type->index_quirk;
+            if (iq == MegaloValueIndexQuirk::presence) {
+               bool presence = stream.read_bits<uint8_t>(1) != 0;
+               if (!presence)
+                  return;
+            }
+            bitcount = this->type->index_bitlength;
+            if (!bitcount)
+               bitcount = reach::megalo::bits_for_index_type(this->type->index_type);
+            assert(bitcount && "Unknown index type; add it to reach::megalo::bits_for_index_type.");
+            if (iq == MegaloValueIndexQuirk::word) {
+               this->value.integer_signed = stream.read_bits<int32_t>(bitcount, cobb::bitstream_read_flags::is_signed);
+            } else {
+               this->value.integer_signed = stream.read_bits<uint32_t>(bitcount);
+               if (iq == MegaloValueIndexQuirk::offset)
+                  this->value.integer_signed--;
+            }
+         }
          break;
       case SimpleValueType::integer_8_signed:
       case SimpleValueType::integer_8_unsigned:
       case SimpleValueType::integer_16_signed:
-         this->value.integer_signed = stream.read_bits(bitcount, is_signed ? cobb::bitstream_read_flags::is_signed : 0);
+         this->value.integer_signed = stream.read_bits<int32_t>(bitcount, is_signed ? cobb::bitstream_read_flags::is_signed : 0);
          break;
       case SimpleValueType::vector3:
          stream.read(this->value.vector3.x);
@@ -130,12 +242,32 @@ bool SimpleValue::read(cobb::bitstream& stream) noexcept {
 }
 
 namespace {
-   template<int N> ComplexValueSubtype* _getComplexSubtype(ComplexValueType type, const std::array<ComplexValueSubtype, N>& list) {
-      int index = (int)type;
-      if (index < list.size())
-         return list[index];
+   template<int N> const ComplexValueSubtype* _getComplexSubtype(cobb::bitstream& stream, const std::array<ComplexValueSubtype, N>& list) {
+      int8_t index = stream.read_bits<int8_t>(cobb::bitcount(N - 1), cobb::bitstream_read_flags::is_signed);
+      if (index >= 0 && index < N)
+         return &list[index];
       return nullptr;
    }
+}
+void ComplexValue::to_string(std::string& out) const noexcept {
+   out.clear();
+   auto subtype = this->subtype;
+   if (!subtype) {
+      out = "!INVALID!";
+      return;
+   }
+   if (subtype->has_enum()) {
+      if (subtype->has_constant()) { // almost certainly a variable
+         cobb::sprintf(out, "%s[%u]", subtype->name, this->constant);
+         return;
+      }
+      cobb::sprintf(out, "%u", this->constant); // for now
+   } else if (subtype->has_constant()) {
+      cobb::sprintf(out, "%d", this->constant);
+   } else if (subtype->has_index()) {
+      cobb::sprintf(out, "%u", this->constant); // for now
+   } else
+      out = subtype->name; // almost certainly a game state value
 }
 void ComplexValue::read(cobb::bitstream& stream) noexcept {
    ComplexValueType type = this->type;
@@ -143,26 +275,26 @@ void ComplexValue::read(cobb::bitstream& stream) noexcept {
       type = (ComplexValueType)stream.read_bits(3);
    switch (type) {
       case ComplexValueType::scalar:
-         this->subtype = _getComplexSubtype(type, reach::megalo::complex_values::scalar);
+         this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::scalar);
          break;
       case ComplexValueType::player:
-         this->subtype = _getComplexSubtype(type, reach::megalo::complex_values::player);
+         this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::player);
          break;
       case ComplexValueType::object:
-         this->subtype = _getComplexSubtype(type, reach::megalo::complex_values::object);
+         this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::object);
          break;
       case ComplexValueType::team:
-         this->subtype = _getComplexSubtype(type, reach::megalo::complex_values::team);
+         this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::team);
          break;
       case ComplexValueType::timer:
-         this->subtype = _getComplexSubtype(type, reach::megalo::complex_values::timer);
+         this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::timer);
          break;
    }
    if (!this->subtype) {
-      printf("Failed to identify subtype for complex type %d.", (int)type);
+      printf("Failed to identify subtype for complex type %d.\n", (int)type);
       return;
    }
-   ComplexValueSubtype& st = *this->subtype;
+   const ComplexValueSubtype& st = *this->subtype;
    if (st.enumeration != MegaloValueEnum::not_applicable) {
       this->enum_value = stream.read_bits(reach::megalo::bits_for_enum(st.enumeration)) - reach::megalo::offset_for_enum(st.enumeration);
    }
@@ -189,11 +321,20 @@ void ComplexValue::read(cobb::bitstream& stream) noexcept {
 
 void MegaloValue::read(cobb::bitstream& stream) noexcept {
    assert(this->type && "Cannot read a value that hasn't had its type set!");
-   switch (this->type->underlying_type) {
-      case MegaloValueUnderlyingType::boolean:
-         this->value.boolean = stream.read_bits(1) != 0;
-         break;
-      default:
-         assert(false && "Type not implemented!");
+   if (this->type->is_simple()) {
+      this->simple.type = this->type;
+      this->simple.read(stream);
+      return;
    }
+   if (this->type->is_complex()) {
+      this->complex.type = this->type->complex_type;
+      this->complex.read(stream);
+      return;
+   }
+   switch (this->type->special_type) {
+      case SpecialType::shape:
+         this->special.shape.read(stream);
+         return;
+   }
+   assert(false && "Failed to load a MegaloValue!");
 }

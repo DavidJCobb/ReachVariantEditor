@@ -155,6 +155,7 @@
     <ClInclude Include="game_variants\loadouts.h" />
     <ClInclude Include="game_variants\map_permissions.h" />
     <ClInclude Include="game_variants\megalo\conditions.h" />
+    <ClInclude Include="game_variants\megalo\limits.h" />
     <ClInclude Include="game_variants\megalo\value_types.h" />
     <ClInclude Include="game_variants\megalo_options.h" />
     <ClInclude Include="game_variants\option_toggles.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
+    <ClInclude Include="helpers\strings.h" />
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="stdafx.h" />
@@ -185,6 +187,7 @@
     <ClCompile Include="game_variants\player_traits.cpp" />
     <ClCompile Include="helpers\bitstream.cpp" />
     <ClCompile Include="helpers\files.cpp" />
+    <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

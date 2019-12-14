@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include "limits.h"
 #include "value_types.h"
 
 struct MegaloOpcodeBaseArgumentFlags {
@@ -14,9 +15,11 @@ struct MegaloOpcodeBaseArgumentFlags {
 struct MegaloOpcodeBaseArgument { // for conditions or actions
    const char* name  = "";
    const MegaloValueType* type; // can't be a reference because MegaloValueTypes are constexpr; it would have to be a const reference, and then std::vector can't instantiate
-   uint32_t    flags = 0;
+   uint32_t    flags = 0; // MegaloOpcodeBaseArgumentFlags
    //
    MegaloOpcodeBaseArgument(const char* n, const MegaloValueType& t, uint32_t f = 0) : name(n), type(&t), flags(f) {};
+   //
+   void to_string(std::string& out, const MegaloValue& value) const noexcept;
 };
 
 class MegaloConditionFunction {
@@ -47,19 +50,20 @@ class MegaloConditionFunction {
       };
 };
 
-struct MegaloConditionFunctionList {
-   MegaloConditionFunctionList();
-   ~MegaloConditionFunctionList();
-   //
-   MegaloConditionFunction* list = nullptr;
-   uint32_t size;
-   //
-   inline const MegaloConditionFunction& operator[](int v) const noexcept {
-      return this->list[v];
-   }
-   //
-   inline static const MegaloConditionFunctionList& get() {
-      static MegaloConditionFunctionList instance;
-      return instance;
-   }
+extern std::vector<MegaloConditionFunction> g_conditionFunctionList;
+
+class MegaloCondition {
+   public:
+      #if _DEBUG
+         std::string debug_stringified;
+      #endif
+      //
+      const MegaloConditionFunction* function = nullptr;
+      bool    inverted     = false;
+      int32_t or_group     = -1; // 0 == none, or -1? // local to containing virtual trigger. all conditions with the same non-none (or_group) are OR-linked.
+      int32_t child_action = -1; // used to group conditions with their actions into triggers
+      std::vector<MegaloValue> arguments;
+      //
+      void to_string(std::string& out) const noexcept;
+      void read(cobb::bitstream& stream) noexcept;
 };

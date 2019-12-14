@@ -15,6 +15,7 @@
 #include "player_rating_params.h"
 #include "player_traits.h"
 #include "tu1_options.h"
+#include "megalo/conditions.h"
 
 class BlamHeader {
    public:

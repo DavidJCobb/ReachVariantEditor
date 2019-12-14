@@ -70,6 +70,9 @@
 //    member, and a union of all special type classes.
 //
 
+struct ComplexValue;
+class MegaloValueType;
+
 enum class MegaloScopeType {
    // values in this enum aren't intended to match with what the game engine uses
    not_applicable = -1,
@@ -118,24 +121,7 @@ enum class MegaloValueIndexQuirk {
 };
 namespace reach {
    namespace megalo {
-      int bits_for_index_type(MegaloValueIndexType it) {
-         switch (it) {
-            // icon - unknown
-            case MegaloValueIndexType::incident:        return cobb::bitcount(reach::megalo::max_incident_types - 1);
-            case MegaloValueIndexType::loadout_palette: return cobb::bitcount(6 - 1);
-            case MegaloValueIndexType::name:            return cobb::bitcount(reach::megalo::max_string_ids - 1);
-            case MegaloValueIndexType::object_filter:   return cobb::bitcount(reach::megalo::max_script_labels - 1);
-            case MegaloValueIndexType::object_type:     return cobb::bitcount(reach::megalo::max_object_types - 1);
-            case MegaloValueIndexType::option:          return cobb::bitcount(reach::megalo::max_script_options - 1);
-            case MegaloValueIndexType::player_traits:   return cobb::bitcount(reach::megalo::max_script_traits - 1);
-            case MegaloValueIndexType::sound:           return cobb::bitcount(reach::megalo::max_engine_sounds - 1);
-            case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats);
-            case MegaloValueIndexType::string:          return cobb::bitcount(reach::megalo::max_variant_strings - 1);
-            case MegaloValueIndexType::trigger:         return cobb::bitcount(reach::megalo::max_triggers - 1);
-            case MegaloValueIndexType::widget:          return cobb::bitcount(reach::megalo::max_script_widgets - 1);
-         }
-         return 0;
-      }
+      extern int bits_for_index_type(MegaloValueIndexType it);
    }
 }
 
@@ -166,43 +152,10 @@ enum class MegaloValueFlagsMask {
 };
 namespace reach {
    namespace megalo {
-      int bits_for_enum(MegaloValueEnum st) {
-         switch (st) {
-            case MegaloValueEnum::add_weapon_mode:   return 2;
-            case MegaloValueEnum::c_hud_destination: return 1;
-            case MegaloValueEnum::compare_operator:  return 3;
-            case MegaloValueEnum::drop_weapon_mode:  return 1;
-            case MegaloValueEnum::grenade_type:      return 1;
-            case MegaloValueEnum::math_operator:     return 5;
-            case MegaloValueEnum::object:            return 5;
-            case MegaloValueEnum::pickup_priority:   return 2;
-            case MegaloValueEnum::player:            return 5;
-            case MegaloValueEnum::team:              return 5;
-            case MegaloValueEnum::team_designator:   return 4;
-            case MegaloValueEnum::team_disposition:  return 2;
-            case MegaloValueEnum::waypoint_icon:     return 5;
-            case MegaloValueEnum::waypoint_priority: return 2;
-         }
-         return 0;
-      }
-      int offset_for_enum(MegaloValueEnum st) {
-         switch (st) {
-            case MegaloValueEnum::team_designator:
-            case MegaloValueEnum::waypoint_icon:
-            case MegaloValueEnum::team:
-               return 1;
-         }
-         return 0;
-      }
+      extern int bits_for_enum(MegaloValueEnum st);
+      extern int offset_for_enum(MegaloValueEnum st);
       //
-      int bits_for_flags(MegaloValueFlagsMask fm) {
-         switch (fm) {
-            case MegaloValueFlagsMask::create_object_flags: return 2;
-            case MegaloValueFlagsMask::killer_type: return 3;
-            case MegaloValueFlagsMask::player_unused_mode_flags: return 2;
-         }
-         return 0;
-      }
+      extern int bits_for_flags(MegaloValueFlagsMask fm);
    }
 }
 
@@ -296,28 +249,28 @@ namespace reach {
       struct create_object_flags {
          create_object_flags() = delete;
          enum {
-            never_garbage_collect,
-            unk_1,
-            unk_2,
+            never_garbage_collect = 0x01,
+            unk_1 = 0x02,
+            unk_2 = 0x04,
          };
       };
       struct killer_type {
          killer_type() = delete;
          enum {
-            guardians,
-            suicide,
-            kill,
-            betrayal,
-            quit,
+            guardians = 0x01,
+            suicide   = 0x02,
+            kill      = 0x04,
+            betrayal  = 0x08,
+            quit      = 0x10,
          };
       };
       struct player_unused_mode_flags {
          player_unused_mode_flags() = delete;
          enum {
-            unk_0,
-            unk_1,
-            unk_2,
-            unk_3,
+            unk_0 = 0x01,
+            unk_1 = 0x02,
+            unk_2 = 0x04,
+            unk_3 = 0x08,
          };
       };
    }
@@ -615,6 +568,10 @@ class ComplexValueSubtype {
          instance.constant_bitlength = reach::bitlength_for_variable_index<st, vt>;
          return instance;
       }
+      //
+      constexpr bool has_enum()     const noexcept { return this->enumeration != MegaloValueEnum::not_applicable; }
+      constexpr bool has_constant() const noexcept { return this->constant_flags & flags::has_constant; }
+      constexpr bool has_index()    const noexcept { return this->constant_flags & flags::has_index; };
 };
 namespace reach {
    namespace megalo {
@@ -650,16 +607,15 @@ union RawMegaloValue {
    ReachVector3 vector3;
 };
 struct SimpleValue {
-   SimpleValueType      type;
-   MegaloValueEnum      enumeration = MegaloValueEnum::not_applicable;
-   MegaloValueFlagsMask flags_mask  = MegaloValueFlagsMask::not_applicable;
-   RawMegaloValue       value;
+   const MegaloValueType* type = nullptr;
+   RawMegaloValue value;
    //
-   bool read(cobb::bitstream& stream) noexcept;
+   void to_string(std::string& out) const noexcept;
+   void read(cobb::bitstream& stream) noexcept;
 };
 struct ComplexValue {
-   ComplexValueType     type;
-   ComplexValueSubtype* subtype = nullptr;
+   ComplexValueType type;
+   const ComplexValueSubtype* subtype = nullptr;
    uint32_t enum_value = 0;
    union {
       uint32_t constant = 0;
@@ -668,6 +624,7 @@ struct ComplexValue {
    //
    ComplexValue(ComplexValueType t) : type(t) {};
    //
+   void to_string(std::string& out) const noexcept;
    void read(cobb::bitstream& stream) noexcept;
 };
 
@@ -713,13 +670,22 @@ class MegaloValueType {
       MegaloValueFlagsMask  flags_mask   = MegaloValueFlagsMask::not_applicable;
       MegaloValueIndexType  index_type   = MegaloValueIndexType::not_applicable;
       MegaloValueIndexQuirk index_quirk  = MegaloValueIndexQuirk::none;
+      int                   index_bitlength = 0;
+      //
+      constexpr bool is_complex() const noexcept { return this->complex_type != ComplexValueType::not_applicable; }
+      constexpr bool is_simple()  const noexcept { return this->simple_type  != SimpleValueType::not_applicable; }
       //
       constexpr MegaloValueType(SimpleValueType s) : simple_type(s) {};
       constexpr MegaloValueType(ComplexValueType c) : complex_type(c) {};
       constexpr MegaloValueType(SpecialType s) : special_type(s) {};
       constexpr MegaloValueType(MegaloValueEnum e) : simple_type(SimpleValueType::enumeration), enumeration(e) {};
       constexpr MegaloValueType(MegaloValueFlagsMask f) : simple_type(SimpleValueType::flags), flags_mask(f) {};
-      constexpr MegaloValueType(MegaloValueIndexType it, MegaloValueIndexQuirk iq = MegaloValueIndexQuirk::none) : simple_type(SimpleValueType::index), index_type(it), index_quirk(iq) {};
+      constexpr MegaloValueType(MegaloValueIndexType it, MegaloValueIndexQuirk iq = MegaloValueIndexQuirk::none, int index_bitlength = 0) :
+         simple_type(SimpleValueType::index),
+         index_type(it),
+         index_quirk(iq),
+         index_bitlength(index_bitlength)
+      {};
 };
 
 namespace reach {
@@ -757,8 +723,14 @@ namespace reach {
 
 class MegaloValue {
    public:
-      MegaloValueType* type = nullptr;
-      RawMegaloValue   value;
+      const MegaloValueType* type = nullptr;
+      SimpleValue  simple;
+      ComplexValue complex = ComplexValue(ComplexValueType::not_applicable);
+      union SpecialValue {
+         ReachShape shape;
+         //
+         SpecialValue() : shape(ReachShape()) {};
+      } special;
       //
       void read(cobb::bitstream&) noexcept;
 };

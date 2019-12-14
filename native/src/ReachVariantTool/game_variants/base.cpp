@@ -174,6 +174,23 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       m.disabled.read(stream);
       m.hidden.read(stream);
    }
+   {  // Megalo
+      std::vector<MegaloCondition> conditions;
+      int count;
+      //
+      count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions));
+      conditions.resize(count);
+      for (int i = 0; i < count; i++) {
+         printf("Reading condition %d of %d...\n", i, count);
+         conditions[i].read(stream);
+      }
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      //
+      // TODO: retain data
+      //
+   }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.read(stream);
 
