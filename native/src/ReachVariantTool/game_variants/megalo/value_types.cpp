@@ -340,12 +340,33 @@ namespace {
          cobb::sprintf(out, "widget index %u", value);
       }
    }
+   //
+   namespace _flags_names {
+      const char* create_object_flags[] = {
+         "never garbage collect",
+         "unk 1",
+         "unk 2",
+      };
+      const char* killer_type[] = {
+         "guardians",
+         "suicide",
+         "kill",
+         "betrayal",
+         "quit",
+      };
+      const char* player_unused_mode_flags[] = {
+         "unk_0",
+         "unk_1",
+         "unk_2",
+         "unk_3",
+      };
+   };
 }
 namespace reach {
    namespace megalo {
       extern int bits_for_index_type(MegaloValueIndexType it) {
          switch (it) {
-            // icon - unknown
+            // icon - varies; there are multiple types for the same index, with different bitlengths
             case MegaloValueIndexType::incident:        return cobb::bitcount(reach::megalo::max_incident_types - 1);
             case MegaloValueIndexType::loadout_palette: return cobb::bitcount(6 - 1);
             case MegaloValueIndexType::name:            return cobb::bitcount(reach::megalo::max_string_ids - 1);
@@ -357,7 +378,7 @@ namespace reach {
             case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats);
             case MegaloValueIndexType::string:          return cobb::bitcount(reach::megalo::max_variant_strings - 1);
             case MegaloValueIndexType::trigger:         return cobb::bitcount(reach::megalo::max_triggers - 1);
-            case MegaloValueIndexType::widget:          return cobb::bitcount(reach::megalo::max_script_widgets - 1);
+            case MegaloValueIndexType::widget:          return 2;
          }
          return 0;
       }
@@ -440,7 +461,16 @@ namespace reach {
          #undef preprocessor_case
          return nullptr;
       }
-      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_flags(MegaloValueFlagsMask f) noexcept;
+      extern const char** get_names_for_flags(MegaloValueFlagsMask f) noexcept {
+         #define preprocessor_case(name) case MegaloValueFlagsMask::##name##: return _flags_names::##name##;
+         switch (f) {
+            preprocessor_case(create_object_flags);
+            preprocessor_case(killer_type);
+            preprocessor_case(player_unused_mode_flags);
+         }
+         #undef preprocessor_case
+         return nullptr;
+      }
    }
 }
 
@@ -558,7 +588,26 @@ void SimpleValue::to_string(std::string& out) const noexcept {
          }
          return;
       case SimpleValueType::flags:
-         cobb::sprintf(out, "flags:%08X", this->value.integer_unsigned); // for now
+         {
+            auto flags_mask = this->type->flags_mask;
+            int  bitcount   = reach::megalo::bits_for_flags(flags_mask);
+            auto name_list  = reach::megalo::get_names_for_flags(flags_mask);
+            if (bitcount && name_list) {
+               for (int i = 0; i < bitcount; i++) {
+                  bool bit = (this->value.integer_unsigned & (1 << i)) != 0;
+                  if (bit) {
+                     if (!out.empty())
+                        out += ", ";
+                     if (name_list[i])
+                        out += name_list[i];
+                     else
+                        cobb::sprintf(out, "%sunknown flag %d", out.c_str(), i);
+                  }
+               }
+            } else {
+               cobb::sprintf(out, "flags:%08X", this->value.integer_unsigned);
+            }
+         }
          return;
       case SimpleValueType::index:
          {

@@ -162,7 +162,7 @@ namespace reach {
       extern int bits_for_flags(MegaloValueFlagsMask fm);
       //
       extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_enum(MegaloValueEnum e) noexcept;
-      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_flags(MegaloValueFlagsMask f) noexcept;
+      extern const char** get_names_for_flags(MegaloValueFlagsMask f) noexcept;
    }
 }
 
