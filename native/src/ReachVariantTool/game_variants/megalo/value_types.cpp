@@ -433,9 +433,9 @@ namespace reach {
       //
       extern int bits_for_flags(MegaloValueFlagsMask fm) {
          switch (fm) {
-            case MegaloValueFlagsMask::create_object_flags:      return 2;
-            case MegaloValueFlagsMask::killer_type:              return 5; // all values can be held in 3 bits, but it seems to use 5 bits for some reason
-            case MegaloValueFlagsMask::player_unused_mode_flags: return 2;
+            case MegaloValueFlagsMask::create_object_flags:      return 3;
+            case MegaloValueFlagsMask::killer_type:              return 5;
+            case MegaloValueFlagsMask::player_unused_mode_flags: return 4;
          }
          return 0;
       }
