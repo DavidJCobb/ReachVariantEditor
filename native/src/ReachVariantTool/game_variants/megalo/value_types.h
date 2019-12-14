@@ -740,7 +740,7 @@ namespace reach {
       inline constexpr MegaloValueType pickup_priority   = MegaloValueType(MegaloValueEnum::pickup_priority);
       inline constexpr MegaloValueType player_traits     = MegaloValueType(MegaloValueIndexType::player_traits, MegaloValueIndexQuirk::reference);
       inline constexpr MegaloValueType script_option     = MegaloValueType(MegaloValueIndexType::option, MegaloValueIndexQuirk::reference);
-      inline constexpr MegaloValueType shape             = MegaloValueType(SpecializedType::shape);
+      inline constexpr MegaloValueType shape             = MegaloValueType(SpecialType::shape);
       inline constexpr MegaloValueType stat              = MegaloValueType(MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference);
       inline constexpr MegaloValueType string            = MegaloValueType(MegaloValueIndexType::string, MegaloValueIndexQuirk::offset);
       inline constexpr MegaloValueType team_designator   = MegaloValueType(MegaloValueEnum::team_designator);

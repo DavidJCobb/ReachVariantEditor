@@ -125,8 +125,58 @@ MegaloConditionFunctionList::MegaloConditionFunctionList() {
          }
       ),
       //
-      // TODO: FINISH ME
+      MegaloConditionFunction(
+         "Player Is Not Respawning",
+         "Checks whether a player is not currently respawning.",
+         "Player %1 %v respawning.", // Player [player] [is not] respawning.
+         "is not",
+         "is",
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("player", reach::value_types::variable_player);
+         }
+      ),
       //
+      MegaloConditionFunction(
+         "Equipment In Use",
+         "",
+         "Equipment %1 %v in use.", // Equipment [object] [is] in use.
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("object", reach::value_types::variable_object);
+         }
+      ),
+      //
+      MegaloConditionFunction(
+         "Species Is Spartan",
+         "Checks whether a player is a Spartan.",
+         "Player %1 %v a Spartan.", // Player [player] [is] a Spartan.
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("player", reach::value_types::variable_player);
+         }
+      ),
+      //
+      MegaloConditionFunction(
+         "Species Is Elite",
+         "Checks whether a player is an Elite.",
+         "Player %1 %v an Elite.", // Player [player] [is] an Elite.
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("player", reach::value_types::variable_player);
+         }
+      ),
+      //
+      MegaloConditionFunction(
+         "Species Is Monitor",
+         "Checks whether a player is a Monitor.",
+         "Player %1 %v a Monitor.", // Player [player] [is] a Monitor.
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("player", reach::value_types::variable_player);
+         }
+      ),
+      //
+      MegaloConditionFunction(
+         "Unknown 17 (Is Matchmaking?)",
+         "Checks whether this match is taking place in Matchmaking?.",
+         "This match %v taking place in Matchmaking." // This match [is] taking place in Matchmaking.
+      ),
    };
    //
    this->list = (MegaloConditionFunction*)malloc(sizeof(conditions));
