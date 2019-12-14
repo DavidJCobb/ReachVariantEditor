@@ -608,9 +608,11 @@ void SimpleValue::read(cobb::bitstream& stream) noexcept {
          {
             auto iq = this->type->index_quirk;
             if (iq == MegaloValueIndexQuirk::presence) {
-               bool presence = stream.read_bits<uint8_t>(1) != 0;
-               if (!presence)
+               bool absence = stream.read_bits<uint8_t>(1) != 0;
+               if (absence) {
+                  this->value.integer_signed = -1;
                   return;
+               }
             }
             bitcount = this->type->index_bitlength;
             if (!bitcount)
@@ -711,9 +713,11 @@ void ComplexValue::read(cobb::bitstream& stream) noexcept {
       this->constant = stream.read_bits(st.constant_bitlength);
    } else if (st.constant_flags & ComplexValueSubtype::flags::has_index) {
       if (st.index_quirk == MegaloValueIndexQuirk::presence) {
-         bool presence = stream.read_bits<uint8_t>(1) != 0;
-         if (!presence)
+         bool absence = stream.read_bits<uint8_t>(1) != 0;
+         if (absence) {
+            this->index = -1;
             return;
+         }
       }
       int bitlength = st.index_bitlength;
       if (!bitlength)
