@@ -708,7 +708,7 @@ class MegaloValueType {
    public:
       SimpleValueType       simple_type  = SimpleValueType::not_applicable;
       ComplexValueType      complex_type = ComplexValueType::not_applicable;
-      SpecializedType       special_type = SpecializedType::not_applicable;
+      SpecialType           special_type = SpecialType::not_applicable;
       MegaloValueEnum       enumeration  = MegaloValueEnum::not_applicable;
       MegaloValueFlagsMask  flags_mask   = MegaloValueFlagsMask::not_applicable;
       MegaloValueIndexType  index_type   = MegaloValueIndexType::not_applicable;
@@ -716,7 +716,7 @@ class MegaloValueType {
       //
       constexpr MegaloValueType(SimpleValueType s) : simple_type(s) {};
       constexpr MegaloValueType(ComplexValueType c) : complex_type(c) {};
-      constexpr MegaloValueType(SpecializedType s) : special_type(s) {};
+      constexpr MegaloValueType(SpecialType s) : special_type(s) {};
       constexpr MegaloValueType(MegaloValueEnum e) : simple_type(SimpleValueType::enumeration), enumeration(e) {};
       constexpr MegaloValueType(MegaloValueFlagsMask f) : simple_type(SimpleValueType::flags), flags_mask(f) {};
       constexpr MegaloValueType(MegaloValueIndexType it, MegaloValueIndexQuirk iq = MegaloValueIndexQuirk::none) : simple_type(SimpleValueType::index), index_type(it), index_quirk(iq) {};
