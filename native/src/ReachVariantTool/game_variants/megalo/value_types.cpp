@@ -1,6 +1,308 @@
 #include "value_types.h"
 #include "../../helpers/strings.h"
 
+namespace {
+   namespace _stringify_enum {
+      void add_weapon_mode(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::add_weapon_mode;
+         //
+         switch ((_enum)value) {
+            case _enum::add:
+               out = "Add";
+               return;
+            case _enum::swap:
+               out = "Swap";
+               return;
+            case _enum::unk_1:
+               out = "Unk_1";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void c_hud_destination(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::c_hud_destination;
+         //
+         switch ((_enum)value) {
+            case _enum::unk_0:
+               out = "Unk_0";
+               return;
+            case _enum::unk_1:
+               out = "Unk_1";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void compare_operator(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::compare_operator;
+         //
+         switch ((_enum)value) {
+            case _enum::equal:
+               out = "equal to";
+               return;
+            case _enum::greater:
+               out = "greater than";
+               return;
+            case _enum::greater_or_equal:
+               out = "greater than or equal to";
+               return;
+            case _enum::less:
+               out = "less than";
+               return;
+            case _enum::less_or_equal:
+               out = "less than or equal to";
+               return;
+            case _enum::not_equal:
+               out = "not equal to";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void drop_weapon_mode(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::drop_weapon_mode;
+         //
+         switch ((_enum)value) {
+            case _enum::primary:
+               out = "primary";
+               return;
+            case _enum::secondary:
+               out = "secondary";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void grenade_type(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::grenade_type;
+         //
+         switch ((_enum)value) {
+            case _enum::frag:
+               out = "frag";
+               return;
+            case _enum::plasma:
+               out = "plasma";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void math_operator(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::math_operator;
+         //
+         constexpr char* strings[] = {
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "assign",
+            "modulo",
+            "bitwise_and",
+            "bitwise_or",
+            "bitwise_xor",
+            "bitwise_not",
+            "bitwise_shift_left",
+            "bitwise_shift_right",
+            "bitwise_shift_left_2",
+         };
+         if (value >= std::extent<decltype(strings)>::value) {
+            cobb::sprintf(out, "unknown:%u", value);
+            return;
+         }
+         out = strings[value];
+      }
+      void object(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::object;
+         //
+         if (value >= (uint32_t)_enum::global_object_0 && value <= (uint32_t)_enum::global_object_15) {
+            cobb::sprintf(out, "Global.Object[%d]", value - (uint32_t)_enum::global_object_0 + '0');
+            return;
+         }
+         //
+         switch ((_enum)value) {
+            case _enum::current_object:
+               out = "current object";
+               return;
+            case _enum::hud_target:
+               out = "HUD target";
+               return;
+            case _enum::killed:
+               out = "killed object";
+               return;
+            case _enum::killer:
+               out = "killer object";
+               return;
+            case _enum::none:
+               out = "none";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void pickup_priority(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::pickup_priority;
+         //
+         constexpr char* strings[] = {
+            "Unk_0",
+            "hold action",
+            "automatic",
+            "Unk_3",
+         };
+         if (value >= std::extent<decltype(strings)>::value) {
+            cobb::sprintf(out, "unknown:%u", value);
+            return;
+         }
+         out = strings[value];
+      }
+      void player(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::player;
+         //
+         if (value >= (uint32_t)_enum::global_player_0 && value <= (uint32_t)_enum::global_player_7) {
+            cobb::sprintf(out, "Global.Player[%d]", value - (uint32_t)_enum::global_player_0 + '0');
+            return;
+         }
+         if (value >= (uint32_t)_enum::player_0 && value <= (uint32_t)_enum::player_15) {
+            cobb::sprintf(out, "Player %d", value - (uint32_t)_enum::player_0 + '1');
+            return;
+         }
+         switch ((_enum)value) {
+            case _enum::current_player:
+               out = "current player";
+               return;
+            case _enum::hud_player:
+               out = "HUD player";
+               return;
+            case _enum::hud_target:
+               out = "HUD target";
+               return;
+            case _enum::killer:
+               out = "killer";
+               return;
+            case _enum::none:
+               out = "none";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void team(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::team;
+         //
+         if (value >= (uint32_t)_enum::global_team_0 && value <= (uint32_t)_enum::global_team_7) {
+            cobb::sprintf(out, "Global.Team[%d]", value - (uint32_t)_enum::global_team_0 + '0');
+            return;
+         }
+         if (value >= (uint32_t)_enum::team_0 && value <= (uint32_t)_enum::team_7) {
+            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team_0 + '1');
+            return;
+         }
+         switch ((_enum)value) {
+            case _enum::current_team:
+               out = "current team";
+               return;
+            case _enum::hud_player:
+               out = "HUD player's team";
+               return;
+            case _enum::hud_target:
+               out = "HUD target's team";
+               return;
+            case _enum::neutral:
+               out = "neutral team";
+               return;
+            case _enum::none:
+               out = "none";
+               return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void team_designator(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::team_designator;
+         //
+         switch ((_enum)value) {
+            case _enum::attackers:
+               out = "Attackers";
+               return;
+            case _enum::defenders:
+               out = "Defenders";
+               return;
+            case _enum::neutral:
+               out = "Neutral Team";
+               return;
+            case _enum::none:
+               out = "None";
+               return;
+         }
+         if (value >= (uint32_t)_enum::team3 && value <= (uint32_t)_enum::team8) {
+            cobb::sprintf(out, "Team %d", value - (uint32_t)_enum::team3 + '3');
+            return;
+         }
+         cobb::sprintf(out, "unknown:%u", value);
+      }
+      void team_disposition(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::team_disposition;
+         //
+         constexpr char* strings[] = {
+            "Unk_0",
+            "Unk_1",
+            "Unk_2",
+         };
+         if (value >= std::extent<decltype(strings)>::value) {
+            cobb::sprintf(out, "unknown:%u", value);
+            return;
+         }
+         out = strings[value];
+      }
+      void waypoint_icon(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::waypoint_icon;
+         //
+         constexpr char* strings[] = { // indices start at -1
+            "none",
+            "microphone",
+            "death_marker",
+            "lightning_bolt",
+            "bullseye",
+            "diamond",
+            "bomb",
+            "flag",
+            "skull",
+            "crown",
+            "vip",
+            "territory_lock",
+            "territory_a",
+            "territory_b",
+            "territory_c",
+            "territory_d",
+            "territory_e",
+            "territory_f",
+            "territory_g",
+            "territory_h",
+            "territory_i",
+            "supply",
+            "supply_health",
+            "supply_air_drop",
+            "supply_ammo",
+            "arrow",
+            "defend",
+            "unk_26",
+            "unk_27",
+         };
+         if (value + 1 >= std::extent<decltype(strings)>::value) {
+            cobb::sprintf(out, "unknown:%u", value);
+            return;
+         }
+         out = strings[value + 1];
+      }
+      void waypoint_priority(uint32_t value, std::string& out) {
+         using _enum = reach::megalo_value_enums::waypoint_priority;
+         //
+         constexpr char* strings[] = {
+            "none",
+            "low",
+            "high",
+            "default",
+         };
+         if (value >= std::extent<decltype(strings)>::value) {
+            cobb::sprintf(out, "unknown:%u", value);
+            return;
+         }
+         out = strings[value];
+      }
+   }
+}
 namespace reach {
    namespace megalo {
       extern int bits_for_index_type(MegaloValueIndexType it) {
@@ -52,12 +354,35 @@ namespace reach {
       //
       extern int bits_for_flags(MegaloValueFlagsMask fm) {
          switch (fm) {
-            case MegaloValueFlagsMask::create_object_flags: return 2;
-            case MegaloValueFlagsMask::killer_type: return 3;
+            case MegaloValueFlagsMask::create_object_flags:      return 2;
+            case MegaloValueFlagsMask::killer_type:              return 5; // all values can be held in 3 bits, but it seems to use 5 bits for some reason
             case MegaloValueFlagsMask::player_unused_mode_flags: return 2;
          }
          return 0;
       }
+      //
+      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_enum(MegaloValueEnum e) noexcept {
+         #define preprocessor_case(name) case MegaloValueEnum::##name##: return _stringify_enum::##name##;
+         switch (e) {
+            preprocessor_case(add_weapon_mode);
+            preprocessor_case(c_hud_destination);
+            preprocessor_case(compare_operator);
+            preprocessor_case(drop_weapon_mode);
+            preprocessor_case(grenade_type);
+            preprocessor_case(math_operator);
+            preprocessor_case(object);
+            preprocessor_case(pickup_priority);
+            preprocessor_case(player);
+            preprocessor_case(team);
+            preprocessor_case(team_designator);
+            preprocessor_case(team_disposition);
+            preprocessor_case(waypoint_icon);
+            preprocessor_case(waypoint_priority);
+         }
+         #undef preprocessor_case
+         return nullptr;
+      }
+      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_flags(MegaloValueFlagsMask f) noexcept;
    }
 }
 
@@ -114,7 +439,7 @@ namespace reach {
             ComplexValueSubtype("Death Event Damage Type", true), // byte
          };
          extern std::array<ComplexValueSubtype,  4> player = {
-            ComplexValueSubtype("Player (Explicit)", MegaloValueEnum::player),
+            ComplexValueSubtype("Player (Explicit)", MegaloValueEnum::player), // Global.Player and any "state" players e.g. current-player
             ComplexValueSubtype::variable<_MST::player, _MVT::player>("Player.Player"),
             ComplexValueSubtype::variable<_MST::object, _MVT::player>("Object.Player"),
             ComplexValueSubtype::variable<_MST::team,   _MVT::player>("Team.Player"),
@@ -165,7 +490,14 @@ void SimpleValue::to_string(std::string& out) const noexcept {
          out = this->value.boolean ? "true" : "false";
          return;
       case SimpleValueType::enumeration:
-         cobb::sprintf(out, "enum:%d", this->value.integer_signed); // for now
+         {
+            auto func = reach::megalo::stringify_function_for_enum(this->type->enumeration);
+            if (func) {
+               func(this->value.integer_signed, out);
+            } else {
+               cobb::sprintf(out, "enum:%d", this->value.integer_signed);
+            }
+         }
          return;
       case SimpleValueType::flags:
          cobb::sprintf(out, "flags:%08X", this->value.integer_unsigned); // for now
@@ -243,8 +575,10 @@ void SimpleValue::read(cobb::bitstream& stream) noexcept {
 
 namespace {
    template<int N> const ComplexValueSubtype* _getComplexSubtype(cobb::bitstream& stream, const std::array<ComplexValueSubtype, N>& list) {
-      int8_t index = stream.read_bits<int8_t>(cobb::bitcount(N - 1), cobb::bitstream_read_flags::is_signed);
-      if (index >= 0 && index < N)
+      constexpr int index_bitcount = cobb::bitcount(N - 1);
+      //
+      uint8_t index = stream.read_bits<uint8_t>(index_bitcount);
+      if (index < N)
          return &list[index];
       return nullptr;
    }
@@ -261,7 +595,12 @@ void ComplexValue::to_string(std::string& out) const noexcept {
          cobb::sprintf(out, "%s[%u]", subtype->name, this->constant);
          return;
       }
-      cobb::sprintf(out, "%u", this->constant); // for now
+      auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
+      if (func) {
+         func(this->constant, out);
+      } else {
+         cobb::sprintf(out, "%u", this->constant);
+      }
    } else if (subtype->has_constant()) {
       cobb::sprintf(out, "%d", this->constant);
    } else if (subtype->has_index()) {

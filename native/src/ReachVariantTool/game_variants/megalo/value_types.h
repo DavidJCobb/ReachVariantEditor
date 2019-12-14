@@ -125,6 +125,7 @@ namespace reach {
    }
 }
 
+using MegaloStringifyEnumOrFlagsFunction = void(*)(uint32_t value, std::string& out);
 enum class MegaloValueEnum {
    not_applicable = -1,
    //
@@ -156,6 +157,9 @@ namespace reach {
       extern int offset_for_enum(MegaloValueEnum st);
       //
       extern int bits_for_flags(MegaloValueFlagsMask fm);
+      //
+      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_enum(MegaloValueEnum e) noexcept;
+      extern MegaloStringifyEnumOrFlagsFunction stringify_function_for_flags(MegaloValueFlagsMask f) noexcept;
    }
 }
 
