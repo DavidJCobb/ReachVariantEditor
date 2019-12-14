@@ -4,6 +4,7 @@
 #include <type_traits>
 #include "bitwise.h"
 #include "files.h"
+#include "templating.h"
 #include "polyfills_cpp20.h"
 
 namespace cobb {
@@ -76,15 +77,15 @@ namespace cobb {
          uint32_t read_bits(int count, uint32_t read_flags = 0) noexcept;
          //*/
          //
-      protected:
-         template<class T> inline static constexpr bool is_not_array_v = std::is_array<T>::value != true;
       public:
-         template<typename T, std::enable_if_t<is_not_array_v<T>, int> = 0> void read(T& out) noexcept {
+         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T>)> void read(T& out) noexcept {
             out = this->read_bits<T>(cobb::bits_in<T>, std::is_signed_v<T> ? read_flags::is_signed : 0);
          };
-         template<typename T, std::enable_if_t<std::is_bounded_array_v<T>, int> = 0> void read(T& out) noexcept {
+         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void read(T& out) noexcept {
+            using item_type = std::remove_extent_t<T>; // from X[i] to X
+            //
             for (int i = 0; i < std::extent<T>::value; i++)
-               out[i] = this->read_bits<decltype(out[i])>(cobb::bits_in<T>, std::is_signed_v<T> ? read_flags::is_signed : 0);
+               out[i] = this->read_bits<item_type>(cobb::bits_in<item_type>, std::is_signed_v<item_type> ? read_flags::is_signed : 0);
          };
          template<int = 0> void read(float& out) noexcept {
             union {

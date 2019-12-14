@@ -12,11 +12,11 @@ struct MegaloOpcodeBaseArgumentFlags {
    };
 };
 struct MegaloOpcodeBaseArgument { // for conditions or actions
-   const char*      name;
-   MegaloValueType& type;
-   uint32_t         flags = 0;
+   const char* name  = "";
+   const MegaloValueType* type; // can't be a reference because MegaloValueTypes are constexpr; it would have to be a const reference, and then std::vector can't instantiate
+   uint32_t    flags = 0;
    //
-   MegaloOpcodeBaseArgument(const char* n, MegaloValueType& t, uint32_t f = 0) : name(n), type(t), flags(f) {};
+   MegaloOpcodeBaseArgument(const char* n, const MegaloValueType& t, uint32_t f = 0) : name(n), type(&t), flags(f) {};
 };
 
 class MegaloConditionFunction {
@@ -27,7 +27,7 @@ class MegaloConditionFunction {
       const char* verb_no  = "is not"; // for inverted conditions
       const char* format;
       //
-      std::vector<MegaloOpcodeBaseArgumentFlags> arguments;
+      std::vector<MegaloOpcodeBaseArgument> arguments;
       //
       MegaloConditionFunction(const char* c, const char* d, const char* f) : name(c), desc(d), format(f) {};
       //

@@ -2,13 +2,13 @@
 #include <type_traits>
 
 namespace cobb {
-   template<typename T, bool = std::is_enum_v<T>> struct enum_or_int_to_int {
+   template<typename T, bool = std::is_enum_v<T>> struct strip_enum {
    };
-   template<typename T> struct enum_or_int_to_int<T, true> {
+   template<typename T> struct strip_enum<T, true> {
       using type = std::underlying_type_t<T>;
    };
-   template<typename T> struct enum_or_int_to_int<T, false> {
+   template<typename T> struct strip_enum<T, false> {
       using type = T;
    };
-   template<typename T> using enum_or_int_to_int_t = typename enum_or_int_to_int<T>::type;
+   template<typename T> using strip_enum_t = typename strip_enum<T>::type;
 }

@@ -4,9 +4,7 @@
 bool BlamHeader::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
    stream.read(this->data.unk0C);
-   //stream.read(this->data.unk0E);
-   for(int i = 0; i < std::extent<decltype(this->data.unk0E)>::value; i++) // metaprogramming sucks
-      stream.read(this->data.unk0E[i]);
+   stream.read(this->data.unk0E);
    stream.read(this->data.unk2E);
    return true;
 }

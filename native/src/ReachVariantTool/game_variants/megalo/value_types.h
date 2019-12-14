@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include "../../helpers/bitwise.h"
 #include "../../helpers/bitstream.h"
@@ -19,7 +20,7 @@
 //
 //  - Can be a single enum (e.g. for predefined variables like Score to Win), a 
 //    constant, or an enum paired with a constant (for scoped variables; the constant 
-//    indicates which variable to use).
+//    indicates which variable to use), or neither (for game state variables).
 //
 // Enums and flags are not VarRefTypes. Some bools are not VarRefTypes. Constants, 
 // variables, and game state values like Score To Win are VarRefTypes.
@@ -32,6 +33,48 @@
 // type that can take multiple forms depending on what you're referencing: a complex 
 // number can be a constant, a variable, or a reference to any of a number of game 
 // state values.
+//
+// Let's use a specific example: a "compare" condition, which compares two scalars 
+// (i.e. numbers or bools). Either scalar can be a constant number, a number variable, 
+// or a game state value. So you can compare the Rounds To Win to a constant, or 
+// compare the fifth number variable on a player to the Score To Win. This is a 
+// complex type, and each of the things it can be -- variable, constant, game state 
+// value -- is a subtype.
+//
+// Each complex subtype has an ID number and can optionally have an enum and a 
+// constant.
+//
+//  - A constant integer has just a constant.
+//
+//  - A variable has an enum and a constant. If I want to access Player.Number[5], 
+//    the enum indicates which player I'm accessing that on (e.g. Player 1, or a 
+//    player variable, or "current player"), and the constant indicates which number 
+//    variable on that player I'm accessing.
+//
+//  - A game state value has neither an enum nor a constant. If we know that you're 
+//    referring to the "Score To Win" subtype, then that's all we need to know.
+//
+// The overwhelming majority of opcode arguments are complex-type arguments, it seems.
+//
+// TODO:
+//
+//  - There is a hardcoded VarRefType in KSoft.Tool called "Any." How is that loaded? 
+//    It wouldn't be enough to load the subtype ID, enum, and constant, because you'd 
+//    have to know what the complex type itself is (e.g. is it a number, or a player, 
+//    or what?).
+//
+//  - Currently we've organized ComplexValueSubtype instances into namespaces. However, 
+//    complex types are kind of like enums: each subtype has a numeric index; when you 
+//    read a complex value, you do so by first reading that index to know what subtype 
+//    the value has, and then you read it in the manner appropriate for the subtype. 
+//    As such, we should probably use std::array<ComplexValueSubtype, howeverMany> 
+//    instead of namespaces.
+//
+//     - The goal is to be able to do, like, "Oh, we know it's a scalar, so read the 
+//       type and do scalar_types[type]."
+//
+//  - Create a struct, ComplexValue, that has a reference to a ComplexValueSubtype, 
+//    a uint32_t for the enum value, and a uint32_t for the constant value.
 //
 
 struct ComplexValue {
@@ -93,7 +136,7 @@ enum class MegaloValueIndexQuirk {
    word, // UInt16
 };
 
-enum MegaloValueEnum {
+enum class MegaloValueEnum {
    not_applicable = -1,
    //
    add_weapon_mode,
@@ -110,7 +153,7 @@ enum MegaloValueEnum {
    waypoint_icon,
    waypoint_priority,
 };
-enum MegaloValueFlagsMask {
+enum class MegaloValueFlagsMask {
    not_applicable = -1,
    //
    create_object_flags,
@@ -446,10 +489,8 @@ class ComplexValueSubtype {
       MegaloValueIndexType  index_type  = MegaloValueIndexType::not_applicable;
       MegaloValueIndexQuirk index_quirk = MegaloValueIndexQuirk::none;
       //
-   protected:
-      ComplexValueSubtype(const char* n) : name(n) {};
-      //
    public:
+      constexpr ComplexValueSubtype(const char* n) : name(n) {}; // needs to be public so 
       constexpr ComplexValueSubtype(const char* n, bool readonly) : name(n), constant_flags(readonly ? flags::is_read_only : 0) {};
       constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e) : name(n), enumeration(e), constant_flags(flags::is_read_only) {};
       constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, uint8_t f) : name(n), enumeration(e), constant_flags(f | flags::is_read_only) {};
@@ -467,13 +508,13 @@ class ComplexValueSubtype {
          index_quirk(iq)
       {};
       //
-      template<typename T> static constexpr const ComplexValueSubtype& constant(const char* n) {
+      template<typename T> static constexpr const ComplexValueSubtype constant(const char* n) {
          ComplexValueSubtype instance(n);
          instance.constant_flags     = flags::has_constant | flags::is_read_only | (std::is_signed_v<T> ? flags::constant_is_signed : 0);
          instance.constant_bitlength = cobb::bits_in<T>;
          return instance;
       }
-      template<MegaloScopeType st, MegaloVariableType vt> static constexpr const ComplexValueSubtype& variable(const char* n) {
+      template<MegaloScopeType st, MegaloVariableType vt> static constexpr const ComplexValueSubtype variable(const char* n) {
          ComplexValueSubtype instance(n);
          instance.enumeration        = reach::megalo_enum_for_scope_type<st>; // falls back to not_applicable as appropriate
          instance.constant_flags     = flags::has_constant;
@@ -505,60 +546,20 @@ class ComplexValueSubtype {
 namespace reach {
    namespace megalo {
       namespace complex_values {
-         using _MST = MegaloScopeType;    // just a shorthand
-         using _MVT = MegaloVariableType; // just a shorthand
          //
-         namespace scalar {
-            //
-            // TODO: The indices are important; can we use a std::array<> instead of a namespace?
-            //
-            // TODO: Find a way to represent the underlying types, i.e. bools versus numbers, when 
-            // the value isn't a script-specified constant (i.e. a read-only game state value).
-            //
-            extern ComplexValueSubtype const_int         = ComplexValueSubtype::constant<int16_t>("Int16");
-            extern ComplexValueSubtype player_number_var = ComplexValueSubtype::variable<_MST::player,  _MVT::number>("Player.Number");
-            extern ComplexValueSubtype team_number_var   = ComplexValueSubtype::variable<_MST::team,    _MVT::number>("Team.Number");
-            extern ComplexValueSubtype global_number_var = ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number");
-            extern ComplexValueSubtype script_option     = ComplexValueSubtype("User-Defined Option", MegaloValueIndexType::option, MegaloValueIndexQuirk::reference);
-            extern ComplexValueSubtype spawn_sequence    = ComplexValueSubtype("Spawn Sequence", MegaloValueEnum::object);
-            extern ComplexValueSubtype team_score        = ComplexValueSubtype("Team Score",     MegaloValueEnum::team);
-            extern ComplexValueSubtype player_score      = ComplexValueSubtype("Player Score",   MegaloValueEnum::player);
-            extern ComplexValueSubtype unknown_09        = ComplexValueSubtype("Unknown 09",     MegaloValueEnum::player);
-            extern ComplexValueSubtype player_rating     = ComplexValueSubtype("Player Rating",  MegaloValueEnum::player); // runtime: float converted to int
-            extern ComplexValueSubtype player_stat       = ComplexValueSubtype("Player Stat",    MegaloValueEnum::player, MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference);
-            extern ComplexValueSubtype team_stat         = ComplexValueSubtype("Team Stat",      MegaloValueEnum::team,   MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference);
-            extern ComplexValueSubtype current_round     = ComplexValueSubtype("Current Round", true); // UInt16 extended to int
-            extern ComplexValueSubtype symmetry_get      = ComplexValueSubtype("Symmetry (Read-Only)", true); // bool
-            extern ComplexValueSubtype symmetry          = ComplexValueSubtype("Symmetry", false); // bool
-            extern ComplexValueSubtype score_to_win      = ComplexValueSubtype("Score To Win", true);
-            extern ComplexValueSubtype unkF7A6           = ComplexValueSubtype("unkF7A6", false); // bool
-            extern ComplexValueSubtype teams_enabled     = ComplexValueSubtype("Teams Enabled", false); // bool
-            extern ComplexValueSubtype round_time_limit  = ComplexValueSubtype("Round Time Limit", true);
-            extern ComplexValueSubtype round_limit       = ComplexValueSubtype("Round Limit", true);
-            extern ComplexValueSubtype misc_unk0_bit3    = ComplexValueSubtype("MiscOptions.unk0.bit3", false); // bool
-            extern ComplexValueSubtype rounds_to_win     = ComplexValueSubtype("Round Victories To Win", true);
-            extern ComplexValueSubtype sudden_death_time = ComplexValueSubtype("Sudden Death Time Limit", true);
-            extern ComplexValueSubtype grace_period      = ComplexValueSubtype("Grace Period", true);
-            extern ComplexValueSubtype lives_per_round   = ComplexValueSubtype("Lives Per Round", true);
-            extern ComplexValueSubtype team_lives_per_round = ComplexValueSubtype("Team Lives Per Round", true);
-            extern ComplexValueSubtype respawn_time      = ComplexValueSubtype("Respawn Time", true);
-            extern ComplexValueSubtype suicide_penalty   = ComplexValueSubtype("Suicide Penalty", true);
-            extern ComplexValueSubtype betrayal_penalty  = ComplexValueSubtype("Betrayal Penalty", true);
-            extern ComplexValueSubtype respawn_growth    = ComplexValueSubtype("Respawn Growth", true);
-            extern ComplexValueSubtype loadout_cam_time  = ComplexValueSubtype("Loadout Camera Time", true);
-            extern ComplexValueSubtype respawn_traits_duration = ComplexValueSubtype("Respawn Traits Duration", true);
-            extern ComplexValueSubtype friendly_fire     = ComplexValueSubtype("Friendly Fire", true); // bool
-            extern ComplexValueSubtype betrayal_booting  = ComplexValueSubtype("Betrayal Booting", true); // bool
-            extern ComplexValueSubtype social_flag_2     = ComplexValueSubtype("Social Flags Bit 2", true); // bool
-            extern ComplexValueSubtype social_flag_3     = ComplexValueSubtype("Social Flags Bit 3", true); // bool
-            extern ComplexValueSubtype social_flag_4     = ComplexValueSubtype("Social Flags Bit 4", true); // bool
-            extern ComplexValueSubtype grenades_on_map   = ComplexValueSubtype("Grenades On Map", true); // bool
-            extern ComplexValueSubtype indestructible_vehicles = ComplexValueSubtype("Indestructible Vehicles", true); // bool
-            extern ComplexValueSubtype powerup_duration_red    = ComplexValueSubtype("Powerup Duration, Red", true);
-            extern ComplexValueSubtype powerup_duration_blue   = ComplexValueSubtype("Powerup Duration, Blue", true);
-            extern ComplexValueSubtype powerup_duration_yellow = ComplexValueSubtype("Powerup Duration, Yellow", true);
-            extern ComplexValueSubtype death_event_damage_type = ComplexValueSubtype("Death Event Damage Type", true); // byte
-         }
+         //
+         // TODO: The indices are important; can we use a std::array<> instead of a namespace? 
+         // We should create an enum alongside it just so we remember everything.
+         //
+         // TODO: Ditch the static templated methods in favor of constructor overloads. We only 
+         // went with the static methods in the first place because constructor overloads were 
+         // failing on constexpr (turns out, things have to be constexpr AND const to truly be 
+         // constexpr, because this language is odd).
+         //
+         // TODO: Find a way to represent the underlying types, i.e. bools versus numbers, when 
+         // the value isn't a script-specified constant (i.e. a read-only game state value).
+         //
+         extern std::array<ComplexValueSubtype, 43> scalar;
          namespace player {
          }
          namespace object {
@@ -593,6 +594,9 @@ union RawMegaloValue {
 };
 
 class MegaloValueType {
+   //
+   // this may be somewhat outdated? it was written before I came to understand complex and simple types
+   //
    public:
       MegaloValueUnderlyingType underlying_type;
       MegaloValueEnum       enumeration = MegaloValueEnum::not_applicable;      // only if underlying type is "enumeration"
@@ -601,26 +605,26 @@ class MegaloValueType {
       MegaloValueIndexType  index_type  = MegaloValueIndexType::not_applicable; // only if underlying type is "index"
       MegaloValueIndexQuirk index_quirk = MegaloValueIndexQuirk::none;          // only if underlying type is "index" -- describes any special encoding (akin to what cobb::bitnumber handles)
       //
-      MegaloValueType(MegaloValueUnderlyingType ut) : underlying_type(ut) {};
-      MegaloValueType(MegaloValueEnum e) : underlying_type(MegaloValueUnderlyingType::enumeration), enumeration(e) {};
-      MegaloValueType(MegaloValueFlagsMask f) : underlying_type(MegaloValueUnderlyingType::flags), flags_mask(f) {};
-      MegaloValueType(MegaloVariableType vt) : underlying_type(MegaloValueUnderlyingType::variable), var_type(vt) {};
+      constexpr MegaloValueType(MegaloValueUnderlyingType ut) : underlying_type(ut) {};
+      constexpr MegaloValueType(MegaloValueEnum e) : underlying_type(MegaloValueUnderlyingType::enumeration), enumeration(e) {};
+      constexpr MegaloValueType(MegaloValueFlagsMask f) : underlying_type(MegaloValueUnderlyingType::flags), flags_mask(f) {};
+      constexpr MegaloValueType(MegaloVariableType vt) : underlying_type(MegaloValueUnderlyingType::variable), var_type(vt) {};
 };
 
 namespace reach {
    namespace value_types {
-      MegaloValueType boolean           = MegaloValueType(MegaloValueUnderlyingType::boolean);
-      MegaloValueType compare_operator  = MegaloValueType(MegaloValueEnum::compare_operator);
-      MegaloValueType killer_type_flags = MegaloValueType(MegaloValueFlagsMask::killer_type);
-      MegaloValueType explicit_object   = MegaloValueType(MegaloValueEnum::object);
-      MegaloValueType explicit_player   = MegaloValueType(MegaloValueEnum::player);
-      MegaloValueType explicit_team     = MegaloValueType(MegaloValueEnum::team);
-      MegaloValueType team_disposition  = MegaloValueType(MegaloValueEnum::team_disposition);
-      MegaloValueType variable_any      = MegaloValueType(MegaloVariableType::any);
-      MegaloValueType variable_object   = MegaloValueType(MegaloVariableType::object);
-      MegaloValueType variable_player   = MegaloValueType(MegaloVariableType::player);
-      MegaloValueType variable_team     = MegaloValueType(MegaloVariableType::team);
-      MegaloValueType variable_timer    = MegaloValueType(MegaloVariableType::timer);
+      inline constexpr MegaloValueType boolean           = MegaloValueType(MegaloValueUnderlyingType::boolean);
+      inline constexpr MegaloValueType compare_operator  = MegaloValueType(MegaloValueEnum::compare_operator);
+      inline constexpr MegaloValueType killer_type_flags = MegaloValueType(MegaloValueFlagsMask::killer_type);
+      inline constexpr MegaloValueType explicit_object   = MegaloValueType(MegaloValueEnum::object);
+      inline constexpr MegaloValueType explicit_player   = MegaloValueType(MegaloValueEnum::player);
+      inline constexpr MegaloValueType explicit_team     = MegaloValueType(MegaloValueEnum::team);
+      inline constexpr MegaloValueType team_disposition  = MegaloValueType(MegaloValueEnum::team_disposition);
+      inline constexpr MegaloValueType variable_any      = MegaloValueType(MegaloVariableType::any);
+      inline constexpr MegaloValueType variable_object   = MegaloValueType(MegaloVariableType::object);
+      inline constexpr MegaloValueType variable_player   = MegaloValueType(MegaloVariableType::player);
+      inline constexpr MegaloValueType variable_team     = MegaloValueType(MegaloVariableType::team);
+      inline constexpr MegaloValueType variable_timer    = MegaloValueType(MegaloVariableType::timer);
    }
 }
 
@@ -629,5 +633,5 @@ class MegaloValue {
       MegaloValueType* type = nullptr;
       RawMegaloValue   value;
       //
-      bool read(cobb::bitstream&) noexcept;
+      void read(cobb::bitstream&) noexcept;
 };

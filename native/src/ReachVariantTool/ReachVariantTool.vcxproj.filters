@@ -84,6 +84,15 @@
     <ClInclude Include="game_variants\tu1_options.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\megalo\value_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\megalo\conditions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\templating.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -117,6 +126,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\loadouts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\megalo\value_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\megalo\conditions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

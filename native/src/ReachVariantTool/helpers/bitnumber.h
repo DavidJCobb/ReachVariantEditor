@@ -90,9 +90,28 @@ namespace cobb {
       typename   presence_bit = bitnumber_no_presence_bit, // if std::true_type or std::false_type, then the game writes a bit indicating whether the value is present; if the bit equals the specified type, the value is present
       underlying if_absent    = underlying() // if the bitnumber has a presence bit, this value is assigned when the bit indicates absence
    > class bitnumber {
+      //
+      // A class which represents a number that is encoded into a bit-aligned stream, e.g. 
+      // a 3-bit number or a 5-bit number. The class is designed to handle the following 
+      // quirks:
+      //
+      // swap
+      //    For numbers that need to have their bit order swapped after being read.
+      //
+      // offset
+      //    For numbers that are incremented by some value before being encoded, and must 
+      //    be decremented by the same value after being decoded, e.g. numbers that use 
+      //    negative values as sentinels in-memory while being incremented to positive 
+      //    to avoid sign bit issues in a file format.
+      //
+      // presence
+      //    For numbers that have a "presence bit." If the presence bit is equal to a 
+      //    certain bool, then the number's value follows it; otherwise, no value is 
+      //    encoded into the file and the number should be given a default during read.
+      //
       public:
          using underlying_type = underlying;
-         using underlying_int  = cobb::enum_or_int_to_int_t<underlying_type>; // int type if (underlying_type) is an enum
+         using underlying_int  = cobb::strip_enum_t<underlying_type>; // int type if (underlying_type) is an enum
          static constexpr int  bitcount        = bitcount;
          static constexpr bool bitswap_on_read = swap;
          static constexpr int  value_offset    = offset;

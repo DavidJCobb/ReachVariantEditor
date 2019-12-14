@@ -43,7 +43,7 @@ namespace cobb {
          }
          //
          inline bool is_in_bounds(uint32_t offset, uint32_t bytes) const noexcept {
-            return (offset + bytes) < this->size;
+            return ((uint64_t)offset + bytes) < this->size;
          }
    };
    class file_guard {

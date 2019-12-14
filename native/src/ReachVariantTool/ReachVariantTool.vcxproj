@@ -154,6 +154,8 @@
     <ClInclude Include="game_variants\base.h" />
     <ClInclude Include="game_variants\loadouts.h" />
     <ClInclude Include="game_variants\map_permissions.h" />
+    <ClInclude Include="game_variants\megalo\conditions.h" />
+    <ClInclude Include="game_variants\megalo\value_types.h" />
     <ClInclude Include="game_variants\megalo_options.h" />
     <ClInclude Include="game_variants\option_toggles.h" />
     <ClInclude Include="game_variants\player_rating_params.h" />
@@ -166,6 +168,7 @@
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
+    <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -176,6 +179,8 @@
     <ClCompile Include="formats\localized_string_table.cpp" />
     <ClCompile Include="game_variants\base.cpp" />
     <ClCompile Include="game_variants\loadouts.cpp" />
+    <ClCompile Include="game_variants\megalo\conditions.cpp" />
+    <ClCompile Include="game_variants\megalo\value_types.cpp" />
     <ClCompile Include="game_variants\megalo_options.cpp" />
     <ClCompile Include="game_variants\player_traits.cpp" />
     <ClCompile Include="helpers\bitstream.cpp" />
