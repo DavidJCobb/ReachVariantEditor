@@ -55,12 +55,19 @@
 //  - A game state value has neither an enum nor a constant. If we know that you're 
 //    referring to the "Score To Win" subtype, then that's all we need to know.
 //
-// The overwhelming majority of opcode arguments are complex-type arguments, it seems.
+// The overwhelming majority of opcode arguments are complex-type arguments, it seems. 
+//
+// There are a few types that don't fit neatly into this paradigm, such as the "Shape" 
+// type, which consists of zero or more complex scalar values depending on the shape 
+// type. We'll call these "special types."
 //
 // TODO:
 //
-//  - Create a struct, ComplexValue, that has a reference to a ComplexValueSubtype, 
-//    a uint32_t for the enum value, and a uint32_t for the constant value.
+//  - Look at the SpecialType enum and create classes for anything we don't have 
+//    classes for yet.
+//
+//  - Create a class MegaloOpcodeValue that has a SimpleValue member, a ComplexValue 
+//    member, and a union of all special type classes.
 //
 
 enum class MegaloScopeType {
@@ -536,10 +543,20 @@ enum class SimpleValueType {
    enumeration,
    flags,
    // Halo 4: float32
+   index,
    integer_8_signed,
    integer_8_unsigned,
    integer_16_signed,
    vector3,
+};
+enum class SpecialType {
+   not_applicable = -1,
+   object_with_player_var_index, // TODO: make a class for this
+   shape,
+   target_var, // TODO: make a class for this
+   team_filter_params, // TODO: make a class for this
+   waypoint_params, // TODO: make a class for this
+   widget_meter_params, // TODO: make a class for this
 };
 
 class ComplexValueSubtype {
@@ -615,6 +632,12 @@ namespace reach {
    }
 }
 
+enum class ReachShapeType {
+   none,
+   sphere,
+   cylinder,
+   box,
+};
 struct ReachVector3 { // TODO: bring in cobb::vector3<int8_t>
    int8_t x;
    int8_t y;
@@ -643,7 +666,39 @@ struct ComplexValue {
       int32_t  index;
    };
    //
+   ComplexValue(ComplexValueType t) : type(t) {};
+   //
    void read(cobb::bitstream& stream) noexcept;
+};
+
+struct ReachShape {
+   ReachShapeType type;
+   ComplexValue   radius = ComplexValue(ComplexValueType::scalar); // doubles as width for box
+   ComplexValue   length = ComplexValue(ComplexValueType::scalar);
+   ComplexValue   top    = ComplexValue(ComplexValueType::scalar);
+   ComplexValue   bottom = ComplexValue(ComplexValueType::scalar);
+   //
+   void read(cobb::bitstream& stream) noexcept {
+      this->type = (ReachShapeType)stream.read_bits(2);
+      switch (this->type) {
+         case ReachShapeType::none:
+            break;
+         case ReachShapeType::box:
+            this->radius.read(stream);
+            this->length.read(stream);
+            this->top.read(stream);
+            this->bottom.read(stream);
+            break;
+         case ReachShapeType::cylinder:
+            this->radius.read(stream);
+            this->top.read(stream);
+            this->bottom.read(stream);
+            break;
+         case ReachShapeType::sphere:
+            this->radius.read(stream);
+            break;
+      }
+   }
 };
 
 class MegaloValueType {
@@ -651,15 +706,20 @@ class MegaloValueType {
    // this may be somewhat outdated? it was written before I came to understand complex and simple types
    //
    public:
-      SimpleValueType  simple_type  = SimpleValueType::not_applicable;
-      ComplexValueType complex_type = ComplexValueType::not_applicable;
-      MegaloValueEnum  enumeration  = MegaloValueEnum::not_applicable;
-      MegaloValueFlagsMask flags_mask = MegaloValueFlagsMask::not_applicable;
+      SimpleValueType       simple_type  = SimpleValueType::not_applicable;
+      ComplexValueType      complex_type = ComplexValueType::not_applicable;
+      SpecializedType       special_type = SpecializedType::not_applicable;
+      MegaloValueEnum       enumeration  = MegaloValueEnum::not_applicable;
+      MegaloValueFlagsMask  flags_mask   = MegaloValueFlagsMask::not_applicable;
+      MegaloValueIndexType  index_type   = MegaloValueIndexType::not_applicable;
+      MegaloValueIndexQuirk index_quirk  = MegaloValueIndexQuirk::none;
       //
       constexpr MegaloValueType(SimpleValueType s) : simple_type(s) {};
       constexpr MegaloValueType(ComplexValueType c) : complex_type(c) {};
+      constexpr MegaloValueType(SpecializedType s) : special_type(s) {};
       constexpr MegaloValueType(MegaloValueEnum e) : simple_type(SimpleValueType::enumeration), enumeration(e) {};
       constexpr MegaloValueType(MegaloValueFlagsMask f) : simple_type(SimpleValueType::flags), flags_mask(f) {};
+      constexpr MegaloValueType(MegaloValueIndexType it, MegaloValueIndexQuirk iq = MegaloValueIndexQuirk::none) : simple_type(SimpleValueType::index), index_type(it), index_quirk(iq) {};
 };
 
 namespace reach {
@@ -673,8 +733,16 @@ namespace reach {
       inline constexpr MegaloValueType explicit_object   = MegaloValueType(MegaloValueEnum::object);
       inline constexpr MegaloValueType explicit_player   = MegaloValueType(MegaloValueEnum::player);
       inline constexpr MegaloValueType explicit_team     = MegaloValueType(MegaloValueEnum::team);
+      inline constexpr MegaloValueType loadout_palette   = MegaloValueType(MegaloValueIndexType::loadout_palette, MegaloValueIndexQuirk::reference);
       inline constexpr MegaloValueType math_operator     = MegaloValueType(MegaloValueEnum::math_operator);
+      inline constexpr MegaloValueType object_label      = MegaloValueType(MegaloValueIndexType::object_filter, MegaloValueIndexQuirk::presence);
+      inline constexpr MegaloValueType object_type       = MegaloValueType(MegaloValueIndexType::object_type, MegaloValueIndexQuirk::presence);
       inline constexpr MegaloValueType pickup_priority   = MegaloValueType(MegaloValueEnum::pickup_priority);
+      inline constexpr MegaloValueType player_traits     = MegaloValueType(MegaloValueIndexType::player_traits, MegaloValueIndexQuirk::reference);
+      inline constexpr MegaloValueType script_option     = MegaloValueType(MegaloValueIndexType::option, MegaloValueIndexQuirk::reference);
+      inline constexpr MegaloValueType shape             = MegaloValueType(SpecializedType::shape);
+      inline constexpr MegaloValueType stat              = MegaloValueType(MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference);
+      inline constexpr MegaloValueType string            = MegaloValueType(MegaloValueIndexType::string, MegaloValueIndexQuirk::offset);
       inline constexpr MegaloValueType team_designator   = MegaloValueType(MegaloValueEnum::team_designator);
       inline constexpr MegaloValueType team_disposition  = MegaloValueType(MegaloValueEnum::team_disposition);
       inline constexpr MegaloValueType variable_any      = MegaloValueType(ComplexValueType::any);
@@ -683,6 +751,7 @@ namespace reach {
       inline constexpr MegaloValueType variable_player   = MegaloValueType(ComplexValueType::player);
       inline constexpr MegaloValueType variable_team     = MegaloValueType(ComplexValueType::team);
       inline constexpr MegaloValueType variable_timer    = MegaloValueType(ComplexValueType::timer);
+      inline constexpr MegaloValueType widget            = MegaloValueType(MegaloValueIndexType::widget, MegaloValueIndexQuirk::presence);
    }
 }
 
