@@ -113,6 +113,18 @@ MegaloConditionFunctionList::MegaloConditionFunctionList() {
          }
       ),
       //
+      MegaloConditionFunction(
+         "Object Has Label",
+         "Checks whether an object has a given Forge label.",
+         "Object %1 %v label %2.", // Object [object] [has] label [INF_HAVEN].
+         "has",
+         "does not have",
+         [](MegaloConditionFunction& cf) {
+            cf.arguments.emplace_back("object", reach::value_types::variable_object);
+            cf.arguments.emplace_back("label",  reach::value_types::object_label);
+         }
+      ),
+      //
       // TODO: FINISH ME
       //
    };

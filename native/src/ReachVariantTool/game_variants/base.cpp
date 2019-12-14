@@ -75,8 +75,7 @@ void ReachTeamData::read(cobb::bitstream& stream) noexcept {
 
 bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
-   for (int i = 0; i < std::extent<decltype(this->hashSHA1)>::value; i++)
-      stream.read(this->hashSHA1[i]);
+   stream.read(this->hashSHA1);
    stream.skip(8 * 8); // skip eight bytes
    this->type.read(stream);
    stream.read(this->encodingVersion);

@@ -4,6 +4,7 @@
 #include "../../helpers/bitwise.h"
 #include "../../helpers/bitstream.h"
 #include "../../helpers/bitnumber.h"
+#include "limits.h"
 
 // VarRefTypes:
 // Custom: indices need to go up to 0x2B; number of possible members is 0x2C
@@ -58,27 +59,9 @@
 //
 // TODO:
 //
-//  - There is a hardcoded VarRefType in KSoft.Tool called "Any." How is that loaded? 
-//    It wouldn't be enough to load the subtype ID, enum, and constant, because you'd 
-//    have to know what the complex type itself is (e.g. is it a number, or a player, 
-//    or what?).
-//
-//  - Currently we've organized ComplexValueSubtype instances into namespaces. However, 
-//    complex types are kind of like enums: each subtype has a numeric index; when you 
-//    read a complex value, you do so by first reading that index to know what subtype 
-//    the value has, and then you read it in the manner appropriate for the subtype. 
-//    As such, we should probably use std::array<ComplexValueSubtype, howeverMany> 
-//    instead of namespaces.
-//
-//     - The goal is to be able to do, like, "Oh, we know it's a scalar, so read the 
-//       type and do scalar_types[type]."
-//
 //  - Create a struct, ComplexValue, that has a reference to a ComplexValueSubtype, 
 //    a uint32_t for the enum value, and a uint32_t for the constant value.
 //
-
-struct ComplexValue {
-};
 
 enum class MegaloScopeType {
    // values in this enum aren't intended to match with what the game engine uses
@@ -98,15 +81,6 @@ enum class MegaloVariableType {
    player = 3,
    object = 4,
 };
-enum class MegaloValueUnderlyingType {
-   boolean,
-   enumeration,
-   flags,
-   index,
-   integer_signed,
-   integer_unsigned,
-   variable,
-};
 
 enum class MegaloValueIndexType {
    not_applicable = -1,
@@ -116,8 +90,8 @@ enum class MegaloValueIndexType {
    name,
    sound,
    incident,
-   icon,
-   // Halo 4: medal
+   icon, // bit length unknown
+   // Halo 4? medal
    // Halo 4: ordnance
    loadout_palette,
    option,
@@ -135,6 +109,28 @@ enum class MegaloValueIndexQuirk {
    reference, // value cannot be "none"
    word, // UInt16
 };
+namespace reach {
+   namespace megalo {
+      int bits_for_index_type(MegaloValueIndexType it) {
+         switch (it) {
+            // icon - unknown
+            case MegaloValueIndexType::incident:        return cobb::bitcount(reach::megalo::max_incident_types - 1);
+            case MegaloValueIndexType::loadout_palette: return cobb::bitcount(6 - 1);
+            case MegaloValueIndexType::name:            return cobb::bitcount(reach::megalo::max_string_ids - 1);
+            case MegaloValueIndexType::object_filter:   return cobb::bitcount(reach::megalo::max_script_labels - 1);
+            case MegaloValueIndexType::object_type:     return cobb::bitcount(reach::megalo::max_object_types - 1);
+            case MegaloValueIndexType::option:          return cobb::bitcount(reach::megalo::max_script_options - 1);
+            case MegaloValueIndexType::player_traits:   return cobb::bitcount(reach::megalo::max_script_traits - 1);
+            case MegaloValueIndexType::sound:           return cobb::bitcount(reach::megalo::max_engine_sounds - 1);
+            case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats);
+            case MegaloValueIndexType::string:          return cobb::bitcount(reach::megalo::max_variant_strings - 1);
+            case MegaloValueIndexType::trigger:         return cobb::bitcount(reach::megalo::max_triggers - 1);
+            case MegaloValueIndexType::widget:          return cobb::bitcount(reach::megalo::max_script_widgets - 1);
+         }
+         return 0;
+      }
+   }
+}
 
 enum class MegaloValueEnum {
    not_applicable = -1,
@@ -149,6 +145,7 @@ enum class MegaloValueEnum {
    pickup_priority,
    player,
    team,
+   team_designator,
    team_disposition,
    waypoint_icon,
    waypoint_priority,
@@ -160,6 +157,47 @@ enum class MegaloValueFlagsMask {
    killer_type,
    player_unused_mode_flags,
 };
+namespace reach {
+   namespace megalo {
+      int bits_for_enum(MegaloValueEnum st) {
+         switch (st) {
+            case MegaloValueEnum::add_weapon_mode:   return 2;
+            case MegaloValueEnum::c_hud_destination: return 1;
+            case MegaloValueEnum::compare_operator:  return 3;
+            case MegaloValueEnum::drop_weapon_mode:  return 1;
+            case MegaloValueEnum::grenade_type:      return 1;
+            case MegaloValueEnum::math_operator:     return 5;
+            case MegaloValueEnum::object:            return 5;
+            case MegaloValueEnum::pickup_priority:   return 2;
+            case MegaloValueEnum::player:            return 5;
+            case MegaloValueEnum::team:              return 5;
+            case MegaloValueEnum::team_designator:   return 4;
+            case MegaloValueEnum::team_disposition:  return 2;
+            case MegaloValueEnum::waypoint_icon:     return 5;
+            case MegaloValueEnum::waypoint_priority: return 2;
+         }
+         return 0;
+      }
+      int offset_for_enum(MegaloValueEnum st) {
+         switch (st) {
+            case MegaloValueEnum::team_designator:
+            case MegaloValueEnum::waypoint_icon:
+            case MegaloValueEnum::team:
+               return 1;
+         }
+         return 0;
+      }
+      //
+      int bits_for_flags(MegaloValueFlagsMask fm) {
+         switch (fm) {
+            case MegaloValueFlagsMask::create_object_flags: return 2;
+            case MegaloValueFlagsMask::killer_type: return 3;
+            case MegaloValueFlagsMask::player_unused_mode_flags: return 2;
+         }
+         return 0;
+      }
+   }
+}
 
 class MegaloScope {
    //
@@ -403,6 +441,18 @@ namespace reach {
          unk_14,
          unk_15,
       };
+      enum class team_designator {
+         none = -1,
+         defenders,
+         attackers,
+         team3,
+         team4,
+         team5,
+         team6,
+         team7,
+         team8,
+         neutral,
+      };
       enum class team_disposition {
          unk_0,
          unk_1,
@@ -470,7 +520,32 @@ namespace reach {
    template<MegaloScopeType st> inline constexpr MegaloValueEnum megalo_enum_for_scope_type = _megalo_enum_for_scope_type<st>::value;
 }
 
+enum class ComplexValueType {
+   not_applicable = -2,
+   any = -1, // complex-value is preceded by a 3-bit value indicating the ComplexValueType in use
+   scalar, // numbers, bools
+   player,
+   object,
+   team,
+   timer,
+};
+enum class SimpleValueType {
+   not_applicable = -1,
+   //
+   boolean,
+   enumeration,
+   flags,
+   // Halo 4: float32
+   integer_8_signed,
+   integer_8_unsigned,
+   integer_16_signed,
+   vector3,
+};
+
 class ComplexValueSubtype {
+   //
+   // The type for an actual loaded value is ComplexValue.
+   //
    public:
       struct flags {
          flags() = delete;
@@ -488,6 +563,7 @@ class ComplexValueSubtype {
       int     constant_bitlength = 0;
       MegaloValueIndexType  index_type  = MegaloValueIndexType::not_applicable;
       MegaloValueIndexQuirk index_quirk = MegaloValueIndexQuirk::none;
+      int index_bitlength = 0; // can be overridden
       //
    public:
       constexpr ComplexValueSubtype(const char* n) : name(n) {}; // needs to be public so 
@@ -500,12 +576,13 @@ class ComplexValueSubtype {
          index_type(it),
          index_quirk(iq)
       {};
-      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, MegaloValueIndexType it, MegaloValueIndexQuirk iq) :
+      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, MegaloValueIndexType it, MegaloValueIndexQuirk iq, int index_bitlength = 0) :
          name(n),
          enumeration(e),
          constant_flags(flags::has_index | flags::is_read_only),
          index_type(it),
-         index_quirk(iq)
+         index_quirk(iq),
+         index_bitlength(index_bitlength)
       {};
       //
       template<typename T> static constexpr const ComplexValueSubtype constant(const char* n) {
@@ -521,76 +598,52 @@ class ComplexValueSubtype {
          instance.constant_bitlength = reach::bitlength_for_variable_index<st, vt>;
          return instance;
       }
-      //
-      // TO READ ONE OF THESE FROM A SCRIPT'S DATA:
-      //
-      // // given std::array<ComplexValueSubtype, num> subtypes;
-      // // given type_bitlength = cobb::bitcount<num - 1>;
-      // // given some object (myValue) that can hold subtype info
-      //
-      // int type = stream.read_bits<uint8_t>(type_bitlength);
-      // if (type >= subtypes.size())
-      //    assert(false && "handle this error");
-      // ComplexValueSubtype& subtype = subtypes[type];
-      // if (subtype.enumeration != MegaloValueEnum::not_applicable) {
-      //    myValue.enumValue = ...; // read a number of bits dependent on the enum
-      //    // TODO: this applies to flags masks as well; we need to add support for that
-      // }
-      // if (subtype.constant_flags & flags::has_constant) {
-      //    myValue.constant = stream.read_bits(subtype.constant_bitlength);
-      // } else if (subtype.constant_flags & flags::has_index) {
-      //    // TODO: read the index accounting for the MegaloValueIndexQuirk
-      // }
-      //
 };
 namespace reach {
    namespace megalo {
       namespace complex_values {
          //
-         //
-         // TODO: The indices are important; can we use a std::array<> instead of a namespace? 
-         // We should create an enum alongside it just so we remember everything.
-         //
-         // TODO: Ditch the static templated methods in favor of constructor overloads. We only 
-         // went with the static methods in the first place because constructor overloads were 
-         // failing on constexpr (turns out, things have to be constexpr AND const to truly be 
-         // constexpr, because this language is odd).
-         //
          // TODO: Find a way to represent the underlying types, i.e. bools versus numbers, when 
          // the value isn't a script-specified constant (i.e. a read-only game state value).
          //
          extern std::array<ComplexValueSubtype, 43> scalar;
-         namespace player {
-         }
-         namespace object {
-         }
-         namespace team {
-         }
-         namespace timer{
-         }
+         extern std::array<ComplexValueSubtype,  4> player;
+         extern std::array<ComplexValueSubtype,  8> object;
+         extern std::array<ComplexValueSubtype,  6> team;
+         extern std::array<ComplexValueSubtype,  7> timer;
       }
    }
 }
 
-// A variable reference e.g. Player.Numeric 5 is:
-// [reference kind][index bitcount: enum VariableReferenceTypes.Custom][DataType, if any][DataValue, if any]
-
-struct ReachVector3 { // TODO: bring in cobb::vector3<float>
-   float x;
-   float y;
-   float z;
-};
-struct RawMegaloVariableReferencingValue {
-   MegaloScopeType    scope;
-   MegaloVariableType type;
-   uint8_t            which = 0;
+struct ReachVector3 { // TODO: bring in cobb::vector3<int8_t>
+   int8_t x;
+   int8_t y;
+   int8_t z;
 };
 union RawMegaloValue {
    bool         boolean;
    int32_t      integer_signed;
    uint32_t     integer_unsigned = 0;
    ReachVector3 vector3;
-   RawMegaloVariableReferencingValue variable;
+};
+struct SimpleValue {
+   SimpleValueType      type;
+   MegaloValueEnum      enumeration = MegaloValueEnum::not_applicable;
+   MegaloValueFlagsMask flags_mask  = MegaloValueFlagsMask::not_applicable;
+   RawMegaloValue       value;
+   //
+   bool read(cobb::bitstream& stream) noexcept;
+};
+struct ComplexValue {
+   ComplexValueType     type;
+   ComplexValueSubtype* subtype = nullptr;
+   uint32_t enum_value = 0;
+   union {
+      uint32_t constant = 0;
+      int32_t  index;
+   };
+   //
+   void read(cobb::bitstream& stream) noexcept;
 };
 
 class MegaloValueType {
@@ -598,33 +651,38 @@ class MegaloValueType {
    // this may be somewhat outdated? it was written before I came to understand complex and simple types
    //
    public:
-      MegaloValueUnderlyingType underlying_type;
-      MegaloValueEnum       enumeration = MegaloValueEnum::not_applicable;      // only if underlying type is "enumeration"
-      MegaloValueFlagsMask  flags_mask  = MegaloValueFlagsMask::not_applicable; // only if underlying type is "flags"
-      MegaloVariableType    var_type    = MegaloVariableType::not_applicable;   // only if underlying type is "variable"
-      MegaloValueIndexType  index_type  = MegaloValueIndexType::not_applicable; // only if underlying type is "index"
-      MegaloValueIndexQuirk index_quirk = MegaloValueIndexQuirk::none;          // only if underlying type is "index" -- describes any special encoding (akin to what cobb::bitnumber handles)
+      SimpleValueType  simple_type  = SimpleValueType::not_applicable;
+      ComplexValueType complex_type = ComplexValueType::not_applicable;
+      MegaloValueEnum  enumeration  = MegaloValueEnum::not_applicable;
+      MegaloValueFlagsMask flags_mask = MegaloValueFlagsMask::not_applicable;
       //
-      constexpr MegaloValueType(MegaloValueUnderlyingType ut) : underlying_type(ut) {};
-      constexpr MegaloValueType(MegaloValueEnum e) : underlying_type(MegaloValueUnderlyingType::enumeration), enumeration(e) {};
-      constexpr MegaloValueType(MegaloValueFlagsMask f) : underlying_type(MegaloValueUnderlyingType::flags), flags_mask(f) {};
-      constexpr MegaloValueType(MegaloVariableType vt) : underlying_type(MegaloValueUnderlyingType::variable), var_type(vt) {};
+      constexpr MegaloValueType(SimpleValueType s) : simple_type(s) {};
+      constexpr MegaloValueType(ComplexValueType c) : complex_type(c) {};
+      constexpr MegaloValueType(MegaloValueEnum e) : simple_type(SimpleValueType::enumeration), enumeration(e) {};
+      constexpr MegaloValueType(MegaloValueFlagsMask f) : simple_type(SimpleValueType::flags), flags_mask(f) {};
 };
 
 namespace reach {
    namespace value_types {
-      inline constexpr MegaloValueType boolean           = MegaloValueType(MegaloValueUnderlyingType::boolean);
+      inline constexpr MegaloValueType add_weapon_mode   = MegaloValueType(MegaloValueEnum::add_weapon_mode);
+      inline constexpr MegaloValueType boolean           = MegaloValueType(SimpleValueType::boolean);
       inline constexpr MegaloValueType compare_operator  = MegaloValueType(MegaloValueEnum::compare_operator);
+      inline constexpr MegaloValueType drop_weapon_mode  = MegaloValueType(MegaloValueEnum::drop_weapon_mode);
+      inline constexpr MegaloValueType grenade_type      = MegaloValueType(MegaloValueEnum::grenade_type);
       inline constexpr MegaloValueType killer_type_flags = MegaloValueType(MegaloValueFlagsMask::killer_type);
       inline constexpr MegaloValueType explicit_object   = MegaloValueType(MegaloValueEnum::object);
       inline constexpr MegaloValueType explicit_player   = MegaloValueType(MegaloValueEnum::player);
       inline constexpr MegaloValueType explicit_team     = MegaloValueType(MegaloValueEnum::team);
+      inline constexpr MegaloValueType math_operator     = MegaloValueType(MegaloValueEnum::math_operator);
+      inline constexpr MegaloValueType pickup_priority   = MegaloValueType(MegaloValueEnum::pickup_priority);
+      inline constexpr MegaloValueType team_designator   = MegaloValueType(MegaloValueEnum::team_designator);
       inline constexpr MegaloValueType team_disposition  = MegaloValueType(MegaloValueEnum::team_disposition);
-      inline constexpr MegaloValueType variable_any      = MegaloValueType(MegaloVariableType::any);
-      inline constexpr MegaloValueType variable_object   = MegaloValueType(MegaloVariableType::object);
-      inline constexpr MegaloValueType variable_player   = MegaloValueType(MegaloVariableType::player);
-      inline constexpr MegaloValueType variable_team     = MegaloValueType(MegaloVariableType::team);
-      inline constexpr MegaloValueType variable_timer    = MegaloValueType(MegaloVariableType::timer);
+      inline constexpr MegaloValueType variable_any      = MegaloValueType(ComplexValueType::any);
+      inline constexpr MegaloValueType variable_scalar   = MegaloValueType(ComplexValueType::scalar);
+      inline constexpr MegaloValueType variable_object   = MegaloValueType(ComplexValueType::object);
+      inline constexpr MegaloValueType variable_player   = MegaloValueType(ComplexValueType::player);
+      inline constexpr MegaloValueType variable_team     = MegaloValueType(ComplexValueType::team);
+      inline constexpr MegaloValueType variable_timer    = MegaloValueType(ComplexValueType::timer);
    }
 }
 
