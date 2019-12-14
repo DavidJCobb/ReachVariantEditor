@@ -370,7 +370,7 @@ namespace reach {
             case MegaloValueIndexType::incident:        return cobb::bitcount(reach::megalo::max_incident_types - 1);
             case MegaloValueIndexType::loadout_palette: return cobb::bitcount(6 - 1);
             case MegaloValueIndexType::name:            return cobb::bitcount(reach::megalo::max_string_ids - 1);
-            case MegaloValueIndexType::object_filter:   return cobb::bitcount(reach::megalo::max_script_labels - 1);
+            case MegaloValueIndexType::object_filter:   return cobb::bitcount(reach::megalo::max_script_labels - 1); // 4 bits
             case MegaloValueIndexType::object_type:     return cobb::bitcount(reach::megalo::max_object_types - 1);
             case MegaloValueIndexType::option:          return cobb::bitcount(reach::megalo::max_script_options - 1);
             case MegaloValueIndexType::player_traits:   return cobb::bitcount(reach::megalo::max_script_traits - 1);
@@ -404,6 +404,8 @@ namespace reach {
       //
       extern int bits_for_enum(MegaloValueEnum st) {
          switch (st) {
+            case MegaloValueEnum::not_applicable: return 0;
+            //
             case MegaloValueEnum::add_weapon_mode:   return 2;
             case MegaloValueEnum::c_hud_destination: return 1;
             case MegaloValueEnum::compare_operator:  return 3;
@@ -419,6 +421,9 @@ namespace reach {
             case MegaloValueEnum::waypoint_icon:     return 5;
             case MegaloValueEnum::waypoint_priority: return 2;
          }
+         #ifdef _DEBUG
+            assert(false && "Unrecognized MegaloValueEnum passed to reach::megalo::bits_for_enum!"); // haven't needed this yet but better to leave it here for the future
+         #endif
          return 0;
       }
       extern int offset_for_enum(MegaloValueEnum st) {
@@ -432,11 +437,21 @@ namespace reach {
       }
       //
       extern int bits_for_flags(MegaloValueFlagsMask fm) {
+         //
+         // Cobb, don't let yourself get mixed up between enums and flags again. It was already 
+         // doofy the first time and it'd be doofier a second time. The number of bits in a flags 
+         // mask IS the number of flags.
+         //
          switch (fm) {
+            case MegaloValueFlagsMask::not_applicable: return 0;
+            //
             case MegaloValueFlagsMask::create_object_flags:      return 3;
             case MegaloValueFlagsMask::killer_type:              return 5;
             case MegaloValueFlagsMask::player_unused_mode_flags: return 4;
          }
+         #ifdef _DEBUG
+            assert(false && "Unrecognized MegaloValueFlagsMask passed to reach::megalo::bits_for_flags!"); // haven't needed this yet but better to leave it here for the future
+         #endif
          return 0;
       }
       //
@@ -793,7 +808,7 @@ void MegaloValue::read(cobb::bitstream& stream) noexcept {
       this->complex.read(stream);
       return;
    }
-   switch (this->type->special_type) {
+   switch (this->type->special_type) { // I think these are only used in actions
       case SpecialType::shape:
          this->special.shape.read(stream);
          return;

@@ -169,8 +169,28 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       auto& e = ot.engine;
       auto& m = ot.megalo;
       //
+      #if _DEBUG
+         uint32_t offset = stream.offset;
+      #endif
       e.disabled.read(stream);
       e.hidden.read(stream);
+      #if _DEBUG
+         uint32_t distance = stream.offset - offset;
+         if (distance != 2560) {
+            //
+            // this doesn't trip, so as of this writing we ARE handling this correctly
+            //
+            // we ARE reading megalo data from the right place; the problem is some hard-to-find 
+            // mistake we're making when reading it
+            //
+            printf("WARNING: Possible incorrect handling for ReachGameVariantEngineOptionToggles.\n"
+               "Data type holds 1272 bits; minimum size needed to hold this using uint32_ts as the "
+               "game does is 1280 bits. After loading two of these, we should be 1280 * 2 = 2560 bits "
+               "ahead of the start; however, we are only %d bits ahead.",
+               distance
+            );
+         }
+      #endif
       //
       m.disabled.read(stream);
       m.hidden.read(stream);
@@ -179,7 +199,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       std::vector<MegaloCondition> conditions;
       int count;
       //
-      count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions)); // 10 bits?
+      count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions)); // 10 bits
       conditions.resize(count);
       for (int i = 0; i < count; i++) {
          printf("Reading condition %d of %d...\n", i, count);
@@ -189,10 +209,37 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
          __debugbreak();
       #endif
 
+      // all conditions (10-bit count)
+      // all actions    (11-bit count)
+      // all triggers
+         // execution mode
+         // trigger type
+         // switch (execution mode)
+            // case object filter:
+               // object filter index
+            // case candy spawner:
+               // game object type (1 bit)
+               // object filter index
+         // first condition index (condition index bitlength; no presence bit or offset)
+         // condition count       (condition count bitlength)
+         // first action index (action index bitlength; no presence bit or offset)
+         // action count       (action count bitlength)
+      // game statistics
+      // global variable declarations
+      // player variable declarations
+      // object variable declarations
+      // team   variable declarations
+      // HUD widget definitions
+      // trigger entry points
+      // object type references (bitset)
+      // object filters (i.e. Forge labels?)
 
+      // NOTES:
+      //  - GameObjectFilters are Halo 4 only
 
       //
-      // TODO: retain data
+      // TODO: retain data and organize it (i.e. go from struct-of-arrays to array-of-structs, 
+      // with triggers actually containing their conditions and actions).
       //
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)

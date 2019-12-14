@@ -55,5 +55,5 @@ template<int count> class ReachGameVariantOptionToggles {
          };
       #endif
 };
-using ReachGameVariantEngineOptionToggles = ReachGameVariantOptionToggles<1272>;
+using ReachGameVariantEngineOptionToggles = ReachGameVariantOptionToggles<1272>; // 1280 bits (160 bytes) in the file
 using ReachGameVariantMegaloOptionToggles = ReachGameVariantOptionToggles<16>;

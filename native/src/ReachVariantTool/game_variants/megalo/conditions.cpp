@@ -255,8 +255,8 @@ void MegaloCondition::read(cobb::bitstream& stream) noexcept {
    }
    this->function = &g_conditionFunctionList[type];
    stream.read(this->inverted);
-   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); // 9 bits?
-   this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions - 1)); // 10 bits?
+   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); //  9 bits // Nitrogen uses the count bitlengths for Halo 4 rather than the index bitlengths, but testing shows that Reach does require the index bitlengths.
+   this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions    - 1)); // 10 bits
    //
    auto arg_count = this->function->arguments.size();
    this->arguments.resize(arg_count);
@@ -271,6 +271,6 @@ void MegaloCondition::read(cobb::bitstream& stream) noexcept {
    }
    //
    #if _DEBUG
-      this->to_string(this->debug_stringified);
+      this->to_string(this->debug_str);
    #endif
 }

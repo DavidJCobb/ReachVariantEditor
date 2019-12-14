@@ -55,7 +55,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList;
 class MegaloCondition {
    public:
       #if _DEBUG
-         std::string debug_stringified;
+         std::string debug_str; // the condition's content as a human-readable string, for ease of viewing in a debugger
       #endif
       //
       const MegaloConditionFunction* function = nullptr;
