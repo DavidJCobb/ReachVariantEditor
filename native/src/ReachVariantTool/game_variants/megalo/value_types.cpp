@@ -302,6 +302,44 @@ namespace {
          out = strings[value];
       }
    }
+   namespace _stringify_index {
+      void incident(int32_t value, std::string& out) {
+         cobb::sprintf(out, "incident:%u", value);
+      }
+      void loadout_palette(int32_t value, std::string& out) {
+         cobb::sprintf(out, "loadout palette %u", value);
+      }
+      void name(int32_t value, std::string& out) {
+         cobb::sprintf(out, "string ID %u", value);
+      }
+      void object_filter(int32_t value, std::string& out) {
+         cobb::sprintf(out, "label ID %u", value);
+      }
+      void object_type(int32_t value, std::string& out) {
+         cobb::sprintf(out, "object_type:%u", value);
+      }
+      void option(int32_t value, std::string& out) {
+         cobb::sprintf(out, "option ID %u", value);
+      }
+      void player_traits(int32_t value, std::string& out) {
+         cobb::sprintf(out, "player traits index %u", value);
+      }
+      void sound(int32_t value, std::string& out) {
+         cobb::sprintf(out, "sound index %u", value);
+      }
+      void stat(int32_t value, std::string& out) {
+         cobb::sprintf(out, "scripted stat index %u", value);
+      }
+      void string(int32_t value, std::string& out) {
+         cobb::sprintf(out, "variant string ID %u", value);
+      }
+      void trigger(int32_t value, std::string& out) {
+         cobb::sprintf(out, "trigger index %u", value);
+      }
+      void widget(int32_t value, std::string& out) {
+         cobb::sprintf(out, "widget index %u", value);
+      }
+   }
 }
 namespace reach {
    namespace megalo {
@@ -323,6 +361,26 @@ namespace reach {
          }
          return 0;
       }
+      extern MegaloStringifyIndexFunction stringify_function_for_index_type(MegaloValueIndexType i) noexcept {
+         #define preprocessor_case(name) case MegaloValueIndexType::##name##: return _stringify_index::##name##;
+         switch (i) {
+            preprocessor_case(incident);
+            preprocessor_case(loadout_palette);
+            preprocessor_case(name);
+            preprocessor_case(object_filter);
+            preprocessor_case(object_type);
+            preprocessor_case(option);
+            preprocessor_case(player_traits);
+            preprocessor_case(sound);
+            preprocessor_case(stat);
+            preprocessor_case(string);
+            preprocessor_case(trigger);
+            preprocessor_case(widget);
+         }
+         #undef preprocessor_case
+         return nullptr;
+      }
+      //
       extern int bits_for_enum(MegaloValueEnum st) {
          switch (st) {
             case MegaloValueEnum::add_weapon_mode:   return 2;
@@ -503,7 +561,14 @@ void SimpleValue::to_string(std::string& out) const noexcept {
          cobb::sprintf(out, "flags:%08X", this->value.integer_unsigned); // for now
          return;
       case SimpleValueType::index:
-         cobb::sprintf(out, "index:%u", this->value.integer_unsigned); // for now
+         {
+            auto func = reach::megalo::stringify_function_for_index_type(this->type->index_type);
+            if (func) {
+               func(this->value.integer_unsigned, out);
+            } else {
+               cobb::sprintf(out, "index:%u", this->value.integer_unsigned);
+            }
+         }
          break;
       case SimpleValueType::vector3:
          cobb::sprintf(out, "(%d, %d, %d)", this->value.vector3.x, this->value.vector3.y, this->value.vector3.z);
@@ -602,9 +667,14 @@ void ComplexValue::to_string(std::string& out) const noexcept {
          cobb::sprintf(out, "%u", this->constant);
       }
    } else if (subtype->has_constant()) {
-      cobb::sprintf(out, "%d", this->constant);
+      cobb::sprintf(out, "const %d", this->constant);
    } else if (subtype->has_index()) {
-      cobb::sprintf(out, "%u", this->constant); // for now
+      auto func = reach::megalo::stringify_function_for_index_type(subtype->index_type);
+      if (func) {
+         func(this->constant, out);
+      } else {
+         cobb::sprintf(out, "index:%u", this->constant);
+      }
    } else
       out = subtype->name; // almost certainly a game state value
 }

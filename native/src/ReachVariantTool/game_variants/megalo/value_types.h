@@ -92,6 +92,7 @@ enum class MegaloVariableType {
    object = 4,
 };
 
+using MegaloStringifyIndexFunction = void(*)(int32_t value, std::string & out);
 enum class MegaloValueIndexType {
    not_applicable = -1,
    undefined, // KSoft.Tool has this. what is it? is it used?
@@ -122,6 +123,8 @@ enum class MegaloValueIndexQuirk {
 namespace reach {
    namespace megalo {
       extern int bits_for_index_type(MegaloValueIndexType it);
+      //
+      extern MegaloStringifyIndexFunction stringify_function_for_index_type(MegaloValueIndexType i) noexcept;
    }
 }
 
