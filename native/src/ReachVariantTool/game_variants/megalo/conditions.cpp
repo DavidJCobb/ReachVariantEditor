@@ -246,15 +246,17 @@ void MegaloCondition::to_string(std::string& out) const noexcept {
    }
 }
 void MegaloCondition::read(cobb::bitstream& stream) noexcept {
-   uint8_t type = stream.read_bits<uint8_t>(cobb::bitcount(g_conditionFunctionList.size() - 1));
+   uint8_t type = stream.read_bits<uint8_t>(cobb::bitcount(g_conditionFunctionList.size() - 1)); // should be 5 bits
+   if (type == 0)
+      return;
    if (type >= g_conditionFunctionList.size()) {
       printf("WARNING: Condition function ID %u is out of bounds.\n", type);
       return;
    }
    this->function = &g_conditionFunctionList[type];
    stream.read(this->inverted);
-   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1));
-   this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions - 1));
+   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); // 9 bits?
+   this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions - 1)); // 10 bits?
    //
    auto arg_count = this->function->arguments.size();
    this->arguments.resize(arg_count);

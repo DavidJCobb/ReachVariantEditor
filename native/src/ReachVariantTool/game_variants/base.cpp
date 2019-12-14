@@ -163,6 +163,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    this->scoreToWin.read(stream);
    this->unkF7A6.read(stream);
    this->unkF7A7.read(stream);
+   printf("Stream bit pos: %d\n", stream.offset);
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;
@@ -178,7 +179,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       std::vector<MegaloCondition> conditions;
       int count;
       //
-      count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions));
+      count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions)); // 10 bits?
       conditions.resize(count);
       for (int i = 0; i < count; i++) {
          printf("Reading condition %d of %d...\n", i, count);

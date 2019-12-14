@@ -4,6 +4,16 @@
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
 
+#if _DEBUG
+   struct ReachGameVariantOptionToggleDebugInfo {
+      std::vector<uint32_t> setBitIndices;
+      //
+      void registerBit(uint32_t index) noexcept {
+         this->setBitIndices.push_back(index);
+      }
+   };
+#endif
+
 template<int count> class ReachGameVariantOptionToggles {
    public:
       cobb::bitset<count> options;
@@ -29,7 +39,21 @@ template<int count> class ReachGameVariantOptionToggles {
                   this->options.set(index);
             }
          }
+         #if _DEBUG
+            this->build_debug_info();
+         #endif
       }
+      //
+      #if _DEBUG
+         mutable ReachGameVariantOptionToggleDebugInfo debugInfo;
+         void build_debug_info() const noexcept {
+            for (uint32_t i = 0; i < count; i++) {
+               bool flag = this->options.test(i);
+               if (flag)
+                  this->debugInfo.registerBit(i);
+            }
+         };
+      #endif
 };
 using ReachGameVariantEngineOptionToggles = ReachGameVariantOptionToggles<1272>;
 using ReachGameVariantMegaloOptionToggles = ReachGameVariantOptionToggles<16>;
