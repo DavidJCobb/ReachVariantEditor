@@ -1,0 +1,5 @@
+# Don't upload Halo: Reach game content (anymore...)
+*.bin
+
+# Don't upload compiled/linked/etc. files
+*.obj

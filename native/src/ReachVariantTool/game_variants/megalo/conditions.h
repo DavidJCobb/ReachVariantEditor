@@ -59,11 +59,11 @@ class MegaloCondition {
       #endif
       //
       const MegaloConditionFunction* function = nullptr;
-      bool    inverted     = false;
-      int32_t or_group     = -1; // 0 == none, or -1? // local to containing virtual trigger. all conditions with the same non-none (or_group) are OR-linked.
-      int32_t child_action = -1; // used to group conditions with their actions into triggers
+      bool     inverted     = false;
+      uint32_t or_group     = -1; // 0 == none? // all conditions with the same non-none "OR group" are OR-linked.
+      uint32_t child_action = -1; // 0 == none? // used to group conditions with their actions into triggers?
       std::vector<MegaloValue> arguments;
       //
       void to_string(std::string& out) const noexcept;
-      void read(cobb::bitstream& stream) noexcept;
+      bool read(cobb::bitstream& stream) noexcept;
 };

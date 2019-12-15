@@ -24,7 +24,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
    MegaloConditionFunction(
       "Compare",
       "Compares the values of two variables.",
-      "Variable %1 %v %3 varable %2.", // Variable [foo] [is] [equal to] variable [bar].
+      "Variable %1 %v %3 variable %2.", // Variable [foo] [is] [equal to] variable [bar].
       [](MegaloConditionFunction& cf) {
          cf.arguments.emplace_back("a", reach::value_types::variable_any);
          cf.arguments.emplace_back("b", reach::value_types::variable_any);
@@ -245,17 +245,17 @@ void MegaloCondition::to_string(std::string& out) const noexcept {
       }
    }
 }
-void MegaloCondition::read(cobb::bitstream& stream) noexcept {
-   uint8_t type = stream.read_bits<uint8_t>(cobb::bitcount(g_conditionFunctionList.size() - 1)); // should be 5 bits
+bool MegaloCondition::read(cobb::bitstream& stream) noexcept {
+   uint8_t type = stream.read_bits<uint8_t>(cobb::bitcount(g_conditionFunctionList.size() - 1)); // 5 bits
    if (type == 0)
-      return;
+      return true;
    if (type >= g_conditionFunctionList.size()) {
       printf("WARNING: Condition function ID %u is out of bounds.\n", type);
-      return;
+      return false;
    }
    this->function = &g_conditionFunctionList[type];
-   stream.read(this->inverted);
-   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); //  9 bits // Nitrogen uses the count bitlengths for Halo 4 rather than the index bitlengths, but testing shows that Reach does require the index bitlengths.
+   stream.read(this->inverted); // 1 bit
+   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); //  9 bits
    this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions    - 1)); // 10 bits
    //
    auto arg_count = this->function->arguments.size();
@@ -273,4 +273,5 @@ void MegaloCondition::read(cobb::bitstream& stream) noexcept {
    #if _DEBUG
       this->to_string(this->debug_str);
    #endif
+   return true;
 }

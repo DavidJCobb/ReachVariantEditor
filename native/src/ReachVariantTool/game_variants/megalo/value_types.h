@@ -491,10 +491,10 @@ enum class ComplexValueType {
    not_applicable = -2,
    any = -1, // complex-value is preceded by a 3-bit value indicating the ComplexValueType in use
    scalar, // numbers, bools
+   timer,
+   team,
    player,
    object,
-   team,
-   timer,
 };
 enum class SimpleValueType {
    not_applicable = -1,
@@ -535,6 +535,7 @@ class ComplexValueSubtype {
       };
       //
       const char*     name;
+      const char*     format = nullptr; // %n == name, %v == value, %% == percent
       MegaloValueEnum enumeration = MegaloValueEnum::not_applicable;
       uint8_t constant_flags     = 0;
       int     constant_bitlength = 0;
@@ -545,8 +546,8 @@ class ComplexValueSubtype {
    public:
       constexpr ComplexValueSubtype(const char* n) : name(n) {}; // needs to be public so 
       constexpr ComplexValueSubtype(const char* n, bool readonly) : name(n), constant_flags(readonly ? flags::is_read_only : 0) {};
-      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e) : name(n), enumeration(e), constant_flags(flags::is_read_only) {};
-      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, uint8_t f) : name(n), enumeration(e), constant_flags(f | flags::is_read_only) {};
+      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, const char* f = nullptr) : name(n), enumeration(e), constant_flags(flags::is_read_only), format(f) {};
+      constexpr ComplexValueSubtype(const char* n, MegaloValueEnum e, uint8_t f, const char* fo = nullptr) : name(n), enumeration(e), constant_flags(f | flags::is_read_only), format(fo) {};
       constexpr ComplexValueSubtype(const char* n, MegaloValueIndexType it, MegaloValueIndexQuirk iq) :
          name(n),
          constant_flags(flags::has_index | flags::is_read_only),

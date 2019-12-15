@@ -502,11 +502,11 @@ namespace reach {
             ComplexValueSubtype::variable<_MST::team,    _MVT::number>("Team.Number"),
             ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number"),
             ComplexValueSubtype("User-Defined Option", MegaloValueIndexType::option, MegaloValueIndexQuirk::reference),
-            ComplexValueSubtype("Spawn Sequence", MegaloValueEnum::object),
-            ComplexValueSubtype("Team Score",     MegaloValueEnum::team),
-            ComplexValueSubtype("Player Score",   MegaloValueEnum::player),
-            ComplexValueSubtype("Unknown 09",     MegaloValueEnum::player),
-            ComplexValueSubtype("Player Rating",  MegaloValueEnum::player), // runtime: float converted to int
+            ComplexValueSubtype("Spawn Sequence", MegaloValueEnum::object, "%n of %v"), // runtime: SInt8 extended to int
+            ComplexValueSubtype("Team Score",     MegaloValueEnum::team,   "%v's Score"),
+            ComplexValueSubtype("Player Score",   MegaloValueEnum::player, "%v's Score"),
+            ComplexValueSubtype("Unknown 09",     MegaloValueEnum::player, "%v's %n"),
+            ComplexValueSubtype("Player Rating",  MegaloValueEnum::player, "%v's Rating"), // runtime: float converted to int
             ComplexValueSubtype("Player Stat",    MegaloValueEnum::player, MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference),
             ComplexValueSubtype("Team Stat",      MegaloValueEnum::team,   MegaloValueIndexType::stat, MegaloValueIndexQuirk::reference),
             ComplexValueSubtype("Current Round", true), // UInt16 extended to int
@@ -722,10 +722,57 @@ void ComplexValue::to_string(std::string& out) const noexcept {
       return;
    }
    if (subtype->has_enum()) {
-      if (subtype->has_constant()) { // almost certainly a variable
+      if (subtype->format) {
+         int i = 0;
+         while (char c = subtype->format[i++]) {
+            if (c != '%') {
+               out += c;
+               continue;
+            }
+            c = subtype->format[i++];
+            if (!c)
+               break;
+            switch (c) {
+               case '%':
+                  out += '%';
+                  continue;
+               case 'n':
+                  out += subtype->name;
+                  continue;
+               case 'v':
+                  {
+                     std::string temp;
+                     auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
+                     if (func) {
+                        func(this->enum_value, temp);
+                     } else {
+                        cobb::sprintf(temp, "%u", this->enum_value);
+                     }
+                     out += temp;
+                  }
+                  continue;
+            }
+         }
+         return;
+      }
+      if (subtype->has_constant()) { // enum AND constant? almost certainly a variable
          cobb::sprintf(out, "%s[%u]", subtype->name, this->constant);
          return;
       }
+      if (subtype->has_index()) { // enum AND index? index probably "belongs" to whatever is represented by the enum
+         auto func = reach::megalo::stringify_function_for_index_type(subtype->index_type);
+         if (func) {
+            func(this->constant, out);
+         } else {
+            cobb::sprintf(out, "index:%u", this->constant);
+         }
+         out += " of ";
+         out += subtype->name;
+         return;
+      }
+      //
+      // else, just a bare enum:
+      //
       auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
       if (func) {
          func(this->enum_value, out);
@@ -747,7 +794,7 @@ void ComplexValue::to_string(std::string& out) const noexcept {
 void ComplexValue::read(cobb::bitstream& stream) noexcept {
    ComplexValueType type = this->type;
    if (type == ComplexValueType::any)
-      type = (ComplexValueType)stream.read_bits(3);
+      type = this->type = (ComplexValueType)stream.read_bits(3);
    switch (type) {
       case ComplexValueType::scalar:
          this->subtype = _getComplexSubtype(stream, reach::megalo::complex_values::scalar);
@@ -774,7 +821,8 @@ void ComplexValue::read(cobb::bitstream& stream) noexcept {
       this->enum_value = stream.read_bits(reach::megalo::bits_for_enum(st.enumeration)) - reach::megalo::offset_for_enum(st.enumeration);
    }
    if (st.constant_flags & ComplexValueSubtype::flags::has_constant) {
-      this->constant = stream.read_bits(st.constant_bitlength);
+      bool is_signed = st.constant_flags & ComplexValueSubtype::flags::constant_is_signed;
+      this->constant = stream.read_bits<uint32_t>(st.constant_bitlength, is_signed ? cobb::bitstream_read_flags::is_signed : 0);
    } else if (st.constant_flags & ComplexValueSubtype::flags::has_index) {
       if (st.index_quirk == MegaloValueIndexQuirk::presence) {
          bool absence = stream.read_bits<uint8_t>(1) != 0;

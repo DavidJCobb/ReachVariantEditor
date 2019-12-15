@@ -203,7 +203,8 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
       conditions.resize(count);
       for (int i = 0; i < count; i++) {
          printf("Reading condition %d of %d...\n", i, count);
-         conditions[i].read(stream);
+         if (!conditions[i].read(stream))
+            break;
       }
       #if _DEBUG
          __debugbreak();

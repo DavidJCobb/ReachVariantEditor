@@ -151,7 +151,7 @@ class ReachBlockMPVR {
          std::vector<ReachMegaloOption> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
-      MegaloStringIndex stringTableIndexPointer;
+      MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)
       ReachStringTable localizedName = ReachStringTable(1, 0x180);
       ReachStringTable localizedDesc = ReachStringTable(1, 0xC00);
       ReachStringTable localizedCategory = ReachStringTable(1, 0x180);
