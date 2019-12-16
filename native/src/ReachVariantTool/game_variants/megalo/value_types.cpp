@@ -375,7 +375,7 @@ namespace reach {
             case MegaloValueIndexType::option:          return cobb::bitcount(reach::megalo::max_script_options - 1);
             case MegaloValueIndexType::player_traits:   return cobb::bitcount(reach::megalo::max_script_traits - 1);
             case MegaloValueIndexType::sound:           return cobb::bitcount(reach::megalo::max_engine_sounds - 1);
-            case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats);
+            case MegaloValueIndexType::stat:            return cobb::bitcount(reach::megalo::max_script_stats - 1);
             case MegaloValueIndexType::string:          return cobb::bitcount(reach::megalo::max_variant_strings - 1);
             case MegaloValueIndexType::trigger:         return cobb::bitcount(reach::megalo::max_triggers - 1);
             case MegaloValueIndexType::widget:          return 2;
@@ -727,6 +727,26 @@ void ComplexValue::to_string(std::string& out) const noexcept {
       return;
    }
    if (subtype->has_enum()) {
+      if (subtype->has_index()) { // enum AND index? index probably "belongs" to whatever is represented by the enum
+         auto func = reach::megalo::stringify_function_for_index_type(subtype->index_type);
+         if (func) {
+            func(this->constant, out);
+         } else {
+            cobb::sprintf(out, "index:%u", this->constant);
+         }
+         out += " of ";
+         {
+            std::string temp;
+            auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
+            if (func) {
+               func(this->enum_value, temp);
+            } else {
+               cobb::sprintf(temp, "%u", this->enum_value);
+            }
+            out += temp;
+         }
+         return;
+      }
       if (subtype->format) {
          int i = 0;
          while (char c = subtype->format[i++]) {
@@ -771,17 +791,6 @@ void ComplexValue::to_string(std::string& out) const noexcept {
          out += temp;
          //
          cobb::sprintf(out, subtype->name, temp.c_str(), this->constant);
-         return;
-      }
-      if (subtype->has_index()) { // enum AND index? index probably "belongs" to whatever is represented by the enum
-         auto func = reach::megalo::stringify_function_for_index_type(subtype->index_type);
-         if (func) {
-            func(this->constant, out);
-         } else {
-            cobb::sprintf(out, "index:%u", this->constant);
-         }
-         out += " of ";
-         out += subtype->name;
          return;
       }
       //
