@@ -10,6 +10,7 @@ namespace Megalo {
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             stream.read(this->value);
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             out = this->value ? this->baseStringTrue : this->baseStringFalse;
@@ -20,6 +21,10 @@ namespace Megalo {
             if (base.text_false)
                this->baseStringFalse = base.text_false;
          };
+         //
+         static OpcodeArgValue* factory(cobb::bitstream&) {
+            return new OpcodeArgValueConstBool();
+         }
    };
    class OpcodeArgValueConstSInt8 : public OpcodeArgValue {
       public:
@@ -27,9 +32,14 @@ namespace Megalo {
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             stream.read(this->value);
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             cobb::sprintf(out, "%d", this->value);
+         }
+         //
+         static OpcodeArgValue* factory(cobb::bitstream&) {
+            return new OpcodeArgValueConstSInt8();
          }
    };
 

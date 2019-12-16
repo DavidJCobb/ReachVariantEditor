@@ -43,7 +43,10 @@ namespace Megalo {
                case OpcodeStringTokenType::timer:
                   this->value = new OpcodeArgValueTimer();
                   break;
+               default:
+                  return false;
             }
+            return true;
          }
          void to_string(std::string& out) const noexcept {
             this->value->to_string(out);
@@ -65,6 +68,7 @@ namespace Megalo {
             }
             for (uint8_t i = 0; i < this->tokenCount; i++)
                this->tokens[i].read(stream);
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             out.clear();

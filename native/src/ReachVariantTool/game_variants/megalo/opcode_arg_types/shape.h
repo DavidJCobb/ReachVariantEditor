@@ -38,6 +38,7 @@ namespace Megalo {
                   && this->bottom.read(stream)
                   );
             }
+            return false;
          }
          virtual void to_string(std::string& out) const noexcept override {
             std::string temp;
@@ -65,7 +66,7 @@ namespace Megalo {
                   out = "box of width ";
                   this->radius.to_string(temp);
                   out += temp;
-                  out += ", length "
+                  out += ", length ";
                   this->length.to_string(temp);
                   out += temp;
                   out += ", top ";

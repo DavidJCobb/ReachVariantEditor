@@ -1,0 +1,35 @@
+#include "waypoint_icon.h"
+
+namespace Megalo {
+   megalo_define_smart_enum(WaypointIcon,
+      "none", // -1
+      "microphone",
+      "death marker",
+      "lightning bolt",
+      "bullseye",
+      "diamond",
+      "bomb",
+      "flag",
+      "skull",
+      "crown",
+      "vip",
+      "territory lock",
+      "territory A",
+      "territory B",
+      "territory C",
+      "territory D",
+      "territory E",
+      "territory F",
+      "territory G",
+      "territory H",
+      "territory I",
+      "supply",
+      "supply (health)",
+      "supply (air drop)",
+      "supply (ammo)",
+      "arrow",
+      "defend",
+      "unknown 26",
+      "unknown 27",
+   );
+}

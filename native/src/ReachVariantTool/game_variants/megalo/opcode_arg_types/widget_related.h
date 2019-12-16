@@ -31,7 +31,7 @@ namespace Megalo {
                   this->denominator.read(stream);
                   break;
                default:
-                  printf("Widget Meter Parameters had bad type %d.\n". (int)this->type);
+                  printf("Widget Meter Parameters had bad type %d.\n", (int)this->type);
                   return false;
             }
             return true;
