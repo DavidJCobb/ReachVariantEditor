@@ -2,18 +2,18 @@
 #include "../opcode_arg.h"
 
 namespace Megalo {
-   class MegaloValueLabelIndex : public OpcodeArgValueBaseIndex {
+   class OpcodeArgValueLabelIndex : public OpcodeArgValueBaseIndex {
       public:
-         MegaloValueLabelIndex() : OpcodeArgValueBaseIndex("Forge Label", 16, index_quirk::presence) {};
+         OpcodeArgValueLabelIndex() : OpcodeArgValueBaseIndex("Forge Label", 16, index_quirk::presence) {};
          static OpcodeArgValue* factory(cobb::bitstream&) {
-            return new MegaloValueLabelIndex();
+            return new OpcodeArgValueLabelIndex();
          }
    };
-   class MegaloValueMPObjectTypeIndex : public OpcodeArgValueBaseIndex {
+   class OpcodeArgValueMPObjectTypeIndex : public OpcodeArgValueBaseIndex {
       public:
-         MegaloValueMPObjectTypeIndex() : OpcodeArgValueBaseIndex("MP Object Type", 2048, index_quirk::presence) {};
+         OpcodeArgValueMPObjectTypeIndex() : OpcodeArgValueBaseIndex("MP Object Type", 2048, index_quirk::presence) {};
          static OpcodeArgValue* factory(cobb::bitstream&) {
-            return new MegaloValueMPObjectTypeIndex();
+            return new OpcodeArgValueMPObjectTypeIndex();
          }
    };
 }

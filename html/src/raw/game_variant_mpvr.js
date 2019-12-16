@@ -202,7 +202,10 @@ class GameVariantMultiplayerData {
          for(let i = 0; i < count; i++) {
             let c = new MegaloCondition();
             this.conditions.push(c);
-            c.read(stream);
+            if (!c.read(stream)) {
+               console.warn("Failed decode of condition " + i + ".");
+               break;
+            }
          }
       
          // conditions vector

@@ -40,8 +40,8 @@ namespace Megalo {
          uint8_t max_players;
          uint8_t max_objects;
          //
-         constexpr const int which_bits() const noexcept { this->list.index_bits(); }
-         constexpr const int index_bits(const variable_type vt) const noexcept {
+         const int which_bits() const noexcept { return this->list.index_bits(); }
+         const int index_bits(const variable_type vt) const noexcept {
             switch (vt) {
                case variable_type::scalar: return cobb::bitcount(this->max_scalars - 1);
                case variable_type::timer:  return cobb::bitcount(this->max_timers  - 1);
@@ -50,6 +50,7 @@ namespace Megalo {
                case variable_type::object: return cobb::bitcount(this->max_objects - 1);
             }
             assert(false && "Unrecognized variable type.");
+            return 0;
          }
    };
 

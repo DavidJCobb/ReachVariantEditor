@@ -14,9 +14,17 @@ namespace Megalo {
             return nullptr;
          }
    };
-   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::bitstream&);
+   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::bitstream& stream);
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitstream& stream);
    //
-   extern OpcodeArgValueFactory OpcodeArgAnyVariableFactory;
+   class OpcodeArgBase {
+      public:
+         const char* name = "";
+         OpcodeArgValueFactory factory = nullptr;
+         bool is_read_only = false;
+         //
+         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, bool iro = false) : name(n), factory(f), is_read_only(iro) {};
+   };
    //
    class OpcodeArgValueBaseEnum : public OpcodeArgValue {
       public:
@@ -32,6 +40,7 @@ namespace Megalo {
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             this->value = stream.read_bits(this->baseEnum.index_bits());
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             this->baseEnum.to_string(out, this->value);
@@ -45,7 +54,8 @@ namespace Megalo {
          uint32_t value = 0; // loaded value
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->value = stream.read_bits(this->base.index_bits());
+            this->value = stream.read_bits(this->base.bits());
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             this->base.to_string(out, this->value);
@@ -77,12 +87,13 @@ namespace Megalo {
                bool absence = stream.read_bits(1) != 0;
                if (absence) {
                   this->value = OpcodeArgValueBaseIndex::none;
-                  return;
+                  return true;
                }
             }
             this->value = stream.read_bits(cobb::bitcount(this->max - 1));
             if (this->quirk == index_quirk::offset)
                --this->value;
+            return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->value == OpcodeArgValueBaseIndex::none) {

@@ -59,7 +59,7 @@ namespace Megalo {
       switch ((_scopes)this->scope) {
          case _scopes::constant:
             this->index = stream.read_bits<int16_t>(16, cobb::bitstream_read_flags::is_signed);
-            return;
+            return true;
          case _scopes::player_number:
             variable_scope = &MegaloVariableScopePlayer;
             break;
@@ -128,16 +128,18 @@ namespace Megalo {
             break; // these are all accessors to game state values and require no additional information other than the fact of their being used
          default:
             assert(false && "Unrecognized scalar subtype!");
+            return false;
       }
       if (variable_scope) {
          this->which = stream.read_bits<uint16_t>(variable_scope->which_bits());
          this->index = stream.read_bits<uint16_t>(variable_scope->index_bits(variable_type::scalar));
-         return;
+         return true;
       }
       if (which_bits)
          this->which = stream.read_bits<uint16_t>(which_bits);
       if (index_bits)
          this->index = stream.read_bits<uint16_t>(index_bits);
+      return true;
    }
    /*virtual*/ void OpcodeArgValueScalar::to_string(std::string& out) const noexcept /*override*/ {
       const char* which_scope = nullptr;

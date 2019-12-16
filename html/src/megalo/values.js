@@ -750,7 +750,7 @@ class MegaloValueTimer extends MegaloValue {
       let variable_scope = null;
       switch (this.scope) {
          case MegaloValueTimerScopes.global:
-            this.index = stream.readBits(MegaloVariableScopeTeam.which_bits());
+            variable_scope = MegaloVariableScopeGlobal;
             break;
          case MegaloValueTimerScopes.player:
             variable_scope = MegaloVariableScopePlayer;

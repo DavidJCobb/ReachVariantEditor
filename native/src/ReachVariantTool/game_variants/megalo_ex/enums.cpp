@@ -1,5 +1,4 @@
 #include "enums.h"
-#include <string>
 #include "../../helpers/strings.h"
 
 namespace Megalo {
@@ -12,7 +11,7 @@ namespace Megalo {
    }
    void SmartFlags::to_string(std::string& out, uint32_t value) const noexcept {
       out.clear();
-      int i = 0;
+      size_t i = 0;
       for (; i < this->count; i++) {
          if (value & (1 << i)) {
             if (!out.empty())

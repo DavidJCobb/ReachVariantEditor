@@ -160,11 +160,11 @@ class MegaloCondition {
    read(stream) {
       let fi = stream.readBits(_bitcount(g_conditionList.length - 1));
       if (fi == 0) // special-case: read no data for None.
-         return;
+         return true;
       this.func = g_conditionList[fi];
       if (!this.func) {
          console.warn("Condition Function #" + fi + " does not exist.");
-         return;
+         return false;
       }
       this.inverted = stream.readBits(1) != 0;
       this.or_group = stream.readBits(_bitcount(512 - 1));
@@ -179,11 +179,12 @@ class MegaloCondition {
          this.args[i] = factory(stream);
          if (!this.args[i]) { // bad any-type-value, typically
             console.warn("Failed to extract argument " + i + " in this condition.");
-            return;
+            return false;
          }
          this.args[i].read(stream);
       }
       this.string = this.toString();
+      return true;
    }
    toString() {
       if (!this.func)

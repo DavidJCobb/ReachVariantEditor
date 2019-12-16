@@ -1,11 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <string>
 #include <type_traits>
 #include "../../helpers/bitwise.h"
-
-namespace std {
-   class string;
-}
 
 namespace Megalo {
    class SmartEnum {
@@ -13,7 +10,7 @@ namespace Megalo {
          constexpr SmartEnum(const char** v, uint32_t n) : values(v), count(n) {}
          //
          const char** values = nullptr;
-         uint32_t     count  =  0;
+         uint32_t     count  = 0;
          //
          constexpr inline int count_bits() const noexcept {
             if (!this->count)
@@ -28,7 +25,7 @@ namespace Megalo {
          //
          void to_string(std::string& out, uint32_t value) const noexcept;
          //
-         const char* operator[](int a) const noexcept {
+         const char* operator[](size_t a) const noexcept {
             if (a < this->count)
                return this->values[a];
             return nullptr;
@@ -41,17 +38,10 @@ namespace Megalo {
          constexpr SmartFlags(const char** v, uint32_t n) : values(v), count(n) {}
          //
          const char** values = nullptr;
-         uint32_t     count  =  0;
+         uint32_t     count  = 0;
          //
-         constexpr inline int count_bits() const noexcept {
-            if (!this->count)
-               return 0;
-            return cobb::bitcount(this->count);
-         }
-         constexpr inline int index_bits() const noexcept {
-            if (!this->count)
-               return 0;
-            return cobb::bitcount(this->count - 1);
+         constexpr inline int bits() const noexcept {
+            return this->count;
          }
          //
          void to_string(std::string& out, uint32_t value) const noexcept;
