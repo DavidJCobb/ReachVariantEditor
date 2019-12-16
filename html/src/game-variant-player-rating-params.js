@@ -12,9 +12,9 @@ class GameVariantPlayerRatingParams {
       this.unknownFloats = [];
       for(let i = 0; i < 15; i++)
          //
-         // TODO: JavaScript is using the wrong endianness here; C++ on x86 apparently isn't
+         // JavaScript needs to flip the endianness; C++ does not:
          //
-         this.unknownFloats[i] = stream.readFloat();
+         this.unknownFloats[i] = stream.readFloat({ endianness: ENDIAN_BIG });
       this.unknownFlag = stream.readBits(1) != 0;
    }
 }

@@ -26,8 +26,8 @@ class MegaloConditionFunction {
    public:
       const char* name;
       const char* desc;
-      const char* verb_yes = "is";     // for normal   conditions
-      const char* verb_no  = "is not"; // for inverted conditions
+      const char* verb_normal = "is";     // for normal   conditions
+      const char* verb_invert  = "is not"; // for inverted conditions
       const char* format;
       //
       std::vector<MegaloOpcodeBaseArgument> arguments;
@@ -45,7 +45,7 @@ class MegaloConditionFunction {
          const char* y,
          const char* n,
          std::function<void(MegaloConditionFunction&)> init
-      ) : name(c), desc(d), format(f), verb_yes(y), verb_no(n) {
+      ) : name(c), desc(d), format(f), verb_normal(y), verb_invert(n) {
          init(*this);
       };
 };

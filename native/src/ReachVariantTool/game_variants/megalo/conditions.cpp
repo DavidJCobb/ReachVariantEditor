@@ -21,7 +21,7 @@ void MegaloOpcodeBaseArgument::to_string(std::string& out, const MegaloValue& va
 extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
    MegaloConditionFunction("None", "This condition does nothing.", "None."),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 1
       "Compare",
       "Compares the values of two variables.",
       "Variable %1 %v %3 variable %2.", // Variable [foo] [is] [equal to] variable [bar].
@@ -32,7 +32,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 2
       "In Boundary",
       "Checks whether one object is inside of another object's Shape.",
       "%1 %v inside of %2's shape.", // [Object] [is] inside of [object]'s shape.
@@ -42,7 +42,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 3
       "Killer Type",
       "Checks what killed a player.",
       "%1 %v killed by any of: %2.", // [Player] [was] killed by any of: [guardians, suicide].
@@ -54,7 +54,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 4
       //
       // Is this "alliance status?"
       //
@@ -70,7 +70,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 5
       "Timer Is Zero",
       "Checks whether a timer is zero.",
       "Timer %1 %v zero.", // Timer [timer] [is] zero.
@@ -79,7 +79,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 6
       "Objects Are Same Type",
       "Checks whether two objects are of the same type.", // verify
       "Object %1 %v of the same type as %2.", // Object [object] [is] of the same type as [current object].
@@ -89,7 +89,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 7
       "Team Has Players",
       "Checks whether a team has any players on it.",
       "Team %1 %v one or more players.", // Team [team] [has] one or more players.
@@ -100,7 +100,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 8
       "Object Out Of Bounds",
       "Checks whether an object has fallen out of bounds, e.g. into a Soft Kill Zone.",
       "Object %1 %v out of bounds.", // Object [object] [is] out of bounds.
@@ -109,7 +109,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 9
       "Deprecated 09",
       "This condition function always returns false.", // TODO: does it return (true) if inverted?
       "Never. (Unused argument: %1)", // Never. (Unused argument: [player])
@@ -118,7 +118,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 10
       "Player Assisted Kill Of",
       "Checks whether one player assisted in the slaying of another player. Note that you don't count as \"assisting\" your own kills.",
       "Player %1 %v in the killing of player %2.", // Player [attacker] [assisted] in the killing of player [victim].
@@ -130,7 +130,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 11
       "Object Has Label",
       "Checks whether an object has a given Forge label.",
       "Object %1 %v label %2.", // Object [object] [has] label [INF_HAVEN].
@@ -142,7 +142,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 12
       "Player Is Not Respawning",
       "Checks whether a player is not currently respawning.",
       "Player %1 %v respawning.", // Player [player] [is not] respawning.
@@ -153,7 +153,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 13
       "Equipment In Use",
       "",
       "Equipment %1 %v in use.", // Equipment [object] [is] in use.
@@ -162,7 +162,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 14
       "Species Is Spartan",
       "Checks whether a player is a Spartan.",
       "Player %1 %v a Spartan.", // Player [player] [is] a Spartan.
@@ -171,7 +171,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 15
       "Species Is Elite",
       "Checks whether a player is an Elite.",
       "Player %1 %v an Elite.", // Player [player] [is] an Elite.
@@ -180,7 +180,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 16
       "Species Is Monitor",
       "Checks whether a player is a Monitor.",
       "Player %1 %v a Monitor.", // Player [player] [is] a Monitor.
@@ -189,7 +189,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       }
    ),
    //
-   MegaloConditionFunction(
+   MegaloConditionFunction( // 17
       "Unknown 17 (Is Matchmaking?)",
       "Checks whether this match is taking place in Matchmaking?",
       "This match %v taking place in Matchmaking." // This match [is] taking place in Matchmaking.
@@ -223,9 +223,9 @@ void MegaloCondition::to_string(std::string& out) const noexcept {
       if (c == 'v') {
          out += '[';
          if (this->inverted)
-            out += function->verb_no;
+            out += function->verb_invert;
          else
-            out += function->verb_yes;
+            out += function->verb_normal;
          out += ']';
       } else if (c >= '1' && c <= '9') {
          c -= '1';

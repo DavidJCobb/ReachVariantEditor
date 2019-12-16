@@ -55,6 +55,8 @@ class Bitstream {
    }
    //
    /*int*/ readBits(count, options) {
+      if (count <= 0)
+         return 0;
       if (options === !!options)
          options = { swap: options };
       else if (!options)
@@ -191,7 +193,7 @@ class Bitstream {
          else if (raw == precision - 1) // least significant bit is the sign bit?
             result = max;
          else {
-            result == min + (raw - 0.5) * (range / (precision - 2));
+            result = min + (raw - 0.5) * (range / (precision - 2));
             //
             // from math in KSoft.Tool (presumably reverse-engineered):
             //

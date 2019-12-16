@@ -43,3 +43,8 @@ function _bitswap(value, count) {
    }
    return result;
 }
+
+function __purecall() {
+   console.error("Pure virtual function call!");
+   throw new Error("Pure virtual function call!");
+}

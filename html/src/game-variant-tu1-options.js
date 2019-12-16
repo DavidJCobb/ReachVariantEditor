@@ -20,22 +20,21 @@ class GameVariantTU1Data {
    // bloom, which is to spec).
    //
    constructor(stream) { // sizeof == 0xB
+      //
+      // Vanilla settings: // TODO: default values are wrong
+      //
+      this.flags = TU1Flags.make(0);
+      this.precisionBloom            = 0.7677165354330708;
+      this.activeCamoEnergy          = 0.04330708661417323;
+      this.activeCamoEnergyBonus     = 0;
+      this.armorLockDamageDrain      = 1.5551181102362204;
+      this.armorLockDamageDrainLimit = 0;
+      this.magnumDamage              = 2.8149606299212597;
+      this.magnumFireRate            = 0.6102362204724409;
+      this.precisionBloom            = 0.7677165354330708;
+      //
       if (stream)
          this.parse(stream);
-      else {
-         //
-         // Vanilla settings:
-         //
-         this.flags = TU1Flags.make(0);
-         this.precisionBloom            = 0.7677165354330708;
-         this.activeCamoEnergy          = 0.04330708661417323;
-         this.activeCamoEnergyBonus     = 0;
-         this.armorLockDamageDrain      = 1.5551181102362204;
-         this.armorLockDamageDrainLimit = 0;
-         this.magnumDamage              = 2.8149606299212597;
-         this.magnumFireRate            = 0.6102362204724409;
-         this.precisionBloom            = 0.7677165354330708;
-      }
    }
    parse(stream) {
       this.flags = TU1Flags.make(stream.readUInt32()); // 00

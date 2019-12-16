@@ -496,11 +496,12 @@ namespace {
 namespace reach {
    namespace megalo {
       namespace complex_values {
-         extern std::array<ComplexValueSubtype, 43> scalar = {
+         extern std::array<ComplexValueSubtype, 44> scalar = {
             ComplexValueSubtype::constant<int16_t>("Int16"),
-            ComplexValueSubtype::variable<_MST::player,  _MVT::number>("Player.Number"),
-            ComplexValueSubtype::variable<_MST::team,    _MVT::number>("Team.Number"),
-            ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number"),
+            ComplexValueSubtype::variable<_MST::player,  _MVT::number>("%s.Number[%d]"),
+            ComplexValueSubtype::variable<_MST::object,  _MVT::number>("%s.Number[%d]"),
+            ComplexValueSubtype::variable<_MST::team,    _MVT::number>("%s.Number[%d]"),
+            ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number[%d]"),
             ComplexValueSubtype("User-Defined Option", MegaloValueIndexType::option, MegaloValueIndexQuirk::reference),
             ComplexValueSubtype("Spawn Sequence", MegaloValueEnum::object, "%n of %v"), // runtime: SInt8 extended to int
             ComplexValueSubtype("Team Score",     MegaloValueEnum::team,   "%v's Score"),
@@ -543,33 +544,33 @@ namespace reach {
          };
          extern std::array<ComplexValueSubtype,  4> player = {
             ComplexValueSubtype("Player (Explicit)", MegaloValueEnum::player), // Global.Player and any "state" players e.g. current-player
-            ComplexValueSubtype::variable<_MST::player, _MVT::player>("Player.Player"),
-            ComplexValueSubtype::variable<_MST::object, _MVT::player>("Object.Player"),
-            ComplexValueSubtype::variable<_MST::team,   _MVT::player>("Team.Player"),
+            ComplexValueSubtype::variable<_MST::player, _MVT::player>("%s.Player[%d]"),
+            ComplexValueSubtype::variable<_MST::object, _MVT::player>("%s.Player[%d]"),
+            ComplexValueSubtype::variable<_MST::team,   _MVT::player>("%s.Player[%d]"),
          };
          extern std::array<ComplexValueSubtype,  8> object = {
             ComplexValueSubtype("Object (Explicit)", MegaloValueEnum::object),
-            ComplexValueSubtype::variable<_MST::player, _MVT::object>("Player.Object"),
-            ComplexValueSubtype::variable<_MST::object, _MVT::object>("Object.Object"),
-            ComplexValueSubtype::variable<_MST::team,   _MVT::object>("Team.Object"),
-            ComplexValueSubtype("Player.Slave", MegaloValueEnum::object),
-            ComplexValueSubtype::variable<_MST::player, _MVT::player>("Player.Player.Slave"),
-            ComplexValueSubtype::variable<_MST::object, _MVT::player>("Object.Player.Slave"),
-            ComplexValueSubtype::variable<_MST::team,   _MVT::player>("Team.Player.Slave"),
+            ComplexValueSubtype::variable<_MST::player, _MVT::object>("%s.Object[%d]"),
+            ComplexValueSubtype::variable<_MST::object, _MVT::object>("%s.Object[%d]"),
+            ComplexValueSubtype::variable<_MST::team,   _MVT::object>("%s.Object[%d]"),
+            ComplexValueSubtype("Player.Slave", MegaloValueEnum::player),
+            ComplexValueSubtype::variable<_MST::player, _MVT::player>("%s.Player[%d].Slave"),
+            ComplexValueSubtype::variable<_MST::object, _MVT::player>("%s.Player[%d].Slave"),
+            ComplexValueSubtype::variable<_MST::team,   _MVT::player>("%s.Player[%d].Slave"),
          };
          extern std::array<ComplexValueSubtype,  6> team = {
             ComplexValueSubtype("Team (Explicit)", MegaloValueEnum::team),
-            ComplexValueSubtype::variable<_MST::player, _MVT::team>("Player.Team"),
-            ComplexValueSubtype::variable<_MST::object, _MVT::team>("Object.Team"),
-            ComplexValueSubtype::variable<_MST::team,   _MVT::team>("Team.Team"),
+            ComplexValueSubtype::variable<_MST::player, _MVT::team>("%s.Team[%d]"),
+            ComplexValueSubtype::variable<_MST::object, _MVT::team>("%s.Team[%d]"),
+            ComplexValueSubtype::variable<_MST::team,   _MVT::team>("%s.Team[%d]"),
             ComplexValueSubtype("Player.OwnerTeam", MegaloValueEnum::player),
             ComplexValueSubtype("Object.OwnerTeam", MegaloValueEnum::object),
          };
          extern std::array<ComplexValueSubtype,  7> timer = {
             ComplexValueSubtype::variable<_MST::globals, _MVT::timer>("Global.Timer"),
-            ComplexValueSubtype::variable<_MST::player,  _MVT::timer>("Player.Timer"),
-            ComplexValueSubtype::variable<_MST::team,    _MVT::timer>("Team.Timer"),
-            ComplexValueSubtype::variable<_MST::object,  _MVT::timer>("Object.Timer"),
+            ComplexValueSubtype::variable<_MST::player,  _MVT::timer>("%s.Timer[%d]"),
+            ComplexValueSubtype::variable<_MST::team,    _MVT::timer>("%s.Timer[%d]"),
+            ComplexValueSubtype::variable<_MST::object,  _MVT::timer>("%s.Timer[%d]"),
             ComplexValueSubtype("Round Time"),
             ComplexValueSubtype("Sudden Death Time"),
             ComplexValueSubtype("Grace Period Time"),
@@ -721,6 +722,10 @@ void ComplexValue::to_string(std::string& out) const noexcept {
       out = "!INVALID!";
       return;
    }
+   if (_stricmp(subtype->name, "Global.Number") == 0) { // HACK HACK HACK since it's not technically an enum
+      cobb::sprintf(out, "Global.Number[%d]", this->constant);
+      return;
+   }
    if (subtype->has_enum()) {
       if (subtype->format) {
          int i = 0;
@@ -756,7 +761,16 @@ void ComplexValue::to_string(std::string& out) const noexcept {
          return;
       }
       if (subtype->has_constant()) { // enum AND constant? almost certainly a variable
-         cobb::sprintf(out, "%s[%u]", subtype->name, this->constant);
+         std::string temp;
+         auto func = reach::megalo::stringify_function_for_enum(subtype->enumeration);
+         if (func) {
+            func(this->enum_value, temp);
+         } else {
+            cobb::sprintf(temp, "%u", this->enum_value);
+         }
+         out += temp;
+         //
+         cobb::sprintf(out, subtype->name, temp.c_str(), this->constant);
          return;
       }
       if (subtype->has_index()) { // enum AND index? index probably "belongs" to whatever is represented by the enum

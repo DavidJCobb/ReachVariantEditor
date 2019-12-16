@@ -174,9 +174,10 @@ class GameVariantMultiplayerData {
       this.engineCategory  = stream.readBits(_bitcount(32 - 1), BIT_ORDER_UNKNOWN) - 1;
       this.mapPermissions = new GameVariantMapPermissions(stream);
       this.playerRatingParams = new GameVariantPlayerRatingParams(stream);
-      this.scoreToWin = stream.readUInt16();
+      this.scoreToWin = _byteswap_ushort(stream.readUInt16());
       this.unkF7A6 = stream.readBits(1) != 0;
       this.unkF7A7 = stream.readBits(1) != 0;
+      console.log("Stream bit pos: " + stream.offset);
       {  // option toggles
          this.optionToggles = {
             engine: {
@@ -195,6 +196,37 @@ class GameVariantMultiplayerData {
       // data as-is? A non-TU variant had 0.76 bloom, a TU variant 
       // had 0.65, and that makes the TU variant 85% of the other.
       //
+      {  // megalo
+         this.conditions = [];
+         let count = stream.readBits(_bitcount(512));
+         for(let i = 0; i < count; i++) {
+            let c = new MegaloCondition();
+            this.conditions.push(c);
+            c.read(stream);
+         }
+      
+         // conditions vector
+            // condition
+               // serializeImpl
+               // arguments
+         // actions vector
+         // triggers vector
+         // game statistics vector
+         // global vars
+         // player vars
+         // object vars
+         // team vars
+         // HUD widgets vector
+         // trigger entry points
+         // object type references (as bitset)
+         // object filters vector
+         // game-object filters
+            // game object filter count
+            // candy spawner filters vector
+         
+         // BeginDecompile();
+         // EndDecompile();
+      }
       if (this.encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
          this.titleUpdateData = new GameVariantTU1Data(stream);
       else
