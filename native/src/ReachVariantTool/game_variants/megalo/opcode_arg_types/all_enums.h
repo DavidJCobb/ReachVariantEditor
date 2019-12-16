@@ -19,5 +19,6 @@ namespace Megalo {
    megalo_opcode_arg_value_enum(OpcodeArgValueMathOperatorEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValuePickupPriorityEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueTeamDispositionEnum);
+   megalo_opcode_arg_value_enum(OpcodeArgValueTimerRateEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueWaypointPriorityEnum);
 }

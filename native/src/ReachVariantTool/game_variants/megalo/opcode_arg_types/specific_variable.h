@@ -1,6 +1,7 @@
 #pragma once
 #include "../opcode_arg.h"
 #include "../variables_and_scopes.h"
+#include "object.h"
 
 namespace Megalo {
    class OpcodeArgValueSpecificVariableScopeAndType : public OpcodeArgValue {
@@ -49,4 +50,25 @@ namespace Megalo {
       };
 
    megalo_make_specific_variable_type(OpcodeArgValueObjectTimerVariable, variable_scope::object, variable_type::timer);
+
+   
+   class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
+      public:
+         OpcodeArgValueObject object;
+         uint32_t playerIndex = 0;
+         //
+         virtual bool read(cobb::bitstream& stream) noexcept override {
+            if (!this->object.read(stream))
+               return false;
+            this->playerIndex = stream.read_bits(MegaloVariableScopeObject.index_bits(variable_type::player));
+            return true;
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            this->object.to_string(out);
+            cobb::sprintf(out, "%s.Player[%d]", out.c_str(), this->playerIndex);
+         }
+         static OpcodeArgValue* factory(cobb::bitstream&) {
+            return new OpcodeArgValueObjectPlayerVariable();
+         }
+   };
 }

@@ -20,6 +20,9 @@ namespace cobb {
    template<typename T> constexpr int bitcount(T value) noexcept {
       return highest_set_bit(value) + 1;
    }
+   constexpr int bitmax(int bitcount) noexcept { // max value that can be held in X many bits
+      return (1 << bitcount) - 1;
+   }
    //
    template<typename T> constexpr T apply_sign_bit(T value, int bitcount) noexcept {
       T m = T(1) << (bitcount - 1);

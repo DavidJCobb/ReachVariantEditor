@@ -54,6 +54,35 @@ namespace {
          "unk_1",
          "unk_2"
       );
+      megalo_define_smart_enum(TimerRate,
+         "none",
+         "-10",
+         "-25",
+         "-50",
+         "-75",
+         "-100",
+         "-125",
+         "-150",
+         "-175",
+         "-200",
+         "-300",
+         "-400",
+         "-500",
+         "-1000",
+         "+10",
+         "+25",
+         "+50",
+         "+75",
+         "+100",
+         "+125",
+         "+150",
+         "+175",
+         "+200",
+         "+300",
+         "+400",
+         "+500",
+         "+1000",
+      );
       megalo_define_smart_enum(WaypointPriority,
          "none",
          "low",
@@ -93,6 +122,10 @@ namespace Megalo {
    //
    OpcodeArgValueTeamDispositionEnum::OpcodeArgValueTeamDispositionEnum()
       : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::TeamDisposition)
+   {}
+   //
+   OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum()
+      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::TimerRate)
    {}
    //
    OpcodeArgValueWaypointPriorityEnum::OpcodeArgValueWaypointPriorityEnum()

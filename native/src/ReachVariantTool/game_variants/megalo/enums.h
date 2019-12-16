@@ -30,6 +30,14 @@ namespace Megalo {
                return this->values[a];
             return nullptr;
          }
+         //
+         SmartEnum* slice(size_t from, size_t to) const noexcept {
+            size_t size = to - from;
+            const char** pointers = (const char**)malloc(sizeof(const char*) * size);
+            for (size_t i = 0; i < size; i++)
+               pointers[i] = this->values[i + to];
+            return new SmartEnum(pointers, size);
+         }
    };
    #define megalo_define_smart_enum(name, ...) namespace { namespace __smart_enum_members { const char* _##name##[] = { __VA_ARGS__ }; } }; extern const ::Megalo::SmartEnum name = ::Megalo::SmartEnum(__smart_enum_members::_##name##, std::extent<decltype(__smart_enum_members::_##name##)>::value);
 

@@ -1,0 +1,36 @@
+#pragma once
+#include "../opcode_arg.h"
+
+namespace Megalo {
+   class OpcodeArgValueConstBool : public OpcodeArgValue {
+      public:
+         const char* baseStringTrue  = "true";
+         const char* baseStringFalse = "false";
+         bool value; // loaded value
+         //
+         virtual bool read(cobb::bitstream& stream) noexcept override {
+            stream.read(this->value);
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            out = this->value ? this->baseStringTrue : this->baseStringFalse;
+         }
+         virtual void configure_with_base(const OpcodeArgBase& base) noexcept override {
+            if (base.text_true)
+               this->baseStringTrue  = base.text_true;
+            if (base.text_false)
+               this->baseStringFalse = base.text_false;
+         };
+   };
+   class OpcodeArgValueConstSInt8 : public OpcodeArgValue {
+      public:
+         int8_t value; // loaded value
+         //
+         virtual bool read(cobb::bitstream& stream) noexcept override {
+            stream.read(this->value);
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            cobb::sprintf(out, "%d", this->value);
+         }
+   };
+
+}

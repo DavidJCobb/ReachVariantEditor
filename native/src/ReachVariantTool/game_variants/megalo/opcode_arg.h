@@ -6,10 +6,13 @@
 #include "enums.h"
 
 namespace Megalo {
+   class OpcodeArgBase;
+   
    class OpcodeArgValue {
       public:
          virtual bool read(cobb::bitstream&) noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
+         virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          //
          static OpcodeArgValue* factory(cobb::bitstream& stream) {
             assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");
@@ -26,7 +29,11 @@ namespace Megalo {
          OpcodeArgValueFactory factory = nullptr;
          bool is_out_variable = false;
          //
+         const char* text_true  = "true";
+         const char* text_false = "false";
+         //
          OpcodeArgBase(const char* n, OpcodeArgValueFactory f, bool io = false) : name(n), factory(f), is_out_variable(io) {};
+         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, const char* tt, const char* tf) : name(n), factory(f), text_true(tt), text_false(tf) {}
    };
    //
    class OpcodeArgValueBaseEnum : public OpcodeArgValue {

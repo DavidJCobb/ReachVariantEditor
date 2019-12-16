@@ -1,4 +1,5 @@
 #pragma once
+#include "all_constants.h"
 #include "all_enums.h"
 #include "all_flags.h"
 #include "all_indices.h"
@@ -11,5 +12,7 @@
 #include "player_set.h"
 #include "shape.h"
 #include "specific_variable.h"
+#include "tokens.h"
 #include "vector3.h"
 #include "waypoint_icon.h"
+#include "widget_related.h"
