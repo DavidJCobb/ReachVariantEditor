@@ -1,0 +1,321 @@
+#include "scalar.h"
+
+namespace {
+   enum class _scopes {
+      constant,
+      player_number,
+      object_number,
+      team_number,
+      global_number,
+      script_option,
+      spawn_sequence,
+      team_score,
+      player_score,
+      unknown_09, // unused in Reach? used in Halo 4?
+      player_rating,
+      player_stat,
+      team_stat,
+      current_round,
+      symmetry_getter,
+      symmetry,
+      score_to_win,
+      unkF7A6,
+      teams_enabled,
+      round_time_limit,
+      round_limit,
+      misc_unk0_bit3,
+      rounds_to_win,
+      sudden_death_time,
+      grace_period,
+      lives_per_round,
+      team_lives_per_round,
+      respawn_time,
+      suicide_penalty,
+      betrayal_penalty,
+      respawn_growth,
+      loadout_cam_time,
+      respawn_traits_duration,
+      friendly_fire,
+      betrayal_booting,
+      social_flags_bit_2,
+      social_flags_bit_3,
+      social_flags_bit_4,
+      grenades_on_map,
+      indestructible_vehicles,
+      powerup_duration_red,
+      powerup_duration_blue,
+      powerup_duration_yellow,
+      death_event_damage_type,
+      //
+      _count,
+   };
+}
+namespace Megalo {
+   /*virtual*/ bool OpcodeArgValueScalar::read(cobb::bitstream& stream) noexcept /*override*/ {
+      this->scope = stream.read_bits(cobb::bitcount((int)_scopes::_count - 1));
+      int which_bits = 0;
+      int index_bits = 0;
+      const VariableScope* variable_scope = nullptr;
+      switch ((_scopes)this->scope) {
+         case _scopes::constant:
+            this->index = stream.read_bits<int16_t>(16, cobb::bitstream_read_flags::is_signed);
+            return true;
+         case _scopes::player_number:
+            variable_scope = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object_number:
+            variable_scope = &MegaloVariableScopeObject;
+            break;
+         case _scopes::team_number:
+            variable_scope = &MegaloVariableScopeTeam;
+            break;
+         case _scopes::global_number:
+            variable_scope = &MegaloVariableScopeGlobal;
+            break;
+         case _scopes::script_option:
+            index_bits = cobb::bitcount(16 - 1); // scripted options
+            break;
+         case _scopes::spawn_sequence:
+            index_bits = MegaloVariableScopeObject.which_bits();
+            break;
+         case _scopes::team_score:
+            index_bits = MegaloVariableScopeTeam.which_bits();
+            break;
+         case _scopes::player_score: // intentional fall-through
+         case _scopes::unknown_09:
+         case _scopes::player_rating:
+            index_bits = MegaloVariableScopePlayer.which_bits();
+            break;
+         case _scopes::player_stat:
+            which_bits = MegaloVariableScopePlayer.which_bits();
+            index_bits = cobb::bitcount(4 - 1); // scripted stats
+            break;
+         case _scopes::team_stat:
+            which_bits = MegaloVariableScopeTeam.which_bits();
+            index_bits = cobb::bitcount(4 - 1); // scripted stats
+            break;
+         case _scopes::current_round:
+         case _scopes::symmetry_getter:
+         case _scopes::symmetry:
+         case _scopes::score_to_win:
+         case _scopes::unkF7A6:
+         case _scopes::teams_enabled:
+         case _scopes::round_time_limit:
+         case _scopes::round_limit:
+         case _scopes::misc_unk0_bit3:
+         case _scopes::rounds_to_win:
+         case _scopes::sudden_death_time:
+         case _scopes::grace_period:
+         case _scopes::lives_per_round:
+         case _scopes::team_lives_per_round:
+         case _scopes::respawn_time:
+         case _scopes::suicide_penalty:
+         case _scopes::betrayal_penalty:
+         case _scopes::respawn_growth:
+         case _scopes::loadout_cam_time:
+         case _scopes::respawn_traits_duration:
+         case _scopes::friendly_fire:
+         case _scopes::betrayal_booting:
+         case _scopes::social_flags_bit_2:
+         case _scopes::social_flags_bit_3:
+         case _scopes::social_flags_bit_4:
+         case _scopes::grenades_on_map:
+         case _scopes::indestructible_vehicles:
+         case _scopes::powerup_duration_red:
+         case _scopes::powerup_duration_blue:
+         case _scopes::powerup_duration_yellow:
+         case _scopes::death_event_damage_type:
+            break; // these are all accessors to game state values and require no additional information other than the fact of their being used
+         default:
+            assert(false && "Unrecognized scalar subtype!");
+            return false;
+      }
+      if (variable_scope) {
+         this->which = stream.read_bits<uint16_t>(variable_scope->which_bits());
+         this->index = stream.read_bits<uint16_t>(variable_scope->index_bits(variable_type::scalar));
+         return true;
+      }
+      if (which_bits)
+         this->which = stream.read_bits<uint16_t>(which_bits);
+      if (index_bits)
+         this->index = stream.read_bits<uint16_t>(index_bits);
+      return true;
+   }
+   /*virtual*/ void OpcodeArgValueScalar::to_string(std::string& out) const noexcept /*override*/ {
+      const char* which_scope = nullptr;
+      switch ((_scopes)this->scope) {
+         case _scopes::constant:
+            cobb::sprintf(out, "%d", this->index);
+            return;
+         case _scopes::player_number:
+            which_scope = megalo_players[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "%s.Number[%u]", which_scope, this->index);
+            else
+               cobb::sprintf(out, "INVALID_PLAYER[%u].Number[%u]", this->which, this->index);
+            return;
+         case _scopes::object_number:
+            which_scope = megalo_objects[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "%s.Number[%u]", which_scope, this->index);
+            else
+               cobb::sprintf(out, "INVALID_OBJECT[%u].Number[%u]", this->which, this->index);
+            return;
+         case _scopes::team_number:
+            which_scope = megalo_teams[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "%s.Number[%u]", which_scope, this->index);
+            else
+               cobb::sprintf(out, "INVALID_TEAM[%u].Number[%u]", this->which, this->index);
+            return;
+         case _scopes::global_number:
+            cobb::sprintf(out, "Global.Number[%u]", this->index);
+            return;
+         case _scopes::script_option:
+            cobb::sprintf(out, "Script Option #%u", this->index);
+            return;
+         case _scopes::spawn_sequence:
+            which_scope = megalo_objects[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "Spawn Sequence of %s", which_scope);
+            else
+               cobb::sprintf(out, "Spawn Sequence of INVALID_OBJECT[%u]", this->which);
+            return;
+         case _scopes::team_score:
+            which_scope = megalo_teams[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "Score of %s", which_scope);
+            else
+               cobb::sprintf(out, "Score of INVALID_TEAM[%u]", this->which);
+            return;
+         case _scopes::player_score:
+            which_scope = megalo_players[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "Score of %s", which_scope);
+            else
+               cobb::sprintf(out, "Score of INVALID_PLAYER[%u]", this->which);
+            return;
+         case _scopes::unknown_09: // unused in Reach? used in Halo 4?
+            which_scope = megalo_players[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "Unknown-09 of %s", which_scope);
+            else
+               cobb::sprintf(out, "Unknown-09 of INVALID_PLAYER[%u]", this->which);
+            return;
+         case _scopes::player_rating:
+            which_scope = megalo_players[this->which];
+            if (which_scope)
+               cobb::sprintf(out, "Rating of %s", which_scope);
+            else
+               cobb::sprintf(out, "Rating of INVALID_PLAYER[%u]", this->which);
+            return;
+         case _scopes::player_stat:
+            which_scope = megalo_players[this->which];
+            if (which_scope)
+               cobb::sprintfp(out, "Stat #%2$u for %1$s", which_scope, this->index);
+            else
+               cobb::sprintfp(out, "Stat # % 2$u for INVALID_PLAYER[%1$u]", this->which, this->index);
+            return;
+         case _scopes::team_stat:
+            which_scope = megalo_teams[this->which];
+            if (which_scope)
+               cobb::sprintfp(out, "Stat #%2$u for %1$s", which_scope, this->index);
+            else
+               cobb::sprintfp(out, "Stat # % 2$u for INVALID_TEAM[%1$u]", this->which, this->index);
+            return;
+         case _scopes::current_round:
+            out = "Current Round";
+            return;
+         case _scopes::symmetry_getter:
+            out = "Symmetry (Read-Only)";
+            return;
+         case _scopes::symmetry:
+            out = "Symmetry";
+            return;
+         case _scopes::score_to_win:
+            out = "Score To Win";
+            return;
+         case _scopes::unkF7A6:
+            out = "unkF7A6";
+            return;
+         case _scopes::teams_enabled:
+            out = "Teams Enabled";
+            return;
+         case _scopes::round_time_limit:
+            out = "Round Time Limit";
+            return;
+         case _scopes::round_limit:
+            out = "Round Limit";
+            return;
+         case _scopes::misc_unk0_bit3:
+            out = "Misc Options Unk0 Bit3";
+            return;
+         case _scopes::rounds_to_win:
+            out = "Rounds To Win";
+            return;
+         case _scopes::sudden_death_time:
+            out = "Sudden Death Time";
+            return;
+         case _scopes::grace_period:
+            out = "Grace Period";
+            return;
+         case _scopes::lives_per_round:
+            out = "Lives Per Round";
+            return;
+         case _scopes::team_lives_per_round:
+            out = "Team Lives Per Round";
+            return;
+         case _scopes::respawn_time:
+            out = "Respawn Time";
+            return;
+         case _scopes::suicide_penalty:
+            out = "Suicide Penalty";
+            return;
+         case _scopes::betrayal_penalty:
+            out = "Betrayal Penalty";
+            return;
+         case _scopes::respawn_growth:
+            out = "Respawn Growth";
+            return;
+         case _scopes::loadout_cam_time:
+            out = "Loadout Camera Time";
+            return;
+         case _scopes::respawn_traits_duration:
+            out = "Respawn Traits Duration";
+            return;
+         case _scopes::friendly_fire:
+            out = "Friendly Fire Enabled";
+            return;
+         case _scopes::betrayal_booting:
+            out = "Betrayal Booting Enabled";
+            return;
+         case _scopes::social_flags_bit_2:
+            out = "Social Flags Bit 2";
+            return;
+         case _scopes::social_flags_bit_3:
+            out = "Social Flags Bit 3";
+            return;
+         case _scopes::social_flags_bit_4:
+            out = "Social Flags Bit 4";
+            return;
+         case _scopes::grenades_on_map:
+            out = "Grenades On Map";
+            return;
+         case _scopes::indestructible_vehicles:
+            out = "Indestructible Vehicles";
+            return;
+         case _scopes::powerup_duration_red:
+            out = "Red Powerup Duration";
+            return;
+         case _scopes::powerup_duration_blue:
+            out = "Blue Powerup Duration";
+            return;
+         case _scopes::powerup_duration_yellow:
+            out = "Yellow Powerup Duration";
+            return;
+         case _scopes::death_event_damage_type:
+            out = "Death Event Damage Type";
+            return;
+      }
+   }
+}

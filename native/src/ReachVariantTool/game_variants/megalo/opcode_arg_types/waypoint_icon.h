@@ -1,0 +1,56 @@
+#pragma once
+#include "scalar.h"
+
+namespace Megalo {
+   megalo_define_smart_enum(WaypointIcon,
+      "none", // -1
+      "microphone",
+      "death marker",
+      "lightning bolt",
+      "bullseye",
+      "diamond",
+      "bomb",
+      "flag",
+      "skull",
+      "crown",
+      "vip",
+      "territory lock",
+      "territory A",
+      "territory B",
+      "territory C",
+      "territory D",
+      "territory E",
+      "territory F",
+      "territory G",
+      "territory H",
+      "territory I",
+      "supply",
+      "supply (health)",
+      "supply (air drop)",
+      "supply (ammo)",
+      "arrow",
+      "defend",
+      "unknown 26",
+      "unknown 27",
+   );
+   class OpcodeArgValueWaypointIcon : public OpcodeArgValueScalar {
+      public:
+         uint32_t icon = 0;
+         //
+         virtual bool read(cobb::bitstream& stream) noexcept override {
+            this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
+            return OpcodeArgValueScalar::read(stream);
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            OpcodeArgValueScalar::to_string(out);
+            std::string icon;
+            WaypointIcon.to_string(icon, this->icon);
+            cobb::sprintf(out, "icon %s with number %s", icon.c_str(), out.c_str());
+         }
+         //
+         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+            return new OpcodeArgValueWaypointIcon();
+         }
+   };
+
+}

@@ -1,0 +1,15 @@
+#pragma once
+#include "all_enums.h"
+#include "all_flags.h"
+#include "all_indices.h"
+#include "scalar.h"
+#include "player.h"
+#include "object.h"
+#include "team.h"
+#include "timer.h"
+//
+#include "player_set.h"
+#include "shape.h"
+#include "specific_variable.h"
+#include "vector3.h"
+#include "waypoint_icon.h"

@@ -1,277 +1,242 @@
 #include "conditions.h"
+#include "opcode_arg_types/all.h"
 
-void MegaloOpcodeBaseArgument::to_string(std::string& out, const MegaloValue& value) const noexcept {
-   out.clear();
-   assert(this->type && "MegaloOpcodeBaseArgument should have a type pointer!");
-   if (this->type->is_complex()) {
-      value.complex.to_string(out);
-      return;
-   }
-   if (this->type->is_simple()) {
-      value.simple.to_string(out);
-      return;
-   }
-   #if _DEBUG
-      out = "<PRINTING OF SPECIAL TYPES NOT YET IMPLEMENTED>";
-   #else
-      static_assert(false, "IMPLEMENT ME");
-   #endif
-}
-
-extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
-   MegaloConditionFunction("None", "This condition does nothing.", "None."),
-   //
-   MegaloConditionFunction( // 1
-      "Compare",
-      "Compares the values of two variables.",
-      "Variable %1 %v %3 variable %2.", // Variable [foo] [is] [equal to] variable [bar].
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("a", reach::value_types::variable_any);
-         cf.arguments.emplace_back("b", reach::value_types::variable_any);
-         cf.arguments.emplace_back("operator", reach::value_types::compare_operator);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 2
-      "In Boundary",
-      "Checks whether one object is inside of another object's Shape.",
-      "%1 %v inside of %2's shape.", // [Object] [is] inside of [object]'s shape.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("a", reach::value_types::variable_object);
-         cf.arguments.emplace_back("b", reach::value_types::variable_object);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 3
-      "Killer Type",
-      "Checks what killed a player.",
-      "%1 %v killed by any of: %2.", // [Player] [was] killed by any of: [guardians, suicide].
-      "was",
-      "was not",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("victim",       reach::value_types::variable_player);
-         cf.arguments.emplace_back("killer types", reach::value_types::killer_type_flags);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 4
+namespace Megalo {
+   extern std::array<ConditionFunction, 18> conditionFunctionList = {{
       //
-      // Is this "alliance status?"
+      // The double-curly-braces for this array are NOT a mistake; you should be able to 
+      // use single braces but not every compiler handles that correctly.
       //
-      "Team Disposition",
-      "Unknown.",
-      "Team %1 %v disposition %3 with team %2.", // Team [team] [has] disposition [unk_1] with team [team].
-      "has",
-      "does not have",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("a", reach::value_types::variable_team);
-         cf.arguments.emplace_back("b", reach::value_types::variable_team);
-         cf.arguments.emplace_back("disposition", reach::value_types::team_disposition);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 5
-      "Timer Is Zero",
-      "Checks whether a timer is zero.",
-      "Timer %1 %v zero.", // Timer [timer] [is] zero.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("timer", reach::value_types::variable_timer);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 6
-      "Objects Are Same Type",
-      "Checks whether two objects are of the same type.", // verify
-      "Object %1 %v of the same type as %2.", // Object [object] [is] of the same type as [current object].
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("object", reach::value_types::variable_object);
-         cf.arguments.emplace_back("other",  reach::value_types::mp_object_type);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 7
-      "Team Has Players",
-      "Checks whether a team has any players on it.",
-      "Team %1 %v one or more players.", // Team [team] [has] one or more players.
-      "has",
-      "does not have",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("team", reach::value_types::variable_team);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 8
-      "Object Out Of Bounds",
-      "Checks whether an object has fallen out of bounds, e.g. into a Soft Kill Zone.",
-      "Object %1 %v out of bounds.", // Object [object] [is] out of bounds.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("object", reach::value_types::variable_object);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 9
-      "Deprecated 09",
-      "This condition function always returns false.", // TODO: does it return (true) if inverted?
-      "Never. (Unused argument: %1)", // Never. (Unused argument: [player])
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("player", reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 10
-      "Player Assisted Kill Of",
-      "Checks whether one player assisted in the slaying of another player. Note that you don't count as \"assisting\" your own kills.",
-      "Player %1 %v in the killing of player %2.", // Player [attacker] [assisted] in the killing of player [victim].
-      "assisted",
-      "did not assist",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("attacker", reach::value_types::variable_player);
-         cf.arguments.emplace_back("victim",   reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 11
-      "Object Has Label",
-      "Checks whether an object has a given Forge label.",
-      "Object %1 %v label %2.", // Object [object] [has] label [INF_HAVEN].
-      "has",
-      "does not have",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("object", reach::value_types::variable_object);
-         cf.arguments.emplace_back("label",  reach::value_types::object_label);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 12
-      "Player Is Not Respawning",
-      "Checks whether a player is not currently respawning.",
-      "Player %1 %v respawning.", // Player [player] [is not] respawning.
-      "is not",
-      "is",
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("player", reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 13
-      "Equipment In Use",
-      "",
-      "Equipment %1 %v in use.", // Equipment [object] [is] in use.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("object", reach::value_types::variable_object);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 14
-      "Species Is Spartan",
-      "Checks whether a player is a Spartan.",
-      "Player %1 %v a Spartan.", // Player [player] [is] a Spartan.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("player", reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 15
-      "Species Is Elite",
-      "Checks whether a player is an Elite.",
-      "Player %1 %v an Elite.", // Player [player] [is] an Elite.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("player", reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 16
-      "Species Is Monitor",
-      "Checks whether a player is a Monitor.",
-      "Player %1 %v a Monitor.", // Player [player] [is] a Monitor.
-      [](MegaloConditionFunction& cf) {
-         cf.arguments.emplace_back("player", reach::value_types::variable_player);
-      }
-   ),
-   //
-   MegaloConditionFunction( // 17
-      "Unknown 17 (Is Matchmaking?)",
-      "Checks whether this match is taking place in Matchmaking?",
-      "This match %v taking place in Matchmaking." // This match [is] taking place in Matchmaking.
-   ),
-};
+      ConditionFunction( // 0
+         "None",
+         "This condition does nothing.",
+         "None.",
+         {}
+      ),
+      ConditionFunction( // 1
+         "Compare",
+         "Compares any two values.",
+         "%1 %v %3 %2.",
+         {
+            OpcodeArgBase("a", OpcodeArgAnyVariableFactory),
+            OpcodeArgBase("b", OpcodeArgAnyVariableFactory),
+            OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::factory)
+         }
+      ),
+      ConditionFunction( // 2
+         "Object In Boundary",
+         "Checks whether one object is inside of another object's Shape.",
+         "%1 %v inside of %2's shape.",
+         {
+            OpcodeArgBase("a", OpcodeArgValueObject::factory),
+            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+         }
+      ),
+      ConditionFunction( // 3
+         "Killer Type",
+         "Checks what killed a player.",
+         "%1 %v killed by any of: %2.",
+         {
+            OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::factory),
+         },
+         "was", "was not"
+      ),
+      ConditionFunction( // 4
+         "Team Disposition",
+         "",
+         "%1 %v disposition %3 with %2.",
+         {
+            OpcodeArgBase("a", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("b", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::factory),
+         },
+         "has", "does not have"
+      ),
+      ConditionFunction( // 5
+         "Timer Is Zero",
+         "Checks whether a timer is at zero.",
+         "%1 %v at zero.",
+         {
+            OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
+         }
+      ),
+      ConditionFunction( // 6
+         "Object Type",
+         "Checks an object's type.",
+         "%1 %v of type %2.",
+         {
+            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
+         }
+      ),
+      ConditionFunction( // 7
+         "Team Has Players",
+         "Checks whether a team has one or more players on it.",
+         "%1 %v one or more players on it.",
+         {
+            OpcodeArgBase("team", OpcodeArgValueTeam::factory),
+         },
+         "has", "does not have"
+      ),
+      ConditionFunction( // 8
+         "Object Out Of Bounds",
+         "Checks whether an object is out of bounds.",
+         "%1 %v out of bounds.",
+         {
+            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+         }
+      ),
+      ConditionFunction( // 9
+         "Deprecated-09",
+         "This condition always returns false.", // TODO: does inverting it change that?
+         "Never. (Unused argument: %1)",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+         }
+      ),
+      ConditionFunction( // 10
+         "Player Assisted Kill Of",
+         "Checks whether one player assisted in the slaying of another player. Note that players don't count as \"assisting\" themselves.",
+         "%1 %v in the killing of %2.",
+         {
+            OpcodeArgBase("attacker", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("victim",   OpcodeArgValuePlayer::factory),
+         },
+         "assisted", "did not assist"
+      ),
+      ConditionFunction( // 11
+         "Object Has Label",
+         "Checks whether an object has a Forge label.",
+         "%1 %v label %2.",
+         {
+            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("label",  OpcodeArgValueLabelIndex::factory),
+         },
+         "has", "does not have"
+      ),
+      ConditionFunction( // 12
+         "Player Is Not Respawning",
+         "Checks whether a player is NOT waiting to respawn.", // TODO: includes loadout cam time?
+         "%1 %v waiting to respawn.",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+         },
+         "is not", "is"
+      ),
+      ConditionFunction( // 13
+         "Equipment In Use",
+         "",
+         "%1 %v in use.",
+         {
+            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+         }
+      ),
+      ConditionFunction( // 14
+         "Species Is Spartan",
+         "Checks whether a player is a Spartan.",
+         "%1 %v a Spartan.",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+         }
+      ),
+      ConditionFunction( // 15
+         "Species Is Elite",
+         "Checks whether a player is an Elite.",
+         "%1 %v an Elite.",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+         }
+      ),
+      ConditionFunction( // 16
+         "Species Is Monitor",
+         "Checks whether a player is a Monitor.",
+         "%1 %v a Monitor.",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+         }
+      ),
+      ConditionFunction( // 17
+         "In Matchmaking",
+         "This condition is believed to test whether the current match is taking place in Matchmaking.",
+         "This match %v taking place in Matchmaking.",
+         {}
+      ),
+   }};
 
-
-void MegaloCondition::to_string(std::string& out) const noexcept {
-   out.clear();
-   //
-   auto function = this->function;
-   if (!function)
-      return;
-   auto format = function->format;
-   if (!format)
-      format = "";
-   auto length = strlen(format);
-   for (size_t i = 0; i < length; i++) {
-      unsigned char c = format[i];
-      if (c != '%') {
-         out += c;
-         continue;
+   bool Condition::read(cobb::bitstream& stream) noexcept {
+      {
+         auto&  list  = conditionFunctionList;
+         size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));
+         if (index >= list.size()) {
+            printf("Bad condition function ID %d.\n", index);
+            return false;
+         }
+         this->function = &list[index];
+         if (index == 0) { // The "None" condition loads no further data.
+            return true;
+         }
       }
-      if (++i >= length)
-         break;
-      c = format[i];
-      if (c == '%') {
-         out += c;
-         continue;
+      stream.read(this->inverted);
+      this->or_group = stream.read_bits(cobb::bitcount(512 - 1));
+      this->action   = stream.read_bits(cobb::bitcount(1024 - 1));
+      //
+      auto&  base     = this->function->arguments;
+      size_t argCount = base.size();
+      this->arguments.resize(argCount);
+      for (size_t i = 0; i < argCount; i++) {
+         auto factory = base[i].factory;
+         this->arguments[i] = factory(stream);
+         if (this->arguments[i]) {
+            if (!this->arguments[i]->read(stream)) {
+               printf("Failed to load argument %d for condition %s.\n", i, this->function->name);
+               return false;
+            }
+         } else {
+            printf("Failed to construct argument %d for condition %s.\n", i, this->function->name);
+            return false;
+         }
       }
-      if (c == 'v') {
-         out += '[';
-         if (this->inverted)
-            out += function->verb_invert;
-         else
-            out += function->verb_normal;
-         out += ']';
-      } else if (c >= '1' && c <= '9') {
-         c -= '1';
-         if (c > this->arguments.size()) {
-            out += '%';
-            out += (char)(c + '1');
+      #if _DEBUG
+         this->to_string(this->debug_str);
+      #endif
+      return true;
+   }
+   void Condition::to_string(std::string& out) const noexcept {
+      if (!this->function) {
+         out = "<NO FUNC>";
+         return;
+      }
+      auto f = this->function->format;
+      assert(f && "Cannot stringify a condition whose function has no format string!");
+      out.clear();
+      size_t l = strlen(f);
+      for (size_t i = 0; i < l; i++) {
+         unsigned char c = f[i];
+         if (c != '%') {
+            out += c;
             continue;
          }
-         auto& arg_base = function->arguments[c];
-         out += '[';
-         out += arg_base.name; // PLACEHOLDER; TODO: ACTUALLY SHOW THE VALUE
-         out += ':';
-         std::string value;
-         arg_base.to_string(value, this->arguments[c]);
-         out += value;
-         out += ']';
+         c = f[++i];
+         if (c == '%') {
+            out += '%';
+            continue;
+         }
+         if (c == 'v') {
+            out += (this->inverted) ? this->function->verb_invert : this->function->verb_normal;
+            continue;
+         }
+         if (c >= '1' && c <= '9') {
+            c -= '1';
+            if (c >= this->arguments.size()) {
+               out += '%';
+               out += (c + '1');
+               continue;
+            }
+            std::string temporary;
+            this->arguments[c]->to_string(temporary);
+            out += temporary;
+         }
       }
    }
-}
-bool MegaloCondition::read(cobb::bitstream& stream) noexcept {
-   uint8_t type = stream.read_bits<uint8_t>(cobb::bitcount(g_conditionFunctionList.size() - 1)); // 5 bits
-   if (type == 0)
-      return true;
-   if (type >= g_conditionFunctionList.size()) {
-      printf("WARNING: Condition function ID %u is out of bounds.\n", type);
-      return false;
-   }
-   this->function = &g_conditionFunctionList[type];
-   stream.read(this->inverted); // 1 bit
-   this->or_group     = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions - 1)); //  9 bits
-   this->child_action = stream.read_bits(cobb::bitcount(reach::megalo::max_actions    - 1)); // 10 bits
-   //
-   auto arg_count = this->function->arguments.size();
-   this->arguments.resize(arg_count);
-   for (uint8_t i = 0; i < arg_count; i++) {
-      auto& arg_base = this->function->arguments[i];
-      auto  arg_type = arg_base.type;
-      assert(arg_type && "A MegaloConditionFunction should never have an argument whose MegaloValueType is nullptr!");
-      //
-      auto& arg = this->arguments[i];
-      arg.type = arg_type;
-      arg.read(stream);
-   }
-   //
-   #if _DEBUG
-      this->to_string(this->debug_str);
-   #endif
-   return true;
 }

@@ -1,7 +1,7 @@
 #include "base.h"
 #include "../helpers/bitstream.h"
 
-#include "megalo_ex/conditions.h"
+#include "megalo/conditions.h"
 
 bool BlamHeader::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
@@ -200,26 +200,6 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    {  // Megalo
       uint32_t stream_bitpos = stream.offset;
       {
-         printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-         printf("   Loading conditions using old-style code...\n");
-         printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-         std::vector<MegaloCondition> conditions;
-         int count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions)); // 10 bits
-         conditions.resize(count);
-         for (int i = 0; i < count; i++) {
-            printf("Reading condition %d of %d...\n", i, count);
-            if (!conditions[i].read(stream))
-               break;
-         }
-         #if _DEBUG
-            //__debugbreak();
-         #endif
-      }
-      stream.offset = stream_bitpos;
-      {
-         printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-         printf("   Loading conditions using new-style code...\n");
-         printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
          std::vector<Megalo::Condition> conditions;
          int count = stream.read_bits(cobb::bitcount(reach::megalo::max_conditions)); // 10 bits
          conditions.resize(count);

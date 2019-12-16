@@ -6,42 +6,33 @@
 #include "opcode_arg.h"
 
 namespace Megalo {
-   class ConditionFunction {
+   class ActionFunction {
       public:
          const char* name;
          const char* desc = "";
          const char* format;
-         const char* verb_normal = "is";
-         const char* verb_invert = "is not";
          std::vector<OpcodeArgBase> arguments;
          //
-         ConditionFunction(
+         ActionFunction(
             const char* n,
             const char* d,
             const char* f,
-            std::initializer_list<OpcodeArgBase> a,
-            const char* vn = "is",
-            const char* vi = "is not"
+            std::initializer_list<OpcodeArgBase> a
          ) :
             name(n),
             desc(d),
             format(f),
-            arguments(a),
-            verb_normal(vn),
-            verb_invert(vi)
+            arguments(a)
          {}
    };
-   extern std::array<ConditionFunction, 18> conditionFunctionList;
+   extern std::array<ActionFunction, 99> actionFunctionList;
 
-   class Condition {
+   class Action {
       public:
          #if _DEBUG
             std::string debug_str;
          #endif
-         const ConditionFunction* function = nullptr;
-         bool     inverted = false;
-         uint16_t or_group = 0;
-         uint16_t action   = 0;
+         const ActionFunction* function = nullptr;
          std::vector<OpcodeArgValue*> arguments;
          //
          bool read(cobb::bitstream&) noexcept;
