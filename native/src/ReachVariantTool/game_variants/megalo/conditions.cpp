@@ -85,7 +85,7 @@ extern std::vector<MegaloConditionFunction> g_conditionFunctionList = {
       "Object %1 %v of the same type as %2.", // Object [object] [is] of the same type as [current object].
       [](MegaloConditionFunction& cf) {
          cf.arguments.emplace_back("object", reach::value_types::variable_object);
-         cf.arguments.emplace_back("other",  reach::value_types::explicit_object);
+         cf.arguments.emplace_back("other",  reach::value_types::mp_object_type);
       }
    ),
    //

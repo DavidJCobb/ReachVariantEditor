@@ -82,14 +82,13 @@ enum class MegaloScopeType {
    team    = 3,
 };
 enum class MegaloVariableType {
-   // values in this enum aren't intended to match with what the game engine uses
    not_applicable = -2,
    any            = -1, // only for opcode argument definitions; not for loaded values
-   number = 0,
-   timer  = 1,
-   team   = 2,
-   player = 3,
-   object = 4,
+   number = 0, scalar = 0,
+   player = 1,
+   object = 2,
+   team   = 3,
+   timer  = 4,
 };
 
 using MegaloStringifyIndexFunction = void(*)(int32_t value, std::string & out);
@@ -487,15 +486,7 @@ namespace reach {
    template<MegaloScopeType st> inline constexpr MegaloValueEnum megalo_enum_for_scope_type = _megalo_enum_for_scope_type<st>::value;
 }
 
-enum class ComplexValueType {
-   not_applicable = -2,
-   any = -1, // complex-value is preceded by a 3-bit value indicating the ComplexValueType in use
-   scalar, // numbers, bools
-   timer,
-   team,
-   player,
-   object,
-};
+using ComplexValueType = MegaloVariableType;
 enum class SimpleValueType {
    not_applicable = -1,
    //
@@ -667,9 +658,6 @@ struct ReachShape {
 };
 
 class MegaloValueType {
-   //
-   // this may be somewhat outdated? it was written before I came to understand complex and simple types
-   //
    public:
       SimpleValueType       simple_type  = SimpleValueType::not_applicable;
       ComplexValueType      complex_type = ComplexValueType::not_applicable;
@@ -710,9 +698,9 @@ namespace reach {
       inline constexpr MegaloValueType killer_type_flags = MegaloValueType(MegaloValueFlagsMask::killer_type);
       inline constexpr MegaloValueType loadout_palette   = MegaloValueType(MegaloValueIndexType::loadout_palette, MegaloValueIndexQuirk::reference);
       inline constexpr MegaloValueType math_operator     = MegaloValueType(MegaloValueEnum::math_operator);
+      inline constexpr MegaloValueType mp_object_type    = MegaloValueType(MegaloValueIndexType::object_type, MegaloValueIndexQuirk::presence);
       inline constexpr MegaloValueType name              = MegaloValueType(MegaloValueIndexType::name, MegaloValueIndexQuirk::offset);
       inline constexpr MegaloValueType object_label      = MegaloValueType(MegaloValueIndexType::object_filter, MegaloValueIndexQuirk::presence);
-      inline constexpr MegaloValueType object_type       = MegaloValueType(MegaloValueIndexType::object_type, MegaloValueIndexQuirk::presence);
       inline constexpr MegaloValueType pickup_priority   = MegaloValueType(MegaloValueEnum::pickup_priority);
       inline constexpr MegaloValueType player_traits     = MegaloValueType(MegaloValueIndexType::player_traits, MegaloValueIndexQuirk::reference);
       inline constexpr MegaloValueType script_option     = MegaloValueType(MegaloValueIndexType::option, MegaloValueIndexQuirk::reference);

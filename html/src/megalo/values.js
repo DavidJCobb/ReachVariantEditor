@@ -238,6 +238,14 @@ class MegaloValueLabelIndex extends MegaloValueBaseIndex {
       return new MegaloValueLabelIndex();
    }
 }
+class MegaloValueMPObjectTypeIndex extends MegaloValueBaseIndex {
+   constructor() {
+      super("MP Object Type", 2048, MegaloValueIndexQuirk.presence);
+   }
+   static /*MegaloValue*/ factory(stream) /*noexcept*/ {
+      return new MegaloValueMPObjectTypeIndex();
+   }
+}
 
 function MegaloValueAnyFactory(stream) {
    let type = stream.readBits(3);
@@ -613,7 +621,7 @@ class MegaloValueObject extends MegaloValue {
       if (variable_scope) {
          //this.scope = variable_scope;
          this.which = stream.readBits(variable_scope.which_bits());
-         this.index = stream.readBits(variable_scope.index_bits("player"));
+         this.index = stream.readBits(variable_scope.index_bits("object"));
          return true;
       }
       return true;
@@ -682,10 +690,10 @@ class MegaloValueTeam extends MegaloValue {
             variable_scope = MegaloVariableScopeTeam;
             break;
          case MegaloValueTeamScopes.player_owner_team:
-            this.which = MegaloVariableScopePlayer.which_bits();
+            this.which = stream.readBits(MegaloVariableScopePlayer.which_bits());
             break;
          case MegaloValueTeamScopes.object_owner_team:
-            this.which = MegaloVariableScopeObject.which_bits();
+            this.which = stream.readBits(MegaloVariableScopeObject.which_bits());
             break;
          default:
             console.warn("Team value failed to load: unknown scope " + this.scope + ".");
@@ -761,7 +769,7 @@ class MegaloValueTimer extends MegaloValue {
       if (variable_scope) {
          //this.scope = variable_scope;
          this.which = stream.readBits(variable_scope.which_bits());
-         this.index = stream.readBits(variable_scope.index_bits("team"));
+         this.index = stream.readBits(variable_scope.index_bits("timer"));
          return true;
       }
       return true;

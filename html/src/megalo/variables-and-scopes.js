@@ -7,16 +7,16 @@ const megalo_scope = {
 };
 const megalo_variable_type = {
    numeric: 0,
-   timer:   1,
-   team:    2,
-   player:  3,
-   object:  4,
+   player:  1,
+   object:  2,
+   team:    3,
+   timer:   4,
 };
 
 const megalo_objects = (function() {
    let r = [ "none" ];
    for(let i = 0; i < 16; i++)
-      r.push("global_object_" + i);
+      r.push("Global.Object[" + i + "]");
    r = r.concat([
       "current_object",
       "hud_target",
@@ -28,9 +28,9 @@ const megalo_objects = (function() {
 const megalo_players = (function() {
    let r = [ "none" ];
    for(let i = 0; i < 16; i++)
-      r.push("player_player_" + i);
+      r.push("Player " + (i + 1));
    for(let i = 0; i < 8; i++)
-      r.push("global_player_" + i);
+      r.push("Global.Player[" + i + "]");
    r = r.concat([
       "current_player",
       "hud_player",
@@ -51,7 +51,7 @@ const megalo_teams = (function() {
       r.push("Team " + (i + 1));
    r.push("Neutral");
    for(let i = 0; i < 8; i++)
-      r.push("global_team_" + i);
+      r.push("Global.Team[" + i + "]");
    r = r.concat([
       "current_team",
       "hud_player",

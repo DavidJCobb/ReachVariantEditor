@@ -501,7 +501,7 @@ namespace reach {
             ComplexValueSubtype::variable<_MST::player,  _MVT::number>("%s.Number[%d]"),
             ComplexValueSubtype::variable<_MST::object,  _MVT::number>("%s.Number[%d]"),
             ComplexValueSubtype::variable<_MST::team,    _MVT::number>("%s.Number[%d]"),
-            ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number[%d]"),
+            ComplexValueSubtype::variable<_MST::globals, _MVT::number>("Global.Number"),
             ComplexValueSubtype("User-Defined Option", MegaloValueIndexType::option, MegaloValueIndexQuirk::reference),
             ComplexValueSubtype("Spawn Sequence", MegaloValueEnum::object, "%n of %v"), // runtime: SInt8 extended to int
             ComplexValueSubtype("Team Score",     MegaloValueEnum::team,   "%v's Score"),
@@ -563,8 +563,8 @@ namespace reach {
             ComplexValueSubtype::variable<_MST::player, _MVT::team>("%s.Team[%d]"),
             ComplexValueSubtype::variable<_MST::object, _MVT::team>("%s.Team[%d]"),
             ComplexValueSubtype::variable<_MST::team,   _MVT::team>("%s.Team[%d]"),
-            ComplexValueSubtype("Player.OwnerTeam", MegaloValueEnum::player),
-            ComplexValueSubtype("Object.OwnerTeam", MegaloValueEnum::object),
+            ComplexValueSubtype("Player.OwnerTeam", MegaloValueEnum::player, "Team of %v"),
+            ComplexValueSubtype("Object.OwnerTeam", MegaloValueEnum::object, "Team of %v"),
          };
          extern std::array<ComplexValueSubtype,  7> timer = {
             ComplexValueSubtype::variable<_MST::globals, _MVT::timer>("Global.Timer"),

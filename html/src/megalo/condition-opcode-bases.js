@@ -68,7 +68,7 @@ let g_conditionList = [
       "%1 %v of the same type as %2.",
       [
          MegaloValueObject.factory,
-         MegaloValueObject.factory, // TODO: increment by 1 after reading
+         MegaloValueMPObjectTypeIndex.factory, // TODO: increment by 1 after reading
       ]
    ),
    new MegaloConditionFunction( // 7
