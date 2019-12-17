@@ -202,21 +202,19 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    {  // Megalo
       uint32_t stream_bitpos = stream.offset;
       {
+         int count;
+         //
          std::vector<Megalo::Condition> conditions;
-         int count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
          conditions.resize(count);
          for (int i = 0; i < count; i++) {
             printf("Reading condition %d of %d...\n", i, count);
             if (!conditions[i].read(stream))
                break;
          }
-         #if _DEBUG
-            __debugbreak();
-         #endif
-      }
-      {
+         //
          std::vector<Megalo::Action> actions;
-         int count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
          actions.resize(count);
          for (int i = 0; i < count; i++) {
             printf("Reading action %d of %d...\n", i, count);
@@ -224,7 +222,9 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
                break;
          }
          #if _DEBUG
-         __debugbreak();
+            volatile int foo = conditions.size(); // otherwise compiler may have discarded (conditions) and (actions) before we hit our debug-break
+            volatile int bar = actions.size();    //
+            __debugbreak();
          #endif
       }
 

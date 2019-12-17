@@ -76,6 +76,7 @@ namespace Megalo {
       //
       // Format specifiers seen:
       //    %n    Prints a game state value (e.g. Round Limit) as a number.
+      //    %s    Not yet known. "Safe Haven - %s"
       //
       // TODO: Does the game do a raw printf? If so, can we cause crashes using bad 
       //       parameters? If so, any script editor will need to validate parameters.
@@ -98,7 +99,7 @@ namespace Megalo {
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->tokenCount == 0) {
-               cobb::sprintf(out, "string ID %d", this->stringIndex);
+               cobb::sprintf(out, "localized string ID %d", this->stringIndex);
                return;
             }
             out.clear();
