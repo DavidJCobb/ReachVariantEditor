@@ -51,9 +51,7 @@ namespace Megalo {
       };
 
    megalo_make_specific_variable_type(OpcodeArgValueObjectTimerVariable,  variable_scope::object, variable_type::timer);
-   megalo_make_specific_variable_type(OpcodeArgValueObjectPlayerVariable, variable_scope::object, variable_type::player);
 
-   /*//
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
       public:
          OpcodeArgValueObject object;
@@ -73,5 +71,4 @@ namespace Megalo {
             return new OpcodeArgValueObjectPlayerVariable();
          }
    };
-   //*/
 }

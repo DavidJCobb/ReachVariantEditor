@@ -29,6 +29,7 @@ namespace Megalo {
                this->player.to_string(out);
                this->addOrRemove.to_string(temp);
                cobb::sprintf(out, "%s - add or remove: %s", out.c_str(), temp.c_str());
+               return;
             }
             switch (this->set_type) {
                case PlayerSetType::no_one:

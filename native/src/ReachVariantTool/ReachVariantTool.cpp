@@ -48,8 +48,8 @@ TestingGameVariant g_tests[] = {
    TestingGameVariant("Rally",            L"rally.bin"),
    TestingGameVariant("Skeeball",         L"skeeball.bin"),
    TestingGameVariant("Slayer",           L"slayer.bin"),
-   TestingGameVariant("Stockpile",        L"slayer.bin"),
-   TestingGameVariant("Territories",      L"slayer.bin"),
+   TestingGameVariant("Stockpile",        L"stockpile.bin"),
+   TestingGameVariant("Territories",      L"territories.bin"),
 };
 
 LPCWSTR testFile  = L"alphazombies.bin";

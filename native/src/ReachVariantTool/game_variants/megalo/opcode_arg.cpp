@@ -37,8 +37,8 @@ namespace Megalo {
             return OpcodeArgValueTeam::factory(stream);
          case 1: // Player
             return OpcodeArgValuePlayer::factory(stream);
-         case 2: // None
-            return OpcodeArgValueNone::factory(stream);
+         case 2: // All Players
+            return OpcodeArgValueAllPlayers::factory(stream);
       }
       auto& error = ParseState::get();
       error.signalled = true;

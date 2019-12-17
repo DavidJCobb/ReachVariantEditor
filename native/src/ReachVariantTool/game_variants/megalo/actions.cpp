@@ -167,7 +167,7 @@ namespace Megalo {
          "",
          "For %1, play sound %2 and display message: %3.",
          {
-            OpcodeArgBase("who",   OpcodeArgValuePlayerSet::factory),
+            OpcodeArgBase("who",   OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("sound", OpcodeArgValueSound::factory),
             OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
          }
@@ -554,7 +554,7 @@ namespace Megalo {
       ActionFunction( // 60
          "Set Respawn Object for Team",
          "",
-         "Set team respawn object: %1.",
+         "Set %1's respawn object: %2.",
          {
             OpcodeArgBase("team",    OpcodeArgValueTeam::factory),
             OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
@@ -563,7 +563,7 @@ namespace Megalo {
       ActionFunction( // 61
          "Set Respawn Object for Player",
          "",
-         "Set player respawn object: %1.",
+         "Set %1's respawn object: %2.",
          {
             OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
             OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
@@ -916,9 +916,9 @@ namespace Megalo {
          }
       ),
       ActionFunction( // 98
-         "Set Boundary Visibility Filter", // TODO: figure out what this even means
+         "Set Boundary Visibility Filter", // TODO: figure out what this even means; current speculation is based on Halo 4's known actions
          "",
-         "Set boundary visibility filter? %1",
+         "Make an object's boundary visible to one of its player variables?: %1.",
          {
             OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::factory),
          }

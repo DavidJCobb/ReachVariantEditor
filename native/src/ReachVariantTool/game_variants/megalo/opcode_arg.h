@@ -114,18 +114,18 @@ namespace Megalo {
          }
    };
 
-   class OpcodeArgValueNone : public OpcodeArgValue { // one of the possibilities for team-or-player-vars.
+   class OpcodeArgValueAllPlayers : public OpcodeArgValue { // one of the possibilities for team-or-player-vars.
       public:
-         OpcodeArgValueNone() {};
+         OpcodeArgValueAllPlayers() {};
          //
          static OpcodeArgValue* factory(cobb::bitstream&) {
-            return new OpcodeArgValueNone();
+            return new OpcodeArgValueAllPlayers();
          }
          virtual bool read(cobb::bitstream& stream) noexcept override {
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
-            out = "no value";
+            out = "all players";
          }
 
    };
