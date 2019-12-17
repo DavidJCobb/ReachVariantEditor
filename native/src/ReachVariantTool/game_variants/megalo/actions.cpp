@@ -2,6 +2,11 @@
 #include "opcode_arg_types/all.h"
 #include "parse_error_reporting.h"
 
+#define MEGALO_DISALLOW_NONE_ACTION 0
+#if _DEBUG
+   #define MEGALO_DISALLOW_NONE_ACTION 1
+#endif
+
 namespace Megalo {
    extern std::array<ActionFunction, 99> actionFunctionList = {{
       //
@@ -160,8 +165,9 @@ namespace Megalo {
       ActionFunction( // 16
          "CHUD Message",
          "",
-         "For all players, play sound %1 and display message: %2.",
+         "For %1, play sound %2 and display message: %3.",
          {
+            OpcodeArgBase("who",   OpcodeArgValuePlayerSet::factory),
             OpcodeArgBase("sound", OpcodeArgValueSound::factory),
             OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
          }
@@ -464,13 +470,13 @@ namespace Megalo {
          }
       ),
       ActionFunction( // 51
-         "CHUD Message To Some",
+         "Play Sound",
          "",
-         "For %3, play sound %1 and display message: %2.",
+         "For %3, play sound %1. Unknown parameter: %2.",
          {
-            OpcodeArgBase("sound", OpcodeArgValueSound::factory),
-            OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
-            OpcodeArgBase("who", OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("sound",  OpcodeArgValueSound::factory),
+            OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::factory),
+            OpcodeArgBase("who",    OpcodeArgTeamOrPlayerVariableFactory),
          }
       ),
       ActionFunction( // 52
@@ -763,7 +769,7 @@ namespace Megalo {
          "%2 spawn zone %1.",
          {
             OpcodeArgBase("spawn zone", OpcodeArgValueObject::factory),
-            OpcodeArgBase("enable", OpcodeArgValueConstBool::factory, "Enable", "Disable"),
+            OpcodeArgBase("enable (treated as bool)", OpcodeArgValueScalar::factory),
          }
       ),
       ActionFunction( // 83
@@ -925,10 +931,23 @@ namespace Megalo {
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));
          if (index >= list.size()) {
             printf("Bad action function ID %d.\n", index);
+            //
+            auto& error = ParseState::get();
+            error.signalled = true;
+            error.opcode    = ParseState::opcode_type::action;
+            error.cause     = ParseState::what::bad_opcode_id;
+            error.extra[0]  = index;
             return false;
          }
          this->function = &list[index];
          if (index == 0) { // The "None" condition loads no further data.
+            #if MEGALO_DISALLOW_NONE_ACTION == 1
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.opcode    = ParseState::opcode_type::action;
+               error.cause     = ParseState::what::none_opcode_not_allowed;
+               return false;
+            #endif
             return true;
          }
       }

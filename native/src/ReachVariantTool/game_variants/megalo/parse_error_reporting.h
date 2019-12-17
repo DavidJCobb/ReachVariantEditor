@@ -24,6 +24,8 @@ namespace Megalo {
          bad_variable_type,
          bad_variable_subtype,
          bad_player_or_team_var_type,
+         none_opcode_not_allowed,
+         bad_opcode_id,
       };
       //
       bool        signalled = false;

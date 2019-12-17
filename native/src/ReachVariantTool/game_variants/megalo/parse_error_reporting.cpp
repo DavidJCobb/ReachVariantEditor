@@ -45,6 +45,12 @@ namespace Megalo {
                   printf("Bad variable subtype: %s subtype #%u.\n", type, this->extra[1]);
                }
                break;
+            case what::none_opcode_not_allowed:
+               printf("It's a None opcode. Those do not normally appear in Bungie gametypes but, being Opcode 0, are common when we have misread opcodes; as such, for debugging purposes we are currently failing when we encounter them.\n");
+               break;
+            case what::bad_opcode_id:
+               printf("Bad opcode ID: %u\n", this->extra[0]);
+               break;
             default:
                printf("Cause not specified.\n");
          }

@@ -5,6 +5,10 @@
 #include <vector>
 #include "opcode_arg.h"
 
+// NOTE: actions.cpp contains a preprocessor flag, MEGALO_DISALLOW_NONE_ACTION, which 
+// causes us to fail with an error if we encounter the "None" opcode. This flag exists 
+// for development/debugging purposes and should not be enabled in release builds.
+
 namespace Megalo {
    class ActionFunction {
       public:

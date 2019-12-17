@@ -2,6 +2,11 @@
 #include "opcode_arg_types/all.h"
 #include "parse_error_reporting.h"
 
+#define MEGALO_DISALLOW_NONE_CONDITION 0
+#if _DEBUG
+   #define MEGALO_DISALLOW_NONE_CONDITION 1
+#endif
+
 namespace Megalo {
    extern std::array<ConditionFunction, 18> conditionFunctionList = {{
       //
@@ -171,10 +176,23 @@ namespace Megalo {
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));
          if (index >= list.size()) {
             printf("Bad condition function ID %d.\n", index);
+            //
+            auto& error = ParseState::get();
+            error.signalled = true;
+            error.opcode    = ParseState::opcode_type::condition;
+            error.cause     = ParseState::what::bad_opcode_id;
+            error.extra[0]  = index;
             return false;
          }
          this->function = &list[index];
          if (index == 0) { // The "None" condition loads no further data.
+            #if MEGALO_DISALLOW_NONE_CONDITION == 1
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.opcode    = ParseState::opcode_type::condition;
+               error.cause     = ParseState::what::none_opcode_not_allowed;
+               return false;
+            #endif
             return true;
          }
       }
