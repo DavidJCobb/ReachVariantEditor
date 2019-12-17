@@ -8,7 +8,7 @@
 #include "timer.h"
 
 namespace Megalo {
-   enum class OpcodeStringTokenType {
+   enum class OpcodeStringTokenType : int8_t {
       none = -1,
       //
       player, // player's gamertag
@@ -24,21 +24,30 @@ namespace Megalo {
          OpcodeStringTokenType type;
          OpcodeArgValue* value = nullptr;
          //
+         ~OpcodeStringToken() {
+            if (this->value) {
+               delete this->value;
+               this->value = nullptr;
+            }
+         }
+         //
          bool read(cobb::bitstream& stream) noexcept {
-            this->type = (OpcodeStringTokenType)(stream.read_bits(3) - 1);
+            this->type = (OpcodeStringTokenType)((int8_t)stream.read_bits(3) - 1);
             switch (this->type) {
+               case OpcodeStringTokenType::none:
+                  break;
                case OpcodeStringTokenType::player:
                   this->value = new OpcodeArgValuePlayer();
                   break;
                case OpcodeStringTokenType::team:
-                  this->value = new OpcodeArgValueTeam();
+                  this->value = new OpcodeArgValueTeam(); // MSVC is compiling this as new OpcodeArgValuePlayerSet? What the fuck?
                   break;
                case OpcodeStringTokenType::object:
                   this->value = new OpcodeArgValueObject();
                   break;
                case OpcodeStringTokenType::number:
                case OpcodeStringTokenType::number_with_sign:
-                  this->value = new OpcodeArgValueScalar();
+                  this->value = new OpcodeArgValueScalar(); // MSVC is compiling this as new OpcodeArgValueObject? What the fuck?
                   break;
                case OpcodeStringTokenType::timer:
                   this->value = new OpcodeArgValueTimer();
@@ -46,21 +55,29 @@ namespace Megalo {
                default:
                   return false;
             }
+            if (this->value) {
+               this->value->read(stream);
+            }
             return true;
          }
          void to_string(std::string& out) const noexcept {
-            this->value->to_string(out);
+            if (this->value)
+               this->value->to_string(out);
          }
    };
 
    template<int N> class OpcodeArgValueStringTokens : OpcodeArgValue {
+      //
+      // Format specifiers seen:
+      //    %n    Prints a game state value (e.g. Round Limit) as a number.
+      //
       public:
-         int32_t stringIndex = -1;
+         int32_t stringIndex = -1; // format string - index in scriptData::strings
          uint8_t tokenCount  =  0;
          OpcodeStringToken tokens[N];
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->stringIndex = stream.read_bits(Limits::max_variant_strings - 1) - 1; // string table index pointer; -1 == none
+            this->stringIndex = stream.read_bits<uint32_t>(cobb::bitcount(Limits::max_variant_strings - 1)) - 1; // string table index pointer; -1 == none
             this->tokenCount  = stream.read_bits(cobb::bitcount(N));
             if (this->tokenCount > N) {
                printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount, N);
@@ -71,8 +88,12 @@ namespace Megalo {
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
+            if (this->tokenCount == 0) {
+               cobb::sprintf(out, "string ID %d", this->stringIndex);
+               return;
+            }
             out.clear();
-            for (int i = 0; i < this->tokenCount; i++) {
+            for (uint8_t i = 0; i < this->tokenCount; i++) {
                std::string temp;
                //
                auto& token = this->tokens[i];

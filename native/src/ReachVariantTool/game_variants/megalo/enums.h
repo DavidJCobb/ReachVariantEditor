@@ -31,6 +31,13 @@ namespace Megalo {
             return nullptr;
          }
          //
+         int32_t lookup(const char* value) const noexcept {
+            for (uint32_t i = 0; i < this->count; i++)
+               if (_stricmp(value, this->values[i]) == 0)
+                  return i;
+            return -1;
+         }
+         //
          SmartEnum* slice(size_t from, size_t to) const noexcept {
             size_t size = to - from;
             const char** pointers = (const char**)malloc(sizeof(const char*) * size);

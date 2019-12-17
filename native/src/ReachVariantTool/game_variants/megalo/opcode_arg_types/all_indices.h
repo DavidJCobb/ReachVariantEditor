@@ -33,7 +33,7 @@ namespace Megalo {
    };
    class OpcodeArgValueNameIndex : public OpcodeArgValueBaseIndex {
       public:
-         OpcodeArgValueNameIndex() : OpcodeArgValueBaseIndex("Name", Limits::max_variant_strings, index_quirk::offset) {};
+         OpcodeArgValueNameIndex() : OpcodeArgValueBaseIndex("Name", Limits::max_string_ids, index_quirk::offset) {};
          static OpcodeArgValue* factory(cobb::bitstream&) {
             return new OpcodeArgValueNameIndex();
          }

@@ -13,6 +13,10 @@ namespace {
       //
       _count,
    };
+   //
+   // From looking at CTF trigger actions, I think the "slave" object of a player is 
+   // basically the "third weapon" i.e. a carried flag, bomb, or oddball.
+   //
 }
 namespace Megalo {
    /*virtual*/ bool OpcodeArgValueObject::read(cobb::bitstream& stream) noexcept /*override*/ {

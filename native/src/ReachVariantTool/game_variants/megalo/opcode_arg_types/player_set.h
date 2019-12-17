@@ -10,29 +10,25 @@ namespace Megalo {
       specific_player,
       no_one_2,
    };
-   class OpcodeArgValuePlayerSet : public OpcodeArgValuePlayer {
+   class OpcodeArgValuePlayerSet : public OpcodeArgValue {
       public:
-         PlayerSetType set_type = PlayerSetType::no_one;
-         bool specific_player_add_or_remove = false;
+         PlayerSetType        set_type = PlayerSetType::no_one;
+         OpcodeArgValuePlayer player;
+         OpcodeArgValueScalar addOrRemove;
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             this->set_type = (PlayerSetType)stream.read_bits<uint8_t>(3);
             if (this->set_type == PlayerSetType::specific_player) {
-               if (OpcodeArgValuePlayer::read(stream)) {
-                  stream.read(this->specific_player_add_or_remove);
-                  return true;
-               }
-               return false;
+               return this->player.read(stream) && this->addOrRemove.read(stream);
             }
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->set_type == PlayerSetType::specific_player) {
-               OpcodeArgValuePlayer::to_string(out);
-               const char* verb = "add";
-               if (!this->specific_player_add_or_remove)
-                  verb = "remove";
-               cobb::sprintf(out, "%s %s", verb, out.c_str());
+               std::string temp;
+               this->player.to_string(out);
+               this->addOrRemove.to_string(temp);
+               cobb::sprintf(out, "%s - add or remove: %s", out.c_str(), temp.c_str());
             }
             switch (this->set_type) {
                case PlayerSetType::no_one:

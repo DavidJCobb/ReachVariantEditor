@@ -29,7 +29,7 @@ namespace Megalo {
          "Create %1 at offset %6 from %3 with Forge label %4, settings (%5), and name %7. Store a reference to it in %2.",
          {
             OpcodeArgBase("type",        OpcodeArgValueMPObjectTypeIndex::factory),
-            OpcodeArgBase("result",      OpcodeArgValueObject::factory),
+            OpcodeArgBase("result",      OpcodeArgValueObject::factory, true),
             OpcodeArgBase("spawn point", OpcodeArgValueObject::factory),
             OpcodeArgBase("label",       OpcodeArgValueLabelIndex::factory),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::factory),
@@ -267,7 +267,7 @@ namespace Megalo {
       ),
       ActionFunction( // 29
          "Get Killer",
-         "Set a player variable to whoever most recently killed the target player.",
+         "Set a player variable to whoever most recently killed the target player.", // does nothing if player isn't dead? bungie sets the out-variable to no-player before running this
          "Set %2 to the killer of %1.",
          {
             OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
@@ -285,7 +285,7 @@ namespace Megalo {
       ),
       ActionFunction( // 31
          "Get Death Damage Modifier",
-         "Set a number variable to indicate what damage modifier killed a player.",
+         "Set a number variable to indicate what damage modifier killed a player.", // does nothing if player isn't dead? bungie sets the out-variable to 0 before running this
          "Set integer %2 to the damage modifier(s) that killed %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
@@ -366,7 +366,7 @@ namespace Megalo {
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
-         "Sets an object variable to the vehicle that a player is currently using. Does not include boarding.",
+         "Sets an object variable to the vehicle that a player is currently using. Does not include boarding.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
          "Set %2 to the vehicle that %1 is currently using.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
@@ -455,11 +455,11 @@ namespace Megalo {
       ActionFunction( // 50
          "Set Widget Visibility",
          "Modify a HUD widget's icon.",
-         "%3 widget %1 to player %2.",
+         "%3 widget %1 for player %2.",
          {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::factory),
             OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("visible", OpcodeArgValueConstBool::factory, "show", "hide"),
+            OpcodeArgBase("visible", OpcodeArgValueConstBool::factory, "Show", "Hide"),
          }
       ),
       ActionFunction( // 51
@@ -709,10 +709,10 @@ namespace Megalo {
       ),
       ActionFunction( // 77
          "Set Player Loadout Palette",
-         "Set which loadout palette a player has access to.",
+         "Set which loadout palette a player or team has access to.",
          "Switch %1 to %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("team or player",  OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("loadout palette", OpcodeArgValueLoadoutPalette::factory),
          }
       ),
@@ -777,7 +777,7 @@ namespace Megalo {
       ),
       ActionFunction( // 84
          "Get Player Armor Ability",
-         "Returns a player's armor ability.",
+         "Returns a player's armor ability.", // does nothing if no player / no AA? bungie sets the out-variable to no-object before running this
          "Set %2 to %1's Armor Ability.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
