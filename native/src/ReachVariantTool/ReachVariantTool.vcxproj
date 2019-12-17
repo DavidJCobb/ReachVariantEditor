@@ -176,6 +176,7 @@
     <ClInclude Include="game_variants\megalo\opcode_arg_types\vector3.h" />
     <ClInclude Include="game_variants\megalo\opcode_arg_types\waypoint_icon.h" />
     <ClInclude Include="game_variants\megalo\opcode_arg_types\widget_related.h" />
+    <ClInclude Include="game_variants\megalo\parse_error_reporting.h" />
     <ClInclude Include="game_variants\megalo\variables_and_scopes.h" />
     <ClInclude Include="game_variants\megalo_options.h" />
     <ClInclude Include="game_variants\option_toggles.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="helpers\bitset.h" />
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
+    <ClInclude Include="helpers\debugging.h" />
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
@@ -213,6 +215,7 @@
     <ClCompile Include="game_variants\megalo\opcode_arg_types\team.cpp" />
     <ClCompile Include="game_variants\megalo\opcode_arg_types\timer.cpp" />
     <ClCompile Include="game_variants\megalo\opcode_arg_types\waypoint_icon.cpp" />
+    <ClCompile Include="game_variants\megalo\parse_error_reporting.cpp" />
     <ClCompile Include="game_variants\megalo\variables_and_scopes.cpp" />
     <ClCompile Include="game_variants\megalo_options.cpp" />
     <ClCompile Include="game_variants\player_traits.cpp" />

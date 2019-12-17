@@ -183,7 +183,7 @@ class ReachBlockMPVR {
       //
       ReachGameVariantTU1Options titleUpdateData;
       //
-      bool read(cobb::bitstream&) noexcept;
+      bool read(cobb::bitstream&);
 };
 
 class GameVariant {

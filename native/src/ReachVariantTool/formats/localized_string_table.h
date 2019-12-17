@@ -82,4 +82,10 @@ class ReachStringTable {
       void* _make_buffer(cobb::bitstream&) const noexcept;
    public:
       void read(cobb::bitstream&) noexcept;
+      //
+      ReachString* get_entry(size_t index) noexcept {
+         if (index < this->strings.size())
+            return &this->strings[index];
+         return nullptr;
+      }
 };

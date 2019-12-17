@@ -7,6 +7,8 @@
 #include "opcode_arg_types/team.h"
 #include "opcode_arg_types/timer.h"
 
+#include "parse_error_reporting.h"
+
 namespace Megalo {
    extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitstream& stream) {
       uint8_t type = stream.read_bits<uint8_t>(3);
@@ -22,7 +24,11 @@ namespace Megalo {
          case variable_type::object:
             return OpcodeArgValueObject::factory(stream);
       }
-      assert(false && "Any-value had an invalid type.");
+      auto& error = ParseState::get();
+      error.signalled = true;
+      error.cause     = ParseState::what::bad_variable_type;
+      error.extra[0]  = type;
+      return false;
    }
    extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitstream& stream) {
       uint8_t type = stream.read_bits<uint8_t>(2);
@@ -34,6 +40,10 @@ namespace Megalo {
          case 2: // None
             return OpcodeArgValueNone::factory(stream);
       }
-      assert(false && "Team-or-player-value had an invalid type.");
+      auto& error = ParseState::get();
+      error.signalled = true;
+      error.cause     = ParseState::what::bad_player_or_team_var_type;
+      error.extra[0]  = type;
+      return false;
    }
 }

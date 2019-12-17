@@ -1,5 +1,6 @@
 #include "conditions.h"
 #include "opcode_arg_types/all.h"
+#include "parse_error_reporting.h"
 
 namespace Megalo {
    extern std::array<ConditionFunction, 18> conditionFunctionList = {{
@@ -190,10 +191,20 @@ namespace Megalo {
          if (this->arguments[i]) {
             if (!this->arguments[i]->read(stream)) {
                printf("Failed to load argument %d for condition %s.\n", i, this->function->name);
+               //
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.opcode    = ParseState::opcode_type::condition;
+               error.opcode_arg_index = i;
                return false;
             }
          } else {
             printf("Failed to construct argument %d for condition %s.\n", i, this->function->name);
+            //
+            auto& error = ParseState::get();
+            error.signalled = true;
+            error.opcode    = ParseState::opcode_type::condition;
+            error.opcode_arg_index = i;
             return false;
          }
       }

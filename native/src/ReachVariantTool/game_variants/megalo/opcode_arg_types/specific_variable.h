@@ -10,33 +10,34 @@ namespace Megalo {
          //
          variable_scope baseScope;
          variable_type  baseType;
-         uint32_t       index = 0; // loaded argument value: which variable (e.g. for an object.number variable, which number)
+         int32_t        index = -1; // loaded argument value: which variable (e.g. for an object.number variable, which number)
+         //
+         inline bool is_none() const noexcept { return this->index == -1; }
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
+            bool absence = stream.read_bits(1) != 0;
+            if (absence)
+               return true;
             auto scope = getScopeObjectForConstant(this->baseScope);
             this->index = stream.read_bits(scope.index_bits(this->baseType));
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
+            const char* owner = "INVALID";
+            switch (this->baseScope) {
+               case variable_scope::object: owner = "object"; break;
+               case variable_scope::player: owner = "player"; break;
+               case variable_scope::team:   owner = "team";   break;
+            }
             const char* type  = "INVALID";
             switch (this->baseType) {
-               case variable_type::object:
-                  type = "Object";
-                  break;
-               case variable_type::player:
-                  type = "Player";
-                  break;
-               case variable_type::scalar:
-                  type = "Number";
-                  break;
-               case variable_type::team:
-                  type = "Team";
-                  break;
-               case variable_type::timer:
-                  type = "Timer";
-                  break;
+               case variable_type::object: type = "Object"; break;
+               case variable_type::player: type = "Player"; break;
+               case variable_type::scalar: type = "Number"; break;
+               case variable_type::team:   type = "Team";   break;
+               case variable_type::timer:  type = "Timer";  break;
             }
-            cobb::sprintf(out, "the object in question's %s[%u] variable", type, this->index);
+            cobb::sprintf(out, "the %s in question's %s[%u] variable", owner, type, this->index);
          }
    };
    //
@@ -49,9 +50,10 @@ namespace Megalo {
             } \
       };
 
-   megalo_make_specific_variable_type(OpcodeArgValueObjectTimerVariable, variable_scope::object, variable_type::timer);
+   megalo_make_specific_variable_type(OpcodeArgValueObjectTimerVariable,  variable_scope::object, variable_type::timer);
+   megalo_make_specific_variable_type(OpcodeArgValueObjectPlayerVariable, variable_scope::object, variable_type::player);
 
-   
+   /*//
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
       public:
          OpcodeArgValueObject object;
@@ -71,4 +73,5 @@ namespace Megalo {
             return new OpcodeArgValueObjectPlayerVariable();
          }
    };
+   //*/
 }

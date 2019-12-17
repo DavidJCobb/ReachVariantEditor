@@ -1,5 +1,6 @@
 #include "actions.h"
 #include "opcode_arg_types/all.h"
+#include "parse_error_reporting.h"
 
 namespace Megalo {
    extern std::array<ActionFunction, 99> actionFunctionList = {{
@@ -942,10 +943,20 @@ namespace Megalo {
             this->arguments[i]->configure_with_base(base[i]);
             if (!this->arguments[i]->read(stream)) {
                printf("Failed to load argument %d for action %s.\n", i, this->function->name);
+               //
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.opcode    = ParseState::opcode_type::action;
+               error.opcode_arg_index = i;
                return false;
             }
          } else {
             printf("Failed to construct argument %d for action %s.\n", i, this->function->name);
+            //
+            auto& error = ParseState::get();
+            error.signalled = true;
+            error.opcode    = ParseState::opcode_type::action;
+            error.opcode_arg_index = i;
             return false;
          }
       }

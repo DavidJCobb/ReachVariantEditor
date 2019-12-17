@@ -1,4 +1,5 @@
 #include "scalar.h"
+#include "../parse_error_reporting.h"
 
 namespace {
    enum class _scopes {
@@ -127,7 +128,13 @@ namespace Megalo {
          case _scopes::death_event_damage_type:
             break; // these are all accessors to game state values and require no additional information other than the fact of their being used
          default:
-            assert(false && "Unrecognized scalar subtype!");
+            {
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.cause     = ParseState::what::bad_variable_subtype;
+               error.extra[0]  = (uint32_t)variable_type::scalar;
+               error.extra[1]  = this->scope;
+            }
             return false;
       }
       if (variable_scope) {

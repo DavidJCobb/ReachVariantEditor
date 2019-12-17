@@ -8,19 +8,26 @@ using ReachMegaloOptionValue = cobb::bitnumber<10, int16_t>;
 using ReachMegaloOptionValueIndex = cobb::bitnumber<cobb::bitcount(8 - 1), uint8_t>;
 using ReachMegaloOptionValueCount = cobb::bitnumber<cobb::bitcount(8), uint8_t>;
 
+class ReachBlockMPVR;
+
 class ReachMegaloOption;
 
 class ReachMegaloOptionValueEntry {
    public:
+      ReachString* name = nullptr;
+      ReachString* desc = nullptr;
       ReachMegaloOptionValue value;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
       void read(cobb::bitstream&, ReachMegaloOption& owner) noexcept;
+      void postprocess_string_indices(ReachStringTable& table) noexcept;
 };
 
 class ReachMegaloOption {
    public:
+      ReachString* name = nullptr;
+      ReachString* desc = nullptr;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       cobb::bitbool isRange;
@@ -33,4 +40,5 @@ class ReachMegaloOption {
       ReachMegaloOptionValueIndex currentValueIndex;
       //
       void read(cobb::bitstream&) noexcept;
+      void postprocess_string_indices(ReachStringTable& table) noexcept;
 };

@@ -1,4 +1,5 @@
 #include "object.h"
+#include "../parse_error_reporting.h"
 
 namespace {
    enum class _scopes {
@@ -51,7 +52,13 @@ namespace Megalo {
             slave_var_scope = &MegaloVariableScopeTeam;
             break;
          default:
-            assert(false && "Unrecognized object subtype!");
+            {
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.cause     = ParseState::what::bad_variable_subtype;
+               error.extra[0]  = (uint32_t)variable_type::object;
+               error.extra[1]  = this->scope;
+            }
             return false;
       }
       if (variable_scope) {

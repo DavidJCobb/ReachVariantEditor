@@ -1,9 +1,11 @@
 #include "base.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/debugging.h"
 
 #include "megalo/actions.h"
 #include "megalo/conditions.h"
 #include "megalo/limits.h"
+#include "megalo/parse_error_reporting.h"
 
 bool BlamHeader::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
@@ -77,7 +79,9 @@ void ReachTeamData::read(cobb::bitstream& stream) noexcept {
    this->fireteamCount.read(stream);
 }
 
-bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
+bool ReachBlockMPVR::read(cobb::bitstream& stream) {
+   Megalo::ParseState::reset();
+   //
    this->header.read(stream);
    stream.read(this->hashSHA1);
    stream.skip(8 * 8); // skip eight bytes
@@ -155,6 +159,11 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
          o[i].read(stream);
       //
       sd.strings.read(stream);
+      //
+      for (auto& traits : t)
+         traits.postprocess_string_indices(sd.strings);
+      for (auto& option : o)
+         option.postprocess_string_indices(sd.strings);
    }
    this->stringTableIndexPointer.read(stream);
    this->localizedName.read(stream);
@@ -202,28 +211,47 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) noexcept {
    {  // Megalo
       uint32_t stream_bitpos = stream.offset;
       {
-         int count;
+         int  count;
+         int  i;
+         bool success = true;
          //
          std::vector<Megalo::Condition> conditions;
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
          conditions.resize(count);
-         for (int i = 0; i < count; i++) {
+         for (i = 0; i < count; i++) {
             printf("Reading condition %d of %d...\n", i, count);
-            if (!conditions[i].read(stream))
+            if (!(success = conditions[i].read(stream))) {
+               Megalo::ParseState::get().opcode_index = i;
                break;
+            }
+         }
+         #if _DEBUG
+            cobb::try_to_keep_visible_in_debugger(conditions); // keep visible for __debugbreak in Megalo::ParseState::print
+         #endif
+         Megalo::ParseState::print();
+         if (!success) {
+            return false;
          }
          //
          std::vector<Megalo::Action> actions;
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
          actions.resize(count);
-         for (int i = 0; i < count; i++) {
+         for (i = 0; i < count; i++) {
             printf("Reading action %d of %d...\n", i, count);
-            if (!actions[i].read(stream))
+            if (!(success = actions[i].read(stream))) {
+               Megalo::ParseState::get().opcode_index = i;
                break;
+            }
          }
          #if _DEBUG
-            volatile int foo = conditions.size(); // otherwise compiler may have discarded (conditions) and (actions) before we hit our debug-break
-            volatile int bar = actions.size();    //
+            cobb::try_to_keep_visible_in_debugger(conditions, actions); // keep visible for __debugbreak in Megalo::ParseState::print
+         #endif
+         Megalo::ParseState::print();
+         if (!success) {
+            return false;
+         }
+         #if _DEBUG
+            cobb::try_to_keep_visible_in_debugger(conditions, actions);
             __debugbreak();
          #endif
       }

@@ -15,7 +15,7 @@ namespace Megalo {
       team,   // "team_none" or team designator string
       object, // "none" or "unknown"
       number, // "%i"
-      number_with_sign, // "+%i" if positive; "%i" otherwise according to KSoft.Tool source
+      // number_with_sign, // Halo 4 only // "+%i" if positive; "%i" otherwise according to KSoft.Tool source
       timer,  // "%i:%02i:%02i" or "%i:%02i" or "0:%02i" according to KSoft.Tool source
    };
    //
@@ -46,7 +46,7 @@ namespace Megalo {
                   this->value = new OpcodeArgValueObject();
                   break;
                case OpcodeStringTokenType::number:
-               case OpcodeStringTokenType::number_with_sign:
+               //case OpcodeStringTokenType::number_with_sign:
                   this->value = new OpcodeArgValueScalar();
                   break;
                case OpcodeStringTokenType::timer:
@@ -99,6 +99,10 @@ namespace Megalo {
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->tokenCount == 0) {
+               if (this->stringIndex == -1) {
+                  out = "no string";
+                  return;
+               }
                cobb::sprintf(out, "localized string ID %d", this->stringIndex);
                return;
             }

@@ -1,4 +1,5 @@
 #include "team.h"
+#include "../parse_error_reporting.h"
 
 namespace {
    enum class _scopes {
@@ -39,7 +40,13 @@ namespace Megalo {
             owner_team_of = &MegaloVariableScopeObject;
             break;
          default:
-            assert(false && "Unrecognized team subtype!");
+            {
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.cause     = ParseState::what::bad_variable_subtype;
+               error.extra[0]  = (uint32_t)variable_type::team;
+               error.extra[1]  = this->scope;
+            }
             return false;
       }
       if (variable_scope) {

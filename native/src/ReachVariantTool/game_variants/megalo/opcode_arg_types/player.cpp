@@ -1,4 +1,5 @@
 #include "player.h"
+#include "../parse_error_reporting.h"
 
 namespace {
    enum class _scopes {
@@ -30,7 +31,13 @@ namespace Megalo {
             variable_scope = &MegaloVariableScopeTeam;
             break;
          default:
-            assert(false && "Unrecognized player subtype!");
+            {
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.cause     = ParseState::what::bad_variable_subtype;
+               error.extra[0]  = (uint32_t)variable_type::player;
+               error.extra[1]  = this->scope;
+            }
             return false;
       }
       if (variable_scope) {

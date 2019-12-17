@@ -296,6 +296,8 @@ class ReachPlayerTraits {
 
 class ReachMegaloPlayerTraits : public ReachPlayerTraits {
    public:
+      ReachString* name = nullptr;
+      ReachString* desc = nullptr;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
@@ -303,5 +305,9 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);
+      }
+      void postprocess_string_indices(ReachStringTable& table) noexcept {
+         this->name = table.get_entry(this->nameIndex);
+         this->desc = table.get_entry(this->descIndex);
       }
 };

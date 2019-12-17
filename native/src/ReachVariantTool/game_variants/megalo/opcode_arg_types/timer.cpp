@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "../parse_error_reporting.h"
 
 namespace {
    enum class _scopes {
@@ -37,7 +38,13 @@ namespace Megalo {
          case _scopes::grace_period_time:
             break;
          default:
-            assert(false && "Unrecognized timer subtype!");
+            {
+               auto& error = ParseState::get();
+               error.signalled = true;
+               error.cause     = ParseState::what::bad_variable_subtype;
+               error.extra[0]  = (uint32_t)variable_type::timer;
+               error.extra[1]  = this->scope;
+            }
             return false;
       }
       if (variable_scope) {

@@ -7,6 +7,11 @@ void ReachMegaloOptionValueEntry::read(cobb::bitstream& stream, ReachMegaloOptio
       this->descIndex.read(stream);
    }
 }
+void ReachMegaloOptionValueEntry::postprocess_string_indices(ReachStringTable& table) noexcept {
+   this->name = table.get_entry(this->nameIndex);
+   this->desc = table.get_entry(this->descIndex);
+}
+
 void ReachMegaloOption::read(cobb::bitstream& stream) noexcept {
    this->nameIndex.read(stream);
    this->descIndex.read(stream);
@@ -29,4 +34,11 @@ void ReachMegaloOption::read(cobb::bitstream& stream) noexcept {
       if (this->currentValueIndex >= this->values.size())
          printf("WARNING: Megalo option has out-of-bounds current index!\n");
    }
+}
+void ReachMegaloOption::postprocess_string_indices(ReachStringTable& table) noexcept {
+   this->name = table.get_entry(this->nameIndex);
+   this->desc = table.get_entry(this->descIndex);
+   this->rangeDefault.postprocess_string_indices(table);
+   for (auto& value : this->values)
+      value.postprocess_string_indices(table);
 }
