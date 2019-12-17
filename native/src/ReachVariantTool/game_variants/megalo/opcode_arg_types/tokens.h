@@ -40,14 +40,14 @@ namespace Megalo {
                   this->value = new OpcodeArgValuePlayer();
                   break;
                case OpcodeStringTokenType::team:
-                  this->value = new OpcodeArgValueTeam(); // MSVC is compiling this as new OpcodeArgValuePlayerSet? What the fuck?
+                  this->value = new OpcodeArgValueTeam();
                   break;
                case OpcodeStringTokenType::object:
                   this->value = new OpcodeArgValueObject();
                   break;
                case OpcodeStringTokenType::number:
                case OpcodeStringTokenType::number_with_sign:
-                  this->value = new OpcodeArgValueScalar(); // MSVC is compiling this as new OpcodeArgValueObject? What the fuck?
+                  this->value = new OpcodeArgValueScalar();
                   break;
                case OpcodeStringTokenType::timer:
                   this->value = new OpcodeArgValueTimer();
@@ -68,8 +68,17 @@ namespace Megalo {
 
    template<int N> class OpcodeArgValueStringTokens : OpcodeArgValue {
       //
+      // An opcode argument which consists of a format string and zero or more tokens to 
+      // insert into it. The format string is specified as an index into the string 
+      // table, and that index can contain printf-style format codes (though I don't 
+      // know that the game uses printf directly as opposed to a custom format inspired 
+      // by it).
+      //
       // Format specifiers seen:
       //    %n    Prints a game state value (e.g. Round Limit) as a number.
+      //
+      // TODO: Does the game do a raw printf? If so, can we cause crashes using bad 
+      //       parameters? If so, any script editor will need to validate parameters.
       //
       public:
          int32_t stringIndex = -1; // format string - index in scriptData::strings
