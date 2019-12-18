@@ -214,12 +214,13 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
          int  count;
          int  i;
          bool success = true;
+         auto& conditions = this->scriptContent.raw.conditions;
+         auto& actions    = this->scriptContent.raw.actions;
+         auto& triggers   = this->scriptContent.triggers;
          //
-         std::vector<Megalo::Condition> conditions;
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
          conditions.resize(count);
          for (i = 0; i < count; i++) {
-            printf("Reading condition %d of %d...\n", i, count);
             if (!(success = conditions[i].read(stream))) {
                Megalo::ParseState::get().opcode_index = i;
                break;
@@ -233,11 +234,9 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
             return false;
          }
          //
-         std::vector<Megalo::Action> actions;
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
          actions.resize(count);
          for (i = 0; i < count; i++) {
-            printf("Reading action %d of %d...\n", i, count);
             if (!(success = actions[i].read(stream))) {
                Megalo::ParseState::get().opcode_index = i;
                break;
@@ -250,14 +249,39 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
          if (!success) {
             return false;
          }
+         //
+         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
+         triggers.resize(count);
+         for (i = 0; i < count; i++) {
+            printf("Reading trigger %d of %d...\n", i, count);
+            triggers[i].read(stream);
+            triggers[i].postprocess_opcodes(conditions, actions);
+         }
+         printf("\nFull script content:\n");
+         for (auto& trigger : triggers) {
+            if (trigger.entry == Megalo::trigger_type::subroutine)
+               continue;
+            std::string out;
+            trigger.to_string(triggers, out);
+            printf(out.c_str());
+         }
+         //
          #if _DEBUG
             cobb::try_to_keep_visible_in_debugger(conditions, actions);
             __debugbreak();
          #endif
+
+         // game stats
+         // variable declarations
+         // HUD widget declarations
+         if (!this->scriptContent.entryPoints.read(stream))
+            return false;
+         // object type references
+         // Forge labels
       }
 
-      // all conditions (10-bit count)
-      // all actions    (11-bit count)
+      // all conditions (10-bit count) [DONE]
+      // all actions    (11-bit count) [DONE]
       // all triggers
          // execution mode
          // trigger type
@@ -286,7 +310,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
 
       //
       // TODO: retain data and organize it (i.e. go from struct-of-arrays to array-of-structs, 
-      // with triggers actually containing their conditions and actions).
+      // with triggers actually containing their conditions and actions)
       //
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)

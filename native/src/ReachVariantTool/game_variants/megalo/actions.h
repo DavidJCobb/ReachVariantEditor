@@ -30,6 +30,7 @@ namespace Megalo {
          {}
    };
    extern std::array<ActionFunction, 99> actionFunctionList;
+   extern const ActionFunction& actionFunction_runNestedTrigger;
 
    class Action {
       public:

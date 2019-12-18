@@ -11,6 +11,7 @@
 #include "loadouts.h"
 #include "map_permissions.h"
 #include "megalo_options.h"
+#include "megalo/trigger.h"
 #include "option_toggles.h"
 #include "player_rating_params.h"
 #include "player_traits.h"
@@ -171,6 +172,14 @@ class ReachBlockMPVR {
             ReachGameVariantMegaloOptionToggles hidden;
          } megalo;
       } optionToggles;
+      struct {
+         struct {
+            std::vector<Megalo::Condition> conditions;
+            std::vector<Megalo::Action>    actions;
+         } raw;
+         std::vector<Megalo::Trigger> triggers;
+         Megalo::TriggerEntryPoints entryPoints;
+      } scriptContent;
       //
       // KSoft.Tool code suggests that megalo data goes here, but if 
       // that's true, then how come we seem to be getting perfect TU 

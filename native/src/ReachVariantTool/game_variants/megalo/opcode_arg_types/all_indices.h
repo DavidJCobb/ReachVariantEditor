@@ -12,7 +12,7 @@ namespace Megalo {
    };
    class OpcodeArgValueLabelIndex : public OpcodeArgValueBaseIndex {
       public:
-         OpcodeArgValueLabelIndex() : OpcodeArgValueBaseIndex("Forge Label", 16, index_quirk::presence) {};
+         OpcodeArgValueLabelIndex() : OpcodeArgValueBaseIndex("Forge Label", Limits::max_script_labels, index_quirk::presence) {};
          static OpcodeArgValue* factory(cobb::bitstream&) {
             return new OpcodeArgValueLabelIndex();
          }

@@ -18,11 +18,11 @@ namespace cobb {
    // to this function don't work: the variables in earlier calls can be discarded.
    //
    template<typename T> void try_to_keep_visible_in_debugger(T& x) noexcept {
-      #pragma warning(suppress: 4474 4477) // turn off printf arg checking
+      #pragma warning(suppress: 4474 4477 6271) // turn off printf arg checking
       printf("\0%u", x);
    }
    template<typename T, typename U> void try_to_keep_visible_in_debugger(T& x, U y) noexcept {
-      #pragma warning(suppress: 4474 4477) // turn off printf arg checking
+      #pragma warning(suppress: 4474 4477 6271) // turn off printf arg checking
       printf("\0%u%u", x, y);
    }
    #pragma optimize("", on)

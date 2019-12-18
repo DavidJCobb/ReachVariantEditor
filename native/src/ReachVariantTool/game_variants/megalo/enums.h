@@ -42,6 +42,7 @@ namespace Megalo {
             size_t size = to - from;
             const char** pointers = (const char**)malloc(sizeof(const char*) * size);
             for (size_t i = 0; i < size; i++)
+               #pragma warning(suppress: 6011) // if we didn't have enough memory, then malloc returned nullptr, which we are deferencing... but not having memory is a larger and irrecoverable problem anyway
                pointers[i] = this->values[i + to];
             return new SmartEnum(pointers, size);
          }
