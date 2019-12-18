@@ -1,5 +1,6 @@
 #include "base.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/bitwriter.h"
 
 #include "megalo/actions.h"
 #include "megalo/conditions.h"
@@ -12,6 +13,13 @@ bool BlamHeader::read(cobb::bitstream& stream) noexcept {
    stream.read(this->data.unk0E);
    stream.read(this->data.unk2E);
    return true;
+}
+void BlamHeader::write(cobb::bitwriter& stream) const noexcept {
+   this->header.write(stream);
+   stream.enlarge_by(0x24);
+   stream.write(this->data.unk0C);
+   stream.write(this->data.unk0E);
+   stream.write(this->data.unk2E);
 }
 
 bool GameVariantHeader::read(cobb::bitstream& stream) noexcept {

@@ -1,5 +1,6 @@
 #include "block.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/bitwriter.h"
 #include "../helpers/endianness.h"
 
 bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
@@ -33,6 +34,13 @@ bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
       return false;
    return true;
 }
+void ReachFileBlock::write(cobb::bitwriter& stream) const noexcept {
+   stream.enlarge_by(0xC);
+   stream.write(this->found.signature);
+   stream.write(this->found.size);
+   stream.write(this->found.version);
+   stream.write(this->found.flags);
+}
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {
    if (this->remainder) {
@@ -64,4 +72,10 @@ bool ReachUnknownBlock::read(cobb::bytestream& stream) noexcept {
    for (uint32_t i = 0; i < size; i++)
       stream.read(*(uint8_t*)(this->data + i));
    return true;
+}
+void ReachUnknownBlock::write(cobb::bitwriter& stream) const noexcept {
+   this->header.write(stream);
+   stream.enlarge_by(this->header.found.size);
+   for (uint32_t i = 0; i < this->header.found.size; i++)
+      stream.write(*(uint8_t*)(this->data + i));
 }

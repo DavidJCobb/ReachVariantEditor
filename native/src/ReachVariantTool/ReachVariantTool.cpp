@@ -4,8 +4,11 @@
 #include "stdafx.h"
 
 #include "game_variants/base.h"
+#include "helpers/bitwriter.h"
 #include "helpers/endianness.h"
 #include "helpers/files.h"
+
+#define REACH_GAME_VARIANTS_TESTING_RESAVE 1
 
 struct TestingGameVariant {
    LPCWSTR     path = L"";
@@ -63,6 +66,37 @@ int main() {
       printf("Current processor is little-endian.\n");
       printf("'ABCD' swapped to big-endian: %08X -> %08X\n", 'ABCD', cobb::to_big_endian(uint32_t('ABCD')));
    }
+   //
+   #if REACH_GAME_VARIANTS_TESTING_RESAVE == 1
+      {
+         auto test = g_tests[0];
+         cobb::mapped_file file;
+         file.open(test.path);
+         //
+         printf("----------------------------------------------------------------------\n");
+         printf("   Loading: %s <%S>\n", test.name, test.path);
+         printf("----------------------------------------------------------------------\n");
+         //
+         auto variant = new GameVariant();
+         variant->read(file);
+         //
+         printf("Header name: %S\n", variant->contentHeader.data.title);
+         printf("Header desc: %S\n", variant->contentHeader.data.description);
+         printf("Embedded name: %S\n", variant->multiplayer.variantHeader.title);
+         printf("Embedded desc: %S\n", variant->multiplayer.variantHeader.description);
+         printf("Loadout camera time: %d\n", (int)variant->multiplayer.options.respawn.loadoutCamTime);
+         #if _DEBUG
+            __debugbreak();
+         #endif
+         printf("\n");
+         printf("Resaving...\n");
+         cobb::bitwriter writer;
+         variant->write(writer);
+         #if _DEBUG
+            __debugbreak();
+         #endif
+      }
+   #endif
    //
    for (int i = 0; i < std::extent<decltype(g_tests)>::value; i++)
       g_tests[i].execute();

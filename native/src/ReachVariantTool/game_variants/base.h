@@ -31,6 +31,7 @@ class BlamHeader {
       } data;
       //
       bool read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter&) const noexcept;
 };
 
 class GameVariantHeader {
@@ -235,5 +236,12 @@ class GameVariant {
             }
          }
          return true;
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         this->blamHeader.write(stream);
+
+         #if !_DEBUG
+            static_assert(false, "FINISH ME");
+         #endif
       }
 };

@@ -46,7 +46,7 @@ namespace cobb {
          }
          //
       public:
-         template<typename T = uint32_t> T read_bits(int count, uint32_t flags = 0) noexcept {
+         template<typename T = uint32_t> T read_bits(int count, uint32_t flags = 0) noexcept { // should naturally read in big-endian
             #if _DEBUG
                auto pos   = this->get_bytepos();
                auto shift = this->get_bitshift();
