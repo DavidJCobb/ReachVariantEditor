@@ -36,10 +36,10 @@ bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
 }
 void ReachFileBlock::write(cobb::bitwriter& stream) const noexcept {
    stream.enlarge_by(0xC);
-   stream.write(this->found.signature);
-   stream.write(this->found.size);
-   stream.write(this->found.version);
-   stream.write(this->found.flags);
+   stream.write(this->found.signature, cobb::endian::big);
+   stream.write(this->found.size,      cobb::endian::big);
+   stream.write(this->found.version,   cobb::endian::big);
+   stream.write(this->found.flags,     cobb::endian::big);
 }
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {

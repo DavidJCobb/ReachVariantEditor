@@ -62,6 +62,8 @@ class GameVariantHeader {
       //
       bool read(cobb::bitstream&) noexcept;
       bool read(cobb::bytestream&) noexcept;
+      void write_bits(cobb::bitwriter& stream) const noexcept;
+      void write_bytes(cobb::bitwriter& stream) const noexcept;
 };
 class ReachBlockCHDR {
    public:
@@ -72,6 +74,10 @@ class ReachBlockCHDR {
          if (this->header.read(stream) && this->data.read(stream))
             return true;
          return false;
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         this->header.write(stream);
+         this->data.write_bytes(stream);
       }
 };
 
@@ -239,6 +245,7 @@ class GameVariant {
       }
       void write(cobb::bitwriter& stream) const noexcept {
          this->blamHeader.write(stream);
+         this->contentHeader.write(stream);
 
          #if !_DEBUG
             static_assert(false, "FINISH ME");

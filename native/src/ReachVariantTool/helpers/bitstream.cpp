@@ -66,6 +66,7 @@ namespace cobb {
    }
    //
    void bitstream::read_string(char* out, int maxlength) noexcept {
+      memset(out, 0, maxlength);
       int  i = 0;
       char c;
       this->read(c);
@@ -75,6 +76,7 @@ namespace cobb {
       }
    }
    void bitstream::read_wstring(wchar_t* out, int maxlength) noexcept {
+      memset(out, 0, maxlength * sizeof(wchar_t));
       int     i = 0;
       wchar_t c;
       this->read(c);

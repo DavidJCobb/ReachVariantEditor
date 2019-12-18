@@ -17,7 +17,7 @@ bool BlamHeader::read(cobb::bitstream& stream) noexcept {
 void BlamHeader::write(cobb::bitwriter& stream) const noexcept {
    this->header.write(stream);
    stream.enlarge_by(0x24);
-   stream.write(this->data.unk0C);
+   stream.write(this->data.unk0C, cobb::endian::big);
    stream.write(this->data.unk0E);
    stream.write(this->data.unk2E);
 }
@@ -73,6 +73,60 @@ bool GameVariantHeader::read(cobb::bytestream& stream) noexcept {
    this->engineIcon.read(stream);
    stream.read(this->unk284);
    return true;
+}
+void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
+   this->contentType.write_bits(stream);
+   #if _DEBUG
+      this->fileLength.write_bits(stream);
+   #else
+      static_assert(false, "TODO: Write out a dummy file length and then, after the file is fully written, come back and overwrite that length with a real value.");
+   #endif
+   this->unk08.write_bits(stream);
+   this->unk10.write_bits(stream);
+   this->unk18.write_bits(stream);
+   this->unk20.write_bits(stream);
+   this->activity.write_bits(stream);
+   this->gameMode.write_bits(stream);
+   this->engine.write_bits(stream);
+   this->unk2C.write_bits(stream);
+   this->engineCategory.write_bits(stream);
+   this->createdBy.write_bits(stream);
+   this->modifiedBy.write_bits(stream);
+   stream.write_wstring(this->title,       128); // big-endian
+   stream.write_wstring(this->description, 128); // big-endian
+   if (this->contentType == 6) {
+      this->engineIcon.write_bits(stream);
+   }
+   if (this->activity == 2)
+      assert(false && "Hopper ID writing not implemented!"); // TODO: hopper ID
+}
+void GameVariantHeader::write_bytes(cobb::bitwriter& stream) const noexcept {
+   this->build.major.write_bytes(stream);
+   this->build.minor.write_bytes(stream);
+   this->contentType.write_bytes(stream);
+   stream.pad_bytes(3);
+   #if _DEBUG
+      this->fileLength.write_bytes(stream);
+   #else
+      static_assert(false, "TODO: Write out a dummy file length and then, after the file is fully written, come back and overwrite that length with a real value.");
+   #endif
+   this->unk08.write_bytes(stream);
+   this->unk10.write_bytes(stream);
+   this->unk18.write_bytes(stream);
+   this->unk20.write_bytes(stream);
+   this->activity.write_bytes(stream);
+   this->gameMode.write_bytes(stream);
+   this->engine.write_bytes(stream);
+   stream.pad_bytes(1);
+   this->unk2C.write_bytes(stream);
+   this->engineCategory.write_bytes(stream);
+   stream.pad_bytes(4);
+   this->createdBy.write_bytes(stream);
+   this->modifiedBy.write_bytes(stream);
+   stream.write(this->title);
+   stream.write(this->description);
+   this->engineIcon.write_bytes(stream);
+   stream.write(this->unk284);
 }
 
 void ReachTeamData::read(cobb::bitstream& stream) noexcept {

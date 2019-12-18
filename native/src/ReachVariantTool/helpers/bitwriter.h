@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <type_traits>
+#include "bitwise.h"
+#include "endianness.h"
 #include "polyfills_cpp20.h"
 #include "templating.h"
 
@@ -18,10 +20,19 @@ namespace cobb {
          void _ensure_room_for(unsigned int bitcount) noexcept;
          //
       public:
+         ~bitwriter();
+         //
          inline uint32_t get_bitpos()   const noexcept { return this->_bitpos; };
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
          inline int      get_bitshift() const noexcept { return this->_bitpos % 8; };
          //
+         uint8_t get_byte(uint32_t bytepos) const noexcept {
+            if (bytepos > this->_bitpos / 8)
+               return 0;
+            return *(uint8_t*)(this->_buffer + bytepos);
+         }
+         //
+         void dump_to_console() const noexcept;
          inline void enlarge_by(uint32_t bytes) noexcept {
             this->resize(this->_size + bytes);
          }
@@ -31,40 +42,59 @@ namespace cobb {
          }
          void pad_to_bytepos(uint32_t bytepos) noexcept;
          void resize(uint32_t size) noexcept;
-         void write(uint32_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
-         inline void write(const uint32_t value, int bits) noexcept {
+         void write(uint64_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
+         inline void write(uint64_t value, int bits) noexcept {
             this->write(value, bits, bits);
          }
-         inline void write(int32_t value, int bits, _is_signed_sentinel) noexcept {
+         inline void write(int64_t value, int bits, _is_signed_sentinel) noexcept {
             if (value < 0)
-               value |= (1 << (bits - 1));
+               value |= ((int64_t)1 << (bits - 1));
             this->write(value, bits, bits);
          }
          //
-         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T>)> void write(const T& value) noexcept {
-            if (std::is_signed_v<T>)
-               this->write((int32_t)value, cobb::bits_in<T>, is_signed);
-            else
-               this->write((uint32_t)value, cobb::bits_in<T>);
+         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+            T v = value;
+            if (save_endianness != cobb::endian::big)
+               v = cobb::to_big_endian(v);
+            this->write((uint64_t)v, cobb::bits_in<T>);
          };
-         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value) noexcept {
+         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
             using item_type = std::remove_extent_t<T>; // from X[i] to X
             //
-            for (int i = 0; i < std::extent<T>::value; i++)
-               if (std::is_signed_v<item_type>)
-                  this->write(value[i], cobb::bits_in<item_type>, is_signed);
-               else
+            if (save_endianness != cobb::endian::big)
+               for (int i = 0; i < std::extent<T>::value; i++)
+                  this->write(cobb::to_big_endian(value[i]), cobb::bits_in<item_type>);
+            else
+               for (int i = 0; i < std::extent<T>::value; i++)
                   this->write(value[i], cobb::bits_in<item_type>);
          };
-         template<int = 0> void read(const float& value) noexcept {
+         template<int = 0> void write(const float& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
             union {
                uint32_t i;
                float    f = value;
-            } value;
-            this->write(value.i, 32);
+            } uv;
+            uint32_t v = uv.i;
+            if (save_endianness != cobb::endian::big)
+               v = cobb::to_big_endian(v);
+            this->write(v, 32);
          }
-         template<int = 0> void read(const bool& value) noexcept {
+         template<int = 0> void write(const bool& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
             this->write(value ? 1 : 0, 1);
+         }
+         //
+         void write_string(const char* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept { // writes as bits; stops early after null char
+            for (int i = 0; i < maxlength; i++) {
+               this->write(value[i], save_endianness);
+               if (!value[i])
+                  break;
+            }
+         }
+         void write_wstring(const wchar_t* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept { // writes as bits; stops early after null char
+            for (int i = 0; i < maxlength; i++) {
+               this->write(value[i], save_endianness);
+               if (!value[i])
+                  break;
+            }
          }
    };
 }

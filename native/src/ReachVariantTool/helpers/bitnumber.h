@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "bitstream.h"
+#include "bitwriter.h"
 #include "type_traits.h"
 
 namespace cobb {
@@ -150,6 +151,12 @@ namespace cobb {
          }
          void read(cobb::bytestream& stream) noexcept {
             stream.read(this->value);
+         }
+         void write_bits(cobb::bitwriter& stream) const noexcept {
+            stream.write((underlying_int)this->value, bitcount);
+         }
+         void write_bytes(cobb::bitwriter& stream) const noexcept {
+            stream.write((underlying_int)this->value);
          }
          //
          // Operators:

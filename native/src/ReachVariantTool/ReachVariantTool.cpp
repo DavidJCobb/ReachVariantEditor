@@ -92,6 +92,7 @@ int main() {
          printf("Resaving...\n");
          cobb::bitwriter writer;
          variant->write(writer);
+         writer.dump_to_console();
          #if _DEBUG
             __debugbreak();
          #endif

@@ -7,31 +7,38 @@
 
 namespace cobb {
    #ifdef __cpp_lib_endian
-      using endian = std::endian;
+      using endian   = std::endian;
+      using endian_t = std::endian;
    #else
+      enum class endian_t {
+         little,
+         big,
+      };
       namespace endian {
-         extern constexpr int little = 0;
-         extern constexpr int big    = 1;
-         extern const int native;
+         extern constexpr endian_t little = endian_t::little;
+         extern constexpr endian_t big    = endian_t::big;
+         extern const endian_t native;
       }
    #endif
+
+   template<typename T> T byteswap(T v) noexcept {
+      switch (sizeof(T)) {
+         case 1: return v;
+         case 2: return (T)_byteswap_ushort((uint16_t)v);
+         case 4: return (T)_byteswap_ulong ((uint32_t)v);
+         case 8: return (T)_byteswap_uint64((uint64_t)v);
+      }
+      static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8, "No byteswap intrinsic available for this size.");
+      __assume(0); // let MSVC know this branch should never be reached, so it doesn't warn on not returning a value here
+   }
+
    //
    // Byteswap a value if we are not on a big-endian platform. Use this when 
    // serializing ints to a big-endian file format.
    //
-   inline uint64_t to_big_endian(uint64_t v) noexcept {
+   template<typename T> T to_big_endian(T v) noexcept {
       if (endian::native == endian::little)
-         return _byteswap_uint64(v);
-      return v;
-   }
-   inline uint32_t to_big_endian(uint32_t v) noexcept {
-      if (endian::native == endian::little)
-         return _byteswap_ulong(v);
-      return v;
-   }
-   inline uint16_t to_big_endian(uint16_t v) noexcept {
-      if (endian::native == endian::little)
-         return _byteswap_ushort(v);
+         return byteswap(v);
       return v;
    }
 
@@ -39,19 +46,9 @@ namespace cobb {
    // Byteswap a value if we are not on a little-endian platform. Use this when 
    // serializing ints to a little-endian file format.
    //
-   inline uint64_t to_little_endian(uint64_t v) noexcept {
+   template<typename T> T to_little_endian(T v) noexcept {
       if (endian::native == endian::big)
-         return _byteswap_uint64(v);
-      return v;
-   }
-   inline uint32_t to_little_endian(uint32_t v) noexcept {
-      if (endian::native == endian::big)
-         return _byteswap_ulong(v);
-      return v;
-   }
-   inline uint16_t to_little_endian(uint16_t v) noexcept {
-      if (endian::native == endian::big)
-         return _byteswap_ushort(v);
+         return byteswap(v);
       return v;
    }
 

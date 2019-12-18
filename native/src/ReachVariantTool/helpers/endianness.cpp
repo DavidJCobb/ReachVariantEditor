@@ -2,7 +2,7 @@
 
 #ifndef __cpp_lib_endian
 namespace {
-   const int _check() noexcept {
+   const cobb::endian_t _check() noexcept {
       union {
          uint32_t dword = 'ABCD';
          uint8_t  chars[4];
@@ -12,7 +12,7 @@ namespace {
 }
 namespace cobb {
    namespace endian {
-      extern const int native = _check();
+      extern const endian_t native = _check();
    }
 }
 #endif

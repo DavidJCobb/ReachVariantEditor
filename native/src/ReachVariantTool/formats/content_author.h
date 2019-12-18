@@ -11,4 +11,6 @@ class ReachContentAuthor {
       //
       bool read(cobb::bitstream&) noexcept;
       bool read(cobb::bytestream&) noexcept;
+      void write_bits(cobb::bitwriter& stream) const noexcept;
+      void write_bytes(cobb::bitwriter& stream) const noexcept;
 };
