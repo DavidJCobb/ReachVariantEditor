@@ -55,16 +55,23 @@ namespace Megalo {
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
       public:
          OpcodeArgValueObject object;
-         uint32_t playerIndex = 0;
+         int32_t playerIndex = -1;
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             if (!this->object.read(stream))
                return false;
+            bool absence = stream.read_bits(1) != 0;
+            if (absence)
+               return true;
             this->playerIndex = stream.read_bits(MegaloVariableScopeObject.index_bits(variable_type::player));
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
             this->object.to_string(out);
+            if (this->playerIndex == -1) {
+               out += " - no/all? players";
+               return;
+            }
             cobb::sprintf(out, "%s.Player[%d]", out.c_str(), this->playerIndex);
          }
          static OpcodeArgValue* factory(cobb::bitstream&) {

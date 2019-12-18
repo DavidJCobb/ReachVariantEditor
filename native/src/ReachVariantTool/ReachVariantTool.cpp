@@ -50,10 +50,9 @@ TestingGameVariant g_tests[] = {
    TestingGameVariant("Slayer",           L"slayer.bin"),
    TestingGameVariant("Stockpile",        L"stockpile.bin"),
    TestingGameVariant("Territories",      L"territories.bin"),
+   TestingGameVariant("Invasion (Boneyard)",   L"invasion_boneyard.bin"),
+   TestingGameVariant("Invasion (Breakpoint)", L"invasion_breakpoint.bin"),
 };
-
-LPCWSTR testFile  = L"alphazombies.bin";
-LPCWSTR testFile2 = L"tu_ctf_1flag.bin";
 
 int main() {
    for (int i = 0; i < std::extent<decltype(g_tests)>::value; i++)
