@@ -5,9 +5,9 @@ namespace Megalo {
    class OpcodeArgValueVector3 : public OpcodeArgValue {
       public:
          struct {
-            int8_t x;
-            int8_t y;
-            int8_t z;
+            int8_t x = 0;
+            int8_t y = 0;
+            int8_t z = 0;
          } value; // loaded value
          //
          static OpcodeArgValue* factory(cobb::bitstream&) {

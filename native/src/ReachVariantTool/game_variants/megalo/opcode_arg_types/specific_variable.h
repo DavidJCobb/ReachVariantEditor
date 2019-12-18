@@ -37,6 +37,10 @@ namespace Megalo {
                case variable_type::team:   type = "Team";   break;
                case variable_type::timer:  type = "Timer";  break;
             }
+            if (this->index == -1) {
+               cobb::sprintf(out, "the %s in question's %s[None] variable", owner, type);
+               return;
+            }
             cobb::sprintf(out, "the %s in question's %s[%u] variable", owner, type, this->index);
          }
    };

@@ -13,7 +13,7 @@ namespace Megalo {
    };
    class OpcodeArgValueShape : public OpcodeArgValueScalar {
       public:
-         ShapeType shapeType;
+         ShapeType shapeType = ShapeType::none;
          OpcodeArgValueScalar radius; // or "width"
          OpcodeArgValueScalar length;
          OpcodeArgValueScalar top;

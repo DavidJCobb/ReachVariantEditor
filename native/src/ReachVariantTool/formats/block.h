@@ -11,14 +11,14 @@ class ReachFileBlock {
       struct {
          uint32_t signature;
          uint32_t size;
-         uint16_t version;
-         uint16_t flags;
+         uint16_t version = 0;
+         uint16_t flags   = 0;
       } expected;
       struct {
-         uint32_t signature;
-         uint32_t size;
-         uint16_t version;
-         uint16_t flags;
+         uint32_t signature = 0;
+         uint32_t size      = 0;
+         uint16_t version   = 0;
+         uint16_t flags     = 0;
       } found;
       //
       ReachFileBlock(uint32_t sig, uint32_t size) {

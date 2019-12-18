@@ -191,7 +191,6 @@
     <ClInclude Include="helpers\bitset.h" />
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
-    <ClInclude Include="helpers\debugging.h" />
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />

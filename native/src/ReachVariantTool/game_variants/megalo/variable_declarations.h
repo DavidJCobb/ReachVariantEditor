@@ -1,5 +1,6 @@
 #pragma once
 #include "variables_and_scopes.h"
+#include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
 #include "../../helpers/bitstream.h"
 
@@ -10,6 +11,18 @@ namespace Megalo {
       high,
       default,
    };
+   enum class const_team : int8_t {
+      none = -1,
+      team_1,
+      team_2,
+      team_3,
+      team_4,
+      team_5,
+      team_6,
+      team_7,
+      team_8,
+      neutral,
+   };
    //
    class ScalarVariableDeclaration {
       public:
@@ -17,13 +30,11 @@ namespace Megalo {
          //
          network_type networking = network_type::default;
          OpcodeArgValueScalar initial;
-         bool flag = false;
          //
          void read(cobb::bitstream& stream) noexcept {
             if (!this->initial.read(stream))
                return;
             this->networking = (network_type)stream.read_bits(2);
-            stream.read(this->flag);
          }
    };
    class PlayerVariableDeclaration {
@@ -31,11 +42,9 @@ namespace Megalo {
          using network_type = variable_network_priority;
          //
          network_type networking = network_type::default;
-         bool flag = false;
          //
          void read(cobb::bitstream& stream) noexcept {
             this->networking = (network_type)stream.read_bits(2);
-            stream.read(this->flag);
          }
    };
    class ObjectVariableDeclaration {
@@ -43,11 +52,9 @@ namespace Megalo {
          using network_type = variable_network_priority;
          //
          network_type networking = network_type::default;
-         bool flag = false;
          //
          void read(cobb::bitstream& stream) noexcept {
             this->networking = (network_type)stream.read_bits(2);
-            stream.read(this->flag);
          }
    };
    class TeamVariableDeclaration {
@@ -55,13 +62,11 @@ namespace Megalo {
          using network_type = variable_network_priority;
          //
          network_type networking = network_type::default;
-         bool    flag    = false;
-         uint8_t initial = 0;
+         const_team   initial    = const_team::none;
          //
          void read(cobb::bitstream& stream) noexcept {
-            this->initial    = stream.read_bits<uint8_t>(4);
+            this->initial    = (const_team)(stream.read_bits(cobb::bitcount(8)) - 1);
             this->networking = (network_type)stream.read_bits(2);
-            stream.read(this->flag);
          }
    };
    class TimerVariableDeclaration {
@@ -87,25 +92,16 @@ namespace Megalo {
          void read(cobb::bitstream& stream) noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
             //
-            this->scalars.resize(stream.read_bits(scope.count_bits(variable_type::scalar)));
-            for (auto& var : this->scalars)
-               var.read(stream);
-            //
-            this->players.resize(stream.read_bits(scope.count_bits(variable_type::player)));
-            for (auto& var : this->players)
-               var.read(stream);
-            //
-            this->objects.resize(stream.read_bits(scope.count_bits(variable_type::object)));
-            for (auto& var : this->objects)
-               var.read(stream);
-            //
-            this->teams.resize(stream.read_bits(scope.count_bits(variable_type::team)));
-            for (auto& var : this->teams)
-               var.read(stream);
-            //
-            this->timers.resize(stream.read_bits(scope.count_bits(variable_type::timer)));
-            for (auto& var : this->timers)
-               var.read(stream);
+            #define megalo_variable_declaration_set_read_type(name) \
+               this->##name##s.resize(stream.read_bits(scope.count_bits(variable_type::##name##))); \
+               for (auto& var : this->##name##s) \
+                  var.read(stream);
+            megalo_variable_declaration_set_read_type(scalar);
+            megalo_variable_declaration_set_read_type(timer);
+            megalo_variable_declaration_set_read_type(team);
+            megalo_variable_declaration_set_read_type(player);
+            megalo_variable_declaration_set_read_type(object);
+            #undef megalo_variable_declaration_set_read_type
          }
    };
 }

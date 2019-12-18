@@ -6,7 +6,7 @@ namespace Megalo {
       public:
          const char* baseStringTrue  = "true";
          const char* baseStringFalse = "false";
-         bool value; // loaded value
+         bool value = false; // loaded value
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             stream.read(this->value);
@@ -28,7 +28,7 @@ namespace Megalo {
    };
    class OpcodeArgValueConstSInt8 : public OpcodeArgValue {
       public:
-         int8_t value; // loaded value
+         int8_t value = 0; // loaded value
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
             stream.read(this->value);

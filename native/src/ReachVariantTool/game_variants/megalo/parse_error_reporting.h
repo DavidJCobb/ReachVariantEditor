@@ -28,11 +28,11 @@ namespace Megalo {
          bad_opcode_id,
       };
       //
-      bool        signalled = false;
-      opcode_type opcode;
-      uint32_t    opcode_index;
-      uint32_t    opcode_arg_index;
-      what        cause;
+      bool        signalled        = false;
+      opcode_type opcode           = opcode_type::none;
+      uint32_t    opcode_index     = 0;
+      uint32_t    opcode_arg_index = 0;
+      what        cause            = what::none;
       //
       uint32_t    extra[10];
       //

@@ -13,11 +13,11 @@ namespace Megalo {
       this->blockType = (block_type)stream.read_bits(3);
       this->entry     = (trigger_type)stream.read_bits(3);
       if (this->blockType == block_type::for_each_object_with_label) {
-         this->labelIndex = stream.read_bits(cobb::bitcount(Limits::max_script_labels - 1)) - 1;
+         this->labelIndex = stream.read_bits(cobb::bitcount(Limits::max_script_labels)) - 1;
       }
-      this->raw.conditionStart = stream.read_bits(cobb::bitcount(Limits::max_conditions) - 1);
+      this->raw.conditionStart = stream.read_bits(cobb::bitcount(Limits::max_conditions - 1));
       this->raw.conditionCount = stream.read_bits(cobb::bitcount(Limits::max_conditions));
-      this->raw.actionStart = stream.read_bits(cobb::bitcount(Limits::max_actions) - 1);
+      this->raw.actionStart = stream.read_bits(cobb::bitcount(Limits::max_actions - 1));
       this->raw.actionCount = stream.read_bits(cobb::bitcount(Limits::max_actions));
       return true;
    }
@@ -28,18 +28,20 @@ namespace Megalo {
       this->opcodes.reserve(raw.actionCount + raw.conditionCount);
       temp.reserve(raw.actionCount);
       //
-      if (raw.actionStart >= 0 && raw.actionStart < actions.size()) {
+      assert(raw.actionStart < actions.size() && "Bad trigger first-action-index."); // TODO: fail with an error in-app instead of asserting
+      if (raw.actionStart >= 0) {
          size_t end = raw.actionStart + raw.actionCount;
-         if (end <= actions.size())
+         if (end <= actions.size()) // TODO: if (end) is too high, fail with an error
             for (size_t i = raw.actionStart; i < end; i++) {
                auto instance = new Action(actions[i]);
                this->opcodes.push_back(instance);
                temp.push_back(instance);
             }
       }
-      if (raw.conditionStart >= 0 && raw.conditionStart < conditions.size()) {
+      assert(raw.conditionStart < conditions.size() && "Bad trigger first-conditions-index."); // TODO: fail with an error in-app instead of asserting
+      if (raw.conditionStart >= 0) {
          size_t end = raw.conditionStart + raw.conditionCount;
-         if (end <= conditions.size())
+         if (end <= conditions.size()) // TODO: if (end) is too high, fail with an error
             for (size_t i = raw.conditionStart; i < end; i++) {
                auto& condition = conditions[i];
                if (condition.action >= raw.actionCount) {
@@ -99,10 +101,11 @@ namespace Megalo {
       }
       out += '\n';
       //
-      cobb::sprintf(line, "%Opcodes:\n", indent.c_str());
       out += line;
-      if (!this->opcodes.size())
-         out += "<No Opcodes>\n";
+      if (!this->opcodes.size()) {
+         out += indent;
+         out += "<Empty Trigger>";
+      }
       for (auto& opcode : this->opcodes) {
          auto condition = dynamic_cast<const Condition*>(opcode);
          if (condition) {

@@ -1,6 +1,5 @@
 #include "base.h"
 #include "../helpers/bitstream.h"
-#include "../helpers/debugging.h"
 
 #include "megalo/actions.h"
 #include "megalo/conditions.h"
@@ -226,9 +225,6 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
                break;
             }
          }
-         #if _DEBUG
-            cobb::try_to_keep_visible_in_debugger(conditions); // keep visible for __debugbreak in Megalo::ParseState::print
-         #endif
          Megalo::ParseState::print();
          if (!success) {
             return false;
@@ -242,9 +238,6 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
                break;
             }
          }
-         #if _DEBUG
-            cobb::try_to_keep_visible_in_debugger(conditions, actions); // keep visible for __debugbreak in Megalo::ParseState::print
-         #endif
          Megalo::ParseState::print();
          if (!success) {
             return false;

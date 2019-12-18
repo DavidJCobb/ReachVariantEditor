@@ -50,16 +50,16 @@ namespace Megalo {
          {}
          //
          const SmartEnum& baseEnum;
-         uint32_t baseOffset = 0;
+         uint32_t baseOffset = 0; // not currently applied
          //
          uint32_t value = 0; // loaded value
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->value = stream.read_bits(this->baseEnum.index_bits());
+            this->value = stream.read_bits(this->baseEnum.index_bits_with_offset(this->baseOffset)) - this->baseOffset;
             return true;
          }
          virtual void to_string(std::string& out) const noexcept override {
-            this->baseEnum.to_string(out, this->value);
+            this->baseEnum.to_string(out, this->value + this->baseOffset);
          }
    };
    class OpcodeArgValueBaseFlags : public OpcodeArgValue {

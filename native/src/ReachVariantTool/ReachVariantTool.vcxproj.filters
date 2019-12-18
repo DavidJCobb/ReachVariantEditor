@@ -162,9 +162,6 @@
     <ClInclude Include="game_variants\megalo\parse_error_reporting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helpers\debugging.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\megalo\trigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>

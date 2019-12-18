@@ -22,6 +22,11 @@ namespace Megalo {
                return 0;
             return cobb::bitcount(this->count - 1);
          }
+         constexpr inline int index_bits_with_offset(uint32_t offset) const noexcept {
+            if (!this->count)
+               return 0;
+            return cobb::bitcount(this->count + offset - 1);
+         }
          //
          void to_string(std::string& out, uint32_t value) const noexcept;
          //

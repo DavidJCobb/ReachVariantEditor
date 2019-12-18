@@ -13,7 +13,7 @@ namespace Megalo {
    };
    class OpcodeArgValueMeterParameters : public OpcodeArgValue {
       public:
-         MeterType type;
+         MeterType type = MeterType::none;
          OpcodeArgValueTimer  timer;
          OpcodeArgValueScalar numerator;
          OpcodeArgValueScalar denominator;
