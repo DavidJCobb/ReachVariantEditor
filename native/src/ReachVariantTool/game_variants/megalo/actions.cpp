@@ -4,6 +4,7 @@
 
 #define MEGALO_DISALLOW_NONE_ACTION 0
 #if _DEBUG
+   #undef  MEGALO_DISALLOW_NONE_ACTION
    #define MEGALO_DISALLOW_NONE_ACTION 1
 #endif
 
@@ -869,20 +870,20 @@ namespace Megalo {
       ),
       ActionFunction( // 93
          "Add Weapon To",
-         "",
-         "Add weapon of type %2 to player %1 using mode %3.",
+         "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
+         "Add weapon of type %2 to %1 using mode %3.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
             OpcodeArgBase("weapon", OpcodeArgValueMPObjectTypeIndex::factory),
             OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::factory),
          }
       ),
       ActionFunction( // 94
          "Remove Weapon From",
-         "",
+         "Take a weapon from any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
          "Remove %1's %2 weapon, %3.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
             OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::factory),
             OpcodeArgBase("delete", OpcodeArgValueConstBool::factory, "and delete it", "but do not delete it"),
          }
