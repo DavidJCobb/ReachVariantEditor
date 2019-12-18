@@ -43,11 +43,13 @@ class ReachString {
       //
       // Strings are encoded as UTF-8.
       //
-      std::array<int, reach::language_count>         offsets;
+      mutable std::array<int, reach::language_count> offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
       //
       void read_offsets(cobb::bitstream&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
+      void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
+      void write_strings(std::string& out) const noexcept;
       //
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
@@ -83,6 +85,7 @@ class ReachStringTable {
       void* _make_buffer(cobb::bitstream&) const noexcept;
    public:
       void read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
       //
       ReachString* get_entry(size_t index) noexcept {
          if (index < this->strings.size())

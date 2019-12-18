@@ -23,13 +23,18 @@ class ReachLoadout {
       cobb::bitnumber<4, uint8_t> grenadeCount;
       //
       void read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
 };
 class ReachLoadoutPalette {
    public:
       std::array<ReachLoadout, 5> loadouts;
       //
       void read(cobb::bitstream& stream) noexcept {
-         for (size_t i = 0; i < this->loadouts.size(); i++)
-            this->loadouts[i].read(stream);
+         for (auto& loadout : this->loadouts)
+            loadout.read(stream);
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         for (auto& loadout : this->loadouts)
+            loadout.write(stream);
       }
 };

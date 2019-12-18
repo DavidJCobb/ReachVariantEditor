@@ -8,3 +8,11 @@ void ReachLoadout::read(cobb::bitstream& stream) noexcept {
    this->ability.read(stream);
    this->grenadeCount.read(stream);
 }
+void ReachLoadout::write(cobb::bitwriter& stream) const noexcept {
+   this->visible.write(stream);
+   this->nameIndex.write(stream);
+   this->weaponPrimary.write(stream);
+   this->weaponSecondary.write(stream);
+   this->ability.write(stream);
+   this->grenadeCount.write(stream);
+}

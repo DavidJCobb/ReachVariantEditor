@@ -89,7 +89,7 @@ namespace cobb {
       if (old)
          free(old);
    }
-   void bitwriter::write(uint64_t value, int bits, int& remaining) noexcept {
+   void bitwriter::_write(uint64_t value, int bits, int& remaining) noexcept {
       this->_ensure_room_for(bits);
       uint8_t& target = this->_buffer[this->get_bytepos()];
       int shift = this->get_bitshift();

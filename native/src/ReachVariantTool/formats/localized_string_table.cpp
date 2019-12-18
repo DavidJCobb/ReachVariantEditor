@@ -20,6 +20,40 @@ void ReachString::read_strings(void* buffer) noexcept {
       this->strings[i].assign((const char*)((std::uintptr_t)buffer + off));
    }
 }
+void ReachString::write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept {
+   for (auto offset : this->offsets) {
+      if (offset == -1) {
+         stream.write(0, 1);
+         continue;
+      }
+      stream.write(1, 1);
+      stream.write(offset, table.offset_bitlength);
+   }
+}
+void ReachString::write_strings(std::string& out) const noexcept {
+   for (size_t i = 0; i < this->offsets.size(); i++) {
+      auto& s = this->strings[i];
+      if (s.empty()) {
+         this->offsets[i] = -1;
+         continue;
+      }
+      if (i > 0) {
+         //
+         // If two consecutive strings are identical, have them overlap.
+         //
+         // TODO: Make all identical strings across the string table overlap
+         //
+         auto& l = this->strings[i - 1];
+         if (s == l) {
+            this->offsets[i] = this->offsets[i - 1];
+            continue;
+         }
+      }
+      this->offsets[i] = out.size();
+      out += s;
+      out += '\0';
+   }
+}
 
 void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
@@ -74,6 +108,44 @@ void ReachStringTable::read(cobb::bitstream& stream) noexcept {
          for (size_t i = 0; i < count; i++)
             this->strings[i].read_strings(buffer);
          free(buffer);
+      }
+   }
+}
+void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
+   stream.write(this->strings.size(), this->count_bitlength);
+   if (this->strings.size()) {
+      std::string combined; // UTF-8 buffer holding all string data including null terminators
+      for (auto& string : this->strings) {
+         string.write_strings(combined);
+         string.write_offsets(stream, *this);
+      }
+      uint32_t uncompressed_size = combined.size();
+      if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+         printf("WARNING: TOTAL STRING DATA IS TOO LARGE");
+         __debugbreak();
+         assert(false && "String table cannot hold data this large");
+      }
+      stream.write(uncompressed_size, this->buffer_size_bitlength);
+      //
+      bool should_compress = true; // TODO: logic
+      stream.write(should_compress, 1);
+      if (should_compress) {
+         auto bound = compressBound(uncompressed_size);
+         auto buffer = malloc(bound);
+         if (!buffer) {
+            printf("WARNING: FAILED TO ALLOCATE STORAGE FOR COMPRESSED STRING DATA!");
+            __debugbreak();
+            assert(false && "Insufficient memory to compress string data.");
+         }
+         uint32_t compressed_size = 0;
+         compress((Bytef*)buffer, (uLongf*)&compressed_size, (Bytef*)combined.data(), uncompressed_size);
+         stream.write(compressed_size, this->buffer_size_bitlength);
+         stream.write(uncompressed_size, this->buffer_size_bitlength);
+         for (size_t i = 0; i < compressed_size; i++)
+            stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+      } else {
+         for (size_t i = 0; i < uncompressed_size; i++)
+            stream.write((uint8_t)combined[i]);
       }
    }
 }

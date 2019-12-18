@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "../helpers/bitstream.h"
+#include "../helpers/bitwriter.h"
 #include "../helpers/bitnumber.h"
 #include "../formats/localized_string_table.h"
 
@@ -292,6 +293,7 @@ class ReachPlayerTraits {
       } sensors;
       //
       void read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
 };
 
 class ReachMegaloPlayerTraits : public ReachPlayerTraits {
@@ -305,6 +307,11 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         this->nameIndex.write(stream);
+         this->descIndex.write(stream);
+         ReachPlayerTraits::write(stream);
       }
       void postprocess_string_indices(ReachStringTable& table) noexcept {
          this->name = table.get_entry(this->nameIndex);

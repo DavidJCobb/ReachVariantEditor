@@ -98,6 +98,7 @@ class ReachTeamData {
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
       void read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
 };
 
 class ReachBlockMPVR {
@@ -112,7 +113,7 @@ class ReachBlockMPVR {
       struct {
          struct {
             cobb::bitnumber<4, uint8_t> flags;
-            cobb::bytenumber<uint8_t> timeLimit;
+            cobb::bytenumber<uint8_t>   timeLimit;
             cobb::bitnumber<5, uint8_t> roundLimit;
             cobb::bitnumber<4, uint8_t> roundsToWin;
             cobb::bitnumber<7, uint8_t> suddenDeathTime;
@@ -205,6 +206,7 @@ class ReachBlockMPVR {
       ReachFileBlockRemainder remainingData;
       //
       bool read(cobb::bitstream&);
+      void write(cobb::bitwriter& stream) const noexcept;
 };
 
 class GameVariant {
@@ -246,6 +248,7 @@ class GameVariant {
       void write(cobb::bitwriter& stream) const noexcept {
          this->blamHeader.write(stream);
          this->contentHeader.write(stream);
+         this->multiplayer.write(stream);
 
          #if !_DEBUG
             static_assert(false, "FINISH ME");

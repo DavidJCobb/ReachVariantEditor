@@ -18,6 +18,7 @@ namespace cobb {
          uint32_t _bitpos = 0;
          //
          void _ensure_room_for(unsigned int bitcount) noexcept;
+         void _write(uint64_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
          //
       public:
          ~bitwriter();
@@ -42,14 +43,10 @@ namespace cobb {
          }
          void pad_to_bytepos(uint32_t bytepos) noexcept;
          void resize(uint32_t size) noexcept;
-         void write(uint64_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
-         inline void write(uint64_t value, int bits) noexcept {
-            this->write(value, bits, bits);
-         }
-         inline void write(int64_t value, int bits, _is_signed_sentinel) noexcept {
-            if (value < 0)
+         inline void write(int64_t value, int bits, bool is_signed = false) noexcept {
+            if (is_signed && value < 0)
                value |= ((int64_t)1 << (bits - 1));
-            this->write(value, bits, bits);
+            this->_write(value, bits, bits);
          }
          //
          template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
@@ -82,14 +79,14 @@ namespace cobb {
             this->write(value ? 1 : 0, 1);
          }
          //
-         void write_string(const char* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept { // writes as bits; stops early after null char
+         void write_string(const char* value, int maxlength) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {
-               this->write(value[i], save_endianness);
+               this->write(value[i]);
                if (!value[i])
                   break;
             }
          }
-         void write_wstring(const wchar_t* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept { // writes as bits; stops early after null char
+         void write_wstring(const wchar_t* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::big) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {
                this->write(value[i], save_endianness);
                if (!value[i])

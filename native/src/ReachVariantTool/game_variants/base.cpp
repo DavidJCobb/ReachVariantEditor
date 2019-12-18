@@ -26,7 +26,6 @@ bool GameVariantHeader::read(cobb::bitstream& stream) noexcept {
    this->build.major = 0; // not in mpvr
    this->build.minor = 0; // not in mpvr
    this->contentType.read(stream);
-   stream.pad(3);
    this->fileLength.read(stream);
    this->unk08.read(stream);
    this->unk10.read(stream);
@@ -35,7 +34,6 @@ bool GameVariantHeader::read(cobb::bitstream& stream) noexcept {
    this->activity.read(stream);
    this->gameMode.read(stream);
    this->engine.read(stream);
-   stream.pad(1);
    this->unk2C.read(stream);
    this->engineCategory.read(stream);
    this->createdBy.read(stream);
@@ -75,27 +73,31 @@ bool GameVariantHeader::read(cobb::bytestream& stream) noexcept {
    return true;
 }
 void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
-   this->contentType.write_bits(stream);
+   this->contentType.write(stream);
    #if _DEBUG
-      this->fileLength.write_bits(stream);
+      this->fileLength.write(stream);
    #else
       static_assert(false, "TODO: Write out a dummy file length and then, after the file is fully written, come back and overwrite that length with a real value.");
    #endif
-   this->unk08.write_bits(stream);
-   this->unk10.write_bits(stream);
-   this->unk18.write_bits(stream);
-   this->unk20.write_bits(stream);
-   this->activity.write_bits(stream);
-   this->gameMode.write_bits(stream);
-   this->engine.write_bits(stream);
-   this->unk2C.write_bits(stream);
-   this->engineCategory.write_bits(stream);
+   this->unk08.write(stream);
+   this->unk10.write(stream);
+   this->unk18.write(stream);
+   this->unk20.write(stream);
+   this->activity.write(stream);
+   this->gameMode.write(stream);
+   this->engine.write(stream);
+   this->unk2C.write(stream);
+   this->engineCategory.write(stream);
+   printf("== Writer bytepos before MPVR created-by: %08X\n", stream.get_bytepos());
    this->createdBy.write_bits(stream);
+   printf("== Writer bytepos before MPVR modified-by: %08X\n", stream.get_bytepos());
    this->modifiedBy.write_bits(stream);
+   printf("== Writer bytepos before MPVR title: %08X\n", stream.get_bytepos());
    stream.write_wstring(this->title,       128); // big-endian
+   printf("== Writer bytepos before MPVR desc: %08X\n", stream.get_bytepos());
    stream.write_wstring(this->description, 128); // big-endian
    if (this->contentType == 6) {
-      this->engineIcon.write_bits(stream);
+      this->engineIcon.write(stream);
    }
    if (this->activity == 2)
       assert(false && "Hopper ID writing not implemented!"); // TODO: hopper ID
@@ -138,6 +140,16 @@ void ReachTeamData::read(cobb::bitstream& stream) noexcept {
    this->colorSecondary.read(stream);
    this->colorText.read(stream);
    this->fireteamCount.read(stream);
+}
+void ReachTeamData::write(cobb::bitwriter& stream) const noexcept {
+   this->flags.write(stream);
+   this->name.write(stream);
+   this->initialDesignator.write(stream);
+   this->spartanOrElite.write(stream);
+   this->colorPrimary.write(stream);
+   this->colorSecondary.write(stream);
+   this->colorText.write(stream);
+   this->fireteamCount.write(stream);
 }
 
 bool ReachBlockMPVR::read(cobb::bitstream& stream) {
@@ -368,4 +380,77 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       __debugbreak();
    #endif
    return true;
+}
+void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
+   this->header.write(stream);
+   stream.write(this->hashSHA1);
+   stream.pad_bytes(8);
+   this->type.write(stream);
+   stream.write(this->encodingVersion);
+   stream.write(this->engineVersion);
+   this->variantHeader.write_bits(stream);
+   this->flags.write(stream);
+   printf("== Writer bytepos before options: %08X\n", stream.get_bytepos());
+   {
+      auto& o = this->options;
+      auto& m = o.misc;
+      auto& r = o.respawn;
+      auto& s = o.social;
+      auto& a = o.map;
+      auto& t = o.team;
+      auto& l = o.loadouts;
+      //
+      m.flags.write(stream);
+      m.timeLimit.write(stream);
+      m.roundLimit.write(stream);
+      m.roundsToWin.write(stream);
+      m.suddenDeathTime.write(stream);
+      m.gracePeriod.write(stream);
+      printf("== Writer bytepos after misc options: %08X\n", stream.get_bytepos());
+      //
+      r.flags.write(stream);
+      r.livesPerRound.write(stream);
+      r.teamLivesPerRound.write(stream);
+      r.respawnTime.write(stream);
+      r.suicidePenalty.write(stream);
+      r.betrayalPenalty.write(stream);
+      r.respawnGrowth.write(stream);
+      r.loadoutCamTime.write(stream);
+      r.traitsDuration.write(stream);
+      r.traits.write(stream);
+      printf("== Writer bytepos after respawn options: %08X\n", stream.get_bytepos());
+      //
+      s.observers.write(stream);
+      s.teamChanges.write(stream);
+      s.flags.write(stream);
+      printf("== Writer bytepos after social options: %08X\n", stream.get_bytepos());
+      //
+      a.flags.write(stream);
+      a.baseTraits.write(stream);
+      a.weaponSet.write(stream);
+      a.vehicleSet.write(stream);
+      a.powerups.red.traits.write(stream);
+      a.powerups.blue.traits.write(stream);
+      a.powerups.yellow.traits.write(stream);
+      a.powerups.red.duration.write(stream);
+      a.powerups.blue.duration.write(stream);
+      a.powerups.yellow.duration.write(stream);
+      printf("== Writer bytepos after map options: %08X\n", stream.get_bytepos());
+      //
+      t.scoring.write(stream);
+      t.species.write(stream);
+      t.designatorSwitchType.write(stream);
+      for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
+         t.teams[i].write(stream);
+      printf("== Writer bytepos after team options: %08X\n", stream.get_bytepos());
+      //
+      l.flags.write(stream);
+      for (size_t i = 0; i < l.palettes.size(); i++)
+         l.palettes[i].write(stream);
+      printf("== Writer bytepos after loadout options: %08X\n", stream.get_bytepos());
+   }
+   #if !_DEBUG
+      static_assert(false, "FINISH ME");
+   #endif
+
 }

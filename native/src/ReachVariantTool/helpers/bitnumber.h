@@ -6,7 +6,7 @@
 #include "type_traits.h"
 
 namespace cobb {
-   enum class bitnumber_no_presence_bit {};
+   struct bitnumber_no_presence_bit { static constexpr bool value = false; };
 
    /*
       bitnumber<4, sint8_t, false, 0, std::true_type, -1>  jumpHeight; // a bit indicates whether a 4-bit value is present; if that bit is true,  then load the value
@@ -136,6 +136,18 @@ namespace cobb {
          template<> bool _is_present<bitnumber_no_presence_bit>(cobb::bitstream& stream) {
             return true;
          }
+         //
+         bool _write_presence(cobb::bitwriter& stream) const noexcept {
+            if (std::is_same_v<presence_bit, bitnumber_no_presence_bit>)
+               return true;
+            bool presence = presence_bit::value;
+            if (this->value == if_absent) {
+               stream.write(!presence, 1);
+               return false;
+            }
+            stream.write(presence, 1);
+            return true;
+         }
       public:
          void read(cobb::bitstream& stream) noexcept {
             if (!this->_is_present<presence_bit>(stream))
@@ -152,8 +164,13 @@ namespace cobb {
          void read(cobb::bytestream& stream) noexcept {
             stream.read(this->value);
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            if (!this->_write_presence(stream))
+               return;
+            stream.write((underlying_int)this->value + value_offset, bitcount, std::is_signed_v<underlying_type>);
+         }
          void write_bits(cobb::bitwriter& stream) const noexcept {
-            stream.write((underlying_int)this->value, bitcount);
+            this->write(stream);
          }
          void write_bytes(cobb::bitwriter& stream) const noexcept {
             stream.write((underlying_int)this->value);
@@ -208,6 +225,15 @@ namespace cobb {
          }
          void read(cobb::bytestream& stream) noexcept {
             stream.read(this->value);
+         }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write(this->value);
+         }
+         void write_bits(cobb::bitwriter& stream) const noexcept {
+            stream.write(this->value);
+         }
+         void write_bytes(cobb::bitwriter& stream) const noexcept {
+            stream.write((uint8_t)this->value);
          }
          //
          operator underlying_type() const noexcept { return this->value; };
