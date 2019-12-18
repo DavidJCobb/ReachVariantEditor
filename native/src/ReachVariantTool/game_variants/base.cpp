@@ -271,7 +271,13 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
             __debugbreak();
          #endif
 
-         // game stats
+         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
+         this->scriptContent.stats.resize(count);
+         for (int i = 0; i < count; i++) {
+            this->scriptContent.stats[i].read(stream);
+            this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
+         }
+
          // variable declarations
          // HUD widget declarations
          if (!this->scriptContent.entryPoints.read(stream))

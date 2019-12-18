@@ -10,6 +10,7 @@
 #include "../helpers/files.h"
 #include "loadouts.h"
 #include "map_permissions.h"
+#include "megalo_game_stats.h"
 #include "megalo_options.h"
 #include "megalo/trigger.h"
 #include "option_toggles.h"
@@ -179,6 +180,7 @@ class ReachBlockMPVR {
          } raw;
          std::vector<Megalo::Trigger> triggers;
          Megalo::TriggerEntryPoints entryPoints;
+         std::vector<ReachMegaloGameStat> stats;
       } scriptContent;
       //
       // KSoft.Tool code suggests that megalo data goes here, but if 

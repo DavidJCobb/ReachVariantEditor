@@ -78,6 +78,8 @@ namespace Megalo {
       //
       cobb::sprintf(line, "%sConditions:\n", indent.c_str());
       out += line;
+      if (!this->conditions.size())
+         out += "   <No Conditions>\n";
       for (auto& opcode : this->conditions) {
          cobb::sprintf(line, "%s   ", indent.c_str());
          out += line;
@@ -88,6 +90,8 @@ namespace Megalo {
       //
       cobb::sprintf(line, "%sActions:\n", indent.c_str());
       out += line;
+      if (!this->actions.size())
+         out += "   <No Actions>\n";
       for (auto& opcode : this->actions) {
          if (opcode.function == &actionFunction_runNestedTrigger) {
             cobb::sprintf(line, "%s   Run nested trigger:\n", indent.c_str());

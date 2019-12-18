@@ -3,7 +3,6 @@
 #include <cstdint>
 
 namespace cobb {
-   //_printf_p
    void sprintf(std::string& out, const char* format, ...) {
       va_list args;
       va_start(args, format);
@@ -20,19 +19,20 @@ namespace cobb {
       }
       uint32_t s = 256;
       char* b = (char*)malloc(s);
-      uint32_t r = vsprintf_s(b, s, format, args);
+      uint32_t r = vsnprintf(b, s, format, args);
       while (r > s) {
          va_copy(args, safe);
          s += 20;
          free(b);
          b = (char*)malloc(s);
-         r = vsprintf_s(b, s, format, args);
+         r = vsnprintf(b, s, format, args);
       }
       out = b;
       free(b);
       va_end(safe);
       va_end(args);
    };
+   //_printf_p
    void sprintfp(std::string& out, const char* format, ...) {
       va_list args;
       va_start(args, format);
