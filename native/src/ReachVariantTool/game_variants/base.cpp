@@ -281,29 +281,34 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
             for (auto& widget : widgets)
                widget.read(stream);
          }
+         if (!this->scriptContent.entryPoints.read(stream))
+            return false;
+         this->scriptContent.usedMPObjectTypes.read(stream);
          //
+         {  // Forge labels
+            size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
+            this->scriptContent.forgeLabels.resize(count);
+            for (auto& label : this->scriptContent.forgeLabels) {
+               label.read(stream);
+               label.postprocess_string_indices(this->scriptData.strings);
+            }
+         }
+
          #if _DEBUG
             __debugbreak();
          #endif
-
-         // variable declarations
-         // HUD widget declarations
-         if (!this->scriptContent.entryPoints.read(stream))
-            return false;
-         // object type references
-         // Forge labels
       }
 
       // all conditions (10-bit count) [DONE]
       // all actions    (11-bit count) [DONE]
       // all triggers [DONE]
       // game statistics [DONE]
-      // global variable declarations
-      // player variable declarations
-      // object variable declarations
-      // team   variable declarations
-      // HUD widget definitions
-      // trigger entry points
+      // global variable declarations [DONE]
+      // player variable declarations [DONE]
+      // object variable declarations [DONE]
+      // team   variable declarations [DONE]
+      // HUD widget definitions [DONE]
+      // trigger entry points [DONE]
       // object type references (bitset)
       // object filters (i.e. Forge labels?)
 

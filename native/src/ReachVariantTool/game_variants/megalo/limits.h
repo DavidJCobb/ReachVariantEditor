@@ -16,4 +16,18 @@ namespace Megalo {
       constexpr int max_triggers = 320;
       constexpr int max_variant_strings = 112;
    }
+   enum class const_team : int8_t {
+      none = -1,
+      team_1,
+      team_2,
+      team_3,
+      team_4,
+      team_5,
+      team_6,
+      team_7,
+      team_8,
+      neutral,
+      //
+      _count = 10,
+   };
 }

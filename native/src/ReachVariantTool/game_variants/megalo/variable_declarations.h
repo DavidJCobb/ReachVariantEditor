@@ -1,4 +1,5 @@
 #pragma once
+#include "limits.h"
 #include "variables_and_scopes.h"
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
@@ -10,18 +11,6 @@ namespace Megalo {
       low,
       high,
       default,
-   };
-   enum class const_team : int8_t {
-      none = -1,
-      team_1,
-      team_2,
-      team_3,
-      team_4,
-      team_5,
-      team_6,
-      team_7,
-      team_8,
-      neutral,
    };
    //
    class ScalarVariableDeclaration {

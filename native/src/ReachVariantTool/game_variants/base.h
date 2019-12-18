@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include <vector>
+#include "../formats/bitset.h"
 #include "../formats/block.h"
 #include "../formats/content_author.h"
 #include "../formats/localized_string_table.h"
@@ -12,10 +13,10 @@
 #include "map_permissions.h"
 #include "megalo_game_stats.h"
 #include "megalo_options.h"
+#include "megalo/forge_label.h"
 #include "megalo/trigger.h"
 #include "megalo/variable_declarations.h"
 #include "megalo/widgets.h"
-#include "option_toggles.h"
 #include "player_rating_params.h"
 #include "player_traits.h"
 #include "tu1_options.h"
@@ -190,6 +191,8 @@ class ReachBlockMPVR {
             Megalo::VariableDeclarationSet team   = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
          } variables;
          std::vector<Megalo::HUDWidgetDeclaration> widgets;
+         ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
+         std::vector<Megalo::ReachForgeLabel> forgeLabels;
       } scriptContent;
       //
       // KSoft.Tool code suggests that megalo data goes here, but if 

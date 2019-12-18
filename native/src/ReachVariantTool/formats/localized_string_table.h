@@ -23,7 +23,8 @@ namespace reach {
    constexpr int language_count = (int)language::polish + 1;
 };
 
-using MegaloStringIndex = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
+using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
+using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, false, 1>;
 
 class ReachStringTable;
 

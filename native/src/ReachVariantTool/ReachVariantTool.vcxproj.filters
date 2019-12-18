@@ -72,9 +72,6 @@
     <ClInclude Include="game_variants\player_rating_params.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\option_toggles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\bitset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -174,6 +171,12 @@
     <ClInclude Include="game_variants\megalo\widgets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="formats\bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\megalo\forge_label.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -258,6 +261,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\megalo_game_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\megalo\forge_label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
