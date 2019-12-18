@@ -177,6 +177,9 @@
     <ClInclude Include="game_variants\megalo\forge_label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\endianness.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -264,6 +267,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\megalo\forge_label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\endianness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

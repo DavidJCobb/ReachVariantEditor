@@ -194,17 +194,8 @@ class ReachBlockMPVR {
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
          std::vector<Megalo::ReachForgeLabel> forgeLabels;
       } scriptContent;
-      //
-      // KSoft.Tool code suggests that megalo data goes here, but if 
-      // that's true, then how come we seem to be getting perfect TU 
-      // data as-is? A non-TU variant had 0.76 bloom, a TU variant 
-      // had 0.65, and that makes the TU variant 85% of the other.
-      //
-      // TODO: Return to the JavaScript-based prototype for now: 
-      // write code to load Megalo data in full, try loading it from 
-      // this spot in the file, and see what happens.
-      //
       ReachGameVariantTU1Options titleUpdateData;
+      ReachFileBlockRemainder remainingData;
       //
       bool read(cobb::bitstream&);
 };
@@ -214,19 +205,35 @@ class GameVariant {
       BlamHeader     blamHeader;
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
+      std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
       //
       bool read(cobb::mapped_file& file) {
          cobb::bytestream bytes(file);
          cobb::bitstream  bits(file);
          //
-         if (!this->blamHeader.read(bits))
+         if (!this->blamHeader.read(bits)) {
             printf("FAILED to read (_blf).\n");
+            return false;
+         }
          bytes.offset = bits.offset / 8;
-         if (!this->contentHeader.read(bytes))
+         if (!this->contentHeader.read(bytes)) {
             printf("FAILED to read (chdr).\n");
+            return false;
+         }
          bits.offset = bytes.offset * 8;
-         if (!this->multiplayer.read(bits))
+         if (!this->multiplayer.read(bits)) {
             printf("FAILED to read (mpvr).\n");
+            return false;
+         }
+         //
+         bytes.offset = bits.get_bytepos();
+         while (file.is_in_bounds(bytes.offset, 0)) {
+            auto& block = this->unknownBlocks.emplace_back();
+            if (!block.read(bytes) || !block.header.found.signature) {
+               this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
+               break;
+            }
+         }
          return true;
       }
 };

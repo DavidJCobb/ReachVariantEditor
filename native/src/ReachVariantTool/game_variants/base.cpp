@@ -81,7 +81,10 @@ void ReachTeamData::read(cobb::bitstream& stream) noexcept {
 bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    Megalo::ParseState::reset();
    //
-   this->header.read(stream);
+   if (!this->header.read(stream)) {
+      printf("Failed to read MPVR block header.\n");
+      return false;
+   }
    stream.read(this->hashSHA1);
    stream.skip(8 * 8); // skip eight bytes
    this->type.read(stream);
@@ -293,35 +296,14 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
                label.postprocess_string_indices(this->scriptData.strings);
             }
          }
-
-         #if _DEBUG
-            __debugbreak();
-         #endif
       }
-
-      // all conditions (10-bit count) [DONE]
-      // all actions    (11-bit count) [DONE]
-      // all triggers [DONE]
-      // game statistics [DONE]
-      // global variable declarations [DONE]
-      // player variable declarations [DONE]
-      // object variable declarations [DONE]
-      // team   variable declarations [DONE]
-      // HUD widget definitions [DONE]
-      // trigger entry points [DONE]
-      // object type references (bitset)
-      // object filters (i.e. Forge labels?)
-
-      // NOTES:
-      //  - GameObjectFilters are Halo 4 only
-
-      //
-      // TODO: retain data and organize it (i.e. go from struct-of-arrays to array-of-structs, 
-      // with triggers actually containing their conditions and actions)
-      //
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.read(stream);
-
+   this->remainingData.read(stream, this->header.end());
+   //
+   #if _DEBUG
+      __debugbreak();
+   #endif
    return true;
 }

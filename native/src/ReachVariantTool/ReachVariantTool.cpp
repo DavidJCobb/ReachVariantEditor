@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include "game_variants/base.h"
+#include "helpers/endianness.h"
 #include "helpers/files.h"
 
 struct TestingGameVariant {
@@ -55,6 +56,14 @@ TestingGameVariant g_tests[] = {
 };
 
 int main() {
+   if (cobb::endian::native == cobb::endian::big) {
+      printf("Current processor is big-endian.\n");
+      printf("'ABCD' swapped to little-endian: %08X -> %08X\n", 'ABCD', cobb::to_little_endian(uint32_t('ABCD')));
+   } else {
+      printf("Current processor is little-endian.\n");
+      printf("'ABCD' swapped to big-endian: %08X -> %08X\n", 'ABCD', cobb::to_big_endian(uint32_t('ABCD')));
+   }
+   //
    for (int i = 0; i < std::extent<decltype(g_tests)>::value; i++)
       g_tests[i].execute();
    //
