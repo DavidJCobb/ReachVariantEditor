@@ -3,6 +3,12 @@
 #include "opcode_arg_types/all_indices.h"
 
 namespace Megalo {
+   Trigger::~Trigger() {
+      for (auto opcode : this->opcodes)
+         delete opcode;
+      this->opcodes.clear();
+   }
+   //
    bool Trigger::read(cobb::bitstream& stream) noexcept {
       this->blockType = (block_type)stream.read_bits(3);
       this->entry     = (trigger_type)stream.read_bits(3);
@@ -15,19 +21,36 @@ namespace Megalo {
       this->raw.actionCount = stream.read_bits(cobb::bitcount(Limits::max_actions));
       return true;
    }
-   void Trigger::postprocess_opcodes(const std::vector<Condition>& ac, const std::vector<Action>& aa) noexcept {
+   void Trigger::postprocess_opcodes(const std::vector<Condition>& conditions, const std::vector<Action>& actions) noexcept {
       auto& raw = this->raw;
-      if (raw.conditionStart >= 0 && raw.conditionStart < ac.size()) {
-         size_t end = raw.conditionStart + raw.conditionCount;
-         if (end <= ac.size())
-            for (size_t i = raw.conditionStart; i < end; i++)
-               this->conditions.push_back(ac[i]);
-      }
-      if (raw.actionStart >= 0 && raw.actionStart < ac.size()) {
+      std::vector<Action*> temp;
+      //
+      this->opcodes.reserve(raw.actionCount + raw.conditionCount);
+      temp.reserve(raw.actionCount);
+      //
+      if (raw.actionStart >= 0 && raw.actionStart < actions.size()) {
          size_t end = raw.actionStart + raw.actionCount;
-         if (end <= aa.size())
-            for (size_t i = raw.actionStart; i < end; i++)
-               this->actions.push_back(aa[i]);
+         if (end <= actions.size())
+            for (size_t i = raw.actionStart; i < end; i++) {
+               auto instance = new Action(actions[i]);
+               this->opcodes.push_back(instance);
+               temp.push_back(instance);
+            }
+      }
+      if (raw.conditionStart >= 0 && raw.conditionStart < conditions.size()) {
+         size_t end = raw.conditionStart + raw.conditionCount;
+         if (end <= conditions.size())
+            for (size_t i = raw.conditionStart; i < end; i++) {
+               auto& condition = conditions[i];
+               if (condition.action >= raw.actionCount) {
+                  this->opcodes.push_back(new Condition(condition));
+                  continue;
+               }
+               auto target = temp[condition.action];
+               auto it     = std::find(this->opcodes.begin(), this->opcodes.end(), target);
+               assert(it != this->opcodes.end() && "Action not present in the opcode list, even though we have to have inserted it?!");
+               this->opcodes.insert(it, new Condition(condition));
+            }
       }
    }
    void Trigger::to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept {
@@ -76,50 +99,53 @@ namespace Megalo {
       }
       out += '\n';
       //
-      cobb::sprintf(line, "%sConditions:\n", indent.c_str());
+      cobb::sprintf(line, "%Opcodes:\n", indent.c_str());
       out += line;
-      if (!this->conditions.size())
-         out += "   <No Conditions>\n";
-      for (auto& opcode : this->conditions) {
-         cobb::sprintf(line, "%s   ", indent.c_str());
-         out += line;
-         opcode.to_string(line);
-         out += line;
-         out += '\n';
-      }
-      //
-      cobb::sprintf(line, "%sActions:\n", indent.c_str());
-      out += line;
-      if (!this->actions.size())
-         out += "   <No Actions>\n";
-      for (auto& opcode : this->actions) {
-         if (opcode.function == &actionFunction_runNestedTrigger) {
-            cobb::sprintf(line, "%s   Run nested trigger:\n", indent.c_str());
+      if (!this->opcodes.size())
+         out += "<No Opcodes>\n";
+      for (auto& opcode : this->opcodes) {
+         auto condition = dynamic_cast<const Condition*>(opcode);
+         if (condition) {
+            cobb::sprintf(line, "%s[C] ", indent.c_str());
             out += line;
-            //
-            auto index = dynamic_cast<OpcodeArgValueTrigger*>(opcode.arguments[0]);
-            if (index) {
-               auto i = index->value;
-               if (i < 0 || i >= allTriggers.size()) {
-                  cobb::sprintf(line, "%s      <INVALID TRIGGER INDEX %d>\n", indent.c_str(), i);
-                  out += line;
-                  continue;
-               }
-               indent += "      ";
-               line.clear();
-               allTriggers[i].to_string(allTriggers, line, indent);
-               out += line;
-               indent.resize(indent.size() - 6);
-               continue;
-            }
-            out += "      <INVALID>\n";
+            opcode->to_string(line);
+            out += line;
+            out += '\n';
             continue;
          }
-         cobb::sprintf(line, "%s   ", indent.c_str());
-         out += line;
-         opcode.to_string(line);
-         out += line;
-         out += '\n';
+         auto action    = dynamic_cast<const Action*>(opcode);
+         if (action) {
+            if (action->function == &actionFunction_runNestedTrigger) {
+               cobb::sprintf(line, "%s[A] Run nested trigger:\n", indent.c_str());
+               out += line;
+               //
+               auto index = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
+               if (index) {
+                  auto i = index->value;
+                  if (i < 0 || i >= allTriggers.size()) {
+                     cobb::sprintf(line, "%s   <INVALID TRIGGER INDEX %d>\n", indent.c_str(), i);
+                     out += line;
+                     continue;
+                  }
+                  indent += "   ";
+                  line.clear();
+                  allTriggers[i].to_string(allTriggers, line, indent);
+                  out += line;
+                  indent.resize(indent.size() - 3);
+                  continue;
+               }
+               out += "   <INVALID>\n";
+               continue;
+            }
+            cobb::sprintf(line, "%s[A] ", indent.c_str());
+            out += line;
+            opcode->to_string(line);
+            out += line;
+            out += '\n';
+            continue;
+         }
+         out += indent;
+         out += "Opcode with unrecognized type!\n";
       }
    }
 }

@@ -32,7 +32,7 @@ namespace Megalo {
    extern std::array<ActionFunction, 99> actionFunctionList;
    extern const ActionFunction& actionFunction_runNestedTrigger;
 
-   class Action {
+   class Action : public Opcode {
       public:
          #if _DEBUG
             std::string debug_str;
@@ -40,7 +40,7 @@ namespace Megalo {
          const ActionFunction* function = nullptr;
          std::vector<OpcodeArgValue*> arguments;
          //
-         bool read(cobb::bitstream&) noexcept;
-         void to_string(std::string& out) const noexcept;
+         virtual bool read(cobb::bitstream&) noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
 }

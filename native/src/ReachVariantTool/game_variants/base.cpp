@@ -257,26 +257,41 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
             triggers[i].read(stream);
             triggers[i].postprocess_opcodes(conditions, actions);
          }
-         printf("\nFull script content:\n");
-         for (auto& trigger : triggers) {
+         printf("\nFull script content:");
+         for (size_t i = 0; i < triggers.size(); ++i) {
+            auto& trigger = triggers[i];
             if (trigger.entry == Megalo::trigger_type::subroutine)
                continue;
+            printf("\nTRIGGER #%d:\n", i);
             std::string out;
             trigger.to_string(triggers, out);
             printf(out.c_str());
          }
          //
-         #if _DEBUG
-            cobb::try_to_keep_visible_in_debugger(conditions, actions);
-            __debugbreak();
-         #endif
-
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
          this->scriptContent.stats.resize(count);
          for (int i = 0; i < count; i++) {
             this->scriptContent.stats[i].read(stream);
             this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
          }
+         //
+         {  // Script variable declarations
+            auto& v = this->scriptContent.variables;
+            v.global.read(stream);
+            v.player.read(stream);
+            v.object.read(stream);
+            v.team.read(stream);
+         }
+         {  // HUD widget declarations
+            auto& widgets = this->scriptContent.widgets;
+            widgets.resize(stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets)));
+            for (auto& widget : widgets)
+               widget.read(stream);
+         }
+         //
+         #if _DEBUG
+            __debugbreak();
+         #endif
 
          // variable declarations
          // HUD widget declarations
@@ -288,20 +303,8 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
 
       // all conditions (10-bit count) [DONE]
       // all actions    (11-bit count) [DONE]
-      // all triggers
-         // execution mode
-         // trigger type
-         // switch (execution mode)
-            // case object filter:
-               // object filter index
-            // case candy spawner:
-               // game object type (1 bit)
-               // object filter index
-         // first condition index (condition index bitlength; no presence bit or offset)
-         // condition count       (condition count bitlength)
-         // first action index (action index bitlength; no presence bit or offset)
-         // action count       (action count bitlength)
-      // game statistics
+      // all triggers [DONE]
+      // game statistics [DONE]
       // global variable declarations
       // player variable declarations
       // object variable declarations

@@ -13,6 +13,8 @@
 #include "megalo_game_stats.h"
 #include "megalo_options.h"
 #include "megalo/trigger.h"
+#include "megalo/variable_declarations.h"
+#include "megalo/widgets.h"
 #include "option_toggles.h"
 #include "player_rating_params.h"
 #include "player_traits.h"
@@ -181,6 +183,13 @@ class ReachBlockMPVR {
          std::vector<Megalo::Trigger> triggers;
          Megalo::TriggerEntryPoints entryPoints;
          std::vector<ReachMegaloGameStat> stats;
+         struct {
+            Megalo::VariableDeclarationSet global = Megalo::VariableDeclarationSet(Megalo::variable_scope::global);
+            Megalo::VariableDeclarationSet player = Megalo::VariableDeclarationSet(Megalo::variable_scope::player);
+            Megalo::VariableDeclarationSet object = Megalo::VariableDeclarationSet(Megalo::variable_scope::object);
+            Megalo::VariableDeclarationSet team   = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
+         } variables;
+         std::vector<Megalo::HUDWidgetDeclaration> widgets;
       } scriptContent;
       //
       // KSoft.Tool code suggests that megalo data goes here, but if 

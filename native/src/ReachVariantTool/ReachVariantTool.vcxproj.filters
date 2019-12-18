@@ -171,6 +171,12 @@
     <ClInclude Include="game_variants\megalo_game_stats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\megalo\variable_declarations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\megalo\widgets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

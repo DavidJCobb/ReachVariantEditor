@@ -7,6 +7,12 @@
 
 namespace Megalo {
    class OpcodeArgBase;
+
+   class Opcode { // base class for Condition and Action
+      public:
+         virtual bool read(cobb::bitstream&) noexcept = 0;
+         virtual void to_string(std::string& out) const noexcept = 0;
+   };
    
    class OpcodeArgValue {
       public:

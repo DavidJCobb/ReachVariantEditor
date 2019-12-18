@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <vector>
 #include "enums.h"
 
 namespace Megalo {
@@ -41,6 +42,17 @@ namespace Megalo {
          uint8_t max_objects;
          //
          const int which_bits() const noexcept { return this->list.index_bits(); }
+         const int count_bits(const variable_type vt) const noexcept {
+            switch (vt) {
+               case variable_type::scalar: return cobb::bitcount(this->max_scalars);
+               case variable_type::timer:  return cobb::bitcount(this->max_timers);
+               case variable_type::team:   return cobb::bitcount(this->max_teams);
+               case variable_type::player: return cobb::bitcount(this->max_players);
+               case variable_type::object: return cobb::bitcount(this->max_objects);
+            }
+            assert(false && "Unrecognized variable type.");
+            return 0;
+         }
          const int index_bits(const variable_type vt) const noexcept {
             switch (vt) {
                case variable_type::scalar: return cobb::bitcount(this->max_scalars - 1);

@@ -35,6 +35,8 @@ namespace Megalo {
 
    class Trigger {
       public:
+         ~Trigger();
+         //
          block_type   blockType  = block_type::normal;
          trigger_type entry      = trigger_type::normal;
          int32_t      labelIndex = -1; // Forge label index for block_type::for_each_object_with_label
@@ -52,8 +54,7 @@ namespace Megalo {
             uint32_t actionCount =  0;
          } raw;
          //
-         std::vector<Condition> conditions; // set up by postprocess_opcodes after read
-         std::vector<Action>    actions;    // set up by postprocess_opcodes after read
+         std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor
          //
          bool read(cobb::bitstream& stream) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;

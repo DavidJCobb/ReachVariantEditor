@@ -38,18 +38,18 @@ namespace Megalo {
    };
    extern std::array<ConditionFunction, 18> conditionFunctionList;
 
-   class Condition {
+   class Condition : public Opcode {
       public:
          #if _DEBUG
             std::string debug_str;
          #endif
          const ConditionFunction* function = nullptr;
-         bool     inverted = false;
-         uint16_t or_group = 0;
-         uint16_t action   = 0;
+         bool     inverted =  false;
+         uint16_t or_group =  0;
+         int16_t  action   = -1; // execute before this action
          std::vector<OpcodeArgValue*> arguments;
          //
-         bool read(cobb::bitstream&) noexcept;
-         void to_string(std::string& out) const noexcept;
+         virtual bool read(cobb::bitstream&) noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
 }

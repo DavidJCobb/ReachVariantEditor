@@ -179,6 +179,8 @@
     <ClInclude Include="game_variants\megalo\parse_error_reporting.h" />
     <ClInclude Include="game_variants\megalo\trigger.h" />
     <ClInclude Include="game_variants\megalo\variables_and_scopes.h" />
+    <ClInclude Include="game_variants\megalo\variable_declarations.h" />
+    <ClInclude Include="game_variants\megalo\widgets.h" />
     <ClInclude Include="game_variants\megalo_game_stats.h" />
     <ClInclude Include="game_variants\megalo_options.h" />
     <ClInclude Include="game_variants\option_toggles.h" />
