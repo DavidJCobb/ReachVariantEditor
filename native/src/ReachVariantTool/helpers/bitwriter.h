@@ -60,7 +60,7 @@ namespace cobb {
                v = cobb::to_big_endian(v);
             this->write(v, 32);
          }
-         void write(bool value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+         void write(bool value) noexcept {
             this->write(value ? 1 : 0, 1);
          }
          //

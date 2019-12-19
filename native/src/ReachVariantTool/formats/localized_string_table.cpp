@@ -3,6 +3,8 @@ extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 
+#define MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION 1
+
 void ReachString::read_offsets(cobb::bitstream& stream, ReachStringTable& table) noexcept {
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
@@ -31,24 +33,44 @@ void ReachString::write_offsets(cobb::bitwriter& stream, const ReachStringTable&
    }
 }
 void ReachString::write_strings(std::string& out) const noexcept {
+   #if MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION == 1
+      bool allEqual = true;
+      for (size_t i = 1; i < this->offsets.size(); i++) {
+         auto& a = this->strings[i - 1];
+         auto& b = this->strings[i];
+         if (a != b) {
+            allEqual = false;
+            break;
+         }
+      }
+      if (allEqual) {
+         for (auto& offset : this->offsets)
+            offset = 0;
+         out += this->strings[0];
+         out += '\0';
+         return;
+      }
+   #endif
    for (size_t i = 0; i < this->offsets.size(); i++) {
       auto& s = this->strings[i];
       if (s.empty()) {
          this->offsets[i] = -1;
          continue;
       }
-      if (i > 0) {
-         //
-         // If two consecutive strings are identical, have them overlap.
-         //
-         // TODO: Make all identical strings across the string table overlap
-         //
-         auto& l = this->strings[i - 1];
-         if (s == l) {
-            this->offsets[i] = this->offsets[i - 1];
-            continue;
+      #if MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION != 1
+         if (i > 0) {
+            //
+            // If two consecutive strings are identical, have them overlap.
+            //
+            // TODO: Make all identical strings across the string table overlap
+            //
+            auto& l = this->strings[i - 1];
+            if (s == l) {
+               this->offsets[i] = this->offsets[i - 1];
+               continue;
+            }
          }
-      }
+      #endif
       this->offsets[i] = out.size();
       out += s;
       out += '\0';
@@ -127,7 +149,7 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
       }
       stream.write(uncompressed_size, this->buffer_size_bitlength);
       //
-      bool should_compress = combined.size() >= 0x80; // TODO: better logic
+      bool should_compress = uncompressed_size >= 0x80; // TODO: better logic
       stream.write(should_compress, 1);
       if (should_compress) {
          auto bound = compressBound(uncompressed_size);
@@ -137,12 +159,23 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
             __debugbreak();
             assert(false && "Insufficient memory to compress string data.");
          }
-         uint32_t compressed_size = 0;
-         compress((Bytef*)buffer, (uLongf*)&compressed_size, (Bytef*)combined.data(), uncompressed_size);
+         uint32_t compressed_size = bound;
+         int result = compress((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size);
+         switch (result) {
+            case Z_OK:
+               break;
+            case Z_MEM_ERROR:
+               assert(false && "Memory error occurred when trying to compress string table.\n");
+               break;
+            case Z_BUF_ERROR:
+               assert(false && "Insufficient buffer space when trying to compress string table.\h");
+               break;
+         }
          stream.write(compressed_size, this->buffer_size_bitlength);
          stream.write(uncompressed_size, this->buffer_size_bitlength);
          for (size_t i = 0; i < compressed_size; i++)
             stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+         free(buffer);
       } else {
          for (size_t i = 0; i < uncompressed_size; i++)
             stream.write((uint8_t)combined[i]);

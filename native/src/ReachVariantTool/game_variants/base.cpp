@@ -462,10 +462,13 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       stream.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
       for (auto& traits : t)
          traits.write(stream);
+      cobb_test_display_bitwriter_offset("after script traits");
       stream.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
          option.write(stream);
+      cobb_test_display_bitwriter_offset("after script options");
       sd.strings.write(stream);
+      cobb_test_display_bitwriter_offset("after script strings");
    }
    cobb_test_display_bitwriter_offset("after first piece of script data");
    this->stringTableIndexPointer.write(stream);

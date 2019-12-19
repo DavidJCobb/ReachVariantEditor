@@ -60,7 +60,7 @@ void ReachMegaloOption::write(cobb::bitwriter& stream) const noexcept {
       this->rangeCurrent.write(stream);
    } else {
       this->defaultValueIndex.write(stream);
-      stream.write(this->values.size(), 4);
+      stream.write(this->values.size(), cobb::bitcount(8));
       for (auto& value : this->values)
          value.write(stream, *this);
       this->currentValueIndex.write(stream);
