@@ -63,6 +63,45 @@ namespace Megalo {
          this->index = stream.read_bits<uint16_t>(index_bits);
       return true;
    }
+   void OpcodeArgValueTeam::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->scope, cobb::bitcount((int)_scopes::_count - 1));
+      int which_bits = 0;
+      int index_bits = 0;
+      const VariableScope* variable_scope = nullptr;
+      const VariableScope* owner_team_of  = nullptr;
+      switch ((_scopes)this->scope) {
+         case _scopes::global:
+            index_bits = MegaloVariableScopeTeam.which_bits();
+            break;
+         case _scopes::player:
+            variable_scope = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object:
+            variable_scope = &MegaloVariableScopeObject;
+            break;
+         case _scopes::team:
+            variable_scope = &MegaloVariableScopeTeam;
+            break;
+         case _scopes::player_owner_team:
+            owner_team_of = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object_owner_team:
+            owner_team_of = &MegaloVariableScopeObject;
+            break;
+      }
+      if (variable_scope) {
+         stream.write(this->which, variable_scope->which_bits());
+         stream.write(this->index, variable_scope->index_bits(variable_type::timer));
+         return;
+      } else if (owner_team_of) {
+         stream.write(this->which, owner_team_of->which_bits());
+         return;
+      }
+      if (which_bits)
+         stream.write(this->which, which_bits);
+      if (index_bits)
+         stream.write(this->index, index_bits);
+   }
    /*virtual*/ void OpcodeArgValueTeam::to_string(std::string& out) const noexcept /*override*/ {
       const char* which_scope = nullptr;
       switch ((_scopes)this->scope) {

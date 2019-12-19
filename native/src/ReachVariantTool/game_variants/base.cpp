@@ -261,117 +261,94 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       auto& e = ot.engine;
       auto& m = ot.megalo;
       //
-      #if _DEBUG
-         uint32_t offset = stream.offset;
-      #endif
       e.disabled.read(stream);
       e.hidden.read(stream);
-      #if _DEBUG
-         uint32_t distance = stream.offset - offset;
-         if (distance != 2560) {
-            //
-            // this doesn't trip, so as of this writing we ARE handling this correctly
-            //
-            // we ARE reading megalo data from the right place; the problem is some hard-to-find 
-            // mistake we're making when reading it
-            //
-            printf("WARNING: Possible incorrect handling for ReachGameVariantEngineOptionToggles.\n"
-               "Data type holds 1272 bits; minimum size needed to hold this using uint32_ts as the "
-               "game does is 1280 bits. After loading two of these, we should be 1280 * 2 = 2560 bits "
-               "ahead of the start; however, we are only %d bits ahead.",
-               distance
-            );
-         }
-      #endif
       //
       m.disabled.read(stream);
       m.hidden.read(stream);
    }
    {  // Megalo
-      uint32_t stream_bitpos = stream.offset;
-      {
-         int  count;
-         int  i;
-         bool success = true;
-         auto& conditions = this->scriptContent.raw.conditions;
-         auto& actions    = this->scriptContent.raw.actions;
-         auto& triggers   = this->scriptContent.triggers;
-         //
-         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
-         conditions.resize(count);
-         for (i = 0; i < count; i++) {
-            if (!(success = conditions[i].read(stream))) {
-               Megalo::ParseState::get().opcode_index = i;
-               break;
-            }
+      int  count;
+      int  i;
+      bool success = true;
+      auto& conditions = this->scriptContent.raw.conditions;
+      auto& actions    = this->scriptContent.raw.actions;
+      auto& triggers   = this->scriptContent.triggers;
+      //
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+      conditions.resize(count);
+      for (i = 0; i < count; i++) {
+         if (!(success = conditions[i].read(stream))) {
+            Megalo::ParseState::get().opcode_index = i;
+            break;
          }
-         Megalo::ParseState::print();
-         if (!success) {
-            return false;
+      }
+      Megalo::ParseState::print();
+      if (!success) {
+         return false;
+      }
+      //
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+      actions.resize(count);
+      for (i = 0; i < count; i++) {
+         if (!(success = actions[i].read(stream))) {
+            Megalo::ParseState::get().opcode_index = i;
+            break;
          }
-         //
-         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
-         actions.resize(count);
-         for (i = 0; i < count; i++) {
-            if (!(success = actions[i].read(stream))) {
-               Megalo::ParseState::get().opcode_index = i;
-               break;
-            }
-         }
-         Megalo::ParseState::print();
-         if (!success) {
-            return false;
-         }
-         //
-         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
-         triggers.resize(count);
-         for (i = 0; i < count; i++) {
-            printf("Reading trigger %d of %d...\n", i, count);
-            triggers[i].read(stream);
-            triggers[i].postprocess_opcodes(conditions, actions);
-         }
-         printf("\nFull script content:");
-         for (size_t i = 0; i < triggers.size(); ++i) {
-            auto& trigger = triggers[i];
-            if (trigger.entry == Megalo::trigger_type::subroutine)
-               continue;
-            printf("\nTRIGGER #%d:\n", i);
-            std::string out;
-            trigger.to_string(triggers, out);
-            printf(out.c_str());
-         }
-         //
-         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
-         this->scriptContent.stats.resize(count);
-         for (int i = 0; i < count; i++) {
-            this->scriptContent.stats[i].read(stream);
-            this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
-         }
-         //
-         {  // Script variable declarations
-            auto& v = this->scriptContent.variables;
-            v.global.read(stream);
-            v.player.read(stream);
-            v.object.read(stream);
-            v.team.read(stream);
-         }
-         {  // HUD widget declarations
-            auto& widgets = this->scriptContent.widgets;
-            widgets.resize(stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets)));
-            for (auto& widget : widgets)
-               widget.read(stream);
-         }
-         if (!this->scriptContent.entryPoints.read(stream))
-            return false;
-         this->scriptContent.usedMPObjectTypes.read(stream);
-         //
-         {  // Forge labels
-            size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
-            this->scriptContent.forgeLabels.resize(count);
-            for (auto& label : this->scriptContent.forgeLabels) {
-               label.read(stream);
-               label.postprocess_string_indices(this->scriptData.strings);
-            }
+      }
+      Megalo::ParseState::print();
+      if (!success) {
+         return false;
+      }
+      //
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
+      triggers.resize(count);
+      for (i = 0; i < count; i++) {
+         printf("Reading trigger %d of %d...\n", i, count);
+         triggers[i].read(stream);
+         triggers[i].postprocess_opcodes(conditions, actions);
+      }
+      printf("\nFull script content:");
+      for (size_t i = 0; i < triggers.size(); ++i) {
+         auto& trigger = triggers[i];
+         if (trigger.entry == Megalo::trigger_type::subroutine)
+            continue;
+         printf("\nTRIGGER #%d:\n", i);
+         std::string out;
+         trigger.to_string(triggers, out);
+         printf(out.c_str());
+      }
+      //
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
+      this->scriptContent.stats.resize(count);
+      for (int i = 0; i < count; i++) {
+         this->scriptContent.stats[i].read(stream);
+         this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
+      }
+      //
+      {  // Script variable declarations
+         auto& v = this->scriptContent.variables;
+         v.global.read(stream);
+         v.player.read(stream);
+         v.object.read(stream);
+         v.team.read(stream);
+      }
+      {  // HUD widget declarations
+         auto& widgets = this->scriptContent.widgets;
+         widgets.resize(stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets)));
+         for (auto& widget : widgets)
+            widget.read(stream);
+      }
+      if (!this->scriptContent.entryPoints.read(stream))
+         return false;
+      this->scriptContent.usedMPObjectTypes.read(stream);
+      //
+      {  // Forge labels
+         size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
+         this->scriptContent.forgeLabels.resize(count);
+         for (auto& label : this->scriptContent.forgeLabels) {
+            label.read(stream);
+            label.postprocess_string_indices(this->scriptData.strings);
          }
       }
    }
@@ -410,7 +387,6 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       m.roundsToWin.write(stream);
       m.suddenDeathTime.write(stream);
       m.gracePeriod.write(stream);
-      cobb_test_display_bitwriter_offset("after misc options");
       //
       r.flags.write(stream);
       r.livesPerRound.write(stream);
@@ -422,38 +398,31 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       r.loadoutCamTime.write(stream);
       r.traitsDuration.write(stream);
       r.traits.write(stream);
-      cobb_test_display_bitwriter_offset("after respawn options");
       //
       s.observers.write(stream);
       s.teamChanges.write(stream);
       s.flags.write(stream);
-      cobb_test_display_bitwriter_offset("after social options");
       //
       a.flags.write(stream);
       a.baseTraits.write(stream);
       a.weaponSet.write(stream);
       a.vehicleSet.write(stream);
-      cobb_test_display_bitwriter_offset("in map options, between basic options and powerup traits");
       a.powerups.red.traits.write(stream);
       a.powerups.blue.traits.write(stream);
       a.powerups.yellow.traits.write(stream);
-      cobb_test_display_bitwriter_offset("in map options, between powerup traits and durations");
       a.powerups.red.duration.write(stream);
       a.powerups.blue.duration.write(stream);
       a.powerups.yellow.duration.write(stream);
-      cobb_test_display_bitwriter_offset("after map options");
       //
       t.scoring.write(stream);
       t.species.write(stream);
       t.designatorSwitchType.write(stream);
       for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
          t.teams[i].write(stream);
-      cobb_test_display_bitwriter_offset("after team options");
       //
       l.flags.write(stream);
       for (size_t i = 0; i < l.palettes.size(); i++)
          l.palettes[i].write(stream);
-      cobb_test_display_bitwriter_offset("after loadout options");
    }
    {
       auto& sd = this->scriptData;
@@ -462,30 +431,72 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       stream.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
       for (auto& traits : t)
          traits.write(stream);
-      cobb_test_display_bitwriter_offset("after script traits");
       stream.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
          option.write(stream);
-      cobb_test_display_bitwriter_offset("after script options");
       sd.strings.write(stream);
-      cobb_test_display_bitwriter_offset("after script strings");
    }
    cobb_test_display_bitwriter_offset("after first piece of script data");
    this->stringTableIndexPointer.write(stream);
    this->localizedName.write(stream);
    this->localizedDesc.write(stream);
    this->localizedCategory.write(stream);
-   cobb_test_display_bitwriter_offset("after localized category");
    this->engineIcon.write(stream);
    this->engineCategory.write(stream);
-   cobb_test_display_bitwriter_offset("before map perms");
    this->mapPermissions.write(stream);
-   cobb_test_display_bitwriter_offset("before rating params");
    this->playerRatingParams.write(stream);
-   cobb_test_display_bitwriter_offset("after rating params");
    this->scoreToWin.write(stream);
    this->unkF7A6.write(stream);
    this->unkF7A7.write(stream);
+   {
+      auto& ot = this->optionToggles;
+      auto& e = ot.engine;
+      auto& m = ot.megalo;
+      //
+      e.disabled.write(stream);
+      e.hidden.write(stream);
+      //
+      m.disabled.write(stream);
+      m.hidden.write(stream);
+   }
+   cobb_test_display_bitwriter_offset("after engine option toggles");
+   {  // Megalo
+      auto& content = this->scriptContent;
+
+      stream.write(content.raw.conditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+      for (auto& opcode : content.raw.conditions)
+         opcode.write(stream);
+      stream.write(content.raw.actions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+      for (auto& opcode : content.raw.actions)
+         opcode.write(stream);
+      stream.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
+      for (auto& trigger : content.triggers)
+         trigger.write(stream);
+      stream.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
+      for (auto& stat : content.stats)
+         stat.write(stream);
+      //
+      {  // Script variable declarations
+         auto& v = content.variables;
+         v.global.write(stream);
+         v.player.write(stream);
+         v.object.write(stream);
+         v.team.write(stream);
+      }
+      //
+      stream.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
+      for (auto& widget : content.widgets)
+         widget.write(stream);
+      //
+      content.entryPoints.write(stream);
+      content.usedMPObjectTypes.write(stream);
+      //
+      stream.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
+      for (auto& label : content.forgeLabels)
+         label.write(stream);
+   }
+
+
    #if !_DEBUG
       static_assert(false, "FINISH ME");
    #endif

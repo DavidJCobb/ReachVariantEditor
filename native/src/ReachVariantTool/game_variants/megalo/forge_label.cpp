@@ -15,4 +15,15 @@ namespace Megalo {
    void ReachForgeLabel::postprocess_string_indices(ReachStringTable& table) noexcept {
       this->name = table.get_entry(this->nameIndex);
    }
+   void ReachForgeLabel::write(cobb::bitwriter& stream) const noexcept {
+      this->nameIndex.write(stream);
+      stream.write(this->requirements, 3);
+      if (this->requires_object_type())
+         stream.write(this->requiredObjectType + 1, cobb::bitcount(Megalo::Limits::max_object_types));
+      if (this->requires_assigned_team())
+         stream.write((int8_t)this->requiredTeam + 1, cobb::bitcount((int)Megalo::const_team::_count - 1));
+      if (this->requires_number())
+         stream.write(this->requiredNumber, cobb::endian::big);
+      stream.write(this->mapMustHaveAtLeast, 7);
+   }
 }

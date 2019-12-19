@@ -10,5 +10,8 @@ namespace Megalo {
          void read(cobb::bitstream& stream) noexcept {
             this->position = stream.read_bits<uint8_t>(4);
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write(this->position, 4);
+         }
    };
 }

@@ -25,6 +25,7 @@ namespace Megalo {
          //
          void read(cobb::bitstream&) noexcept;
          void postprocess_string_indices(ReachStringTable& table) noexcept;
+         void write(cobb::bitwriter& stream) const noexcept;
          //
          inline bool requires_object_type()   const noexcept { return this->requirements & (requirement_int)requirement_flags::objects_of_type; }
          inline bool requires_assigned_team() const noexcept { return this->requirements & (requirement_int)requirement_flags::assigned_team; }

@@ -3,6 +3,7 @@
 #include <vector>
 #include "../helpers/bitset.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/bitwriter.h"
 
 #include "../game_variants/megalo/limits.h"
 
@@ -44,6 +45,11 @@ template<int count> class ReachDwordBasedBitset {
          #if _DEBUG
             this->build_debug_info();
          #endif
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         auto count = this->bits.dword_count();
+         for (size_t i = 0; i < count; i++)
+            stream.write(this->bits.dword(i), cobb::endian::big);
       }
       //
       #if _DEBUG

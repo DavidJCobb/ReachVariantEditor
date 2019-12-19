@@ -232,6 +232,55 @@ namespace Megalo {
       #endif
       return true;
    }
+   void Condition::write(cobb::bitwriter& stream) const noexcept {
+      {
+         size_t index = 0;
+         auto&  list   = conditionFunctionList;
+         for (; index < list.size(); index++)
+            if (&list[index] == this->function)
+               break;
+         if (index == list.size()) {
+            assert(false && "Condition with unknown function -- can't serialize!");
+         }
+         stream.write(index, cobb::bitcount(list.size() - 1));
+         if (index == 0) // The "None" condition loads no further data.
+            return;
+      }
+      stream.write(this->inverted);
+      stream.write(this->or_group, cobb::bitcount(Limits::max_conditions - 1));
+      stream.write(this->action,   cobb::bitcount(Limits::max_actions - 1));
+      //
+      auto&  base     = this->function->arguments;
+      size_t argCount = base.size();
+      for (size_t i = 0; i < argCount; i++) {
+         auto arg     = this->arguments[i];
+         auto factory = base[i].factory;
+         //
+         // This is really ugly but I've sort of painted myself into a corner here... Some 
+         // arguments can take multiple variable types, and currently the variable classes 
+         // have no way of "knowing" that that's how they got here.
+         //
+         if (factory == OpcodeArgAnyVariableFactory) {
+            stream.write((uint8_t)arg->get_variable_type(), 3);
+         } else if (factory == OpcodeArgTeamOrPlayerVariableFactory) {
+            switch (arg->get_variable_type()) {
+               case variable_type::team:
+                  stream.write(0, 2);
+                  break;
+               case variable_type::player:
+                  stream.write(1, 2);
+                  break;
+               case variable_type::not_a_variable:
+                  stream.write(2, 2);
+                  break;
+            }
+         }
+         //
+         // Now we can serialize the argument value.
+         //
+         arg->write(stream);
+      }
+   }
    void Condition::to_string(std::string& out) const noexcept {
       if (!this->function) {
          out = "<NO FUNC>";

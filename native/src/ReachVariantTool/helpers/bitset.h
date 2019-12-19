@@ -24,7 +24,13 @@ namespace cobb {
             memset(&this->data, 0, sizeof(this->data));
          }
          //
-         bool none() const {
+         uint32_t dword(uint8_t i) const noexcept {
+            return this->data[i];
+         }
+         unsigned int dword_count() const noexcept {
+            return chunk_count;
+         }
+         bool none() const noexcept {
             //
             // We don't have to worry about partial chunks here, since we memset all chunks 
             // to zero. The unused portions of a partial chunk should always be cleared.
@@ -34,28 +40,28 @@ namespace cobb {
                   return false;
             return true;
          }
-         bool test(uint32_t index) const {
+         bool test(uint32_t index) const noexcept {
             uint32_t ci  = index / bits_per_chunk;
             uint32_t bit = 1 << (index % bits_per_chunk);
             return this->data[ci] & bit;
          }
          //
-         void set(uint32_t index) {
+         void set(uint32_t index) noexcept {
             uint32_t ci  = index / bits_per_chunk;
             uint32_t bit = 1 << (index % bits_per_chunk);
             this->data[ci] |= bit;
          }
-         void reset(uint32_t index) {
+         void reset(uint32_t index) noexcept {
             uint32_t ci  = index / bits_per_chunk;
             uint32_t bit = 1 << (index % bits_per_chunk);
             this->data[ci] &= ~bit;
          }
-         void clear() {
+         void clear() noexcept {
             for (uint32_t i = 0; i < chunk_count; i++)
                this->data[i] = 0;
          }
          //
-         int32_t find_first_clear() const {
+         int32_t find_first_clear() const noexcept {
             //
             // Finds the first zero bit in the set. This function performs significantly 
             // better than looping from 0 to (count) and testing each individual bit, as you 
@@ -90,7 +96,7 @@ namespace cobb {
             }
             return -1;
          }
-         int32_t find_first_clear_from(uint32_t index) const {
+         int32_t find_first_clear_from(uint32_t index) const noexcept {
             //
             // Finds the first zero bit in the set. This function performs significantly 
             // better than looping from 0 to (count) and testing each individual bit, as you 

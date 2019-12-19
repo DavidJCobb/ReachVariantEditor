@@ -6,6 +6,7 @@
 #include "conditions.h"
 #include "limits.h"
 #include "../../helpers/bitstream.h"
+#include "../../helpers/bitwriter.h"
 #include "../../helpers/bitwise.h"
 
 namespace Megalo {
@@ -58,6 +59,7 @@ namespace Megalo {
          //
          bool read(cobb::bitstream& stream) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
+         void write(cobb::bitwriter& stream) const noexcept;
          //
          void to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
          inline void to_string(const std::vector<Trigger>& allTriggers, std::string& out) const noexcept {
@@ -71,6 +73,9 @@ namespace Megalo {
       protected:
          static void _stream(cobb::bitstream& stream, int32_t& index) noexcept {
             index = (int32_t)stream.read_bits(cobb::bitcount(Limits::max_triggers)) - 1;
+         }
+         static void _stream(cobb::bitwriter& stream, int32_t index) noexcept {
+            stream.write(index + 1, cobb::bitcount(Limits::max_triggers));
          }
       public:
          static constexpr int32_t none = -1;
@@ -95,6 +100,16 @@ namespace Megalo {
             _stream(stream, i.local);
             _stream(stream, i.pregame);
             return true;
+         }
+         void write(cobb::bitwriter& stream) const noexcept {
+            auto& i = this->indices;
+            _stream(stream, i.init);
+            _stream(stream, i.localInit);
+            _stream(stream, i.hostMigrate);
+            _stream(stream, i.doubleHostMigrate);
+            _stream(stream, i.objectDeath);
+            _stream(stream, i.local);
+            _stream(stream, i.pregame);
          }
    };
 }

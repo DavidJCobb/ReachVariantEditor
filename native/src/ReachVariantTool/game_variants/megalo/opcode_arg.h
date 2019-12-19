@@ -2,8 +2,10 @@
 #include <cassert>
 #include <string>
 #include "../../helpers/bitstream.h"
+#include "../../helpers/bitwriter.h"
 #include "../../helpers/strings.h"
 #include "enums.h"
+#include "variables_and_scopes.h"
 
 namespace Megalo {
    class OpcodeArgBase;
@@ -11,18 +13,23 @@ namespace Megalo {
    class Opcode { // base class for Condition and Action
       public:
          virtual bool read(cobb::bitstream&) noexcept = 0;
+         virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
    };
    
    class OpcodeArgValue {
       public:
          virtual bool read(cobb::bitstream&) noexcept = 0;
+         virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          //
          static OpcodeArgValue* factory(cobb::bitstream& stream) {
             assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");
             return nullptr;
+         }
+         virtual variable_type get_variable_type() const noexcept {
+            return variable_type::not_a_variable;
          }
    };
    using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::bitstream& stream);
@@ -58,6 +65,9 @@ namespace Megalo {
             this->value = stream.read_bits(this->baseEnum.index_bits_with_offset(this->baseOffset)) - this->baseOffset;
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->value + this->baseOffset, this->baseEnum.index_bits_with_offset(this->baseOffset));
+         }
          virtual void to_string(std::string& out) const noexcept override {
             this->baseEnum.to_string(out, this->value + this->baseOffset);
          }
@@ -72,6 +82,9 @@ namespace Megalo {
          virtual bool read(cobb::bitstream& stream) noexcept override {
             this->value = stream.read_bits(this->base.bits());
             return true;
+         }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->value, this->base.bits());
          }
          virtual void to_string(std::string& out) const noexcept override {
             this->base.to_string(out, this->value);
@@ -111,6 +124,19 @@ namespace Megalo {
                --this->value;
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            if (this->quirk == index_quirk::presence) {
+               if (this->value == OpcodeArgValueBaseIndex::none) {
+                  stream.write(1, 1);
+                  return;
+               }
+               stream.write(0, 1);
+            }
+            auto value = this->value;
+            if (this->quirk == index_quirk::offset)
+               ++value;
+            stream.write(value, cobb::bitcount(this->max - 1));
+         }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->value == OpcodeArgValueBaseIndex::none) {
                cobb::sprintf(out, "No %s", this->name);
@@ -130,9 +156,14 @@ namespace Megalo {
          virtual bool read(cobb::bitstream& stream) noexcept override {
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            return;
+         }
          virtual void to_string(std::string& out) const noexcept override {
             out = "all players";
          }
-
+         virtual variable_type get_variable_type() const noexcept {
+            return variable_type::not_a_variable;
+         }
    };
 };

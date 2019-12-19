@@ -41,6 +41,7 @@ namespace Megalo {
          std::vector<OpcodeArgValue*> arguments;
          //
          virtual bool read(cobb::bitstream&) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
    };
 }

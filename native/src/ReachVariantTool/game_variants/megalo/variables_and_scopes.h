@@ -16,6 +16,8 @@ namespace Megalo {
       object = 2,
       team   = 3,
       timer  = 4,
+      //
+      not_a_variable = -1, // needed for "All Players" values in team-or-player vars
    };
 
    extern const SmartEnum megalo_scope_does_not_have_specifier; // there is only one Global scope; you don't need to specify "which Global scope" a variable is in

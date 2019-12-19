@@ -4,6 +4,7 @@
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
 #include "../../helpers/bitstream.h"
+#include "../../helpers/bitwriter.h"
 
 namespace Megalo {
    enum class variable_network_priority {
@@ -25,6 +26,10 @@ namespace Megalo {
                return;
             this->networking = (network_type)stream.read_bits(2);
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            this->initial.write(stream);
+            stream.write((uint8_t)this->networking, 2);
+         }
    };
    class PlayerVariableDeclaration {
       public:
@@ -35,6 +40,9 @@ namespace Megalo {
          void read(cobb::bitstream& stream) noexcept {
             this->networking = (network_type)stream.read_bits(2);
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write((uint8_t)this->networking, 2);
+         }
    };
    class ObjectVariableDeclaration {
       public:
@@ -44,6 +52,9 @@ namespace Megalo {
          //
          void read(cobb::bitstream& stream) noexcept {
             this->networking = (network_type)stream.read_bits(2);
+         }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write((uint8_t)this->networking, 2);
          }
    };
    class TeamVariableDeclaration {
@@ -57,6 +68,10 @@ namespace Megalo {
             this->initial    = (const_team)(stream.read_bits(cobb::bitcount(8)) - 1);
             this->networking = (network_type)stream.read_bits(2);
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write((int8_t)this->initial + 1, cobb::bitcount(8));
+            stream.write((uint8_t)this->networking, 2);
+         }
    };
    class TimerVariableDeclaration {
       public:
@@ -64,6 +79,9 @@ namespace Megalo {
          //
          void read(cobb::bitstream& stream) noexcept {
             this->initial.read(stream);
+         }
+         void write(cobb::bitwriter& stream) const noexcept {
+            this->initial.write(stream);
          }
    };
 
@@ -91,6 +109,20 @@ namespace Megalo {
             megalo_variable_declaration_set_read_type(player);
             megalo_variable_declaration_set_read_type(object);
             #undef megalo_variable_declaration_set_read_type
+         }
+         void write(cobb::bitwriter& stream) const noexcept {
+            auto& scope = getScopeObjectForConstant(this->type);
+            //
+            #define megalo_variable_declaration_set_write_type(name) \
+               stream.write(this->##name##s.size(), scope.count_bits(variable_type::##name##)); \
+               for (auto& var : this->##name##s) \
+                  var.write(stream);
+            megalo_variable_declaration_set_write_type(scalar);
+            megalo_variable_declaration_set_write_type(timer);
+            megalo_variable_declaration_set_write_type(team);
+            megalo_variable_declaration_set_write_type(player);
+            megalo_variable_declaration_set_write_type(object);
+            #undef megalo_variable_declaration_set_write_type
          }
    };
 }

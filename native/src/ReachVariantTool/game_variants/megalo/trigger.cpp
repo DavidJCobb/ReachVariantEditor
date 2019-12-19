@@ -55,6 +55,16 @@ namespace Megalo {
             }
       }
    }
+   void Trigger::write(cobb::bitwriter& stream) const noexcept {
+      stream.write((uint8_t)this->blockType, 3);
+      stream.write((uint8_t)this->entry, 3);
+      if (this->blockType == block_type::for_each_object_with_label)
+         stream.write(this->labelIndex + 1, cobb::bitcount(Limits::max_script_labels));
+      stream.write(this->raw.conditionStart, cobb::bitcount(Limits::max_conditions - 1));
+      stream.write(this->raw.conditionCount, cobb::bitcount(Limits::max_conditions));
+      stream.write(this->raw.actionStart, cobb::bitcount(Limits::max_actions - 1));
+      stream.write(this->raw.actionCount, cobb::bitcount(Limits::max_actions));
+   }
    void Trigger::to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
       //

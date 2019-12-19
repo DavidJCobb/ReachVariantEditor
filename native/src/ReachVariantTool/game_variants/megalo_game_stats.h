@@ -25,5 +25,5 @@ class ReachMegaloGameStat {
       //
       void read(cobb::bitstream&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
-      
+      void write(cobb::bitwriter& stream) const noexcept;
 };

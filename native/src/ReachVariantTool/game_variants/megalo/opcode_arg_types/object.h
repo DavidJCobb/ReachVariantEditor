@@ -13,10 +13,13 @@ namespace Megalo {
          //
          virtual bool read(cobb::bitstream&) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
          //
          static OpcodeArgValue* factory(cobb::bitstream& stream) {
             return new OpcodeArgValueObject();
          }
-         
+         virtual variable_type get_variable_type() const noexcept {
+            return variable_type::object;
+         }
    };
 }

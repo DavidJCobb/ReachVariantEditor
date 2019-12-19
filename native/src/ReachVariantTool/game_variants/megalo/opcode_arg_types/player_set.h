@@ -54,7 +54,5 @@ namespace Megalo {
          static OpcodeArgValue* factory(cobb::bitstream& stream) {
             return new OpcodeArgValuePlayerSet();
          }
-         
    };
-
 }
