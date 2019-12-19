@@ -5,6 +5,20 @@ extern "C" {
 
 #define MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION 1
 
+//
+// Notes on Bungie's string table compression:
+//
+//  - They use zlib with headers and best compression.
+//
+//  - The string table format theoretically allows any two strings to be overlapped 
+//    in the data if they are identical, or if one is identical to the end of the 
+//    other, i.e. the identical data can be stored in the file just once and the 
+//    two strings can have their offset values pointed at it appropriately. Bungie 
+//    only makes use of this when all localizations for a given ReachString are 
+//    the same; if only some are identical, then all are serialized separately, 
+//    producing duplicate data.
+//
+
 namespace reach {
    extern bool language_is_optional(language l) noexcept {
       return l == language::polish;
@@ -167,7 +181,7 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
             assert(false && "Insufficient memory to compress string data.");
          }
          uint32_t compressed_size = bound;
-         int result = compress((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size);
+         int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
          switch (result) {
             case Z_OK:
                break;
@@ -178,8 +192,9 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
                assert(false && "Insufficient buffer space when trying to compress string table.");
                break;
          }
-         stream.write(compressed_size, this->buffer_size_bitlength);
-         stream.write(uncompressed_size, this->buffer_size_bitlength);
+         stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
+         static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
+         stream.write(cobb::to_big_endian(uncompressed_size)); // redundant uncompressed size
          for (size_t i = 0; i < compressed_size; i++)
             stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
          free(buffer);

@@ -8,6 +8,15 @@
 
 namespace cobb {
    class bitwriter {
+      //
+      // Serialize bit-aligned data to an internal buffer.
+      //
+      // ENDIANNESS USED:
+      //
+      //  - Big-endian when you specify a bitcount
+      //  - Little-endian when you serialize whole values (i.e. no bitcount given), unless you override it
+      //     - This remains true even when the whole values are serialized to non-byte-aligned positions
+      //
       protected:
          enum class _is_signed_sentinel {};
       public:
