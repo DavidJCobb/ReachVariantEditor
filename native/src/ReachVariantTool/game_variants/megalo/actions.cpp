@@ -767,7 +767,7 @@ namespace Megalo {
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
          "",
-         "%2 spawn zone %1.",
+         "Modify enable state for spawn zone %1: set to %2.",
          {
             OpcodeArgBase("spawn zone", OpcodeArgValueObject::factory),
             OpcodeArgBase("enable (treated as bool)", OpcodeArgValueScalar::factory),

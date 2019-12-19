@@ -101,7 +101,6 @@ namespace Megalo {
       }
       out += '\n';
       //
-      out += line;
       if (!this->opcodes.size()) {
          out += indent;
          out += "<Empty Trigger>";

@@ -83,6 +83,7 @@ void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
    this->unk10.write(stream);
    this->unk18.write(stream);
    this->unk20.write(stream);
+   printf("== Writer bytepos after MPVR int64s: %08X\n", stream.get_bytepos());
    this->activity.write(stream);
    this->gameMode.write(stream);
    this->engine.write(stream);
@@ -388,6 +389,7 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    this->type.write(stream);
    stream.write(this->encodingVersion);
    stream.write(this->engineVersion);
+   printf("== Writer bytepos after versions: %08X\n", stream.get_bytepos());
    this->variantHeader.write_bits(stream);
    this->flags.write(stream);
    printf("== Writer bytepos before options: %08X\n", stream.get_bytepos());

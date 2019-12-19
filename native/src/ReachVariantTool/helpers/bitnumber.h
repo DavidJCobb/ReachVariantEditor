@@ -126,19 +126,17 @@ namespace cobb {
       protected:
          static constexpr uint32_t read_flags = (bitswap_on_read ? bitstream_read_flags::swap : 0);
          //
-         template<typename T> bool _is_present(cobb::bitstream& stream) {
+         bool _read_presence(cobb::bitstream& stream) { // returns bool: value should be read?
+            if (!this->uses_presence())
+               return true;
             bool bit = stream.read_bits(1);
             if (bit == presence_bit::value)
                return true;
             this->value = underlying_type(if_absent);
             return false;
          }
-         template<> bool _is_present<bitnumber_no_presence_bit>(cobb::bitstream& stream) {
-            return true;
-         }
-         //
-         bool _write_presence(cobb::bitwriter& stream) const noexcept {
-            if (std::is_same_v<presence_bit, bitnumber_no_presence_bit>)
+         bool _write_presence(cobb::bitwriter& stream) const noexcept { // returns bool: value should be written?
+            if (!this->uses_presence())
                return true;
             bool presence = presence_bit::value;
             if (this->value == if_absent) {
@@ -149,8 +147,12 @@ namespace cobb {
             return true;
          }
       public:
+         bool uses_presence() const noexcept {
+            return !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
+         }
+         //
          void read(cobb::bitstream& stream) noexcept {
-            if (!this->_is_present<presence_bit>(stream))
+            if (!this->_read_presence(stream))
                return;
             this->value = underlying_type(stream.read_bits<underlying_int>(bitcount, read_flags) - value_offset);
             if (std::is_signed_v<underlying_type>)
@@ -167,7 +169,7 @@ namespace cobb {
          void write(cobb::bitwriter& stream) const noexcept {
             if (!this->_write_presence(stream))
                return;
-            stream.write((underlying_int)this->value + value_offset, bitcount, std::is_signed_v<underlying_type>);
+            stream.write((underlying_int)this->value + value_offset, bitcount, std::is_signed_v<underlying_type> && !this->uses_presence() && !value_offset);
          }
          void write_bits(cobb::bitwriter& stream) const noexcept {
             this->write(stream);

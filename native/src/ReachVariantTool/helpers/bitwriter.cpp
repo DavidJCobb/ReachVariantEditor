@@ -110,7 +110,7 @@ namespace cobb {
             this->_bitpos += bits;
             return;
          }
-         target &= ~(uint8_t(0xFF) >> extra); // clear the bits we're about to write
+         target &= ~(uint8_t(0xFF) >> shift); // clear the bits we're about to write
          target |= (value >> (bits - extra));
          this->_bitpos += extra;
          remaining -= extra;
