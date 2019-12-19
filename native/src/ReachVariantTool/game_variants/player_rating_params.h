@@ -16,7 +16,7 @@ class ReachPlayerRatingParams {
       }
       void write(cobb::bitwriter& stream) const noexcept {
          for (float f : this->unknown)
-            stream.write(f);
+            stream.write(f, cobb::endian::big);
          this->flag.write(stream);
       }
 };
