@@ -7,6 +7,8 @@
 #include "megalo/limits.h"
 #include "megalo/parse_error_reporting.h"
 
+#define cobb_test_display_bitwriter_offset(text) printf("== Writer bytepos " text ": %08X\n", stream.get_bytepos());
+
 bool BlamHeader::read(cobb::bitstream& stream) noexcept {
    this->header.read(stream);
    stream.read(this->data.unk0C);
@@ -83,19 +85,19 @@ void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
    this->unk10.write(stream);
    this->unk18.write(stream);
    this->unk20.write(stream);
-   printf("== Writer bytepos after MPVR int64s: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("after MPVR int64s");
    this->activity.write(stream);
    this->gameMode.write(stream);
    this->engine.write(stream);
    this->unk2C.write(stream);
    this->engineCategory.write(stream);
-   printf("== Writer bytepos before MPVR created-by: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("before MPVR created-by");
    this->createdBy.write_bits(stream);
-   printf("== Writer bytepos before MPVR modified-by: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("before MPVR modified-by");
    this->modifiedBy.write_bits(stream);
-   printf("== Writer bytepos before MPVR title: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("before MPVR title");
    stream.write_wstring(this->title,       128); // big-endian
-   printf("== Writer bytepos before MPVR desc: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("before MPVR desc");
    stream.write_wstring(this->description, 128); // big-endian
    if (this->contentType == 6) {
       this->engineIcon.write(stream);
@@ -389,10 +391,10 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    this->type.write(stream);
    stream.write(this->encodingVersion);
    stream.write(this->engineVersion);
-   printf("== Writer bytepos after versions: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("after encoding+engine versions");
    this->variantHeader.write_bits(stream);
    this->flags.write(stream);
-   printf("== Writer bytepos before options: %08X\n", stream.get_bytepos());
+   cobb_test_display_bitwriter_offset("before options");
    {
       auto& o = this->options;
       auto& m = o.misc;
@@ -408,7 +410,7 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       m.roundsToWin.write(stream);
       m.suddenDeathTime.write(stream);
       m.gracePeriod.write(stream);
-      printf("== Writer bytepos after misc options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after misc options");
       //
       r.flags.write(stream);
       r.livesPerRound.write(stream);
@@ -420,36 +422,38 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       r.loadoutCamTime.write(stream);
       r.traitsDuration.write(stream);
       r.traits.write(stream);
-      printf("== Writer bytepos after respawn options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after respawn options");
       //
       s.observers.write(stream);
       s.teamChanges.write(stream);
       s.flags.write(stream);
-      printf("== Writer bytepos after social options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after social options");
       //
       a.flags.write(stream);
       a.baseTraits.write(stream);
       a.weaponSet.write(stream);
       a.vehicleSet.write(stream);
+      cobb_test_display_bitwriter_offset("in map options, between basic options and powerup traits");
       a.powerups.red.traits.write(stream);
       a.powerups.blue.traits.write(stream);
       a.powerups.yellow.traits.write(stream);
+      cobb_test_display_bitwriter_offset("in map options, between powerup traits and durations");
       a.powerups.red.duration.write(stream);
       a.powerups.blue.duration.write(stream);
       a.powerups.yellow.duration.write(stream);
-      printf("== Writer bytepos after map options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after map options");
       //
       t.scoring.write(stream);
       t.species.write(stream);
       t.designatorSwitchType.write(stream);
       for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
          t.teams[i].write(stream);
-      printf("== Writer bytepos after team options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after team options");
       //
       l.flags.write(stream);
       for (size_t i = 0; i < l.palettes.size(); i++)
          l.palettes[i].write(stream);
-      printf("== Writer bytepos after loadout options: %08X\n", stream.get_bytepos());
+      cobb_test_display_bitwriter_offset("after loadout options");
    }
    #if !_DEBUG
       static_assert(false, "FINISH ME");

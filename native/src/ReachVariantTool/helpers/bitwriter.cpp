@@ -94,6 +94,7 @@ namespace cobb {
       uint8_t& target = this->_buffer[this->get_bytepos()];
       int shift = this->get_bitshift();
       //
+      value &= cobb::bitmax(bits); // needed for when signed values are sign-extended into an int64_t on the way here
       if (!shift) {
          if (bits < 8) {
             target = value << (8 - bits);
@@ -111,7 +112,7 @@ namespace cobb {
             return;
          }
          target &= ~(uint8_t(0xFF) >> shift); // clear the bits we're about to write
-         target |= (value >> (bits - extra));
+         target |= ((value >> (bits - extra)) & 0xFF);
          this->_bitpos += extra;
          remaining -= extra;
       }

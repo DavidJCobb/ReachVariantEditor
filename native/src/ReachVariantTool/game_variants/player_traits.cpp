@@ -65,6 +65,7 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    d.vampirism.write(stream);
    d.assassinImmune.write(stream);
    d.unk09.write(stream);
+   printf("=== Bitwriter bytepos after writing player traits - defense: %08X\n", stream.get_bytepos());
    //
    o.damageMult.write(stream);
    o.meleeMult.write(stream);
@@ -78,20 +79,24 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    o.infiniteAbility.write(stream);
    o.abilityUsage.write(stream);
    o.ability.write(stream);
+   printf("=== Bitwriter bytepos after writing player traits - offense: %08X\n", stream.get_bytepos());
    //
    m.speed.write(stream);
    m.gravity.write(stream);
    m.vehicleUsage.write(stream);
    m.unknown.write(stream);
    m.jumpHeight.write(stream);
+   printf("=== Bitwriter bytepos after writing player traits - movement: %08X\n", stream.get_bytepos());
    //
    a.activeCamo.write(stream);
    a.waypoint.write(stream);
    a.visibleName.write(stream);
    a.aura.write(stream);
    a.forcedColor.write(stream);
+   printf("=== Bitwriter bytepos after writing player traits - appearance: %08X\n", stream.get_bytepos());
    //
    s.radarState.write(stream);
    s.radarRange.write(stream);
    s.directionalDamageIndicator.write(stream);
+   printf("=== Bitwriter bytepos after writing player traits - sensors: %08X\n", stream.get_bytepos());
 }

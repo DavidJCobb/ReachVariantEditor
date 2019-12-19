@@ -11,17 +11,17 @@ namespace cobb {
       }
       return result;
    }
-   template<typename T> constexpr int highest_set_bit(T value) noexcept {
+   template<typename T> inline constexpr unsigned int highest_set_bit(T value) noexcept {
       int r = 0;
       while (value >>= 1)
          ++r;
       return r;
    }
-   template<typename T> constexpr int bitcount(T value) noexcept {
+   template<typename T> inline constexpr unsigned int bitcount(T value) noexcept {
       return highest_set_bit(value) + 1;
    }
-   constexpr int bitmax(int bitcount) noexcept { // max value that can be held in X many bits
-      return (1 << bitcount) - 1;
+   constexpr inline uint64_t bitmax(int bitcount) noexcept { // max value that can be held in X many bits
+      return (uint64_t(1) << bitcount) - 1;
    }
    //
    template<typename T> constexpr T apply_sign_bit(T value, int bitcount) noexcept {
