@@ -22,6 +22,7 @@ class ReachMegaloOptionValueEntry {
       //
       void read(cobb::bitstream&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
+      void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept;
 };
 
 class ReachMegaloOption {
@@ -41,4 +42,5 @@ class ReachMegaloOption {
       //
       void read(cobb::bitstream&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
 };

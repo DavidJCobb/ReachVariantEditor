@@ -10,8 +10,13 @@ class ReachPlayerRatingParams {
       cobb::bitbool flag;
       //
       void read(cobb::bitstream& stream) noexcept {
-         for (size_t i = 0; i < this->unknown.size(); i++)
-            stream.read(this->unknown[i]);
+         for (float& f : this->unknown)
+            stream.read(f);
          this->flag.read(stream);
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         for (float f : this->unknown)
+            stream.write(f);
+         this->flag.write(stream);
       }
 };

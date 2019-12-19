@@ -49,6 +49,21 @@ namespace cobb {
             this->_write(value, bits, bits);
          }
          //
+         void write(float value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+            union {
+               uint32_t i = 0;
+               float    f;
+            } uv;
+            uv.f = value;
+            uint32_t v = uv.i;
+            if (save_endianness != cobb::endian::big)
+               v = cobb::to_big_endian(v);
+            this->write(v, 32);
+         }
+         void write(bool value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+            this->write(value ? 1 : 0, 1);
+         }
+         //
          template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
             T v = value;
             if (save_endianness != cobb::endian::big)
@@ -65,19 +80,6 @@ namespace cobb {
                for (int i = 0; i < std::extent<T>::value; i++)
                   this->write(value[i], cobb::bits_in<item_type>);
          };
-         template<int = 0> void write(const float& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
-            union {
-               uint32_t i;
-               float    f = value;
-            } uv;
-            uint32_t v = uv.i;
-            if (save_endianness != cobb::endian::big)
-               v = cobb::to_big_endian(v);
-            this->write(v, 32);
-         }
-         template<int = 0> void write(const bool& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
-            this->write(value ? 1 : 0, 1);
-         }
          //
          void write_string(const char* value, int maxlength) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {

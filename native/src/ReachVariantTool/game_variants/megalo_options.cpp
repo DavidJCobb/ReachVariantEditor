@@ -11,6 +11,13 @@ void ReachMegaloOptionValueEntry::postprocess_string_indices(ReachStringTable& t
    this->name = table.get_entry(this->nameIndex);
    this->desc = table.get_entry(this->descIndex);
 }
+void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept {
+   this->value.write(stream);
+   if (!owner.isRange) {
+      this->nameIndex.write(stream);
+      this->descIndex.write(stream);
+   }
+}
 
 void ReachMegaloOption::read(cobb::bitstream& stream) noexcept {
    this->nameIndex.read(stream);
@@ -41,4 +48,21 @@ void ReachMegaloOption::postprocess_string_indices(ReachStringTable& table) noex
    this->rangeDefault.postprocess_string_indices(table);
    for (auto& value : this->values)
       value.postprocess_string_indices(table);
+}
+void ReachMegaloOption::write(cobb::bitwriter& stream) const noexcept {
+   this->nameIndex.write(stream);
+   this->descIndex.write(stream);
+   this->isRange.write(stream);
+   if (this->isRange) {
+      this->rangeDefault.write(stream, *this);
+      this->rangeMin.write(stream, *this);
+      this->rangeMax.write(stream, *this);
+      this->rangeCurrent.write(stream);
+   } else {
+      this->defaultValueIndex.write(stream);
+      stream.write(this->values.size(), 4);
+      for (auto& value : this->values)
+         value.write(stream, *this);
+      this->currentValueIndex.write(stream);
+   }
 }

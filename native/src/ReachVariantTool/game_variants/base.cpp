@@ -227,7 +227,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       auto& o = sd.options;
       int count;
       //
-      count = stream.read_bits(cobb::bitcount(16));
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_traits));
       t.resize(count);
       for (int i = 0; i < count; i++)
          t[i].read(stream);
@@ -455,6 +455,34 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
          l.palettes[i].write(stream);
       cobb_test_display_bitwriter_offset("after loadout options");
    }
+   {
+      auto& sd = this->scriptData;
+      auto& t = sd.traits;
+      auto& o = sd.options;
+      stream.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
+      for (auto& traits : t)
+         traits.write(stream);
+      stream.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
+      for (auto& option : o)
+         option.write(stream);
+      sd.strings.write(stream);
+   }
+   cobb_test_display_bitwriter_offset("after first piece of script data");
+   this->stringTableIndexPointer.write(stream);
+   this->localizedName.write(stream);
+   this->localizedDesc.write(stream);
+   this->localizedCategory.write(stream);
+   cobb_test_display_bitwriter_offset("after localized category");
+   this->engineIcon.write(stream);
+   this->engineCategory.write(stream);
+   cobb_test_display_bitwriter_offset("before map perms");
+   this->mapPermissions.write(stream);
+   cobb_test_display_bitwriter_offset("before rating params");
+   this->playerRatingParams.write(stream);
+   cobb_test_display_bitwriter_offset("after rating params");
+   this->scoreToWin.write(stream);
+   this->unkF7A6.write(stream);
+   this->unkF7A7.write(stream);
    #if !_DEBUG
       static_assert(false, "FINISH ME");
    #endif

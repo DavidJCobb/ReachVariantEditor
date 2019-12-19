@@ -3,6 +3,7 @@
 #include <vector>
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
+#include "../helpers/bitwriter.h"
 
 namespace reach {
    enum class map_permission_type : uint8_t {
@@ -22,5 +23,11 @@ class ReachMapPermissions {
          for (size_t i = 0; i < count; i++)
             this->mapIDs[i] = stream.read_bits<uint16_t>(16);
          this->type.read(stream);
+      }
+      void write(cobb::bitwriter& stream) const noexcept {
+         stream.write(this->mapIDs.size(), 6);
+         for (uint16_t id : this->mapIDs)
+            stream.write(id);
+         this->type.write(stream);
       }
 };
