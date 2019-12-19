@@ -21,6 +21,8 @@ namespace reach {
       polish, // optional
    };
    constexpr int language_count = (int)language::polish + 1;
+   //
+   extern bool language_is_optional(language l) noexcept;
 };
 
 using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;

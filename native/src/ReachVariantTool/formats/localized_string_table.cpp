@@ -5,6 +5,12 @@ extern "C" {
 
 #define MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION 1
 
+namespace reach {
+   extern bool language_is_optional(language l) noexcept {
+      return l == language::polish;
+   }
+};
+
 void ReachString::read_offsets(cobb::bitstream& stream, ReachStringTable& table) noexcept {
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
@@ -44,8 +50,9 @@ void ReachString::write_strings(std::string& out) const noexcept {
          }
       }
       if (allEqual) {
+         auto s = out.size();
          for (auto& offset : this->offsets)
-            offset = 0;
+            offset = s;
          out += this->strings[0];
          out += '\0';
          return;
@@ -165,10 +172,10 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
             case Z_OK:
                break;
             case Z_MEM_ERROR:
-               assert(false && "Memory error occurred when trying to compress string table.\n");
+               assert(false && "Memory error occurred when trying to compress string table.");
                break;
             case Z_BUF_ERROR:
-               assert(false && "Insufficient buffer space when trying to compress string table.\h");
+               assert(false && "Insufficient buffer space when trying to compress string table.");
                break;
          }
          stream.write(compressed_size, this->buffer_size_bitlength);
