@@ -21,7 +21,7 @@ namespace Megalo {
    //
    class OpcodeStringToken {
       public:
-         OpcodeStringTokenType type;
+         OpcodeStringTokenType type = OpcodeStringTokenType::none;
          OpcodeArgValue* value = nullptr;
          //
          ~OpcodeStringToken() {
@@ -60,6 +60,11 @@ namespace Megalo {
             }
             return true;
          }
+         void write(cobb::bitwriter& stream) const noexcept {
+            stream.write((int8_t)this->type + 1, 3);
+            if (this->value)
+               this->value->write(stream);
+         }
          void to_string(std::string& out) const noexcept {
             if (this->value)
                this->value->to_string(out);
@@ -96,6 +101,12 @@ namespace Megalo {
             for (uint8_t i = 0; i < this->tokenCount; i++)
                this->tokens[i].read(stream);
             return true;
+         }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->stringIndex + 1, cobb::bitcount(Limits::max_variant_strings - 1));
+            stream.write(this->tokenCount, cobb::bitcount(N));
+            for (uint8_t i = 0; i < this->tokenCount; i++)
+               this->tokens[i].write(stream);
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->tokenCount == 0) {

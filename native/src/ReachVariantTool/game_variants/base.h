@@ -249,6 +249,8 @@ class GameVariant {
          this->blamHeader.write(stream);
          this->contentHeader.write(stream);
          this->multiplayer.write(stream);
+         for (auto& unknown : this->unknownBlocks)
+            unknown.write(stream);
 
          #if !_DEBUG
             static_assert(false, "FINISH ME");

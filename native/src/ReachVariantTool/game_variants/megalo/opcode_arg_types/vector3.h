@@ -19,6 +19,11 @@ namespace Megalo {
             stream.read(this->value.z);
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->value.x);
+            stream.write(this->value.y);
+            stream.write(this->value.z);
+         }
          virtual void to_string(std::string& out) const noexcept override {
             cobb::sprintf(out, "(%d, %d, %d)", this->value.x, this->value.y, this->value.z);
          }

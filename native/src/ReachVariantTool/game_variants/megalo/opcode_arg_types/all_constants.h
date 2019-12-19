@@ -12,6 +12,9 @@ namespace Megalo {
             stream.read(this->value);
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->value);
+         }
          virtual void to_string(std::string& out) const noexcept override {
             out = this->value ? this->baseStringTrue : this->baseStringFalse;
          }
@@ -33,6 +36,9 @@ namespace Megalo {
          virtual bool read(cobb::bitstream& stream) noexcept override {
             stream.read(this->value);
             return true;
+         }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->value);
          }
          virtual void to_string(std::string& out) const noexcept override {
             cobb::sprintf(out, "%d", this->value);

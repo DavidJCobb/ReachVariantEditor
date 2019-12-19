@@ -26,11 +26,14 @@ namespace cobb {
          uint32_t _size   = 0;
          uint32_t _bitpos = 0;
          //
+         uint8_t& _access_byte(uint32_t bytepos) const noexcept;
          void _ensure_room_for(unsigned int bitcount) noexcept;
          void _write(uint64_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
          //
       public:
          ~bitwriter();
+         bitwriter() {};
+         bitwriter(const bitwriter&) = delete; // no copy
          //
          inline uint32_t get_bitpos()   const noexcept { return this->_bitpos; };
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
@@ -51,8 +54,10 @@ namespace cobb {
                this->write(0, 8);
          }
          void pad_to_bytepos(uint32_t bytepos) noexcept;
-         void resize(uint32_t size) noexcept;
+         void resize(uint32_t size) noexcept; // size in bytes
          inline void write(int64_t value, int bits, bool is_signed = false) noexcept {
+            if (!bits)
+               return;
             if (is_signed && value < 0)
                value |= ((int64_t)1 << (bits - 1));
             this->_write(value, bits, bits);
@@ -104,5 +109,7 @@ namespace cobb {
                   break;
             }
          }
+         //
+         void write_compressed_float(float value, const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept;
    };
 }

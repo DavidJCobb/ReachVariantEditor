@@ -36,6 +36,22 @@ namespace Megalo {
             }
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write((uint8_t)this->type, 2);
+            switch (this->type) {
+               case MeterType::none:
+                  break;
+               case MeterType::timer:
+                  this->timer.write(stream);
+                  break;
+               case MeterType::number:
+                  this->numerator.write(stream);
+                  this->denominator.write(stream);
+                  break;
+               default:
+                  assert(false && "Widget Meter Parameters had a bad type.");
+            }
+         }
          virtual void to_string(std::string& out) const noexcept override {
             std::string temp;
             switch (this->type) {

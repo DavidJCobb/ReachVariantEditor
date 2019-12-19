@@ -50,4 +50,14 @@ class ReachGameVariantTU1Options {
          this->magnumDamage              = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
          this->magnumFireRate            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
       }
+      void write(cobb::bitwriter& stream) const noexcept {
+         this->flags.write(stream);
+         stream.write_compressed_float(this->precisionBloom,            8, 0.0F, 10.0F, false, true);
+         stream.write_compressed_float(this->armorLockDamageDrain,      8, 0.0F,  2.0F, false, true);
+         stream.write_compressed_float(this->armorLockDamageDrainLimit, 8, 0.0F,  2.0F, false, true);
+         stream.write_compressed_float(this->activeCamoEnergyBonus,     8, 0.0F,  2.0F, false, true);
+         stream.write_compressed_float(this->activeCamoEnergy,          8, 0.0F,  2.0F, false, true);
+         stream.write_compressed_float(this->magnumDamage,              8, 0.0F, 10.0F, false, true);
+         stream.write_compressed_float(this->magnumFireRate,            8, 0.0F, 10.0F, false, true);
+      }
 };

@@ -148,6 +148,92 @@ namespace Megalo {
          this->index = stream.read_bits<uint16_t>(index_bits);
       return true;
    }
+   void OpcodeArgValueScalar::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->scope, cobb::bitcount((int)_scopes::_count - 1));
+      int which_bits = 0;
+      int index_bits = 0;
+      const VariableScope* variable_scope = nullptr;
+      switch ((_scopes)this->scope) {
+         case _scopes::constant:
+            stream.write(this->index, cobb::endian::big);
+            return;
+         case _scopes::player_number:
+            variable_scope = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object_number:
+            variable_scope = &MegaloVariableScopeObject;
+            break;
+         case _scopes::team_number:
+            variable_scope = &MegaloVariableScopeTeam;
+            break;
+         case _scopes::global_number:
+            variable_scope = &MegaloVariableScopeGlobal;
+            break;
+         case _scopes::script_option:
+            index_bits = cobb::bitcount(16 - 1); // scripted options
+            break;
+         case _scopes::spawn_sequence:
+            index_bits = MegaloVariableScopeObject.which_bits();
+            break;
+         case _scopes::team_score:
+            index_bits = MegaloVariableScopeTeam.which_bits();
+            break;
+         case _scopes::player_score: // intentional fall-through
+         case _scopes::unknown_09:
+         case _scopes::player_rating:
+            index_bits = MegaloVariableScopePlayer.which_bits();
+            break;
+         case _scopes::player_stat:
+            which_bits = MegaloVariableScopePlayer.which_bits();
+            index_bits = cobb::bitcount(4 - 1); // scripted stats
+            break;
+         case _scopes::team_stat:
+            which_bits = MegaloVariableScopeTeam.which_bits();
+            index_bits = cobb::bitcount(4 - 1); // scripted stats
+            break;
+         case _scopes::current_round:
+         case _scopes::symmetry_getter:
+         case _scopes::symmetry:
+         case _scopes::score_to_win:
+         case _scopes::unkF7A6:
+         case _scopes::teams_enabled:
+         case _scopes::round_time_limit:
+         case _scopes::round_limit:
+         case _scopes::misc_unk0_bit3:
+         case _scopes::rounds_to_win:
+         case _scopes::sudden_death_time:
+         case _scopes::grace_period:
+         case _scopes::lives_per_round:
+         case _scopes::team_lives_per_round:
+         case _scopes::respawn_time:
+         case _scopes::suicide_penalty:
+         case _scopes::betrayal_penalty:
+         case _scopes::respawn_growth:
+         case _scopes::loadout_cam_time:
+         case _scopes::respawn_traits_duration:
+         case _scopes::friendly_fire:
+         case _scopes::betrayal_booting:
+         case _scopes::social_flags_bit_2:
+         case _scopes::social_flags_bit_3:
+         case _scopes::social_flags_bit_4:
+         case _scopes::grenades_on_map:
+         case _scopes::indestructible_vehicles:
+         case _scopes::powerup_duration_red:
+         case _scopes::powerup_duration_blue:
+         case _scopes::powerup_duration_yellow:
+         case _scopes::death_event_damage_type:
+            break; // these are all accessors to game state values and require no additional information other than the fact of their being used
+      }
+      if (variable_scope) {
+         stream.write(this->which, variable_scope->which_bits());
+         stream.write(this->index, variable_scope->index_bits(variable_type::scalar));
+         return;
+      }
+      if (which_bits)
+         stream.write(this->which, which_bits);
+      if (index_bits)
+         stream.write(this->index, index_bits);
+   }
    /*virtual*/ void OpcodeArgValueScalar::to_string(std::string& out) const noexcept /*override*/ {
       const char* which_scope = nullptr;
       switch ((_scopes)this->scope) {

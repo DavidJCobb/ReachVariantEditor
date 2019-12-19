@@ -73,9 +73,6 @@ namespace cobb {
             #endif
             return result;
          }
-         /*// Split into a templated function so we can support in64s
-         uint32_t read_bits(int count, uint32_t read_flags = 0) noexcept;
-         //*/
          //
       public:
          template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T>)> void read(T& out) noexcept {

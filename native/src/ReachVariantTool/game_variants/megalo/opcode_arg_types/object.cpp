@@ -15,8 +15,8 @@ namespace {
       _count,
    };
    //
-   // From looking at CTF trigger actions, I think the "slave" object of a player is 
-   // basically the "third weapon" i.e. a carried flag, bomb, or oddball.
+   // TODO: Is "slave" being used as a term for "biped?" Because if so, then just calling it 
+   // "biped" would be simpler, more intuitive, and... I dunno -- nicer, I guess.
    //
 }
 namespace Megalo {
@@ -75,6 +75,52 @@ namespace Megalo {
       if (index_bits)
          this->index = stream.read_bits<uint16_t>(index_bits);
       return true;
+   }
+   void OpcodeArgValueObject::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->scope, cobb::bitcount((int)_scopes::_count - 1));
+      int which_bits = 0;
+      int index_bits = 0;
+      const VariableScope* variable_scope = nullptr;
+      const VariableScope* slave_var_scope = nullptr;
+      switch ((_scopes)this->scope) {
+         case _scopes::global:
+            index_bits = MegaloVariableScopePlayer.which_bits();
+            break;
+         case _scopes::player:
+            variable_scope = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object:
+            variable_scope = &MegaloVariableScopeObject;
+            break;
+         case _scopes::team:
+            variable_scope = &MegaloVariableScopeTeam;
+            break;
+         case _scopes::player_slave:
+            which_bits = MegaloVariableScopePlayer.which_bits();
+            break;
+         case _scopes::player_player_slave:
+            slave_var_scope = &MegaloVariableScopePlayer;
+            break;
+         case _scopes::object_player_slave:
+            slave_var_scope = &MegaloVariableScopeObject;
+            break;
+         case _scopes::team_player_slave:
+            slave_var_scope = &MegaloVariableScopeTeam;
+            break;
+      }
+      if (variable_scope) {
+         stream.write(this->which, variable_scope->which_bits());
+         stream.write(this->index, variable_scope->index_bits(variable_type::object));
+         return;
+      } else if (slave_var_scope) {
+         stream.write(this->which, slave_var_scope->which_bits());
+         stream.write(this->index, slave_var_scope->index_bits(variable_type::player));
+         return;
+      }
+      if (which_bits)
+         stream.write(this->which, which_bits);
+      if (index_bits)
+         stream.write(this->index, index_bits);
    }
    /*virtual*/ void OpcodeArgValueObject::to_string(std::string& out) const noexcept /*override*/ {
       const char* which_scope = nullptr;

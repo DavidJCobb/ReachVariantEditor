@@ -58,7 +58,23 @@ TestingGameVariant g_tests[] = {
    TestingGameVariant("Invasion (Breakpoint)", L"invasion_breakpoint.bin"),
 };
 
+void _cobb_invalid_parameter(
+   const wchar_t* expression,
+   const wchar_t* function,
+   const wchar_t* file,
+   unsigned int line,
+   uintptr_t pReserved
+) {
+   printf("CRT Invalid Parameter Error\nFile: %S\nLine: %u\nFunc: %S\nExpr: %S\n", file, line, function, expression);
+   assert(false && "Invalid parameter");
+}
+
 int main() {
+   #if _DEBUG
+      _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_WNDW); // make asserts log to the console and pop a window
+      _CrtSetReportMode(_CRT_ERROR,  _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_WNDW);
+      _set_invalid_parameter_handler(_cobb_invalid_parameter);
+   #endif
    if (cobb::endian::native == cobb::endian::big) {
       printf("Current processor is big-endian.\n");
       printf("'ABCD' swapped to little-endian: %08X -> %08X\n", 'ABCD', cobb::to_little_endian(uint32_t('ABCD')));

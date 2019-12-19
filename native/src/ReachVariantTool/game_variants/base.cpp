@@ -462,19 +462,26 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    cobb_test_display_bitwriter_offset("after engine option toggles");
    {  // Megalo
       auto& content = this->scriptContent;
-
+      //
       stream.write(content.raw.conditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
       for (auto& opcode : content.raw.conditions)
          opcode.write(stream);
+      cobb_test_display_bitwriter_offset("after conditions");
+      //
       stream.write(content.raw.actions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
       for (auto& opcode : content.raw.actions)
          opcode.write(stream);
+      cobb_test_display_bitwriter_offset("after actions");
+      //
       stream.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
       for (auto& trigger : content.triggers)
          trigger.write(stream);
+      cobb_test_display_bitwriter_offset("after triggers");
+      //
       stream.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
       for (auto& stat : content.stats)
          stat.write(stream);
+      cobb_test_display_bitwriter_offset("after stats");
       //
       {  // Script variable declarations
          auto& v = content.variables;
@@ -483,10 +490,12 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
          v.object.write(stream);
          v.team.write(stream);
       }
+      cobb_test_display_bitwriter_offset("after variable declarations");
       //
       stream.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
       for (auto& widget : content.widgets)
          widget.write(stream);
+      cobb_test_display_bitwriter_offset("after widgets");
       //
       content.entryPoints.write(stream);
       content.usedMPObjectTypes.write(stream);
@@ -494,11 +503,9 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       stream.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
       for (auto& label : content.forgeLabels)
          label.write(stream);
+      cobb_test_display_bitwriter_offset("after forge labels");
    }
-
-
-   #if !_DEBUG
-      static_assert(false, "FINISH ME");
-   #endif
-
+   if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
+      this->titleUpdateData.write(stream);
+   stream.pad_to_bytepos(this->header.write_end());
 }

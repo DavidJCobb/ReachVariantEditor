@@ -11,8 +11,13 @@ namespace Megalo {
          virtual bool read(cobb::bitstream& stream) noexcept override {
             this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
             if (this->icon == WaypointIcon.lookup("territory A"))
-               return OpcodeArgValueScalar::read(stream);
+               return OpcodeArgValueScalar::read(stream); // call super
             return true;
+         }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write(this->icon, WaypointIcon.index_bits());
+            if (this->icon == WaypointIcon.lookup("territory A"))
+               OpcodeArgValueScalar::write(stream); // call super
          }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->icon == WaypointIcon.lookup("territory A")) {

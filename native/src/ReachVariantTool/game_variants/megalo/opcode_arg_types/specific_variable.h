@@ -22,6 +22,15 @@ namespace Megalo {
             this->index = stream.read_bits(scope.index_bits(this->baseType));
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            if (this->index == -1) {
+               stream.write(1, 1);
+               return;
+            }
+            stream.write(0, 1);
+            auto scope = getScopeObjectForConstant(this->baseScope);
+            stream.write(this->index, scope.index_bits(this->baseType));
+         }
          virtual void to_string(std::string& out) const noexcept override {
             const char* owner = "INVALID";
             switch (this->baseScope) {
@@ -69,6 +78,15 @@ namespace Megalo {
                return true;
             this->playerIndex = stream.read_bits(MegaloVariableScopeObject.index_bits(variable_type::player));
             return true;
+         }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            this->object.write(stream);
+            if (this->playerIndex == -1) {
+               stream.write(1, 1);
+               return;
+            }
+            stream.write(0, 1);
+            stream.write(this->playerIndex, MegaloVariableScopeObject.index_bits(variable_type::player));
          }
          virtual void to_string(std::string& out) const noexcept override {
             this->object.to_string(out);

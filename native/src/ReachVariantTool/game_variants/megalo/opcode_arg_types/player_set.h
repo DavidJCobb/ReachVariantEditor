@@ -23,6 +23,13 @@ namespace Megalo {
             }
             return true;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write((uint8_t)this->set_type, 3);
+            if (this->set_type == PlayerSetType::specific_player) {
+               this->player.write(stream);
+               this->addOrRemove.write(stream);
+            }
+         }
          virtual void to_string(std::string& out) const noexcept override {
             if (this->set_type == PlayerSetType::specific_player) {
                std::string temp;

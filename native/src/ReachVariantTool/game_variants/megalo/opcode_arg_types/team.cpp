@@ -91,7 +91,7 @@ namespace Megalo {
       }
       if (variable_scope) {
          stream.write(this->which, variable_scope->which_bits());
-         stream.write(this->index, variable_scope->index_bits(variable_type::timer));
+         stream.write(this->index, variable_scope->index_bits(variable_type::team));
          return;
       } else if (owner_team_of) {
          stream.write(this->which, owner_team_of->which_bits());

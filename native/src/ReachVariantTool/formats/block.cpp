@@ -4,7 +4,7 @@
 #include "../helpers/endianness.h"
 
 bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
-   this->pos = stream.get_bytepos();
+   this->readState.pos = stream.get_bytepos();
    stream.read(this->found.signature); // bswap?
    stream.read(this->found.size);
    stream.read(this->found.version); // bswap?
@@ -18,7 +18,7 @@ bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
    return true;
 }
 bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
-   this->pos = stream.offset;
+   this->readState.pos = stream.offset;
    stream.read(this->found.signature); // bswap?
    stream.read(this->found.size);
    stream.read(this->found.version); // bswap?
@@ -35,6 +35,7 @@ bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
    return true;
 }
 void ReachFileBlock::write(cobb::bitwriter& stream) const noexcept {
+   this->writeState.pos = stream.get_bytepos();
    stream.enlarge_by(0xC);
    stream.write(this->found.signature, cobb::endian::big);
    stream.write(this->found.size,      cobb::endian::big);

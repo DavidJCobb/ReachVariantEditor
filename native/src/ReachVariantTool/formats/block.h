@@ -11,10 +11,10 @@ namespace cobb {
 class ReachFileBlock {
    public:
       struct {
-         uint32_t signature;
-         uint32_t size;
-         uint16_t version = 0;
-         uint16_t flags   = 0;
+         uint32_t signature = 0;
+         uint32_t size      = 0;
+         uint16_t version   = 0;
+         uint16_t flags     = 0;
       } expected;
       struct {
          uint32_t signature = 0;
@@ -22,7 +22,12 @@ class ReachFileBlock {
          uint16_t version   = 0;
          uint16_t flags     = 0;
       } found;
-      uint32_t pos = 0; // in bytes, not bits
+      struct {
+         uint32_t pos = 0; // in bytes, not bits
+      } readState;
+      mutable struct {
+         uint32_t pos = 0;
+      } writeState;
       //
       ReachFileBlock() {};
       ReachFileBlock(uint32_t sig, uint32_t size) {
@@ -34,7 +39,8 @@ class ReachFileBlock {
       bool read(cobb::bytestream&) noexcept;
       void write(cobb::bitwriter&) const noexcept;
       //
-      uint32_t end() const noexcept { return this->pos + this->expected.size; }
+      uint32_t end() const noexcept { return this->readState.pos + this->expected.size; }
+      uint32_t write_end() const noexcept { return this->writeState.pos + this->expected.size; }
 };
 
 class ReachFileBlockRemainder {

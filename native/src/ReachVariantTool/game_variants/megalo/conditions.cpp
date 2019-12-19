@@ -233,11 +233,14 @@ namespace Megalo {
       return true;
    }
    void Condition::write(cobb::bitwriter& stream) const noexcept {
+      #if _DEBUG
+         printf("Saving condition: %s\n", this->debug_str.c_str());
+      #endif
       {
          size_t index = 0;
          auto&  list   = conditionFunctionList;
          for (; index < list.size(); index++)
-            if (&list[index] == this->function)
+            if (this->function == &list[index])
                break;
          if (index == list.size()) {
             assert(false && "Condition with unknown function -- can't serialize!");
@@ -252,17 +255,28 @@ namespace Megalo {
       //
       auto&  base     = this->function->arguments;
       size_t argCount = base.size();
+      assert(this->arguments.size() == argCount && "A condition didn't have enough arguments during save!");
       for (size_t i = 0; i < argCount; i++) {
-         auto arg     = this->arguments[i];
-         auto factory = base[i].factory;
+         #if _DEBUG
+            printf(" - Serializing argument #%d...\n", i);
+         #endif
+         auto* arg     = this->arguments[i];
+         auto  factory = base[i].factory;
+         assert(arg && "A condition's argument is nullptr during save!");
          //
          // This is really ugly but I've sort of painted myself into a corner here... Some 
          // arguments can take multiple variable types, and currently the variable classes 
          // have no way of "knowing" that that's how they got here.
          //
          if (factory == OpcodeArgAnyVariableFactory) {
+            #if _DEBUG
+               printf("   Opcode base type is <any-variable>. Serializing variable type code...\n");
+            #endif
             stream.write((uint8_t)arg->get_variable_type(), 3);
          } else if (factory == OpcodeArgTeamOrPlayerVariableFactory) {
+            #if _DEBUG
+               printf("   Opcode base type is <team-or-player>. Serializing variable type code...\n");
+            #endif
             switch (arg->get_variable_type()) {
                case variable_type::team:
                   stream.write(0, 2);
@@ -278,7 +292,13 @@ namespace Megalo {
          //
          // Now we can serialize the argument value.
          //
+         #if _DEBUG
+            printf("   About to write argument of type %s...\n", typeid(*arg).name());
+         #endif
          arg->write(stream);
+         #if _DEBUG
+            printf("   Wrote argument.\n");
+         #endif
       }
    }
    void Condition::to_string(std::string& out) const noexcept {

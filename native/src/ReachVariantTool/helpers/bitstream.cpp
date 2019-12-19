@@ -9,57 +9,29 @@ namespace cobb {
          return result;
       return 0;
    }
-   /*// Split into a templated function so we can support int64s:
-   uint32_t bitstream::read_bits(int count, uint32_t flags) noexcept {
-      auto pos   = this->get_bytepos();
-      auto shift = this->get_bitshift();
-      uint32_t bits = this->_grab_byte(pos) & (0xFF >> shift);
-      int      bits_read = 8 - shift;
-      if (count < bits_read) {
-         bits = bits >> (bits_read - count);
-         this->offset += count;
-      } else {
-         this->offset += bits_read;
-         auto remaining = count - bits_read;
-         if (remaining) {
-            auto next = this->read_bits(remaining);
-            bits = (bits << remaining) | next;
-         }
-      }
-      if (flags & read_flags::swap) {
-         bits = cobb::bitswap<uint32_t>(bits, count);
-      }
-      if (flags & read_flags::is_signed) {
-         uint32_t m = 1 << (count - 1);
-         bits = (bits ^ m) - m;
-      }
-      assert(this->offset == (pos * 8 + shift) + count && "Failed to advance by the correct number of bits.");
-      return bits;
-   }
-   //*/
    //
    float bitstream::read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept {
       assert(bitcount <= 8 && "bitstream::read_compressed_float doesn't currently support compressed floats larger than one byte.");
       uint8_t raw = this->read_bits<uint8_t>(bitcount);
       //
-      float    range     = max - min;
-      uint32_t precision = 1 << bitcount;
+      float    range       = max - min;
+      uint32_t max_encoded = 1 << bitcount;
       if (is_signed)
-         precision--;
+         max_encoded--;
       float result;
       if (unknown) {
          if (!raw)
             result = min;
-         else if (raw == precision - 1)
+         else if (raw == max_encoded - 1)
             result = max;
          else
-            result = min + ((float)raw - 0.5F) * (range / (float)(precision - 2));
+            result = min + ((float)raw - 0.5F) * (range / (float)(max_encoded - 2));
       } else {
-         result = min + ((float)raw + 0.5F) * (range / (float)precision);
+         result = min + ((float)raw + 0.5F) * (range / (float)max_encoded);
       }
       if (is_signed) {
-         precision--;
-         if (raw * 2 == precision)
+         max_encoded--;
+         if (raw * 2 == max_encoded)
             result = (min + max) * 0.5F;
       }
       return result;

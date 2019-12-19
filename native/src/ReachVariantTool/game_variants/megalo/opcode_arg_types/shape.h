@@ -40,6 +40,25 @@ namespace Megalo {
             }
             return false;
          }
+         virtual void write(cobb::bitwriter& stream) const noexcept override {
+            stream.write((uint8_t)this->shapeType, cobb::bitcount((int)ShapeType::_count - 1));
+            switch (this->shapeType) {
+               case ShapeType::sphere:
+                  this->radius.write(stream);
+                  return;
+               case ShapeType::cylinder:
+                  this->radius.write(stream);
+                  this->top.write(stream);
+                  this->bottom.write(stream);
+                  return;
+               case ShapeType::box:
+                  this->radius.write(stream);
+                  this->length.write(stream);
+                  this->top.write(stream);
+                  this->bottom.write(stream);
+                  return;
+            }
+         }
          virtual void to_string(std::string& out) const noexcept override {
             std::string temp;
             switch (this->shapeType) {
