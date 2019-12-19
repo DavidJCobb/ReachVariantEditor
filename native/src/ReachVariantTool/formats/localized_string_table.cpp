@@ -127,7 +127,7 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
       }
       stream.write(uncompressed_size, this->buffer_size_bitlength);
       //
-      bool should_compress = true; // TODO: logic
+      bool should_compress = combined.size() >= 0x80; // TODO: better logic
       stream.write(should_compress, 1);
       if (should_compress) {
          auto bound = compressBound(uncompressed_size);
