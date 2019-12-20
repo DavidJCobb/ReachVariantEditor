@@ -7,6 +7,35 @@
 #include "enums.h"
 #include "variables_and_scopes.h"
 
+//
+// Here, an "opcode" is an instruction that can appear in a Megalo trigger, i.e. a 
+// condition or an action. An "opcode base" is a kind of opcode. The appropriate 
+// comparison for x86 would be to say that MOV is an opcode base, while a specific 
+// MOV instruction in a block of code is an opcode. Opcodes can have arguments.
+//
+// A loaded opcode argument is stored as an instance of a subclass of OpcodeArgValue. 
+// There are subclasses for every possible argument type, and each subclass has a 
+// factory function which constructs an instance. Opcode bases specify their argument 
+// types via a list of factory functions; at run-time, opcodes will go over the list 
+// and construct instances of OpcodeArgValue subclasses to hold loaded arguments.
+//
+// Factory functions can receive a cobb::bitstream reference. This is used in cases 
+// where an argument type can vary. For example, the "Compare" condition can compare 
+// any two variables (or game state values or constant integers), and so its opcode 
+// base has two pointers to the (OpcodeArgAnyVariableFactory) factory function. That 
+// factory function reads bits from the file which indicate what variable type is 
+// present, and then constructs an instance of the appropriate subclass. Factory 
+// functions should not use the bitstream for any other purpose; it is the opcode's 
+// responsibility to direct an OpcodeArgValue received from a factory to load its 
+// data.
+//
+// The class OpcodeArgBase is the means through which opcode bases list their 
+// arguments. An OpcodeArgBase contains, as of this writing, a factory function 
+// pointer, a name (for UI purposes), and flags indicating things such as whether 
+// the argument is an out-variable (in which case read-only values would not be 
+// allowed, e.g. a trigger action cannot modify the value of a constant integer).
+//
+
 namespace Megalo {
    class OpcodeArgBase;
 

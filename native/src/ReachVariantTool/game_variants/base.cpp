@@ -159,13 +159,17 @@ void ReachTeamData::write(cobb::bitwriter& stream) const noexcept {
 
 bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    Megalo::ParseState::reset();
+   uint32_t offset_before_hashable;
+   uint32_t offset_after_hashable;
    //
    if (!this->header.read(stream)) {
       printf("Failed to read MPVR block header.\n");
       return false;
    }
    stream.read(this->hashSHA1);
-   stream.skip(8 * 8); // skip eight bytes
+   stream.skip(4 * 8); // skip four unused bytes
+   stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
+   offset_before_hashable = stream.get_bytespan();
    this->type.read(stream);
    stream.read(this->encodingVersion);
    stream.read(this->engineVersion);
@@ -320,6 +324,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
          trigger.to_string(triggers, out);
          printf(out.c_str());
       }
+      printf("\n");
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       this->scriptContent.stats.resize(count);
@@ -356,7 +361,30 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.read(stream);
+   offset_after_hashable = stream.get_bytespan();
    this->remainingData.read(stream, this->header.end());
+   //
+   {
+      auto     hasher   = InProgressSHA1();
+      uint32_t size     = offset_after_hashable - offset_before_hashable;
+      printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
+      uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
+      auto     buffer   = (const uint8_t*)stream.buffer.data();
+      auto     buffer32 = (const uint32_t*)buffer;
+      uint8_t* working  = (uint8_t*)malloc(bufsize);
+      memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
+      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(uint32_t(size));
+      memcpy(working + bufsize - size, buffer + offset_before_hashable, size);
+      hasher.transform(working, sizeof(reachSHA1Salt) + 4 + size);
+      //
+      printf("File's existing hash:\n");
+      for (int i = 0; i < 5; i++)
+         printf("   %08X\n", buffer32[0x2FC / 4 + i]);
+      printf("\nOur hash:\n");
+      for (int i = 0; i < 5; i++)
+         printf("   %08X\n", hasher.hash[i]);
+      printf("Check done.\n");
+   }
    //
    #if _DEBUG
       __debugbreak();
@@ -364,9 +392,14 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    return true;
 }
 void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
+   uint32_t offset_before_hashable;
+   uint32_t offset_after_hashable;
+   //
    this->header.write(stream);
    stream.write(this->hashSHA1);
-   stream.pad_bytes(8);
+   stream.pad_bytes(4); // four unused bytes
+   stream.pad_bytes(4); // TODO: go back after writing all data and set this to big-endian: (offset_after_hashable - offset_before_hashable)
+   offset_before_hashable = stream.get_bytespan();
    this->type.write(stream);
    stream.write(this->encodingVersion, cobb::endian::big);
    stream.write(this->engineVersion,   cobb::endian::big);
@@ -509,6 +542,7 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.write(stream);
+   offset_after_hashable = stream.get_bytespan();
    stream.pad_to_bytepos(this->header.write_end());
    //
    {  // SHA-1 hash
@@ -560,6 +594,11 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
       //    big-endian
       //
       //  - The game variant data
+      //
+      //  = The above is all stitched together into one buffer and then hashed. We only specif-
+      //    ically need to worry about endianness when writing the length in; we write the salt 
+      //    in as bytes and our SHA-1 code reads everything as bytes and stitches them into big-
+      //    endian dwords as needed.
       //
       // TODO:
       //

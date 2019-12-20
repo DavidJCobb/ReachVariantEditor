@@ -242,6 +242,18 @@ class GameVariant {
             return false;
          }
          //
+         // TODO: We need to handle the '_eof' block here, because it contains a 
+         // file length.
+         //
+         // The file length in the CHDR and MPVR blocks is the total size of the 
+         // file up to the end of the '_eof' block. The file length in the _EOF 
+         // block is the total size of the file up to the beginning of the '_eof' 
+         // block, and not including the block itself.
+         //
+         // In general, the major chunks for a file should all be of constant 
+         // lengths, e.g. MPVR is always 0x5000 bytes plus the size of its hash 
+         // and other odds and ends. Still, we should try to handle this robustly.
+         //
          bytes.offset = bits.get_bytepos();
          while (file.is_in_bounds(bytes.offset, 0)) {
             auto& block = this->unknownBlocks.emplace_back();

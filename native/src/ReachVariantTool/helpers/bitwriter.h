@@ -37,6 +37,14 @@ namespace cobb {
          //
          inline uint32_t get_bitpos()   const noexcept { return this->_bitpos; };
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
+         inline uint32_t get_bytespan() const noexcept {
+            //
+            // "Bytepos" is the byte we're currently reading from, i.e. the number of 
+            // entire bytes we've read. "Bytespan" is the number of all bytes that 
+            // we've read any bits from.
+            //
+            return this->get_bytepos() + (this->get_bitshift() ? 1 : 0);
+         }
          inline int      get_bitshift() const noexcept { return this->_bitpos % 8; };
          inline const uint8_t* data() const noexcept { return this->_buffer; }
          //

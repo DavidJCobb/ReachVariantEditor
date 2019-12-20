@@ -8,7 +8,7 @@
 #include "helpers/endianness.h"
 #include "helpers/files.h"
 
-#define REACH_GAME_VARIANTS_TESTING_RESAVE 1
+#define REACH_GAME_VARIANTS_TESTING_RESAVE 0
 
 struct TestingGameVariant {
    LPCWSTR     path = L"";
@@ -92,11 +92,6 @@ int main() {
          printf("----------------------------------------------------------------------\n");
          printf("   Loading: %s <%S>\n", test.name, test.path);
          printf("----------------------------------------------------------------------\n");
-         //
-         GameVariant::test_mpvr_hash(file);
-         #if _DEBUG
-            __debugbreak();
-         #endif
          //
          auto variant = new GameVariant();
          variant->read(file);
