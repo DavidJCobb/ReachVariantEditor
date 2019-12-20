@@ -27,6 +27,10 @@ namespace cobb {
       }
    }
    //
+   void bitwriter::save_to(FILE* file) const noexcept {
+      assert(file && "Cannot save to a nullptr file handle.");
+      fwrite(this->_buffer, 1, this->get_bytespan(), file);
+   }
    void bitwriter::dump_to_console() const noexcept {
       printf("\nWritten stream:\n");
       //

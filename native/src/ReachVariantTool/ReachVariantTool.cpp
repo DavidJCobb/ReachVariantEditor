@@ -7,8 +7,9 @@
 #include "helpers/bitwriter.h"
 #include "helpers/endianness.h"
 #include "helpers/files.h"
+#include "formats/sha1.h"
 
-#define REACH_GAME_VARIANTS_TESTING_RESAVE 0
+#define REACH_GAME_VARIANTS_TESTING_RESAVE 1
 
 struct TestingGameVariant {
    LPCWSTR     path = L"";
@@ -40,6 +41,9 @@ struct TestingGameVariant {
 };
 
 TestingGameVariant g_tests[] = {
+   //
+   // MCC files:
+   //
    TestingGameVariant("Alpha Zombies",    L"alphazombies.bin"),
    TestingGameVariant("TU One Flag",      L"tu_ctf_1flag.bin"),
    TestingGameVariant("Assault",          L"assault.bin"),
@@ -58,29 +62,77 @@ TestingGameVariant g_tests[] = {
    TestingGameVariant("Invasion (Breakpoint)", L"invasion_breakpoint.bin"),
 };
 
-void _cobb_invalid_parameter(
-   const wchar_t* expression,
-   const wchar_t* function,
-   const wchar_t* file,
-   unsigned int line,
-   uintptr_t pReserved
-) {
-   printf("CRT Invalid Parameter Error\nFile: %S\nLine: %u\nFunc: %S\nExpr: %S\n", file, line, function, expression);
-   assert(false && "Invalid parameter");
+void test_create_hacked_variant() {
+   const wchar_t* path = L"hr_4v4_team_slayer_dmr_ar_50points_tu.bin";
+   //
+   printf("Attempting to create hacked TU Slayer variant...\n");
+   cobb::mapped_file file;
+   file.open(path);
+   auto variant = new GameVariant();
+   if (!variant->read(file)) {
+      printf("Failed to read base variant.\n");
+      return;
+   }
+   printf("Variant read.\n");
+   //
+   auto& mp = variant->multiplayer;
+   mp.options.map.baseTraits.movement.jumpHeight = 420;
+   mp.titleUpdateData.precisionBloom = 10.0F;
+   mp.titleUpdateData.magnumFireRate = 10.0F;
+   mp.titleUpdateData.magnumDamage   =  0.65F;
+   //
+   auto& chdr = variant->contentHeader;
+   chdr.data.set_title(L"Cursed Slayer");
+   mp.variantHeader.set_title(L"Cursed Slayer");
+   chdr.data.set_description(L"2x bloom; 420% jump height; 10x Magnum fire rate, full clip + headshot to kill.");
+   mp.variantHeader.set_description(L"2x bloom; 420% jump height; 10x Magnum fire rate, full clip + headshot to kill.");
+   //
+   mp.variantHeader.unk08 = 0;
+   mp.variantHeader.unk10 = 0;
+   mp.variantHeader.unk18 = 0;
+   mp.variantHeader.unk20 = 0;
+   chdr.data.unk08 = 0;
+   chdr.data.unk10 = 0;
+   chdr.data.unk18 = 0;
+   chdr.data.unk20 = 0;
+   //
+   printf("Writing modified data to buffer...\n");
+   cobb::bitwriter writer;
+   variant->write(writer);
+   //
+   FILE*   out   = nullptr;
+   errno_t error = fopen_s(&out, "test_output_game_variant.bin", "wb");
+   if (out) {
+      printf("Writing modified data to output file...\n");
+      writer.save_to(out);
+      fclose(out);
+      printf("Game variant saved.\n");
+   } else
+      printf("Failed to open output file for game variant.\n");
 }
 
 int main() {
-   #if _DEBUG
-      _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_WNDW); // make asserts log to the console and pop a window
-      _CrtSetReportMode(_CRT_ERROR,  _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_WNDW);
-      _set_invalid_parameter_handler(_cobb_invalid_parameter);
-   #endif
    if (cobb::endian::native == cobb::endian::big) {
       printf("Current processor is big-endian.\n");
       printf("'ABCD' swapped to little-endian: %08X -> %08X\n", 'ABCD', cobb::to_little_endian(uint32_t('ABCD')));
    } else {
       printf("Current processor is little-endian.\n");
       printf("'ABCD' swapped to big-endian: %08X -> %08X\n", 'ABCD', cobb::to_big_endian(uint32_t('ABCD')));
+   }
+   test_create_hacked_variant();
+   {
+      const char* text = "This is a test";
+      auto hasher = InProgressSHA1();
+      hasher.transform((const uint8_t*)text, strlen(text));
+      printf("SHA-1 hash of: %s\n", text);
+      for (size_t i = 0; i < 5; i++)
+         printf("   %08X\n", hasher.hash[i]);
+      printf("\n");
+   }
+   {  // Test hash of a 360 file
+      cobb::mapped_file file;
+      file.open(L"SvE Mythic Infection.bin");
+      GameVariant::test_mpvr_hash(file);
    }
    //
    #if REACH_GAME_VARIANTS_TESTING_RESAVE == 1

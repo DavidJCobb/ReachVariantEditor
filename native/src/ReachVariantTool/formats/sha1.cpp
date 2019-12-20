@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <cstring>
 #include "../helpers/endianness.h"
+#if _DEBUG
+   #include <cassert>
+#endif
 
 namespace {
    constexpr int _512_bits_as_bytes = 64;
@@ -23,6 +26,9 @@ void InProgressSHA1::transform(const uint8_t* buffer, uint32_t size) {
    if (padding < 0)
       padding += _512_bits_as_bytes;
    uint32_t padsize = size + padding + 8;
+   #if _DEBUG
+      assert((padsize % 64) == 0 && "messed up my math");
+   #endif
    uint8_t* working = (uint8_t*)malloc(padsize);
    memcpy(working, buffer, size);
    memset(working + size, 0, padsize - size);

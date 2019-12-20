@@ -48,6 +48,8 @@ namespace cobb {
          inline int      get_bitshift() const noexcept { return this->_bitpos % 8; };
          inline const uint8_t* data() const noexcept { return this->_buffer; }
          //
+         void save_to(FILE* file) const noexcept;
+         //
          inline void go_to_bitpos(uint32_t pos) noexcept {
             if (pos / 8 >= this->_size - 1)
                this->resize(pos / 8 + 1);

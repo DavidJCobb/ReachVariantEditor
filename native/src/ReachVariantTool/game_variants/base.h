@@ -71,6 +71,9 @@ class GameVariantHeader {
       bool read(cobb::bytestream&) noexcept;
       void write_bits(cobb::bitwriter& stream) const noexcept;
       void write_bytes(cobb::bitwriter& stream) const noexcept;
+      //
+      void set_title(const wchar_t* value) noexcept;
+      void set_description(const wchar_t* value) noexcept;
 };
 class ReachBlockCHDR {
    public:
@@ -273,6 +276,12 @@ class GameVariant {
          this->multiplayer.header.write_postprocess(stream);
          for (auto& unknown : this->unknownBlocks)
             unknown.write(stream);
+
+         // TODO: fix up file length in CHDR
+         // TODO: fix up file length in MPVR
+         // TODO: fix up file length in _EOF
+
+         // TODO: All block headers' sizes are serializing as little-endian even when I explicitly specify big-endian; investigate
 
          #if !_DEBUG
             static_assert(false, "FINISH ME");
