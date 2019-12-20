@@ -7,6 +7,8 @@
 #include "megalo/limits.h"
 #include "megalo/parse_error_reporting.h"
 
+#include "../formats/sha1.h"
+
 #define cobb_test_display_bitwriter_offset(text) printf("== Writer bytepos " text ": %08X\n", stream.get_bytepos());
 
 bool BlamHeader::read(cobb::bitstream& stream) noexcept {
@@ -366,8 +368,8 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    stream.write(this->hashSHA1);
    stream.pad_bytes(8);
    this->type.write(stream);
-   stream.write(this->encodingVersion);
-   stream.write(this->engineVersion);
+   stream.write(this->encodingVersion, cobb::endian::big);
+   stream.write(this->engineVersion,   cobb::endian::big);
    cobb_test_display_bitwriter_offset("after encoding+engine versions");
    this->variantHeader.write_bits(stream);
    this->flags.write(stream);
@@ -508,4 +510,84 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.write(stream);
    stream.pad_to_bytepos(this->header.write_end());
+   //
+   {  // SHA-1 hash
+      uint32_t stream_offset = stream.get_bytepos();
+      stream.go_to_bytepos(this->header.writeState.pos + 0x28);
+      const uint8_t* data = stream.data() + 0x28;
+      //
+      auto hasher = InProgressSHA1();
+      hasher.transform(reachSHA1Salt, sizeof(reachSHA1Salt));
+      hasher.transform(data, 0x5000);
+      //
+      stream.write(hasher.hash[0]); // TODO: not sure about endianness...
+      stream.write(hasher.hash[1]);
+      stream.write(hasher.hash[2]);
+      stream.write(hasher.hash[3]);
+      stream.write(hasher.hash[4]);
+      #if !_DEBUG
+         static_assert(false, "Once we determine the right hashing approach through testing, make this consistent with it.");
+      #endif
+      stream.go_to_bytepos(stream_offset);
+   }
+}
+
+void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
+   printf("Testing our hashing algorithm on this game variant...\n");
+   //
+   const uint8_t*  buffer   = (const uint8_t*)file.data();
+   const uint32_t* buffer32 = (const uint32_t*)buffer;
+   //
+   uint32_t signature = cobb::from_big_endian(buffer32[0x2F0 / 4]);
+   if (signature != 'mpvr') {
+      printf("Failed to find the mpvr block; signature found was %08X when we expected %08X.\n", signature, 'mpvr');
+      return;
+   }
+   //
+   printf("File's existing hash:\n");
+   for (int i = 0; i < 5; i++)
+      printf("   %08X\n", buffer32[0x2FC / 4 + i]);
+   printf("\n");
+   //
+   auto hasher = InProgressSHA1();
+   {
+      //
+      // DATA TO BE HASHED:
+      //
+      //  - The hash salt
+      //
+      //  - A uint32_t indicating the length of the game variant data (always 0x5000?), in 
+      //    big-endian
+      //
+      //  - The game variant data
+      //
+      // TODO:
+      //
+      // I'm pretty sure at this point that they're not serializing the max data size (0x5000, 
+      // the number of bytes that a file always contains for holding game variant data) but 
+      // rather the actual data size (i.e. how many of those 0x5000 bytes are actually being 
+      // used by the game variant). This means two things:
+      //
+      //  - We can't test our hashing code on an existing file without bundling it with the 
+      //    code to actually read that file, i.e. we need to know the stream position in bytes 
+      //    at the end of the game variant data and before the filler.
+      //
+      //     - Test this.
+      //
+      //     - If that doesn't work, modify the second memcpy we're using and don't add 4. 
+      //       I think that four of the padding bytes after the SHA-1 hash in the file aren't 
+      //       part of the content that gets hashed but it's hard to be sure.
+      //
+      //  - Same for saving: we need to compute the hash before we handle the filler.
+      //
+      uint8_t* working = (uint8_t*)malloc(sizeof(reachSHA1Salt) + 4 + 0x5000);
+      memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
+      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(uint32_t(0x5000));
+      memcpy(working + sizeof(reachSHA1Salt) + 4, buffer + 0x2FC + 0x14 + 0x4, 0x5000); // there are four padding bytes after the hash that are not part of the actual "data" that gets hashed
+      hasher.transform(working, sizeof(reachSHA1Salt) + 4 + 0x5000);
+   }
+   printf("Our hash:\n");
+   for (int i = 0; i < 5; i++)
+      printf("   %08X\n", hasher.hash[i]);
+   printf("Test done.\n");
 }

@@ -23,7 +23,7 @@ namespace cobb {
          static constexpr _is_signed_sentinel is_signed = _is_signed_sentinel();
       protected:
          uint8_t* _buffer = nullptr;
-         uint32_t _size   = 0;
+         uint32_t _size   = 0; // in bytes
          uint32_t _bitpos = 0;
          //
          uint8_t& _access_byte(uint32_t bytepos) const noexcept;
@@ -38,6 +38,18 @@ namespace cobb {
          inline uint32_t get_bitpos()   const noexcept { return this->_bitpos; };
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
          inline int      get_bitshift() const noexcept { return this->_bitpos % 8; };
+         inline const uint8_t* data() const noexcept { return this->_buffer; }
+         //
+         inline void go_to_bitpos(uint32_t pos) noexcept {
+            if (pos / 8 >= this->_size - 1)
+               this->resize(pos / 8 + 1);
+            this->_bitpos = pos;
+         };
+         inline void go_to_bytepos(uint32_t pos) noexcept {
+            if (pos >= this->_size - 1)
+               this->resize(pos + 1);
+            this->_bitpos = pos * 8;
+         };
          //
          uint8_t get_byte(uint32_t bytepos) const noexcept {
             if (bytepos > this->_bitpos / 8)
@@ -49,6 +61,7 @@ namespace cobb {
          inline void enlarge_by(uint32_t bytes) noexcept {
             this->resize(this->_size + bytes);
          }
+         void fixup_size_field(uint32_t offset, uint32_t size, bool offset_is_in_bits = false) noexcept;
          inline void pad_bytes(uint32_t bytes) noexcept {
             while (bytes--)
                this->write(0, 8);

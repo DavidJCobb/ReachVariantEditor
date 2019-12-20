@@ -152,6 +152,7 @@
     <ClInclude Include="formats\content_author.h" />
     <ClInclude Include="formats\game_variant.h" />
     <ClInclude Include="formats\localized_string_table.h" />
+    <ClInclude Include="formats\sha1.h" />
     <ClInclude Include="game_variants\base.h" />
     <ClInclude Include="game_variants\megalo\forge_label.h" />
     <ClInclude Include="game_variants\loadouts.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
+    <ClCompile Include="formats\sha1.cpp" />
     <ClCompile Include="game_variants\base.cpp" />
     <ClCompile Include="game_variants\loadouts.cpp" />
     <ClCompile Include="game_variants\megalo\actions.cpp" />

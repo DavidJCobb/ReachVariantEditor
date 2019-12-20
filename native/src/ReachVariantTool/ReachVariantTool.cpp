@@ -93,6 +93,11 @@ int main() {
          printf("   Loading: %s <%S>\n", test.name, test.path);
          printf("----------------------------------------------------------------------\n");
          //
+         GameVariant::test_mpvr_hash(file);
+         #if _DEBUG
+            __debugbreak();
+         #endif
+         //
          auto variant = new GameVariant();
          variant->read(file);
          //

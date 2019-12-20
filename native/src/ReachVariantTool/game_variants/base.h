@@ -33,6 +33,13 @@ class BlamHeader {
       bool read(cobb::bitstream&) noexcept;
       void write(cobb::bitwriter&) const noexcept;
 };
+class EOFBlock : public ReachFileBlock {
+   public:
+      EOFBlock() : ReachFileBlock('_eof', 0) {}
+      //
+      bool read(cobb::bitstream&) noexcept;
+      void write(cobb::bitwriter&) const noexcept;
+};
 
 class GameVariantHeader {
    public:
@@ -247,8 +254,11 @@ class GameVariant {
       }
       void write(cobb::bitwriter& stream) const noexcept {
          this->blamHeader.write(stream);
+         this->blamHeader.header.write_postprocess(stream);
          this->contentHeader.write(stream);
+         this->contentHeader.header.write_postprocess(stream);
          this->multiplayer.write(stream);
+         this->multiplayer.header.write_postprocess(stream);
          for (auto& unknown : this->unknownBlocks)
             unknown.write(stream);
 
@@ -256,4 +266,6 @@ class GameVariant {
             static_assert(false, "FINISH ME");
          #endif
       }
+      //
+      static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
 };

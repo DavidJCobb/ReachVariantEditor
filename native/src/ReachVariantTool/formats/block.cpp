@@ -19,10 +19,10 @@ bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
 }
 bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
    this->readState.pos = stream.offset;
-   stream.read(this->found.signature); // bswap?
+   stream.read(this->found.signature);
    stream.read(this->found.size);
-   stream.read(this->found.version); // bswap?
-   stream.read(this->found.flags); // bswap?
+   stream.read(this->found.version);
+   stream.read(this->found.flags);
    this->found.signature = cobb::from_big_endian(this->found.signature);
    this->found.size      = cobb::from_big_endian(this->found.size);
    this->found.version   = cobb::from_big_endian(this->found.version);
@@ -41,6 +41,15 @@ void ReachFileBlock::write(cobb::bitwriter& stream) const noexcept {
    stream.write(this->found.size,      cobb::endian::big);
    stream.write(this->found.version,   cobb::endian::big);
    stream.write(this->found.flags,     cobb::endian::big);
+}
+void ReachFileBlock::write_postprocess(cobb::bitwriter& stream) const noexcept { // rewrites block size, etc.; must be called immediately after the block is done writing
+   uint32_t size = stream.get_bytepos() - this->writeState.pos;
+   if (this->expected.size && size != this->expected.size) {
+      #if _DEBUG
+         __debugbreak(); // unexpected output size
+      #endif
+   }
+   stream.fixup_size_field(this->writeState.pos + 0x04, size);
 }
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {
@@ -79,4 +88,5 @@ void ReachUnknownBlock::write(cobb::bitwriter& stream) const noexcept {
    stream.enlarge_by(this->header.found.size);
    for (uint32_t i = 0; i < this->header.found.size; i++)
       stream.write(*(uint8_t*)(this->data + i));
+   this->header.write_postprocess(stream);
 }

@@ -38,6 +38,7 @@ class ReachFileBlock {
       bool read(cobb::bitstream&) noexcept;
       bool read(cobb::bytestream&) noexcept;
       void write(cobb::bitwriter&) const noexcept;
+      void write_postprocess(cobb::bitwriter&) const noexcept; // rewrites block size, etc.; must be called immediately after the block is done writing
       //
       uint32_t end() const noexcept { return this->readState.pos + this->expected.size; }
       uint32_t write_end() const noexcept { return this->writeState.pos + this->expected.size; }

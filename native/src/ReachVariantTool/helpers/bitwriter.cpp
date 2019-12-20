@@ -61,6 +61,17 @@ namespace cobb {
       }
    }
    //
+   void bitwriter::fixup_size_field(uint32_t offset, uint32_t size, bool offset_is_in_bits) noexcept {
+      if (!offset_is_in_bits) {
+         *(uint32_t*)((std::intptr_t)this->_buffer + offset) = size;
+         return;
+      }
+      uint32_t bitpos = this->_bitpos;
+      this->_bitpos = offset;
+      this->write(size);
+      this->_bitpos = bitpos;
+   }
+   //
    void bitwriter::pad_to_bytepos(uint32_t bytepos) noexcept {
       assert(bytepos * 8 >= this->_size && "Cannot pad to a position we've already passed.");
       this->resize(bytepos);

@@ -18,6 +18,8 @@ namespace cobb {
          mapped_file(wchar_t const* path) noexcept { this->open(path); }
          ~mapped_file();
          //
+         const void* data() const noexcept { return this->view; }
+         //
          void open(wchar_t const* path) noexcept;
          void open(FILE* handle) noexcept;
          //
