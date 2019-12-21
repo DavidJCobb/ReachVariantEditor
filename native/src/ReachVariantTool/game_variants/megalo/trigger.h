@@ -5,6 +5,8 @@
 #include "actions.h"
 #include "conditions.h"
 #include "limits.h"
+#include "limits_bitnumbers.h"
+#include "../../helpers/bitnumber.h"
 #include "../../helpers/bitstream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/bitwise.h"
@@ -22,7 +24,7 @@ namespace Megalo {
       for_each_object, // every MP object?
       for_each_object_with_label,
    };
-   enum class trigger_type : uint8_t {
+   enum class entry_type : uint8_t {
       normal,
       subroutine, // preserves iterator values?
       on_init,
@@ -38,9 +40,9 @@ namespace Megalo {
       public:
          ~Trigger();
          //
-         block_type   blockType  = block_type::normal;
-         trigger_type entry      = trigger_type::normal;
-         int32_t      labelIndex = -1; // Forge label index for block_type::for_each_object_with_label
+         cobb::bitnumber<3, block_type> blockType = block_type::normal;
+         cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
+         forge_label_index labelIndex = -1; // Forge label index for block_type::for_each_object_with_label
          struct {
             //
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 
@@ -49,10 +51,10 @@ namespace Megalo {
             // This represents raw struct-of-arrays data; the (conditions) and (actions) vectors are 
             // generated post-load by the (postprocess_opcodes) member function.
             //
-            int32_t  conditionStart = -1;
-            uint32_t conditionCount =  0;
-            int32_t  actionStart = -1;
-            uint32_t actionCount =  0;
+            condition_index conditionStart = -1;
+            condition_count conditionCount =  0;
+            action_index    actionStart    = -1;
+            action_count    actionCount    =  0;
          } raw;
          //
          std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor

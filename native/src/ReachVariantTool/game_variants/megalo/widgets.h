@@ -1,17 +1,18 @@
 #pragma once
 #include <cstdint>
+#include "../../helpers/bitnumber.h"
 #include "../../helpers/bitstream.h"
 
 namespace Megalo {
    class HUDWidgetDeclaration {
       public:
-         uint8_t position;
+         cobb::bitnumber<4, uint8_t> position;
          //
          void read(cobb::bitstream& stream) noexcept {
-            this->position = stream.read_bits<uint8_t>(4);
+            this->position.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            stream.write(this->position, 4);
+            this->position.write(stream);
          }
    };
 }

@@ -326,7 +326,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       printf("\nFull script content:");
       for (size_t i = 0; i < triggers.size(); ++i) {
          auto& trigger = triggers[i];
-         if (trigger.entry == Megalo::trigger_type::subroutine)
+         if (trigger.entryType == Megalo::entry_type::subroutine)
             continue;
          printf("\nTRIGGER #%d:\n", i);
          std::string out;

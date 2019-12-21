@@ -13,13 +13,13 @@ namespace Megalo {
    };
    class OpcodeArgValueMeterParameters : public OpcodeArgValue {
       public:
-         MeterType type = MeterType::none;
+         cobb::bitnumber<2, MeterType> type = MeterType::none;
          OpcodeArgValueTimer  timer;
          OpcodeArgValueScalar numerator;
          OpcodeArgValueScalar denominator;
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->type = (MeterType)stream.read_bits(2);
+            this->type.read(stream);
             switch (this->type) {
                case MeterType::none:
                   break;
@@ -31,13 +31,13 @@ namespace Megalo {
                   this->denominator.read(stream);
                   break;
                default:
-                  printf("Widget Meter Parameters had bad type %d.\n", (int)this->type);
+                  printf("Widget Meter Parameters had bad type %u.\n", (int)this->type);
                   return false;
             }
             return true;
          }
          virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write((uint8_t)this->type, 2);
+            this->type.write(stream);
             switch (this->type) {
                case MeterType::none:
                   break;

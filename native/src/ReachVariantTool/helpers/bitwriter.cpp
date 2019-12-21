@@ -103,7 +103,7 @@ namespace cobb {
          assert(buf != old, "Recycling buffer? How?");
       #endif
       if (old)
-         free(old); // TODO: UNKNOWN HANG HERE; PROBABLE HEAP CORRUPTION PRIOR TO THIS
+         free(old);
    }
    void bitwriter::_write(uint64_t value, int bits, int& remaining) noexcept {
       this->_ensure_room_for(bits);

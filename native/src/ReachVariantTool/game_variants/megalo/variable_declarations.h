@@ -3,6 +3,7 @@
 #include "variables_and_scopes.h"
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
+#include "../../helpers/bitnumber.h"
 #include "../../helpers/bitstream.h"
 #include "../../helpers/bitwriter.h"
 
@@ -13,64 +14,70 @@ namespace Megalo {
       high,
       default,
    };
+   using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
    //
    class ScalarVariableDeclaration {
       public:
-         using network_type = variable_network_priority;
+         using network_enum = variable_network_priority;
+         using network_type = variable_network_priority_t;
          //
-         network_type networking = network_type::default;
+         network_type networking = network_enum::default;
          OpcodeArgValueScalar initial;
          //
          void read(cobb::bitstream& stream) noexcept {
             if (!this->initial.read(stream))
                return;
-            this->networking = (network_type)stream.read_bits(2);
+            this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
             this->initial.write(stream);
-            stream.write((uint8_t)this->networking, 2);
+            this->networking.write(stream);
          }
    };
    class PlayerVariableDeclaration {
       public:
-         using network_type = variable_network_priority;
+         using network_enum = variable_network_priority;
+         using network_type = variable_network_priority_t;
          //
-         network_type networking = network_type::default;
+         network_type networking = network_enum::default;
          //
          void read(cobb::bitstream& stream) noexcept {
-            this->networking = (network_type)stream.read_bits(2);
+            this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            stream.write((uint8_t)this->networking, 2);
+            this->networking.write(stream);
          }
    };
    class ObjectVariableDeclaration {
       public:
-         using network_type = variable_network_priority;
+         using network_enum = variable_network_priority;
+         using network_type = variable_network_priority_t;
          //
-         network_type networking = network_type::default;
+         network_type networking = network_enum::default;
          //
          void read(cobb::bitstream& stream) noexcept {
-            this->networking = (network_type)stream.read_bits(2);
+            this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            stream.write((uint8_t)this->networking, 2);
+            this->networking.write(stream);
          }
    };
    class TeamVariableDeclaration {
       public:
-         using network_type = variable_network_priority;
+         using network_enum   = variable_network_priority;
+         using network_type   = variable_network_priority_t;
+         using team_bitnumber = cobb::bitnumber<cobb::bitcount(8), const_team, false, 1>;
          //
-         network_type networking = network_type::default;
-         const_team   initial    = const_team::none;
+         network_type   networking = network_enum::default;
+         team_bitnumber initial    = const_team::none;
          //
          void read(cobb::bitstream& stream) noexcept {
-            this->initial    = (const_team)(stream.read_bits(cobb::bitcount(8)) - 1);
-            this->networking = (network_type)stream.read_bits(2);
+            this->initial.read(stream);
+            this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            stream.write((int8_t)this->initial + 1, cobb::bitcount(8));
-            stream.write((uint8_t)this->networking, 2);
+            this->initial.write(stream);
+            this->networking.write(stream);
          }
    };
    class TimerVariableDeclaration {

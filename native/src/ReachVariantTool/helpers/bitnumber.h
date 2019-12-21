@@ -13,76 +13,6 @@ namespace cobb {
       bitnumber<4, sint8_t, false, 0, std::false_type, -1> jumpHeight; // a bit indicates whether a 4-bit value is present; if that bit is false, then load the value
    */
 
-   /*//
-   //
-   // WIP: class that does everything at run-time rather than compile-time; combined with some 
-   // other stuff it'd allow me to define lists of fields and enumerate over them to read or 
-   // save them.
-   //
-   class bitnum {
-      protected:
-         int      underlying_size; // in bytes
-         bool     underlying_signed = false;
-         bool     swap_on_read = false;
-         int      offset = 0;
-         bool     uses_presence_bit = false;
-         bool     presence_bit      = false;
-         int64_t  if_absent         = 0;
-         //
-         int bitcount;
-         union {
-            uint64_t u64;
-            int64_t  i64;
-            uint32_t u32;
-            int32_t  i32;
-            uint16_t u16;
-            int16_t  i16;
-            uint8_t  u8;
-            int8_t   i8;
-         } value;
-         //
-         template<typename T> void _setUnderlying() {
-            this->underlying_size   = sizeof(T);
-            this->underlying_signed = std::is_signed_v<T>;
-         }
-         //
-         enum class _presence_bit_none_sentinel {};
-         //
-      public:
-         static constexpr _presence_bit_none_sentinel no_presence_bit = _presence_bit_none_sentinel();
-         //
-         template<typename T> bitnum(
-            //
-            int     bc,
-            bool    presence_bit,
-            int64_t if_absent    = 0,
-            bool    swap_on_read = false,
-            int     offset       = 0
-            //
-         ) : bitcount(bc) {
-            this->_setUnderlying<T>();
-            this->uses_presence_bit = true;
-            this->presence_bit = presence_bit;
-            this->if_absent    = if_absent;
-            this->swap_on_read = swap_on_read;
-            this->offset       = offset;
-         };
-         template<typename T> bitnum(
-            //
-            int bc,
-            _presence_bit_none_sentinel presence_bit = no_presence_bit,
-            int64_t if_absent    = 0,
-            bool    swap_on_read = false,
-            int     offset       = 0
-            //
-         ) : bitcount(bc) {
-            this->_setUnderlying<T>();
-            this->swap_on_read = swap_on_read;
-            this->offset       = offset;
-         };
-   };
-   //*/
-
    template<
       int        bitcount,   // number of bits that the value is encoded as
       typename   underlying, // type to use to hold the value in-memory / type the value is encoded as when not in a bitstream
@@ -113,6 +43,7 @@ namespace cobb {
       public:
          using underlying_type = underlying;
          using underlying_int  = cobb::strip_enum_t<underlying_type>; // int type if (underlying_type) is an enum
+         static constexpr bool is_integer_type = std::is_same_v<underlying_type, underlying_int>;
          static constexpr int  bitcount        = bitcount;
          static constexpr bool bitswap_on_read = swap;
          static constexpr int  value_offset    = offset;
@@ -153,6 +84,13 @@ namespace cobb {
          constexpr bool write_as_signed() const noexcept {
             return std::is_signed_v<underlying_type> && !this->uses_presence() && !value_offset;
          }
+         //
+         bool is_absent() const noexcept {
+            if (!this->uses_presence())
+               return false;
+            return this->value == if_absent;
+         }
+         inline bool is_present() const noexcept { return !this->is_absent(); }
          //
          void read(cobb::bitstream& stream) noexcept {
             if (!this->_read_presence(stream))
@@ -220,7 +158,12 @@ namespace cobb {
             return *this;
          }
          //
-         operator underlying_int() const noexcept { return (underlying_int)this->value; }; // this cast is used implicitly for conversion operators, so we don't need to define overloads for those
+         // Having an implicit cast-to-int for enums breaks switch-cases. :(
+         operator underlying_type() const noexcept { return this->value; }; // implicitly creates compare operators if underlying_type is integer
+         //
+         template<typename T> explicit operator T() const noexcept { // needed for explicit enum-to-int casts
+            return (T)this->value;
+         }
    };
    class bitbool {
       public:

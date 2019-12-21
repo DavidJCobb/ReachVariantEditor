@@ -9,6 +9,32 @@
 #include "helpers/files.h"
 #include "formats/sha1.h"
 
+//
+// TODO:
+//
+//  - Finish auditing our code and making everything that reads a consistent 
+//    number of bits use (bitnumber) or (bytenumber).
+//
+//  - Bitnumber: remove the (swap) template parameter.
+//
+//  - Rename (bitstream) and (bytestream) to (bitreader) and (bytereader).
+//
+//  - Bytereader: add handling for endianness.
+//
+//  - Create a (bytewriter).
+//
+//  - Use a bytewriter to write all data outside of MPVR's bit-packed data, 
+//    and use a bytereader to read that data.
+//
+//     - Consider making a class that, given a memory region, provides both 
+//       bit and byte access to it. If the class is declared const, it should 
+//       offer readers; else, writers. Or something like that.
+//
+//  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
+//    MPVR up into multiple classes in order to allow us to load the other 
+//    types.
+//
+
 #define REACH_GAME_VARIANTS_TESTING_RESAVE 1
 
 struct TestingGameVariant {
@@ -105,7 +131,7 @@ void test_create_hacked_variant() {
    variant->write(writer);
    //
    FILE*   out   = nullptr;
-   errno_t error = fopen_s(&out, "test_output_game_variant.bin", "wb");
+   errno_t error = fopen_s(&out, "test_output_cursed_slayer.bin", "wb");
    if (out) {
       printf("Writing modified data to output file...\n");
       writer.save_to(out);

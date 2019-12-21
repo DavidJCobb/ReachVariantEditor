@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include "limits_bitnumbers.h"
 #include "opcode_arg.h"
 
 // NOTE: conditions.cpp contains a preprocessor flag, MEGALO_DISALLOW_NONE_CONDITION, 
@@ -45,8 +46,8 @@ namespace Megalo {
          #endif
          const ConditionFunction* function = nullptr;
          bool     inverted =  false;
-         uint16_t or_group =  0;
-         int16_t  action   = -1; // execute before this action
+         condition_index or_group = 0;
+         action_index    action   = 0; // execute before this action (cannot be none, which implies that a condition can't be the last opcode in a trigger)
          std::vector<OpcodeArgValue*> arguments;
          //
          virtual bool read(cobb::bitstream&) noexcept override;

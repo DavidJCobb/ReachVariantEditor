@@ -1,5 +1,6 @@
 #pragma once
 #include "player.h"
+#include "../../../helpers/bitnumber.h"
 
 namespace Megalo {
    enum class PlayerSetType {
@@ -12,19 +13,19 @@ namespace Megalo {
    };
    class OpcodeArgValuePlayerSet : public OpcodeArgValue {
       public:
-         PlayerSetType        set_type = PlayerSetType::no_one;
+         cobb::bitnumber<3, PlayerSetType> set_type = PlayerSetType::no_one;
          OpcodeArgValuePlayer player;
          OpcodeArgValueScalar addOrRemove;
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->set_type = (PlayerSetType)stream.read_bits<uint8_t>(3);
+            this->set_type.read(stream);
             if (this->set_type == PlayerSetType::specific_player) {
                return this->player.read(stream) && this->addOrRemove.read(stream);
             }
             return true;
          }
          virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write((uint8_t)this->set_type, 3);
+            this->set_type.write(stream);
             if (this->set_type == PlayerSetType::specific_player) {
                this->player.write(stream);
                this->addOrRemove.write(stream);

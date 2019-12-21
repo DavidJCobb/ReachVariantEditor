@@ -161,6 +161,7 @@
     <ClInclude Include="game_variants\megalo\limits.h" />
     <ClInclude Include="game_variants\megalo\conditions.h" />
     <ClInclude Include="game_variants\megalo\enums.h" />
+    <ClInclude Include="game_variants\megalo\limits_bitnumbers.h" />
     <ClInclude Include="game_variants\megalo\opcode_arg.h" />
     <ClInclude Include="game_variants\megalo\opcode_arg_types\all.h" />
     <ClInclude Include="game_variants\megalo\opcode_arg_types\all_constants.h" />

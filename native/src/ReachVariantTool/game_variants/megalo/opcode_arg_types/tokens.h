@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../helpers/bitnumber.h"
 #include "../limits.h"
 #include "../opcode_arg.h"
 #include "object.h"
@@ -21,7 +22,7 @@ namespace Megalo {
    //
    class OpcodeStringToken {
       public:
-         OpcodeStringTokenType type = OpcodeStringTokenType::none;
+         cobb::bitnumber<3, OpcodeStringTokenType, false, 1> type = OpcodeStringTokenType::none;
          OpcodeArgValue* value = nullptr;
          //
          ~OpcodeStringToken() {
@@ -32,7 +33,7 @@ namespace Megalo {
          }
          //
          bool read(cobb::bitstream& stream) noexcept {
-            this->type = (OpcodeStringTokenType)((int8_t)stream.read_bits(3) - 1);
+            this->type.read(stream);
             switch (this->type) {
                case OpcodeStringTokenType::none:
                   break;
@@ -61,7 +62,7 @@ namespace Megalo {
             return true;
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            stream.write((int8_t)this->type + 1, 3);
+            this->type.write(stream);
             if (this->value)
                this->value->write(stream);
          }
@@ -87,13 +88,13 @@ namespace Megalo {
       //       parameters? If so, any script editor will need to validate parameters.
       //
       public:
-         int32_t stringIndex = -1; // format string - index in scriptData::strings
-         uint8_t tokenCount  =  0;
+         cobb::bitnumber<cobb::bitcount(Limits::max_variant_strings - 1), int32_t, false, 1> stringIndex = -1; // format string - index in scriptData::strings
+         cobb::bitnumber<cobb::bitcount(N), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[N];
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->stringIndex = stream.read_bits<uint32_t>(cobb::bitcount(Limits::max_variant_strings - 1)) - 1; // string table index pointer; -1 == none
-            this->tokenCount  = stream.read_bits(cobb::bitcount(N));
+            this->stringIndex.read(stream); // string table index pointer; -1 == none
+            this->tokenCount.read(stream);
             if (this->tokenCount > N) {
                printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount, N);
                return false;
@@ -103,8 +104,8 @@ namespace Megalo {
             return true;
          }
          virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->stringIndex + 1, cobb::bitcount(Limits::max_variant_strings - 1));
-            stream.write(this->tokenCount, cobb::bitcount(N));
+            this->stringIndex.write(stream);
+            this->tokenCount.write(stream);
             for (uint8_t i = 0; i < this->tokenCount; i++)
                this->tokens[i].write(stream);
          }

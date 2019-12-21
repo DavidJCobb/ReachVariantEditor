@@ -13,14 +13,14 @@ namespace Megalo {
    };
    class OpcodeArgValueShape : public OpcodeArgValueScalar {
       public:
-         ShapeType shapeType = ShapeType::none;
+         cobb::bitnumber<cobb::bitcount((int)ShapeType::_count - 1), ShapeType> shapeType = ShapeType::none; // 2 bits
          OpcodeArgValueScalar radius; // or "width"
          OpcodeArgValueScalar length;
          OpcodeArgValueScalar top;
          OpcodeArgValueScalar bottom;
          //
          virtual bool read(cobb::bitstream& stream) noexcept override {
-            this->shapeType = (ShapeType)stream.read_bits(cobb::bitcount((int)ShapeType::_count - 1)); // 2 bits
+            this->shapeType.read(stream);
             switch (this->shapeType) {
                case ShapeType::sphere:
                   return this->radius.read(stream);
@@ -41,7 +41,7 @@ namespace Megalo {
             return false;
          }
          virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write((uint8_t)this->shapeType, cobb::bitcount((int)ShapeType::_count - 1));
+            this->shapeType.write(stream);
             switch (this->shapeType) {
                case ShapeType::sphere:
                   this->radius.write(stream);

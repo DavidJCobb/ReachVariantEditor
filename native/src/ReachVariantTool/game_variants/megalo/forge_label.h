@@ -4,6 +4,7 @@
 #include "../../helpers/bitstream.h"
 #include "../../formats/localized_string_table.h"
 #include "limits.h"
+#include "limits_bitnumbers.h"
 
 namespace Megalo {
    class ReachForgeLabel {
@@ -13,15 +14,15 @@ namespace Megalo {
             assigned_team   = 0x02,
             number          = 0x04,
          };
-         using requirement_int = std::underlying_type_t<requirement_flags>;
+         using requirement_int   = std::underlying_type_t<requirement_flags>;
          //
          ReachString* name = nullptr;
          MegaloStringIndexOptional nameIndex;
-         requirement_int    requirements       = 0;
-         int32_t            requiredObjectType = -1;
-         Megalo::const_team requiredTeam       = Megalo::const_team::none;
-         int32_t            requiredNumber     = 0;
-         uint8_t            mapMustHaveAtLeast = 0;
+         cobb::bitnumber<3, requirement_int> requirements = 0;
+         object_type_index_optional  requiredObjectType = -1;
+         const_team_index            requiredTeam       = Megalo::const_team::none;
+         cobb::bytenumber<int16_t>   requiredNumber     = 0;
+         cobb::bitnumber<7, uint8_t> mapMustHaveAtLeast = 0;
          //
          void read(cobb::bitstream&) noexcept;
          void postprocess_string_indices(ReachStringTable& table) noexcept;

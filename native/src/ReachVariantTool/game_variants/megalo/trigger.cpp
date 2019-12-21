@@ -10,15 +10,14 @@ namespace Megalo {
    }
    //
    bool Trigger::read(cobb::bitstream& stream) noexcept {
-      this->blockType = (block_type)stream.read_bits(3);
-      this->entry     = (trigger_type)stream.read_bits(3);
-      if (this->blockType == block_type::for_each_object_with_label) {
-         this->labelIndex = stream.read_bits(cobb::bitcount(Limits::max_script_labels)) - 1;
-      }
-      this->raw.conditionStart = stream.read_bits(cobb::bitcount(Limits::max_conditions - 1));
-      this->raw.conditionCount = stream.read_bits(cobb::bitcount(Limits::max_conditions));
-      this->raw.actionStart = stream.read_bits(cobb::bitcount(Limits::max_actions - 1));
-      this->raw.actionCount = stream.read_bits(cobb::bitcount(Limits::max_actions));
+      this->blockType.read(stream);
+      this->entryType.read(stream);
+      if (this->blockType == block_type::for_each_object_with_label)
+         this->labelIndex.read(stream);
+      this->raw.conditionStart.read(stream);
+      this->raw.conditionCount.read(stream);
+      this->raw.actionStart.read(stream);
+      this->raw.actionCount.read(stream);
       return true;
    }
    void Trigger::postprocess_opcodes(const std::vector<Condition>& conditions, const std::vector<Action>& actions) noexcept {
@@ -56,14 +55,14 @@ namespace Megalo {
       }
    }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
-      stream.write((uint8_t)this->blockType, 3);
-      stream.write((uint8_t)this->entry, 3);
+      this->blockType.write(stream);
+      this->entryType.write(stream);
       if (this->blockType == block_type::for_each_object_with_label)
-         stream.write(this->labelIndex + 1, cobb::bitcount(Limits::max_script_labels));
-      stream.write(this->raw.conditionStart, cobb::bitcount(Limits::max_conditions - 1));
-      stream.write(this->raw.conditionCount, cobb::bitcount(Limits::max_conditions));
-      stream.write(this->raw.actionStart, cobb::bitcount(Limits::max_actions - 1));
-      stream.write(this->raw.actionCount, cobb::bitcount(Limits::max_actions));
+         this->labelIndex.write(stream);
+      this->raw.conditionStart.write(stream);
+      this->raw.conditionCount.write(stream);
+      this->raw.actionStart.write(stream);
+      this->raw.actionCount.write(stream);
    }
    void Trigger::to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
@@ -97,17 +96,17 @@ namespace Megalo {
       //
       out += indent;
       out += "Entry type: ";
-      switch (this->entry) {
-         case trigger_type::local:             out += "local";          break;
-         case trigger_type::normal:            out += "normal";         break;
-         case trigger_type::on_host_migration: out += "host migration"; break;
-         case trigger_type::on_init:           out += "init";           break;
-         case trigger_type::on_local_init:     out += "local init";     break;
-         case trigger_type::on_object_death:   out += "object death";   break;
-         case trigger_type::pregame:           out += "pregame";        break;
-         case trigger_type::subroutine:        out += "subroutine";     break;
+      switch (this->entryType) {
+         case entry_type::local:             out += "local";          break;
+         case entry_type::normal:            out += "normal";         break;
+         case entry_type::on_host_migration: out += "host migration"; break;
+         case entry_type::on_init:           out += "init";           break;
+         case entry_type::on_local_init:     out += "local init";     break;
+         case entry_type::on_object_death:   out += "object death";   break;
+         case entry_type::pregame:           out += "pregame";        break;
+         case entry_type::subroutine:        out += "subroutine";     break;
          default:
-            cobb::sprintf(line, "unknown %u", (uint32_t)this->entry);
+            cobb::sprintf(line, "unknown %u", (uint32_t)this->entryType);
       }
       out += '\n';
       //

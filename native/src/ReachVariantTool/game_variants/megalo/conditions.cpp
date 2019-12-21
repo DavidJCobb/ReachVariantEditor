@@ -198,8 +198,8 @@ namespace Megalo {
          }
       }
       stream.read(this->inverted);
-      this->or_group = stream.read_bits(cobb::bitcount(512 - 1));
-      this->action   = stream.read_bits(cobb::bitcount(1024 - 1));
+      this->or_group.read(stream);
+      this->action.read(stream);
       //
       auto&  base     = this->function->arguments;
       size_t argCount = base.size();
@@ -250,8 +250,8 @@ namespace Megalo {
             return;
       }
       stream.write(this->inverted);
-      stream.write(this->or_group, cobb::bitcount(Limits::max_conditions - 1));
-      stream.write(this->action,   cobb::bitcount(Limits::max_actions - 1));
+      this->or_group.write(stream);
+      this->action.write(stream);
       //
       auto&  base     = this->function->arguments;
       size_t argCount = base.size();
