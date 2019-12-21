@@ -374,9 +374,6 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    this->remainingData.read(stream, this->header.end());
    //
    {
-
-      // TODO: hashing is incorrect. Testing indicates that my SHA-1 code is correct, though. :\
-
       auto     hasher   = InProgressSHA1();
       uint32_t size     = offset_after_hashable - offset_before_hashable;
       printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
@@ -400,9 +397,6 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       printf("Check done.\n");
    }
    //
-   #if _DEBUG
-      __debugbreak();
-   #endif
    return true;
 }
 void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
@@ -564,10 +558,6 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
    stream.pad_to_bytepos(this->header.write_end());
    //
    {  // SHA-1 hash
-      uint32_t stream_offset = stream.get_bytepos();
-      //
-      // TODO: THIS IS WRONG; ONCE WE HANDLE READING PROPERLY, WE NEED TO UPDATE THIS
-      //
       auto hasher = InProgressSHA1();
       uint32_t size     = offset_after_hashable + offset_before_hashable;
       stream.fixup_size_field(offset_of_hashable_length, cobb::to_big_endian(size));
@@ -600,13 +590,10 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
       printf("Failed to find the mpvr block; signature found was %08X when we expected %08X.\n", signature, 'mpvr');
       return;
    }
-
    //
-   // TODO: Bungie only hashes the portion of MPVR that the game variant actually uses. This bytecount 
-   // is a big-endian uint32_t located 0x4 bytes after the hash (i.e. offset 0x314 in the file). We need 
-   // to read that, and then only run the hashing algorithm on that many bytes after that length value.
-   //
-
+   // Bungie only hashes the portion of MPVR that the game variant actually uses. This bytecount is a 
+   // big-endian uint32_t located 0x4 bytes after the hash (i.e. offset 0x314 in the file). We need to 
+   // read that, and then only run the hashing algorithm on that many bytes after that length value.
    //
    uint32_t size = cobb::from_big_endian(buffer32[0x314 / 4]);
    printf("File's existing hash (%04X bytes of data):\n", size);

@@ -5,10 +5,10 @@
 
 bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
    this->readState.pos = stream.get_bytepos();
-   stream.read(this->found.signature); // bswap?
+   stream.read(this->found.signature);
    stream.read(this->found.size);
-   stream.read(this->found.version); // bswap?
-   stream.read(this->found.flags); // bswap?
+   stream.read(this->found.version);
+   stream.read(this->found.flags);
    // cobb::bitstream basically always reads data as big-endian, so we don't need to swap here.
    //
    if (this->expected.signature && this->found.signature != this->expected.signature)
@@ -49,7 +49,7 @@ void ReachFileBlock::write_postprocess(cobb::bitwriter& stream) const noexcept {
          __debugbreak(); // unexpected output size
       #endif
    }
-   stream.fixup_size_field(this->writeState.pos + 0x04, size);
+   stream.fixup_size_field(this->writeState.pos + 0x04, cobb::to_big_endian(size));
 }
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {

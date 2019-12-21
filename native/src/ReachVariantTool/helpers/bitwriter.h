@@ -94,7 +94,7 @@ namespace cobb {
             uv.f = value;
             uint32_t v = uv.i;
             if (save_endianness != cobb::endian::big)
-               v = cobb::to_big_endian(v);
+               v = cobb::to_big_endian(v); // bit-aligned write will implicitly convert it to big-endian
             this->write(v, 32);
          }
          void write(bool value) noexcept {
@@ -104,7 +104,7 @@ namespace cobb {
          template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
             T v = value;
             if (save_endianness != cobb::endian::big)
-               v = cobb::to_big_endian(v);
+               v = cobb::from_big_endian(v); // bit-aligned write will implicitly convert it to big-endian
             this->write((uint64_t)v, cobb::bits_in<T>);
          };
          template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
@@ -112,7 +112,7 @@ namespace cobb {
             //
             if (save_endianness != cobb::endian::big)
                for (int i = 0; i < std::extent<T>::value; i++)
-                  this->write(cobb::to_big_endian(value[i]), cobb::bits_in<item_type>);
+                  this->write(cobb::to_big_endian(value[i]), cobb::bits_in<item_type>); // bit-aligned write will implicitly convert it to big-endian
             else
                for (int i = 0; i < std::extent<T>::value; i++)
                   this->write(value[i], cobb::bits_in<item_type>);

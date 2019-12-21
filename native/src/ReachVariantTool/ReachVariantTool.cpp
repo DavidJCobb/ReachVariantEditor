@@ -76,16 +76,20 @@ void test_create_hacked_variant() {
    printf("Variant read.\n");
    //
    auto& mp = variant->multiplayer;
-   mp.options.map.baseTraits.movement.jumpHeight = 420;
-   mp.titleUpdateData.precisionBloom = 10.0F;
-   mp.titleUpdateData.magnumFireRate = 10.0F;
-   mp.titleUpdateData.magnumDamage   =  0.65F;
+   mp.options.map.baseTraits.movement.jumpHeight  = 69;
+   mp.options.map.baseTraits.offense.grenadeRegen = (uint8_t)reach::bool_trait::enabled;
+   mp.options.map.baseTraits.offense.weaponPrimary   = (uint8_t)reach::weapon::none;
+   mp.options.map.baseTraits.offense.weaponSecondary = (uint8_t)reach::weapon::none;
+   mp.titleUpdateData.flags |= (uint8_t)ReachTU1Flags::enable_automatic_magnum;
+   mp.titleUpdateData.precisionBloom  = 10.0F; // 2x bloom
+   mp.titleUpdateData.magnumFireDelay =  0.0F; // max fire rate
+   mp.titleUpdateData.magnumDamage    =  1.0F;
    //
    auto& chdr = variant->contentHeader;
    chdr.data.set_title(L"Cursed Slayer");
    mp.variantHeader.set_title(L"Cursed Slayer");
-   chdr.data.set_description(L"2x bloom; 420% jump height; 10x Magnum fire rate, full clip + headshot to kill.");
-   mp.variantHeader.set_description(L"2x bloom; 420% jump height; 10x Magnum fire rate, full clip + headshot to kill.");
+   chdr.data.set_description(L"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
+   mp.variantHeader.set_description(L"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
    //
    mp.variantHeader.unk08 = 0;
    mp.variantHeader.unk10 = 0;

@@ -147,15 +147,18 @@ namespace cobb {
             return true;
          }
       public:
-         bool uses_presence() const noexcept {
+         constexpr bool uses_presence() const noexcept {
             return !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
+         }
+         constexpr bool write_as_signed() const noexcept {
+            return std::is_signed_v<underlying_type> && !this->uses_presence() && !value_offset;
          }
          //
          void read(cobb::bitstream& stream) noexcept {
             if (!this->_read_presence(stream))
                return;
             this->value = underlying_type(stream.read_bits<underlying_int>(bitcount, read_flags) - value_offset);
-            if (std::is_signed_v<underlying_type>)
+            if (std::is_signed_v<underlying_type> && !this->uses_presence())
                //
                // We have to apply the sign bit ourselves, or (offset) will break some signed 
                // values. Main example is mpvr::activity, which is incremented by 1 before 
@@ -169,7 +172,7 @@ namespace cobb {
          void write(cobb::bitwriter& stream) const noexcept {
             if (!this->_write_presence(stream))
                return;
-            stream.write((underlying_int)this->value + value_offset, bitcount, std::is_signed_v<underlying_type> && !this->uses_presence() && !value_offset);
+            stream.write((underlying_int)this->value + value_offset, bitcount, this->write_as_signed());
          }
          void write_bits(cobb::bitwriter& stream) const noexcept {
             this->write(stream);
@@ -202,6 +205,18 @@ namespace cobb {
          }
          bitnumber& operator%=(const underlying_type& other) noexcept {
             this->value %= other;
+            return *this;
+         }
+         bitnumber& operator|=(const underlying_type& other) noexcept {
+            this->value |= other;
+            return *this;
+         }
+         bitnumber& operator&=(const underlying_type& other) noexcept {
+            this->value &= other;
+            return *this;
+         }
+         bitnumber& operator^=(const underlying_type& other) noexcept {
+            this->value ^= other;
             return *this;
          }
          //

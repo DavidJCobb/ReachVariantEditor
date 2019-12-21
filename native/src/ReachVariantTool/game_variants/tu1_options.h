@@ -28,8 +28,8 @@ class ReachGameVariantTU1Options {
       static constexpr float vanilla_armor_lock_damage_drain_limit = 0.0F;
       static constexpr float patched_armor_lock_damage_drain_limit = 0.4F;
       //
-      static constexpr float vanilla_magnum_damage    = 1.0F; // patched changes this to like 0.999 which is probably an unintentional side-effect of how floats are encoded
-      static constexpr float vanilla_magnum_fire_rate = 1.0F; // TU doesn't change this
+      static constexpr float vanilla_magnum_damage     = 1.0F; // patched changes this to like 0.999 which is probably an unintentional side-effect of how floats are encoded
+      static constexpr float vanilla_magnum_fire_delay = 1.0F; // TU doesn't change this
 
       cobb::bitnumber<32, uint32_t> flags;
       float precisionBloom            = vanilla_precision_bloom;
@@ -38,7 +38,7 @@ class ReachGameVariantTU1Options {
       float armorLockDamageDrain      = vanilla_armor_lock_damage_drain;
       float armorLockDamageDrainLimit = vanilla_armor_lock_damage_drain_limit;
       float magnumDamage              = vanilla_magnum_damage;
-      float magnumFireRate            = vanilla_magnum_fire_rate;
+      float magnumFireDelay           = vanilla_magnum_fire_delay;
       //
       void read(cobb::bitstream& stream) noexcept {
          this->flags.read(stream);
@@ -48,7 +48,7 @@ class ReachGameVariantTU1Options {
          this->activeCamoEnergyBonus     = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
          this->activeCamoEnergy          = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
          this->magnumDamage              = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
-         this->magnumFireRate            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
+         this->magnumFireDelay           = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
       }
       void write(cobb::bitwriter& stream) const noexcept {
          this->flags.write(stream);
@@ -58,6 +58,6 @@ class ReachGameVariantTU1Options {
          stream.write_compressed_float(this->activeCamoEnergyBonus,     8, 0.0F,  2.0F, false, true);
          stream.write_compressed_float(this->activeCamoEnergy,          8, 0.0F,  2.0F, false, true);
          stream.write_compressed_float(this->magnumDamage,              8, 0.0F, 10.0F, false, true);
-         stream.write_compressed_float(this->magnumFireRate,            8, 0.0F, 10.0F, false, true);
+         stream.write_compressed_float(this->magnumFireDelay,           8, 0.0F, 10.0F, false, true);
       }
 };
