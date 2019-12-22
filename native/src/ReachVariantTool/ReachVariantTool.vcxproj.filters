@@ -189,6 +189,12 @@
     <ClInclude Include="game_variants\megalo\limits_bitnumbers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\bytereader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\bytewriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -285,6 +291,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="formats\sha1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\bytereader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\bytewriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,5 +1,6 @@
 #include "block.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/bytereader.h"
 #include "../helpers/bitwriter.h"
 #include "../helpers/endianness.h"
 
@@ -17,16 +18,12 @@ bool ReachFileBlock::read(cobb::bitstream& stream) noexcept {
       return false;
    return true;
 }
-bool ReachFileBlock::read(cobb::bytestream& stream) noexcept {
-   this->readState.pos = stream.offset;
-   stream.read(this->found.signature);
-   stream.read(this->found.size);
-   stream.read(this->found.version);
-   stream.read(this->found.flags);
-   this->found.signature = cobb::from_big_endian(this->found.signature);
-   this->found.size      = cobb::from_big_endian(this->found.size);
-   this->found.version   = cobb::from_big_endian(this->found.version);
-   this->found.flags     = cobb::from_big_endian(this->found.flags);
+bool ReachFileBlock::read(cobb::bytereader& stream) noexcept {
+   this->readState.pos = stream.get_bytepos();
+   stream.read(this->found.signature, cobb::endian::big);
+   stream.read(this->found.size,      cobb::endian::big);
+   stream.read(this->found.version,   cobb::endian::big);
+   stream.read(this->found.flags,     cobb::endian::big);
    //
    if (this->expected.signature && this->found.signature != this->expected.signature)
       return false;
@@ -74,13 +71,13 @@ bool ReachFileBlockRemainder::read(cobb::bitstream& stream, uint32_t blockEnd) n
    return true;
 }
 
-bool ReachUnknownBlock::read(cobb::bytestream& stream) noexcept {
+bool ReachUnknownBlock::read(cobb::bytereader& stream) noexcept {
    if (!this->header.read(stream))
       return false;
    auto size = this->header.found.size;
    this->data = (uint8_t*)malloc(size);
    for (uint32_t i = 0; i < size; i++)
-      stream.read(*(uint8_t*)(this->data + i));
+      stream.read(this->data[i]);
    return true;
 }
 void ReachUnknownBlock::write(cobb::bitwriter& stream) const noexcept {

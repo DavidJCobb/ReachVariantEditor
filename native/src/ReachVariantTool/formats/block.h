@@ -3,6 +3,7 @@
 
 namespace cobb {
    class bitstream;
+   class bytereader;
    class bytestream;
    //
    class bitwriter;
@@ -36,7 +37,7 @@ class ReachFileBlock {
       }
       //
       bool read(cobb::bitstream&) noexcept;
-      bool read(cobb::bytestream&) noexcept;
+      bool read(cobb::bytereader&) noexcept;
       void write(cobb::bitwriter&) const noexcept;
       void write_postprocess(cobb::bitwriter&) const noexcept; // rewrites block size, etc.; must be called immediately after the block is done writing
       //
@@ -60,6 +61,6 @@ class ReachUnknownBlock {
       ReachFileBlock header;
       uint8_t* data = nullptr;
       //
-      bool read(cobb::bytestream& stream) noexcept;
+      bool read(cobb::bytereader& stream) noexcept;
       void write(cobb::bitwriter&) const noexcept;
 };

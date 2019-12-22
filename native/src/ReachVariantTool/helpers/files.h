@@ -11,22 +11,23 @@
 namespace cobb {
    class mapped_file {
       protected:
-         void*    view = nullptr;
-         uint64_t size = 0;
+         void*    _view = nullptr;
+         uint64_t _size = 0;
       public:
          mapped_file() noexcept {}
          mapped_file(wchar_t const* path) noexcept { this->open(path); }
          ~mapped_file();
          //
-         const void* data() const noexcept { return this->view; }
+         const void*    data() const noexcept { return this->_view; }
+         const uint64_t size() const noexcept { return this->_size; }
          //
          void open(wchar_t const* path) noexcept;
          void open(FILE* handle) noexcept;
          //
-         inline operator bool() const noexcept { return this->view != nullptr; }
+         inline operator bool() const noexcept { return this->_view != nullptr; }
          //
          uint32_t read_from(uint32_t pos, void* buffer, uint32_t size) const noexcept {
-            std::uintptr_t addr = (std::uintptr_t)this->view + pos;
+            std::uintptr_t addr = (std::uintptr_t)this->_view + pos;
             memcpy(buffer, (void*)addr, size);
             return size;
          }
@@ -34,18 +35,18 @@ namespace cobb {
             return this->read_from(pos, (void*)buffer, size);
          }
          template<typename T> uint32_t read_from(uint32_t pos, T& field, uint32_t size) const noexcept {
-            std::uintptr_t addr = (std::uintptr_t)this->view + pos;
+            std::uintptr_t addr = (std::uintptr_t)this->_view + pos;
             memcpy(&field, (void*)addr, size);
             return size;
          }
          template<typename T> uint32_t read_from(uint32_t pos, T& field) const noexcept {
-            std::uintptr_t addr = (std::uintptr_t)this->view + pos;
+            std::uintptr_t addr = (std::uintptr_t)this->_view + pos;
             memcpy(&field, (void*)addr, sizeof(field));
             return sizeof(field);
          }
          //
          inline bool is_in_bounds(uint32_t offset, uint32_t bytes) const noexcept {
-            return ((uint64_t)offset + bytes) < this->size;
+            return ((uint64_t)offset + bytes) < this->_size;
          }
    };
    class file_guard {

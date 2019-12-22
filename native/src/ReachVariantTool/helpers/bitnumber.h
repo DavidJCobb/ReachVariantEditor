@@ -3,6 +3,8 @@
 #include <type_traits>
 #include "bitstream.h"
 #include "bitwriter.h"
+#include "bytereader.h"
+#include "bytewriter.h"
 #include "type_traits.h"
 
 namespace cobb {
@@ -104,9 +106,6 @@ namespace cobb {
                //
                this->value = underlying_type(cobb::apply_sign_bit((underlying_int)this->value, bitcount));
          }
-         void read(cobb::bytestream& stream) noexcept {
-            stream.read(this->value);
-         }
          void write(cobb::bitwriter& stream) const noexcept {
             if (!this->_write_presence(stream))
                return;
@@ -117,6 +116,13 @@ namespace cobb {
          }
          void write_bytes(cobb::bitwriter& stream) const noexcept {
             stream.write((underlying_int)this->value);
+         }
+         //
+         void read(cobb::bytereader& stream) noexcept {
+            stream.read(this->value);
+         }
+         void write(cobb::bytewriter& stream) noexcept {
+            stream.write(this->value);
          }
          //
          // Operators:
@@ -183,8 +189,11 @@ namespace cobb {
          void read(cobb::bitstream& stream) noexcept {
             this->value = stream.read_bits<int>(1);
          }
-         void read(cobb::bytestream& stream) noexcept {
-            stream.read(this->value);
+         void read(cobb::bytereader& stream) noexcept {
+            stream.read(&this->value, 1);
+         }
+         void write(cobb::bytewriter& stream) const noexcept {
+            stream.write(&this->value, 1);
          }
          void write(cobb::bitwriter& stream) const noexcept {
             stream.write(this->value);

@@ -1,5 +1,6 @@
 #include "content_author.h"
 #include "../helpers/bitstream.h"
+#include "../helpers/bytereader.h"
 
 bool ReachContentAuthor::read(cobb::bitstream& stream) noexcept {
    this->timestamp.read(stream);
@@ -9,7 +10,7 @@ bool ReachContentAuthor::read(cobb::bitstream& stream) noexcept {
    stream.pad(3);
    return true;
 }
-bool ReachContentAuthor::read(cobb::bytestream& stream) noexcept {
+bool ReachContentAuthor::read(cobb::bytereader& stream) noexcept {
    this->timestamp.read(stream);
    this->xuid.read(stream);
    stream.read_string(this->author, 16);

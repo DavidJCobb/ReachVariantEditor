@@ -116,37 +116,4 @@ namespace cobb {
          void read_string(char* out, int maxlength) noexcept;
          void read_wstring(wchar_t* out, int maxlength) noexcept;
    };
-   class bytestream {
-      public:
-         struct read_flags { // scoped enum
-            read_flags() = delete;
-            enum {
-               is_signed = 0x0001,
-               swap      = 0x0002,
-            };
-         };
-      public:
-         bytestream(cobb::mapped_file& file) : buffer(file) {}
-         //
-         cobb::mapped_file& buffer;
-         uint32_t           offset = 0; // in bytes
-         //
-         inline uint32_t get_bytepos() const noexcept { return this->offset; }
-         inline int get_bitshift() const noexcept { return 0; }
-         //
-      public:
-         template<typename T> void read(T& out) noexcept {
-            this->buffer.read_from(this->offset, out);
-            this->offset += sizeof(out);
-         };
-         inline void pad(int bytes) {
-            this->offset += bytes;
-         }
-         inline void skip(int bytes) {
-            this->offset += bytes;
-         }
-         //
-         void read_string(char* out, int maxlength) noexcept;
-         void read_wstring(wchar_t* out, int maxlength) noexcept;
-   };
 };

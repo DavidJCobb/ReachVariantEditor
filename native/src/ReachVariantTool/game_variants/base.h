@@ -68,7 +68,7 @@ class GameVariantHeader {
       uint8_t  unk284[0x2C]; // only in chdr
       //
       bool read(cobb::bitstream&) noexcept;
-      bool read(cobb::bytestream&) noexcept;
+      bool read(cobb::bytereader&) noexcept;
       void write_bits(cobb::bitwriter& stream) const noexcept;
       void write_bytes(cobb::bitwriter& stream) const noexcept;
       //
@@ -80,9 +80,11 @@ class ReachBlockCHDR {
       ReachFileBlock    header = ReachFileBlock('chdr', 0x2C0);
       GameVariantHeader data;
       //
-      bool read(cobb::bytestream& stream) noexcept {
-         if (this->header.read(stream) && this->data.read(stream))
+      bool read(cobb::bytereader& stream) noexcept {
+         if (this->header.read(stream) && this->data.read(stream)) {
+            stream.set_bytepos(this->header.end()); // CHDR doesn't necessarily use all of its available space
             return true;
+         }
          return false;
       }
       void write(cobb::bitwriter& stream) const noexcept {
@@ -227,19 +229,19 @@ class GameVariant {
       std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
       //
       bool read(cobb::mapped_file& file) {
-         cobb::bytestream bytes(file);
+         cobb::bytereader bytes(file.data(), file.size());
          cobb::bitstream  bits(file);
          //
          if (!this->blamHeader.read(bits)) {
             printf("FAILED to read (_blf).\n");
             return false;
          }
-         bytes.offset = bits.offset / 8;
+         bytes.set_bytepos(bits.offset / 8);
          if (!this->contentHeader.read(bytes)) {
             printf("FAILED to read (chdr).\n");
             return false;
          }
-         bits.offset = bytes.offset * 8;
+         bits.offset = bytes.get_bytepos() * 8;
          if (!this->multiplayer.read(bits)) {
             printf("FAILED to read (mpvr).\n");
             return false;
@@ -257,8 +259,8 @@ class GameVariant {
          // lengths, e.g. MPVR is always 0x5000 bytes plus the size of its hash 
          // and other odds and ends. Still, we should try to handle this robustly.
          //
-         bytes.offset = bits.get_bytepos();
-         while (file.is_in_bounds(bytes.offset, 0)) {
+         bytes.set_bytepos(bits.get_bytepos());
+         while (file.is_in_bounds(bytes.get_bytepos(), 0)) {
             auto& block = this->unknownBlocks.emplace_back();
             if (!block.read(bytes) || !block.header.found.signature) {
                this->unknownBlocks.resize(this->unknownBlocks.size() - 1);

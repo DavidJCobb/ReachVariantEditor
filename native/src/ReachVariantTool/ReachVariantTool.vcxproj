@@ -195,6 +195,8 @@
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
     <ClInclude Include="helpers\bitwriter.h" />
+    <ClInclude Include="helpers\bytereader.h" />
+    <ClInclude Include="helpers\bytewriter.h" />
     <ClInclude Include="helpers\endianness.h" />
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
@@ -233,6 +235,8 @@
     <ClCompile Include="game_variants\player_traits.cpp" />
     <ClCompile Include="helpers\bitstream.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
+    <ClCompile Include="helpers\bytereader.cpp" />
+    <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
     <ClCompile Include="helpers\strings.cpp" />

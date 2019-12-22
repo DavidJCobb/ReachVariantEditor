@@ -12,23 +12,16 @@
 //
 // TODO:
 //
-//  - Finish auditing our code and making everything that reads a consistent 
-//    number of bits use (bitnumber) or (bytenumber).
-//
 //  - Bitnumber: remove the (swap) template parameter.
 //
-//  - Rename (bitstream) and (bytestream) to (bitreader) and (bytereader).
-//
-//  - Bytereader: add handling for endianness.
-//
-//  - Create a (bytewriter).
+//  - Rename (bitstream) to (bitreader).
 //
 //  - Use a bytewriter to write all data outside of MPVR's bit-packed data, 
 //    and use a bytereader to read that data.
 //
 //     - Consider making a class that, given a memory region, provides both 
-//       bit and byte access to it. If the class is declared const, it should 
-//       offer readers; else, writers. Or something like that.
+//       bit and byte access to it. (Well, two classes -- one for reading and 
+//       one for writing.)
 //
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 

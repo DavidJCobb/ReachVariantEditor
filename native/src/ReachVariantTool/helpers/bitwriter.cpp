@@ -99,9 +99,6 @@ namespace cobb {
       }
       this->_buffer = buf;
       this->_size   = size;
-      #if _DEBUG
-         assert(buf != old, "Recycling buffer? How?");
-      #endif
       if (old)
          free(old);
    }

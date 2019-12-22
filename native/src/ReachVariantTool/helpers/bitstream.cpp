@@ -57,13 +57,4 @@ namespace cobb {
          this->read(c);
       }
    }
-   //
-   void bytestream::read_string(char* out, int maxlength) noexcept {
-      for (int i = 0; i < maxlength; i++)
-         this->read(out[i]);
-   }
-   void bytestream::read_wstring(wchar_t* out, int maxlength) noexcept {
-      for (int i = 0; i < maxlength; i++)
-         this->read(out[i]);
-   }
 }

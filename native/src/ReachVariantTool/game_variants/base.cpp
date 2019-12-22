@@ -51,7 +51,7 @@ bool GameVariantHeader::read(cobb::bitstream& stream) noexcept {
       stream.skip(16); // TODO: hopper ID
    return true;
 }
-bool GameVariantHeader::read(cobb::bytestream& stream) noexcept {
+bool GameVariantHeader::read(cobb::bytereader& stream) noexcept {
    this->build.major.read(stream);
    this->build.minor.read(stream);
    this->contentType.read(stream);
