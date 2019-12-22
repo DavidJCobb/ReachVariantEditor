@@ -20,7 +20,9 @@ namespace cobb {
    template<typename T> inline constexpr unsigned int bitcount(T value) noexcept {
       return highest_set_bit(value) + 1;
    }
-   constexpr inline uint64_t bitmax(int bitcount) noexcept { // max value that can be held in X many bits
+   constexpr inline uint64_t bitmax(int bitcount) noexcept { // max value that can be held in X many bits; caps out at 40 bits
+      if (bitcount >= 40)
+         return uint64_t(0xFFFFFFFFFFFFFFFF);
       return (uint64_t(1) << bitcount) - 1;
    }
    //
