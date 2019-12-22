@@ -16,9 +16,9 @@ namespace reach {
 class ReachLoadout {
    public:
       cobb::bitbool visible;
-      cobb::bitnumber<7, int8_t, false, 0, std::false_type, -1> nameIndex = -1;
-      cobb::bitnumber<8, reach::weapon> weaponPrimary   = reach::weapon::unchanged;
-      cobb::bitnumber<8, reach::weapon> weaponSecondary = reach::weapon::unchanged;
+      cobb::bitnumber<7, int8_t, false, std::false_type, -1> nameIndex = -1;
+      cobb::bitnumber<8, reach::weapon>  weaponPrimary   = reach::weapon::unchanged;
+      cobb::bitnumber<8, reach::weapon>  weaponSecondary = reach::weapon::unchanged;
       cobb::bitnumber<8, reach::ability> ability = reach::ability::unchanged;
       cobb::bitnumber<4, uint8_t> grenadeCount;
       //

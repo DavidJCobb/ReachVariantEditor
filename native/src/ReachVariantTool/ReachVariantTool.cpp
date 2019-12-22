@@ -12,9 +12,6 @@
 //
 // TODO:
 //
-//  - Bitnumber: remove the (swap) template parameter. (Requires adjustment 
-//    of all bitnumber instances and typedefs that use the advanced params.)
-//
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.

@@ -66,7 +66,7 @@ namespace Megalo {
       public:
          using network_enum   = variable_network_priority;
          using network_type   = variable_network_priority_t;
-         using team_bitnumber = cobb::bitnumber<cobb::bitcount(8), const_team, false, 1>;
+         using team_bitnumber = cobb::bitnumber<cobb::bitcount(8), const_team, true>;
          //
          network_type   networking = network_enum::default;
          team_bitnumber initial    = const_team::none;

@@ -277,7 +277,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<4, reach::player_gravity> gravity = reach::player_gravity::unchanged;
          cobb::bitnumber<4, reach::vehicle_usage> vehicleUsage = reach::vehicle_usage::unchanged;
          cobb::bitnumber<2, uint8_t> unknown;
-         cobb::bitnumber<9, int16_t, false, 0, std::true_type, -1> jumpHeight = -1;
+         cobb::bitnumber<9, int16_t, false, std::true_type, -1> jumpHeight = -1;
       } movement;
       struct {
          cobb::bitnumber<3, reach::active_camo> activeCamo = reach::active_camo::unchanged;

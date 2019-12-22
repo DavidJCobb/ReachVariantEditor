@@ -22,7 +22,7 @@ namespace Megalo {
    //
    class OpcodeStringToken {
       public:
-         cobb::bitnumber<3, OpcodeStringTokenType, false, 1> type = OpcodeStringTokenType::none;
+         cobb::bitnumber<3, OpcodeStringTokenType, true> type = OpcodeStringTokenType::none;
          OpcodeArgValue* value = nullptr;
          //
          ~OpcodeStringToken() {
@@ -88,7 +88,7 @@ namespace Megalo {
       //       parameters? If so, any script editor will need to validate parameters.
       //
       public:
-         cobb::bitnumber<cobb::bitcount(Limits::max_variant_strings - 1), int32_t, false, 1> stringIndex = -1; // format string - index in scriptData::strings
+         cobb::bitnumber<cobb::bitcount(Limits::max_variant_strings - 1), int32_t, true> stringIndex = -1; // format string - index in scriptData::strings
          cobb::bitnumber<cobb::bitcount(N), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[N];
          //

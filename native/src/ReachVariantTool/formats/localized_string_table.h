@@ -27,7 +27,7 @@ namespace reach {
 };
 
 using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
-using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, false, 1>;
+using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
 
 class ReachStringTable;
 

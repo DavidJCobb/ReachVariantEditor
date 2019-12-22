@@ -51,14 +51,14 @@ class GameVariantHeader {
          cobb::bytenumber<uint16_t> major; // chdr-only
          cobb::bytenumber<uint16_t> minor; // chdr-only
       } build;
-      cobb::bitnumber<4, int8_t, false, 1> contentType;
+      cobb::bitnumber<4, int8_t, true> contentType;
       // skip 3 bytes
       cobb::bytenumber<uint32_t> fileLength;
       cobb::bytenumber<uint64_t> unk08;
       cobb::bytenumber<uint64_t> unk10;
       cobb::bytenumber<uint64_t> unk18;
       cobb::bytenumber<uint64_t> unk20;
-      cobb::bitnumber<3, int8_t, false, 1> activity;
+      cobb::bitnumber<3, int8_t, true> activity;
       cobb::bitnumber<3, uint8_t> gameMode;
       cobb::bitnumber<3, uint8_t> engine;
       // skip 1 byte
@@ -121,7 +121,7 @@ class ReachBlockMPVR {
    public:
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
       uint8_t  hashSHA1[0x14];
-      cobb::bitnumber<4, uint8_t, false, 1> type;
+      cobb::bitnumber<4, uint8_t, true> type;
       uint32_t encodingVersion;
       uint32_t engineVersion;
       GameVariantHeader variantHeader;
@@ -183,8 +183,8 @@ class ReachBlockMPVR {
       ReachStringTable localizedName = ReachStringTable(1, 0x180);
       ReachStringTable localizedDesc = ReachStringTable(1, 0xC00);
       ReachStringTable localizedCategory = ReachStringTable(1, 0x180);
-      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, false, 1> engineIcon;
-      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, false, 1> engineCategory;
+      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, true> engineIcon;
+      cobb::bitnumber<cobb::bitcount(32 - 1), int8_t, true> engineCategory;
       ReachMapPermissions mapPermissions;
       ReachPlayerRatingParams playerRatingParams;
       cobb::bytenumber<uint16_t> scoreToWin;

@@ -18,8 +18,7 @@ namespace cobb {
    template<
       int        bitcount,   // number of bits that the value is encoded as
       typename   underlying, // type to use to hold the value in-memory / type the value is encoded as when not in a bitstream
-      bool       swap         = false, // whether to bitswap the value after loading it as bits
-      int        offset       = 0, // offset added to the file before saving; must be subtracted when loaded
+      bool       offset       = false, // if true, the value is incremented by 1 when saved and must be decremented hwen loaded; used to avoid sign issues with small-bitcount values
       typename   presence_bit = bitnumber_no_presence_bit, // if std::true_type or std::false_type, then the game writes a bit indicating whether the value is present; if the bit equals the specified type, the value is present
       underlying if_absent    = underlying() // if the bitnumber has a presence bit, this value is assigned when the bit indicates absence
    > class bitnumber {
@@ -48,8 +47,7 @@ namespace cobb {
          using underlying_uint = std::make_unsigned_t<underlying_int>;
          static constexpr bool is_integer_type = std::is_same_v<underlying_type, underlying_int>;
          static constexpr int  bitcount        = bitcount;
-         static constexpr bool bitswap_on_read = swap;
-         static constexpr int  value_offset    = offset;
+         static constexpr bool uses_offset     = offset;
          //
          underlying_type value = underlying_type();
          //
@@ -83,7 +81,7 @@ namespace cobb {
             return !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
          }
          constexpr bool write_as_signed() const noexcept {
-            return std::is_signed_v<underlying_type> && !this->uses_presence() && !value_offset;
+            return std::is_signed_v<underlying_type> && !this->uses_presence() && !uses_offset;
          }
          //
          bool is_absent() const noexcept {
@@ -96,7 +94,7 @@ namespace cobb {
          void read(cobb::bitreader& stream) noexcept {
             if (!this->_read_presence(stream))
                return;
-            this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - value_offset);
+            this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - (uses_offset ? 1 : 0));
             if (std::is_signed_v<underlying_type> && !this->uses_presence())
                //
                // We have to apply the sign bit ourselves, or (offset) will break some signed 
@@ -108,7 +106,7 @@ namespace cobb {
          void write(cobb::bitwriter& stream) const noexcept {
             if (!this->_write_presence(stream))
                return;
-            stream.write((underlying_int)this->value + value_offset, bitcount, this->write_as_signed());
+            stream.write((underlying_int)this->value + (uses_offset ? 1 : 0), bitcount, this->write_as_signed());
          }
          //
          void read(cobb::bytereader& stream) noexcept {
@@ -169,9 +167,8 @@ namespace cobb {
    class bitbool {
       public:
          using underlying_type = bool;
-         static constexpr int  bitcount        = 1;
-         static constexpr bool bitswap_on_read = false;
-         static constexpr int  value_offset    = 0;
+         static constexpr int  bitcount    = 1;
+         static constexpr bool uses_offset = false;
          //
          using presence_bit = bitnumber_no_presence_bit;
          static constexpr underlying_type if_absent = false;

@@ -8,8 +8,8 @@ namespace Megalo {
    using action_index    = cobb::bitnumber<cobb::bitcount(Limits::max_actions - 1), int16_t>;
    using action_count    = cobb::bitnumber<cobb::bitcount(Limits::max_actions), uint16_t>;
    //
-   using const_team_index = cobb::bitnumber<cobb::bitcount((int)const_team::_count - 1), const_team, false, 1>;
+   using const_team_index = cobb::bitnumber<cobb::bitcount((int)const_team::_count - 1), const_team, true>;
    //
-   using object_type_index_optional = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_object_types), int32_t, false, 1>;
-   using forge_label_index = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t, false, 1>;
+   using object_type_index_optional = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_object_types), int32_t, true>;
+   using forge_label_index = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t, true>;
 }
