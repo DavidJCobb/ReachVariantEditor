@@ -27,31 +27,35 @@ namespace Megalo {
       this->opcodes.reserve(raw.actionCount + raw.conditionCount);
       temp.reserve(raw.actionCount);
       //
-      assert(raw.actionStart < actions.size() && "Bad trigger first-action-index."); // TODO: fail with an error in-app instead of asserting
-      if (raw.actionStart >= 0) {
-         size_t end = raw.actionStart + raw.actionCount;
-         if (end <= actions.size()) // TODO: if (end) is too high, fail with an error
-            for (size_t i = raw.actionStart; i < end; i++) {
-               auto instance = new Action(actions[i]);
-               this->opcodes.push_back(instance);
-               temp.push_back(instance);
-            }
-      }
-      assert(raw.conditionStart < conditions.size() && "Bad trigger first-conditions-index."); // TODO: fail with an error in-app instead of asserting
-      if (raw.conditionStart >= 0) {
-         size_t end = raw.conditionStart + raw.conditionCount;
-         if (end <= conditions.size()) // TODO: if (end) is too high, fail with an error
-            for (size_t i = raw.conditionStart; i < end; i++) {
-               auto& condition = conditions[i];
-               if (condition.action >= raw.actionCount) {
-                  this->opcodes.push_back(new Condition(condition));
-                  continue;
+      if (raw.actionCount > 0) {
+         assert(raw.actionStart < actions.size() && "Bad trigger first-action-index."); // TODO: fail with an error in-app instead of asserting
+         if (raw.actionStart >= 0) {
+            size_t end = raw.actionStart + raw.actionCount;
+            if (end <= actions.size()) // TODO: if (end) is too high, fail with an error
+               for (size_t i = raw.actionStart; i < end; i++) {
+                  auto instance = new Action(actions[i]);
+                  this->opcodes.push_back(instance);
+                  temp.push_back(instance);
                }
-               auto target = temp[condition.action];
-               auto it     = std::find(this->opcodes.begin(), this->opcodes.end(), target);
-               assert(it != this->opcodes.end() && "Action not present in the opcode list, even though we have to have inserted it?!");
-               this->opcodes.insert(it, new Condition(condition));
-            }
+         }
+      }
+      if (raw.conditionCount > 0) {
+         assert(raw.conditionStart < conditions.size() && "Bad trigger first-conditions-index."); // TODO: fail with an error in-app instead of asserting
+         if (raw.conditionStart >= 0) {
+            size_t end = raw.conditionStart + raw.conditionCount;
+            if (end <= conditions.size()) // TODO: if (end) is too high, fail with an error
+               for (size_t i = raw.conditionStart; i < end; i++) {
+                  auto& condition = conditions[i];
+                  if (condition.action >= raw.actionCount) {
+                     this->opcodes.push_back(new Condition(condition));
+                     continue;
+                  }
+                  auto target = temp[condition.action];
+                  auto it = std::find(this->opcodes.begin(), this->opcodes.end(), target);
+                  assert(it != this->opcodes.end() && "Action not present in the opcode list, even though we have to have inserted it?!");
+                  this->opcodes.insert(it, new Condition(condition));
+               }
+         }
       }
    }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
