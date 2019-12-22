@@ -1,7 +1,6 @@
 #include "bitwriter.h"
 #include "bytewriter.h"
 #include <cassert>
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -49,61 +48,6 @@ namespace cobb {
          assert(target < std::numeric_limits<uint32_t>::max() && "Cannot allocate that much memory!");
          this->resize((uint32_t)(target / 8));
       }
-   }
-   //
-   void bitwriter::save_to(FILE* file) const noexcept {
-      assert(file && "Cannot save to a nullptr file handle.");
-      fwrite(this->_buffer, 1, this->get_bytespan(), file);
-   }
-   void bitwriter::dump_to_console() const noexcept {
-      printf("\nWritten stream:\n");
-      //
-      constexpr int column_width = 16;
-      uint32_t pos = this->get_bytepos();
-      //
-      uint32_t rows    = pos / column_width;
-      uint32_t partial = pos % column_width;
-      if (partial)
-         ++rows;
-      for (uint32_t r = 0; r < rows; r++) {
-         printf("%08X | ", r * column_width);
-         //
-         int length = r == rows - 1 ? partial : column_width;
-         int c = 0;
-         for (; c < length; c++)
-            printf("%02X ", this->get_byte(r * column_width + c));
-         while (c++ < column_width)
-            printf("   ");
-         printf("| "); // separator between bytes and chars
-         c = 0;
-         for (; c < length; c++) {
-            unsigned char glyph = this->get_byte(r * column_width + c);
-            if (!isprint(glyph))
-               glyph = '.';
-            printf("%c", glyph);
-         }
-         while (c++ < column_width)
-            printf(" ");
-         //
-         printf("\n");
-      }
-   }
-   //
-   void bitwriter::fixup_size_field(uint32_t offset, uint32_t size, bool offset_is_in_bits) noexcept {
-      if (!offset_is_in_bits) {
-         *(uint32_t*)((std::intptr_t)this->_buffer + offset) = size;
-         return;
-      }
-      uint32_t bitpos = this->_bitpos;
-      this->_bitpos = offset;
-      this->write(size);
-      this->_bitpos = bitpos;
-   }
-   //
-   void bitwriter::pad_to_bytepos(uint32_t bytepos) noexcept {
-      assert(bytepos * 8 >= this->_size && "Cannot pad to a position we've already passed.");
-      this->resize(bytepos);
-      this->_bitpos = bytepos * 8;
    }
    void bitwriter::resize(uint32_t size) noexcept {
       if (this->_size == size)

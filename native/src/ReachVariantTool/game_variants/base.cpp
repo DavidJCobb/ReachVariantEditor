@@ -416,8 +416,8 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) const noexcept {
    writer.synchronize();
    //
    this->type.write(bits);
-   bits.write(this->encodingVersion, cobb::endian::big);
-   bits.write(this->engineVersion, cobb::endian::big);
+   bits.write(this->encodingVersion);
+   bits.write(this->engineVersion);
    cobb_test_display_bitwriter_offset("after encoding+engine versions");
    this->variantHeader.write(bits);
    this->flags.write(bits);

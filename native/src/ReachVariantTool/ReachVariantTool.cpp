@@ -15,22 +15,9 @@
 //  - Bitnumber: remove the (swap) template parameter. (Requires adjustment 
 //    of all bitnumber instances and typedefs that use the advanced params.)
 //
-//  - Rename (bitstream) to (bitreader).
-//
-//  - Use a bytewriter to write all data outside of MPVR's bit-packed data, 
-//    and use a bytereader to read that data. Only use bit[verb]ers for the 
-//    bit-aligned portions of MPVR.
-//
-//     - Consider making a class that, given a memory region, provides both 
-//       bit and byte access to it. (Well, two classes -- one for reading and 
-//       one for writing.)
-//
-//        - Probably best if the class just has an instance of the bit[verb]er 
-//          and an instance of the byte[verb]er, and a "synchronize" method 
-//          that takes whichever object is further behind and moves its offset 
-//          forward to match that of its counterpart. Objects using the class 
-//          can get a reference to both readers and synchronize and swap as 
-//          necessary.
+//  - Clean up cobb::bitwriter -- in particular, remove all endianness code, 
+//    since we should only be using it for bit-aligned data which is always 
+//    big-endian.
 //
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 

@@ -49,7 +49,7 @@ template<int count> class ReachDwordBasedBitset {
       void write(cobb::bitwriter& stream) const noexcept {
          auto count = this->bits.dword_count();
          for (uint8_t i = 0; i < count; i++)
-            stream.write(this->bits.dword(i), cobb::endian::big);
+            stream.write(this->bits.dword(i));
       }
       //
       #if _DEBUG

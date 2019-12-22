@@ -155,7 +155,7 @@ namespace Megalo {
       const VariableScope* variable_scope = nullptr;
       switch ((_scopes)this->scope) {
          case _scopes::constant:
-            stream.write(this->index, cobb::endian::big);
+            stream.write(this->index);
             return;
          case _scopes::player_number:
             variable_scope = &MegaloVariableScopePlayer;

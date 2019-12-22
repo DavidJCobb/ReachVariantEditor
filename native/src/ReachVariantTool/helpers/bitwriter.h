@@ -51,8 +51,6 @@ namespace cobb {
             this->_bitpos = pos * 8;
          };
          //
-         void save_to(FILE* file) const noexcept;
-         //
          inline void go_to_bitpos(uint32_t pos) noexcept {
             if (pos / 8 >= this->_size - 1)
                this->resize(pos / 8 + 1);
@@ -64,22 +62,9 @@ namespace cobb {
             this->_bitpos = pos * 8;
          };
          //
-         uint8_t get_byte(uint32_t bytepos) const noexcept {
-            if (bytepos > this->_bitpos / 8)
-               return 0;
-            return *(uint8_t*)(this->_buffer + bytepos);
-         }
-         //
-         void dump_to_console() const noexcept;
          inline void enlarge_by(uint32_t bytes) noexcept {
             this->resize(this->_size + bytes);
          }
-         void fixup_size_field(uint32_t offset, uint32_t size, bool offset_is_in_bits = false) noexcept;
-         inline void pad_bytes(uint32_t bytes) noexcept {
-            while (bytes--)
-               this->write(0, 8);
-         }
-         void pad_to_bytepos(uint32_t bytepos) noexcept;
          void resize(uint32_t size) noexcept; // size in bytes
          inline void write(int64_t value, int bits, bool is_signed = false) noexcept {
             if (!bits)
@@ -89,36 +74,28 @@ namespace cobb {
             this->_write(value, bits, bits);
          }
          //
-         void write(float value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+         void write(float value) noexcept {
             union {
                uint32_t i = 0;
                float    f;
             } uv;
             uv.f = value;
             uint32_t v = uv.i;
-            if (save_endianness != cobb::endian::big)
-               v = cobb::to_big_endian(v); // bit-aligned write will implicitly convert it to big-endian
             this->write(v, 32);
          }
          void write(bool value) noexcept {
             this->write(value ? 1 : 0, 1);
          }
          //
-         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value) noexcept {
             T v = value;
-            if (save_endianness != cobb::endian::big)
-               v = cobb::from_big_endian(v); // bit-aligned write will implicitly convert it to big-endian
             this->write((uint64_t)v, cobb::bits_in<T>);
          };
-         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value, const cobb::endian_t save_endianness = cobb::endian_t::little) noexcept {
+         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value) noexcept {
             using item_type = std::remove_extent_t<T>; // from X[i] to X
             //
-            if (save_endianness != cobb::endian::big)
-               for (int i = 0; i < std::extent<T>::value; i++)
-                  this->write(cobb::to_big_endian(value[i]), cobb::bits_in<item_type>); // bit-aligned write will implicitly convert it to big-endian
-            else
-               for (int i = 0; i < std::extent<T>::value; i++)
-                  this->write(value[i], cobb::bits_in<item_type>);
+            for (int i = 0; i < std::extent<T>::value; i++)
+               this->write(value[i], cobb::bits_in<item_type>);
          };
          //
          void write_string(const char* value, int maxlength) noexcept { // writes as bits; stops early after null char
@@ -128,9 +105,9 @@ namespace cobb {
                   break;
             }
          }
-         void write_wstring(const wchar_t* value, int maxlength, const cobb::endian_t save_endianness = cobb::endian_t::big) noexcept { // writes as bits; stops early after null char
+         void write_wstring(const wchar_t* value, int maxlength) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {
-               this->write(value[i], save_endianness);
+               this->write(value[i]);
                if (!value[i])
                   break;
             }

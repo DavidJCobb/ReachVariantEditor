@@ -27,7 +27,7 @@ class ReachMapPermissions {
       void write(cobb::bitwriter& stream) const noexcept {
          stream.write(this->mapIDs.size(), 6);
          for (uint16_t id : this->mapIDs)
-            stream.write(id, cobb::endian::big);
+            stream.write(id);
          this->type.write(stream);
       }
 };

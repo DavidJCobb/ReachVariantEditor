@@ -194,7 +194,7 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
          }
          stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
          static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
-         stream.write(cobb::to_big_endian(uncompressed_size)); // redundant uncompressed size
+         stream.write(uncompressed_size); // redundant uncompressed size
          for (size_t i = 0; i < compressed_size; i++)
             stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
          free(buffer);
