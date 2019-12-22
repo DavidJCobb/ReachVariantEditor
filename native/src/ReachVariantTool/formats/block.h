@@ -2,11 +2,10 @@
 #include <cstdint>
 
 namespace cobb {
-   class bitstream;
-   class bytereader;
-   class bytestream;
-   //
+   class bitreader;
    class bitwriter;
+   class bytereader;
+   class bytewriter;
 }
 
 class ReachFileBlock {
@@ -36,10 +35,10 @@ class ReachFileBlock {
          this->expected.size      = size;
       }
       //
-      bool read(cobb::bitstream&) noexcept;
+      bool read(cobb::bitreader&) noexcept;
       bool read(cobb::bytereader&) noexcept;
-      void write(cobb::bitwriter&) const noexcept;
-      void write_postprocess(cobb::bitwriter&) const noexcept; // rewrites block size, etc.; must be called immediately after the block is done writing
+      void write(cobb::bytewriter&) const noexcept;
+      void write_postprocess(cobb::bytewriter&) const noexcept; // rewrites block size, etc.; must be called immediately after the block is done writing
       //
       uint32_t end() const noexcept { return this->readState.pos + this->expected.size; }
       uint32_t write_end() const noexcept { return this->writeState.pos + this->expected.size; }
@@ -53,7 +52,7 @@ class ReachFileBlockRemainder {
       uint8_t  bitsInFractionalByte;
       uint8_t* remainder = nullptr;
       //
-      bool read(cobb::bitstream&, uint32_t blockEnd) noexcept;
+      bool read(cobb::bitreader&, uint32_t blockEnd) noexcept;
 };
 
 class ReachUnknownBlock {
@@ -62,5 +61,5 @@ class ReachUnknownBlock {
       uint8_t* data = nullptr;
       //
       bool read(cobb::bytereader& stream) noexcept;
-      void write(cobb::bitwriter&) const noexcept;
+      void write(cobb::bytewriter&) const noexcept;
 };

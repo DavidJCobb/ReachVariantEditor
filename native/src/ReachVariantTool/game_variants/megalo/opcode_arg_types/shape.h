@@ -19,7 +19,7 @@ namespace Megalo {
          OpcodeArgValueScalar top;
          OpcodeArgValueScalar bottom;
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->shapeType.read(stream);
             switch (this->shapeType) {
                case ShapeType::sphere:
@@ -98,7 +98,7 @@ namespace Megalo {
             }
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+         static OpcodeArgValue* factory(cobb::bitreader& stream) {
             return new OpcodeArgValueShape();
          }
    };

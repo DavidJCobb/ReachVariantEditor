@@ -48,7 +48,7 @@ class ReachString {
       mutable std::array<int, reach::language_count> offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
       //
-      void read_offsets(cobb::bitstream&, ReachStringTable& table) noexcept;
+      void read_offsets(cobb::bitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) const noexcept;
@@ -84,9 +84,9 @@ class ReachStringTable {
       std::vector<ReachString> strings;
       //
    protected:
-      void* _make_buffer(cobb::bitstream&) const noexcept;
+      void* _make_buffer(cobb::bitreader&) const noexcept;
    public:
-      void read(cobb::bitstream&) noexcept;
+      void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
       ReachString* get_entry(size_t index) noexcept {

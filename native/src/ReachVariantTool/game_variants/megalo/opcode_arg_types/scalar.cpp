@@ -52,14 +52,14 @@ namespace {
    };
 }
 namespace Megalo {
-   /*virtual*/ bool OpcodeArgValueScalar::read(cobb::bitstream& stream) noexcept /*override*/ {
+   /*virtual*/ bool OpcodeArgValueScalar::read(cobb::bitreader& stream) noexcept /*override*/ {
       this->scope = stream.read_bits(cobb::bitcount((int)_scopes::_count - 1));
       int which_bits = 0;
       int index_bits = 0;
       const VariableScope* variable_scope = nullptr;
       switch ((_scopes)this->scope) {
          case _scopes::constant:
-            this->index = stream.read_bits<int16_t>(16, cobb::bitstream_read_flags::is_signed);
+            stream.read(this->index);
             return true;
          case _scopes::player_number:
             variable_scope = &MegaloVariableScopePlayer;

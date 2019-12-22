@@ -17,7 +17,7 @@ namespace Megalo {
          OpcodeArgValuePlayer player;
          OpcodeArgValueScalar addOrRemove;
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->set_type.read(stream);
             if (this->set_type == PlayerSetType::specific_player) {
                return this->player.read(stream) && this->addOrRemove.read(stream);
@@ -59,7 +59,7 @@ namespace Megalo {
             cobb::sprintf(out, "unknown:%u", (uint32_t)this->set_type);
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+         static OpcodeArgValue* factory(cobb::bitreader& stream) {
             return new OpcodeArgValuePlayerSet();
          }
    };

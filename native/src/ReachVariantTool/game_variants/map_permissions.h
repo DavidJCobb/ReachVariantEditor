@@ -17,7 +17,7 @@ class ReachMapPermissions {
       std::vector<uint16_t> mapIDs;
       cobb::bitnumber<1, reach::map_permission_type> type;
       //
-      void read(cobb::bitstream& stream) noexcept {
+      void read(cobb::bitreader& stream) noexcept {
          size_t count = stream.read_bits<size_t>(6);
          this->mapIDs.resize(count);
          for (size_t i = 0; i < count; i++)

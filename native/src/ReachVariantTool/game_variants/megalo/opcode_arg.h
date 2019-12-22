@@ -1,7 +1,7 @@
 #pragma once
 #include <cassert>
 #include <string>
-#include "../../helpers/bitstream.h"
+#include "../../helpers/bitreader.h"
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/strings.h"
 #include "enums.h"
@@ -41,19 +41,19 @@ namespace Megalo {
 
    class Opcode { // base class for Condition and Action
       public:
-         virtual bool read(cobb::bitstream&) noexcept = 0;
+         virtual bool read(cobb::bitreader&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
    };
    
    class OpcodeArgValue {
       public:
-         virtual bool read(cobb::bitstream&) noexcept = 0;
+         virtual bool read(cobb::bitreader&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          //
-         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+         static OpcodeArgValue* factory(cobb::bitreader& stream) {
             assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");
             return nullptr;
          }
@@ -61,9 +61,9 @@ namespace Megalo {
             return variable_type::not_a_variable;
          }
    };
-   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::bitstream& stream);
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitstream& stream);
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitstream& stream);
+   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::bitreader& stream);
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitreader& stream);
+   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitreader& stream);
    //
    class OpcodeArgBase {
       public:
@@ -90,7 +90,7 @@ namespace Megalo {
          //
          uint32_t value = 0; // loaded value
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->value = stream.read_bits(this->baseEnum.index_bits_with_offset(this->baseOffset)) - this->baseOffset;
             return true;
          }
@@ -108,7 +108,7 @@ namespace Megalo {
          const SmartFlags& base;
          uint32_t value = 0; // loaded value
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->value = stream.read_bits(this->base.bits());
             return true;
          }
@@ -140,7 +140,7 @@ namespace Megalo {
          index_quirk quirk;
          int32_t     value = 0; // loaded value
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             if (this->quirk == index_quirk::presence) {
                bool absence = stream.read_bits(1) != 0;
                if (absence) {
@@ -179,10 +179,10 @@ namespace Megalo {
       public:
          OpcodeArgValueAllPlayers() {};
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueAllPlayers();
          }
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             return true;
          }
          virtual void write(cobb::bitwriter& stream) const noexcept override {

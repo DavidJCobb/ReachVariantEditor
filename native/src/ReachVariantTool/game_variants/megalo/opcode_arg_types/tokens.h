@@ -32,7 +32,7 @@ namespace Megalo {
             }
          }
          //
-         bool read(cobb::bitstream& stream) noexcept {
+         bool read(cobb::bitreader& stream) noexcept {
             this->type.read(stream);
             switch (this->type) {
                case OpcodeStringTokenType::none:
@@ -92,7 +92,7 @@ namespace Megalo {
          cobb::bitnumber<cobb::bitcount(N), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[N];
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->stringIndex.read(stream); // string table index pointer; -1 == none
             this->tokenCount.read(stream);
             if (this->tokenCount > N) {
@@ -132,7 +132,7 @@ namespace Megalo {
             cobb::sprintf(out, "format string ID %d and tokens: %s", this->stringIndex, out.c_str());
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueStringTokens;
          }
    };

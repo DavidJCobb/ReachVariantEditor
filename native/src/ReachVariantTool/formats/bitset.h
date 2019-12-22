@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include "../helpers/bitset.h"
-#include "../helpers/bitstream.h"
+#include "../helpers/bitreader.h"
 #include "../helpers/bitwriter.h"
 
 #include "../game_variants/megalo/limits.h"
@@ -21,7 +21,7 @@ template<int count> class ReachDwordBasedBitset {
    public:
       cobb::bitset<count> bits;
       //
-      void read(cobb::bitstream& stream) noexcept {
+      void read(cobb::bitreader& stream) noexcept {
          constexpr int dwordcount = (count + 31) / 32;
          for (int i = 0; i < dwordcount; i++) {
             uint32_t dword;
@@ -48,7 +48,7 @@ template<int count> class ReachDwordBasedBitset {
       }
       void write(cobb::bitwriter& stream) const noexcept {
          auto count = this->bits.dword_count();
-         for (size_t i = 0; i < count; i++)
+         for (uint8_t i = 0; i < count; i++)
             stream.write(this->bits.dword(i), cobb::endian::big);
       }
       //

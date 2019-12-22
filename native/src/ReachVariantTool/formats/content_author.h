@@ -10,8 +10,8 @@ class ReachContentAuthor {
       char author[16]; // includes null terminator
       cobb::bitbool isOnlineID;
       //
-      bool read(cobb::bitstream&) noexcept;
+      bool read(cobb::bitreader&) noexcept;
       bool read(cobb::bytereader&) noexcept;
-      void write_bits(cobb::bitwriter& stream) const noexcept;
-      void write_bytes(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bytewriter& stream) const noexcept;
 };

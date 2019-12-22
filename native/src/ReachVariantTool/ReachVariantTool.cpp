@@ -4,9 +4,9 @@
 #include "stdafx.h"
 
 #include "game_variants/base.h"
-#include "helpers/bitwriter.h"
 #include "helpers/endianness.h"
 #include "helpers/files.h"
+#include "helpers/stream.h"
 #include "formats/sha1.h"
 
 //
@@ -211,8 +211,9 @@ void test_create_hacked_variant() {
    chdr.data.unk20 = 0;
    //
    printf("Writing modified data to buffer...\n");
-   cobb::bitwriter writer;
+   cobb::bit_or_byte_writer writer;
    variant->write(writer);
+   writer.dump_to_console();
    //
    FILE*   out   = nullptr;
    errno_t error = fopen_s(&out, "test_output_cursed_slayer.bin", "wb");
@@ -272,7 +273,7 @@ int main() {
          #endif
          printf("\n");
          printf("Resaving...\n");
-         cobb::bitwriter writer;
+         cobb::bit_or_byte_writer writer;
          variant->write(writer);
          writer.dump_to_console();
          #if _DEBUG

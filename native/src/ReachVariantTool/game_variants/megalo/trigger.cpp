@@ -9,7 +9,7 @@ namespace Megalo {
       this->opcodes.clear();
    }
    //
-   bool Trigger::read(cobb::bitstream& stream) noexcept {
+   bool Trigger::read(cobb::bitreader& stream) noexcept {
       this->blockType.read(stream);
       this->entryType.read(stream);
       if (this->blockType == block_type::for_each_object_with_label)

@@ -9,7 +9,7 @@ class ReachPlayerRatingParams {
       std::array<float, 15> unknown;
       cobb::bitbool flag;
       //
-      void read(cobb::bitstream& stream) noexcept {
+      void read(cobb::bitreader& stream) noexcept {
          for (float& f : this->unknown)
             stream.read(f);
          this->flag.read(stream);

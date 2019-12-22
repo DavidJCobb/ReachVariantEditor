@@ -24,7 +24,7 @@ namespace Megalo {
          cobb::bytenumber<int16_t>   requiredNumber     = 0;
          cobb::bitnumber<7, uint8_t> mapMustHaveAtLeast = 0;
          //
-         void read(cobb::bitstream&) noexcept;
+         void read(cobb::bitreader&) noexcept;
          void postprocess_string_indices(ReachStringTable& table) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          //

@@ -8,7 +8,10 @@
 #include "../formats/localized_string_table.h"
 #include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
+#include "../helpers/bitreader.h"
+#include "../helpers/bytereader.h"
 #include "../helpers/files.h"
+#include "../helpers/stream.h"
 #include "loadouts.h"
 #include "map_permissions.h"
 #include "megalo_game_stats.h"
@@ -30,14 +33,14 @@ class BlamHeader {
          uint16_t unk2E = 0;
       } data;
       //
-      bool read(cobb::bitstream&) noexcept;
-      void write(cobb::bitwriter&) const noexcept;
+      bool read(cobb::bytereader&) noexcept;
+      void write(cobb::bytewriter&) const noexcept;
 };
 class EOFBlock : public ReachFileBlock {
    public:
       EOFBlock() : ReachFileBlock('_eof', 0) {}
       //
-      bool read(cobb::bitstream&) noexcept;
+      bool read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter&) const noexcept;
 };
 
@@ -67,10 +70,10 @@ class GameVariantHeader {
       cobb::bitnumber<8, uint32_t> engineIcon;
       uint8_t  unk284[0x2C]; // only in chdr
       //
-      bool read(cobb::bitstream&) noexcept;
+      bool read(cobb::bitreader&) noexcept;
       bool read(cobb::bytereader&) noexcept;
-      void write_bits(cobb::bitwriter& stream) const noexcept;
-      void write_bytes(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bytewriter& stream) const noexcept;
       //
       void set_title(const wchar_t* value) noexcept;
       void set_description(const wchar_t* value) noexcept;
@@ -87,9 +90,9 @@ class ReachBlockCHDR {
          }
          return false;
       }
-      void write(cobb::bitwriter& stream) const noexcept {
+      void write(cobb::bytewriter& stream) const noexcept {
          this->header.write(stream);
-         this->data.write_bytes(stream);
+         this->data.write(stream);
       }
 };
 
@@ -109,7 +112,7 @@ class ReachTeamData {
       cobb::bytenumber<int32_t>   colorText;
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
-      void read(cobb::bitstream&) noexcept;
+      void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 };
 
@@ -217,8 +220,8 @@ class ReachBlockMPVR {
       ReachGameVariantTU1Options titleUpdateData;
       ReachFileBlockRemainder remainingData;
       //
-      bool read(cobb::bitstream&);
-      void write(cobb::bitwriter& stream) const noexcept;
+      bool read(cobb::bit_or_byte_reader&);
+      void write(cobb::bit_or_byte_writer&) const noexcept;
 };
 
 class GameVariant {
@@ -229,23 +232,21 @@ class GameVariant {
       std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
       //
       bool read(cobb::mapped_file& file) {
-         cobb::bytereader bytes(file.data(), file.size());
-         cobb::bitstream  bits(file);
-         //
-         if (!this->blamHeader.read(bits)) {
+         auto reader = cobb::bit_or_byte_reader(file.data(), file.size());
+         if (!this->blamHeader.read(reader.bytes)) {
             printf("FAILED to read (_blf).\n");
             return false;
          }
-         bytes.set_bytepos(bits.offset / 8);
-         if (!this->contentHeader.read(bytes)) {
+         if (!this->contentHeader.read(reader.bytes)) {
             printf("FAILED to read (chdr).\n");
             return false;
          }
-         bits.offset = bytes.get_bytepos() * 8;
-         if (!this->multiplayer.read(bits)) {
+         reader.synchronize();
+         if (!this->multiplayer.read(reader)) {
             printf("FAILED to read (mpvr).\n");
             return false;
          }
+         reader.synchronize();
          //
          // TODO: We need to handle the '_eof' block here, because it contains a 
          // file length.
@@ -259,25 +260,24 @@ class GameVariant {
          // lengths, e.g. MPVR is always 0x5000 bytes plus the size of its hash 
          // and other odds and ends. Still, we should try to handle this robustly.
          //
-         bytes.set_bytepos(bits.get_bytepos());
-         while (file.is_in_bounds(bytes.get_bytepos(), 0)) {
+         while (file.is_in_bounds(reader.bytes.get_bytepos(), 0)) {
             auto& block = this->unknownBlocks.emplace_back();
-            if (!block.read(bytes) || !block.header.found.signature) {
+            if (!block.read(reader.bytes) || !block.header.found.signature) {
                this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
                break;
             }
          }
          return true;
       }
-      void write(cobb::bitwriter& stream) const noexcept {
-         this->blamHeader.write(stream);
-         this->blamHeader.header.write_postprocess(stream);
-         this->contentHeader.write(stream);
-         this->contentHeader.header.write_postprocess(stream);
-         this->multiplayer.write(stream);
-         this->multiplayer.header.write_postprocess(stream);
+      void write(cobb::bit_or_byte_writer& writer) const noexcept {
+         this->blamHeader.write(writer.bytes);
+         this->blamHeader.header.write_postprocess(writer.bytes);
+         this->contentHeader.write(writer.bytes);
+         this->contentHeader.header.write_postprocess(writer.bytes);
+         this->multiplayer.write(writer);
+         this->multiplayer.header.write_postprocess(writer.bytes);
          for (auto& unknown : this->unknownBlocks)
-            unknown.write(stream);
+            unknown.write(writer.bytes);
 
          // TODO: fix up file length in CHDR
          // TODO: fix up file length in MPVR

@@ -59,9 +59,7 @@ namespace cobb {
          template<typename = std::enable_if_t<!std::is_same_v<int, underlying_type>>> bitnumber(underlying_type v) : value(v) {};
          //
       protected:
-         static constexpr uint32_t read_flags = (bitswap_on_read ? bitstream_read_flags::swap : 0);
-         //
-         bool _read_presence(cobb::bitstream& stream) { // returns bool: value should be read?
+         bool _read_presence(cobb::bitreader& stream) { // returns bool: value should be read?
             if (!this->uses_presence())
                return true;
             bool bit = stream.read_bits(1);
@@ -99,19 +97,7 @@ namespace cobb {
          void read(cobb::bitreader& stream) noexcept {
             if (!this->_read_presence(stream))
                return;
-            this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount, read_flags) - value_offset);
-            if (std::is_signed_v<underlying_type> && !this->uses_presence())
-               //
-               // We have to apply the sign bit ourselves, or (offset) will break some signed 
-               // values. Main example is mpvr::activity, which is incremented by 1 before 
-               // saving (in case its value is -1) and then serialized as a 3-bit number.
-               //
-               this->value = underlying_type(cobb::apply_sign_bit((underlying_int)this->value, bitcount));
-         }
-         void read(cobb::bitstream& stream) noexcept {
-            if (!this->_read_presence(stream))
-               return;
-            this->value = underlying_type(stream.read_bits<underlying_int>(bitcount, read_flags) - value_offset);
+            this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - value_offset);
             if (std::is_signed_v<underlying_type> && !this->uses_presence())
                //
                // We have to apply the sign bit ourselves, or (offset) will break some signed 
@@ -125,17 +111,11 @@ namespace cobb {
                return;
             stream.write((underlying_int)this->value + value_offset, bitcount, this->write_as_signed());
          }
-         void write_bits(cobb::bitwriter& stream) const noexcept {
-            this->write(stream);
-         }
-         void write_bytes(cobb::bitwriter& stream) const noexcept {
-            stream.write((underlying_int)this->value);
-         }
          //
          void read(cobb::bytereader& stream) noexcept {
             stream.read(this->value);
          }
-         void write(cobb::bytewriter& stream) noexcept {
+         void write(cobb::bytewriter& stream) const noexcept {
             stream.write(this->value);
          }
          //
@@ -202,26 +182,17 @@ namespace cobb {
          bitbool() {};
          bitbool(bool v) : value(v) {};
          //
-         void read(cobb::bitstream& stream) noexcept {
-            this->value = stream.read_bits<int>(1);
-         }
          void read(cobb::bitreader& stream) noexcept {
-            stream.read(this->value);
+            this->value = stream.read_bits<int>(1);
          }
          void read(cobb::bytereader& stream) noexcept {
             stream.read(&this->value, 1);
          }
-         void write(cobb::bytewriter& stream) const noexcept {
-            stream.write(&this->value, 1);
-         }
          void write(cobb::bitwriter& stream) const noexcept {
             stream.write(this->value);
          }
-         void write_bits(cobb::bitwriter& stream) const noexcept {
-            stream.write(this->value);
-         }
-         void write_bytes(cobb::bitwriter& stream) const noexcept {
-            stream.write((uint8_t)this->value);
+         void write(cobb::bytewriter& stream) const noexcept {
+            stream.write(&this->value, 1);
          }
          //
          operator underlying_type() const noexcept { return this->value; };

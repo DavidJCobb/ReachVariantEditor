@@ -927,7 +927,7 @@ namespace Megalo {
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];
 
-   bool Action::read(cobb::bitstream& stream) noexcept {
+   bool Action::read(cobb::bitreader& stream) noexcept {
       {
          auto&  list  = actionFunctionList;
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));

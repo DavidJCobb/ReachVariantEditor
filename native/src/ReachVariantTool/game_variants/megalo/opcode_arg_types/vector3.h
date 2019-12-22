@@ -10,10 +10,10 @@ namespace Megalo {
             int8_t z = 0;
          } value; // loaded value
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueVector3();
          }
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             stream.read(this->value.x);
             stream.read(this->value.y);
             stream.read(this->value.z);

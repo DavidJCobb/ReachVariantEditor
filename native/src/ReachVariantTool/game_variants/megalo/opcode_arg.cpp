@@ -10,7 +10,7 @@
 #include "parse_error_reporting.h"
 
 namespace Megalo {
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitstream& stream) {
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitreader& stream) {
       uint8_t type = stream.read_bits<uint8_t>(3);
       switch ((variable_type)type) {
          case variable_type::scalar:
@@ -30,7 +30,7 @@ namespace Megalo {
       error.extra[0]  = type;
       return false;
    }
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitstream& stream) {
+   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitreader& stream) {
       uint8_t type = stream.read_bits<uint8_t>(2);
       switch (type) {
          case 0: // Team

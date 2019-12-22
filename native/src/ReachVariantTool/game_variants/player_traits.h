@@ -292,7 +292,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, uint8_t> directionalDamageIndicator;
       } sensors;
       //
-      void read(cobb::bitstream&) noexcept;
+      void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 };
 
@@ -303,7 +303,7 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
-      void read(cobb::bitstream& stream) noexcept {
+      void read(cobb::bitreader& stream) noexcept {
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);

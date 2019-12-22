@@ -8,7 +8,7 @@ namespace Megalo {
          const char* baseStringFalse = "false";
          bool value = false; // loaded value
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             stream.read(this->value);
             return true;
          }
@@ -25,7 +25,7 @@ namespace Megalo {
                this->baseStringFalse = base.text_false;
          };
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueConstBool();
          }
    };
@@ -33,7 +33,7 @@ namespace Megalo {
       public:
          int8_t value = 0; // loaded value
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             stream.read(this->value);
             return true;
          }
@@ -44,7 +44,7 @@ namespace Megalo {
             cobb::sprintf(out, "%d", this->value);
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueConstSInt8();
          }
    };

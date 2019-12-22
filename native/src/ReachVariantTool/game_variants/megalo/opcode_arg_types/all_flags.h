@@ -6,7 +6,7 @@ namespace Megalo {
       class name : public OpcodeArgValueBaseFlags { \
          public: \
             name##(); \
-            static OpcodeArgValue* factory(cobb::bitstream&) { \
+            static OpcodeArgValue* factory(cobb::bitreader&) { \
                return new name##(); \
             } \
       };

@@ -1,6 +1,6 @@
 #include "loadouts.h"
 
-void ReachLoadout::read(cobb::bitstream& stream) noexcept {
+void ReachLoadout::read(cobb::bitreader& stream) noexcept {
    this->visible.read(stream);
    this->nameIndex.read(stream);
    this->weaponPrimary.read(stream);

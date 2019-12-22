@@ -11,11 +11,11 @@ namespace Megalo {
          uint16_t which = none; // which scope (i.e. if it's a number variable on a player, then which player; if it's Spawn Sequence, then on which object)
          int16_t  index = none; // which variable (i.e. if it's a number variable on a player, then which player); if it's a constant, then this is the constant value
          //
-         virtual bool read(cobb::bitstream&) noexcept override;
+         virtual bool read(cobb::bitreader&) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          //
-         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+         static OpcodeArgValue* factory(cobb::bitreader& stream) {
             return new OpcodeArgValueScalar();
          }
          virtual variable_type get_variable_type() const noexcept {

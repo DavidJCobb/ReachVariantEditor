@@ -18,7 +18,7 @@ namespace Megalo {
          OpcodeArgValueScalar numerator;
          OpcodeArgValueScalar denominator;
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->type.read(stream);
             switch (this->type) {
                case MeterType::none:
@@ -70,7 +70,7 @@ namespace Megalo {
             }
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueMeterParameters;
          }
    };

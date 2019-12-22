@@ -7,33 +7,31 @@
 #include "templating.h"
 
 namespace cobb {
+   class bytewriter;
+
    class bitwriter {
+      friend bytewriter;
       //
-      // Serialize bit-aligned data to an internal buffer.
+      // Serialize bit-aligned data to an internal buffer. All serialization is big-endian.
       //
-      // ENDIANNESS USED:
-      //
-      //  - Big-endian when you specify a bitcount
-      //  - Little-endian when you serialize whole values (i.e. no bitcount given), unless you override it
-      //     - This remains true even when the whole values are serialized to non-byte-aligned positions
-      //
-      protected:
-         enum class _is_signed_sentinel {};
-      public:
-         static constexpr _is_signed_sentinel is_signed = _is_signed_sentinel();
       protected:
          uint8_t* _buffer = nullptr;
          uint32_t _size   = 0; // in bytes
          uint32_t _bitpos = 0;
          //
+         bytewriter* share_buffer_with = nullptr;
+         //
          uint8_t& _access_byte(uint32_t bytepos) const noexcept;
          void _ensure_room_for(unsigned int bitcount) noexcept;
+         void _sync_shared_buffer() noexcept;
          void _write(uint64_t value, int bits, int& recurse_remaining) noexcept; // should naturally write in big-endian
          //
       public:
          ~bitwriter();
          bitwriter() {};
          bitwriter(const bitwriter&) = delete; // no copy
+         //
+         void share_buffer(cobb::bytewriter& other) noexcept; // NOTE: does not keep the (offset) synchronized; just the buffer
          //
          inline uint32_t get_bitpos()   const noexcept { return this->_bitpos; };
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
@@ -47,6 +45,11 @@ namespace cobb {
          }
          inline int      get_bitshift() const noexcept { return this->_bitpos % 8; };
          inline const uint8_t* data() const noexcept { return this->_buffer; }
+         inline void set_bytepos(uint32_t pos) noexcept {
+            if (pos >= this->_size - 1)
+               this->resize(pos + 1);
+            this->_bitpos = pos * 8;
+         };
          //
          void save_to(FILE* file) const noexcept;
          //

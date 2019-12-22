@@ -25,7 +25,7 @@ namespace reach {
    }
 };
 
-void ReachString::read_offsets(cobb::bitstream& stream, ReachStringTable& table) noexcept {
+void ReachString::read_offsets(cobb::bitreader& stream, ReachStringTable& table) noexcept {
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
       if (has)
@@ -98,7 +98,7 @@ void ReachString::write_strings(std::string& out) const noexcept {
    }
 }
 
-void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
+void* ReachStringTable::_make_buffer(cobb::bitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
    bool     is_compressed     = stream.read_bits(1) != 0;
    uint32_t size = uncompressed_size;
@@ -140,7 +140,7 @@ void* ReachStringTable::_make_buffer(cobb::bitstream& stream) const noexcept {
    }
    return buffer;
 }
-void ReachStringTable::read(cobb::bitstream& stream) noexcept {
+void ReachStringTable::read(cobb::bitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    this->strings.resize(count);
    for (size_t i = 0; i < count; i++)

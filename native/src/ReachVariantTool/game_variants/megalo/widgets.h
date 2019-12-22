@@ -8,7 +8,7 @@ namespace Megalo {
       public:
          cobb::bitnumber<4, uint8_t> position;
          //
-         void read(cobb::bitstream& stream) noexcept {
+         void read(cobb::bitreader& stream) noexcept {
             this->position.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {

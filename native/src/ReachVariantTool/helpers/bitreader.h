@@ -42,6 +42,7 @@ namespace cobb {
          // entire bytes we've read. "Bytespan" is the number of all bytes that 
          // we've read any bits from.
          //
+         inline const uint8_t* data()   const noexcept { return this->buffer; }
          inline uint32_t get_bitpos()   const noexcept { return this->offset; }
          inline uint32_t get_bytepos()  const noexcept { return this->offset / 8; }
          inline uint32_t get_bytespan() const noexcept { return this->get_bytepos() + (this->get_bitshift() ? 1 : 0); }
@@ -49,12 +50,13 @@ namespace cobb {
          inline void set_bitpos(uint32_t bitpos)   noexcept { this->offset = bitpos; }
          inline void set_bytepos(uint32_t bytepos) noexcept { this->offset = bytepos * 8; }
          inline bool is_in_bounds() const noexcept { return this->offset / 8 < this->length; }
+         inline bool is_byte_aligned() const noexcept { return !this->get_bitshift(); }
 
          template<typename T = uint32_t> T read_bits(uint8_t bitcount) noexcept {
             using uT = std::make_unsigned_t<cobb::strip_enum_t<T>>;
             //
             #if _DEBUG
-               auto pos = this->get_bytepos();
+               auto pos   = this->get_bitpos();
                auto shift = this->get_bitshift();
             #endif
             uT      result = uT(0);
@@ -71,13 +73,13 @@ namespace cobb {
             if (std::is_signed_v<T>)
                result = cobb::apply_sign_bit(result, bitcount);
             #if _DEBUG
-               assert(this->offset == (pos * 8 + shift) + bitcount && "Failed to advance by the correct number of bits.");
+               assert(this->offset == pos + bitcount && "Failed to advance by the correct number of bits.");
             #endif
             return (T)result;
          }
          //
-         template<typename T> void read(T out[]) noexcept {
-            for (uint32_t i = 0; i < std::extent<decltype(out)>::value; i++)
+         template<typename T, size_t count> void read(T(&out)[count]) noexcept {
+            for (uint32_t i = 0; i < count; i++)
                this->read(out[i]);
          };
          template<typename T> void read(T& out) noexcept {

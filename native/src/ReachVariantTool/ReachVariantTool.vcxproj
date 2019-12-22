@@ -242,6 +242,7 @@
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
+    <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />
     <ClCompile Include="stdafx.cpp">

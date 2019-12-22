@@ -1,4 +1,5 @@
 #include "bitwriter.h"
+#include "bytewriter.h"
 #include <cassert>
 #include <cctype>
 #include <cstdio>
@@ -11,6 +12,29 @@ namespace cobb {
          free(this->_buffer);
          this->_buffer = nullptr;
       }
+      this->_size = 0;
+      this->_sync_shared_buffer();
+   }
+
+   void bitwriter::_sync_shared_buffer() noexcept {
+      auto target = this->share_buffer_with;
+      if (!target)
+         return;
+      target->_buffer = this->_buffer;
+      target->_size   = this->_size;
+   }
+
+   void bitwriter::share_buffer(cobb::bytewriter& other) noexcept {
+      if (this->share_buffer_with == &other)
+         return;
+      if (this->share_buffer_with || other.share_buffer_with)
+         assert(false && "I didn't write code to properly unlink existing shares!");
+      other.share_buffer_with = this;
+      this->share_buffer_with = &other;
+      if (other._buffer)
+         free(other._buffer);
+      other._buffer = this->_buffer;
+      other._size   = this->_size;
    }
 
    uint8_t& bitwriter::_access_byte(uint32_t bytepos) const noexcept {
@@ -101,6 +125,7 @@ namespace cobb {
       this->_size   = size;
       if (old)
          free(old);
+      this->_sync_shared_buffer();
    }
    void bitwriter::_write(uint64_t value, int bits, int& remaining) noexcept {
       this->_ensure_room_for(bits);

@@ -23,7 +23,7 @@ class ReachMegaloGameStat {
       Sort   sortOrder   = Sort::ascending;
       bool   groupByTeam = false;
       //
-      void read(cobb::bitstream&) noexcept;
+      void read(cobb::bitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 };

@@ -1,7 +1,7 @@
 #include "player_traits.h"
 
 
-void ReachPlayerTraits::read(cobb::bitstream& stream) noexcept {
+void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
    auto& d = this->defense;
    auto& o = this->offense;
    auto& m = this->movement;

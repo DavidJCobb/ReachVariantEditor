@@ -1,22 +1,32 @@
 #pragma once
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include "endianness.h"
+#include "polyfills_cpp20.h"
 #include "type_traits.h"
 
 namespace cobb {
+   class bitwriter;
+
    class bytewriter {
+      friend bitwriter;
       protected:
          uint8_t* _buffer = nullptr;
          uint32_t _offset = 0;
          uint32_t _size   = 0;
          //
+         bitwriter* share_buffer_with = nullptr;
+         //
          void _ensure_room_for(unsigned int bytecount) noexcept;
+         void _sync_shared_buffer() noexcept;
          //
       public:
          ~bytewriter();
          bytewriter() {};
          bytewriter(const bytewriter&) = delete; // no copy
+         //
+         void share_buffer(cobb::bitwriter& other) noexcept; // NOTE: does not keep the (offset) synchronized; just the buffer
          //
          inline uint32_t get_bitpos()   const noexcept { return this->_offset * 8; };
          inline uint32_t get_bytepos()  const noexcept { return this->_offset; };
@@ -25,12 +35,13 @@ namespace cobb {
          inline void set_bytepos(uint32_t pos) noexcept {
             if (pos >= this->_size - 1)
                this->resize(pos + 1);
-            this->_offset = pos * 8;
+            this->_offset = pos;
          };
 
          // Write to the buffer and advance the (offset) value.
          //
          void write(const void* out, uint32_t length) noexcept;
+         //
          template<typename T> void write(T v, cobb::endian_t endianness = cobb::endian::little) noexcept {
             _ensure_room_for(sizeof(T));
             //
@@ -42,6 +53,12 @@ namespace cobb {
                   value = cobb::byteswap(value);
             *(int_type*)(this->_buffer + this->_offset) = value;
             this->_offset += sizeof(int_type);
+         };
+         //
+         template<typename T, size_t count> void write(const T(&v)[count], cobb::endian_t endianness = cobb::endian::little) noexcept {
+            _ensure_room_for(sizeof(T) * count);
+            for (size_t i = 0; i < count; i++)
+               this->write(v[i], endianness);
          };
 
          // Write to someplace in the middle of the buffer, without advancing the (offset).
@@ -57,15 +74,15 @@ namespace cobb {
                if (endianness != cobb::endian::native)
                   value = cobb::byteswap(value);
             *(int_type*)(this->_buffer + offset) = value;
-            this->_offset += sizeof(int_type);
          }
 
          inline void enlarge_by(uint32_t bytes) noexcept {
             this->resize(this->_size + bytes);
          }
          inline void pad(uint32_t bytes) noexcept {
-            while (bytes--)
-               this->write(0, 8);
+            this->_ensure_room_for(bytes);
+            memset(this->_buffer + this->_offset, 0, bytes);
+            this->_offset += bytes;
          }
          inline void skip(uint32_t bytes) noexcept {
             this->_offset += bytes;

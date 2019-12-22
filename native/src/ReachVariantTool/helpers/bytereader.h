@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "endianness.h"
+#include "polyfills_cpp20.h"
 
 namespace cobb {
    class bytereader {
@@ -21,8 +22,7 @@ namespace cobb {
          //
          void read(void* out, uint32_t length) noexcept;
          void read(uint8_t* out, uint32_t length) noexcept;
-         template<typename T> void read(T out[], cobb::endian_t endianness = cobb::endian::little) noexcept {
-            constexpr uint32_t count = std::extent<decltype(out)>::value;
+         template<typename T, size_t count> void read(T(&out)[count], cobb::endian_t endianness = cobb::endian::little) noexcept {
             if (sizeof(T) == 1) {
                this->read(out, count);
             } else {

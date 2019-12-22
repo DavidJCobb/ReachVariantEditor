@@ -9,16 +9,16 @@
 
 #include "../formats/sha1.h"
 
-#define cobb_test_display_bitwriter_offset(text) printf("== Writer bytepos " text ": %08X\n", stream.get_bytepos());
+#define cobb_test_display_bitwriter_offset(text) printf("== Writer bytepos " text ": %08X\n", bits.get_bytepos());
 
-bool BlamHeader::read(cobb::bitstream& stream) noexcept {
+bool BlamHeader::read(cobb::bytereader& stream) noexcept {
    this->header.read(stream);
-   stream.read(this->data.unk0C);
-   stream.read(this->data.unk0E);
-   stream.read(this->data.unk2E);
+   stream.read(this->data.unk0C, cobb::endian::big); // endianness assumed but not known
+   stream.read(this->data.unk0E, cobb::endian::big); // endianness assumed but not known
+   stream.read(this->data.unk2E, cobb::endian::big); // endianness assumed but not known
    return true;
 }
-void BlamHeader::write(cobb::bitwriter& stream) const noexcept {
+void BlamHeader::write(cobb::bytewriter& stream) const noexcept {
    this->header.write(stream);
    stream.enlarge_by(0x24);
    stream.write(this->data.unk0C, cobb::endian::big);
@@ -26,7 +26,7 @@ void BlamHeader::write(cobb::bitwriter& stream) const noexcept {
    stream.write(this->data.unk2E);
 }
 
-bool GameVariantHeader::read(cobb::bitstream& stream) noexcept {
+bool GameVariantHeader::read(cobb::bitreader& stream) noexcept {
    this->build.major = 0; // not in mpvr
    this->build.minor = 0; // not in mpvr
    this->contentType.read(stream);
@@ -76,7 +76,7 @@ bool GameVariantHeader::read(cobb::bytereader& stream) noexcept {
    stream.read(this->unk284);
    return true;
 }
-void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
+void GameVariantHeader::write(cobb::bitwriter& stream) const noexcept {
    this->contentType.write(stream);
    #if _DEBUG
       this->fileLength.write(stream);
@@ -87,19 +87,14 @@ void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
    this->unk10.write(stream);
    this->unk18.write(stream);
    this->unk20.write(stream);
-   cobb_test_display_bitwriter_offset("after MPVR int64s");
    this->activity.write(stream);
    this->gameMode.write(stream);
    this->engine.write(stream);
    this->unk2C.write(stream);
    this->engineCategory.write(stream);
-   cobb_test_display_bitwriter_offset("before MPVR created-by");
-   this->createdBy.write_bits(stream);
-   cobb_test_display_bitwriter_offset("before MPVR modified-by");
-   this->modifiedBy.write_bits(stream);
-   cobb_test_display_bitwriter_offset("before MPVR title");
+   this->createdBy.write(stream);
+   this->modifiedBy.write(stream);
    stream.write_wstring(this->title,       128); // big-endian
-   cobb_test_display_bitwriter_offset("before MPVR desc");
    stream.write_wstring(this->description, 128); // big-endian
    if (this->contentType == 6) {
       this->engineIcon.write(stream);
@@ -107,32 +102,32 @@ void GameVariantHeader::write_bits(cobb::bitwriter& stream) const noexcept {
    if (this->activity == 2)
       assert(false && "Hopper ID writing not implemented!"); // TODO: hopper ID
 }
-void GameVariantHeader::write_bytes(cobb::bitwriter& stream) const noexcept {
-   this->build.major.write_bytes(stream);
-   this->build.minor.write_bytes(stream);
-   this->contentType.write_bytes(stream);
-   stream.pad_bytes(3);
+void GameVariantHeader::write(cobb::bytewriter& stream) const noexcept {
+   this->build.major.write(stream);
+   this->build.minor.write(stream);
+   this->contentType.write(stream);
+   stream.pad(3);
    #if _DEBUG
-      this->fileLength.write_bytes(stream);
+      this->fileLength.write(stream);
    #else
       static_assert(false, "TODO: Write out a dummy file length and then, after the file is fully written, come back and overwrite that length with a real value.");
    #endif
-   this->unk08.write_bytes(stream);
-   this->unk10.write_bytes(stream);
-   this->unk18.write_bytes(stream);
-   this->unk20.write_bytes(stream);
-   this->activity.write_bytes(stream);
-   this->gameMode.write_bytes(stream);
-   this->engine.write_bytes(stream);
-   stream.pad_bytes(1);
-   this->unk2C.write_bytes(stream);
-   this->engineCategory.write_bytes(stream);
-   stream.pad_bytes(4);
-   this->createdBy.write_bytes(stream);
-   this->modifiedBy.write_bytes(stream);
+   this->unk08.write(stream);
+   this->unk10.write(stream);
+   this->unk18.write(stream);
+   this->unk20.write(stream);
+   this->activity.write(stream);
+   this->gameMode.write(stream);
+   this->engine.write(stream);
+   stream.pad(1);
+   this->unk2C.write(stream);
+   this->engineCategory.write(stream);
+   stream.pad(4);
+   this->createdBy.write(stream);
+   this->modifiedBy.write(stream);
    stream.write(this->title);
    stream.write(this->description);
-   this->engineIcon.write_bytes(stream);
+   this->engineIcon.write(stream);
    stream.write(this->unk284);
 }
 //
@@ -145,7 +140,7 @@ void GameVariantHeader::set_description(const wchar_t* value) noexcept {
    memcpy(this->description, value, wcslen(value) * sizeof(wchar_t));
 }
 
-void ReachTeamData::read(cobb::bitstream& stream) noexcept {
+void ReachTeamData::read(cobb::bitreader& stream) noexcept {
    this->flags.read(stream);
    this->name.read(stream);
    this->initialDesignator.read(stream);
@@ -166,15 +161,18 @@ void ReachTeamData::write(cobb::bitwriter& stream) const noexcept {
    this->fireteamCount.write(stream);
 }
 
-bool ReachBlockMPVR::read(cobb::bitstream& stream) {
+bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
    Megalo::ParseState::reset();
    uint32_t offset_before_hashable;
    uint32_t offset_after_hashable;
    //
-   if (!this->header.read(stream)) {
+   if (!this->header.read(reader.bytes)) {
       printf("Failed to read MPVR block header.\n");
       return false;
    }
+   reader.synchronize();
+   auto& stream = reader.bits;
+   //
    stream.read(this->hashSHA1);
    stream.skip(4 * 8); // skip four unused bytes
    stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
@@ -270,7 +268,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    this->scoreToWin.read(stream);
    this->unkF7A6.read(stream);
    this->unkF7A7.read(stream);
-   printf("Stream bit pos: %d\n", stream.offset);
+   printf("Stream bit pos: %d\n", stream.get_bitpos());
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;
@@ -378,7 +376,7 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
       uint32_t size     = offset_after_hashable - offset_before_hashable;
       printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
-      auto     buffer   = (const uint8_t*)stream.buffer.data();
+      auto     buffer   = (const uint8_t*)stream.data();
       auto     buffer32 = (const uint32_t*)buffer;
       uint8_t* working  = (uint8_t*)malloc(bufsize);
       memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
@@ -399,25 +397,30 @@ bool ReachBlockMPVR::read(cobb::bitstream& stream) {
    //
    return true;
 }
-void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
+void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) const noexcept {
+   auto& bytes = writer.bytes;
+   auto& bits  = writer.bits;
+
    uint32_t offset_of_hash;
    uint32_t offset_before_hashable;
    uint32_t offset_after_hashable;
    uint32_t offset_of_hashable_length;
+   this->header.write(bytes);
+   offset_of_hash = bytes.get_bytespan();
+   bytes.write(this->hashSHA1);
+   bytes.pad(4); // four unused bytes
+   offset_of_hashable_length = bytes.get_bytespan();
+   bytes.pad(4); // TODO: go back after writing all data and set this to big-endian: (offset_after_hashable - offset_before_hashable)
+   offset_before_hashable = bytes.get_bytespan();
    //
-   this->header.write(stream);
-   offset_of_hash = stream.get_bytespan();
-   stream.write(this->hashSHA1);
-   stream.pad_bytes(4); // four unused bytes
-   offset_of_hashable_length = stream.get_bytespan();
-   stream.pad_bytes(4); // TODO: go back after writing all data and set this to big-endian: (offset_after_hashable - offset_before_hashable)
-   offset_before_hashable = stream.get_bytespan();
-   this->type.write(stream);
-   stream.write(this->encodingVersion, cobb::endian::big);
-   stream.write(this->engineVersion,   cobb::endian::big);
+   writer.synchronize();
+   //
+   this->type.write(bits);
+   bits.write(this->encodingVersion, cobb::endian::big);
+   bits.write(this->engineVersion, cobb::endian::big);
    cobb_test_display_bitwriter_offset("after encoding+engine versions");
-   this->variantHeader.write_bits(stream);
-   this->flags.write(stream);
+   this->variantHeader.write(bits);
+   this->flags.write(bits);
    cobb_test_display_bitwriter_offset("before options");
    {
       auto& o = this->options;
@@ -428,141 +431,144 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       auto& t = o.team;
       auto& l = o.loadouts;
       //
-      m.flags.write(stream);
-      m.timeLimit.write(stream);
-      m.roundLimit.write(stream);
-      m.roundsToWin.write(stream);
-      m.suddenDeathTime.write(stream);
-      m.gracePeriod.write(stream);
+      m.flags.write(bits);
+      m.timeLimit.write(bits);
+      m.roundLimit.write(bits);
+      m.roundsToWin.write(bits);
+      m.suddenDeathTime.write(bits);
+      m.gracePeriod.write(bits);
       //
-      r.flags.write(stream);
-      r.livesPerRound.write(stream);
-      r.teamLivesPerRound.write(stream);
-      r.respawnTime.write(stream);
-      r.suicidePenalty.write(stream);
-      r.betrayalPenalty.write(stream);
-      r.respawnGrowth.write(stream);
-      r.loadoutCamTime.write(stream);
-      r.traitsDuration.write(stream);
-      r.traits.write(stream);
+      r.flags.write(bits);
+      r.livesPerRound.write(bits);
+      r.teamLivesPerRound.write(bits);
+      r.respawnTime.write(bits);
+      r.suicidePenalty.write(bits);
+      r.betrayalPenalty.write(bits);
+      r.respawnGrowth.write(bits);
+      r.loadoutCamTime.write(bits);
+      r.traitsDuration.write(bits);
+      r.traits.write(bits);
       //
-      s.observers.write(stream);
-      s.teamChanges.write(stream);
-      s.flags.write(stream);
+      s.observers.write(bits);
+      s.teamChanges.write(bits);
+      s.flags.write(bits);
       //
-      a.flags.write(stream);
-      a.baseTraits.write(stream);
-      a.weaponSet.write(stream);
-      a.vehicleSet.write(stream);
-      a.powerups.red.traits.write(stream);
-      a.powerups.blue.traits.write(stream);
-      a.powerups.yellow.traits.write(stream);
-      a.powerups.red.duration.write(stream);
-      a.powerups.blue.duration.write(stream);
-      a.powerups.yellow.duration.write(stream);
+      a.flags.write(bits);
+      a.baseTraits.write(bits);
+      a.weaponSet.write(bits);
+      a.vehicleSet.write(bits);
+      a.powerups.red.traits.write(bits);
+      a.powerups.blue.traits.write(bits);
+      a.powerups.yellow.traits.write(bits);
+      a.powerups.red.duration.write(bits);
+      a.powerups.blue.duration.write(bits);
+      a.powerups.yellow.duration.write(bits);
       //
-      t.scoring.write(stream);
-      t.species.write(stream);
-      t.designatorSwitchType.write(stream);
+      t.scoring.write(bits);
+      t.species.write(bits);
+      t.designatorSwitchType.write(bits);
       for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
-         t.teams[i].write(stream);
+         t.teams[i].write(bits);
       //
-      l.flags.write(stream);
+      l.flags.write(bits);
       for (size_t i = 0; i < l.palettes.size(); i++)
-         l.palettes[i].write(stream);
+         l.palettes[i].write(bits);
    }
    {
       auto& sd = this->scriptData;
       auto& t = sd.traits;
       auto& o = sd.options;
-      stream.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
+      bits.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
       for (auto& traits : t)
-         traits.write(stream);
-      stream.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
+         traits.write(bits);
+      bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
-         option.write(stream);
-      sd.strings.write(stream);
+         option.write(bits);
+      sd.strings.write(bits);
    }
    cobb_test_display_bitwriter_offset("after first piece of script data");
-   this->stringTableIndexPointer.write(stream);
-   this->localizedName.write(stream);
-   this->localizedDesc.write(stream);
-   this->localizedCategory.write(stream);
-   this->engineIcon.write(stream);
-   this->engineCategory.write(stream);
-   this->mapPermissions.write(stream);
-   this->playerRatingParams.write(stream);
-   this->scoreToWin.write(stream);
-   this->unkF7A6.write(stream);
-   this->unkF7A7.write(stream);
+   this->stringTableIndexPointer.write(bits);
+   this->localizedName.write(bits);
+   this->localizedDesc.write(bits);
+   this->localizedCategory.write(bits);
+   this->engineIcon.write(bits);
+   this->engineCategory.write(bits);
+   this->mapPermissions.write(bits);
+   this->playerRatingParams.write(bits);
+   this->scoreToWin.write(bits);
+   this->unkF7A6.write(bits);
+   this->unkF7A7.write(bits);
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;
       auto& m = ot.megalo;
       //
-      e.disabled.write(stream);
-      e.hidden.write(stream);
+      e.disabled.write(bits);
+      e.hidden.write(bits);
       //
-      m.disabled.write(stream);
-      m.hidden.write(stream);
+      m.disabled.write(bits);
+      m.hidden.write(bits);
    }
    cobb_test_display_bitwriter_offset("after engine option toggles");
    {  // Megalo
       auto& content = this->scriptContent;
       //
-      stream.write(content.raw.conditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+      bits.write(content.raw.conditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
       for (auto& opcode : content.raw.conditions)
-         opcode.write(stream);
+         opcode.write(bits);
       cobb_test_display_bitwriter_offset("after conditions");
       //
-      stream.write(content.raw.actions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+      bits.write(content.raw.actions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
       for (auto& opcode : content.raw.actions)
-         opcode.write(stream);
+         opcode.write(bits);
       cobb_test_display_bitwriter_offset("after actions");
       //
-      stream.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
+      bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
       for (auto& trigger : content.triggers)
-         trigger.write(stream);
+         trigger.write(bits);
       cobb_test_display_bitwriter_offset("after triggers");
       //
-      stream.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
+      bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
       for (auto& stat : content.stats)
-         stat.write(stream);
+         stat.write(bits);
       cobb_test_display_bitwriter_offset("after stats");
       //
       {  // Script variable declarations
          auto& v = content.variables;
-         v.global.write(stream);
-         v.player.write(stream);
-         v.object.write(stream);
-         v.team.write(stream);
+         v.global.write(bits);
+         v.player.write(bits);
+         v.object.write(bits);
+         v.team.write(bits);
       }
       cobb_test_display_bitwriter_offset("after variable declarations");
       //
-      stream.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
+      bits.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
       for (auto& widget : content.widgets)
-         widget.write(stream);
+         widget.write(bits);
       cobb_test_display_bitwriter_offset("after widgets");
       //
-      content.entryPoints.write(stream);
-      content.usedMPObjectTypes.write(stream);
+      content.entryPoints.write(bits);
+      content.usedMPObjectTypes.write(bits);
       //
-      stream.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
+      bits.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
       for (auto& label : content.forgeLabels)
-         label.write(stream);
+         label.write(bits);
       cobb_test_display_bitwriter_offset("after forge labels");
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
-      this->titleUpdateData.write(stream);
-   offset_after_hashable = stream.get_bytespan();
-   stream.pad_to_bytepos(this->header.write_end());
+      this->titleUpdateData.write(bits);
+   offset_after_hashable = bits.get_bytespan();
+   //
+   writer.synchronize();
+   //
+   bytes.pad_to_bytepos(this->header.write_end());
    //
    {  // SHA-1 hash
       auto hasher = InProgressSHA1();
-      uint32_t size     = offset_after_hashable + offset_before_hashable;
-      stream.fixup_size_field(offset_of_hashable_length, cobb::to_big_endian(size));
+      uint32_t size = offset_after_hashable + offset_before_hashable;
+      bytes.write_to_offset(offset_of_hashable_length, size, cobb::endian::big);
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
-      auto     buffer   = (const uint8_t*)stream.data();
+      auto     buffer   = (const uint8_t*)bytes.data();
       auto     buffer32 = (const uint32_t*)buffer;
       uint8_t* working  = (uint8_t*)malloc(bufsize);
       memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
@@ -571,11 +577,11 @@ void ReachBlockMPVR::write(cobb::bitwriter& stream) const noexcept {
       hasher.transform(working, bufsize);
       free(working);
       //
-      stream.fixup_size_field(offset_of_hash + 0x00, cobb::to_big_endian(hasher.hash[0]));
-      stream.fixup_size_field(offset_of_hash + 0x04, cobb::to_big_endian(hasher.hash[1]));
-      stream.fixup_size_field(offset_of_hash + 0x08, cobb::to_big_endian(hasher.hash[2]));
-      stream.fixup_size_field(offset_of_hash + 0x0C, cobb::to_big_endian(hasher.hash[3]));
-      stream.fixup_size_field(offset_of_hash + 0x10, cobb::to_big_endian(hasher.hash[4]));
+      bytes.write_to_offset(offset_of_hash + 0x00, hasher.hash[0], cobb::endian::big);
+      bytes.write_to_offset(offset_of_hash + 0x04, hasher.hash[1], cobb::endian::big);
+      bytes.write_to_offset(offset_of_hash + 0x08, hasher.hash[2], cobb::endian::big);
+      bytes.write_to_offset(offset_of_hash + 0x0C, hasher.hash[3], cobb::endian::big);
+      bytes.write_to_offset(offset_of_hash + 0x10, hasher.hash[4], cobb::endian::big);
    }
 }
 

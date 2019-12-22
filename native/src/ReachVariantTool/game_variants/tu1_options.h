@@ -40,7 +40,7 @@ class ReachGameVariantTU1Options {
       float magnumDamage              = vanilla_magnum_damage;
       float magnumFireDelay           = vanilla_magnum_fire_delay;
       //
-      void read(cobb::bitstream& stream) noexcept {
+      void read(cobb::bitreader& stream) noexcept {
          this->flags.read(stream);
          this->precisionBloom            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
          this->armorLockDamageDrain      = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);

@@ -8,7 +8,7 @@ namespace Megalo {
       public:
          uint32_t icon = 0;
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
             if (this->icon == WaypointIcon.lookup("territory A"))
                return OpcodeArgValueScalar::read(stream); // call super
@@ -30,7 +30,7 @@ namespace Megalo {
             }
          }
          //
-         static OpcodeArgValue* factory(cobb::bitstream& stream) {
+         static OpcodeArgValue* factory(cobb::bitreader& stream) {
             return new OpcodeArgValueWaypointIcon();
          }
    };

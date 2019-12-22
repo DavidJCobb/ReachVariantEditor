@@ -14,7 +14,7 @@ namespace Megalo {
          //
          inline bool is_none() const noexcept { return this->index == -1; }
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             bool absence = stream.read_bits(1) != 0;
             if (absence)
                return true;
@@ -58,7 +58,7 @@ namespace Megalo {
       class classname : public OpcodeArgValueSpecificVariableScopeAndType { \
          public: \
             classname##() : OpcodeArgValueSpecificVariableScopeAndType( scope, type ) {} \
-            static OpcodeArgValue* factory(cobb::bitstream&) { \
+            static OpcodeArgValue* factory(cobb::bitreader&) { \
                return new classname##(); \
             } \
       };
@@ -70,7 +70,7 @@ namespace Megalo {
          OpcodeArgValueObject object;
          int32_t playerIndex = -1;
          //
-         virtual bool read(cobb::bitstream& stream) noexcept override {
+         virtual bool read(cobb::bitreader& stream) noexcept override {
             if (!this->object.read(stream))
                return false;
             bool absence = stream.read_bits(1) != 0;
@@ -96,7 +96,7 @@ namespace Megalo {
             }
             cobb::sprintf(out, "%s.Player[%d]", out.c_str(), this->playerIndex);
          }
-         static OpcodeArgValue* factory(cobb::bitstream&) {
+         static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueObjectPlayerVariable();
          }
    };

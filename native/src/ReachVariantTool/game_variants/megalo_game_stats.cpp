@@ -1,6 +1,6 @@
 #include "megalo_game_stats.h"
 
-void ReachMegaloGameStat::read(cobb::bitstream& stream) noexcept {
+void ReachMegaloGameStat::read(cobb::bitreader& stream) noexcept {
    this->nameIndex.read(stream);
    this->format    = (Format)stream.read_bits(2);
    this->sortOrder = (Sort)stream.read_bits(2);

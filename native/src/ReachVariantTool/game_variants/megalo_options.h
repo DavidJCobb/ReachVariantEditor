@@ -20,7 +20,7 @@ class ReachMegaloOptionValueEntry {
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
-      void read(cobb::bitstream&, ReachMegaloOption& owner) noexcept;
+      void read(cobb::bitreader&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept;
 };
@@ -40,7 +40,7 @@ class ReachMegaloOption {
       ReachMegaloOptionValue rangeCurrent;
       ReachMegaloOptionValueIndex currentValueIndex;
       //
-      void read(cobb::bitstream&) noexcept;
+      void read(cobb::bitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 };
