@@ -12,20 +12,110 @@
 //
 // TODO:
 //
-//  - Bitnumber: remove the (swap) template parameter.
+//  - Bitnumber: remove the (swap) template parameter. (Requires adjustment 
+//    of all bitnumber instances and typedefs that use the advanced params.)
 //
 //  - Rename (bitstream) to (bitreader).
 //
 //  - Use a bytewriter to write all data outside of MPVR's bit-packed data, 
-//    and use a bytereader to read that data.
+//    and use a bytereader to read that data. Only use bit[verb]ers for the 
+//    bit-aligned portions of MPVR.
 //
 //     - Consider making a class that, given a memory region, provides both 
 //       bit and byte access to it. (Well, two classes -- one for reading and 
 //       one for writing.)
 //
+//        - Probably best if the class just has an instance of the bit[verb]er 
+//          and an instance of the byte[verb]er, and a "synchronize" method 
+//          that takes whichever object is further behind and moves its offset 
+//          forward to match that of its counterpart. Objects using the class 
+//          can get a reference to both readers and synchronize and swap as 
+//          necessary.
+//
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.
+//
+//  - Change how we load blocks: we should loop over all blocks in the file, 
+//    instead of assuming that CHDR and MPVR must be at the start. I think 
+//    the game itself makes that assumption but I'm not sure (wouldn't be 
+//    hard to hex-edit a dummy block between them and find out; maybe I 
+//    should).
+//
+//     - We could have GameVariant store a std::vector of ReachFileBlock 
+//       instances, and each instance could have a pointer to a "data" 
+//       object with virtual read/save methods. You wouldn't call those 
+//       directly; rather, you'd call read/save on the block, and it would 
+//       call read/save on its data object (and this in turn would allow 
+//       the block to do things like block length fixup after writing).
+//
+// ==========================================================================
+//
+//  - Begin testing to identify further unknown information in Reach.
+//
+//     - Unknown values for Shield Regen Rate
+//
+//        - Presumed to be "decay."
+//
+//     - Unknown values for Health Regen Rate
+//
+//        - Presumed to be "decay."
+//
+//           - Does it take effect when your shields are up?
+//
+//           - Does it prevent shield regen?
+//
+//           - Can it kill?
+//
+//     - Shield Delay
+//
+//     - Shield Vampirism
+//
+//        - Requires someone to test with.
+//
+//     - Three settings governing Ability Usage
+//
+//        - Wouldn't be surprised if it was one or two settings with 
+//          different values. I should look at the bits for each UI-exposed 
+//          value.
+//
+//     - Unknown spawn AA indices
+//
+//     - Maximum jump height (game clamps or validates values; 420% did not 
+//       work in-game despite being supported by the format).
+//
+//     - Unknown Active Camo option value
+//
+//        - Presumed to be "perfect camo."
+//
+//        - Remember: you can use mounted turrets to get a third-person view 
+//          of your player model.
+//
+//     - Appearance: Aura
+//
+//        - Remember: you can use mounted turrets to get a third-person view 
+//          of your player model.
+//
+//     - Sensors: Directional Damage Indicator
+//
+//        - Probably a bool trait. Could try setting off explosives near 
+//          oneself to see.
+//
+//        - May require someone to test with.
+//
+//     - Unknown radar range values
+//
+//        - May require someone to test with.
+//
+//     - Test all illegal-but-storable values for all player trait enums
+//
+//     - Test all engine option toggles
+//
+//  = KNOWN INFO:
+//
+//     - The Grenade Regeneration trait is a trait-bool. If enabled for a 
+//       player, that player will receive one frag and one plasma on every 
+//       fifth second of the round.
 //
 
 #define REACH_GAME_VARIANTS_TESTING_RESAVE 1
@@ -66,6 +156,7 @@ TestingGameVariant g_tests[] = {
    TestingGameVariant("Alpha Zombies",    L"alphazombies.bin"),
    TestingGameVariant("TU One Flag",      L"tu_ctf_1flag.bin"),
    TestingGameVariant("Assault",          L"assault.bin"),
+   //TestingGameVariant("Halo Chess",       L"halo_chess.bin"), // Halo Chess is not valid; it uses a _cmp block instead of an mpvr block
    TestingGameVariant("Headhunter",       L"headhunter.bin"),
    TestingGameVariant("TU Headhunter",    L"headhunter_tu.bin"),
    TestingGameVariant("Juggernaut",       L"juggernaut.bin"),

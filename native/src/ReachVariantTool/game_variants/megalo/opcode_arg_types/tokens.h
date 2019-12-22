@@ -96,7 +96,7 @@ namespace Megalo {
             this->stringIndex.read(stream); // string table index pointer; -1 == none
             this->tokenCount.read(stream);
             if (this->tokenCount > N) {
-               printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount, N);
+               printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount.to_int(), N);
                return false;
             }
             for (uint8_t i = 0; i < this->tokenCount; i++)

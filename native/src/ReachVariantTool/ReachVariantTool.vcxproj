@@ -191,6 +191,7 @@
     <ClInclude Include="game_variants\player_traits.h" />
     <ClInclude Include="game_variants\tu1_options.h" />
     <ClInclude Include="helpers\bitnumber.h" />
+    <ClInclude Include="helpers\bitreader.h" />
     <ClInclude Include="helpers\bitset.h" />
     <ClInclude Include="helpers\bitstream.h" />
     <ClInclude Include="helpers\bitwise.h" />
@@ -201,6 +202,7 @@
     <ClInclude Include="helpers\files.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
+    <ClInclude Include="helpers\stream.h" />
     <ClInclude Include="helpers\strings.h" />
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
@@ -233,6 +235,7 @@
     <ClCompile Include="game_variants\megalo_game_stats.cpp" />
     <ClCompile Include="game_variants\megalo_options.cpp" />
     <ClCompile Include="game_variants\player_traits.cpp" />
+    <ClCompile Include="helpers\bitreader.cpp" />
     <ClCompile Include="helpers\bitstream.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytereader.cpp" />

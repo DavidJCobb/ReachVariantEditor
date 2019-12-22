@@ -265,7 +265,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<8, reach::weapon> weaponSecondary = reach::weapon::unchanged;
          cobb::bitnumber<4, reach::grenade_count> grenadeCount = reach::grenade_count::unchanged;
          cobb::bitnumber<2, reach::infinite_ammo> infiniteAmmo = reach::infinite_ammo::unchanged;
-         cobb::bitnumber<2, uint8_t> grenadeRegen;
+         cobb::bitnumber<2, reach::bool_trait> grenadeRegen = reach::bool_trait::unchanged;
          cobb::bitnumber<2, reach::bool_trait> weaponPickup = reach::bool_trait::unchanged;
          cobb::bitnumber<2, uint8_t> abilityDrop; // this and the next three may actually be the same value?
          cobb::bitnumber<2, uint8_t> infiniteAbility;

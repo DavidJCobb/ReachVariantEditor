@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 #include "bitstream.h"
+#include "bitreader.h"
 #include "bitwriter.h"
 #include "bytereader.h"
 #include "bytewriter.h"
@@ -45,6 +46,7 @@ namespace cobb {
       public:
          using underlying_type = underlying;
          using underlying_int  = cobb::strip_enum_t<underlying_type>; // int type if (underlying_type) is an enum
+         using underlying_uint = std::make_unsigned_t<underlying_int>;
          static constexpr bool is_integer_type = std::is_same_v<underlying_type, underlying_int>;
          static constexpr int  bitcount        = bitcount;
          static constexpr bool bitswap_on_read = swap;
@@ -94,6 +96,18 @@ namespace cobb {
          }
          inline bool is_present() const noexcept { return !this->is_absent(); }
          //
+         void read(cobb::bitreader& stream) noexcept {
+            if (!this->_read_presence(stream))
+               return;
+            this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount, read_flags) - value_offset);
+            if (std::is_signed_v<underlying_type> && !this->uses_presence())
+               //
+               // We have to apply the sign bit ourselves, or (offset) will break some signed 
+               // values. Main example is mpvr::activity, which is incremented by 1 before 
+               // saving (in case its value is -1) and then serialized as a 3-bit number.
+               //
+               this->value = underlying_type(cobb::apply_sign_bit((underlying_int)this->value, bitcount));
+         }
          void read(cobb::bitstream& stream) noexcept {
             if (!this->_read_presence(stream))
                return;
@@ -124,6 +138,8 @@ namespace cobb {
          void write(cobb::bytewriter& stream) noexcept {
             stream.write(this->value);
          }
+         //
+         underlying_int to_int() const noexcept { return (underlying_int)this->value; } // printf helper to avoid C4477
          //
          // Operators:
          //
@@ -188,6 +204,9 @@ namespace cobb {
          //
          void read(cobb::bitstream& stream) noexcept {
             this->value = stream.read_bits<int>(1);
+         }
+         void read(cobb::bitreader& stream) noexcept {
+            stream.read(this->value);
          }
          void read(cobb::bytereader& stream) noexcept {
             stream.read(&this->value, 1);
