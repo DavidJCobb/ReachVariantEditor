@@ -1,7 +1,8 @@
 #pragma once
 #include <cstdint>
-#include "../helpers/bitstream.h"
 #include "../helpers/bitnumber.h"
+#include "../helpers/bitreader.h"
+#include "../helpers/bitwriter.h"
 
 enum class ReachTU1Flags : uint8_t {
    enable_bleed_through = 0x01,

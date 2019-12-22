@@ -7,7 +7,7 @@
 #include "limits.h"
 #include "limits_bitnumbers.h"
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitstream.h"
+#include "../../helpers/bitreader.h"
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/bitwise.h"
 

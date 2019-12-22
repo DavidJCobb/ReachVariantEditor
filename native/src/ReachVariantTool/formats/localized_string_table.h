@@ -3,7 +3,8 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
-#include "../helpers/bitstream.h"
+#include "../helpers/bitreader.h"
+#include "../helpers/bitwriter.h"
 
 namespace reach {
    enum class language {

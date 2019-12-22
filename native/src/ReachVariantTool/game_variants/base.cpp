@@ -1,5 +1,5 @@
 #include "base.h"
-#include "../helpers/bitstream.h"
+#include "../helpers/bitreader.h"
 #include "../helpers/bitwriter.h"
 
 #include "megalo/actions.h"
@@ -8,6 +8,7 @@
 #include "megalo/parse_error_reporting.h"
 
 #include "../formats/sha1.h"
+#include "../helpers/sha1.h"
 
 #define cobb_test_display_bitwriter_offset(text) printf("== Writer bytepos " text ": %08X\n", bits.get_bytepos());
 
@@ -372,7 +373,7 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
    this->remainingData.read(stream, this->header.end());
    //
    {
-      auto     hasher   = InProgressSHA1();
+      auto     hasher   = cobb::sha1();
       uint32_t size     = offset_after_hashable - offset_before_hashable;
       printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
@@ -564,7 +565,7 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) const noexcept {
    bytes.pad_to_bytepos(this->header.write_end());
    //
    {  // SHA-1 hash
-      auto hasher = InProgressSHA1();
+      auto hasher = cobb::sha1();
       uint32_t size = offset_after_hashable + offset_before_hashable;
       bytes.write_to_offset(offset_of_hashable_length, size, cobb::endian::big);
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
@@ -607,7 +608,7 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
       printf("   %08X\n", buffer32[0x2FC / 4 + i]);
    printf("\n");
    //
-   auto hasher = InProgressSHA1();
+   auto hasher = cobb::sha1();
    {
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
       auto     buffer   = (const uint8_t*)file.data();

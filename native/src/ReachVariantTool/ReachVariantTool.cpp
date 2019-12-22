@@ -15,10 +15,6 @@
 //  - Bitnumber: remove the (swap) template parameter. (Requires adjustment 
 //    of all bitnumber instances and typedefs that use the advanced params.)
 //
-//  - Clean up cobb::bitwriter -- in particular, remove all endianness code, 
-//    since we should only be using it for bit-aligned data which is always 
-//    big-endian.
-//
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.
@@ -222,20 +218,6 @@ int main() {
       printf("'ABCD' swapped to big-endian: %08X -> %08X\n", 'ABCD', cobb::to_big_endian(uint32_t('ABCD')));
    }
    test_create_hacked_variant();
-   {
-      const char* text = "This is a test";
-      auto hasher = InProgressSHA1();
-      hasher.transform((const uint8_t*)text, strlen(text));
-      printf("SHA-1 hash of: %s\n", text);
-      for (size_t i = 0; i < 5; i++)
-         printf("   %08X\n", hasher.hash[i]);
-      printf("\n");
-   }
-   {  // Test hash of a 360 file
-      cobb::mapped_file file;
-      file.open(L"SvE Mythic Infection.bin");
-      GameVariant::test_mpvr_hash(file);
-   }
    //
    #if REACH_GAME_VARIANTS_TESTING_RESAVE == 1
       {

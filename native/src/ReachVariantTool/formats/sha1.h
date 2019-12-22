@@ -12,10 +12,3 @@ extern constexpr uint8_t reachSHA1Salt[] = {
    0xB7, 0x71, 0x4F, 0x1C,
    0x36, 0xEC,
 };
-
-class InProgressSHA1 {
-   public:
-      uint32_t hash[5] = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
-      //
-      void transform(const uint8_t* buffer, uint32_t size);
-};

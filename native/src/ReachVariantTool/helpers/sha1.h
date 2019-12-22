@@ -14,21 +14,19 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-#include "endianness.h"
+#pragma once
+#include <cstdint>
 
-#ifndef __cpp_lib_endian
-namespace {
-   const cobb::endian_t _check() noexcept {
-      union {
-         uint32_t dword = 'ABCD';
-         uint8_t  chars[4];
-      } sentinel;
-      return sentinel.chars[0] == 'A' ? cobb::endian::big : cobb::endian::little;
-   }
-}
 namespace cobb {
-   namespace endian {
-      extern const endian_t native = _check();
-   }
+   class sha1 {
+      public:
+         sha1() {}
+         sha1(const uint8_t* buffer, uint8_t size) {
+            this->transform(buffer, size);
+         }
+         //
+         uint32_t hash[5] = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+         //
+         void transform(const uint8_t* buffer, uint32_t size);
+   };
 }
-#endif

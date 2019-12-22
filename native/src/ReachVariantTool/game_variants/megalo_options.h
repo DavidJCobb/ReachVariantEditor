@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include "../helpers/bitnumber.h"
-#include "../helpers/bitstream.h"
+#include "../helpers/bitreader.h"
+#include "../helpers/bitwriter.h"
 #include "../formats/localized_string_table.h"
 
 using ReachMegaloOptionValue = cobb::bitnumber<10, int16_t>;

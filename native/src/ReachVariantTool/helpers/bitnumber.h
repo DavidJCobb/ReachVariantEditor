@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <type_traits>
-#include "bitstream.h"
 #include "bitreader.h"
 #include "bitwriter.h"
 #include "bytereader.h"

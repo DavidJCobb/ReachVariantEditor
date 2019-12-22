@@ -1,6 +1,8 @@
 #include "content_author.h"
-#include "../helpers/bitstream.h"
+#include "../helpers/bitreader.h"
+#include "../helpers/bitwriter.h"
 #include "../helpers/bytereader.h"
+#include "../helpers/bytewriter.h"
 
 bool ReachContentAuthor::read(cobb::bitreader& stream) noexcept {
    this->timestamp.read(stream);

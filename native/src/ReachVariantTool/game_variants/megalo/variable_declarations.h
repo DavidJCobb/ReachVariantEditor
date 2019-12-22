@@ -4,7 +4,7 @@
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitstream.h"
+#include "../../helpers/bitreader.h"
 #include "../../helpers/bitwriter.h"
 
 namespace Megalo {
