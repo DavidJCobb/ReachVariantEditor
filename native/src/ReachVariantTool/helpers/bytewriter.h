@@ -37,6 +37,7 @@ namespace cobb {
                this->resize(pos + 1);
             this->_offset = pos;
          };
+         inline uint32_t size() const noexcept { return this->_size; }
 
          // Write to the buffer and advance the (offset) value.
          //

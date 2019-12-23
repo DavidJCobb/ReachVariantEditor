@@ -141,11 +141,11 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="editor_state.h" />
     <ClInclude Include="formats\bitset.h" />
     <ClInclude Include="formats\block.h" />
     <ClInclude Include="formats\compressed_float.h" />
     <ClInclude Include="formats\content_author.h" />
-    <ClInclude Include="formats\game_variant.h" />
     <ClInclude Include="formats\localized_string_table.h" />
     <ClInclude Include="formats\sha1.h" />
     <ClInclude Include="game_variants\base.h" />

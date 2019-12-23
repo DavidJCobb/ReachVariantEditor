@@ -162,9 +162,6 @@
     <ClInclude Include="formats\content_author.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="formats\game_variant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="formats\localized_string_table.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -328,6 +325,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\type_traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="editor_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
