@@ -2,6 +2,8 @@
 #include <cassert>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QString>
+#include <QTreeWidget>
 #include "editor_state.h"
 #include "helpers/stream.h"
 
@@ -10,6 +12,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
     //
     QObject::connect(this->ui.actionOpen,   &QAction::triggered, this, &ReachVariantTool::openFile);
     QObject::connect(this->ui.actionSaveAs, &QAction::triggered, this, &ReachVariantTool::saveFile);
+    //
+    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
 }
 
 void ReachVariantTool::openFile() {
@@ -29,9 +33,7 @@ void ReachVariantTool::openFile() {
       return;
    }
    editor.take_game_variant(variant);
-   //
-   // TODO: trigger mass update of all UI to show new game variant data
-   //
+   this->refreshWidgetsFromVariant();
 }
 void ReachVariantTool::saveFile() {
    auto& editor = ReachEditorState::get();
@@ -54,4 +56,54 @@ void ReachVariantTool::saveFile() {
    cobb::bit_or_byte_writer writer;
    editor.currentVariant->write(writer);
    out.writeRawData((const char*)writer.bytes.data(), writer.bytes.get_bytespan());
+}
+void ReachVariantTool::onSelectedPageChanged() {
+   auto widget     = this->ui.MainTreeview;
+   auto selections = widget->selectedItems();
+   if (!selections.size())
+      return;
+   auto sel   = selections[0];
+   auto text  = sel->text(0);
+   auto stack = this->ui.MainContentView;
+   if (text == tr("Metadata", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageGameVariantHeader);
+      return;
+   }
+   if (text == tr("General Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionsGeneral);
+      return;
+   }
+   //
+   // TODO: add other panes
+   //
+}
+void ReachVariantTool::refreshWidgetsFromVariant() {
+   auto& editor = ReachEditorState::get();
+   auto variant = editor.currentVariant;
+   if (!variant)
+      return;
+   this->isUpdatingFromVariant = true;
+   {  // Metadata
+      this->ui.headerName->setText(QString::fromWCharArray(variant->multiplayer.variantHeader.title));
+      this->ui.headerDesc->setPlainText(QString::fromWCharArray(variant->multiplayer.variantHeader.description));
+      this->ui.authorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.createdBy.author));
+      this->ui.editorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.modifiedBy.author));
+   }
+   {  // General Settings
+      auto& o = variant->multiplayer.options.misc;
+      auto  f = o.flags;
+      //
+      // TODO: Flag 0 may not actually be Teams Enabled? Or at least, it may not be the only team-enabling flag?
+      //
+      this->ui.optionsGeneralTeamsEnabled->setChecked(f & 1);
+      this->ui.optionsGeneralNewRoundResetsPlayers->setChecked(f & 2);
+      this->ui.optionsGeneralNewRoundResetsMap->setChecked(f & 4);
+      this->ui.optionsGeneralFlag3->setChecked(f & 8);
+      this->ui.optionsGeneralRoundTimeLimit->setValue(o.timeLimit);
+      this->ui.optionsGeneralRoundLimit->setValue(o.roundLimit);
+      this->ui.optionsGeneralRoundsToWin->setValue(o.roundsToWin);
+      this->ui.optionsGeneralSuddenDeathTime->setValue(o.suddenDeathTime);
+      this->ui.optionsGeneralGracePeriod->setValue(o.gracePeriod);
+   }
+   this->isUpdatingFromVariant = false;
 }

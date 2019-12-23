@@ -128,11 +128,11 @@ class ReachBlockMPVR {
       cobb::bitbool flags;
       struct {
          struct {
-            cobb::bitnumber<4, uint8_t> flags;
-            cobb::bytenumber<uint8_t>   timeLimit;
+            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = teams, reset players on new round, reset map on new round, unknown 3
+            cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
             cobb::bitnumber<5, uint8_t> roundLimit;
             cobb::bitnumber<4, uint8_t> roundsToWin;
-            cobb::bitnumber<7, uint8_t> suddenDeathTime;
+            cobb::bitnumber<7, uint8_t> suddenDeathTime; // seconds
             cobb::bitnumber<5, uint8_t> gracePeriod;
          } misc;
          struct {

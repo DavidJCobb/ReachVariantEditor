@@ -12,7 +12,12 @@ class ReachVariantTool : public QMainWindow {
    private slots:
    private:
       void openFile();
-      void saveFile();
+      void saveFile(); // TODO: this is "Save As;" we need "Save"
+      void onSelectedPageChanged();
+      //
+      void refreshWidgetsFromVariant();
+      //
+      bool isUpdatingFromVariant = false; // if true, we should ignore all changes to UI controls, since we're the one causing them
       //
    private:
       Ui::ReachVariantToolClass ui;
