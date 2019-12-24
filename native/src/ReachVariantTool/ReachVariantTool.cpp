@@ -5,15 +5,77 @@
 #include <QString>
 #include <QTreeWidget>
 #include "editor_state.h"
+#include "game_variants/base.h"
+#include "helpers/pointer_to_member.h"
 #include "helpers/stream.h"
 
 ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
-    ui.setupUi(this);
-    //
-    QObject::connect(this->ui.actionOpen,   &QAction::triggered, this, &ReachVariantTool::openFile);
-    QObject::connect(this->ui.actionSaveAs, &QAction::triggered, this, &ReachVariantTool::saveFile);
-    //
-    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
+   ui.setupUi(this);
+   //
+   QObject::connect(this->ui.actionOpen,   &QAction::triggered, this, &ReachVariantTool::openFile);
+   QObject::connect(this->ui.actionSaveAs, &QAction::triggered, this, &ReachVariantTool::saveFile);
+   //
+   QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
+   //
+   {
+      //
+      // This would be about a thousand times cleaner if we could use pointers-to-members-of-members, 
+      // but the language doesn't support that even though it easily could. There are workarounds, but 
+      // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
+      // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
+      //
+      #define reach_main_window_setup_spinbox(w, field) \
+         { \
+            QSpinBox* widget = w; \
+            QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [widget](int value) { \
+               auto variant = ReachEditorState::get().currentVariant; \
+               if (!variant) \
+                  return; \
+               variant->##field = value; \
+            }); \
+         };
+      #define reach_main_window_setup_flag_checkbox(w, field, mask) \
+         { \
+            QCheckBox* widget = w; \
+            QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
+               auto variant = ReachEditorState::get().currentVariant; \
+               if (!variant) \
+                  return; \
+               if (widget->isChecked()) \
+                  variant->##field |= mask ; \
+               else \
+                  variant->##field &= ~ mask ; \
+            }); \
+         };
+      { // General
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     multiplayer.options.misc.flags, 4);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralFlag3,                 multiplayer.options.misc.flags, 8);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundTimeLimit,  multiplayer.options.misc.timeLimit);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundLimit,      multiplayer.options.misc.roundLimit);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundsToWin,     multiplayer.options.misc.roundsToWin);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralSuddenDeathTime, multiplayer.options.misc.suddenDeathTime);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralGracePeriod,     multiplayer.options.misc.gracePeriod);
+      }
+      {  // Respawn
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   multiplayer.options.respawn.flags, 1);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag1,          multiplayer.options.respawn.flags, 2);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag2,          multiplayer.options.respawn.flags, 4);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, multiplayer.options.respawn.flags, 8);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnLivesPerRound,     multiplayer.options.respawn.livesPerRound);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnTeamLivesPerRound, multiplayer.options.respawn.teamLivesPerRound);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnTime,       multiplayer.options.respawn.respawnTime);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnSuicidePenalty,    multiplayer.options.respawn.suicidePenalty);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnBetrayalPenalty,   multiplayer.options.respawn.betrayalPenalty);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnGrowth,     multiplayer.options.respawn.respawnGrowth);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnLoadoutCamTime,    multiplayer.options.respawn.loadoutCamTime);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnTraitsDuration,    multiplayer.options.respawn.traitsDuration);
+      }
+      //
+      #undef reach_main_window_setup_spinbox
+      #undef reach_main_window_setup_flag_checkbox
+   }
 }
 
 void ReachVariantTool::openFile() {
@@ -73,6 +135,10 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsGeneral);
       return;
    }
+   if (text == tr("Respawn Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionsRespawn);
+      return;
+   }
    //
    // TODO: add other panes
    //
@@ -89,21 +155,52 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       this->ui.authorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.createdBy.author));
       this->ui.editorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.modifiedBy.author));
    }
-   {  // General Settings
-      auto& o = variant->multiplayer.options.misc;
-      auto  f = o.flags;
-      //
-      // TODO: Flag 0 may not actually be Teams Enabled? Or at least, it may not be the only team-enabling flag?
-      //
-      this->ui.optionsGeneralTeamsEnabled->setChecked(f & 1);
-      this->ui.optionsGeneralNewRoundResetsPlayers->setChecked(f & 2);
-      this->ui.optionsGeneralNewRoundResetsMap->setChecked(f & 4);
-      this->ui.optionsGeneralFlag3->setChecked(f & 8);
-      this->ui.optionsGeneralRoundTimeLimit->setValue(o.timeLimit);
-      this->ui.optionsGeneralRoundLimit->setValue(o.roundLimit);
-      this->ui.optionsGeneralRoundsToWin->setValue(o.roundsToWin);
-      this->ui.optionsGeneralSuddenDeathTime->setValue(o.suddenDeathTime);
-      this->ui.optionsGeneralGracePeriod->setValue(o.gracePeriod);
+   //
+   // This would be about a thousand times cleaner if we could use pointers-to-members-of-members, 
+   // but the language doesn't support that even though it easily could. There are workarounds, but 
+   // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
+   // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
+   //
+   #define reach_main_window_update_spinbox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setValue( variant->##field ); \
+      };
+   #define reach_main_window_update_flag_checkbox(w, field, mask) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setChecked(( variant->##field & mask ) != 0); \
+      };
+   {  // General
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     multiplayer.options.misc.flags, 4);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralFlag3,                 multiplayer.options.misc.flags, 8);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundTimeLimit,  multiplayer.options.misc.timeLimit);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundLimit,      multiplayer.options.misc.roundLimit);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundsToWin,     multiplayer.options.misc.roundsToWin);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralSuddenDeathTime, multiplayer.options.misc.suddenDeathTime);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralGracePeriod,     multiplayer.options.misc.gracePeriod);
    }
+   {  // Respawn
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   multiplayer.options.respawn.flags, 1);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag1,          multiplayer.options.respawn.flags, 2);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag2,          multiplayer.options.respawn.flags, 4);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, multiplayer.options.respawn.flags, 8);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnLivesPerRound,     multiplayer.options.respawn.livesPerRound);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnTeamLivesPerRound, multiplayer.options.respawn.teamLivesPerRound);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnTime,       multiplayer.options.respawn.respawnTime);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnSuicidePenalty,    multiplayer.options.respawn.suicidePenalty);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnBetrayalPenalty,   multiplayer.options.respawn.betrayalPenalty);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnGrowth,     multiplayer.options.respawn.respawnGrowth);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnLoadoutCamTime,    multiplayer.options.respawn.loadoutCamTime);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnTraitsDuration,    multiplayer.options.respawn.traitsDuration);
+   }
+   //
+   #undef reach_main_window_update_spinbox
+   #undef reach_main_window_update_flag_checkbox
+   //
    this->isUpdatingFromVariant = false;
 }

@@ -330,5 +330,8 @@
     <ClInclude Include="editor_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\pointer_to_member.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
