@@ -136,7 +136,7 @@ class ReachBlockMPVR {
             cobb::bitnumber<5, uint8_t> gracePeriod;
          } misc;
          struct {
-            cobb::bitnumber<4, uint8_t> flags;
+            cobb::bitnumber<4, uint8_t> flags; // flags: synch with team; unknown (respawn at teammate?); unknown (respawn at location?); respawn on kills
             cobb::bitnumber<6, uint8_t> livesPerRound;
             cobb::bitnumber<7, uint8_t> teamLivesPerRound;
             cobb::bytenumber<uint8_t> respawnTime = 5;
@@ -150,13 +150,13 @@ class ReachBlockMPVR {
          struct {
             cobb::bitbool observers = false;
             cobb::bitnumber<2, uint8_t> teamChanges;
-            cobb::bitnumber<5, uint8_t> flags;
+            cobb::bitnumber<5, uint8_t> flags; // flags: friendly fire; betrayal booting; proximity voice; global voice; dead player voice
          } social;
          struct {
             cobb::bitnumber<6, uint8_t> flags;
             ReachPlayerTraits baseTraits;
-            cobb::bytenumber<int8_t> weaponSet;
-            cobb::bytenumber<int8_t> vehicleSet;
+            cobb::bytenumber<int8_t> weaponSet; // map default == -2
+            cobb::bytenumber<int8_t> vehicleSet; // map default == -2
             struct {
                ReachPowerupData red;
                ReachPowerupData blue;

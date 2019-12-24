@@ -32,3 +32,14 @@ void ReachContentAuthor::write(cobb::bytewriter& stream) const noexcept {
    stream.write(this->isOnlineID);
    stream.pad(3);
 }
+void ReachContentAuthor::set_author_name(const char* s) noexcept {
+   uint8_t i = 0;
+   for (; i < 16; i++) {
+      char c = s[i];
+      if (!c)
+         break;
+      this->author[i] = c;
+   }
+   for (; i < 16; i++)
+      this->author[i] = '\0';
+}

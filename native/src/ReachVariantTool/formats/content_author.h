@@ -14,4 +14,6 @@ class ReachContentAuthor {
       bool read(cobb::bytereader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
+      //
+      void set_author_name(const char* s) noexcept;
 };

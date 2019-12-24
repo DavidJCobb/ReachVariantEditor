@@ -86,11 +86,31 @@
        </item>
        <item>
         <property name="text">
-         <string comment="MainTreeview" extracomment="options-map">Map and Powerups</string>
+         <string comment="MainTreeview" extracomment="options-map">Map and Game Settings</string>
         </property>
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEnabled</set>
         </property>
+        <item>
+         <property name="text">
+          <string>Base Player Traits</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Red Powerup Traits</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Blue Powerup Traits</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom Powerup Traits</string>
+         </property>
+        </item>
        </item>
        <item>
         <property name="text">
@@ -99,6 +119,46 @@
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEnabled</set>
         </property>
+        <item>
+         <property name="text">
+          <string>Team 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 5</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 7</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Team 8</string>
+         </property>
+        </item>
        </item>
        <item>
         <property name="text">
@@ -107,6 +167,36 @@
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEnabled</set>
         </property>
+        <item>
+         <property name="text">
+          <string>Spartan Tier 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Spartan Tier 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Spartan Tier 3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Elite Tier 1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Elite Tier 2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Elite Tier 3</string>
+         </property>
+        </item>
        </item>
        <item>
         <property name="text">
@@ -117,12 +207,28 @@
         </property>
        </item>
       </item>
+      <item>
+       <property name="text">
+        <string>Option Visibility</string>
+       </property>
+       <property name="toolTip">
+        <string>Control which options are visible and enabled in the in-game menus.</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Title Update Settings</string>
+       </property>
+       <property name="toolTip">
+        <string>Modify developer-only settings added as part of Title Update 1, including bloom, armor ability configuration, and pistol settings.</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -561,6 +667,395 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageOptionsSocial">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>Team Changing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialProximityVoice">
+          <property name="toolTip">
+           <string>Allow players to hear the microphones of nearby enemies.</string>
+          </property>
+          <property name="text">
+           <string>Proximity Voice</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="optionsSocialTeamChanging">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="prefix">
+           <string>unknown mode </string>
+          </property>
+          <property name="maximum">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialObservers">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Enable Observers</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialBetrayalBooting">
+          <property name="text">
+           <string>Betrayal Booting</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialGlobalVoice">
+          <property name="text">
+           <string>Don't Team-Restrict Voice Chat</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialDeadPlayerVoice">
+          <property name="text">
+           <string>Allow Dead Players To Talk</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsSocialFriendlyFire">
+          <property name="text">
+           <string>Friendly Fire</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" colspan="2">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageOptionsMap">
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="6" column="1">
+         <widget class="QComboBox" name="optionsMapWeaponSet">
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Map Default</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Human</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Covenant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">No Snipers</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Rocket Launchers</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">No Power Weapons</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Juggernaut</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Slayer Pro</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Rifles Only</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Mid-Range Only</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Long-Range Only</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Sniper Rifles</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Melee</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Energy Swords</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Gravity Hammers</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">Mass Destruction</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string comment="Weapon Set Value">No Weapons</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>Weapon Set</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QComboBox" name="optionsMapVehicleSet">
+          <item>
+           <property name="text">
+            <string>Map Default</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Mongooses</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Warthogs</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Aircraft</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Only Aircraft</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Tanks</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Only Tanks</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Light Ground</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Only Light Ground</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Covenant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>All Covenant</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Human</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>All Human</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>No Vehicles</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>All Vehicles</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QSpinBox" name="optionsMapBluePowerupDuration">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="suffix">
+           <string> seconds</string>
+          </property>
+          <property name="maximum">
+           <number>127</number>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1">
+         <widget class="QSpinBox" name="optionsMapYellowPowerupDuration">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="suffix">
+           <string> seconds</string>
+          </property>
+          <property name="maximum">
+           <number>127</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapAbilitiesEnabled">
+          <property name="text">
+           <string>Armor Abilities on Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_20">
+          <property name="text">
+           <string>Vehicle Set</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_21">
+          <property name="text">
+           <string>Red Powerup Duration</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapGrenadesEnabled">
+          <property name="text">
+           <string>Grenades on Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
+         <widget class="QLabel" name="label_23">
+          <property name="text">
+           <string>Custom Powerup Duration</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QSpinBox" name="optionsMapRedPowerupDuration">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="suffix">
+           <string> seconds</string>
+          </property>
+          <property name="maximum">
+           <number>127</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapPowerupsEnabled">
+          <property name="text">
+           <string>Powerups on Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="label_22">
+          <property name="text">
+           <string>Blue Powerup Duration</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapShortcutsEnabled">
+          <property name="text">
+           <string>Shortcuts on Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapTurretsEnabled">
+          <property name="text">
+           <string>Turrets on Map</string>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0" colspan="2">
+         <spacer name="verticalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QCheckBox" name="optionsMapIndestructibleVehicles">
+          <property name="text">
+           <string>Indestructible Vehicles</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
