@@ -20,4 +20,10 @@ class ReachEditorState {
          this->currentVariant = other;
          this->currentFile    = path;
       }
+      //
+      // TODO: Something to consider: if we create a copy of a game variant upon 
+      // loading it, then we can use comparisons to check whether things are 
+      // actually unchanged (rather than just using a simple bool). Might be slow 
+      // though.
+      //
 };

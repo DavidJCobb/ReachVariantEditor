@@ -7,7 +7,9 @@ class ReachVariantTool : public QMainWindow {
    Q_OBJECT
    //
    public:
-      ReachVariantTool(QWidget *parent = Q_NULLPTR);
+      ReachVariantTool(QWidget* parent = Q_NULLPTR); // needs to be public for Qt? but do not call; use the static getter
+      //
+      static ReachVariantTool& get();
       //
    private slots:
    private:
@@ -19,8 +21,7 @@ class ReachVariantTool : public QMainWindow {
       void onSelectedPageChanged();
       //
       void refreshWidgetsFromVariant();
-      //
-      bool isUpdatingFromVariant = false; // if true, we should ignore all changes to UI controls, since we're the one causing them
+      void refreshWindowTitle();
       //
    private:
       Ui::ReachVariantToolClass ui;

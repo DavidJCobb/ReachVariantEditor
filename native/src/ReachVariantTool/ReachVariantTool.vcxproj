@@ -127,6 +127,7 @@
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />
+    <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\ProgramOptionsDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -204,6 +205,7 @@
     <ClInclude Include="helpers\strings.h" />
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
+    <ClInclude Include="services\ini.h" />
     <QtMoc Include="ProgramOptionsDialog.h" />
   </ItemGroup>
   <ItemGroup>

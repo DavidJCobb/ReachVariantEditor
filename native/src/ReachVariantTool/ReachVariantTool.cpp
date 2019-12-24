@@ -1,5 +1,6 @@
 #include "ReachVariantTool.h"
 #include <cassert>
+#include <filesystem>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QString>
@@ -7,11 +8,28 @@
 #include "editor_state.h"
 #include "game_variants/base.h"
 #include "helpers/stream.h"
+#include "services/ini.h"
 
 #include "ProgramOptionsDialog.h"
 
+namespace {
+   ReachVariantTool* _window = nullptr;
+}
+
+/*static*/ ReachVariantTool& ReachVariantTool::get() {
+   assert(_window && "You shouldn't be calling ReachVariantTool::get before the main window is actually created!");
+   return *_window;
+}
 ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    ui.setupUi(this);
+   _window = this;
+   //
+   ReachINI::RegisterForChanges([](ReachINI::setting* setting, ReachINI::setting_value_union oldValue, ReachINI::setting_value_union newValue) {
+      if (setting == &ReachINI::UIWindowTitle::bShowFullPath || setting == &ReachINI::UIWindowTitle::bShowVariantTitle) {
+         ReachVariantTool::get().refreshWindowTitle();
+         return;
+      }
+   });
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, &ReachVariantTool::openFile);
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
@@ -21,13 +39,16 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
    {  // Metadata
+      //
+      // TODO: Put a validator on gamertags; limit them to ASCII glyphs considered valid by XBL
+      //
       QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
-         std::wstring value = text.toStdWString();
-         variant->contentHeader.data.set_title(value.c_str());
-         variant->multiplayer.variantHeader.set_title(value.c_str());
+         const char16_t* value = (const char16_t*)text.utf16();
+         variant->contentHeader.data.set_title(value);
+         variant->multiplayer.variantHeader.set_title(value);
       });
       //
       auto desc = this->ui.headerDesc;
@@ -36,9 +57,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
-         std::wstring value = text.toStdWString();
-         variant->contentHeader.data.set_description(value.c_str());
-         variant->multiplayer.variantHeader.set_description(value.c_str());
+         const char16_t* value = (const char16_t*)text.utf16();
+         variant->contentHeader.data.set_description(value);
+         variant->multiplayer.variantHeader.set_description(value);
       });
       //
       QObject::connect(this->ui.authorGamertag, &QLineEdit::textEdited, [](const QString& text) {
@@ -65,6 +86,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
       // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
       //
+      #pragma region Preprocessor macros to set up widgets
          // reach_main_window_setup_combobox -- use only when an enum maps one-to-one with a combobox's indices
       #define reach_main_window_setup_combobox(w, field) \
          { \
@@ -119,6 +141,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                variant->##field = widget->isChecked(); \
             }); \
          };
+      #pragma endregion
       { // General
          reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
          reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
@@ -269,7 +292,6 @@ void ReachVariantTool::openFile() {
       return;
    std::wstring s = fileName.toStdWString();
    auto file    = cobb::mapped_file(s.c_str());
-   s.clear();
    auto variant = new GameVariant();
    if (!variant->read(file)) {
       QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data."));
@@ -277,11 +299,7 @@ void ReachVariantTool::openFile() {
    }
    editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
-   //
-   {
-      QString title = QString("%1 - ReachVariantTool").arg(fileName);
-      this->setWindowTitle(title);
-   }
+   this->refreshWindowTitle();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();
@@ -373,14 +391,13 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    auto variant = editor.currentVariant;
    if (!variant)
       return;
-   this->isUpdatingFromVariant = true;
    {  // Metadata
       const QSignalBlocker blocker0(this->ui.headerName);
       const QSignalBlocker blocker1(this->ui.headerDesc);
       const QSignalBlocker blocker2(this->ui.authorGamertag);
       const QSignalBlocker blocker3(this->ui.editorGamertag);
-      this->ui.headerName->setText(QString::fromWCharArray(variant->multiplayer.variantHeader.title));
-      this->ui.headerDesc->setPlainText(QString::fromWCharArray(variant->multiplayer.variantHeader.description));
+      this->ui.headerName->setText(QString::fromUtf16(variant->multiplayer.variantHeader.title));
+      this->ui.headerDesc->setPlainText(QString::fromUtf16(variant->multiplayer.variantHeader.description));
       this->ui.authorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.createdBy.author));
       this->ui.editorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.modifiedBy.author));
    }
@@ -390,6 +407,7 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
    // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
    //
+   #pragma region Preprocessor macros to update widgets
       // reach_main_window_update_combobox -- use only when an enum maps one-to-one with a combobox's indices
    #define reach_main_window_update_combobox(w, field) \
       { \
@@ -415,6 +433,7 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
          const QSignalBlocker blocker(widget); \
          widget->setChecked( variant->##field ); \
       };
+   #pragma endregion
    {  // General
       reach_main_window_update_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
       reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
@@ -529,6 +548,25 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    #undef reach_main_window_update_spinbox
    #undef reach_main_window_update_flag_checkbox
    #undef reach_main_window_update_bool_checkbox
-   //
-   this->isUpdatingFromVariant = false;
+}
+void ReachVariantTool::refreshWindowTitle() {
+   auto& editor = ReachEditorState::get();
+   if (!editor.currentVariant) {
+      this->setWindowTitle("ReachVariantTool");
+      return;
+   }
+   std::wstring file = editor.currentFile;
+   if (ReachINI::UIWindowTitle::bShowFullPath.current.b == false) {
+      file = std::filesystem::path(file).filename().wstring();
+   }
+   if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b == true) {
+      QString variantTitle = QString::fromUtf16(editor.currentVariant->contentHeader.data.title);
+      this->setWindowTitle(
+         QString("%1 <%2> - ReachVariantTool").arg(variantTitle).arg(file)
+      );
+   } else {
+      this->setWindowTitle(
+         QString("%1 - ReachVariantTool").arg(file)
+      );
+   }
 }

@@ -6,6 +6,7 @@
 #include "helpers/files.h"
 #include "helpers/stream.h"
 #include "formats/sha1.h"
+#include "services/ini.h"
 
 #define REACH_GAME_VARIANTS_TESTING_RESAVE 0
 
@@ -73,43 +74,12 @@ int main(int argc, char *argv[]) {
 
       test_create_hacked_variant();
       //
-      #if REACH_GAME_VARIANTS_TESTING_RESAVE == 1
-         {
-            auto test = g_tests[0];
-            cobb::mapped_file file;
-            file.open(test.path);
-            //
-            printf("----------------------------------------------------------------------\n");
-            printf("   Loading: %s <%S>\n", test.name, test.path);
-            printf("----------------------------------------------------------------------\n");
-            //
-            auto variant = new GameVariant();
-            variant->read(file);
-            //
-            printf("Header name: %S\n", variant->contentHeader.data.title);
-            printf("Header desc: %S\n", variant->contentHeader.data.description);
-            printf("Embedded name: %S\n", variant->multiplayer.variantHeader.title);
-            printf("Embedded desc: %S\n", variant->multiplayer.variantHeader.description);
-            printf("Loadout camera time: %d\n", (int)variant->multiplayer.options.respawn.loadoutCamTime);
-            #if _DEBUG
-               __debugbreak();
-            #endif
-            printf("\n");
-            printf("Resaving...\n");
-            cobb::bit_or_byte_writer writer;
-            variant->write(writer);
-            writer.dump_to_console();
-            #if _DEBUG
-               __debugbreak();
-            #endif
-         }
-      #endif
-      //
       for (int i = 0; i < std::extent<decltype(g_tests)>::value; i++)
          g_tests[i].execute();
       //
       return 0;
    }
+   ReachINI::INISettingManager::GetInstance().Load();
    //
    QApplication a(argc, argv);
    ReachVariantTool w;
@@ -230,10 +200,10 @@ void test_create_hacked_variant() {
    mp.titleUpdateData.magnumDamage    =  1.0F;
    //
    auto& chdr = variant->contentHeader;
-   chdr.data.set_title(L"Cursed Slayer");
-   mp.variantHeader.set_title(L"Cursed Slayer");
-   chdr.data.set_description(L"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
-   mp.variantHeader.set_description(L"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
+   chdr.data.set_title(u"Cursed Slayer");
+   mp.variantHeader.set_title(u"Cursed Slayer");
+   chdr.data.set_description(u"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
+   mp.variantHeader.set_description(u"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
    //
    mp.variantHeader.unk08 = 0;
    mp.variantHeader.unk10 = 0;

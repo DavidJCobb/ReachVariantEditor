@@ -66,8 +66,8 @@ class GameVariantHeader {
       cobb::bitnumber<8, uint32_t> engineCategory;
       ReachContentAuthor createdBy;
       ReachContentAuthor modifiedBy;
-      wchar_t  title[128];
-      wchar_t  description[128];
+      char16_t title[128];
+      char16_t description[128];
       cobb::bitnumber<8, uint32_t> engineIcon;
       uint8_t  unk284[0x2C]; // only in chdr
       //
@@ -76,8 +76,8 @@ class GameVariantHeader {
       void write(cobb::bitwriter& stream) const noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
       //
-      void set_title(const wchar_t* value) noexcept;
-      void set_description(const wchar_t* value) noexcept;
+      void set_title(const char16_t* value) noexcept;
+      void set_description(const char16_t* value) noexcept;
 };
 class ReachBlockCHDR {
    public:

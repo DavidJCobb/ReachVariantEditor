@@ -100,7 +100,7 @@ namespace cobb {
          float read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept;
          //
          void read_string(char* out, uint32_t maxlength) noexcept;
-         void read_wstring(wchar_t* out, uint32_t maxlength) noexcept;
+         void read_u16string(char16_t* out, uint32_t maxlength) noexcept;
          //
          inline void skip(uint32_t bitcount) noexcept {
             this->offset += bitcount;

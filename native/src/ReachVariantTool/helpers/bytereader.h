@@ -46,6 +46,6 @@ namespace cobb {
          }
          //
          void read_string(char* out, uint32_t length) noexcept;
-         void read_wstring(wchar_t* out, uint32_t length, cobb::endian_t endianness = cobb::endian::little) noexcept;
+         void read_u16string(char16_t* out, uint32_t length, cobb::endian_t endianness = cobb::endian::little) noexcept;
    };
 }

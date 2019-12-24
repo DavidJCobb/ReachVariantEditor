@@ -105,7 +105,7 @@ namespace cobb {
                   break;
             }
          }
-         void write_wstring(const wchar_t* value, int maxlength) noexcept { // writes as bits; stops early after null char
+         void write_u16string(const char16_t* value, int maxlength) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {
                this->write(value[i]);
                if (!value[i])

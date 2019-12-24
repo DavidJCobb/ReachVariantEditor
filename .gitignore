@@ -3,3 +3,8 @@
 
 # Don't upload compiled/linked/etc. files
 *.obj
+
+# Don't upload the program's generated INI files
+*.ini
+*.ini.tmp
+*.ini.bak

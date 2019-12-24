@@ -20,10 +20,10 @@ namespace reach {
       sprint           =  0,
       jetpack          =  1,
       armor_lock       =  2,
-      // 3
+      //  3: KSoft.Tool identifies this as "power fist"
       active_camo      =  4,
-      // 5
-      // 6
+      //  5: KSoft.Tool identifies this as "ammo pack"
+      //  6: KSoft.TOol identifies this as "sensor pack"
       hologram         =  7,
       evade            =  8,
       drop_shield      =  9

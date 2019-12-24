@@ -43,8 +43,8 @@ bool GameVariantHeader::read(cobb::bitreader& stream) noexcept {
    this->engineCategory.read(stream);
    this->createdBy.read(stream);
    this->modifiedBy.read(stream);
-   stream.read_wstring(this->title,       128); // big-endian
-   stream.read_wstring(this->description, 128); // big-endian
+   stream.read_u16string(this->title,       128); // big-endian
+   stream.read_u16string(this->description, 128); // big-endian
    if (this->contentType == 6) {
       this->engineIcon.read(stream);
    }
@@ -71,8 +71,8 @@ bool GameVariantHeader::read(cobb::bytereader& stream) noexcept {
    stream.pad(4);
    this->createdBy.read(stream);
    this->modifiedBy.read(stream);
-   stream.read_wstring(this->title, 128);
-   stream.read_wstring(this->description, 128);
+   stream.read_u16string(this->title, 128);
+   stream.read_u16string(this->description, 128);
    this->engineIcon.read(stream);
    stream.read(this->unk284);
    return true;
@@ -95,8 +95,8 @@ void GameVariantHeader::write(cobb::bitwriter& stream) const noexcept {
    this->engineCategory.write(stream);
    this->createdBy.write(stream);
    this->modifiedBy.write(stream);
-   stream.write_wstring(this->title,       128); // big-endian
-   stream.write_wstring(this->description, 128); // big-endian
+   stream.write_u16string(this->title,       128); // big-endian
+   stream.write_u16string(this->description, 128); // big-endian
    if (this->contentType == 6) {
       this->engineIcon.write(stream);
    }
@@ -132,13 +132,23 @@ void GameVariantHeader::write(cobb::bytewriter& stream) const noexcept {
    stream.write(this->unk284);
 }
 //
-void GameVariantHeader::set_title(const wchar_t* value) noexcept {
+void GameVariantHeader::set_title(const char16_t* value) noexcept {
    memset(this->title, 0, sizeof(this->title));
-   memcpy(this->title, value, wcslen(value) * sizeof(wchar_t));
+   for (size_t i = 0; i < std::extent<decltype(this->title)>::value; i++) {
+      char16_t c = value[i];
+      if (!c)
+         break;
+      this->title[i] = c;
+   }
 }
-void GameVariantHeader::set_description(const wchar_t* value) noexcept {
+void GameVariantHeader::set_description(const char16_t* value) noexcept {
    memset(this->description, 0, sizeof(this->description));
-   memcpy(this->description, value, wcslen(value) * sizeof(wchar_t));
+   for (size_t i = 0; i < std::extent<decltype(this->title)>::value; i++) {
+      char16_t c = value[i];
+      if (!c)
+         break;
+      this->title[i] = c;
+   }
 }
 
 void ReachTeamData::read(cobb::bitreader& stream) noexcept {

@@ -13,6 +13,10 @@ class ProgramOptionsDialog : public QDialog {
          static ProgramOptionsDialog instance;
          return instance;
       }
+      void open() Q_DECL_OVERRIDE {
+         this->refreshWidgetsFromINI();
+         QDialog::open();
+      }
       //
    private slots:
    private:
@@ -24,9 +28,9 @@ class ProgramOptionsDialog : public QDialog {
    //
    // TODO: implement loading and saving option values to an INI file (bring over the code from NorthernUI)
    //
-      void close() {
-         this->done(0);
-      }
+      void close();
+      void refreshWidgetsFromINI();
+      void saveAndClose();
       //
    private:
       Ui::ProgramOptionsDialog ui;

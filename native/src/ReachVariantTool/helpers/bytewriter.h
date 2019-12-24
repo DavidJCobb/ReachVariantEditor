@@ -95,7 +95,7 @@ namespace cobb {
             for (uint32_t i = 0; i < length; i++)
                this->write(value[i]);
          }
-         void write_wstring(const wchar_t* value, uint32_t length, const cobb::endian_t endianness = cobb::endian::little) noexcept {
+         void write_u16string(const char16_t* value, uint32_t length, const cobb::endian_t endianness = cobb::endian::little) noexcept {
             for (uint32_t i = 0; i < length; i++)
                this->write(value[i], endianness);
          }

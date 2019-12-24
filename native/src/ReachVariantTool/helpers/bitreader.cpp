@@ -36,7 +36,7 @@ namespace cobb {
             return;
       }
    }
-   void bitreader::read_wstring(wchar_t* out, uint32_t maxlength) noexcept {
+   void bitreader::read_u16string(char16_t* out, uint32_t maxlength) noexcept {
       for (uint32_t i = 0; i < maxlength; i++) {
          this->read(out[i]);
          if (!out[i])
