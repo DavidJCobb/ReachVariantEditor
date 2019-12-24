@@ -11,8 +11,11 @@ class ReachVariantTool : public QMainWindow {
       //
    private slots:
    private:
+      void _saveFileImpl(bool saveAs);
+      //
       void openFile();
-      void saveFile(); // TODO: this is "Save As;" we need "Save"
+      void saveFile()   { this->_saveFileImpl(false); }
+      void saveFileAs() { this->_saveFileImpl(true); }
       void onSelectedPageChanged();
       //
       void refreshWidgetsFromVariant();

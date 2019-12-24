@@ -127,12 +127,14 @@
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />
+    <ClCompile Include="ui\ProgramOptionsDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui" />
+    <QtUic Include="ProgramOptionsDialog.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="ReachVariantTool.qrc" />
@@ -202,6 +204,7 @@
     <ClInclude Include="helpers\strings.h" />
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
+    <QtMoc Include="ProgramOptionsDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\zlib\zlib.vcxproj">

@@ -11,11 +11,13 @@ class ReachEditorState {
       ReachEditorState() {}
       ReachEditorState(const ReachEditorState& other) = delete; // no copy
       //
+      std::wstring currentFile;
       GameVariant* currentVariant = nullptr;
       //
-      void take_game_variant(GameVariant* other) noexcept {
+      void take_game_variant(GameVariant* other, const wchar_t* path) noexcept {
          if (this->currentVariant)
             delete this->currentVariant;
          this->currentVariant = other;
+         this->currentFile    = path;
       }
 };

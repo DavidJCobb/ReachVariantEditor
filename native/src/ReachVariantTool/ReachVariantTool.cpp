@@ -6,14 +6,17 @@
 #include <QTreeWidget>
 #include "editor_state.h"
 #include "game_variants/base.h"
-#include "helpers/pointer_to_member.h"
 #include "helpers/stream.h"
+
+#include "ProgramOptionsDialog.h"
 
 ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    ui.setupUi(this);
    //
-   QObject::connect(this->ui.actionOpen,   &QAction::triggered, this, &ReachVariantTool::openFile);
-   QObject::connect(this->ui.actionSaveAs, &QAction::triggered, this, &ReachVariantTool::saveFile);
+   QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, &ReachVariantTool::openFile);
+   QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
+   QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
+   QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
    //
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
@@ -62,10 +65,31 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
       // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
       //
+         // reach_main_window_setup_combobox -- use only when an enum maps one-to-one with a combobox's indices
+      #define reach_main_window_setup_combobox(w, field) \
+         { \
+            QComboBox* widget = w; \
+            QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
+               auto variant = ReachEditorState::get().currentVariant; \
+               if (!variant) \
+                  return; \
+               variant->##field = value; \
+            }); \
+         };
       #define reach_main_window_setup_spinbox(w, field) \
          { \
             QSpinBox* widget = w; \
-            QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [widget](int value) { \
+            QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
+               auto variant = ReachEditorState::get().currentVariant; \
+               if (!variant) \
+                  return; \
+               variant->##field = value; \
+            }); \
+         };
+      #define reach_main_window_setup_spinbox_dbl(w, field) \
+         { \
+            QDoubleSpinBox* widget = w; \
+            QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) { \
                auto variant = ReachEditorState::get().currentVariant; \
                if (!variant) \
                   return; \
@@ -189,8 +213,47 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          reach_main_window_setup_spinbox(this->ui.optionsMapBluePowerupDuration, multiplayer.options.map.powerups.blue.duration);
          reach_main_window_setup_spinbox(this->ui.optionsMapYellowPowerupDuration, multiplayer.options.map.powerups.yellow.duration);
       }
+      {  // Team
+         reach_main_window_setup_spinbox(this->ui.optionsTeamScoringMethod, multiplayer.options.team.scoring);
+         reach_main_window_setup_combobox(this->ui.optionsTeamPlayerSpecies, multiplayer.options.team.species);
+         reach_main_window_setup_spinbox(this->ui.optionsTeamDesignatorSwitchType, multiplayer.options.team.designatorSwitchType);
+      }
+      {  // Loadout Base Options
+         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag0, multiplayer.options.loadouts.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag1, multiplayer.options.loadouts.flags, 0x02);
+      }
       //
+      // TODO: other pages
+      //
+      {  // Title Update Config
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, multiplayer.titleUpdateData.flags, 0x04);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, multiplayer.titleUpdateData.flags, 0x08);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, multiplayer.titleUpdateData.flags, 0x10);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, multiplayer.titleUpdateData.flags, 0x20);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag6, multiplayer.titleUpdateData.flags, 0x40);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag7, multiplayer.titleUpdateData.flags, 0x80);
+         {  // Precision Bloom
+            QDoubleSpinBox* widget = this->ui.titleUpdatePrecisionBloom;
+            QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](int value) {
+               auto variant = ReachEditorState::get().currentVariant;
+               if (!variant)
+                  return;
+               variant->multiplayer.titleUpdateData.precisionBloom = value * 5.0F / 100.0F; // normalize from percentage of vanilla to internal format
+            });
+         }
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrain, multiplayer.titleUpdateData.armorLockDamageDrain);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrainLimit, multiplayer.titleUpdateData.armorLockDamageDrainLimit);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergyBonus, multiplayer.titleUpdateData.activeCamoEnergyBonus);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergy, multiplayer.titleUpdateData.activeCamoEnergy);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumDamage, multiplayer.titleUpdateData.magnumDamage);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumFireDelay, multiplayer.titleUpdateData.magnumFireDelay);
+      }
+      //
+      #undef reach_main_window_setup_combobox
       #undef reach_main_window_setup_spinbox
+      #undef reach_main_window_setup_spinbox_dbl
       #undef reach_main_window_setup_flag_checkbox
       #undef reach_main_window_setup_bool_checkbox
    }
@@ -212,19 +275,28 @@ void ReachVariantTool::openFile() {
       QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data."));
       return;
    }
-   editor.take_game_variant(variant);
+   editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
+   //
+   {
+      QString title = QString("%1 - ReachVariantTool").arg(fileName);
+      this->setWindowTitle(title);
+   }
 }
-void ReachVariantTool::saveFile() {
+void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();
    if (!editor.currentVariant) {
       QMessageBox::information(this, tr("No game variant is open"), tr("We do not currently support creating game variants from scratch. Open a variant and then you can save an edited copy of it."));
       return;
    }
-   //
-   QString fileName = QFileDialog::getSaveFileName(this, tr("Save Game Variant"), "", tr("Game Variant (*.bin);;All Files (*)"));
-   if (fileName.isEmpty())
-      return;
+   QString fileName;
+   if (saveAs) {
+      QString fileName = QFileDialog::getSaveFileName(this, tr("Save Game Variant"), "", tr("Game Variant (*.bin);;All Files (*)"));
+      if (fileName.isEmpty())
+         return;
+   } else {
+      fileName = QString::fromWCharArray(editor.currentFile.c_str());
+   }
    QFile file(fileName);
    if (!file.open(QIODevice::WriteOnly)) {
       QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
@@ -274,9 +346,27 @@ void ReachVariantTool::onSelectedPageChanged() {
    // TODO: Blue Powerup Traits
    // TODO: Custom Powerup Traits
    //
+   if (text == tr("Team Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionsTeam);
+      return;
+   }
+   //
+   // TODO: panes for each team
+   //
+   if (text == tr("Loadout Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionsLoadout);
+      return;
+   }
+   //
+   // TODO: panes for each loadout palette
+   //
    //
    // TODO: add other panes
    //
+   if (text == tr("Title Update Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageTitleUpdateConfig);
+      return;
+   }
 }
 void ReachVariantTool::refreshWidgetsFromVariant() {
    auto& editor = ReachEditorState::get();
@@ -300,6 +390,13 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
    // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
    //
+      // reach_main_window_update_combobox -- use only when an enum maps one-to-one with a combobox's indices
+   #define reach_main_window_update_combobox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setCurrentIndex( variant->##field ); \
+      };
    #define reach_main_window_update_spinbox(w, field) \
       { \
          auto widget = w; \
@@ -352,7 +449,7 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       reach_main_window_update_flag_checkbox(this->ui.optionsSocialGlobalVoice,     multiplayer.options.social.flags, 0x08);
       reach_main_window_update_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, multiplayer.options.social.flags, 0x10);
    }
-   {
+   {  // Map and Game
       reach_main_window_update_flag_checkbox(this->ui.optionsMapGrenadesEnabled, multiplayer.options.map.flags, 0x01);
       reach_main_window_update_flag_checkbox(this->ui.optionsMapShortcutsEnabled, multiplayer.options.map.flags, 0x02);
       reach_main_window_update_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, multiplayer.options.map.flags, 0x04);
@@ -394,7 +491,41 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       reach_main_window_update_spinbox(this->ui.optionsMapBluePowerupDuration, multiplayer.options.map.powerups.blue.duration);
       reach_main_window_update_spinbox(this->ui.optionsMapYellowPowerupDuration, multiplayer.options.map.powerups.yellow.duration);
    }
+   {  // Team
+      reach_main_window_update_spinbox(this->ui.optionsTeamScoringMethod, multiplayer.options.team.scoring);
+      reach_main_window_update_combobox(this->ui.optionsTeamPlayerSpecies, multiplayer.options.team.species);
+      reach_main_window_update_spinbox(this->ui.optionsTeamDesignatorSwitchType, multiplayer.options.team.designatorSwitchType);
+   }
+   {  // Loadout Base Options
+      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag0, multiplayer.options.loadouts.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag1, multiplayer.options.loadouts.flags, 0x02);
+   }
    //
+   // TODO: add other panes
+   //
+   {  // Title Update Config
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, multiplayer.titleUpdateData.flags, 0x04);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, multiplayer.titleUpdateData.flags, 0x08);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, multiplayer.titleUpdateData.flags, 0x10);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, multiplayer.titleUpdateData.flags, 0x20);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag6, multiplayer.titleUpdateData.flags, 0x40);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag7, multiplayer.titleUpdateData.flags, 0x80);
+      {  // Precision Bloom
+         auto widget = this->ui.titleUpdatePrecisionBloom;
+         const QSignalBlocker blocker(widget);
+         widget->setValue(variant->multiplayer.titleUpdateData.precisionBloom * 100.0F / 5.0F); // normalize to percentage of vanilla
+      }
+      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrain, multiplayer.titleUpdateData.armorLockDamageDrain);
+      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrainLimit, multiplayer.titleUpdateData.armorLockDamageDrainLimit);
+      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergyBonus, multiplayer.titleUpdateData.activeCamoEnergyBonus);
+      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergy, multiplayer.titleUpdateData.activeCamoEnergy);
+      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumDamage, multiplayer.titleUpdateData.magnumDamage);
+      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumFireDelay, multiplayer.titleUpdateData.magnumFireDelay);
+   }
+   //
+   #undef reach_main_window_update_combobox
    #undef reach_main_window_update_spinbox
    #undef reach_main_window_update_flag_checkbox
    #undef reach_main_window_update_bool_checkbox

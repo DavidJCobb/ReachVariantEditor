@@ -130,14 +130,23 @@
     <ClCompile Include="helpers\strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\ProgramOptionsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ProgramOptionsDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ProgramOptionsDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

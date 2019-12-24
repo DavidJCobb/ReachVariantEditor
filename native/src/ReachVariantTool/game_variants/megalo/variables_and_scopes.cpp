@@ -102,5 +102,6 @@ namespace Megalo {
             return MegaloVariableScopeTeam;
       }
       assert(false && "Unknown variable scope!");
+      __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
    }
 }

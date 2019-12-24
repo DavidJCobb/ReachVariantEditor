@@ -35,7 +35,7 @@ class ReachGameVariantTU1Options {
       cobb::bitnumber<32, uint32_t> flags;
       float precisionBloom            = vanilla_precision_bloom;
       float activeCamoEnergy          = vanilla_active_camo_energy;
-      float activeCamoEnergyBonus     = vanilla_active_camo_energy_bonus;
+      float activeCamoEnergyBonus     = vanilla_active_camo_energy_bonus; // drain rate?
       float armorLockDamageDrain      = vanilla_armor_lock_damage_drain;
       float armorLockDamageDrainLimit = vanilla_armor_lock_damage_drain_limit;
       float magnumDamage              = vanilla_magnum_damage;
