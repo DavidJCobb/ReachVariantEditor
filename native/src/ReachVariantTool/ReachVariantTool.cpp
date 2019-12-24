@@ -138,16 +138,12 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapIndestructibleVehicles, multiplayer.options.map.flags, 0x20);
          {  // Weapon Set
             QComboBox* widget = this->ui.optionsMapWeaponSet;
-            #if _DEBUG
-               QObject::connect(widget, QOverload<int>::of(&QComboBox::activated), [this](int index) {
-                  auto variant = ReachEditorState::get().currentVariant;
-                  if (!variant)
-                     return;
-                  int8_t value = variant->multiplayer.options.map.weaponSet;
-                  QString text = QString("The variant had Weapon Set %1.").arg(value);
-                  QMessageBox::information(this, tr("DEBUG: WEAPON SET"), text);
-               });
-            #endif
+            //
+            // -2 = Map Default
+            // -1 = No Weapons
+            //  0 = Human
+            //  1 = Covenant
+            //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
                auto variant = ReachEditorState::get().currentVariant;
                if (!variant)
@@ -165,25 +161,15 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                }
                variant->multiplayer.options.map.weaponSet = value;
             });
-            //
-            // -2 = Map Default
-            // -1 = No Weapons
-            //  0 = Human
-            //  1 = Covenant
-            //
          }
          {  // Vehicle Set
             QComboBox* widget = this->ui.optionsMapVehicleSet;
-            #if _DEBUG
-               QObject::connect(widget, QOverload<int>::of(&QComboBox::activated), [this](int index) {
-                  auto variant = ReachEditorState::get().currentVariant;
-                  if (!variant)
-                     return;
-                  int8_t value = variant->multiplayer.options.map.vehicleSet;
-                  QString text = QString("The variant had Vehicle Set %1.").arg(value);
-                  QMessageBox::information(this, tr("DEBUG: VEHICLE SET"), text);
-               });
-            #endif
+            //
+            // -2 = Map Default
+            //  0 = Mongooses
+            //  1 = Warthogs
+            // 12 = No Vehicles
+            //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
                auto variant = ReachEditorState::get().currentVariant;
                if (!variant)
@@ -198,12 +184,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                }
                variant->multiplayer.options.map.vehicleSet = value;
             });
-            //
-            // -2 = Map Default
-            //  0 = Mongooses
-            //  1 = Warthogs
-            // 12 = No Vehicles
-            //
          }
          reach_main_window_setup_spinbox(this->ui.optionsMapRedPowerupDuration, multiplayer.options.map.powerups.red.duration);
          reach_main_window_setup_spinbox(this->ui.optionsMapBluePowerupDuration, multiplayer.options.map.powerups.blue.duration);
