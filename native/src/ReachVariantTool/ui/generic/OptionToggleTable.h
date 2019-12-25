@@ -5,6 +5,27 @@
 #include <QLabel>
 #include <QTreeView>
 
+/*
+
+   The model I'm using here is ugly as sin, but for now my sole interest is in 
+   building something that works. If I have time, and if I manage to identify 
+   a significant number of the option toggles, then I'll pretty it up later.
+
+   The game stores option toggles as a flat list... so we do that as well. I've 
+   added very rudimentary support for nesting -- any toggle can specify another 
+   toggle's index as its "parent," and we identify parents, children, and so on 
+   by just looping over the whole list and counting things up. The only reason 
+   I've even added nesting support is because there are 1,272 engine option 
+   toggles and I don't know what they all refer to -- whether it might be 
+   possible to block off entire submenus, for example, in which case nesting 
+   would be appropriate.
+
+*/
+
+//
+// TODO: Create a model and treeview class for Megalo option toggles.
+//
+
 class OptionToggleTreeModel;
 class OptionToggleTreeRowModel {
    public:
@@ -164,14 +185,13 @@ class EngineOptionToggleTree : public QTreeView {
             }
          }
          auto model = static_cast<OptionToggleTreeModel*>(this->model());
-         for (uint16_t i = 0; i < 1272; i++) {
-            QString label;
-            if (i == 1) {
-               label = tr("Teams Enabled");
-            } else {
-               label = QString("Unknown #%1").arg(i);
-            }
-            model->insertItem(i, label);
+         model->insertItem(0, tr("Score to Win"));
+         model->insertItem(1, tr("Teams Enabled"));
+         model->insertItem(2, tr("Unknown #2"));
+         model->insertItem(3, tr("Time Limit"));
+         model->insertItem(4, tr("Sudden Death"));
+         for (uint16_t i = 5; i < 1272; i++) {
+            model->insertItem(i, QString("Unknown #%1").arg(i));
          }
       }
 };

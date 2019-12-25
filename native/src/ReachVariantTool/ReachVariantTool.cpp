@@ -30,6 +30,10 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          ReachVariantTool::get().refreshWindowTitle();
          return;
       }
+      if (setting == &ReachINI::Editing::bAllowUnsafeValues) {
+         ReachVariantTool::get().refreshWidgetsForUnsafeOptions();
+         return;
+      }
    });
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, &ReachVariantTool::openFile);
@@ -299,13 +303,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             reach_traits_pane_setup_combobox(this->ui.playerTraitDefenseUnknown09, defense.unk09);
          }
          {  // Offense
-            //
-            // TODO: WE CAN'T USE THE MACRO FOR WEAPONS OR THE ARMOR ABILITY. REMEMBER, WE SORTED THOSE 
-            // NEAR-ALPHABETICALLY AND ATTACHED A "QVariant" DATA ITEM TO EACH SO WE COULD SELECT BY 
-            // VALUE THAT WAY
-            //
-            // REMEMBER TO FIX THE "UPDATE" CODE TOO, NOT JUST THIS CODE HERE
-            //
             reach_traits_pane_setup_combobox(this->ui.playerTraitDamageMult,      offense.damageMult);
             reach_traits_pane_setup_combobox(this->ui.playerTraitMeleeMult,       offense.meleeMult);
             {
@@ -339,9 +336,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             reach_traits_pane_setup_combobox(this->ui.playerTraitGrenadeRegen,    offense.grenadeRegen);
             reach_traits_pane_setup_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
             reach_traits_pane_setup_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
-            //
-            // TODO: Armor Ability settings
-            //
+            reach_traits_pane_setup_combobox(this->ui.playerTraitAbilityUsage,    offense.abilityUsage);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitAbilityUnknown,  offense.abilityUnknown);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitInfiniteAbility, offense.infiniteAbility);
          }
          {  // Movement
             reach_traits_pane_setup_combobox(this->ui.playerTraitMovementSpeed, movement.speed);
@@ -395,6 +392,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       #undef reach_main_window_setup_flag_checkbox
       #undef reach_main_window_setup_bool_checkbox
    }
+   this->setupWidgetsForUnsafeOptions();
 }
 
 void ReachVariantTool::openFile() {
@@ -443,6 +441,7 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    if (saveAs) {
       std::wstring temp = fileName.toStdWString();
       editor.set_variant_file_path(temp.c_str());
+      this->refreshWindowTitle();
    }
    QDataStream out(&file);
    out.setVersion(QDataStream::Qt_4_5);
@@ -456,9 +455,10 @@ void ReachVariantTool::onSelectedPageChanged() {
    auto selections = widget->selectedItems();
    if (!selections.size())
       return;
-   auto sel   = selections[0];
-   auto text  = sel->text(0);
-   auto stack = this->ui.MainContentView;
+   auto sel     = selections[0];
+   auto text    = sel->text(0);
+   auto stack   = this->ui.MainContentView;
+   auto variant = ReachEditorState::get().currentVariant;
    if (text == tr("Metadata", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageGameVariantHeader);
       return;
@@ -471,47 +471,12 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsRespawn);
       return;
    }
-   if (text == tr("Respawn Traits", "MainTreeview")) {
-      auto variant = ReachEditorState::get().currentVariant;
-      if (!variant)
-         return;
-      this->switchToPlayerTraits(&variant->multiplayer.options.respawn.traits);
-      return;
-   }
    if (text == tr("Social Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsSocial);
       return;
    }
    if (text == tr("Map and Game Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsMap);
-      return;
-   }
-   if (text == tr("Base Player Traits", "MainTreeview")) {
-      auto variant = ReachEditorState::get().currentVariant;
-      if (!variant)
-         return;
-      this->switchToPlayerTraits(&variant->multiplayer.options.map.baseTraits);
-      return;
-   }
-   if (text == tr("Red Powerup Traits", "MainTreeview")) {
-      auto variant = ReachEditorState::get().currentVariant;
-      if (!variant)
-         return;
-      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.red.traits);
-      return;
-   }
-   if (text == tr("Blue Powerup Traits", "MainTreeview")) {
-      auto variant = ReachEditorState::get().currentVariant;
-      if (!variant)
-         return;
-      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.blue.traits);
-      return;
-   }
-   if (text == tr("Custom Powerup Traits", "MainTreeview")) {
-      auto variant = ReachEditorState::get().currentVariant;
-      if (!variant)
-         return;
-      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.yellow.traits);
       return;
    }
    if (text == tr("Team Settings", "MainTreeview")) {
@@ -525,9 +490,53 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsLoadout);
       return;
    }
-   //
-   // TODO: panes for each loadout palette
-   //
+   if (variant) { // traits; loadout palettes
+      if (text == tr("Respawn Traits", "MainTreeview")) {
+         if (!variant)
+            return;
+         this->switchToPlayerTraits(&variant->multiplayer.options.respawn.traits);
+         return;
+      }
+      if (text == tr("Base Player Traits", "MainTreeview")) {
+         if (!variant)
+            return;
+         this->switchToPlayerTraits(&variant->multiplayer.options.map.baseTraits);
+         return;
+      }
+      if (text == tr("Red Powerup Traits", "MainTreeview")) {
+         if (!variant)
+            return;
+         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.red.traits);
+         return;
+      }
+      if (text == tr("Blue Powerup Traits", "MainTreeview")) {
+         if (!variant)
+            return;
+         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.blue.traits);
+         return;
+      }
+      if (text == tr("Custom Powerup Traits", "MainTreeview")) {
+         if (!variant)
+            return;
+         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.yellow.traits);
+         return;
+      }
+      //
+      const QString paletteNames[] = {
+         tr("Spartan Tier 1", "MainTreeview"),
+         tr("Spartan Tier 2", "MainTreeview"),
+         tr("Spartan Tier 3", "MainTreeview"),
+         tr("Elite Tier 1", "MainTreeview"),
+         tr("Elite Tier 2", "MainTreeview"),
+         tr("Elite Tier 3", "MainTreeview"),
+      };
+      for (uint8_t i = 0; i < std::extent<decltype(paletteNames)>::value; i++) {
+         if (text == paletteNames[i]) {
+            this->switchToLoadoutPalette(&variant->multiplayer.options.loadouts.palettes[i]);
+            return;
+         }
+      }
+   }
    //
    // TODO: add other panes
    //
@@ -703,10 +712,22 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    #undef reach_main_window_update_flag_checkbox
    #undef reach_main_window_update_bool_checkbox
 }
+void ReachVariantTool::switchToLoadoutPalette(ReachLoadoutPalette* palette) {
+   ReachEditorState::get().start_editing_loadouts(palette);
+   this->refreshWidgetsForLoadoutPalette();
+   this->ui.MainContentView->setCurrentWidget(this->ui.PageLoadoutPalette);
+}
 void ReachVariantTool::switchToPlayerTraits(ReachPlayerTraits* traits) {
    ReachEditorState::get().start_editing_traits(traits);
    this->refreshWidgetsForPlayerTraits();
    this->ui.MainContentView->setCurrentWidget(this->ui.PagePlayerTraits);
+}
+void ReachVariantTool::refreshWidgetsForLoadoutPalette() {
+   this->ui.loadout1Content->pullFromGameVariant();
+   this->ui.loadout2Content->pullFromGameVariant();
+   this->ui.loadout3Content->pullFromGameVariant();
+   this->ui.loadout4Content->pullFromGameVariant();
+   this->ui.loadout5Content->pullFromGameVariant();
 }
 void ReachVariantTool::refreshWidgetsForPlayerTraits() {
    auto& editor = ReachEditorState::get();
@@ -759,9 +780,9 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
       reach_traits_pane_update_combobox(this->ui.playerTraitGrenadeRegen,    offense.grenadeRegen);
       reach_traits_pane_update_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
       reach_traits_pane_update_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
-      //
-      // TODO: Armor Ability settings
-      //
+      reach_traits_pane_update_combobox(this->ui.playerTraitAbilityUsage, offense.abilityUsage);
+      reach_traits_pane_update_combobox(this->ui.playerTraitAbilityUnknown, offense.abilityUnknown);
+      reach_traits_pane_update_combobox(this->ui.playerTraitInfiniteAbility, offense.infiniteAbility);
    }
    {  // Movement
       reach_traits_pane_update_combobox(this->ui.playerTraitMovementSpeed, movement.speed);
@@ -784,6 +805,8 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
    }
    #undef reach_traits_pane_update_combobox
    #undef reach_traits_pane_update_spinbox
+   //
+   this->refreshWidgetsForUnsafeOptions();
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();
@@ -805,4 +828,16 @@ void ReachVariantTool::refreshWindowTitle() {
          QString("%1 - ReachVariantTool").arg(file)
       );
    }
+}
+//
+void ReachVariantTool::setupWidgetsForUnsafeOptions() {
+   //this->_setupComboboxForUnsafeOption<0>(this->ui.playerTraitAura); // not actually unsafe; left here as an example
+   //
+   this->refreshWidgetsForUnsafeOptions();
+}
+void ReachVariantTool::setStateForWidgetForUnsafeOption(QWidget* widget, bool disable) {
+   widget->setEnabled(!disable);
+}
+void ReachVariantTool::refreshWidgetsForUnsafeOptions() {
+   //this->_refreshComboboxForUnsafeOption<0>(this->ui.playerTraitAura); // not actually unsafe; left here as an example
 }

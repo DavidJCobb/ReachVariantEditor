@@ -20,14 +20,6 @@ class ProgramOptionsDialog : public QDialog {
       //
    private slots:
    private:
-      //
-   //
-   // TODO: implement options
-   //  - Show full file path in title bar, or just file name
-   //  - Show variant name in title bar (e.g. "Alpha Zombies <29d37337-1b7f-4902-9f13-8538e1eeb7e9.bin> - ReachVariantTool")
-   //
-   // TODO: implement loading and saving option values to an INI file (bring over the code from NorthernUI)
-   //
       void close();
       void refreshWidgetsFromINI();
       void saveAndClose();

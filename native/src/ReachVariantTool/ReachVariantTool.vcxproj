@@ -129,7 +129,8 @@
     <ClCompile Include="ReachVariantTool.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\generic\OptionToggleTable.cpp" />
-    <ClCompile Include="ui\ProgramOptionsDialog.cpp" />
+    <ClCompile Include="ProgramOptionsDialog.cpp" />
+    <ClCompile Include="ui\LoadoutForm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h" />
@@ -137,6 +138,7 @@
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui" />
     <QtUic Include="ProgramOptionsDialog.ui" />
+    <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="ReachVariantTool.qrc" />
@@ -207,6 +209,8 @@
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
+    <ClInclude Include="ui\generic\LabelForUnsafeOptions.h" />
+    <QtMoc Include="ui\LoadoutForm.h" />
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h" />
     <QtMoc Include="ui\generic\OptionToggleTable.h" />
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h" />

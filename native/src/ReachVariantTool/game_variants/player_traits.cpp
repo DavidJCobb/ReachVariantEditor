@@ -27,9 +27,9 @@ void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
    o.infiniteAmmo.read(stream);
    o.grenadeRegen.read(stream);
    o.weaponPickup.read(stream);
-   o.abilityDrop.read(stream);
-   o.infiniteAbility.read(stream);
    o.abilityUsage.read(stream);
+   o.abilityUnknown.read(stream);
+   o.infiniteAbility.read(stream);
    o.ability.read(stream);
    //
    m.speed.read(stream);
@@ -75,9 +75,9 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    o.infiniteAmmo.write(stream);
    o.grenadeRegen.write(stream);
    o.weaponPickup.write(stream);
-   o.abilityDrop.write(stream);
-   o.infiniteAbility.write(stream);
    o.abilityUsage.write(stream);
+   o.abilityUnknown.write(stream);
+   o.infiniteAbility.write(stream);
    o.ability.write(stream);
    printf("=== Bitwriter bytepos after writing player traits - offense: %08X\n", stream.get_bytepos());
    //

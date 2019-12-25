@@ -107,6 +107,18 @@ int main(int argc, char *argv[]) {
 //       call read/save on its data object (and this in turn would allow 
 //       the block to do things like block length fixup after writing).
 //
+//  - UI
+//
+//     - Implement Megalo Option Toggles
+//
+//     - Player Traits pages should not be selectable if a variant isn't 
+//       open.
+//
+//     - Active Camo 2 crashes. We can't disable individual items in a combo-
+//       box -- at least, not if they're preplaced in Qt Designer. Can we 
+//       disable them through code? If so, wire this one up to the INI setting 
+//       for unsafe options.
+//
 // ==========================================================================
 //
 //  - Begin testing to identify further unknown information in Reach.
@@ -149,11 +161,6 @@ int main(int argc, char *argv[]) {
 //        - Remember: you can use mounted turrets to get a third-person view 
 //          of your player model.
 //
-//     - Appearance: Aura
-//
-//        - Remember: you can use mounted turrets to get a third-person view 
-//          of your player model.
-//
 //     - Sensors: Directional Damage Indicator
 //
 //        - Probably a bool trait. Could try setting off explosives near 
@@ -174,6 +181,11 @@ int main(int argc, char *argv[]) {
 //     - The Grenade Regeneration trait is a trait-bool. If enabled for a 
 //       player, that player will receive one frag and one plasma on every 
 //       fifth second of the round.
+//
+//     - Active Camo trait:
+//
+//        - 2: Fades very, very slightly on movement; fades on attacks
+//        - 5: Doesn't fade on movement; fades on attacks
 //
 
 void test_create_hacked_variant() {

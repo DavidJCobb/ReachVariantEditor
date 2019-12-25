@@ -32,6 +32,9 @@ namespace ReachINI {
    // synchronized between the two files.
    //
    #define REACHTOOL_MAKE_INI_SETTING(name, category, value) extern setting name = setting(#name, category, value);
+   namespace Editing {
+      REACHTOOL_MAKE_INI_SETTING(bAllowUnsafeValues, "Editing", false);
+   }
    namespace UIWindowTitle {
       REACHTOOL_MAKE_INI_SETTING(bShowFullPath,     "UIWindowTitle", true);
       REACHTOOL_MAKE_INI_SETTING(bShowVariantTitle, "UIWindowTitle", true);

@@ -14,29 +14,45 @@ namespace reach {
    // those bits, or if they're valid in general.
    //
    enum class ability : int8_t {
-      // -4: random?
+      // -4: Icon is two concentric circles. Acts as Sprint.
       unchanged        = -3,
-      // -2: map default?
+      // -2: Acts as None.
       none             = -1,
       sprint           =  0,
       jetpack          =  1,
       armor_lock       =  2,
-      //  3: KSoft.Tool identifies this as "power fist"
+      //  3: KSoft.Tool identifies this as "power fist." Armor Lock icon in loadout selection; acts as None.
       active_camo      =  4,
-      //  5: KSoft.Tool identifies this as "ammo pack"
-      //  6: KSoft.TOol identifies this as "sensor pack"
+      //  5: KSoft.Tool identifies this as "ammo pack." Armor Lock icon in loadout selection; acts as None.
+      //  6: KSoft.Tool identifies this as "sensor pack." Armor Lock icon in loadout selection; acts as None.
       hologram         =  7,
       evade            =  8,
       drop_shield      =  9
    };
+   enum class ability_usage : uint8_t {
+      unchanged = 0,
+      disabled  = 1,
+      default   = 2,
+      enabled   = 3,
+   };
    enum class active_camo : uint8_t {
       unchanged = 0,
       off       = 1,
-      // 2
+      unknown_2 = 2, // fades only very slightly with movement
       poor      = 3,
       good      = 4,
-      // 5 // seen in Blue Powerup Traits
+      best      = 5, // seen in Blue Powerup Traits; doesn't fade with movement
       // bitfield can hold 6 and 7, though they're likely not valid
+   };
+   enum class aura : uint8_t {
+      unchanged    = 0,
+      unknown_1    = 1,
+      unknown_2    = 2,
+      darken_armor = 3, // armor color becomes darker and faded
+      pastel_armor = 4, // orange armor becomes sulfur yellow
+      unknown_5    = 5,
+      unknown_6    = 6,
+      // bitfield can hold 7, but using that causes the MCC to crash on startup
    };
    enum class bool_trait : uint8_t {
       unchanged = 0,
@@ -186,9 +202,9 @@ namespace reach {
    };
    enum class shield_rate : uint8_t {
       unchanged =  0,
-      // 1 (possibly decay)
-      // 2 (possibly decay)
-      // 3 (possibly decay)
+      drain_in_12_s = 1, // decays from 100% to 0% in 12 seconds
+      drain_in_30_s = 2, // decays from 100% to 0% in 30 seconds
+      drain_in_60_s = 3, // decays from 100% to 0% in 60 seconds
       value_000 =  4,
       value_010 =  5,
       value_025 =  6,
@@ -244,6 +260,12 @@ namespace reach {
       grenade_launcher = 18,
       golf_club        = 19,
       fuel_rod_gun     = 20,
+      machine_gun_turret = 21, // 400 rounds instead of the normal 200; loadout icon is Mauler
+      plasma_cannon    = 22, // 400 rounds instead of the normal 200; loadout icon is Flamethrower
+      // 23 // Magnum, but with SMG icon in loadout selection
+      // 24 // Magnum, but with no icon in loadout selection
+      // ...
+      // 32 // Magnum, but with no icon in loadout selection; probably just a default
    };
 }
 
@@ -270,9 +292,9 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, reach::infinite_ammo> infiniteAmmo = reach::infinite_ammo::unchanged;
          cobb::bitnumber<2, reach::bool_trait> grenadeRegen = reach::bool_trait::unchanged;
          cobb::bitnumber<2, reach::bool_trait> weaponPickup = reach::bool_trait::unchanged;
-         cobb::bitnumber<2, uint8_t> abilityDrop; // this and the next three may actually be the same value?
-         cobb::bitnumber<2, uint8_t> infiniteAbility;
-         cobb::bitnumber<2, uint8_t> abilityUsage;
+         cobb::bitnumber<2, reach::ability_usage> abilityUsage;
+         cobb::bitnumber<2, uint8_t> abilityUnknown;
+         cobb::bitnumber<2, reach::bool_trait> infiniteAbility;
          cobb::bitnumber<8, reach::ability> ability = reach::ability::unchanged;
       } offense;
       struct {
@@ -286,7 +308,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<3, reach::active_camo> activeCamo = reach::active_camo::unchanged;
          cobb::bitnumber<2, reach::visible_identity> waypoint    = reach::visible_identity::unchanged;
          cobb::bitnumber<2, reach::visible_identity> visibleName = reach::visible_identity::unchanged;
-         cobb::bitnumber<3, uint8_t> aura;
+         cobb::bitnumber<3, reach::aura> aura = reach::aura::unchanged;
          cobb::bitnumber<4, reach::forced_color> forcedColor = reach::forced_color::unchanged;
       } appearance;
       struct {

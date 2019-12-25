@@ -130,13 +130,16 @@
     <ClCompile Include="helpers\strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\ProgramOptionsDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="services\ini.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\generic\OptionToggleTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramOptionsDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\LoadoutForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -153,12 +156,18 @@
     <QtMoc Include="ui\generic\OptionToggleTable.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\LoadoutForm.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ProgramOptionsDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\widget_loadout_options.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -358,6 +367,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\generic\LabelForUnsafeOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
