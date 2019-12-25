@@ -108,13 +108,19 @@ class ReachTeamData {
       ReachStringTable name = ReachStringTable(1, 0x20, 5, 6);
       cobb::bitnumber<4, uint8_t> initialDesignator;
       cobb::bitnumber<1, uint8_t> spartanOrElite;
-      cobb::bytenumber<int32_t>   colorPrimary;
-      cobb::bytenumber<int32_t>   colorSecondary;
-      cobb::bytenumber<int32_t>   colorText;
+      cobb::bytenumber<int32_t>   colorPrimary; // xRGB
+      cobb::bytenumber<int32_t>   colorSecondary; // xRGB
+      cobb::bytenumber<int32_t>   colorText; // xRGB
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
       void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      ReachString* get_name() noexcept {
+         if (this->name.strings.size())
+            return &this->name.strings[0];
+         return nullptr;
+      }
 };
 
 class ReachBlockMPVR {

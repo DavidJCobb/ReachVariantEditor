@@ -128,46 +128,6 @@
         <property name="flags">
          <set>ItemIsSelectable|ItemIsEnabled</set>
         </property>
-        <item>
-         <property name="text">
-          <string>Team 1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 3</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 4</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 5</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 6</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 7</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Team 8</string>
-         </property>
-        </item>
        </item>
        <item>
         <property name="text">
@@ -237,7 +197,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>7</number>
+       <number>8</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -1212,7 +1172,7 @@
         <item row="0" column="0">
          <widget class="QTabWidget" name="PagePlayerTraitsTabview">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="PagePlayerTraitsTabDefense">
            <attribute name="title">
@@ -2687,12 +2647,215 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="PageSpecificTeamConfig">
+       <layout class="QGridLayout" name="gridLayout_21">
+        <item row="4" column="2">
+         <widget class="QPushButton" name="specificTeamButtonColorText">
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click here to open a color picker.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Edit Text Color</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_71">
+          <property name="text">
+           <string>Initial Designator</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_73">
+          <property name="text">
+           <string>Fireteam Count</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QCheckBox" name="specificTeamFlagColorText">
+          <property name="toolTip">
+           <string>If this box is not checked, a game-engine-default color will be used.</string>
+          </property>
+          <property name="text">
+           <string>Set Text Color</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QCheckBox" name="specificTeamFlagColorSecondary">
+          <property name="toolTip">
+           <string>If this box is not checked, a game-engine-default color will be used.</string>
+          </property>
+          <property name="text">
+           <string>Set Secondary Color</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_72">
+          <property name="text">
+           <string>Player Species</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QCheckBox" name="specificTeamFlagColorPrimary">
+          <property name="toolTip">
+           <string>If this box is not checked, a game-engine-default color will be used.</string>
+          </property>
+          <property name="text">
+           <string>Set Primary Color</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="specificTeamButtonEditName">
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="accessibleName">
+           <string>Edit Name</string>
+          </property>
+          <property name="text">
+           <string>Edit...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QCheckBox" name="specificTeamFlagEnabled">
+          <property name="text">
+           <string>Enabled</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QComboBox" name="specificTeamSpecies">
+          <item>
+           <property name="text">
+            <string>Spartan</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Elite</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="2">
+         <widget class="QSpinBox" name="specificTeamFireteamCount">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>31</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_51">
+          <property name="text">
+           <string>Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QPushButton" name="specificTeamButtonColorSecondary">
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click here to open a color picker.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Edit Secondary Color</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="2">
+         <widget class="QSpinBox" name="specificTeamInitialDesignator">
+          <property name="maximum">
+           <number>15</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="specificTeamNameLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="specificTeamButtonColorPrimary">
+          <property name="contextMenuPolicy">
+           <enum>Qt::NoContextMenu</enum>
+          </property>
+          <property name="toolTip">
+           <string>Click here to open a color picker.</string>
+          </property>
+          <property name="accessibleName">
+           <string>Edit Primary Color</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" colspan="3">
+         <widget class="QLabel" name="label_74">
+          <property name="text">
+           <string>&lt;b&gt;NOTE:&lt;/b&gt; &amp;nbsp; This team's species option will only be used if the &quot;Player Species&quot; option under &quot;Team Settings&quot; is set to &quot;Use Team Species.&quot;</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="3">
+         <spacer name="verticalSpacer_15">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="PageLoadoutPalette">
        <layout class="QGridLayout" name="gridLayout_15">
         <item row="0" column="0">
          <widget class="QToolBox" name="toolBox">
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="loadout1">
            <property name="geometry">

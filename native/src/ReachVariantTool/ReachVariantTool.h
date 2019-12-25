@@ -1,10 +1,12 @@
 #pragma once
+#include <cstdint>
 
 #include <QtWidgets/QMainWindow>
 #include "ui_ReachVariantTool.h"
 
 class ReachLoadoutPalette;
 class ReachPlayerTraits;
+class ReachTeamData;
 
 class ReachVariantTool : public QMainWindow {
    Q_OBJECT
@@ -49,6 +51,11 @@ class ReachVariantTool : public QMainWindow {
       void setupWidgetsForUnsafeOptions();
       void setStateForWidgetForUnsafeOption(QWidget*, bool disable);
       void refreshWidgetsForUnsafeOptions();
+      //
+      int8_t currentTeam = -1;
+      void switchToTeam(int8_t team);
+      void refreshTeamColorWidgets();
+      ReachTeamData* _getCurrentTeam() const noexcept;
       //
    private:
       Ui::ReachVariantToolClass ui;

@@ -1,6 +1,7 @@
 #include "ReachVariantTool.h"
 #include <cassert>
 #include <filesystem>
+#include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QString>
@@ -15,6 +16,13 @@
 
 namespace {
    ReachVariantTool* _window = nullptr;
+
+   QColor _colorFromReach(uint32_t c) {
+      return QColor((c >> 0x10) & 0xFF, (c >> 0x08) & 0xFF, c & 0xFF);
+   }
+   uint32_t _colorToReach(const QColor& c) {
+      return ((c.red() & 0xFF) << 0x10) | ((c.green() & 0xFF) << 0x08) | (c.blue() & 0xFF);
+   }
 }
 
 /*static*/ ReachVariantTool& ReachVariantTool::get() {
@@ -55,13 +63,16 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
    {  // Metadata
-      QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [](const QString& text) {
+      QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [this](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
          const char16_t* value = (const char16_t*)text.utf16();
          variant->contentHeader.data.set_title(value);
          variant->multiplayer.variantHeader.set_title(value);
+         //
+         if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b)
+            this->refreshWindowTitle();
       });
       //
       auto desc = this->ui.headerDesc;
@@ -264,6 +275,107 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       //
       // TODO: other pages
       //
+      {  // Specific Team Settings
+         {  // Add each team to the navigation
+            auto tree = this->ui.MainTreeview;
+            QTreeWidgetItem* branch;
+            {
+               auto list = tree->findItems(tr("Team Settings", "MainTreeview"), Qt::MatchRecursive, 0);
+               if (!list.size())
+                  return;
+               branch = list[0];
+            }
+            for (QTreeWidgetItem* child : branch->takeChildren())
+               delete child;
+            for (size_t i = 0; i < 8; i++) {
+               auto item = new QTreeWidgetItem(branch, QTreeWidgetItem::UserType + i);
+               item->setText(0, QString("Team %1").arg(i + 1));
+            }
+         }
+         //
+         #pragma region Preprocessor macros to set up Specific Team widgets
+         #define reach_team_pane_setup_flag_checkbox(w, field, mask) \
+            { \
+               QCheckBox* widget = w; \
+               QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
+                  auto team = ReachVariantTool::get()._getCurrentTeam(); \
+                  if (!team) \
+                     return; \
+                  if (widget->isChecked()) \
+                     team->##field |= mask ; \
+                  else \
+                     team->##field &= ~ mask ; \
+               }); \
+            };
+         #define reach_team_pane_setup_combobox(w, field) \
+            { \
+               auto widget = w; \
+               QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
+                  auto team = ReachVariantTool::get()._getCurrentTeam(); \
+                  if (!team) \
+                     return; \
+                  team->##field = value; \
+               }); \
+            };
+         #define reach_team_pane_setup_spinbox(w, field) \
+            { \
+               auto widget = w; \
+               QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
+                  auto team = ReachVariantTool::get()._getCurrentTeam(); \
+                  if (!team) \
+                     return; \
+                  team->##field = value; \
+               }); \
+            };
+         #pragma endregion
+         reach_team_pane_setup_flag_checkbox(this->ui.specificTeamFlagEnabled,        flags, 1);
+         reach_team_pane_setup_flag_checkbox(this->ui.specificTeamFlagColorPrimary,   flags, 2);
+         reach_team_pane_setup_flag_checkbox(this->ui.specificTeamFlagColorSecondary, flags, 4);
+         reach_team_pane_setup_flag_checkbox(this->ui.specificTeamFlagColorText,      flags, 8);
+         reach_team_pane_setup_combobox(this->ui.specificTeamSpecies, spartanOrElite);
+         reach_team_pane_setup_spinbox(this->ui.specificTeamFireteamCount, fireteamCount);
+         reach_team_pane_setup_spinbox(this->ui.specificTeamInitialDesignator, initialDesignator);
+         QObject::connect(this->ui.specificTeamButtonEditName, &QPushButton::clicked, [this]() {
+            //
+            // TODO
+            //
+            QMessageBox::information(this, tr("Not implemented"), tr("Editing of localized strings is not yet implemented."));
+            return;
+         });
+         QObject::connect(this->ui.specificTeamButtonColorPrimary, &QPushButton::clicked, [this]() {
+            auto team = this->_getCurrentTeam();
+            if (!team)
+               return;
+            auto color = QColorDialog::getColor(_colorFromReach(team->colorPrimary), this);
+            if (!color.isValid())
+               return;
+            team->colorPrimary = _colorToReach(color);
+            this->refreshTeamColorWidgets();
+         });
+         QObject::connect(this->ui.specificTeamButtonColorSecondary, &QPushButton::clicked, [this]() {
+            auto team = this->_getCurrentTeam();
+            if (!team)
+               return;
+            auto color = QColorDialog::getColor(_colorFromReach(team->colorSecondary), this);
+            if (!color.isValid())
+               return;
+            team->colorSecondary = _colorToReach(color);
+            this->refreshTeamColorWidgets();
+         });
+         QObject::connect(this->ui.specificTeamButtonColorText, &QPushButton::clicked, [this]() {
+            auto team = this->_getCurrentTeam();
+            if (!team)
+               return;
+            auto color = QColorDialog::getColor(_colorFromReach(team->colorText), this);
+            if (!color.isValid())
+               return;
+            team->colorText = _colorToReach(color);
+            this->refreshTeamColorWidgets();
+         });
+         #undef reach_team_pane_setup_flag_checkbox
+         #undef reach_team_pane_setup_combobox
+         #undef reach_team_pane_setup_spinbox
+      }
       {  // Player Traits
          #pragma region Preprocessor macros to set up Player Traits widgets
          #define reach_traits_pane_setup_combobox(w, field) \
@@ -356,6 +468,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             reach_traits_pane_setup_combobox(this->ui.playerTraitRadarRange, sensors.radarRange);
             reach_traits_pane_setup_combobox(this->ui.playerTraitDirectionalDamageIndicator, sensors.directionalDamageIndicator);
          }
+         #undef reach_traits_pane_setup_combobox
+         #undef reach_traits_pane_setup_spinbox
       }
       {  // Title Update Config
          reach_main_window_setup_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
@@ -410,6 +524,7 @@ void ReachVariantTool::openFile() {
    editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
    this->refreshScriptedPlayerTraitList();
+   this->switchToTeam(this->currentTeam); // update specific-team widgets if we're currently viewing them
    this->refreshWindowTitle();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
@@ -488,7 +603,7 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsLoadout);
       return;
    }
-   if (variant) { // traits; loadout palettes; scripted traits
+   if (variant) { // traits; loadout palettes; scripted traits; teams
       if (auto p = sel->parent()) {
          const auto text = p->text(0);
          if (text == tr("Script-Specific Options", "MainTreeview")) {
@@ -496,6 +611,17 @@ void ReachVariantTool::onSelectedPageChanged() {
             if (t >= QTreeWidgetItem::UserType) {
                size_t index = t - QTreeWidgetItem::UserType;
                this->switchToPlayerTraits(&variant->multiplayer.scriptData.traits[index]);
+               return;
+            }
+         }
+      }
+      if (auto p = sel->parent()) {
+         const auto text = p->text(0);
+         if (text == tr("Team Settings", "MainTreeview")) {
+            auto t = sel->type();
+            if (t >= QTreeWidgetItem::UserType) {
+               size_t index = t - QTreeWidgetItem::UserType;
+               this->switchToTeam(index);
                return;
             }
          }
@@ -867,4 +993,74 @@ void ReachVariantTool::setStateForWidgetForUnsafeOption(QWidget* widget, bool di
 }
 void ReachVariantTool::refreshWidgetsForUnsafeOptions() {
    //this->_refreshComboboxForUnsafeOption<0>(this->ui.playerTraitAura); // not actually unsafe; left here as an example
+}
+
+void ReachVariantTool::refreshTeamColorWidgets() {
+   auto team = this->_getCurrentTeam();
+   if (!team)
+      return;
+   //
+   const QString style("QPushButton { background-color : %1; }");
+   //
+   this->ui.specificTeamButtonColorPrimary->setStyleSheet(style.arg(_colorFromReach(team->colorPrimary).name()));
+   this->ui.specificTeamButtonColorSecondary->setStyleSheet(style.arg(_colorFromReach(team->colorSecondary).name()));
+   this->ui.specificTeamButtonColorText->setStyleSheet(style.arg(_colorFromReach(team->colorText).name()));
+}
+void ReachVariantTool::switchToTeam(int8_t teamIndex) {
+   this->currentTeam = teamIndex;
+   if (teamIndex < 0)
+      return;
+   this->ui.MainContentView->setCurrentWidget(this->ui.PageSpecificTeamConfig);
+   //
+   auto team = this->_getCurrentTeam();
+   //
+   #pragma region Preprocessor macros to update Specific Team widgets
+   #define reach_team_pane_update_flag_checkbox(w, field, mask) \
+      { \
+         QCheckBox* widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setChecked((team->##field & mask) != 0); \
+      };
+   #define reach_team_pane_update_combobox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setCurrentIndex(team->##field ); \
+      };
+   #define reach_team_pane_update_spinbox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setValue(team->##field ); \
+      };
+   #pragma endregion
+   {  // Show localized team name
+      auto name = team->get_name();
+      QString text;
+      if (name)
+         text = QString::fromUtf8(name->english().c_str());
+      this->ui.specificTeamNameLabel->setText(text);
+   }
+   //
+   reach_team_pane_update_flag_checkbox(this->ui.specificTeamFlagEnabled,        flags, 1);
+   reach_team_pane_update_flag_checkbox(this->ui.specificTeamFlagColorPrimary,   flags, 2);
+   reach_team_pane_update_flag_checkbox(this->ui.specificTeamFlagColorSecondary, flags, 4);
+   reach_team_pane_update_flag_checkbox(this->ui.specificTeamFlagColorText,      flags, 8);
+   reach_team_pane_update_combobox(this->ui.specificTeamSpecies, spartanOrElite);
+   reach_team_pane_update_spinbox(this->ui.specificTeamFireteamCount, fireteamCount);
+   reach_team_pane_update_spinbox(this->ui.specificTeamInitialDesignator, initialDesignator);
+   //
+   #undef reach_team_pane_update_flag_checkbox
+   #undef reach_team_pane_update_combobox
+   #undef reach_team_pane_update_spinbox
+   //
+   this->refreshTeamColorWidgets();
+}
+ReachTeamData* ReachVariantTool::_getCurrentTeam() const noexcept {
+   if (this->currentTeam < 0)
+      return nullptr;
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return nullptr;
+   return &variant->multiplayer.options.team.teams[this->currentTeam];
 }

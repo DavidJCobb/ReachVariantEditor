@@ -77,6 +77,12 @@ void LoadoutForm::pullFromGameVariant() {
    if (!palette)
       return;
    auto& loadout = palette->loadouts[index];
+   const QSignalBlocker blocker1(this->ui.loadoutFlagVisible);
+   const QSignalBlocker blocker2(this->ui.loadoutName);
+   const QSignalBlocker blocker3(this->ui.loadoutWeaponPrimary);
+   const QSignalBlocker blocker4(this->ui.loadoutWeaponSecondary);
+   const QSignalBlocker blocker5(this->ui.loadoutAbility);
+   const QSignalBlocker blocker6(this->ui.loadoutGrenadeCount);
    this->ui.loadoutFlagVisible->setChecked(loadout.visible);
    this->ui.loadoutName->setCurrentIndex((int)loadout.nameIndex + 1);
    this->ui.loadoutWeaponPrimary->setByData((int)loadout.weaponPrimary);
