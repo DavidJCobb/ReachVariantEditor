@@ -524,7 +524,11 @@ void ReachVariantTool::openFile() {
    editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
    this->refreshScriptedPlayerTraitList();
-   this->switchToTeam(this->currentTeam); // update specific-team widgets if we're currently viewing them
+   {
+      auto i = this->ui.MainTreeview->currentIndex();
+      this->ui.MainTreeview->setCurrentItem(nullptr);
+      this->ui.MainTreeview->setCurrentIndex(i); // force update of team, trait, etc., pages
+   }
    this->refreshWindowTitle();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
