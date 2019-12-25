@@ -29,6 +29,7 @@ class ReachVariantTool : public QMainWindow {
       void refreshWidgetsFromVariant();
       void refreshWidgetsForLoadoutPalette();
       void refreshWidgetsForPlayerTraits();
+      void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //
       template<int N> void _setupComboboxForUnsafeOption(QComboBox* widget) {

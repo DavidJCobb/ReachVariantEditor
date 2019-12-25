@@ -55,9 +55,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
    {  // Metadata
-      //
-      // TODO: Put a validator on gamertags; limit them to ASCII glyphs considered valid by XBL
-      //
       QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
@@ -412,6 +409,7 @@ void ReachVariantTool::openFile() {
    }
    editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
+   this->refreshScriptedPlayerTraitList();
    this->refreshWindowTitle();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
@@ -490,34 +488,36 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsLoadout);
       return;
    }
-   if (variant) { // traits; loadout palettes
+   if (variant) { // traits; loadout palettes; scripted traits
+      if (auto p = sel->parent()) {
+         const auto text = p->text(0);
+         if (text == tr("Script-Specific Options", "MainTreeview")) {
+            auto t = sel->type();
+            if (t >= QTreeWidgetItem::UserType) {
+               size_t index = t - QTreeWidgetItem::UserType;
+               this->switchToPlayerTraits(&variant->multiplayer.scriptData.traits[index]);
+               return;
+            }
+         }
+      }
+      //
       if (text == tr("Respawn Traits", "MainTreeview")) {
-         if (!variant)
-            return;
          this->switchToPlayerTraits(&variant->multiplayer.options.respawn.traits);
          return;
       }
       if (text == tr("Base Player Traits", "MainTreeview")) {
-         if (!variant)
-            return;
          this->switchToPlayerTraits(&variant->multiplayer.options.map.baseTraits);
          return;
       }
       if (text == tr("Red Powerup Traits", "MainTreeview")) {
-         if (!variant)
-            return;
          this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.red.traits);
          return;
       }
       if (text == tr("Blue Powerup Traits", "MainTreeview")) {
-         if (!variant)
-            return;
          this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.blue.traits);
          return;
       }
       if (text == tr("Custom Powerup Traits", "MainTreeview")) {
-         if (!variant)
-            return;
          this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.yellow.traits);
          return;
       }
@@ -807,6 +807,33 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
    #undef reach_traits_pane_update_spinbox
    //
    this->refreshWidgetsForUnsafeOptions();
+}
+void ReachVariantTool::refreshScriptedPlayerTraitList() {
+   auto tree   = this->ui.MainTreeview;
+   QTreeWidgetItem* branch;
+   {
+      auto list = tree->findItems(tr("Script-Specific Options", "MainTreeview"), Qt::MatchRecursive, 0);
+      if (!list.size())
+         return;
+      branch = list[0];
+   }
+   for (QTreeWidgetItem* child : branch->takeChildren())
+      delete child;
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return;
+   auto& t = variant->multiplayer.scriptData.traits;
+   for (size_t i = 0; i < t.size(); i++) {
+      auto item = new QTreeWidgetItem(branch, QTreeWidgetItem::UserType + i);
+      auto name = t[i].name;
+      QString text;
+      if (name) {
+         text = QString::fromUtf8(name->english().c_str());
+      } else {
+         text = QString("Unnamed Traits %1").arg(i);
+      }
+      item->setText(0, text);
+   }
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();
