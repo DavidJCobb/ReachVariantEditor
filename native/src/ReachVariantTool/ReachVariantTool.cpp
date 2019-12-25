@@ -9,6 +9,7 @@
 #include "game_variants/base.h"
 #include "helpers/stream.h"
 #include "services/ini.h"
+#include "ui/generic/QXBLGamertagValidator.h"
 
 #include "ProgramOptionsDialog.h"
 
@@ -35,7 +36,18 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
+   #if _DEBUG
+      QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, []() {
+         auto variant = ReachEditorState::get().currentVariant;
+         __debugbreak();
+      });
+   #else
+      this->ui.actionDebugbreak->setEnabled(false);
+      this->ui.actionDebugbreak->setVisible(false);
+   #endif
    //
+   this->ui.MainContentView->setCurrentIndex(0); // Qt Designer makes the last page you were looking at in the editor the default page; let's just switch to the first page here
+   this->ui.PagePlayerTraitsTabview->setCurrentIndex(0);
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
    {  // Metadata
@@ -78,6 +90,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          variant->contentHeader.data.modifiedBy.set_author_name(latin.constData());
          variant->multiplayer.variantHeader.modifiedBy.set_author_name(latin.constData());
       });
+      //
+      this->ui.authorGamertag->setValidator(QXBLGamertagValidator::getReachInstance());
+      this->ui.editorGamertag->setValidator(QXBLGamertagValidator::getReachInstance());
    }
    {
       //
@@ -248,6 +263,106 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       //
       // TODO: other pages
       //
+      {  // Player Traits
+         #pragma region Preprocessor macros to set up Player Traits widgets
+         #define reach_traits_pane_setup_combobox(w, field) \
+            { \
+               auto widget = w; \
+               QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
+                  auto traits = ReachEditorState::get().currentTraits; \
+                  if (!traits) \
+                     return; \
+                  traits->##field = value; \
+               }); \
+            };
+         #define reach_traits_pane_setup_spinbox(w, field) \
+            { \
+               auto widget = w; \
+               QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
+                  auto traits = ReachEditorState::get().currentTraits; \
+                  if (!traits) \
+                     return; \
+                  traits->##field = value; \
+               }); \
+            };
+         #pragma endregion
+         {  // Defense
+            reach_traits_pane_setup_combobox(this->ui.playerTraitDamageResist,     defense.damageResist);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitHealthMult,       defense.healthMult);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitHealthRegenRate,  defense.healthRate);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitShieldMult,       defense.shieldMult);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitShieldRegenRate,  defense.shieldRate);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitShieldRegenDelay, defense.shieldDelay);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitHeadshotImmunity, defense.headshotImmune);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitAssassinationImmunity, defense.assassinImmune);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitShieldVampirism,  defense.vampirism);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitDefenseUnknown09, defense.unk09);
+         }
+         {  // Offense
+            //
+            // TODO: WE CAN'T USE THE MACRO FOR WEAPONS OR THE ARMOR ABILITY. REMEMBER, WE SORTED THOSE 
+            // NEAR-ALPHABETICALLY AND ATTACHED A "QVariant" DATA ITEM TO EACH SO WE COULD SELECT BY 
+            // VALUE THAT WAY
+            //
+            // REMEMBER TO FIX THE "UPDATE" CODE TOO, NOT JUST THIS CODE HERE
+            //
+            reach_traits_pane_setup_combobox(this->ui.playerTraitDamageMult,      offense.damageMult);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitMeleeMult,       offense.meleeMult);
+            {
+               auto widget = this->ui.playerTraitWeaponPrimary;
+               QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+                  auto traits = ReachEditorState::get().currentTraits;
+                  if (!traits)
+                     return;
+                  traits->offense.weaponPrimary = (reach::weapon)widget->currentData().toInt();
+               });
+            }
+            {
+               auto widget = this->ui.playerTraitWeaponSecondary;
+               QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+                  auto traits = ReachEditorState::get().currentTraits;
+                  if (!traits)
+                     return;
+                  traits->offense.weaponSecondary = (reach::weapon)widget->currentData().toInt();
+               });
+            }
+            {
+               auto widget = this->ui.playerTraitArmorAbility;
+               QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+                  auto traits = ReachEditorState::get().currentTraits;
+                  if (!traits)
+                     return;
+                  traits->offense.ability = (reach::ability)widget->currentData().toInt();
+               });
+            }
+            reach_traits_pane_setup_combobox(this->ui.playerTraitGrenadeCount,    offense.grenadeCount);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitGrenadeRegen,    offense.grenadeRegen);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
+            //
+            // TODO: Armor Ability settings
+            //
+         }
+         {  // Movement
+            reach_traits_pane_setup_combobox(this->ui.playerTraitMovementSpeed, movement.speed);
+            reach_traits_pane_setup_spinbox(this->ui.playerTraitJumpHeight, movement.jumpHeight);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitGravity, movement.gravity);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitMovementUnknown, movement.unknown);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitVehicleUse, movement.vehicleUsage);
+         }
+         {  // Appearance
+            reach_traits_pane_setup_combobox(this->ui.playerTraitActiveCamo,      appearance.activeCamo);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitVisibleWaypoint, appearance.waypoint);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitVisibleName,     appearance.visibleName);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitAura,            appearance.aura);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitForcedColor,     appearance.forcedColor);
+         }
+         {  // Sensors
+            reach_traits_pane_setup_combobox(this->ui.playerTraitRadarState, sensors.radarState);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitRadarRange, sensors.radarRange);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitDirectionalDamageIndicator, sensors.directionalDamageIndicator);
+         }
+      }
       {  // Title Update Config
          reach_main_window_setup_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
          reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
@@ -309,7 +424,12 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    }
    QString fileName;
    if (saveAs) {
-      QString fileName = QFileDialog::getSaveFileName(this, tr("Save Game Variant"), "", tr("Game Variant (*.bin);;All Files (*)"));
+      fileName = QFileDialog::getSaveFileName(
+         this,
+         tr("Save Game Variant"), // window title
+         QString::fromWCharArray(editor.currentFile.c_str()), // working directory and optionally default-selected file
+         tr("Game Variant (*.bin);;All Files (*)") // filetype filters
+      );
       if (fileName.isEmpty())
          return;
    } else {
@@ -319,6 +439,10 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    if (!file.open(QIODevice::WriteOnly)) {
       QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
       return;
+   }
+   if (saveAs) {
+      std::wstring temp = fileName.toStdWString();
+      editor.set_variant_file_path(temp.c_str());
    }
    QDataStream out(&file);
    out.setVersion(QDataStream::Qt_4_5);
@@ -347,9 +471,13 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsRespawn);
       return;
    }
-   //
-   // TODO: Respawn Traits
-   //
+   if (text == tr("Respawn Traits", "MainTreeview")) {
+      auto variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      this->switchToPlayerTraits(&variant->multiplayer.options.respawn.traits);
+      return;
+   }
    if (text == tr("Social Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsSocial);
       return;
@@ -358,12 +486,34 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsMap);
       return;
    }
-   //
-   // TODO: Base Player Traits
-   // TODO: Red Powerup Traits
-   // TODO: Blue Powerup Traits
-   // TODO: Custom Powerup Traits
-   //
+   if (text == tr("Base Player Traits", "MainTreeview")) {
+      auto variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      this->switchToPlayerTraits(&variant->multiplayer.options.map.baseTraits);
+      return;
+   }
+   if (text == tr("Red Powerup Traits", "MainTreeview")) {
+      auto variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.red.traits);
+      return;
+   }
+   if (text == tr("Blue Powerup Traits", "MainTreeview")) {
+      auto variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.blue.traits);
+      return;
+   }
+   if (text == tr("Custom Powerup Traits", "MainTreeview")) {
+      auto variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.yellow.traits);
+      return;
+   }
    if (text == tr("Team Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsTeam);
       return;
@@ -381,6 +531,10 @@ void ReachVariantTool::onSelectedPageChanged() {
    //
    // TODO: add other panes
    //
+   if (text == tr("Option Visibility", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionToggles);
+      return;
+   }
    if (text == tr("Title Update Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageTitleUpdateConfig);
       return;
@@ -548,6 +702,88 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    #undef reach_main_window_update_spinbox
    #undef reach_main_window_update_flag_checkbox
    #undef reach_main_window_update_bool_checkbox
+}
+void ReachVariantTool::switchToPlayerTraits(ReachPlayerTraits* traits) {
+   ReachEditorState::get().start_editing_traits(traits);
+   this->refreshWidgetsForPlayerTraits();
+   this->ui.MainContentView->setCurrentWidget(this->ui.PagePlayerTraits);
+}
+void ReachVariantTool::refreshWidgetsForPlayerTraits() {
+   auto& editor = ReachEditorState::get();
+   auto  traits = editor.currentTraits;
+   if (!traits)
+      return;
+   #define reach_traits_pane_update_combobox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setCurrentIndex((int)traits->##field ); \
+      }
+   #define reach_traits_pane_update_spinbox(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setValue((int)traits->##field ); \
+      }
+   {  // Defense
+      reach_traits_pane_update_combobox(this->ui.playerTraitDamageResist,     defense.damageResist);
+      reach_traits_pane_update_combobox(this->ui.playerTraitHealthMult,       defense.healthMult);
+      reach_traits_pane_update_combobox(this->ui.playerTraitHealthRegenRate,  defense.healthRate);
+      reach_traits_pane_update_combobox(this->ui.playerTraitShieldMult,       defense.shieldMult);
+      reach_traits_pane_update_combobox(this->ui.playerTraitShieldRegenRate,  defense.shieldRate);
+      reach_traits_pane_update_combobox(this->ui.playerTraitShieldRegenDelay, defense.shieldDelay);
+      reach_traits_pane_update_combobox(this->ui.playerTraitHeadshotImmunity, defense.headshotImmune);
+      reach_traits_pane_update_combobox(this->ui.playerTraitAssassinationImmunity, defense.assassinImmune);
+      reach_traits_pane_update_combobox(this->ui.playerTraitShieldVampirism,  defense.vampirism);
+      reach_traits_pane_update_combobox(this->ui.playerTraitDefenseUnknown09, defense.unk09);
+   }
+   {  // Offense
+      reach_traits_pane_update_combobox(this->ui.playerTraitDamageMult,      offense.damageMult);
+      reach_traits_pane_update_combobox(this->ui.playerTraitMeleeMult,       offense.meleeMult);
+      {
+         auto widget = this->ui.playerTraitWeaponPrimary;
+         const QSignalBlocker blocker(widget);
+         widget->setByData((int)traits->offense.weaponPrimary);
+      }
+      {
+         auto widget = this->ui.playerTraitWeaponSecondary;
+         const QSignalBlocker blocker(widget);
+         widget->setByData((int)traits->offense.weaponSecondary);
+      }
+      {
+         auto widget = this->ui.playerTraitArmorAbility;
+         const QSignalBlocker blocker(widget);
+         widget->setByData((int)traits->offense.ability);
+      }
+      reach_traits_pane_update_combobox(this->ui.playerTraitGrenadeCount,    offense.grenadeCount);
+      reach_traits_pane_update_combobox(this->ui.playerTraitGrenadeRegen,    offense.grenadeRegen);
+      reach_traits_pane_update_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
+      reach_traits_pane_update_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
+      //
+      // TODO: Armor Ability settings
+      //
+   }
+   {  // Movement
+      reach_traits_pane_update_combobox(this->ui.playerTraitMovementSpeed, movement.speed);
+      reach_traits_pane_update_spinbox(this->ui.playerTraitJumpHeight, movement.jumpHeight);
+      reach_traits_pane_update_combobox(this->ui.playerTraitGravity, movement.gravity);
+      reach_traits_pane_update_combobox(this->ui.playerTraitMovementUnknown, movement.unknown);
+      reach_traits_pane_update_combobox(this->ui.playerTraitVehicleUse, movement.vehicleUsage);
+   }
+   {  // Appearance
+      reach_traits_pane_update_combobox(this->ui.playerTraitActiveCamo,      appearance.activeCamo);
+      reach_traits_pane_update_combobox(this->ui.playerTraitVisibleWaypoint, appearance.waypoint);
+      reach_traits_pane_update_combobox(this->ui.playerTraitVisibleName,     appearance.visibleName);
+      reach_traits_pane_update_combobox(this->ui.playerTraitAura,            appearance.aura);
+      reach_traits_pane_update_combobox(this->ui.playerTraitForcedColor,     appearance.forcedColor);
+   }
+   {  // Sensors
+      reach_traits_pane_update_combobox(this->ui.playerTraitRadarState, sensors.radarState);
+      reach_traits_pane_update_combobox(this->ui.playerTraitRadarRange, sensors.radarRange);
+      reach_traits_pane_update_combobox(this->ui.playerTraitDirectionalDamageIndicator, sensors.directionalDamageIndicator);
+   }
+   #undef reach_traits_pane_update_combobox
+   #undef reach_traits_pane_update_spinbox
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();

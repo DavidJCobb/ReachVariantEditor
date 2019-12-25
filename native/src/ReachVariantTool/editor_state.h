@@ -1,5 +1,6 @@
 #pragma once
 #include "game_variants/base.h"
+#include "game_variants/player_traits.h"
 
 class ReachEditorState {
    public:
@@ -11,14 +12,22 @@ class ReachEditorState {
       ReachEditorState() {}
       ReachEditorState(const ReachEditorState& other) = delete; // no copy
       //
-      std::wstring currentFile;
-      GameVariant* currentVariant = nullptr;
+      std::wstring       currentFile;
+      GameVariant*       currentVariant = nullptr;
+      ReachPlayerTraits* currentTraits  = nullptr;
       //
       void take_game_variant(GameVariant* other, const wchar_t* path) noexcept {
          if (this->currentVariant)
             delete this->currentVariant;
          this->currentVariant = other;
+         this->currentTraits  = nullptr;
          this->currentFile    = path;
+      }
+      void start_editing_traits(ReachPlayerTraits* which) {
+         this->currentTraits = which;
+      }
+      void set_variant_file_path(const wchar_t* path) noexcept { // call after Save As
+         this->currentFile = path;
       }
       //
       // TODO: Something to consider: if we create a copy of a game variant upon 

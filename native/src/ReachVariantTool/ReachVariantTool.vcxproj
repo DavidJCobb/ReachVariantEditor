@@ -128,6 +128,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ReachVariantTool.cpp" />
     <ClCompile Include="services\ini.cpp" />
+    <ClCompile Include="ui\generic\OptionToggleTable.cpp" />
     <ClCompile Include="ui\ProgramOptionsDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -206,6 +207,9 @@
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
+    <ClInclude Include="ui\generic\QXBLGamertagValidator.h" />
+    <QtMoc Include="ui\generic\OptionToggleTable.h" />
+    <QtMoc Include="ui\generic\PlayerTraitWidgets.h" />
     <QtMoc Include="ProgramOptionsDialog.h" />
   </ItemGroup>
   <ItemGroup>

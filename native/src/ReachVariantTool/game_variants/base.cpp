@@ -143,11 +143,11 @@ void GameVariantHeader::set_title(const char16_t* value) noexcept {
 }
 void GameVariantHeader::set_description(const char16_t* value) noexcept {
    memset(this->description, 0, sizeof(this->description));
-   for (size_t i = 0; i < std::extent<decltype(this->title)>::value; i++) {
+   for (size_t i = 0; i < std::extent<decltype(this->description)>::value; i++) {
       char16_t c = value[i];
       if (!c)
          break;
-      this->title[i] = c;
+      this->description[i] = c;
    }
 }
 

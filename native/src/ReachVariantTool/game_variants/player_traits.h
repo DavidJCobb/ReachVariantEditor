@@ -4,6 +4,7 @@
 #include "../helpers/bitreader.h"
 #include "../helpers/bitwriter.h"
 #include "../formats/localized_string_table.h"
+#include <QObject>
 
 namespace reach {
    //
@@ -34,6 +35,8 @@ namespace reach {
       // 2
       poor      = 3,
       good      = 4,
+      // 5 // seen in Blue Powerup Traits
+      // bitfield can hold 6 and 7, though they're likely not valid
    };
    enum class bool_trait : uint8_t {
       unchanged = 0,

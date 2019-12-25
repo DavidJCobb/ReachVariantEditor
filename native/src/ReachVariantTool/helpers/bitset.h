@@ -56,6 +56,12 @@ namespace cobb {
             uint32_t bit = 1 << (index % bits_per_chunk);
             this->data[ci] &= ~bit;
          }
+         void modify(uint32_t index, bool state) noexcept {
+            if (state)
+               this->set(index);
+            else
+               this->reset(index);
+         }
          void clear() noexcept {
             for (uint32_t i = 0; i < chunk_count; i++)
                this->data[i] = 0;

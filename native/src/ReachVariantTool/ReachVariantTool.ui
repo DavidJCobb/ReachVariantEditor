@@ -231,7 +231,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>7</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -271,6 +271,9 @@
         </item>
         <item row="2" column="1">
          <widget class="QLineEdit" name="authorGamertag">
+          <property name="toolTip">
+           <string>Must be an ASCII string.</string>
+          </property>
           <property name="maxLength">
            <number>15</number>
           </property>
@@ -281,6 +284,9 @@
         </item>
         <item row="3" column="1">
          <widget class="QLineEdit" name="editorGamertag">
+          <property name="toolTip">
+           <string>Must be an ASCII string.</string>
+          </property>
           <property name="maxLength">
            <number>15</number>
           </property>
@@ -1189,6 +1195,1471 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="PagePlayerTraits">
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="0" column="0">
+         <widget class="QTabWidget" name="PagePlayerTraitsTabview">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="PagePlayerTraitsTabDefense">
+           <attribute name="title">
+            <string>Defense</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_10">
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>Headshot Immunity</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_37">
+              <property name="text">
+               <string>Shield Multiplier</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_36">
+              <property name="text">
+               <string>Health Regen Rate</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="label_43">
+              <property name="text">
+               <string>Unknown-09</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_35">
+              <property name="text">
+               <string>Health Multiplier</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_38">
+              <property name="text">
+               <string>Shield Regen Rate</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_39">
+              <property name="text">
+               <string>Shield Regen Delay</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="playerTraitDamageResist">
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">10%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">50%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">90%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">110%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">150%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">200%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">300%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">500%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">1000%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">2000%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string comment="Player Damage Resistance">Invulnerable</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>Assassination Immunity</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Shield Vampirism</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_34">
+              <property name="text">
+               <string>Damage Resistance</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0" colspan="2">
+             <spacer name="verticalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="playerTraitHealthMult">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 7</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="playerTraitHealthRegenRate">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>0%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>50%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>90%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>110%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>200%</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="playerTraitShieldMult">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>0%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>150% (1.5x Overshields)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>200% (2x Overshields)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>300% (3x Overshields)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>400% (4x Overshields)</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="playerTraitShieldRegenRate">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>0%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>10%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>25%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>50%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>75%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>110%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>125%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>150%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>200%</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QComboBox" name="playerTraitShieldRegenDelay">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 7</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 8</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 9</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 10</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 11</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 12</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 13</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 14</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 15</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitHeadshotImmunity"/>
+            </item>
+            <item row="7" column="1">
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitAssassinationImmunity"/>
+            </item>
+            <item row="8" column="1">
+             <widget class="QComboBox" name="playerTraitShieldVampirism">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 7</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="9" column="1">
+             <widget class="QComboBox" name="playerTraitDefenseUnknown09">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="PagePlayerTraitsTabOffense">
+           <attribute name="title">
+            <string>Offense</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="6" column="1">
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitGrenadeRegen"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="PlayerTraitDamageMultCombobox" name="playerTraitMeleeMult"/>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_65">
+              <property name="text">
+               <string>Weapon Pickup</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_44">
+              <property name="text">
+               <string>Weapon Damage Multiplier</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="PlayerTraitWeaponCombobox" name="playerTraitWeaponPrimary"/>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>Grenade Count</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="PlayerTraitArmorAbilityCombobox" name="playerTraitArmorAbility"/>
+            </item>
+            <item row="5" column="1">
+             <widget class="QComboBox" name="playerTraitGrenadeCount">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Map Default(?)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Frag 1x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Frag 2x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Frag 3x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Frag 4x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Plasma 1x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Plasma 2x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Plasma 3x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Plasma 4x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both 1x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both 2x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both 3x</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Both 4x</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="10" column="0" colspan="2">
+             <spacer name="verticalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="7" column="1">
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitWeaponPickup"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_48">
+              <property name="text">
+               <string>Armor Ability</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" colspan="2">
+             <widget class="QLabel" name="label_51">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <italic>true</italic>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>TODO: ABILITY SETTINGS</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="PlayerTraitWeaponCombobox" name="playerTraitWeaponSecondary"/>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_50">
+              <property name="text">
+               <string>Grenade Regeneration</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="PlayerTraitDamageMultCombobox" name="playerTraitDamageMult"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_45">
+              <property name="text">
+               <string>Melee Damage Multiplier</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_47">
+              <property name="text">
+               <string>Secondary Weapon</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_46">
+              <property name="text">
+               <string>Primary Weapon</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="label_66">
+              <property name="text">
+               <string>Infinite Ammo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QComboBox" name="playerTraitInfiniteAmmo">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Disabled</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Enabled</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bottomless Mag</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="PagePlayerTraitsTabMovement">
+           <attribute name="title">
+            <string>Movement</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_12">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_52">
+              <property name="text">
+               <string>Movement Speed</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_56">
+              <property name="text">
+               <string>Vehicle Use</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_55">
+              <property name="text">
+               <string>Unknown</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_54">
+              <property name="text">
+               <string>Player Gravity</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_53">
+              <property name="text">
+               <string>Jump Height</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="playerTraitMovementSpeed">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>0%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>25%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>50%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>75%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>90%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>110%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>120%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>130% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>140% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>150%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>160% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>170% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>180% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>190% (Unverified)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>200%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>300%</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="2">
+             <spacer name="verticalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="playerTraitJumpHeight">
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="specialValueText">
+               <string>Unchanged</string>
+              </property>
+              <property name="suffix">
+               <string>%</string>
+              </property>
+              <property name="minimum">
+               <number>-1</number>
+              </property>
+              <property name="maximum">
+               <number>511</number>
+              </property>
+              <property name="value">
+               <number>-1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="playerTraitGravity">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>50%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>75%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>150%</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>200%</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="playerTraitMovementUnknown">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="playerTraitVehicleUse">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Passenger Only</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Driver Only</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gunner Only</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>No Passenger</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>No Driver</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>No Gunner</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Full Use</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="PagePlayerTraitsTabAppearance">
+           <attribute name="title">
+            <string>Appearance</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_13">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_60">
+              <property name="text">
+               <string>Aura</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_59">
+              <property name="text">
+               <string>Visible Name</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_57">
+              <property name="text">
+               <string>Active Camo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_58">
+              <property name="text">
+               <string>Visible Waypoint</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_61">
+              <property name="text">
+               <string>Forced Color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="playerTraitActiveCamo">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Off</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Poor Camo</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Good Camo</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 5</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="2">
+             <spacer name="verticalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="playerTraitVisibleWaypoint">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Visible to Allies</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Visible to Everyone</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="playerTraitVisibleName">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Visible to Allies</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Visible to Everyone</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="playerTraitAura">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 7</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QComboBox" name="playerTraitForcedColor">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Red</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Blue</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Green</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Orange</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Purple</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gold</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Brown</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Pink</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>White</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Black</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Zombie</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="PagePlayerTraitsTabSensors">
+           <attribute name="title">
+            <string>Sensors</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_14">
+            <item row="1" column="1">
+             <widget class="QComboBox" name="playerTraitRadarRange">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>10 Meters</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>25 Meters</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>75 Meters</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>100 Meters</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="playerTraitRadarState">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>No Radar</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Show Only Allies</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Normal</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Enhanced</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_62">
+              <property name="text">
+               <string>Radar State</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_64">
+              <property name="text">
+               <string>Directional Damage Indicator</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_63">
+              <property name="text">
+               <string>Radar Range</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="playerTraitDirectionalDamageIndicator">
+              <item>
+               <property name="text">
+                <string>Unchanged</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Unknown 3</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <spacer name="verticalSpacer_13">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageOptionToggles">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_67">
+          <property name="text">
+           <string>Scripted Options</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeView" name="optionTogglesScripted">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_68">
+          <property name="text">
+           <string>Engine Options</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="EngineOptionToggleTree" name="optionTogglesEngine">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>2</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="PageTitleUpdateConfig">
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="1" column="0" colspan="2">
@@ -1441,6 +2912,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionOptions"/>
+    <addaction name="actionDebugbreak"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -1480,8 +2952,40 @@
     <string>Options...</string>
    </property>
   </action>
+  <action name="actionDebugbreak">
+   <property name="text">
+    <string>Debugbreak on Variant Data</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>PlayerTraitBooleanCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitDamageMultCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitWeaponCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitArmorAbilityCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EngineOptionToggleTree</class>
+   <extends>QTreeView</extends>
+   <header>ui/generic/OptionToggleTable.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="ReachVariantTool.qrc"/>
  </resources>
