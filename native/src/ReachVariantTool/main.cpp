@@ -111,21 +111,16 @@ int main(int argc, char *argv[]) {
 //
 //     - Implement Megalo Option Toggles
 //
+//     - Implement editing for localized strings; start with team names.
+//
 //     - Player Traits pages should not be selectable if a variant isn't 
 //       open.
 //
-//     - Active Camo 2 crashes. We can't disable individual items in a combo-
-//       box -- at least, not if they're preplaced in Qt Designer. Can we 
-//       disable them through code? If so, wire this one up to the INI setting 
-//       for unsafe options.
+//        - Ditto for specific team options.
 //
 // ==========================================================================
 //
 //  - Begin testing to identify further unknown information in Reach.
-//
-//     - Unknown values for Shield Regen Rate
-//
-//        - Presumed to be "decay."
 //
 //     - Unknown values for Health Regen Rate
 //
@@ -143,23 +138,8 @@ int main(int argc, char *argv[]) {
 //
 //        - Requires someone to test with.
 //
-//     - Three settings governing Ability Usage
-//
-//        - Wouldn't be surprised if it was one or two settings with 
-//          different values. I should look at the bits for each UI-exposed 
-//          value.
-//
-//     - Unknown spawn AA indices
-//
 //     - Maximum jump height (game clamps or validates values; 420% did not 
 //       work in-game despite being supported by the format).
-//
-//     - Unknown Active Camo option value
-//
-//        - Presumed to be "perfect camo."
-//
-//        - Remember: you can use mounted turrets to get a third-person view 
-//          of your player model.
 //
 //     - Sensors: Directional Damage Indicator
 //
@@ -167,12 +147,6 @@ int main(int argc, char *argv[]) {
 //          oneself to see.
 //
 //        - May require someone to test with.
-//
-//     - Unknown radar range values
-//
-//        - May require someone to test with.
-//
-//     - Test all illegal-but-storable values for all player trait enums
 //
 //     - Test all engine option toggles
 //

@@ -2802,7 +2802,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string>Team Name Here</string>
           </property>
          </widget>
         </item>
