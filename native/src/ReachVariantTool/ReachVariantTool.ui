@@ -197,7 +197,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>8</number>
+       <number>11</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -1172,7 +1172,7 @@
         <item row="0" column="0">
          <widget class="QTabWidget" name="PagePlayerTraitsTabview">
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="PagePlayerTraitsTabDefense">
            <attribute name="title">
@@ -2812,7 +2812,7 @@
            <enum>Qt::NoContextMenu</enum>
           </property>
           <property name="toolTip">
-           <string>Click here to open a color picker.</string>
+           <string>Click here to open a color picker. This is the main team color, used for armor and objectives. Very dark colors will appear differently in-game due to how the shaders work.</string>
           </property>
           <property name="accessibleName">
            <string>Edit Primary Color</string>
@@ -3417,6 +3417,121 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>MainTreeview</tabstop>
+  <tabstop>headerName</tabstop>
+  <tabstop>headerDesc</tabstop>
+  <tabstop>authorGamertag</tabstop>
+  <tabstop>editorGamertag</tabstop>
+  <tabstop>optionsGeneralTeamsEnabled</tabstop>
+  <tabstop>optionsGeneralNewRoundResetsPlayers</tabstop>
+  <tabstop>optionsGeneralNewRoundResetsMap</tabstop>
+  <tabstop>optionsGeneralFlag3</tabstop>
+  <tabstop>optionsGeneralRoundTimeLimit</tabstop>
+  <tabstop>optionsGeneralRoundLimit</tabstop>
+  <tabstop>optionsGeneralRoundsToWin</tabstop>
+  <tabstop>optionsGeneralSuddenDeathTime</tabstop>
+  <tabstop>optionsGeneralGracePeriod</tabstop>
+  <tabstop>optionsRespawnSyncWithTeam</tabstop>
+  <tabstop>optionsRespawnFlag1</tabstop>
+  <tabstop>optionsRespawnFlag2</tabstop>
+  <tabstop>optionsRespawnRespawnOnKills</tabstop>
+  <tabstop>optionsRespawnLivesPerRound</tabstop>
+  <tabstop>optionsRespawnTeamLivesPerRound</tabstop>
+  <tabstop>optionsRespawnRespawnTime</tabstop>
+  <tabstop>optionsRespawnSuicidePenalty</tabstop>
+  <tabstop>optionsRespawnBetrayalPenalty</tabstop>
+  <tabstop>optionsRespawnRespawnGrowth</tabstop>
+  <tabstop>optionsRespawnLoadoutCamTime</tabstop>
+  <tabstop>optionsRespawnTraitsDuration</tabstop>
+  <tabstop>optionsSocialObservers</tabstop>
+  <tabstop>optionsSocialTeamChanging</tabstop>
+  <tabstop>optionsSocialFriendlyFire</tabstop>
+  <tabstop>optionsSocialBetrayalBooting</tabstop>
+  <tabstop>optionsSocialProximityVoice</tabstop>
+  <tabstop>optionsSocialGlobalVoice</tabstop>
+  <tabstop>optionsSocialDeadPlayerVoice</tabstop>
+  <tabstop>optionsMapAbilitiesEnabled</tabstop>
+  <tabstop>optionsMapGrenadesEnabled</tabstop>
+  <tabstop>optionsMapShortcutsEnabled</tabstop>
+  <tabstop>optionsMapPowerupsEnabled</tabstop>
+  <tabstop>optionsMapTurretsEnabled</tabstop>
+  <tabstop>optionsMapIndestructibleVehicles</tabstop>
+  <tabstop>optionsMapWeaponSet</tabstop>
+  <tabstop>optionsMapVehicleSet</tabstop>
+  <tabstop>optionsMapRedPowerupDuration</tabstop>
+  <tabstop>optionsMapBluePowerupDuration</tabstop>
+  <tabstop>optionsMapYellowPowerupDuration</tabstop>
+  <tabstop>optionsTeamScoringMethod</tabstop>
+  <tabstop>optionsTeamPlayerSpecies</tabstop>
+  <tabstop>optionsTeamDesignatorSwitchType</tabstop>
+  <tabstop>optionsLoadoutFlag0</tabstop>
+  <tabstop>optionsLoadoutFlag1</tabstop>
+  <tabstop>PagePlayerTraitsTabview</tabstop>
+  <tabstop>playerTraitDamageResist</tabstop>
+  <tabstop>playerTraitHealthMult</tabstop>
+  <tabstop>playerTraitHealthRegenRate</tabstop>
+  <tabstop>playerTraitShieldMult</tabstop>
+  <tabstop>playerTraitShieldRegenRate</tabstop>
+  <tabstop>playerTraitShieldRegenDelay</tabstop>
+  <tabstop>playerTraitHeadshotImmunity</tabstop>
+  <tabstop>playerTraitAssassinationImmunity</tabstop>
+  <tabstop>playerTraitShieldVampirism</tabstop>
+  <tabstop>playerTraitDefenseUnknown09</tabstop>
+  <tabstop>playerTraitGrenadeRegen</tabstop>
+  <tabstop>playerTraitMeleeMult</tabstop>
+  <tabstop>playerTraitWeaponPrimary</tabstop>
+  <tabstop>playerTraitArmorAbility</tabstop>
+  <tabstop>playerTraitGrenadeCount</tabstop>
+  <tabstop>playerTraitWeaponPickup</tabstop>
+  <tabstop>playerTraitWeaponSecondary</tabstop>
+  <tabstop>playerTraitDamageMult</tabstop>
+  <tabstop>playerTraitInfiniteAmmo</tabstop>
+  <tabstop>playerTraitAbilityUsage</tabstop>
+  <tabstop>playerTraitAbilityUnknown</tabstop>
+  <tabstop>playerTraitInfiniteAbility</tabstop>
+  <tabstop>playerTraitMovementSpeed</tabstop>
+  <tabstop>playerTraitJumpHeight</tabstop>
+  <tabstop>playerTraitGravity</tabstop>
+  <tabstop>playerTraitMovementUnknown</tabstop>
+  <tabstop>playerTraitVehicleUse</tabstop>
+  <tabstop>playerTraitActiveCamo</tabstop>
+  <tabstop>playerTraitVisibleWaypoint</tabstop>
+  <tabstop>playerTraitVisibleName</tabstop>
+  <tabstop>playerTraitAura</tabstop>
+  <tabstop>playerTraitForcedColor</tabstop>
+  <tabstop>playerTraitRadarRange</tabstop>
+  <tabstop>playerTraitRadarState</tabstop>
+  <tabstop>playerTraitDirectionalDamageIndicator</tabstop>
+  <tabstop>optionTogglesScripted</tabstop>
+  <tabstop>optionTogglesEngine</tabstop>
+  <tabstop>titleUpdateBleedthrough</tabstop>
+  <tabstop>titleUpdateArmorLockCantShed</tabstop>
+  <tabstop>titleUpdateArmorLockCanBeStuck</tabstop>
+  <tabstop>titleUpdateEnableActiveCamoModifiers</tabstop>
+  <tabstop>titleUpdateLimitSwordBlockToSword</tabstop>
+  <tabstop>titleUpdateAutomaticMagnum</tabstop>
+  <tabstop>titleUpdateFlag6</tabstop>
+  <tabstop>titleUpdateFlag7</tabstop>
+  <tabstop>titleUpdatePrecisionBloom</tabstop>
+  <tabstop>titleUpdateArmorLockDamageDrain</tabstop>
+  <tabstop>titleUpdateArmorLockDamageDrainLimit</tabstop>
+  <tabstop>titleUpdateActiveCamoEnergy</tabstop>
+  <tabstop>titleUpdateActiveCamoEnergyBonus</tabstop>
+  <tabstop>titleUpdateMagnumDamage</tabstop>
+  <tabstop>titleUpdateMagnumFireDelay</tabstop>
+  <tabstop>specificTeamButtonEditName</tabstop>
+  <tabstop>specificTeamFlagEnabled</tabstop>
+  <tabstop>specificTeamFlagColorPrimary</tabstop>
+  <tabstop>specificTeamButtonColorPrimary</tabstop>
+  <tabstop>specificTeamFlagColorSecondary</tabstop>
+  <tabstop>specificTeamButtonColorSecondary</tabstop>
+  <tabstop>specificTeamFlagColorText</tabstop>
+  <tabstop>specificTeamButtonColorText</tabstop>
+  <tabstop>specificTeamSpecies</tabstop>
+  <tabstop>specificTeamFireteamCount</tabstop>
+  <tabstop>specificTeamInitialDesignator</tabstop>
+ </tabstops>
  <resources>
   <include location="ReachVariantTool.qrc"/>
  </resources>

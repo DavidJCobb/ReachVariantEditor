@@ -67,6 +67,13 @@ namespace cobb {
                this->data[i] = 0;
          }
          //
+         void set_all() noexcept {
+            for (uint32_t i = 0; i < undershoot_cc; i++)
+               this->data[i] = 0xFFFFFFFF;
+            if (has_partial_chunk)
+               this->data[chunk_count - 1] = partial_chunk_max;
+         }
+         //
          int32_t find_first_clear() const noexcept {
             //
             // Finds the first zero bit in the set. This function performs significantly 

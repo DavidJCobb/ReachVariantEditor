@@ -1,8 +1,11 @@
 #pragma once
 #include <cstdint>
+#include <QAction>
 #include <QCheckBox>
+#include <QContextMenuEvent>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMenu>
 #include <QTreeView>
 
 /*
@@ -19,6 +22,50 @@
    toggles and I don't know what they all refer to -- whether it might be 
    possible to block off entire submenus, for example, in which case nesting 
    would be appropriate.
+
+   Notes:
+
+   Logical column index 0 is always the option name
+   Logical column index 1 is always the "disabled" flag
+   Logical column index 2 is always the "hidden" flag
+
+   Testing indicates that all options can be hidden but important submenus cannot 
+   (i.e. if you empty them out, then they're just blank when entered). As such, 
+   here's our nesting order for all submenus that can't be hidden:
+
+   All Options
+      Megalo Player Traits
+         ...
+      General Settings
+         Player Traits
+            ...
+         Spartan Loadouts
+            Tier 1 Loadouts
+               ...
+            Tier 2 Loadouts
+               ...
+            Tier 3 Loadouts
+               ...
+         Elite Loadouts
+            Tier 1 Loadouts
+               ...
+            Tier 2 Loadouts
+               ...
+            Tier 3 Loadouts
+               ...
+         Respawn Settings
+            Advanced Respawn Settings
+               ...
+               Respawn Traits
+                  ...
+            ...
+         ...
+      Weapons and Vehicles
+         ...
+         Custom Powerup Traits
+            ...
+      Specific Game Options
+         [Megalo options]
 
 */
 
@@ -52,6 +99,8 @@ class OptionToggleTreeModel : public QAbstractItemModel {
       virtual bool checkHiddenFlag(uint16_t index) const noexcept = 0;
       virtual void modifyDisabledFlag(uint16_t index, bool state) noexcept = 0;
       virtual void modifyHiddenFlag(uint16_t index, bool state) noexcept = 0;
+      virtual void modifyAllDisableFlags(bool disabled) noexcept = 0;
+      virtual void modifyAllHiddenFlags(bool hidden) noexcept = 0;
 
       OptionToggleTreeModel(QObject* parent = nullptr) : QAbstractItemModel(parent) {}
       ~OptionToggleTreeModel() {
@@ -149,7 +198,8 @@ class OptionToggleTreeModel : public QAbstractItemModel {
       //
       void insertItem(uint16_t index, QString name, int16_t parent = -1) {
          if (index < this->rows.size()) {
-            assert(!this->rows[index] && "Index already taken!");
+            if (this->rows[index])
+               return;
          } else {
             this->rows.resize(index + 1);
          }
@@ -167,6 +217,8 @@ class EngineOptionToggleTreeModel : public OptionToggleTreeModel {
       virtual bool checkHiddenFlag(uint16_t index) const noexcept override;
       virtual void modifyDisabledFlag(uint16_t index, bool state) noexcept override;
       virtual void modifyHiddenFlag(uint16_t index, bool state) noexcept override;
+      virtual void modifyAllDisableFlags(bool disabled) noexcept override;
+      virtual void modifyAllHiddenFlags(bool hidden) noexcept override;
 };
 
 class EngineOptionToggleTree : public QTreeView {
@@ -187,11 +239,95 @@ class EngineOptionToggleTree : public QTreeView {
          auto model = static_cast<OptionToggleTreeModel*>(this->model());
          model->insertItem(0, tr("Score to Win"));
          model->insertItem(1, tr("Teams Enabled"));
-         model->insertItem(2, tr("Unknown #2"));
+         // 2
          model->insertItem(3, tr("Time Limit"));
          model->insertItem(4, tr("Sudden Death"));
-         for (uint16_t i = 5; i < 1272; i++) {
+         // 5
+         model->insertItem(6, tr("Number of Rounds"));
+         // 7
+         model->insertItem(8, tr("Respawn Options, Synchronize With Team"));
+         // ...
+         model->insertItem(12, tr("Respawn Options, Lives per Round"));
+         // 13
+         model->insertItem(14, tr("Respawn Options, Respawn Time"));
+         model->insertItem(15, tr("Respawn Options, Suicide Penalty"));
+         model->insertItem(16, tr("Respawn Options, Betrayal Penalty"));
+         model->insertItem(17, tr("Respawn Options, Respawn Growth"));
+         // 18
+         model->insertItem(19, tr("Respawn Options, Respawn Traits Duration"));
+         // ...
+         model->insertItem(56, tr("Team Changing"));
+         model->insertItem(57, tr("Friendly Fire"));
+         model->insertItem(58, tr("Betrayal Booting"));
+         // ...
+         model->insertItem(62, tr("Grenades On Map"));
+         model->insertItem(63, tr("Abilities On Map"));
+         model->insertItem(64, tr("Turrets On Map"));
+         // 65
+         model->insertItem(66, tr("Powerups On Map"));
+         model->insertItem(67, tr("Indestructible Vehicles"));
+         // ...
+         model->insertItem(80, tr("Base Player Traits, Offense, Primary Weapon"));
+         model->insertItem(81, tr("Base Player Traits, Offense, Secondary Weapon"));
+         // ...
+         model->insertItem(103, tr("Weapons On Map"));
+         for (uint16_t i = 0; i < 1272; i++) {
             model->insertItem(i, QString("Unknown #%1").arg(i));
          }
+         //
+         {  // Context menu items
+            {  // Disabled
+               this->actionDisableCheckAll = new QAction(tr("Check All",   "Engine Option Toggles: Disabled"), this);
+               this->actionDisableClearAll = new QAction(tr("Uncheck All", "Engine Option Toggles: Disabled"), this);
+               QObject::connect(this->actionDisableCheckAll, &QAction::triggered, [this]() {
+                  auto model = static_cast<OptionToggleTreeModel*>(this->model());
+                  model->modifyAllDisableFlags(true);
+               });
+               QObject::connect(this->actionDisableClearAll, &QAction::triggered, [this]() {
+                  auto model = static_cast<OptionToggleTreeModel*>(this->model());
+                  model->modifyAllDisableFlags(false);
+               });
+            }
+            {  // Hidden
+               this->actionHiddenCheckAll = new QAction(tr("Check All",   "Engine Option Toggles: Hidden"), this);
+               this->actionHiddenClearAll = new QAction(tr("Uncheck All", "Engine Option Toggles: Hidden"), this);
+               QObject::connect(this->actionHiddenCheckAll, &QAction::triggered, [this]() {
+                  auto model = static_cast<OptionToggleTreeModel*>(this->model());
+                  model->modifyAllHiddenFlags(true);
+               });
+               QObject::connect(this->actionHiddenClearAll, &QAction::triggered, [this]() {
+                  auto model = static_cast<OptionToggleTreeModel*>(this->model());
+                  model->modifyAllHiddenFlags(false);
+               });
+            }
+            auto* header = this->header();
+            if (header) {
+               header->setContextMenuPolicy(Qt::CustomContextMenu);
+               QObject::connect(header, &QWidget::customContextMenuRequested, [this, header](const QPoint& pos) {
+                  QPoint globalPos = header->mapToGlobal(pos);
+                  int col = header->logicalIndexAt(pos);
+                  this->showHeaderContextMenu(globalPos, col);
+               });
+            }
+         }
+      }
+      //
+      QAction* actionDisableCheckAll = nullptr;
+      QAction* actionDisableClearAll = nullptr;
+      QAction* actionHiddenCheckAll  = nullptr;
+      QAction* actionHiddenClearAll  = nullptr;
+      //
+      void showHeaderContextMenu(const QPoint& pos, int column) {
+         QMenu menu(this);
+         if (column == 1) {
+            menu.addAction(this->actionDisableCheckAll);
+            menu.addAction(this->actionDisableClearAll);
+         } else if (column == 2) {
+            menu.addAction(this->actionHiddenCheckAll);
+            menu.addAction(this->actionHiddenClearAll);
+         } else {
+            return;
+         }
+         menu.exec(pos);
       }
 };

@@ -39,8 +39,7 @@ int OptionToggleTreeRowModel::get_index_in_parent() const noexcept {
 bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
    if (index >= 1272)
       return false;
-   auto& editor = ReachEditorState::get();
-   auto  variant = editor.currentVariant;
+   auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
       return false;
    return variant->multiplayer.optionToggles.engine.disabled.bits.test(index);
@@ -48,8 +47,7 @@ bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexce
 bool EngineOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
    if (index >= 1272)
       return false;
-   auto& editor = ReachEditorState::get();
-   auto  variant = editor.currentVariant;
+   auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
       return false;
    return variant->multiplayer.optionToggles.engine.hidden.bits.test(index);
@@ -57,8 +55,7 @@ bool EngineOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept
 void EngineOptionToggleTreeModel::modifyDisabledFlag(uint16_t index, bool state) noexcept {
    if (index >= 1272)
       return;
-   auto& editor = ReachEditorState::get();
-   auto  variant = editor.currentVariant;
+   auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
       return;
    variant->multiplayer.optionToggles.engine.disabled.bits.modify(index, state);
@@ -66,9 +63,28 @@ void EngineOptionToggleTreeModel::modifyDisabledFlag(uint16_t index, bool state)
 void EngineOptionToggleTreeModel::modifyHiddenFlag(uint16_t index, bool state) noexcept {
    if (index >= 1272)
       return;
-   auto& editor = ReachEditorState::get();
-   auto  variant = editor.currentVariant;
+   auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
       return;
    variant->multiplayer.optionToggles.engine.hidden.bits.modify(index, state);
+}
+void EngineOptionToggleTreeModel::modifyAllDisableFlags(bool disabled) noexcept {
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return;
+   auto& bitset = variant->multiplayer.optionToggles.engine.disabled.bits;
+   if (disabled)
+      bitset.set_all();
+   else
+      bitset.clear();
+}
+void EngineOptionToggleTreeModel::modifyAllHiddenFlags(bool hidden) noexcept {
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return;
+   auto& bitset = variant->multiplayer.optionToggles.engine.hidden.bits;
+   if (hidden)
+      bitset.set_all();
+   else
+      bitset.clear();
 }
