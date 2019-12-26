@@ -109,10 +109,16 @@
          <property name="text">
           <string>Red Powerup Traits</string>
          </property>
+         <property name="toolTip">
+          <string>Control the player traits applied by the Overshield powerup.</string>
+         </property>
         </item>
         <item>
          <property name="text">
           <string>Blue Powerup Traits</string>
+         </property>
+         <property name="toolTip">
+          <string>Control the player traits applied by the Active Camo powerup.</string>
          </property>
         </item>
         <item>
@@ -197,7 +203,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>7</number>
+       <number>11</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -1830,7 +1836,11 @@
              </widget>
             </item>
             <item row="6" column="1">
-             <widget class="PlayerTraitBooleanCombobox" name="playerTraitGrenadeRegen"/>
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitGrenadeRegen">
+              <property name="toolTip">
+               <string>If enabled, the player will be given one plasma grenade and one frag grenade on every fifth second of the round, up to a maximum of two each.</string>
+              </property>
+             </widget>
             </item>
             <item row="4" column="0">
              <widget class="QLabel" name="label_48">
@@ -3058,7 +3068,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QTreeView" name="optionTogglesScripted">
+         <widget class="MegaloOptionToggleTree" name="optionTogglesScripted">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -3321,7 +3331,7 @@
      <x>0</x>
      <y>0</y>
      <width>618</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -3416,6 +3426,11 @@
    <extends>QWidget</extends>
    <header>ui/LoadoutForm.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MegaloOptionToggleTree</class>
+   <extends>QTreeView</extends>
+   <header>ui/generic/OptionToggleTable.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

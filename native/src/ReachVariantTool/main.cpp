@@ -8,77 +8,7 @@
 #include "formats/sha1.h"
 #include "services/ini.h"
 
-#define REACH_GAME_VARIANTS_TESTING_RESAVE 0
-
-struct TestingGameVariant {
-   LPCWSTR     path = L"";
-   const char* name = "";
-   //
-   TestingGameVariant(const char* n, LPCWSTR p) : path(p), name(n) {};
-   //
-   void execute() {
-      cobb::mapped_file file;
-      file.open(this->path);
-      //
-      printf("----------------------------------------------------------------------\n");
-      printf("   Loading: %s <%S>\n", this->name, this->path);
-      printf("----------------------------------------------------------------------\n");
-      //
-      auto variant = new GameVariant();
-      variant->read(file);
-      //
-      printf("Header name: %S\n", variant->contentHeader.data.title);
-      printf("Header desc: %S\n", variant->contentHeader.data.description);
-      printf("Embedded name: %S\n", variant->multiplayer.variantHeader.title);
-      printf("Embedded desc: %S\n", variant->multiplayer.variantHeader.description);
-      printf("Loadout camera time: %d\n", (int)variant->multiplayer.options.respawn.loadoutCamTime);
-      #if _DEBUG
-         //__debugbreak();
-      #endif
-      printf("\n");
-   }
-};
-TestingGameVariant g_tests[] = {
-   //
-   // MCC files:
-   //
-   TestingGameVariant("Alpha Zombies",    L"alphazombies.bin"),
-   TestingGameVariant("TU One Flag",      L"tu_ctf_1flag.bin"),
-   TestingGameVariant("Assault",          L"assault.bin"),
-   //TestingGameVariant("Halo Chess",       L"halo_chess.bin"), // Halo Chess is not valid; it uses a _cmp block instead of an mpvr block
-   TestingGameVariant("Headhunter",       L"headhunter.bin"),
-   TestingGameVariant("TU Headhunter",    L"headhunter_tu.bin"),
-   TestingGameVariant("Juggernaut",       L"juggernaut.bin"),
-   TestingGameVariant("King of the Hill", L"koth.bin"),
-   TestingGameVariant("Oddball",          L"oddball.bin"),
-   TestingGameVariant("Race",             L"race.bin"),
-   TestingGameVariant("Rally",            L"rally.bin"),
-   TestingGameVariant("Skeeball",         L"skeeball.bin"),
-   TestingGameVariant("Slayer",           L"slayer.bin"),
-   TestingGameVariant("Stockpile",        L"stockpile.bin"),
-   TestingGameVariant("Territories",      L"territories.bin"),
-   TestingGameVariant("Invasion (Boneyard)",   L"invasion_boneyard.bin"),
-   TestingGameVariant("Invasion (Breakpoint)", L"invasion_breakpoint.bin"),
-};
-void test_create_hacked_variant();
-
 int main(int argc, char *argv[]) {
-   if (false) { // if these tests run, Qt doesn't; not sure why yet since I'm just starting
-      if (cobb::endian::native == cobb::endian::big) {
-         printf("Current processor is big-endian.\n");
-         printf("'ABCD' swapped to little-endian: %08X -> %08X\n", 'ABCD', cobb::to_little_endian(uint32_t('ABCD')));
-      } else {
-         printf("Current processor is little-endian.\n");
-         printf("'ABCD' swapped to big-endian: %08X -> %08X\n", 'ABCD', cobb::to_big_endian(uint32_t('ABCD')));
-      }
-
-      test_create_hacked_variant();
-      //
-      for (int i = 0; i < std::extent<decltype(g_tests)>::value; i++)
-         g_tests[i].execute();
-      //
-      return 0;
-   }
    ReachINI::INISettingManager::GetInstance().Load();
    //
    QApplication a(argc, argv);
@@ -118,6 +48,21 @@ int main(int argc, char *argv[]) {
 //
 //        - Ditto for specific team options.
 //
+//     - Strongly consider splitting all of the main window's pages into 
+//       their own *.ui files as subclasses of QFrame. The main window could 
+//       then be made to contain QFrames that we promote to the subclasses.
+//
+//        - We already prefix basically every important widget so this 
+//          wouldn't really change much. We could probably even do a simple 
+//          find-and-replace for the widget names here.
+//
+//     - The models I built for the Option Toggles tree-views suck. They were 
+//       good as a "just build one of these for the first time and get it 
+//       working at all" thing but I should redesign them. Among other things, 
+//       I should have the model classes pull directly from the bitsets if 
+//       possible (I don't know if the QModelIndex class allows for that; it 
+//       seems to have to wrap a pointer).
+//
 // ==========================================================================
 //
 //  - Begin testing to identify further unknown information in Reach.
@@ -126,7 +71,7 @@ int main(int argc, char *argv[]) {
 //
 //        - Presumed to be "decay."
 //
-//           - Does it take effect when your shields are up?
+//           - It doesn't take effect when your shields are up.
 //
 //           - Does it prevent shield regen?
 //
@@ -161,57 +106,3 @@ int main(int argc, char *argv[]) {
 //        - 2: Fades very, very slightly on movement; fades on attacks
 //        - 5: Doesn't fade on movement; fades on attacks
 //
-
-void test_create_hacked_variant() {
-   const wchar_t* path = L"hr_4v4_team_slayer_dmr_ar_50points_tu.bin";
-   //
-   printf("Attempting to create hacked TU Slayer variant...\n");
-   cobb::mapped_file file;
-   file.open(path);
-   auto variant = new GameVariant();
-   if (!variant->read(file)) {
-      printf("Failed to read base variant.\n");
-      return;
-   }
-   printf("Variant read.\n");
-   //
-   auto& mp = variant->multiplayer;
-   mp.options.map.baseTraits.movement.jumpHeight  = 69;
-   mp.options.map.baseTraits.offense.grenadeRegen = (uint8_t)reach::bool_trait::enabled;
-   mp.options.map.baseTraits.offense.weaponPrimary   = (uint8_t)reach::weapon::none;
-   mp.options.map.baseTraits.offense.weaponSecondary = (uint8_t)reach::weapon::none;
-   mp.titleUpdateData.flags |= (uint8_t)ReachTU1Flags::enable_automatic_magnum;
-   mp.titleUpdateData.precisionBloom  = 10.0F; // 2x bloom
-   mp.titleUpdateData.magnumFireDelay =  0.0F; // max fire rate
-   mp.titleUpdateData.magnumDamage    =  1.0F;
-   //
-   auto& chdr = variant->contentHeader;
-   chdr.data.set_title(u"Cursed Slayer");
-   mp.variantHeader.set_title(u"Cursed Slayer");
-   chdr.data.set_description(u"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
-   mp.variantHeader.set_description(u"2x bloom; 69% jump height; grenade regen; unarmed starts; max Magnum fire rate.");
-   //
-   mp.variantHeader.unk08 = 0;
-   mp.variantHeader.unk10 = 0;
-   mp.variantHeader.unk18 = 0;
-   mp.variantHeader.unk20 = 0;
-   chdr.data.unk08 = 0;
-   chdr.data.unk10 = 0;
-   chdr.data.unk18 = 0;
-   chdr.data.unk20 = 0;
-   //
-   printf("Writing modified data to buffer...\n");
-   cobb::bit_or_byte_writer writer;
-   variant->write(writer);
-   writer.dump_to_console();
-   //
-   FILE*   out   = nullptr;
-   errno_t error = fopen_s(&out, "test_output_cursed_slayer.bin", "wb");
-   if (out) {
-      printf("Writing modified data to output file...\n");
-      writer.save_to(out);
-      fclose(out);
-      printf("Game variant saved.\n");
-   } else
-      printf("Failed to open output file for game variant.\n");
-}

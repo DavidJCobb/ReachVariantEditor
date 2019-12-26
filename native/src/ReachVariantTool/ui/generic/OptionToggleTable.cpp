@@ -1,6 +1,7 @@
 #include "OptionToggleTable.h"
 #include "../../editor_state.h"
 
+#pragma region OptionToggleTreeRowModel - The class for option toggle tree model rows
 OptionToggleTreeRowModel* OptionToggleTreeRowModel::get_parent() const noexcept {
    if (this->parent == -1)
       return nullptr;
@@ -35,11 +36,13 @@ int OptionToggleTreeRowModel::get_index_in_parent() const noexcept {
    }
    return -1;
 }
+#pragma endregion
 
 //
 //
 //
 
+#pragma region OptionToggleTreeModel - The abstract class for option toggle tree models
 QModelIndex OptionToggleTreeModel::index(int row, int column, const QModelIndex& parent) const {
    if (parent.isValid()) {
       row_type* parentItem = static_cast<row_type*>(parent.internalPointer());
@@ -140,11 +143,66 @@ void OptionToggleTreeModel::insertItem(uint16_t index, QString name, int16_t par
    row->parent = parent;
    this->rows[index] = row;
 }
+void OptionToggleTreeModel::clear() {
+   for (auto row : this->rows)
+      delete row;
+   this->rows.clear();
+}
+#pragma endregion
 
 //
 //
 //
 
+#pragma region MegaloOptionToggleTreeModel - The model for the Megalo options list; a subclass of OptionToggleTreeModel
+MegaloOptionToggleTreeModel::bitset_type* MegaloOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return nullptr;
+   auto& flagset = variant->multiplayer.optionToggles.megalo;
+   switch (type) {
+      case OptionToggleFlagType::disabled: return &flagset.disabled;
+      case OptionToggleFlagType::hidden:   return &flagset.hidden;
+   }
+   return nullptr;
+}
+bool MegaloOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
+   if (index >= bitset_type::flag_count)
+      return false;
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return false;
+   return variant->multiplayer.optionToggles.megalo.disabled.bits.test(index);
+}
+bool MegaloOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
+   if (index >= bitset_type::flag_count)
+      return false;
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return false;
+   return variant->multiplayer.optionToggles.megalo.hidden.bits.test(index);
+}
+void MegaloOptionToggleTreeModel::modifyFlag(OptionToggleFlagType type, uint16_t index, bool state) noexcept {
+   auto toggles = this->_getToggles(type);
+   if (!toggles)
+      return;
+   if (state)
+      toggles->bits.set(index);
+   else
+      toggles->bits.reset(index);
+}
+void MegaloOptionToggleTreeModel::modifyAllFlagsOfType(OptionToggleFlagType type, bool state) noexcept {
+   auto toggles = this->_getToggles(type);
+   if (!toggles)
+      return;
+   if (state)
+      toggles->bits.set_all();
+   else
+      toggles->bits.clear();
+}
+#pragma endregion
+
+#pragma region EngineOptionToggleTreeModel - The model for the engine options tree; a subclass of OptionToggleTreeModel
 EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
    auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
@@ -157,7 +215,7 @@ EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggl
    return nullptr;
 }
 bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
-   if (index >= 1272)
+   if (index >= bitset_type::flag_count)
       return false;
    auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
@@ -165,7 +223,7 @@ bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexce
    return variant->multiplayer.optionToggles.engine.disabled.bits.test(index);
 }
 bool EngineOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
-   if (index >= 1272)
+   if (index >= bitset_type::flag_count)
       return false;
    auto variant = ReachEditorState::get().currentVariant;
    if (!variant)
@@ -190,23 +248,111 @@ void EngineOptionToggleTreeModel::modifyAllFlagsOfType(OptionToggleFlagType type
    else
       toggles->bits.clear();
 }
-void EngineOptionToggleTreeModel::modifyFlagsInRange(OptionToggleFlagType type, bool state, uint16_t start, uint16_t end) noexcept {
-   auto toggles = this->_getToggles(type);
-   if (!toggles)
-      return;
-   if (state)
-      toggles->bits.set_range(start, end);
-   else
-      toggles->bits.clear_range(start, end);
-}
+#pragma endregion
 
 //
 //
 //
 
-EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : QTreeView(parent) {
-   this->setModel(new EngineOptionToggleTreeModel);
+#pragma region OptionToggleTree - base class for the tree view
+OptionToggleTree::OptionToggleTree(QWidget* parent) : QTreeView(parent) {
    this->setSelectionMode(QAbstractItemView::ExtendedSelection);
+   {  // HeaderContext menu items
+      {  // Disabled
+         this->actionDisableCheckAll = new QAction(tr("Check All",   "Option Toggles: Disabled"), this);
+         this->actionDisableClearAll = new QAction(tr("Uncheck All", "Option Toggles: Disabled"), this);
+         QObject::connect(this->actionDisableCheckAll, &QAction::triggered, [this]() {
+            auto model = static_cast<OptionToggleTreeModel*>(this->model());
+            model->modifyAllFlagsOfType(OptionToggleFlagType::disabled, true);
+         });
+         QObject::connect(this->actionDisableClearAll, &QAction::triggered, [this]() {
+            auto model = static_cast<OptionToggleTreeModel*>(this->model());
+            model->modifyAllFlagsOfType(OptionToggleFlagType::disabled, false);
+         });
+      }
+      {  // Hidden
+         this->actionHiddenCheckAll = new QAction(tr("Check All",   "Option Toggles: Hidden"), this);
+         this->actionHiddenClearAll = new QAction(tr("Uncheck All", "Option Toggles: Hidden"), this);
+         QObject::connect(this->actionHiddenCheckAll, &QAction::triggered, [this]() {
+            auto model = static_cast<OptionToggleTreeModel*>(this->model());
+            model->modifyAllFlagsOfType(OptionToggleFlagType::hidden, true);
+         });
+         QObject::connect(this->actionHiddenClearAll, &QAction::triggered, [this]() {
+            auto model = static_cast<OptionToggleTreeModel*>(this->model());
+            model->modifyAllFlagsOfType(OptionToggleFlagType::hidden, false);
+         });
+      }
+      auto* header = this->header();
+      if (header) {
+         header->setContextMenuPolicy(Qt::CustomContextMenu);
+         QObject::connect(header, &QWidget::customContextMenuRequested, [this, header](const QPoint& pos) {
+            QPoint globalPos = header->mapToGlobal(pos);
+            int col = header->logicalIndexAt(pos);
+            this->showHeaderContextMenu(globalPos, col);
+         });
+      }
+   }
+   {  // Body context menu
+      this->actionDisableCheckAllSelected = new QAction(tr("Disable All Selected", "Option Toggles"), this);
+      this->actionDisableClearAllSelected = new QAction(tr("Enable All Selected",  "Option Toggles"), this);
+      this->actionHiddenCheckAllSelected  = new QAction(tr("Hide All Selected",    "Option Toggles"), this);
+      this->actionHiddenClearAllSelected  = new QAction(tr("Show All Selected",    "Option Toggles"), this);
+      QObject::connect(this->actionDisableCheckAllSelected, &QAction::triggered, [this]() {
+         this->doneBodyContextMenu(OptionToggleFlagType::disabled, true);
+      });
+      QObject::connect(this->actionDisableClearAllSelected, &QAction::triggered, [this]() {
+         this->doneBodyContextMenu(OptionToggleFlagType::disabled, false);
+      });
+      QObject::connect(this->actionHiddenCheckAllSelected, &QAction::triggered, [this]() {
+         this->doneBodyContextMenu(OptionToggleFlagType::hidden, true);
+      });
+      QObject::connect(this->actionHiddenClearAllSelected, &QAction::triggered, [this]() {
+         this->doneBodyContextMenu(OptionToggleFlagType::hidden, false);
+      });
+      //
+      this->setContextMenuPolicy(Qt::CustomContextMenu);
+      QObject::connect(this, &QWidget::customContextMenuRequested, [this](const QPoint& pos) {
+         this->showBodyContextMenu(this->mapToGlobal(pos));
+      });
+   }
+}
+void OptionToggleTree::showHeaderContextMenu(const QPoint& pos, int column) {
+   if (column != 1 && column != 2)
+      return;
+   QMenu menu(this);
+   if (column == 1) {
+      menu.addAction(this->actionDisableCheckAll);
+      menu.addAction(this->actionDisableClearAll);
+   } else if (column == 2) {
+      menu.addAction(this->actionHiddenCheckAll);
+      menu.addAction(this->actionHiddenClearAll);
+   }
+   menu.exec(pos);
+}
+void OptionToggleTree::showBodyContextMenu(const QPoint& screenPos) {
+   QMenu menu(this);
+   menu.addAction(this->actionDisableCheckAllSelected);
+   menu.addAction(this->actionDisableClearAllSelected);
+   menu.addAction(this->actionHiddenCheckAllSelected);
+   menu.addAction(this->actionHiddenClearAllSelected);
+   menu.exec(screenPos);
+}
+void OptionToggleTree::doneBodyContextMenu(OptionToggleFlagType which, bool check) {
+   auto sel = this->selectionModel();
+   auto rows = sel->selectedRows();
+   auto model = dynamic_cast<OptionToggleTreeModel*>(this->model());
+   for (const auto& row : rows) {
+      const auto* item = static_cast<OptionToggleTreeModel::row_type*>(row.internalPointer());
+      if (!item)
+         continue;
+      model->modifyFlag(which, item->index, check);
+   }
+}
+#pragma endregion
+
+#pragma region EngineOptionToggleTree - the tree view
+EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTree(parent) {
+   this->setModel(new EngineOptionToggleTreeModel);
    {
       auto* header = this->header();
       if (header) {
@@ -308,98 +454,44 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : QTreeView(pare
    model->insertItem(424, tr("Player Traits, Forced Color"));
    model->insertItem(425, tr("Player Traits, Visible Name"));
    // ...
-   for (uint16_t i = 0; i < 1272; i++) {
+   for (uint16_t i = 0; i < model_type::bitset_type::flag_count; i++) {
       model->insertItem(i, QString("Unknown #%1").arg(i));
    }
-   //
-   {  // HeaderContext menu items
-      {  // Disabled
-         this->actionDisableCheckAll = new QAction(tr("Check All",   "Engine Option Toggles: Disabled"), this);
-         this->actionDisableClearAll = new QAction(tr("Uncheck All", "Engine Option Toggles: Disabled"), this);
-         QObject::connect(this->actionDisableCheckAll, &QAction::triggered, [this]() {
-            auto model = static_cast<OptionToggleTreeModel*>(this->model());
-            model->modifyAllFlagsOfType(OptionToggleFlagType::disabled, true);
-         });
-         QObject::connect(this->actionDisableClearAll, &QAction::triggered, [this]() {
-            auto model = static_cast<OptionToggleTreeModel*>(this->model());
-            model->modifyAllFlagsOfType(OptionToggleFlagType::disabled, false);
-         });
-      }
-      {  // Hidden
-         this->actionHiddenCheckAll = new QAction(tr("Check All",   "Engine Option Toggles: Hidden"), this);
-         this->actionHiddenClearAll = new QAction(tr("Uncheck All", "Engine Option Toggles: Hidden"), this);
-         QObject::connect(this->actionHiddenCheckAll, &QAction::triggered, [this]() {
-            auto model = static_cast<OptionToggleTreeModel*>(this->model());
-            model->modifyAllFlagsOfType(OptionToggleFlagType::hidden, true);
-         });
-         QObject::connect(this->actionHiddenClearAll, &QAction::triggered, [this]() {
-            auto model = static_cast<OptionToggleTreeModel*>(this->model());
-            model->modifyAllFlagsOfType(OptionToggleFlagType::hidden,  false);
-         });
-      }
+}
+#pragma endregion
+
+#pragma region MegaloOptionToggleTree - the tree view
+MegaloOptionToggleTree::MegaloOptionToggleTree(QWidget* parent) : OptionToggleTree(parent) {
+   this->setModel(new MegaloOptionToggleTreeModel);
+   {
       auto* header = this->header();
       if (header) {
-         header->setContextMenuPolicy(Qt::CustomContextMenu);
-         QObject::connect(header, &QWidget::customContextMenuRequested, [this, header](const QPoint& pos) {
-            QPoint globalPos = header->mapToGlobal(pos);
-            int col = header->logicalIndexAt(pos);
-            this->showHeaderContextMenu(globalPos, col);
-         });
+         header->setStretchLastSection(false);
+         header->setSectionResizeMode(0, QHeaderView::Stretch);
+         header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+         header->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+         header->setSectionsMovable(false);
       }
    }
-   {  // Body context menu
-      this->actionDisableCheckAllSelected = new QAction(tr("Disable All Selected", "Engine Option Toggles"), this);
-      this->actionDisableClearAllSelected = new QAction(tr("Enable All Selected",  "Engine Option Toggles"), this);
-      this->actionHiddenCheckAllSelected  = new QAction(tr("Hide All Selected",    "Engine Option Toggles"), this);
-      this->actionHiddenClearAllSelected  = new QAction(tr("Show All Selected",    "Engine Option Toggles"), this);
-      QObject::connect(this->actionDisableCheckAllSelected, &QAction::triggered, [this]() {
-         this->doneBodyContextMenu(OptionToggleFlagType::disabled, true);
-      });
-      QObject::connect(this->actionDisableClearAllSelected, &QAction::triggered, [this]() {
-         this->doneBodyContextMenu(OptionToggleFlagType::disabled, false);
-      });
-      QObject::connect(this->actionHiddenCheckAllSelected, &QAction::triggered, [this]() {
-         this->doneBodyContextMenu(OptionToggleFlagType::hidden, true);
-      });
-      QObject::connect(this->actionHiddenClearAllSelected, &QAction::triggered, [this]() {
-         this->doneBodyContextMenu(OptionToggleFlagType::hidden, false);
-      });
-      //
-      this->setContextMenuPolicy(Qt::CustomContextMenu);
-      QObject::connect(this, &QWidget::customContextMenuRequested, [this](const QPoint& pos) {
-         this->showBodyContextMenu(this->mapToGlobal(pos));
-      });
-   }
 }
-void EngineOptionToggleTree::showHeaderContextMenu(const QPoint& pos, int column) {
-   if (column != 1 && column != 2)
+void MegaloOptionToggleTree::updateModelFromGameVariant() {
+   auto model = dynamic_cast<MegaloOptionToggleTreeModel*>(this->model());
+   if (!model)
       return;
-   QMenu menu(this);
-   if (column == 1) {
-      menu.addAction(this->actionDisableCheckAll);
-      menu.addAction(this->actionDisableClearAll);
-   } else if (column == 2) {
-      menu.addAction(this->actionHiddenCheckAll);
-      menu.addAction(this->actionHiddenClearAll);
-   }
-   menu.exec(pos);
-}
-void EngineOptionToggleTree::showBodyContextMenu(const QPoint& screenPos) {
-   QMenu menu(this);
-   menu.addAction(this->actionDisableCheckAllSelected);
-   menu.addAction(this->actionDisableClearAllSelected);
-   menu.addAction(this->actionHiddenCheckAllSelected);
-   menu.addAction(this->actionHiddenClearAllSelected);
-   menu.exec(screenPos);
-}
-void EngineOptionToggleTree::doneBodyContextMenu(OptionToggleFlagType which, bool check) {
-   auto sel   = this->selectionModel();
-   auto rows  = sel->selectedRows();
-   auto model = dynamic_cast<model_type*>(this->model());
-   for (const auto& row : rows) {
-      const auto* item = static_cast<EngineOptionToggleTreeModel::row_type*>(row.internalPointer());
-      if (!item)
-         continue;
-      model->modifyFlag(which, item->index, check);
+   model->clear();
+   auto variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return;
+   auto& options = variant->multiplayer.scriptData.options;
+   for (uint32_t i = 0; i < options.size(); i++) {
+      auto& option = options[i];
+      QString name;
+      if (option.name) {
+         name = QString::fromUtf8(option.name->english().c_str());
+      } else {
+         name = QString(tr("Unnamed Option #%1")).arg(i);
+      }
+      model->insertItem(i, name);
    }
 }
+#pragma endregion

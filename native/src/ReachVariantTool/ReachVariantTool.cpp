@@ -534,6 +534,7 @@ void ReachVariantTool::openFile() {
       this->ui.MainTreeview->setCurrentIndex(i); // force update of team, trait, etc., pages
    }
    this->refreshWindowTitle();
+   this->ui.optionTogglesScripted->updateModelFromGameVariant();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();
@@ -1047,6 +1048,7 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
    const auto& options = variant->multiplayer.scriptData.options;
    for (uint32_t i = 0; i < options.size(); i++) {
       auto& option = options[i];
+      auto  desc   = option.desc;
       //
       auto label = new QLabel(this);
       label->setProperty("MegaloOptionIndex", i);
@@ -1056,6 +1058,8 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
          label->setText(QString("Unnamed Option #%1").arg(i + 1));
       }
       layout->addWidget(label, i, 0);
+      if (desc)
+         label->setToolTip(QString::fromUtf8(desc->english().c_str()));
       //
       if (option.isRange) {
          auto slider = new QSlider(Qt::Horizontal, this);
@@ -1068,6 +1072,8 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
          // TODO: display default value?
          //
          QObject::connect(slider, QOverload<int>::of(&QSlider::valueChanged), [slider](int v) { _onMegaloSliderChange(slider, v); });
+         if (desc)
+            slider->setToolTip(QString::fromUtf8(desc->english().c_str()));
       } else {
          auto combo = new QComboBox(this);
          combo->setProperty("MegaloOptionIndex", i);
@@ -1085,6 +1091,8 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
          // TODO: display default value?
          //
          QObject::connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged), [combo](int v) { _onMegaloComboboxChange(combo, v); });
+         if (desc)
+            combo->setToolTip(QString::fromUtf8(desc->english().c_str()));
       }
    }
    auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);

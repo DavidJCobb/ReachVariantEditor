@@ -19,6 +19,8 @@
 
 template<int count> class ReachDwordBasedBitset {
    public:
+      static constexpr int flag_count = count;
+      //
       cobb::bitset<count> bits;
       //
       void read(cobb::bitreader& stream) noexcept {
@@ -63,7 +65,7 @@ template<int count> class ReachDwordBasedBitset {
          };
       #endif
 };
-using ReachGameVariantEngineOptionToggles = ReachDwordBasedBitset<1272>; // 1280 bits (160 bytes) in the file
+using ReachGameVariantEngineOptionToggles = ReachDwordBasedBitset<1273>; // 1280 bits (160 bytes) in the file
 using ReachGameVariantMegaloOptionToggles = ReachDwordBasedBitset<16>;
 
 using ReachGameVariantUsedMPObjectTypeList = ReachDwordBasedBitset<Megalo::Limits::max_object_types>;

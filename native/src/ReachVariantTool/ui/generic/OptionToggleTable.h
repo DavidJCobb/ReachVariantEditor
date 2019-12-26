@@ -111,7 +111,6 @@ class OptionToggleTreeModel : public QAbstractItemModel {
       virtual bool checkHiddenFlag(uint16_t index) const noexcept = 0;
       virtual void modifyFlag(OptionToggleFlagType, uint16_t index, bool state) noexcept = 0;
       virtual void modifyAllFlagsOfType(OptionToggleFlagType, bool state) noexcept = 0;
-      virtual void modifyFlagsInRange(OptionToggleFlagType, bool state, uint16_t start, uint16_t end) noexcept = 0;
 
       OptionToggleTreeModel(QObject* parent = nullptr) : QAbstractItemModel(parent) {}
       ~OptionToggleTreeModel() {
@@ -128,6 +127,7 @@ class OptionToggleTreeModel : public QAbstractItemModel {
       QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
       //
       void insertItem(uint16_t index, QString name, int16_t parent = -1);
+      void clear();
       //
       QVector<OptionToggleTreeRowModel*> topLevelItems;
 };
@@ -141,15 +141,23 @@ class EngineOptionToggleTreeModel : public OptionToggleTreeModel {
       virtual bool checkHiddenFlag(uint16_t index) const noexcept override;
       virtual void modifyFlag(OptionToggleFlagType, uint16_t index, bool state) noexcept override;
       virtual void modifyAllFlagsOfType(OptionToggleFlagType, bool state) noexcept override;
-      virtual void modifyFlagsInRange(OptionToggleFlagType, bool state, uint16_t start, uint16_t end) noexcept override;
+};
+class MegaloOptionToggleTreeModel : public OptionToggleTreeModel {
+   public:
+      using bitset_type = ReachGameVariantMegaloOptionToggles;
+      //
+      bitset_type* _getToggles(OptionToggleFlagType type) const noexcept;
+      //
+      virtual bool checkDisabledFlag(uint16_t index) const noexcept override;
+      virtual bool checkHiddenFlag(uint16_t index) const noexcept override;
+      virtual void modifyFlag(OptionToggleFlagType, uint16_t index, bool state) noexcept override;
+      virtual void modifyAllFlagsOfType(OptionToggleFlagType, bool state) noexcept override;
 };
 
-class EngineOptionToggleTree : public QTreeView {
+class OptionToggleTree : public QTreeView {
    Q_OBJECT
    public:
-      using model_type = EngineOptionToggleTreeModel;
-      //
-      EngineOptionToggleTree(QWidget* parent);
+      OptionToggleTree(QWidget* parent);
       //
       QAction* actionDisableCheckAll = nullptr;
       QAction* actionDisableClearAll = nullptr;
@@ -164,4 +172,19 @@ class EngineOptionToggleTree : public QTreeView {
       //
       void showBodyContextMenu(const QPoint& screenPos);
       void doneBodyContextMenu(OptionToggleFlagType which, bool check);
+};
+class EngineOptionToggleTree : public OptionToggleTree {
+   Q_OBJECT
+   public:
+      using model_type = EngineOptionToggleTreeModel;
+      //
+      EngineOptionToggleTree(QWidget* parent);
+};
+class MegaloOptionToggleTree : public OptionToggleTree {
+   Q_OBJECT
+   public:
+      using model_type = MegaloOptionToggleTreeModel;
+      //
+      MegaloOptionToggleTree(QWidget* parent);
+      void updateModelFromGameVariant();
 };
