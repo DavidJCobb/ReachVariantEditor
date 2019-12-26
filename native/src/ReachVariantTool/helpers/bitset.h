@@ -30,7 +30,9 @@ namespace cobb {
          unsigned int dword_count() const noexcept {
             return chunk_count;
          }
-         bool none() const noexcept {
+         constexpr uint32_t size() const noexcept { return count; }
+         //
+         bool none() const noexcept { // return true if all bits are clear
             //
             // We don't have to worry about partial chunks here, since we memset all chunks 
             // to zero. The unused portions of a partial chunk should always be cleared.
@@ -72,6 +74,20 @@ namespace cobb {
                this->data[i] = 0xFFFFFFFF;
             if (has_partial_chunk)
                this->data[chunk_count - 1] = partial_chunk_max;
+         }
+         void set_range(uint32_t start, uint32_t end) noexcept {
+            uint32_t i = start;
+            for (; i + 32 < end; i += 32)
+               this->data[i / 32] = 0xFFFFFFFF;
+            for (; i < end; i++)
+               this->set(i);
+         }
+         void clear_range(uint32_t start, uint32_t end) noexcept {
+            uint32_t i = start;
+            for (; i + 32 < end; i += 32)
+               this->data[i / 32] = 0;
+            for (; i < end; i++)
+               this->reset(i);
          }
          //
          int32_t find_first_clear() const noexcept {
