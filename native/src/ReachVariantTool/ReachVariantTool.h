@@ -34,6 +34,8 @@ class ReachVariantTool : public QMainWindow {
       void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //
+      void setupWidgetsForScriptedOptions();
+      //
       template<int N> void _setupComboboxForUnsafeOption(QComboBox* widget) {
          QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
             bool allow = true;

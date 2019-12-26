@@ -3,9 +3,12 @@
 #include <filesystem>
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QGridLayout>
 #include <QMessageBox>
+#include <QSlider>
 #include <QString>
 #include <QTreeWidget>
+#include <QWidget>
 #include "editor_state.h"
 #include "game_variants/base.h"
 #include "helpers/stream.h"
@@ -524,6 +527,7 @@ void ReachVariantTool::openFile() {
    editor.take_game_variant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
    this->refreshScriptedPlayerTraitList();
+   this->setupWidgetsForScriptedOptions();
    {
       auto i = this->ui.MainTreeview->currentIndex();
       this->ui.MainTreeview->setCurrentItem(nullptr);
@@ -598,6 +602,10 @@ void ReachVariantTool::onSelectedPageChanged() {
    }
    if (text == tr("Team Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsTeam);
+      return;
+   }
+   if (text == tr("Script-Specific Options", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageOptionsScripted);
       return;
    }
    //
@@ -985,6 +993,102 @@ void ReachVariantTool::refreshWindowTitle() {
          QString("%1 - ReachVariantTool").arg(file)
       );
    }
+}
+//
+namespace {
+   void _onMegaloComboboxChange(QComboBox* widget, int index) {
+      auto  variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      auto v = widget->property("MegaloOptionIndex");
+      if (!v.isValid())
+         return;
+      int32_t i = v.toInt();
+      if (i < 0)
+         return;
+      auto& list   = variant->multiplayer.scriptData.options;
+      if (i >= list.size())
+         return;
+      auto& option = variant->multiplayer.scriptData.options[i];
+      option.currentValueIndex = index;
+   }
+   void _onMegaloSliderChange(QSlider* widget, int value) {
+      auto  variant = ReachEditorState::get().currentVariant;
+      if (!variant)
+         return;
+      auto v = widget->property("MegaloOptionIndex");
+      if (!v.isValid())
+         return;
+      int32_t i = v.toInt();
+      if (i < 0)
+         return;
+      auto& list = variant->multiplayer.scriptData.options;
+      if (i >= list.size())
+         return;
+      auto& option = variant->multiplayer.scriptData.options[i];
+      option.rangeCurrent = value;
+   }
+}
+void ReachVariantTool::setupWidgetsForScriptedOptions() {
+   auto page   = this->ui.PageOptionsScripted;
+   auto layout = dynamic_cast<QGridLayout*>(page->layout());
+   if (!layout) {
+      layout = new QGridLayout;
+      page->setLayout(layout);
+   }
+   {  // Clear layout
+      QLayoutItem* child;
+      while ((child = layout->takeAt(0)) != nullptr)
+         delete child;
+   }
+   auto  variant = ReachEditorState::get().currentVariant;
+   if (!variant)
+      return;
+   const auto& options = variant->multiplayer.scriptData.options;
+   for (uint32_t i = 0; i < options.size(); i++) {
+      auto& option = options[i];
+      //
+      auto label = new QLabel(this);
+      label->setProperty("MegaloOptionIndex", i);
+      if (option.name) {
+         label->setText(QString::fromUtf8(option.name->english().c_str()));
+      } else {
+         label->setText(QString("Unnamed Option #%1").arg(i + 1));
+      }
+      layout->addWidget(label, i, 0);
+      //
+      if (option.isRange) {
+         auto slider = new QSlider(Qt::Horizontal, this);
+         slider->setProperty("MegaloOptionIndex", i);
+         slider->setMinimum(option.rangeMin.value);
+         slider->setMaximum(option.rangeMax.value);
+         slider->setValue(option.rangeCurrent);
+         layout->addWidget(slider, i, 1);
+         //
+         // TODO: display default value?
+         //
+         QObject::connect(slider, QOverload<int>::of(&QSlider::valueChanged), [slider](int v) { _onMegaloSliderChange(slider, v); });
+      } else {
+         auto combo = new QComboBox(this);
+         combo->setProperty("MegaloOptionIndex", i);
+         for (uint32_t j = 0; j < option.values.size(); j++) {
+            auto& value = option.values[j];
+            if (value.name) {
+               combo->addItem(QString::fromUtf8(value.name->english().c_str()), (int16_t)value.value);
+            } else {
+               combo->addItem(QString(value.value), (int16_t)value.value);
+            }
+         }
+         combo->setCurrentIndex(option.currentValueIndex);
+         layout->addWidget(combo, i, 1);
+         //
+         // TODO: display default value?
+         //
+         QObject::connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged), [combo](int v) { _onMegaloComboboxChange(combo, v); });
+      }
+   }
+   auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+   layout->addItem(spacer, options.size(), 0, 1, 2);
 }
 //
 void ReachVariantTool::setupWidgetsForUnsafeOptions() {

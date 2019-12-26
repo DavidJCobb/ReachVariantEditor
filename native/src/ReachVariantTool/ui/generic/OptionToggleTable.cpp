@@ -302,8 +302,12 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : QTreeView(pare
    model->insertItem(418, tr("Player Traits, Motion Tracker Mode"));
    model->insertItem(419, tr("Player Traits, Motion Tracker Range"));
    // 420
-
-
+   model->insertItem(421, tr("Player Traits, Visible Waypoint"));
+   model->insertItem(422, tr("Player Traits, Active Camo"));
+   // 423
+   model->insertItem(424, tr("Player Traits, Forced Color"));
+   model->insertItem(425, tr("Player Traits, Visible Name"));
+   // ...
    for (uint16_t i = 0; i < 1272; i++) {
       model->insertItem(i, QString("Unknown #%1").arg(i));
    }
