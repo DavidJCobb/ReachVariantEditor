@@ -97,7 +97,16 @@ namespace cobb {
             for (int i = 0; i < std::extent<T>::value; i++)
                this->write(value[i], cobb::bits_in<item_type>);
          };
+
+         // Write to someplace in the middle of the buffer, without advancing the (offset).
          //
+         template<typename T> void write_to_bitpos(uint32_t offset, uint32_t bitcount, T v) noexcept {
+            auto bp = this->_bitpos;
+            this->_bitpos = offset;
+            this->write(v, bitcount);
+            this->_bitpos = bp;
+         }
+
          void write_string(const char* value, int maxlength) noexcept { // writes as bits; stops early after null char
             for (int i = 0; i < maxlength; i++) {
                this->write(value[i]);

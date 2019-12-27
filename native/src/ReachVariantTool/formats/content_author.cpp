@@ -43,3 +43,13 @@ void ReachContentAuthor::set_author_name(const char* s) noexcept {
    for (; i < 16; i++)
       this->author[i] = '\0';
 }
+bool ReachContentAuthor::has_xuid() const noexcept {
+   return this->xuid != 0;
+}
+void ReachContentAuthor::erase_xuid() noexcept {
+   this->xuid = 0;
+   this->isOnlineID = false;
+}
+void ReachContentAuthor::set_datetime(uint64_t seconds_since_jan_1_1970) noexcept {
+   this->timestamp = seconds_since_jan_1_1970;
+}

@@ -39,9 +39,17 @@ int main(int argc, char *argv[]) {
 //
 //  - UI
 //
-//     - Implement Megalo Option Toggles
+//     - File header
+//
+//        - Implement editing of the created and edited datestamps.
+//
+//        - Add a button to zero out the XUID and set the "is online ID" 
+//          bool to false. Label it "Strip Xbox LIVE Identifying Info."
 //
 //     - Implement editing for localized strings; start with team names.
+//
+//        - Alternatively, hide the button for that and save string editing 
+//          for a future release.
 //
 //     - Player Traits pages should not be selectable if a variant isn't 
 //       open.
@@ -56,12 +64,36 @@ int main(int argc, char *argv[]) {
 //          wouldn't really change much. We could probably even do a simple 
 //          find-and-replace for the widget names here.
 //
+//        - We could potentially set the split-up pages to be friendly to 
+//          Qt Designer if we compile our program as a DLL (that's what that 
+//          static linkage error re: QDESIGNER_WIDGET_EXPORT was about; it's 
+//          not that we were failing to dynamically link with Qt but rather 
+//          that the program containing the widget-definition needs to be a 
+//          DLL that Qt Designer can load). Might be overkill, though.
+//
 //     - The models I built for the Option Toggles tree-views suck. They were 
 //       good as a "just build one of these for the first time and get it 
 //       working at all" thing but I should redesign them. Among other things, 
 //       I should have the model classes pull directly from the bitsets if 
 //       possible (I don't know if the QModelIndex class allows for that; it 
 //       seems to have to wrap a pointer).
+//
+//     - Investigate the possibility of linking option-editing fields to 
+//       their toggles, i.e. displaying an indicator if they've been toggled 
+//       to disabled/hidden, and letting the user right-click them and jump 
+//       to the toggle (irrespective of its state).
+//
+//        - We could also use a different text color for the field labels; 
+//          we've set up "buddy" relationships between them (the Qt counter-
+//          part to HTML's <label for="..." />).
+//
+//           - Yeah, but buddy relationships are one-way; given a field, we 
+//             have no way to find the label.
+//
+//     - Remove the option to allow/disallow editing of unsafe Custom Game 
+//       options. I only added it after mistaking the cause of some CTDs I 
+//       was getting; there aren't any actual unsafe options (besides having 
+//       out-of-bounds values in some bitfields).
 //
 // ==========================================================================
 //

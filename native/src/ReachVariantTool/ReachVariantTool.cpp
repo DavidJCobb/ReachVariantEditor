@@ -2,6 +2,7 @@
 #include <cassert>
 #include <filesystem>
 #include <QColorDialog>
+#include <QDateTime>
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QMessageBox>
@@ -70,21 +71,25 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
-         const char16_t* value = (const char16_t*)text.utf16();
+         auto u16s = text.toStdU16String();
+         const char16_t* value = u16s.c_str();
          variant->contentHeader.data.set_title(value);
          variant->multiplayer.variantHeader.set_title(value);
          //
          if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b)
             this->refreshWindowTitle();
       });
+      QObject::connect(this->ui.headerName, &QLineEdit::textEdited, this, &ReachVariantTool::updateDescriptionCharacterCount);
       //
-      auto desc = this->ui.headerDesc;
-      QObject::connect(this->ui.headerDesc, &QPlainTextEdit::textChanged, [desc]() {
+      auto desc      = this->ui.headerDesc;
+      auto descCount = this->ui.headerDescCharacterLimit;
+      QObject::connect(this->ui.headerDesc, &QPlainTextEdit::textChanged, [desc, descCount]() {
          auto text    = desc->toPlainText();
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
-         const char16_t* value = (const char16_t*)text.utf16();
+         auto u16s = text.toStdU16String();
+         const char16_t* value = u16s.c_str();
          variant->contentHeader.data.set_description(value);
          variant->multiplayer.variantHeader.set_description(value);
       });
@@ -97,6 +102,32 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          variant->contentHeader.data.createdBy.set_author_name(latin.constData());
          variant->multiplayer.variantHeader.createdBy.set_author_name(latin.constData());
       });
+      QObject::connect(this->ui.eraseAuthorXUID, &QPushButton::clicked, [this]() {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         auto& author_c = variant->contentHeader.data.createdBy;
+         auto& author_m = variant->multiplayer.variantHeader.createdBy;
+         if (author_c.has_xuid() || author_m.has_xuid()) {
+            author_c.erase_xuid();
+            author_m.erase_xuid();
+            QMessageBox::information(this, tr("Operation complete"), tr("The XUID and \"is online ID\" flag for this file's author have been wiped."));
+            return;
+         } else {
+            author_c.erase_xuid();
+            author_m.erase_xuid();
+            QMessageBox::information(this, tr("Operation complete"), tr("The XUID and \"is online ID\" flag for this file's author were already blank."));
+            return;
+         }
+      });
+      QObject::connect(this->ui.createdOnDate, &QDateTimeEdit::dateTimeChanged, [](const QDateTime& time) {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         uint64_t seconds = time.toSecsSinceEpoch();
+         variant->contentHeader.data.createdBy.set_datetime(seconds);
+         variant->multiplayer.variantHeader.createdBy.set_datetime(seconds);
+      });
       QObject::connect(this->ui.editorGamertag, &QLineEdit::textEdited, [](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
@@ -104,6 +135,32 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          auto latin = text.toLatin1();
          variant->contentHeader.data.modifiedBy.set_author_name(latin.constData());
          variant->multiplayer.variantHeader.modifiedBy.set_author_name(latin.constData());
+      });
+      QObject::connect(this->ui.eraseEditorXUID, &QPushButton::clicked, [this]() {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         auto& author_c = variant->contentHeader.data.modifiedBy;
+         auto& author_m = variant->multiplayer.variantHeader.modifiedBy;
+         if (author_c.has_xuid() || author_m.has_xuid()) {
+            author_c.erase_xuid();
+            author_m.erase_xuid();
+            QMessageBox::information(this, tr("Operation complete"), tr("The XUID and \"is online ID\" flag for this file's editor have been wiped."));
+            return;
+         } else {
+            author_c.erase_xuid();
+            author_m.erase_xuid();
+            QMessageBox::information(this, tr("Operation complete"), tr("The XUID and \"is online ID\" flag for this file's editor were already blank."));
+            return;
+         }
+      });
+      QObject::connect(this->ui.editedOnDate, &QDateTimeEdit::dateTimeChanged, [](const QDateTime& time) {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         uint64_t seconds = time.toSecsSinceEpoch();
+         variant->contentHeader.data.modifiedBy.set_datetime(seconds);
+         variant->multiplayer.variantHeader.modifiedBy.set_datetime(seconds);
       });
       //
       this->ui.authorGamertag->setValidator(QXBLGamertagValidator::getReachInstance());
@@ -206,7 +263,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          reach_main_window_setup_flag_checkbox(this->ui.optionsSocialGlobalVoice,     multiplayer.options.social.flags, 0x08);
          reach_main_window_setup_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, multiplayer.options.social.flags, 0x10);
       }
-      {
+      {  // Map and Game
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapGrenadesEnabled, multiplayer.options.map.flags, 0x01);
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapShortcutsEnabled, multiplayer.options.map.flags, 0x02);
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, multiplayer.options.map.flags, 0x04);
@@ -509,6 +566,17 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    this->setupWidgetsForUnsafeOptions();
 }
 
+void ReachVariantTool::updateDescriptionCharacterCount() {
+   auto text    = this->ui.headerDesc->toPlainText();
+   auto length  = text.size();
+   auto readout = this->ui.headerDescCharacterLimit;
+   readout->setText(tr("%1 / %2").arg(length).arg(127));
+   if (length >= 128)
+      readout->setStyleSheet("QLabel { color: red; }");
+   else
+      readout->setStyleSheet("");
+}
+
 void ReachVariantTool::openFile() {
    auto& editor = ReachEditorState::get();
    //
@@ -534,6 +602,7 @@ void ReachVariantTool::openFile() {
       this->ui.MainTreeview->setCurrentIndex(i); // force update of team, trait, etc., pages
    }
    this->refreshWindowTitle();
+   this->updateDescriptionCharacterCount();
    this->ui.optionTogglesScripted->updateModelFromGameVariant();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
@@ -609,9 +678,6 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsScripted);
       return;
    }
-   //
-   // TODO: panes for each team
-   //
    if (text == tr("Loadout Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionsLoadout);
       return;
@@ -676,9 +742,6 @@ void ReachVariantTool::onSelectedPageChanged() {
          }
       }
    }
-   //
-   // TODO: add other panes
-   //
    if (text == tr("Option Visibility", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageOptionToggles);
       return;
@@ -698,13 +761,21 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       const QSignalBlocker blocker1(this->ui.headerDesc);
       const QSignalBlocker blocker2(this->ui.authorGamertag);
       const QSignalBlocker blocker3(this->ui.editorGamertag);
+      const QSignalBlocker blocker4(this->ui.createdOnDate);
+      const QSignalBlocker blocker5(this->ui.editedOnDate);
       this->ui.headerName->setText(QString::fromUtf16(variant->multiplayer.variantHeader.title));
       this->ui.headerDesc->setPlainText(QString::fromUtf16(variant->multiplayer.variantHeader.description));
       this->ui.authorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.createdBy.author));
       this->ui.editorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.modifiedBy.author));
+      //
+      QDateTime temp;
+      temp.setSecsSinceEpoch(variant->multiplayer.variantHeader.createdBy.timestamp);
+      this->ui.createdOnDate->setDateTime(temp);
+      temp.setSecsSinceEpoch(variant->multiplayer.variantHeader.modifiedBy.timestamp);
+      this->ui.editedOnDate->setDateTime(temp);
    }
    //
-   // This would be about a thousand times cleaner if we could use pointers-to-members-of-members, 
+   // This would probably be a whole lot cleaner if we could use pointers-to-members-of-members, 
    // but the language doesn't support that even though it easily could. There are workarounds, but 
    // in C++17 they aren't constexpr and therefore can't be used as template parameters. (My plan 
    // was to create structs that act as decorators, to accomplish this stuff.) So, macros.
@@ -821,9 +892,6 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag0, multiplayer.options.loadouts.flags, 0x01);
       reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag1, multiplayer.options.loadouts.flags, 0x02);
    }
-   //
-   // TODO: add other panes
-   //
    {  // Title Update Config
       reach_main_window_update_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
       reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
@@ -1074,6 +1142,7 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
          QObject::connect(slider, QOverload<int>::of(&QSlider::valueChanged), [slider](int v) { _onMegaloSliderChange(slider, v); });
          if (desc)
             slider->setToolTip(QString::fromUtf8(desc->english().c_str()));
+         label->setBuddy(slider);
       } else {
          auto combo = new QComboBox(this);
          combo->setProperty("MegaloOptionIndex", i);
@@ -1093,6 +1162,7 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
          QObject::connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged), [combo](int v) { _onMegaloComboboxChange(combo, v); });
          if (desc)
             combo->setToolTip(QString::fromUtf8(desc->english().c_str()));
+         label->setBuddy(combo);
       }
    }
    auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);

@@ -6,6 +6,9 @@
 #include "polyfills_cpp20.h"
 #include "type_traits.h"
 
+// NOTE: Some of our code assumes that the bytewriter offset will never be "rewound," i.e. if we finish writing the 
+// file then at that point the offset (the bytespan) is the length of the written data.
+
 namespace cobb {
    class bitwriter;
 

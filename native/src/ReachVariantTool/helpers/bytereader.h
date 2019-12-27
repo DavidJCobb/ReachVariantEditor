@@ -47,5 +47,12 @@ namespace cobb {
          //
          void read_string(char* out, uint32_t length) noexcept;
          void read_u16string(char16_t* out, uint32_t length, cobb::endian_t endianness = cobb::endian::little) noexcept;
+         //
+         template<typename T> void peek(T& out, cobb::endian_t endianness = cobb::endian::little) const noexcept {
+            out = *(T*)(this->buffer + this->offset);
+            if (std::is_integral_v<T> && sizeof(T) > 1)
+               if (endianness != cobb::endian::native)
+                  out = cobb::byteswap(out);
+         }
    };
 }

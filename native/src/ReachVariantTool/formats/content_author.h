@@ -16,4 +16,7 @@ class ReachContentAuthor {
       void write(cobb::bytewriter& stream) const noexcept;
       //
       void set_author_name(const char* s) noexcept;
+      bool has_xuid() const noexcept;
+      void erase_xuid() noexcept;
+      void set_datetime(uint64_t seconds_since_jan_1_1970) noexcept;
 };

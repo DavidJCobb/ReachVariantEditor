@@ -40,9 +40,11 @@ class BlamHeader {
 class EOFBlock : public ReachFileBlock {
    public:
       EOFBlock() : ReachFileBlock('_eof', 0) {}
+      uint32_t length = 0;
+      uint8_t  unk04  = 0;
       //
-      bool read(cobb::bitreader&) noexcept;
-      void write(cobb::bitwriter&) const noexcept;
+      bool read(cobb::bytereader&) noexcept;
+      void write(cobb::bytewriter&) const noexcept;
 };
 
 class GameVariantHeader {
@@ -71,10 +73,16 @@ class GameVariantHeader {
       cobb::bitnumber<8, uint32_t> engineIcon;
       uint8_t  unk284[0x2C]; // only in chdr
       //
+      mutable struct {
+         uint32_t offset_of_file_length = 0;
+      } writeData;
+      //
       bool read(cobb::bitreader&) noexcept;
       bool read(cobb::bytereader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
+      void write_last_minute_fixup(cobb::bitwriter&  stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
+      void write_last_minute_fixup(cobb::bytewriter& stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
       //
       void set_title(const char16_t* value) noexcept;
       void set_description(const char16_t* value) noexcept;
@@ -94,6 +102,10 @@ class ReachBlockCHDR {
       void write(cobb::bytewriter& stream) const noexcept {
          this->header.write(stream);
          this->data.write(stream);
+         this->header.write_postprocess(stream);
+      }
+      void write_last_minute_fixup(cobb::bytewriter& stream) const noexcept { // call after all file content has been written; writes file lengths, etc.
+         this->data.write_last_minute_fixup(stream);
       }
 };
 
@@ -227,8 +239,16 @@ class ReachBlockMPVR {
       ReachGameVariantTU1Options titleUpdateData;
       ReachFileBlockRemainder remainingData;
       //
+      mutable struct {
+         uint32_t offset_of_hashable_length = 0; // bytes
+         uint32_t offset_of_hash            = 0; // bytes
+         uint32_t offset_before_hashable    = 0; // bytes
+         uint32_t offset_after_hashable     = 0; // bytes
+      } writeData;
+      //
       bool read(cobb::bit_or_byte_reader&);
       void write(cobb::bit_or_byte_writer&) const noexcept;
+      void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
 };
 
 class GameVariant {
@@ -236,6 +256,7 @@ class GameVariant {
       BlamHeader     blamHeader;
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
+      EOFBlock       eofBlock;
       std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
       //
       bool read(cobb::mapped_file& file) {
@@ -255,46 +276,32 @@ class GameVariant {
          }
          reader.synchronize();
          //
-         // TODO: We need to handle the '_eof' block here, because it contains a 
-         // file length.
-         //
-         // The file length in the CHDR and MPVR blocks is the total size of the 
-         // file up to the end of the '_eof' block. The file length in the _EOF 
-         // block is the total size of the file up to the beginning of the '_eof' 
-         // block, and not including the block itself.
-         //
-         // In general, the major chunks for a file should all be of constant 
-         // lengths, e.g. MPVR is always 0x5000 bytes plus the size of its hash 
-         // and other odds and ends. Still, we should try to handle this robustly.
-         //
-         while (file.is_in_bounds(reader.bytes.get_bytepos(), 0)) {
-            auto& block = this->unknownBlocks.emplace_back();
-            if (!block.read(reader.bytes) || !block.header.found.signature) {
-               this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
-               break;
+         while (file.is_in_bounds(reader.bytes.get_bytepos(), 4)) {
+            uint32_t signature = 0;
+            reader.bytes.peek(signature, cobb::endian::big);
+            if (signature == '_eof') {
+               this->eofBlock.read(reader.bytes);
+            } else {
+               auto& block = this->unknownBlocks.emplace_back();
+               if (!block.read(reader.bytes) || !block.header.found.signature) {
+                  this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
+                  break;
+               }
             }
          }
          return true;
       }
       void write(cobb::bit_or_byte_writer& writer) const noexcept {
          this->blamHeader.write(writer.bytes);
-         this->blamHeader.header.write_postprocess(writer.bytes);
          this->contentHeader.write(writer.bytes);
-         this->contentHeader.header.write_postprocess(writer.bytes);
+         writer.synchronize();
          this->multiplayer.write(writer);
-         this->multiplayer.header.write_postprocess(writer.bytes);
          for (auto& unknown : this->unknownBlocks)
             unknown.write(writer.bytes);
-
-         // TODO: fix up file length in CHDR
-         // TODO: fix up file length in MPVR
-         // TODO: fix up file length in _EOF
-
-         // TODO: All block headers' sizes are serializing as little-endian even when I explicitly specify big-endian; investigate
-
-         #if !_DEBUG
-            static_assert(false, "FINISH ME");
-         #endif
+         this->eofBlock.write(writer.bytes);
+         //
+         this->contentHeader.write_last_minute_fixup(writer.bytes);
+         this->multiplayer.write_last_minute_fixup(writer);
       }
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;

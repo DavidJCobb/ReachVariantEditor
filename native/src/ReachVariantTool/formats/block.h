@@ -12,21 +12,21 @@ class ReachFileBlock {
    public:
       struct {
          uint32_t signature = 0;
-         uint32_t size      = 0;
+         uint32_t size      = 0; // size in bytes, including the block header
          uint16_t version   = 0;
          uint16_t flags     = 0;
       } expected;
       struct {
          uint32_t signature = 0;
-         uint32_t size      = 0;
+         uint32_t size      = 0; // size in bytes, including the block header
          uint16_t version   = 0;
          uint16_t flags     = 0;
       } found;
       struct {
-         uint32_t pos = 0; // in bytes, not bits
+         uint32_t pos = 0; // location of the start of the header in bytes, not bits
       } readState;
       mutable struct {
-         uint32_t pos = 0;
+         uint32_t pos = 0; // location of the start of the header in bytes, not bits
       } writeState;
       //
       ReachFileBlock() {};

@@ -358,7 +358,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
       if (header) {
          header->setStretchLastSection(false);
          header->setSectionResizeMode(0, QHeaderView::Stretch);
-         header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+         header->setSectionResizeMode(1, QHeaderView::ResizeToContents); // doing this in the superclass asserts; there has to already be a model which defines multiple columns
          header->setSectionResizeMode(2, QHeaderView::ResizeToContents);
          header->setSectionsMovable(false);
       }
@@ -468,7 +468,7 @@ MegaloOptionToggleTree::MegaloOptionToggleTree(QWidget* parent) : OptionToggleTr
       if (header) {
          header->setStretchLastSection(false);
          header->setSectionResizeMode(0, QHeaderView::Stretch);
-         header->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+         header->setSectionResizeMode(1, QHeaderView::ResizeToContents); // doing this in the superclass asserts; there has to already be a model which defines multiple columns
          header->setSectionResizeMode(2, QHeaderView::ResizeToContents);
          header->setSectionsMovable(false);
       }

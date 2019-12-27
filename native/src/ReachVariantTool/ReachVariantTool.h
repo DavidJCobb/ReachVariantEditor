@@ -17,6 +17,8 @@ class ReachVariantTool : public QMainWindow {
       static ReachVariantTool& get(); // done differently because the usual "static singleton getter" approach causes Qt to crash on exit if applied to the main window
       //
    private slots:
+      void updateDescriptionCharacterCount();
+      //
    private:
       void _saveFileImpl(bool saveAs);
       //
