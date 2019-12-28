@@ -587,6 +587,25 @@ void ReachVariantTool::openFile() {
       return;
    std::wstring s = fileName.toStdWString();
    auto file    = cobb::mapped_file(s.c_str());
+   if (!file) {
+      QString text = tr("Failed to open the file. %1");
+      //
+      LPVOID message;
+      uint32_t size = FormatMessage(
+         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+         nullptr,
+         file.get_error(),
+         LANG_USER_DEFAULT,
+         (LPTSTR)&message,
+         0,
+         nullptr
+      );
+      text = text.arg((LPCTSTR)message);
+      LocalFree(message);
+      //
+      QMessageBox::information(this, tr("Unable to open file"), text);
+      return;
+   }
    auto variant = new GameVariant();
    if (!variant->read(file)) {
       QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data."));

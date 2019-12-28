@@ -41,6 +41,11 @@ namespace cobb {
       //    certain bool, then the number's value follows it; otherwise, no value is 
       //    encoded into the file and the number should be given a default during read.
       //
+      // The design goal for this class was to make it easier to work with files that 
+      // store bit-aligned data: if you use bitnumbers to hold the data, then you only 
+      // need to specify the bitcount and related details in one place (the field 
+      // definition) rather than two (all read code and all write code).
+      //
       public:
          using underlying_type = underlying;
          using underlying_int  = cobb::strip_enum_t<underlying_type>; // int type if (underlying_type) is an enum

@@ -24,6 +24,99 @@ int main(int argc, char *argv[]) {
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.
 //
+//     - Forge variants are just Megalo variants with additional data at 
+//       the end: two bits for flags (the first of which is another "open 
+//       channel voice" flag); two bits for edit mode (enum; probably from 
+//       Halo 3's "only party leader can edit" setting); six bits for the 
+//       respawn time to use in edit mode (seconds); and then player traits 
+//       for players in edit mode.
+//
+//       It'd be trivial to add support for these, and perhaps even to let 
+//       users switch a game variant between Megalo and Forge modes. I wonder 
+//       if that would allow access to Forge via Custom Games.
+//
+//     - Firefight hasn't been decoded (see below).
+//
+//     - Campaign has been decoded, but I'd be surprised if it were used for 
+//       anything other than Matchmaking. Campaign variants are very minimal; 
+//       there isn't much to load at all.
+//
+//     = It will be easier for the UI to support wildly divergent game modes 
+//       once we've split everything up and moved the code into different 
+//       files.
+//
+//  - Make sure that our code fails gracefully if we try to load a Campaign, 
+//    Firefight, or Forge variant.
+//
+//     - Firefight hasn't been reverse-engineered yet. Now that we know 
+//       that the file formats are bit-aligned, we could conceivably figure 
+//       it out by testing every possible value for every possible setting 
+//       and paying careful attention to what bits change where... but 
+//       that would take a tremendous amount of time.
+//
+//        - Firefight Limited, at least, only has 0x346 bytes of SHA-1-
+//          hashed data.
+//
+//  - Test whether custom block types between mpvr and _eof are kept in the 
+//    file if it's resaved in-game with changes. I want to know if we can 
+//    use a "cobb" block to store metadata; if we ever do a trigger editor, 
+//    that would come in handy.
+//
+//     - Remember to fix up the file lengths when hex-editing blocks in! 
+//       Even the one in MPVR ends up being byte-aligned, so it'll be easy.
+//
+//     - If we add the ability to swap between Megalo and Forge modes, then 
+//       we could use a custom block to preserve the Forge-specific settings 
+//       when dropping a variant down to Megalo.
+//
+//        - My preferred approach would be to put everything under a "cobb" 
+//          block and then, within that block, have byte-aligned subrecords 
+//          a la Bethesda RPGs and script extender co-saves.
+//
+//  - See about reorganizing all of our UI code -- moving everything into 
+//    the "ui" subfolder, etc..
+//
+//     - Split up game_variants/base.h.
+//
+//  - Investigate overhauling bit_or_byte_reader and its writer counterpart: 
+//    consider making a single class that handles bits and bytes, and offering 
+//    two classes (one for bits and one for bytes) that serve as interfaces 
+//    and accessors to it.
+//
+//  - Delete helpers/pointer_to_member.h.
+//
+//  - Fix cobb::sprintfp. IIRC the functions Microsoft provides for printf 
+//    with positional parameter support -- they assert if the buffer is too 
+//    small, rather than returning the number of chars written or the number 
+//    of chars that would've been written.
+//
+//     - We use cobb::sprintfp to stringify OpcodeArgValueScalar when it 
+//       holds a player or team stat index. That's the only place we use it. 
+//       If we do a UI for trigger editing, we'd probably want to use QString 
+//       instead so we can have localization support, and that has its own 
+//       positional parameter implementation.
+//
+//       We might well be able to remove cobb::sprintfp entirely; we could 
+//       just switch it to normal cobb::sprintf for now and then later move 
+//       to QString.
+//
+//  - Consider making INISettingManager consistent with my newer naming and 
+//    coding styles.
+//
+//     - Consider making it configurable such that a program could use it 
+//       to have multiple INI files, and then moving it to helpers. I'm 
+//       thinking that you could template the settings object on a getter 
+//       that returns INISettingManager& such that each settings object 
+//       auto-registers itself with whichever manager [is returned by the 
+//       getter] it's templated on. Then, you could have one manager per 
+//       INI file, each with its own path and contents.
+//
+//       We don't need all that for this program, but that's what it'd 
+//       take for me to want to move the INI stuff to helpers (while 
+//       keeping the actual INI setting definitions separate since those 
+//       are program-specific; ditto for the manager and a setting typedef 
+//       on it).
+//
 //  - Change how we load blocks: we should loop over all blocks in the file, 
 //    instead of assuming that CHDR and MPVR must be at the start. I think 
 //    the game itself makes that assumption but I'm not sure (wouldn't be 
@@ -39,17 +132,12 @@ int main(int argc, char *argv[]) {
 //
 //  - UI
 //
-//     - File header
-//
-//        - Implement editing of the created and edited datestamps.
-//
-//        - Add a button to zero out the XUID and set the "is online ID" 
-//          bool to false. Label it "Strip Xbox LIVE Identifying Info."
-//
 //     - Implement editing for localized strings; start with team names.
 //
 //        - Alternatively, hide the button for that and save string editing 
 //          for a future release.
+//
+//           - Yeah, just remove the button entirely for now.
 //
 //     - Player Traits pages should not be selectable if a variant isn't 
 //       open.
@@ -64,6 +152,12 @@ int main(int argc, char *argv[]) {
 //          wouldn't really change much. We could probably even do a simple 
 //          find-and-replace for the widget names here.
 //
+//        - After we do this, I wonder if we should make ReachEditorState 
+//          a QObject and have it emit a signal when a variant is loaded; 
+//          then, each individual UI page could just QObject::connect to 
+//          catch that, instead of us needing some central place to call 
+//          on everything.
+//
 //        - We could potentially set the split-up pages to be friendly to 
 //          Qt Designer if we compile our program as a DLL (that's what that 
 //          static linkage error re: QDESIGNER_WIDGET_EXPORT was about; it's 
@@ -74,9 +168,7 @@ int main(int argc, char *argv[]) {
 //     - The models I built for the Option Toggles tree-views suck. They were 
 //       good as a "just build one of these for the first time and get it 
 //       working at all" thing but I should redesign them. Among other things, 
-//       I should have the model classes pull directly from the bitsets if 
-//       possible (I don't know if the QModelIndex class allows for that; it 
-//       seems to have to wrap a pointer).
+//       I should actually store the model items as real trees.
 //
 //     - Investigate the possibility of linking option-editing fields to 
 //       their toggles, i.e. displaying an indicator if they've been toggled 
@@ -89,6 +181,9 @@ int main(int argc, char *argv[]) {
 //
 //           - Yeah, but buddy relationships are one-way; given a field, we 
 //             have no way to find the label.
+//
+//        - This will be somewhat easier if we split each page into its 
+//          own widget, I think.
 //
 //     - Remove the option to allow/disallow editing of unsafe Custom Game 
 //       options. I only added it after mistaking the cause of some CTDs I 

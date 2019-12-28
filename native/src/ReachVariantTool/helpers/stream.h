@@ -24,6 +24,14 @@ namespace cobb {
          }
    };
    class bit_or_byte_writer {
+      //
+      // A class containing both a bitwriter and a bytewriter, synching them up to share a 
+      // single buffer. After using one, you must manually call (synchronize) to bring the 
+      // other up to speed on what changes you've made. (The alternative would've been for 
+      // me to make a single class with bit- and byte-writing functionality, along with 
+      // two interface classes to serve as accessors. I suppose that's not impossible and 
+      // it may be better... I might see to it after I've dealt with other tasks.)
+      //
       public:
          bitwriter  bits;
          bytewriter bytes;

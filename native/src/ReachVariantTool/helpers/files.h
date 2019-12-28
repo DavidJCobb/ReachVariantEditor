@@ -11,8 +11,9 @@
 namespace cobb {
    class mapped_file {
       protected:
-         void*    _view = nullptr;
-         uint64_t _size = 0;
+         void*    _view  = nullptr;
+         uint64_t _size  = 0;
+         uint32_t _error = 0; // WinAPI error
       public:
          mapped_file() noexcept {}
          mapped_file(wchar_t const* path) noexcept { this->open(path); }
@@ -24,7 +25,8 @@ namespace cobb {
          void open(wchar_t const* path) noexcept;
          void open(FILE* handle) noexcept;
          //
-         inline operator bool() const noexcept { return this->_view != nullptr; }
+         inline operator bool() const noexcept { return !(this->_error) && this->_view != nullptr; }
+         inline uint32_t get_error() const noexcept { return this->_error; }
          //
          uint32_t read_from(uint32_t pos, void* buffer, uint32_t size) const noexcept {
             std::uintptr_t addr = (std::uintptr_t)this->_view + pos;
