@@ -2,6 +2,7 @@
 #include "game_variants/base.h"
 #include "game_variants/components/loadouts.h"
 #include "game_variants/components/player_traits.h"
+#include "game_variants/types/multiplayer.h"
 
 class ReachEditorState {
    public:
@@ -17,6 +18,21 @@ class ReachEditorState {
       GameVariant*       currentVariant = nullptr;
       ReachPlayerTraits* currentTraits  = nullptr;
       ReachLoadoutPalette* currentLoadoutPalette = nullptr;
+      //
+      GameVariantDataMultiplayer* get_multiplayer_data() noexcept {
+         auto v = this->currentVariant;
+         if (!v)
+            return nullptr;
+         auto& m = v->multiplayer;
+         if (m.data) {
+            switch (m.data->get_type()) {
+               case ReachGameEngine::multiplayer:
+               case ReachGameEngine::forge:
+                  return dynamic_cast<GameVariantDataMultiplayer*>(m.data);
+            }
+         }
+         return nullptr;
+      }
       //
       void take_game_variant(GameVariant* other, const wchar_t* path) noexcept {
          if (this->currentVariant)

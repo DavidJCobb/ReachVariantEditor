@@ -11,6 +11,8 @@
 #include "../../helpers/sha1.h"
 
 bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept {
+   Megalo::ParseState::reset();
+   //
    reader.synchronize();
    auto& stream = reader.bits;
    //

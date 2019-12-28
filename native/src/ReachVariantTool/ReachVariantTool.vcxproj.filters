@@ -145,6 +145,9 @@
     <ClCompile Include="game_variants\types\multiplayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\teams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -373,6 +376,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\types\multiplayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\powerups.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\teams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

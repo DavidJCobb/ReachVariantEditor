@@ -156,10 +156,10 @@ void OptionToggleTreeModel::clear() {
 
 #pragma region MegaloOptionToggleTreeModel - The model for the Megalo options list; a subclass of OptionToggleTreeModel
 MegaloOptionToggleTreeModel::bitset_type* MegaloOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return nullptr;
-   auto& flagset = variant->multiplayer.optionToggles.megalo;
+   auto& flagset = data->optionToggles.megalo;
    switch (type) {
       case OptionToggleFlagType::disabled: return &flagset.disabled;
       case OptionToggleFlagType::hidden:   return &flagset.hidden;
@@ -169,18 +169,18 @@ MegaloOptionToggleTreeModel::bitset_type* MegaloOptionToggleTreeModel::_getToggl
 bool MegaloOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
-      return false;
-   return variant->multiplayer.optionToggles.megalo.disabled.bits.test(index);
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
+      return nullptr;
+   return data->optionToggles.megalo.disabled.bits.test(index);
 }
 bool MegaloOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
-      return false;
-   return variant->multiplayer.optionToggles.megalo.hidden.bits.test(index);
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
+      return nullptr;
+   return data->optionToggles.megalo.hidden.bits.test(index);
 }
 void MegaloOptionToggleTreeModel::modifyFlag(OptionToggleFlagType type, uint16_t index, bool state) noexcept {
    auto toggles = this->_getToggles(type);
@@ -204,10 +204,10 @@ void MegaloOptionToggleTreeModel::modifyAllFlagsOfType(OptionToggleFlagType type
 
 #pragma region EngineOptionToggleTreeModel - The model for the engine options tree; a subclass of OptionToggleTreeModel
 EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return nullptr;
-   auto& flagset = variant->multiplayer.optionToggles.engine;
+   auto& flagset = data->optionToggles.engine;
    switch (type) {
       case OptionToggleFlagType::disabled: return &flagset.disabled;
       case OptionToggleFlagType::hidden:   return &flagset.hidden;
@@ -217,18 +217,18 @@ EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggl
 bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
-      return false;
-   return variant->multiplayer.optionToggles.engine.disabled.bits.test(index);
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
+      return nullptr;
+   return data->optionToggles.engine.disabled.bits.test(index);
 }
 bool EngineOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
-      return false;
-   return variant->multiplayer.optionToggles.engine.hidden.bits.test(index);
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
+      return nullptr;
+   return data->optionToggles.engine.hidden.bits.test(index);
 }
 void EngineOptionToggleTreeModel::modifyFlag(OptionToggleFlagType type, uint16_t index, bool state) noexcept {
    auto toggles = this->_getToggles(type);
@@ -479,10 +479,10 @@ void MegaloOptionToggleTree::updateModelFromGameVariant() {
    if (!model)
       return;
    model->clear();
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return;
-   auto& options = variant->multiplayer.scriptData.options;
+   auto& options = data->scriptData.options;
    for (uint32_t i = 0; i < options.size(); i++) {
       auto& option = options[i];
       QString name;

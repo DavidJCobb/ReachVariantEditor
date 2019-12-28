@@ -11,6 +11,19 @@
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
 #include "../../helpers/stream.h"
+#include "../components/loadouts.h"
+#include "../components/map_permissions.h"
+#include "../components/megalo_game_stats.h"
+#include "../components/megalo_options.h"
+#include "../components/megalo/forge_label.h"
+#include "../components/megalo/trigger.h"
+#include "../components/megalo/variable_declarations.h"
+#include "../components/megalo/widgets.h"
+#include "../components/player_rating_params.h"
+#include "../components/player_traits.h"
+#include "../components/powerups.h"
+#include "../components/teams.h"
+#include "../components/tu1_options.h"
 
 class GameVariantDataMultiplayer : public GameVariantData {
    public:
@@ -125,8 +138,4 @@ class GameVariantDataMultiplayer : public GameVariantData {
          cobb::bitnumber<6, uint8_t> respawnTime = 0;
          ReachPlayerTraits editorTraits;
       } forgeData;
-};
-class GameVariantDataForge : public GameVariantData {
-   public:
-      virtual ReachGameEngine get_type() const noexcept { return ReachGameEngine::forge; }
 };

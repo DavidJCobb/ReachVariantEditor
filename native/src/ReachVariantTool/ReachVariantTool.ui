@@ -203,7 +203,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>9</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -3028,19 +3028,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="specificTeamButtonEditName">
-          <property name="contextMenuPolicy">
-           <enum>Qt::NoContextMenu</enum>
-          </property>
-          <property name="accessibleName">
-           <string>Edit Name</string>
-          </property>
-          <property name="text">
-           <string>Edit...</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0" colspan="3">
          <widget class="QCheckBox" name="specificTeamFlagEnabled">
           <property name="text">
@@ -3099,19 +3086,6 @@
          <widget class="QSpinBox" name="specificTeamInitialDesignator">
           <property name="maximum">
            <number>15</number>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="specificTeamNameLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>1</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Team Name Here</string>
           </property>
          </widget>
         </item>
@@ -3181,6 +3155,22 @@
           </property>
           <property name="buddy">
            <cstring>specificTeamInitialDesignator</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="specificTeamNameLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Team Name Here</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -3884,7 +3874,6 @@
   <tabstop>titleUpdateActiveCamoEnergyBonus</tabstop>
   <tabstop>titleUpdateMagnumDamage</tabstop>
   <tabstop>titleUpdateMagnumFireDelay</tabstop>
-  <tabstop>specificTeamButtonEditName</tabstop>
   <tabstop>specificTeamFlagEnabled</tabstop>
   <tabstop>specificTeamFlagColorPrimary</tabstop>
   <tabstop>specificTeamButtonColorPrimary</tabstop>

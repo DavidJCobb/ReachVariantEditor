@@ -74,7 +74,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          auto u16s = text.toStdU16String();
          const char16_t* value = u16s.c_str();
          variant->contentHeader.data.set_title(value);
-         variant->multiplayer.variantHeader.set_title(value);
+         variant->multiplayer.data->as_multiplayer()->variantHeader.set_title(value);
          //
          if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b)
             this->refreshWindowTitle();
@@ -91,7 +91,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          auto u16s = text.toStdU16String();
          const char16_t* value = u16s.c_str();
          variant->contentHeader.data.set_description(value);
-         variant->multiplayer.variantHeader.set_description(value);
+         variant->multiplayer.data->as_multiplayer()->variantHeader.set_description(value);
       });
       //
       QObject::connect(this->ui.authorGamertag, &QLineEdit::textEdited, [](const QString& text) {
@@ -100,14 +100,14 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             return;
          auto latin = text.toLatin1();
          variant->contentHeader.data.createdBy.set_author_name(latin.constData());
-         variant->multiplayer.variantHeader.createdBy.set_author_name(latin.constData());
+         variant->multiplayer.data->as_multiplayer()->variantHeader.createdBy.set_author_name(latin.constData());
       });
       QObject::connect(this->ui.eraseAuthorXUID, &QPushButton::clicked, [this]() {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
          auto& author_c = variant->contentHeader.data.createdBy;
-         auto& author_m = variant->multiplayer.variantHeader.createdBy;
+         auto& author_m = variant->multiplayer.data->as_multiplayer()->variantHeader.createdBy;
          if (author_c.has_xuid() || author_m.has_xuid()) {
             author_c.erase_xuid();
             author_m.erase_xuid();
@@ -126,7 +126,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             return;
          uint64_t seconds = time.toSecsSinceEpoch();
          variant->contentHeader.data.createdBy.set_datetime(seconds);
-         variant->multiplayer.variantHeader.createdBy.set_datetime(seconds);
+         variant->multiplayer.data->as_multiplayer()->variantHeader.createdBy.set_datetime(seconds);
       });
       QObject::connect(this->ui.editorGamertag, &QLineEdit::textEdited, [](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
@@ -134,14 +134,14 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             return;
          auto latin = text.toLatin1();
          variant->contentHeader.data.modifiedBy.set_author_name(latin.constData());
-         variant->multiplayer.variantHeader.modifiedBy.set_author_name(latin.constData());
+         variant->multiplayer.data->as_multiplayer()->variantHeader.modifiedBy.set_author_name(latin.constData());
       });
       QObject::connect(this->ui.eraseEditorXUID, &QPushButton::clicked, [this]() {
          auto variant = ReachEditorState::get().currentVariant;
          if (!variant)
             return;
          auto& author_c = variant->contentHeader.data.modifiedBy;
-         auto& author_m = variant->multiplayer.variantHeader.modifiedBy;
+         auto& author_m = variant->multiplayer.data->as_multiplayer()->variantHeader.modifiedBy;
          if (author_c.has_xuid() || author_m.has_xuid()) {
             author_c.erase_xuid();
             author_m.erase_xuid();
@@ -160,7 +160,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             return;
          uint64_t seconds = time.toSecsSinceEpoch();
          variant->contentHeader.data.modifiedBy.set_datetime(seconds);
-         variant->multiplayer.variantHeader.modifiedBy.set_datetime(seconds);
+         variant->multiplayer.data->as_multiplayer()->variantHeader.modifiedBy.set_datetime(seconds);
       });
       //
       this->ui.authorGamertag->setValidator(QXBLGamertagValidator::getReachInstance());
@@ -179,7 +179,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QComboBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
-               auto variant = ReachEditorState::get().currentVariant; \
+               auto variant = ReachEditorState::get().get_multiplayer_data(); \
                if (!variant) \
                   return; \
                variant->##field = value; \
@@ -189,7 +189,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QSpinBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
-               auto variant = ReachEditorState::get().currentVariant; \
+               auto variant = ReachEditorState::get().get_multiplayer_data(); \
                if (!variant) \
                   return; \
                variant->##field = value; \
@@ -199,7 +199,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QDoubleSpinBox* widget = w; \
             QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) { \
-               auto variant = ReachEditorState::get().currentVariant; \
+               auto variant = ReachEditorState::get().get_multiplayer_data(); \
                if (!variant) \
                   return; \
                variant->##field = value; \
@@ -209,7 +209,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto variant = ReachEditorState::get().currentVariant; \
+               auto variant = ReachEditorState::get().get_multiplayer_data(); \
                if (!variant) \
                   return; \
                if (widget->isChecked()) \
@@ -222,7 +222,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto variant = ReachEditorState::get().currentVariant; \
+               auto variant = ReachEditorState::get().get_multiplayer_data(); \
                if (!variant) \
                   return; \
                variant->##field = widget->isChecked(); \
@@ -230,46 +230,46 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          };
       #pragma endregion
       { // General
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     multiplayer.options.misc.flags, 4);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralFlag3,                 multiplayer.options.misc.flags, 8);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundTimeLimit,  multiplayer.options.misc.timeLimit);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundLimit,      multiplayer.options.misc.roundLimit);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundsToWin,     multiplayer.options.misc.roundsToWin);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralSuddenDeathTime, multiplayer.options.misc.suddenDeathTime);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralGracePeriod,     multiplayer.options.misc.gracePeriod);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          options.misc.flags, 1);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, options.misc.flags, 2);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     options.misc.flags, 4);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralFlag3,                 options.misc.flags, 8);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundTimeLimit,  options.misc.timeLimit);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundLimit,      options.misc.roundLimit);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundsToWin,     options.misc.roundsToWin);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralSuddenDeathTime, options.misc.suddenDeathTime);
+         reach_main_window_setup_spinbox(this->ui.optionsGeneralGracePeriod,     options.misc.gracePeriod);
       }
       {  // Respawn
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   multiplayer.options.respawn.flags, 1);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag1,          multiplayer.options.respawn.flags, 2);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag2,          multiplayer.options.respawn.flags, 4);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, multiplayer.options.respawn.flags, 8);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnLivesPerRound,     multiplayer.options.respawn.livesPerRound);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnTeamLivesPerRound, multiplayer.options.respawn.teamLivesPerRound);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnTime,       multiplayer.options.respawn.respawnTime);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnSuicidePenalty,    multiplayer.options.respawn.suicidePenalty);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnBetrayalPenalty,   multiplayer.options.respawn.betrayalPenalty);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnGrowth,     multiplayer.options.respawn.respawnGrowth);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnLoadoutCamTime,    multiplayer.options.respawn.loadoutCamTime);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnTraitsDuration,    multiplayer.options.respawn.traitsDuration);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   options.respawn.flags, 1);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag1,          options.respawn.flags, 2);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag2,          options.respawn.flags, 4);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, options.respawn.flags, 8);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnLivesPerRound,     options.respawn.livesPerRound);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnTeamLivesPerRound, options.respawn.teamLivesPerRound);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnTime,       options.respawn.respawnTime);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnSuicidePenalty,    options.respawn.suicidePenalty);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnBetrayalPenalty,   options.respawn.betrayalPenalty);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnGrowth,     options.respawn.respawnGrowth);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnLoadoutCamTime,    options.respawn.loadoutCamTime);
+         reach_main_window_setup_spinbox(this->ui.optionsRespawnTraitsDuration,    options.respawn.traitsDuration);
       }
       {  // Social
-         reach_main_window_setup_bool_checkbox(this->ui.optionsSocialObservers, multiplayer.options.social.observers);
-         reach_main_window_setup_spinbox(this->ui.optionsSocialTeamChanging, multiplayer.options.social.teamChanges);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialFriendlyFire,    multiplayer.options.social.flags, 0x01);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialBetrayalBooting, multiplayer.options.social.flags, 0x02);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialProximityVoice,  multiplayer.options.social.flags, 0x04);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialGlobalVoice,     multiplayer.options.social.flags, 0x08);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, multiplayer.options.social.flags, 0x10);
+         reach_main_window_setup_bool_checkbox(this->ui.optionsSocialObservers, options.social.observers);
+         reach_main_window_setup_spinbox(this->ui.optionsSocialTeamChanging, options.social.teamChanges);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialFriendlyFire,    options.social.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialBetrayalBooting, options.social.flags, 0x02);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialProximityVoice,  options.social.flags, 0x04);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialGlobalVoice,     options.social.flags, 0x08);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, options.social.flags, 0x10);
       }
       {  // Map and Game
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapGrenadesEnabled, multiplayer.options.map.flags, 0x01);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapShortcutsEnabled, multiplayer.options.map.flags, 0x02);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, multiplayer.options.map.flags, 0x04);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapPowerupsEnabled, multiplayer.options.map.flags, 0x08);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapTurretsEnabled, multiplayer.options.map.flags, 0x10);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsMapIndestructibleVehicles, multiplayer.options.map.flags, 0x20);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapGrenadesEnabled, options.map.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapShortcutsEnabled, options.map.flags, 0x02);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, options.map.flags, 0x04);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapPowerupsEnabled, options.map.flags, 0x08);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapTurretsEnabled, options.map.flags, 0x10);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsMapIndestructibleVehicles, options.map.flags, 0x20);
          {  // Weapon Set
             QComboBox* widget = this->ui.optionsMapWeaponSet;
             //
@@ -279,8 +279,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             //  1 = Covenant
             //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-               auto variant = ReachEditorState::get().currentVariant;
-               if (!variant)
+               auto data = ReachEditorState::get().get_multiplayer_data();
+               if (!data)
                   return;
                int8_t value;
                switch (index) {
@@ -293,7 +293,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                   default:
                      value = index - 1;
                }
-               variant->multiplayer.options.map.weaponSet = value;
+               data->options.map.weaponSet = value;
             });
          }
          {  // Vehicle Set
@@ -305,8 +305,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             // 12 = No Vehicles
             //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-               auto variant = ReachEditorState::get().currentVariant;
-               if (!variant)
+               auto data = ReachEditorState::get().get_multiplayer_data();
+               if (!data)
                   return;
                int8_t value;
                switch (index) {
@@ -316,25 +316,22 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                   default:
                      value = index - 1;
                }
-               variant->multiplayer.options.map.vehicleSet = value;
+               data->options.map.vehicleSet = value;
             });
          }
-         reach_main_window_setup_spinbox(this->ui.optionsMapRedPowerupDuration, multiplayer.options.map.powerups.red.duration);
-         reach_main_window_setup_spinbox(this->ui.optionsMapBluePowerupDuration, multiplayer.options.map.powerups.blue.duration);
-         reach_main_window_setup_spinbox(this->ui.optionsMapYellowPowerupDuration, multiplayer.options.map.powerups.yellow.duration);
+         reach_main_window_setup_spinbox(this->ui.optionsMapRedPowerupDuration, options.map.powerups.red.duration);
+         reach_main_window_setup_spinbox(this->ui.optionsMapBluePowerupDuration, options.map.powerups.blue.duration);
+         reach_main_window_setup_spinbox(this->ui.optionsMapYellowPowerupDuration, options.map.powerups.yellow.duration);
       }
       {  // Team
-         reach_main_window_setup_spinbox(this->ui.optionsTeamScoringMethod, multiplayer.options.team.scoring);
-         reach_main_window_setup_combobox(this->ui.optionsTeamPlayerSpecies, multiplayer.options.team.species);
-         reach_main_window_setup_spinbox(this->ui.optionsTeamDesignatorSwitchType, multiplayer.options.team.designatorSwitchType);
+         reach_main_window_setup_spinbox(this->ui.optionsTeamScoringMethod, options.team.scoring);
+         reach_main_window_setup_combobox(this->ui.optionsTeamPlayerSpecies, options.team.species);
+         reach_main_window_setup_spinbox(this->ui.optionsTeamDesignatorSwitchType, options.team.designatorSwitchType);
       }
       {  // Loadout Base Options
-         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag0, multiplayer.options.loadouts.flags, 0x01);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag1, multiplayer.options.loadouts.flags, 0x02);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag0, options.loadouts.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.optionsLoadoutFlag1, options.loadouts.flags, 0x02);
       }
-      //
-      // TODO: other pages
-      //
       {  // Specific Team Settings
          {  // Add each team to the navigation
             auto tree = this->ui.MainTreeview;
@@ -395,13 +392,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          reach_team_pane_setup_combobox(this->ui.specificTeamSpecies, spartanOrElite);
          reach_team_pane_setup_spinbox(this->ui.specificTeamFireteamCount, fireteamCount);
          reach_team_pane_setup_spinbox(this->ui.specificTeamInitialDesignator, initialDesignator);
-         QObject::connect(this->ui.specificTeamButtonEditName, &QPushButton::clicked, [this]() {
-            //
-            // TODO
-            //
-            QMessageBox::information(this, tr("Not implemented"), tr("Editing of localized strings is not yet implemented."));
-            return;
-         });
          QObject::connect(this->ui.specificTeamButtonColorPrimary, &QPushButton::clicked, [this]() {
             auto team = this->_getCurrentTeam();
             if (!team)
@@ -532,29 +522,29 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          #undef reach_traits_pane_setup_spinbox
       }
       {  // Title Update Config
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, multiplayer.titleUpdateData.flags, 0x04);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, multiplayer.titleUpdateData.flags, 0x08);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, multiplayer.titleUpdateData.flags, 0x10);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, multiplayer.titleUpdateData.flags, 0x20);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag6, multiplayer.titleUpdateData.flags, 0x40);
-         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag7, multiplayer.titleUpdateData.flags, 0x80);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateBleedthrough, titleUpdateData.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, titleUpdateData.flags, 0x02);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, titleUpdateData.flags, 0x04);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, titleUpdateData.flags, 0x08);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, titleUpdateData.flags, 0x10);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, titleUpdateData.flags, 0x20);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag6, titleUpdateData.flags, 0x40);
+         reach_main_window_setup_flag_checkbox(this->ui.titleUpdateFlag7, titleUpdateData.flags, 0x80);
          {  // Precision Bloom
             QDoubleSpinBox* widget = this->ui.titleUpdatePrecisionBloom;
             QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](int value) {
-               auto variant = ReachEditorState::get().currentVariant;
-               if (!variant)
+               auto data = ReachEditorState::get().get_multiplayer_data();
+               if (!data)
                   return;
-               variant->multiplayer.titleUpdateData.precisionBloom = value * 5.0F / 100.0F; // normalize from percentage of vanilla to internal format
+               data->titleUpdateData.precisionBloom = value * 5.0F / 100.0F; // normalize from percentage of vanilla to internal format
             });
          }
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrain, multiplayer.titleUpdateData.armorLockDamageDrain);
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrainLimit, multiplayer.titleUpdateData.armorLockDamageDrainLimit);
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergyBonus, multiplayer.titleUpdateData.activeCamoEnergyBonus);
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergy, multiplayer.titleUpdateData.activeCamoEnergy);
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumDamage, multiplayer.titleUpdateData.magnumDamage);
-         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumFireDelay, multiplayer.titleUpdateData.magnumFireDelay);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrain, titleUpdateData.armorLockDamageDrain);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergyBonus, titleUpdateData.activeCamoEnergyBonus);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateActiveCamoEnergy, titleUpdateData.activeCamoEnergy);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumDamage, titleUpdateData.magnumDamage);
+         reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumFireDelay, titleUpdateData.magnumFireDelay);
       }
       //
       #undef reach_main_window_setup_combobox
@@ -669,6 +659,7 @@ void ReachVariantTool::onSelectedPageChanged() {
    auto text    = sel->text(0);
    auto stack   = this->ui.MainContentView;
    auto variant = ReachEditorState::get().currentVariant;
+   auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
    if (text == tr("Metadata", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageGameVariantHeader);
       return;
@@ -701,14 +692,14 @@ void ReachVariantTool::onSelectedPageChanged() {
       stack->setCurrentWidget(this->ui.PageOptionsLoadout);
       return;
    }
-   if (variant) { // traits; loadout palettes; scripted traits; teams
+   if (variant && mp_data) { // traits; loadout palettes; scripted traits; teams
       if (auto p = sel->parent()) {
          const auto text = p->text(0);
          if (text == tr("Script-Specific Options", "MainTreeview")) {
             auto t = sel->type();
             if (t >= QTreeWidgetItem::UserType) {
                size_t index = t - QTreeWidgetItem::UserType;
-               this->switchToPlayerTraits(&variant->multiplayer.scriptData.traits[index]);
+               this->switchToPlayerTraits(&mp_data->scriptData.traits[index]);
                return;
             }
          }
@@ -726,23 +717,23 @@ void ReachVariantTool::onSelectedPageChanged() {
       }
       //
       if (text == tr("Respawn Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&variant->multiplayer.options.respawn.traits);
+         this->switchToPlayerTraits(&mp_data->options.respawn.traits);
          return;
       }
       if (text == tr("Base Player Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&variant->multiplayer.options.map.baseTraits);
+         this->switchToPlayerTraits(&mp_data->options.map.baseTraits);
          return;
       }
       if (text == tr("Red Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.red.traits);
+         this->switchToPlayerTraits(&mp_data->options.map.powerups.red.traits);
          return;
       }
       if (text == tr("Blue Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.blue.traits);
+         this->switchToPlayerTraits(&mp_data->options.map.powerups.blue.traits);
          return;
       }
       if (text == tr("Custom Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&variant->multiplayer.options.map.powerups.yellow.traits);
+         this->switchToPlayerTraits(&mp_data->options.map.powerups.yellow.traits);
          return;
       }
       //
@@ -756,7 +747,7 @@ void ReachVariantTool::onSelectedPageChanged() {
       };
       for (uint8_t i = 0; i < std::extent<decltype(paletteNames)>::value; i++) {
          if (text == paletteNames[i]) {
-            this->switchToLoadoutPalette(&variant->multiplayer.options.loadouts.palettes[i]);
+            this->switchToLoadoutPalette(&mp_data->options.loadouts.palettes[i]);
             return;
          }
       }
@@ -775,6 +766,9 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    auto variant = editor.currentVariant;
    if (!variant)
       return;
+   auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
+   if (!mp_data)
+      return;
    {  // Metadata
       const QSignalBlocker blocker0(this->ui.headerName);
       const QSignalBlocker blocker1(this->ui.headerDesc);
@@ -782,15 +776,15 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       const QSignalBlocker blocker3(this->ui.editorGamertag);
       const QSignalBlocker blocker4(this->ui.createdOnDate);
       const QSignalBlocker blocker5(this->ui.editedOnDate);
-      this->ui.headerName->setText(QString::fromUtf16(variant->multiplayer.variantHeader.title));
-      this->ui.headerDesc->setPlainText(QString::fromUtf16(variant->multiplayer.variantHeader.description));
-      this->ui.authorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.createdBy.author));
-      this->ui.editorGamertag->setText(QString::fromLatin1(variant->multiplayer.variantHeader.modifiedBy.author));
+      this->ui.headerName->setText(QString::fromUtf16(mp_data->variantHeader.title));
+      this->ui.headerDesc->setPlainText(QString::fromUtf16(mp_data->variantHeader.description));
+      this->ui.authorGamertag->setText(QString::fromLatin1(mp_data->variantHeader.createdBy.author));
+      this->ui.editorGamertag->setText(QString::fromLatin1(mp_data->variantHeader.modifiedBy.author));
       //
       QDateTime temp;
-      temp.setSecsSinceEpoch(variant->multiplayer.variantHeader.createdBy.timestamp);
+      temp.setSecsSinceEpoch(mp_data->variantHeader.createdBy.timestamp);
       this->ui.createdOnDate->setDateTime(temp);
-      temp.setSecsSinceEpoch(variant->multiplayer.variantHeader.modifiedBy.timestamp);
+      temp.setSecsSinceEpoch(mp_data->variantHeader.modifiedBy.timestamp);
       this->ui.editedOnDate->setDateTime(temp);
    }
    //
@@ -805,72 +799,72 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setCurrentIndex( variant->##field ); \
+         widget->setCurrentIndex( mp_data->##field ); \
       };
    #define reach_main_window_update_spinbox(w, field) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setValue( variant->##field ); \
+         widget->setValue( mp_data->##field ); \
       };
    #define reach_main_window_update_flag_checkbox(w, field, mask) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setChecked(( variant->##field & mask ) != 0); \
+         widget->setChecked(( mp_data->##field & mask ) != 0); \
       };
    #define reach_main_window_update_bool_checkbox(w, field) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setChecked( variant->##field ); \
+         widget->setChecked( mp_data->##field ); \
       };
    #pragma endregion
    {  // General
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          multiplayer.options.misc.flags, 1);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, multiplayer.options.misc.flags, 2);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     multiplayer.options.misc.flags, 4);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralFlag3,                 multiplayer.options.misc.flags, 8);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundTimeLimit,  multiplayer.options.misc.timeLimit);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundLimit,      multiplayer.options.misc.roundLimit);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundsToWin,     multiplayer.options.misc.roundsToWin);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralSuddenDeathTime, multiplayer.options.misc.suddenDeathTime);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralGracePeriod,     multiplayer.options.misc.gracePeriod);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          options.misc.flags, 1);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, options.misc.flags, 2);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     options.misc.flags, 4);
+      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralFlag3,                 options.misc.flags, 8);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundTimeLimit,  options.misc.timeLimit);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundLimit,      options.misc.roundLimit);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundsToWin,     options.misc.roundsToWin);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralSuddenDeathTime, options.misc.suddenDeathTime);
+      reach_main_window_update_spinbox(this->ui.optionsGeneralGracePeriod,     options.misc.gracePeriod);
    }
    {  // Respawn
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   multiplayer.options.respawn.flags, 1);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag1,          multiplayer.options.respawn.flags, 2);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag2,          multiplayer.options.respawn.flags, 4);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, multiplayer.options.respawn.flags, 8);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnLivesPerRound,     multiplayer.options.respawn.livesPerRound);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnTeamLivesPerRound, multiplayer.options.respawn.teamLivesPerRound);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnTime,       multiplayer.options.respawn.respawnTime);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnSuicidePenalty,    multiplayer.options.respawn.suicidePenalty);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnBetrayalPenalty,   multiplayer.options.respawn.betrayalPenalty);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnGrowth,     multiplayer.options.respawn.respawnGrowth);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnLoadoutCamTime,    multiplayer.options.respawn.loadoutCamTime);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnTraitsDuration,    multiplayer.options.respawn.traitsDuration);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   options.respawn.flags, 1);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag1,          options.respawn.flags, 2);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag2,          options.respawn.flags, 4);
+      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, options.respawn.flags, 8);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnLivesPerRound,     options.respawn.livesPerRound);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnTeamLivesPerRound, options.respawn.teamLivesPerRound);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnTime,       options.respawn.respawnTime);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnSuicidePenalty,    options.respawn.suicidePenalty);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnBetrayalPenalty,   options.respawn.betrayalPenalty);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnGrowth,     options.respawn.respawnGrowth);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnLoadoutCamTime,    options.respawn.loadoutCamTime);
+      reach_main_window_update_spinbox(this->ui.optionsRespawnTraitsDuration,    options.respawn.traitsDuration);
    }
    {  // Social
-      reach_main_window_update_bool_checkbox(this->ui.optionsSocialObservers, multiplayer.options.social.observers);
-      reach_main_window_update_spinbox(this->ui.optionsSocialTeamChanging, multiplayer.options.social.teamChanges);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialFriendlyFire,    multiplayer.options.social.flags, 0x01);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialBetrayalBooting, multiplayer.options.social.flags, 0x02);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialProximityVoice,  multiplayer.options.social.flags, 0x04);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialGlobalVoice,     multiplayer.options.social.flags, 0x08);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, multiplayer.options.social.flags, 0x10);
+      reach_main_window_update_bool_checkbox(this->ui.optionsSocialObservers, options.social.observers);
+      reach_main_window_update_spinbox(this->ui.optionsSocialTeamChanging, options.social.teamChanges);
+      reach_main_window_update_flag_checkbox(this->ui.optionsSocialFriendlyFire,    options.social.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.optionsSocialBetrayalBooting, options.social.flags, 0x02);
+      reach_main_window_update_flag_checkbox(this->ui.optionsSocialProximityVoice,  options.social.flags, 0x04);
+      reach_main_window_update_flag_checkbox(this->ui.optionsSocialGlobalVoice,     options.social.flags, 0x08);
+      reach_main_window_update_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, options.social.flags, 0x10);
    }
    {  // Map and Game
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapGrenadesEnabled, multiplayer.options.map.flags, 0x01);
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapShortcutsEnabled, multiplayer.options.map.flags, 0x02);
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, multiplayer.options.map.flags, 0x04);
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapPowerupsEnabled, multiplayer.options.map.flags, 0x08);
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapTurretsEnabled, multiplayer.options.map.flags, 0x10);
-      reach_main_window_update_flag_checkbox(this->ui.optionsMapIndestructibleVehicles, multiplayer.options.map.flags, 0x20);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapGrenadesEnabled, options.map.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapShortcutsEnabled, options.map.flags, 0x02);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapAbilitiesEnabled, options.map.flags, 0x04);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapPowerupsEnabled, options.map.flags, 0x08);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapTurretsEnabled, options.map.flags, 0x10);
+      reach_main_window_update_flag_checkbox(this->ui.optionsMapIndestructibleVehicles, options.map.flags, 0x20);
       {  // Weapon Set
          QComboBox* widget = this->ui.optionsMapWeaponSet;
          const QSignalBlocker blocker(widget);
-         auto value = variant->multiplayer.options.map.weaponSet;
+         auto value = mp_data->options.map.weaponSet;
          int  index;
          switch (value) {
             case -2:
@@ -887,7 +881,7 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       {  // Vehicle Set
          QComboBox* widget = this->ui.optionsMapVehicleSet;
          const QSignalBlocker blocker(widget);
-         auto value = variant->multiplayer.options.map.vehicleSet;
+         auto value = mp_data->options.map.vehicleSet;
          int  index;
          switch (value) {
             case -2:
@@ -898,39 +892,39 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
          }
          widget->setCurrentIndex(index);
       }
-      reach_main_window_update_spinbox(this->ui.optionsMapRedPowerupDuration, multiplayer.options.map.powerups.red.duration);
-      reach_main_window_update_spinbox(this->ui.optionsMapBluePowerupDuration, multiplayer.options.map.powerups.blue.duration);
-      reach_main_window_update_spinbox(this->ui.optionsMapYellowPowerupDuration, multiplayer.options.map.powerups.yellow.duration);
+      reach_main_window_update_spinbox(this->ui.optionsMapRedPowerupDuration, options.map.powerups.red.duration);
+      reach_main_window_update_spinbox(this->ui.optionsMapBluePowerupDuration, options.map.powerups.blue.duration);
+      reach_main_window_update_spinbox(this->ui.optionsMapYellowPowerupDuration, options.map.powerups.yellow.duration);
    }
    {  // Team
-      reach_main_window_update_spinbox(this->ui.optionsTeamScoringMethod, multiplayer.options.team.scoring);
-      reach_main_window_update_combobox(this->ui.optionsTeamPlayerSpecies, multiplayer.options.team.species);
-      reach_main_window_update_spinbox(this->ui.optionsTeamDesignatorSwitchType, multiplayer.options.team.designatorSwitchType);
+      reach_main_window_update_spinbox(this->ui.optionsTeamScoringMethod, options.team.scoring);
+      reach_main_window_update_combobox(this->ui.optionsTeamPlayerSpecies, options.team.species);
+      reach_main_window_update_spinbox(this->ui.optionsTeamDesignatorSwitchType, options.team.designatorSwitchType);
    }
    {  // Loadout Base Options
-      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag0, multiplayer.options.loadouts.flags, 0x01);
-      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag1, multiplayer.options.loadouts.flags, 0x02);
+      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag0, options.loadouts.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.optionsLoadoutFlag1, options.loadouts.flags, 0x02);
    }
    {  // Title Update Config
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateBleedthrough, multiplayer.titleUpdateData.flags, 0x01);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, multiplayer.titleUpdateData.flags, 0x02);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, multiplayer.titleUpdateData.flags, 0x04);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, multiplayer.titleUpdateData.flags, 0x08);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, multiplayer.titleUpdateData.flags, 0x10);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, multiplayer.titleUpdateData.flags, 0x20);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag6, multiplayer.titleUpdateData.flags, 0x40);
-      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag7, multiplayer.titleUpdateData.flags, 0x80);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateBleedthrough, titleUpdateData.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCantShed, titleUpdateData.flags, 0x02);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateArmorLockCanBeStuck, titleUpdateData.flags, 0x04);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateEnableActiveCamoModifiers, titleUpdateData.flags, 0x08);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateLimitSwordBlockToSword, titleUpdateData.flags, 0x10);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateAutomaticMagnum, titleUpdateData.flags, 0x20);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag6, titleUpdateData.flags, 0x40);
+      reach_main_window_update_flag_checkbox(this->ui.titleUpdateFlag7, titleUpdateData.flags, 0x80);
       {  // Precision Bloom
          auto widget = this->ui.titleUpdatePrecisionBloom;
          const QSignalBlocker blocker(widget);
-         widget->setValue(variant->multiplayer.titleUpdateData.precisionBloom * 100.0F / 5.0F); // normalize to percentage of vanilla
+         widget->setValue(mp_data->titleUpdateData.precisionBloom * 100.0F / 5.0F); // normalize to percentage of vanilla
       }
-      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrain, multiplayer.titleUpdateData.armorLockDamageDrain);
-      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrainLimit, multiplayer.titleUpdateData.armorLockDamageDrainLimit);
-      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergyBonus, multiplayer.titleUpdateData.activeCamoEnergyBonus);
-      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergy, multiplayer.titleUpdateData.activeCamoEnergy);
-      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumDamage, multiplayer.titleUpdateData.magnumDamage);
-      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumFireDelay, multiplayer.titleUpdateData.magnumFireDelay);
+      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrain, titleUpdateData.armorLockDamageDrain);
+      reach_main_window_update_spinbox(this->ui.titleUpdateArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
+      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergyBonus, titleUpdateData.activeCamoEnergyBonus);
+      reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergy, titleUpdateData.activeCamoEnergy);
+      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumDamage, titleUpdateData.magnumDamage);
+      reach_main_window_update_spinbox(this->ui.titleUpdateMagnumFireDelay, titleUpdateData.magnumFireDelay);
    }
    //
    #undef reach_main_window_update_combobox
@@ -1045,10 +1039,10 @@ void ReachVariantTool::refreshScriptedPlayerTraitList() {
    }
    for (QTreeWidgetItem* child : branch->takeChildren())
       delete child;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return;
-   auto& t = variant->multiplayer.scriptData.traits;
+   auto& t = data->scriptData.traits;
    for (size_t i = 0; i < t.size(); i++) {
       auto item = new QTreeWidgetItem(branch, QTreeWidgetItem::UserType + i);
       auto name = t[i].name;
@@ -1085,8 +1079,8 @@ void ReachVariantTool::refreshWindowTitle() {
 //
 namespace {
    void _onMegaloComboboxChange(QComboBox* widget, int index) {
-      auto  variant = ReachEditorState::get().currentVariant;
-      if (!variant)
+      auto data = ReachEditorState::get().get_multiplayer_data();
+      if (!data)
          return;
       auto v = widget->property("MegaloOptionIndex");
       if (!v.isValid())
@@ -1094,15 +1088,15 @@ namespace {
       int32_t i = v.toInt();
       if (i < 0)
          return;
-      auto& list   = variant->multiplayer.scriptData.options;
+      auto& list   = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = variant->multiplayer.scriptData.options[i];
+      auto& option = data->scriptData.options[i];
       option.currentValueIndex = index;
    }
    void _onMegaloSliderChange(QSlider* widget, int value) {
-      auto  variant = ReachEditorState::get().currentVariant;
-      if (!variant)
+      auto data = ReachEditorState::get().get_multiplayer_data();
+      if (!data)
          return;
       auto v = widget->property("MegaloOptionIndex");
       if (!v.isValid())
@@ -1110,10 +1104,10 @@ namespace {
       int32_t i = v.toInt();
       if (i < 0)
          return;
-      auto& list = variant->multiplayer.scriptData.options;
+      auto& list = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = variant->multiplayer.scriptData.options[i];
+      auto& option = data->scriptData.options[i];
       option.rangeCurrent = value;
    }
 }
@@ -1129,10 +1123,10 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
       while ((child = layout->takeAt(0)) != nullptr)
          delete child;
    }
-   auto  variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return;
-   const auto& options = variant->multiplayer.scriptData.options;
+   const auto& options = data->scriptData.options;
    for (uint32_t i = 0; i < options.size(); i++) {
       auto& option = options[i];
       auto  desc   = option.desc;
@@ -1264,8 +1258,8 @@ void ReachVariantTool::switchToTeam(int8_t teamIndex) {
 ReachTeamData* ReachVariantTool::_getCurrentTeam() const noexcept {
    if (this->currentTeam < 0)
       return nullptr;
-   auto variant = ReachEditorState::get().currentVariant;
-   if (!variant)
+   auto data = ReachEditorState::get().get_multiplayer_data();
+   if (!data)
       return nullptr;
-   return &variant->multiplayer.options.team.teams[this->currentTeam];
+   return &data->options.team.teams[this->currentTeam];
 }

@@ -1,9 +1,9 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include "../helpers/bitnumber.h"
-#include "../helpers/bitreader.h"
-#include "../helpers/bitwriter.h"
+#include "../../helpers/bitnumber.h"
+#include "../../helpers/bitreader.h"
+#include "../../helpers/bitwriter.h"
 
 class ReachPlayerRatingParams {
    public:
