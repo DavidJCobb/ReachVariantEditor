@@ -1,5 +1,5 @@
 #include "enums.h"
-#include "../../helpers/strings.h"
+#include "../../../helpers/strings.h"
 
 namespace Megalo {
    void SmartEnum::to_string(std::string& out, uint32_t value) const noexcept {

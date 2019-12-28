@@ -2,13 +2,15 @@
 #include "../helpers/bitreader.h"
 #include "../helpers/bitwriter.h"
 
-#include "megalo/actions.h"
-#include "megalo/conditions.h"
-#include "megalo/limits.h"
-#include "megalo/parse_error_reporting.h"
+#include "components/megalo/actions.h"
+#include "components/megalo/conditions.h"
+#include "components/megalo/limits.h"
+#include "components/megalo/parse_error_reporting.h"
 
 #include "../formats/sha1.h"
 #include "../helpers/sha1.h"
+
+#include "types/multiplayer.h"
 
 bool BlamHeader::read(cobb::bytereader& stream) noexcept {
    this->header.read(stream);
@@ -205,6 +207,9 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
    stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
    offset_before_hashable = stream.get_bytespan();
    this->type.read(stream);
+   //
+   // Conditional on (this->type), we read different data for Megalo, Forge, Firefight, and Campaign.
+   //
    stream.read(this->encodingVersion);
    stream.read(this->engineVersion);
    this->variantHeader.read(stream);

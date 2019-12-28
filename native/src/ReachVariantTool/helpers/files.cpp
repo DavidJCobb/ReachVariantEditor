@@ -1,5 +1,4 @@
 #include "files.h"
-#include <cassert>
 #include <sys/stat.h>
 #include "intrusive_windows_defines.h"
 

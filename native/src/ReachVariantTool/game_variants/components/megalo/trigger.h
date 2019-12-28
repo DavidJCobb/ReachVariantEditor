@@ -6,10 +6,10 @@
 #include "conditions.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
-#include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
-#include "../../helpers/bitwriter.h"
-#include "../../helpers/bitwise.h"
+#include "../../../helpers/bitnumber.h"
+#include "../../../helpers/bitreader.h"
+#include "../../../helpers/bitwriter.h"
+#include "../../../helpers/bitwise.h"
 
 namespace Megalo {
    enum class block_type : uint8_t {

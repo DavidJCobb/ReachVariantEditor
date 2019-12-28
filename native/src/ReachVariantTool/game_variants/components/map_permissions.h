@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-#include "../helpers/bitnumber.h"
-#include "../helpers/bitreader.h"
-#include "../helpers/bitwriter.h"
+#include "../../helpers/bitnumber.h"
+#include "../../helpers/bitreader.h"
+#include "../../helpers/bitwriter.h"
 
 namespace reach {
    enum class map_permission_type : uint8_t {

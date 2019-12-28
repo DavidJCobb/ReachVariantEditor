@@ -57,22 +57,6 @@ int main(int argc, char *argv[]) {
 //        - Firefight Limited, at least, only has 0x346 bytes of SHA-1-
 //          hashed data.
 //
-//  - Test whether custom block types between mpvr and _eof are kept in the 
-//    file if it's resaved in-game with changes. I want to know if we can 
-//    use a "cobb" block to store metadata; if we ever do a trigger editor, 
-//    that would come in handy.
-//
-//     - Remember to fix up the file lengths when hex-editing blocks in! 
-//       Even the one in MPVR ends up being byte-aligned, so it'll be easy.
-//
-//     - If we add the ability to swap between Megalo and Forge modes, then 
-//       we could use a custom block to preserve the Forge-specific settings 
-//       when dropping a variant down to Megalo.
-//
-//        - My preferred approach would be to put everything under a "cobb" 
-//          block and then, within that block, have byte-aligned subrecords 
-//          a la Bethesda RPGs and script extender co-saves.
-//
 //  - See about reorganizing all of our UI code -- moving everything into 
 //    the "ui" subfolder, etc..
 //
@@ -191,6 +175,16 @@ int main(int argc, char *argv[]) {
 //       out-of-bounds values in some bitfields).
 //
 // ==========================================================================
+//
+//  - Test whether custom block types between mpvr and _eof are kept in the 
+//    file if it's resaved in-game with changes. I want to know if we can 
+//    use a "cobb" block to store metadata; if we ever do a trigger editor, 
+//    that would come in handy.
+//
+//     = Testing indicates that the game discards all unknown blocks when 
+//       resaving a file. The only way to insert custom metadata would be 
+//       to toss it into unused space in MPVR and hope the game ignores 
+//       that.
 //
 //  - Begin testing to identify further unknown information in Reach.
 //

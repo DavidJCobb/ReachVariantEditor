@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <type_traits>
-#include "../../helpers/bitwise.h"
+#include "../../../helpers/bitwise.h"
 
 namespace Megalo {
    class SmartEnum {

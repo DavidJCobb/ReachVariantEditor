@@ -1,9 +1,9 @@
 #pragma once
 #include <type_traits>
-#include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
-#include "../../helpers/bitwriter.h"
-#include "../../formats/localized_string_table.h"
+#include "../../../helpers/bitnumber.h"
+#include "../../../helpers/bitreader.h"
+#include "../../../helpers/bitwriter.h"
+#include "../../../formats/localized_string_table.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
 

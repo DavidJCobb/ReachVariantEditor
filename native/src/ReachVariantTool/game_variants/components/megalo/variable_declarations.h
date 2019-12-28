@@ -3,9 +3,9 @@
 #include "variables_and_scopes.h"
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
-#include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
-#include "../../helpers/bitwriter.h"
+#include "../../../helpers/bitnumber.h"
+#include "../../../helpers/bitreader.h"
+#include "../../../helpers/bitwriter.h"
 
 namespace Megalo {
    enum class variable_network_priority {

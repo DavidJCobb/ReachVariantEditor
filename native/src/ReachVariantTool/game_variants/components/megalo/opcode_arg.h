@@ -1,9 +1,9 @@
 #pragma once
 #include <cassert>
 #include <string>
-#include "../../helpers/bitreader.h"
-#include "../../helpers/bitwriter.h"
-#include "../../helpers/strings.h"
+#include "../../../helpers/bitreader.h"
+#include "../../../helpers/bitwriter.h"
+#include "../../../helpers/strings.h"
 #include "enums.h"
 #include "variables_and_scopes.h"
 

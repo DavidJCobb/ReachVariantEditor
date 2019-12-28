@@ -1,7 +1,7 @@
 #pragma once
 #include "game_variants/base.h"
-#include "game_variants/loadouts.h"
-#include "game_variants/player_traits.h"
+#include "game_variants/components/loadouts.h"
+#include "game_variants/components/player_traits.h"
 
 class ReachEditorState {
    public:

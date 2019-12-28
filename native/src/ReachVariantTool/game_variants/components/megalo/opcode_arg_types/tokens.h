@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../helpers/bitnumber.h"
+#include "../../../../helpers/bitnumber.h"
 #include "../limits.h"
 #include "../opcode_arg.h"
 #include "object.h"

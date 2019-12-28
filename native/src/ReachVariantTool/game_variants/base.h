@@ -13,17 +13,32 @@
 #include "../helpers/bytewriter.h"
 #include "../helpers/files.h"
 #include "../helpers/stream.h"
-#include "loadouts.h"
-#include "map_permissions.h"
-#include "megalo_game_stats.h"
-#include "megalo_options.h"
-#include "megalo/forge_label.h"
-#include "megalo/trigger.h"
-#include "megalo/variable_declarations.h"
-#include "megalo/widgets.h"
-#include "player_rating_params.h"
-#include "player_traits.h"
-#include "tu1_options.h"
+#include "components/loadouts.h"
+#include "components/map_permissions.h"
+#include "components/megalo_game_stats.h"
+#include "components/megalo_options.h"
+#include "components/megalo/forge_label.h"
+#include "components/megalo/trigger.h"
+#include "components/megalo/variable_declarations.h"
+#include "components/megalo/widgets.h"
+#include "components/player_rating_params.h"
+#include "components/player_traits.h"
+#include "components/tu1_options.h"
+
+enum class ReachGameEngine : uint8_t {
+   none,
+   forge,
+   multiplayer,
+   campaign,
+   firefight,
+};
+class GameVariantData {
+   public:
+      virtual ReachGameEngine get_type() const noexcept { return ReachGameEngine::none; }
+      virtual bool read(cobb::bit_or_byte_reader&) noexcept = 0;
+      virtual void write(cobb::bit_or_byte_writer&) const noexcept = 0;
+      virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
+};
 
 class BlamHeader {
    public:
@@ -140,6 +155,8 @@ class ReachBlockMPVR {
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
       uint8_t  hashSHA1[0x14];
       cobb::bitnumber<4, uint8_t, true> type;
+      GameVariantData* data = nullptr;
+
       uint32_t encodingVersion;
       uint32_t engineVersion;
       GameVariantHeader variantHeader;

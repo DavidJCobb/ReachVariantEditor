@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
-#include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
-#include "../../helpers/bitwriter.h"
+#include "../../../helpers/bitnumber.h"
+#include "../../../helpers/bitreader.h"
+#include "../../../helpers/bitwriter.h"
 
 namespace Megalo {
    class HUDWidgetDeclaration {

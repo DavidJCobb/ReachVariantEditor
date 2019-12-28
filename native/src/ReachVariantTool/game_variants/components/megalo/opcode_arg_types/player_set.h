@@ -1,6 +1,6 @@
 #pragma once
 #include "player.h"
-#include "../../../helpers/bitnumber.h"
+#include "../../../../helpers/bitnumber.h"
 
 namespace Megalo {
    enum class PlayerSetType {

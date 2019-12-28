@@ -1,6 +1,6 @@
 #pragma once
 #include <QComboBox>
-#include "../../game_variants/player_traits.h"
+#include "../../game_variants/components/player_traits.h"
 
 class PlayerTraitBooleanCombobox : public QComboBox {
    Q_OBJECT

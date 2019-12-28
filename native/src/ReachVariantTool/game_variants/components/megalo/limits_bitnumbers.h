@@ -1,6 +1,6 @@
 #pragma once
 #include "limits.h"
-#include "../../helpers/bitnumber.h"
+#include "../../../helpers/bitnumber.h"
 
 namespace Megalo {
    using condition_index = cobb::bitnumber<cobb::bitcount(Limits::max_conditions - 1), uint16_t>;
