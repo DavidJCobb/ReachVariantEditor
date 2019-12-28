@@ -247,7 +247,18 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) const noexcept {
    //
    writer.synchronize();
    //
-   this->type.write(bits);
+   if (this->data) {
+      //
+      // Use the data object's type if the value is sensible; we need to do this to allow 
+      // switching variants between multiplayer and Forge.
+      //
+      auto t = this->data->get_type();
+      if (t != ReachGameEngine::none) {
+         decltype(this->type) dummy = t;
+         dummy.write(bits);
+      }
+   } else
+      this->type.write(bits);
 
    if (this->data)
       this->data->write(writer);

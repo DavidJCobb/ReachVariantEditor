@@ -184,7 +184,7 @@
       </item>
       <item>
        <property name="text">
-        <string>Option Visibility</string>
+        <string comment="MainTreeview">Option Visibility</string>
        </property>
        <property name="toolTip">
         <string>Control which options are visible and enabled in the in-game menus.</string>
@@ -192,18 +192,28 @@
       </item>
       <item>
        <property name="text">
-        <string>Title Update Settings</string>
+        <string comment="MainTreeview">Title Update Settings</string>
        </property>
        <property name="toolTip">
         <string>Modify developer-only settings added as part of Title Update 1, including bloom, armor ability configuration, and pistol settings.</string>
        </property>
+      </item>
+      <item>
+       <property name="text">
+        <string comment="MainTreeview">Forge Settings</string>
+       </property>
+       <item>
+        <property name="text">
+         <string comment="MainTreeview">Editor Traits</string>
+        </property>
+       </item>
       </item>
      </widget>
     </item>
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>9</number>
+       <number>13</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -324,6 +334,12 @@
           </property>
           <item>
            <widget class="QPlainTextEdit" name="headerDesc">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="tabChangesFocus">
              <bool>true</bool>
             </property>
@@ -3657,6 +3673,103 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageForge">
+       <layout class="QGridLayout" name="gridLayout_22">
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_78">
+          <property name="text">
+           <string>Edit Mode Access</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QComboBox" name="forgeEditModeAccess">
+          <item>
+           <property name="text">
+            <string>unknown 0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>unknown 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>unknown 2</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <spacer name="verticalSpacer_16">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QLabel" name="label_79">
+          <property name="text">
+           <string>&lt;b&gt;NOTE:&lt;/b&gt; &amp;nbsp; Forge options will only be saved into the game variant file if Forge functionality is enabled.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_77">
+          <property name="text">
+           <string>Respawn Time (Unused?)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QCheckBox" name="forgeEnable">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Enable Forge Functionality</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="forgeFlagOpenVoice">
+          <property name="text">
+           <string>Enable Open-Channel Voice</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="forgeRespawnTime">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="suffix">
+           <string> seconds</string>
+          </property>
+          <property name="maximum">
+           <number>63</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QCheckBox" name="forgeFlag1">
+          <property name="text">
+           <string>Unknown Flag 1</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

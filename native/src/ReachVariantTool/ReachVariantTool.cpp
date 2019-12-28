@@ -179,53 +179,53 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QComboBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
-               auto variant = ReachEditorState::get().get_multiplayer_data(); \
-               if (!variant) \
+               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               if (!data) \
                   return; \
-               variant->##field = value; \
+               data->##field = value; \
             }); \
          };
       #define reach_main_window_setup_spinbox(w, field) \
          { \
             QSpinBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
-               auto variant = ReachEditorState::get().get_multiplayer_data(); \
-               if (!variant) \
+               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               if (!data) \
                   return; \
-               variant->##field = value; \
+               data->##field = value; \
             }); \
          };
       #define reach_main_window_setup_spinbox_dbl(w, field) \
          { \
             QDoubleSpinBox* widget = w; \
             QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) { \
-               auto variant = ReachEditorState::get().get_multiplayer_data(); \
-               if (!variant) \
+               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               if (!data) \
                   return; \
-               variant->##field = value; \
+               data->##field = value; \
             }); \
          };
       #define reach_main_window_setup_flag_checkbox(w, field, mask) \
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto variant = ReachEditorState::get().get_multiplayer_data(); \
-               if (!variant) \
+               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               if (!data) \
                   return; \
                if (widget->isChecked()) \
-                  variant->##field |= mask ; \
+                  data->##field |= mask ; \
                else \
-                  variant->##field &= ~ mask ; \
+                  data->##field &= ~ mask ; \
             }); \
          };
       #define reach_main_window_setup_bool_checkbox(w, field) \
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto variant = ReachEditorState::get().get_multiplayer_data(); \
-               if (!variant) \
+               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               if (!data) \
                   return; \
-               variant->##field = widget->isChecked(); \
+               data->##field = widget->isChecked(); \
             }); \
          };
       #pragma endregion
@@ -546,6 +546,21 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumDamage, titleUpdateData.magnumDamage);
          reach_main_window_setup_spinbox_dbl(this->ui.titleUpdateMagnumFireDelay, titleUpdateData.magnumFireDelay);
       }
+      {  // Forge
+         {
+            QCheckBox* widget = this->ui.forgeEnable;
+            QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) {
+               auto data = ReachEditorState::get().get_multiplayer_data();
+               if (!data)
+                  return;
+               data->isForge = widget->isChecked();
+            });
+         }
+         reach_main_window_setup_flag_checkbox(this->ui.forgeFlagOpenVoice, forgeData.flags, 0x01);
+         reach_main_window_setup_flag_checkbox(this->ui.forgeFlag1, forgeData.flags, 0x02);
+         reach_main_window_setup_spinbox(this->ui.forgeRespawnTime, forgeData.respawnTime);
+         reach_main_window_setup_combobox(this->ui.forgeEditModeAccess, forgeData.editModeType);
+      }
       //
       #undef reach_main_window_setup_combobox
       #undef reach_main_window_setup_spinbox
@@ -736,6 +751,10 @@ void ReachVariantTool::onSelectedPageChanged() {
          this->switchToPlayerTraits(&mp_data->options.map.powerups.yellow.traits);
          return;
       }
+      if (text == tr("Editor Traits", "MainTreeview")) {
+         this->switchToPlayerTraits(&mp_data->forgeData.editorTraits);
+         return;
+      }
       //
       const QString paletteNames[] = {
          tr("Spartan Tier 1", "MainTreeview"),
@@ -758,6 +777,10 @@ void ReachVariantTool::onSelectedPageChanged() {
    }
    if (text == tr("Title Update Settings", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageTitleUpdateConfig);
+      return;
+   }
+   if (text == tr("Forge Settings", "MainTreeview")) {
+      stack->setCurrentWidget(this->ui.PageForge);
       return;
    }
 }
@@ -925,6 +948,15 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       reach_main_window_update_spinbox(this->ui.titleUpdateActiveCamoEnergy, titleUpdateData.activeCamoEnergy);
       reach_main_window_update_spinbox(this->ui.titleUpdateMagnumDamage, titleUpdateData.magnumDamage);
       reach_main_window_update_spinbox(this->ui.titleUpdateMagnumFireDelay, titleUpdateData.magnumFireDelay);
+   }
+   {  // Forge
+      const QSignalBlocker blocker(this->ui.forgeEnable);
+      this->ui.forgeEnable->setChecked(mp_data->isForge);
+      //
+      reach_main_window_update_flag_checkbox(this->ui.forgeFlagOpenVoice, forgeData.flags, 0x01);
+      reach_main_window_update_flag_checkbox(this->ui.forgeFlag1,         forgeData.flags, 0x02);
+      reach_main_window_update_spinbox(this->ui.forgeRespawnTime, forgeData.respawnTime);
+      reach_main_window_update_combobox(this->ui.forgeEditModeAccess, forgeData.editModeType);
    }
    //
    #undef reach_main_window_update_combobox

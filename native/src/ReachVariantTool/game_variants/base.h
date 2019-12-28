@@ -126,7 +126,7 @@ class ReachBlockMPVR {
    public:
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
       uint8_t  hashSHA1[0x14];
-      cobb::bitnumber<4, ReachGameEngine, true> type;
+      cobb::bitnumber<4, ReachGameEngine> type;
       GameVariantData* data = nullptr;
       ReachFileBlockRemainder remainingData;
       //

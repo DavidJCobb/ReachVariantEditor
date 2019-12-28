@@ -20,6 +20,11 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+//  - Make the "engine icon" and "engine category" alterable.
+//
+//  - Verify that the CHDR contentType is "game variant" before proceeding 
+//    with loading.
+//
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.
@@ -45,29 +50,20 @@ int main(int argc, char *argv[]) {
 //       once we've split everything up and moved the code into different 
 //       files.
 //
-//  - Make sure that our code fails gracefully if we try to load a Campaign, 
-//    Firefight, or Forge variant.
+//  - Take (Megalo::ParseState), expand it to cover all load failures, and 
+//    make it thread-local. Then, use it to report specific reasons for any 
+//    failure to load any data (i.e. what failed).
 //
-//     - Firefight hasn't been reverse-engineered yet. Now that we know 
-//       that the file formats are bit-aligned, we could conceivably figure 
-//       it out by testing every possible value for every possible setting 
-//       and paying careful attention to what bits change where... but 
-//       that would take a tremendous amount of time.
-//
-//        - Firefight Limited, at least, only has 0x346 bytes of SHA-1-
-//          hashed data.
+//     - Main goal is to make it so that if the user tries to load a Firefight 
+//       variant, they're told WHY they can't.
 //
 //  - See about reorganizing all of our UI code -- moving everything into 
 //    the "ui" subfolder, etc..
-//
-//     - Split up game_variants/base.h.
 //
 //  - Investigate overhauling bit_or_byte_reader and its writer counterpart: 
 //    consider making a single class that handles bits and bytes, and offering 
 //    two classes (one for bits and one for bytes) that serve as interfaces 
 //    and accessors to it.
-//
-//  - Delete helpers/pointer_to_member.h.
 //
 //  - Fix cobb::sprintfp. IIRC the functions Microsoft provides for printf 
 //    with positional parameter support -- they assert if the buffer is too 
@@ -115,13 +111,6 @@ int main(int argc, char *argv[]) {
 //       the block to do things like block length fixup after writing).
 //
 //  - UI
-//
-//     - Implement editing for localized strings; start with team names.
-//
-//        - Alternatively, hide the button for that and save string editing 
-//          for a future release.
-//
-//           - Yeah, just remove the button entirely for now.
 //
 //     - Player Traits pages should not be selectable if a variant isn't 
 //       open.
@@ -185,6 +174,8 @@ int main(int argc, char *argv[]) {
 //       resaving a file. The only way to insert custom metadata would be 
 //       to toss it into unused space in MPVR and hope the game ignores 
 //       that.
+//
+//        - ...Or use a co-save, which would be better.
 //
 //  - Begin testing to identify further unknown information in Reach.
 //
