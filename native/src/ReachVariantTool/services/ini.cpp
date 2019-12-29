@@ -1,10 +1,4 @@
 #include "ini.h"
-#include <algorithm>
-#include <fstream>
-#include "../helpers/strings.h"
-
-#include <windows.h>
-#include "../helpers/intrusive_windows_defines.h"
 
 namespace ReachINI {
    extern cobb::ini::file& get() {

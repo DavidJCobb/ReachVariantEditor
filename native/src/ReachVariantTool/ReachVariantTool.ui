@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>618</width>
-    <height>523</height>
+    <height>535</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,37 +213,10 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>13</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Author</string>
-          </property>
-          <property name="buddy">
-           <cstring>authorGamertag</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QDateTimeEdit" name="editedOnDate">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="minimumDateTime">
-           <datetime>
-            <hour>0</hour>
-            <minute>0</minute>
-            <second>0</second>
-            <year>1970</year>
-            <month>1</month>
-            <day>1</day>
-           </datetime>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
@@ -254,60 +227,23 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QLineEdit" name="editorGamertag">
+        <item row="2" column="2">
+         <widget class="GametypeIconCombobox" name="engineIcon">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
-           <string>Must be an ASCII string.</string>
+           <string>The game variant's icon. In MCC, this only shows up in-game and not in the menus.</string>
           </property>
-          <property name="maxLength">
-           <number>15</number>
-          </property>
-          <property name="placeholderText">
-           <string>Gamertag</string>
+          <property name="frame">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
-         <widget class="QPushButton" name="eraseAuthorXUID">
-          <property name="text">
-           <string>Erase Xbox LIVE Identifying Data</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0" colspan="2">
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Expanding</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Editor</string>
-          </property>
-          <property name="buddy">
-           <cstring>editorGamertag</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="label_75">
           <property name="text">
            <string>Created At</string>
@@ -317,7 +253,37 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="0">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Description</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="buddy">
+           <cstring>headerDesc</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_80">
+          <property name="text">
+           <string>Categorization</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Editor</string>
+          </property>
+          <property name="buddy">
+           <cstring>editorGamertag</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="0">
          <widget class="QLabel" name="label_76">
           <property name="text">
            <string>Edited At</string>
@@ -327,7 +293,37 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Author</string>
+          </property>
+          <property name="buddy">
+           <cstring>authorGamertag</cstring>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QComboBox" name="engineCategory">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>2</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>The game variant's category.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" colspan="2">
+         <widget class="QLineEdit" name="headerName">
+          <property name="maxLength">
+           <number>127</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" colspan="2">
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
            <number>0</number>
@@ -390,27 +386,27 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="headerName">
+        <item row="4" column="2" colspan="2">
+         <widget class="QLineEdit" name="authorGamertag">
+          <property name="toolTip">
+           <string>Must be an ASCII string.</string>
+          </property>
           <property name="maxLength">
-           <number>127</number>
+           <number>15</number>
+          </property>
+          <property name="placeholderText">
+           <string>Gamertag</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
+        <item row="5" column="2" colspan="2">
+         <widget class="QPushButton" name="eraseAuthorXUID">
           <property name="text">
-           <string>Description</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-          <property name="buddy">
-           <cstring>headerDesc</cstring>
+           <string>Erase Xbox LIVE Identifying Data</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
+        <item row="6" column="2" colspan="2">
          <widget class="QDateTimeEdit" name="createdOnDate">
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -427,15 +423,8 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="authorGamertag">
+        <item row="8" column="2" colspan="2">
+         <widget class="QLineEdit" name="editorGamertag">
           <property name="toolTip">
            <string>Must be an ASCII string.</string>
           </property>
@@ -447,12 +436,59 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
+        <item row="7" column="0" colspan="4">
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="4">
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="2" colspan="2">
          <widget class="QPushButton" name="eraseEditorXUID">
           <property name="text">
            <string>Erase Xbox LIVE Identifying Data</string>
           </property>
          </widget>
+        </item>
+        <item row="10" column="2" colspan="2">
+         <widget class="QDateTimeEdit" name="editedOnDate">
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="minimumDateTime">
+           <datetime>
+            <hour>0</hour>
+            <minute>0</minute>
+            <second>0</second>
+            <year>1970</year>
+            <month>1</month>
+            <day>1</day>
+           </datetime>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0" colspan="4">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -1409,7 +1445,7 @@
         <item row="0" column="0">
          <widget class="QTabWidget" name="PagePlayerTraitsTabview">
           <property name="currentIndex">
-           <number>4</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="PagePlayerTraitsTabDefense">
            <attribute name="title">
@@ -1449,10 +1485,10 @@
             <item row="9" column="0">
              <widget class="QLabel" name="label_43">
               <property name="text">
-               <string>Unknown-09</string>
+               <string>Can't Die From Damage</string>
               </property>
               <property name="buddy">
-               <cstring>playerTraitDefenseUnknown09</cstring>
+               <cstring>playerTraitCannotDieFromDamage</cstring>
               </property>
              </widget>
             </item>
@@ -1947,27 +1983,10 @@
              </widget>
             </item>
             <item row="9" column="1">
-             <widget class="QComboBox" name="playerTraitDefenseUnknown09">
-              <item>
-               <property name="text">
-                <string>Unchanged</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 1</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 3</string>
-               </property>
-              </item>
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitCannotDieFromDamage">
+              <property name="toolTip">
+               <string>If enabled, you cannot die from taking damage or from having your vehicle destroyed; however, level boundaries can still kill you.</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1983,10 +2002,10 @@
             <item row="10" column="0">
              <widget class="QLabel" name="label_69">
               <property name="text">
-               <string>Ability Unknown</string>
+               <string>Abilities Drop on Death</string>
               </property>
               <property name="buddy">
-               <cstring>playerTraitAbilityUnknown</cstring>
+               <cstring>playerTraitAbilitiesDropOnDeath</cstring>
               </property>
              </widget>
             </item>
@@ -2263,27 +2282,10 @@
              </widget>
             </item>
             <item row="10" column="1">
-             <widget class="QComboBox" name="playerTraitAbilityUnknown">
-              <item>
-               <property name="text">
-                <string>Unknown 0</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 1</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Unknown 3</string>
-               </property>
-              </item>
+             <widget class="PlayerTraitBooleanCombobox" name="playerTraitAbilitiesDropOnDeath">
+              <property name="toolTip">
+               <string>If enabled, players will drop their carried Armor Abilities when they die. Normally, they keep the Armor Abilities, such that others can't pick them up.</string>
+              </property>
              </widget>
             </item>
             <item row="11" column="1">
@@ -3802,8 +3804,15 @@
     <addaction name="actionOptions"/>
     <addaction name="actionDebugbreak"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -3845,6 +3854,11 @@
     <string>Debugbreak on Variant Data</string>
    </property>
   </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -3883,6 +3897,11 @@
    <class>MegaloOptionToggleTree</class>
    <extends>QTreeView</extends>
    <header>ui/generic/OptionToggleTable.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GametypeIconCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/GametypeIconCombobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -3944,7 +3963,7 @@
   <tabstop>playerTraitHeadshotImmunity</tabstop>
   <tabstop>playerTraitAssassinationImmunity</tabstop>
   <tabstop>playerTraitShieldVampirism</tabstop>
-  <tabstop>playerTraitDefenseUnknown09</tabstop>
+  <tabstop>playerTraitCannotDieFromDamage</tabstop>
   <tabstop>playerTraitGrenadeRegen</tabstop>
   <tabstop>playerTraitMeleeMult</tabstop>
   <tabstop>playerTraitWeaponPrimary</tabstop>
@@ -3955,7 +3974,7 @@
   <tabstop>playerTraitDamageMult</tabstop>
   <tabstop>playerTraitInfiniteAmmo</tabstop>
   <tabstop>playerTraitAbilityUsage</tabstop>
-  <tabstop>playerTraitAbilityUnknown</tabstop>
+  <tabstop>playerTraitAbilitiesDropOnDeath</tabstop>
   <tabstop>playerTraitInfiniteAbility</tabstop>
   <tabstop>playerTraitMovementSpeed</tabstop>
   <tabstop>playerTraitJumpHeight</tabstop>

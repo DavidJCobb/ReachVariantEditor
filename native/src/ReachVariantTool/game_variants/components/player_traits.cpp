@@ -17,7 +17,7 @@ void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
    d.headshotImmune.read(stream);
    d.vampirism.read(stream);
    d.assassinImmune.read(stream);
-   d.unk09.read(stream);
+   d.cannotDieFromDamage.read(stream);
    //
    o.damageMult.read(stream);
    o.meleeMult.read(stream);
@@ -28,7 +28,7 @@ void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
    o.grenadeRegen.read(stream);
    o.weaponPickup.read(stream);
    o.abilityUsage.read(stream);
-   o.abilityUnknown.read(stream);
+   o.abilitiesDropOnDeath.read(stream);
    o.infiniteAbility.read(stream);
    o.ability.read(stream);
    //
@@ -64,8 +64,7 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    d.headshotImmune.write(stream);
    d.vampirism.write(stream);
    d.assassinImmune.write(stream);
-   d.unk09.write(stream);
-   printf("=== Bitwriter bytepos after writing player traits - defense: %08X\n", stream.get_bytepos());
+   d.cannotDieFromDamage.write(stream);
    //
    o.damageMult.write(stream);
    o.meleeMult.write(stream);
@@ -76,27 +75,23 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    o.grenadeRegen.write(stream);
    o.weaponPickup.write(stream);
    o.abilityUsage.write(stream);
-   o.abilityUnknown.write(stream);
+   o.abilitiesDropOnDeath.write(stream);
    o.infiniteAbility.write(stream);
    o.ability.write(stream);
-   printf("=== Bitwriter bytepos after writing player traits - offense: %08X\n", stream.get_bytepos());
    //
    m.speed.write(stream);
    m.gravity.write(stream);
    m.vehicleUsage.write(stream);
    m.unknown.write(stream);
    m.jumpHeight.write(stream);
-   printf("=== Bitwriter bytepos after writing player traits - movement: %08X\n", stream.get_bytepos());
    //
    a.activeCamo.write(stream);
    a.waypoint.write(stream);
    a.visibleName.write(stream);
    a.aura.write(stream);
    a.forcedColor.write(stream);
-   printf("=== Bitwriter bytepos after writing player traits - appearance: %08X\n", stream.get_bytepos());
    //
    s.radarState.write(stream);
    s.radarRange.write(stream);
    s.directionalDamageIndicator.write(stream);
-   printf("=== Bitwriter bytepos after writing player traits - sensors: %08X\n", stream.get_bytepos());
 }

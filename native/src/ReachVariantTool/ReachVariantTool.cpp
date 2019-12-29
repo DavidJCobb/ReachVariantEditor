@@ -63,6 +63,27 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    this->ui.PagePlayerTraitsTabview->setCurrentIndex(0);
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
+   {  // set up engine categories
+      auto widget = this->ui.engineCategory;
+      widget->clear();
+      widget->addItem(tr("Capture the Flag", "Engine Category"), QVariant(0));
+      widget->addItem(tr("Slayer", "Engine Category"), QVariant(1));
+      widget->addItem(tr("Oddball", "Engine Category"), QVariant(2));
+      widget->addItem(tr("King of the Hill", "Engine Category"), QVariant(3));
+      widget->addItem(tr("Juggernaut", "Engine Category"), QVariant(4));
+      widget->addItem(tr("Territories", "Engine Category"), QVariant(5));
+      widget->addItem(tr("Assault", "Engine Category"), QVariant(6));
+      widget->addItem(tr("Infection", "Engine Category"), QVariant(7));
+      widget->addItem(tr("VIP", "Engine Category"), QVariant(8));
+      widget->addItem(tr("Invasion", "Engine Category"), QVariant(9));
+      widget->addItem(tr("Stockpile", "Engine Category"), QVariant(10));
+      widget->addItem(tr("Race", "Engine Category"), QVariant(12));
+      widget->addItem(tr("Headhunter", "Engine Category"), QVariant(13));
+      widget->addItem(tr("Insane", "Engine Category"), QVariant(16));
+      widget->addItem(tr("Halomods.com", "Engine Category"), QVariant(24)); // for consistency with KSoft
+      widget->addItem(tr("Community", "Engine Category"), QVariant(25));
+   }
+   //
    {  // Metadata
       QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [this](const QString& text) {
          auto variant = ReachEditorState::get().currentVariant;
@@ -89,6 +110,29 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          const char16_t* value = u16s.c_str();
          variant->contentHeader.data.set_description(value);
          variant->multiplayer.data->as_multiplayer()->variantHeader.set_description(value);
+      });
+      //
+      QObject::connect(this->ui.engineIcon, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         auto data    = ReachEditorState::get().get_multiplayer_data();
+         if (!data)
+            return;
+         variant->contentHeader.data.engineIcon = value;
+         data->engineIcon = value;
+         data->variantHeader.engineIcon = value;
+      });
+      QObject::connect(this->ui.engineCategory, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
+         auto variant = ReachEditorState::get().currentVariant;
+         if (!variant)
+            return;
+         auto data    = ReachEditorState::get().get_multiplayer_data();
+         if (!data)
+            return;
+         variant->contentHeader.data.engineCategory = value;
+         data->engineCategory = value;
+         data->variantHeader.engineCategory = value;
       });
       //
       QObject::connect(this->ui.authorGamertag, &QLineEdit::textEdited, [](const QString& text) {
@@ -456,7 +500,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             reach_traits_pane_setup_combobox(this->ui.playerTraitHeadshotImmunity, defense.headshotImmune);
             reach_traits_pane_setup_combobox(this->ui.playerTraitAssassinationImmunity, defense.assassinImmune);
             reach_traits_pane_setup_combobox(this->ui.playerTraitShieldVampirism,  defense.vampirism);
-            reach_traits_pane_setup_combobox(this->ui.playerTraitDefenseUnknown09, defense.unk09);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitCannotDieFromDamage, defense.cannotDieFromDamage);
          }
          {  // Offense
             reach_traits_pane_setup_combobox(this->ui.playerTraitDamageMult,      offense.damageMult);
@@ -493,7 +537,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             reach_traits_pane_setup_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
             reach_traits_pane_setup_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
             reach_traits_pane_setup_combobox(this->ui.playerTraitAbilityUsage,    offense.abilityUsage);
-            reach_traits_pane_setup_combobox(this->ui.playerTraitAbilityUnknown,  offense.abilityUnknown);
+            reach_traits_pane_setup_combobox(this->ui.playerTraitAbilitiesDropOnDeath,  offense.abilitiesDropOnDeath);
             reach_traits_pane_setup_combobox(this->ui.playerTraitInfiniteAbility, offense.infiniteAbility);
          }
          {  // Movement
@@ -800,6 +844,15 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
       this->ui.authorGamertag->setText(QString::fromLatin1(mp_data->variantHeader.createdBy.author));
       this->ui.editorGamertag->setText(QString::fromLatin1(mp_data->variantHeader.modifiedBy.author));
       //
+      {
+         const QSignalBlocker blocker0(this->ui.engineIcon);
+         const QSignalBlocker blocker1(this->ui.engineCategory);
+         this->ui.engineIcon->setCurrentIndex(mp_data->engineIcon);
+         int index = this->ui.engineCategory->findData((int)mp_data->engineCategory);
+         if (index != -1)
+            this->ui.engineCategory->setCurrentIndex(index);
+      }
+      //
       QDateTime temp;
       temp.setSecsSinceEpoch(mp_data->variantHeader.createdBy.timestamp);
       this->ui.createdOnDate->setDateTime(temp);
@@ -1004,7 +1057,7 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
       reach_traits_pane_update_combobox(this->ui.playerTraitHeadshotImmunity, defense.headshotImmune);
       reach_traits_pane_update_combobox(this->ui.playerTraitAssassinationImmunity, defense.assassinImmune);
       reach_traits_pane_update_combobox(this->ui.playerTraitShieldVampirism,  defense.vampirism);
-      reach_traits_pane_update_combobox(this->ui.playerTraitDefenseUnknown09, defense.unk09);
+      reach_traits_pane_update_combobox(this->ui.playerTraitCannotDieFromDamage, defense.cannotDieFromDamage);
    }
    {  // Offense
       reach_traits_pane_update_combobox(this->ui.playerTraitDamageMult,      offense.damageMult);
@@ -1029,7 +1082,7 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
       reach_traits_pane_update_combobox(this->ui.playerTraitWeaponPickup,    offense.weaponPickup);
       reach_traits_pane_update_combobox(this->ui.playerTraitInfiniteAmmo,    offense.infiniteAmmo);
       reach_traits_pane_update_combobox(this->ui.playerTraitAbilityUsage, offense.abilityUsage);
-      reach_traits_pane_update_combobox(this->ui.playerTraitAbilityUnknown, offense.abilityUnknown);
+      reach_traits_pane_update_combobox(this->ui.playerTraitAbilitiesDropOnDeath, offense.abilitiesDropOnDeath);
       reach_traits_pane_update_combobox(this->ui.playerTraitInfiniteAbility, offense.infiniteAbility);
    }
    {  // Movement

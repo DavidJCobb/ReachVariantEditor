@@ -20,17 +20,21 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
-//  - cobb::ini
-//
-//     - setting::modify_and_signal will fail if the incoming argument isn't 
-//       EXACTLY one of the setting types, e.g. passing uint8_t instead of 
-//       uint32_t. If we put a bit more work into the templates, we should be 
-//       able to fix this; alternatively, we could just define overloads.
-//
 //  - Make the "engine icon" and "engine category" alterable.
 //
+//     - Someone else extracted the original Reach icons IIRC but put numbers 
+//       over them -- useful for knowing which is which, but I think we may 
+//       want to try and screenshot the MCC icons instead.
+//
+//  - Take (Megalo::ParseState), expand it to cover all load failures, and 
+//    make it thread-local. Then, use it to report specific reasons for any 
+//    failure to load any data (i.e. what failed).
+//
+//     - Main goal is to make it so that if the user tries to load a Firefight 
+//       variant, they're told WHY they can't.
+//
 //  - Verify that the CHDR contentType is "game variant" before proceeding 
-//    with loading.
+//    with loading. Fail if it isn't.
 //
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
@@ -46,12 +50,9 @@ int main(int argc, char *argv[]) {
 //       once we've split everything up and moved the code into different 
 //       files.
 //
-//  - Take (Megalo::ParseState), expand it to cover all load failures, and 
-//    make it thread-local. Then, use it to report specific reasons for any 
-//    failure to load any data (i.e. what failed).
-//
-//     - Main goal is to make it so that if the user tries to load a Firefight 
-//       variant, they're told WHY they can't.
+//        - On that note, we should only show Forge options for Forge variants. 
+//          Sadly it doesn't seem possibly to force Forge into the Custom Game 
+//          lobby like in Halo 3.
 //
 //  - See about reorganizing all of our UI code -- moving everything into 
 //    the "ui" subfolder, etc..

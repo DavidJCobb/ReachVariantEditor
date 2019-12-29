@@ -1,7 +1,4 @@
 #pragma once
-#include <string>
-#include <unordered_map>
-#include <vector>
 #include "../helpers/ini.h"
 
 namespace ReachINI {

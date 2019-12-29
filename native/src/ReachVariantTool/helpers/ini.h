@@ -1,7 +1,41 @@
 #pragma once
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <type_traits>
+
+/*
+
+   The approach I take to defining settings is to do something like this in a header file:
+
+      namespace MyProgram {
+         extern cobb::ini::file& get();
+
+         #define MYPROGRAM_MAKE_INI_SETTING(name, category, value) extern cobb::ini::setting name;
+         namespace UIWindowTitle {
+            MYPROGRAM_MAKE_INI_SETTING(bShowFullPath,     "UIWindowTitle", true);
+            MYPROGRAM_MAKE_INI_SETTING(bShowVariantTitle, "UIWindowTitle", true);
+         }
+         #undef MYPROGRAM_MAKE_INI_SETTING
+      }
+
+   And then do this in the CPP file:
+
+      namespace MyProgram {
+         extern cobb::ini::file& get() {
+            static cobb::ini::file instance = cobb::ini::file(L"MyFile.ini");
+            return instance;
+         }
+
+         #define MYPROGRAM_MAKE_INI_SETTING(name, category, value) extern cobb::ini::setting name = cobb::ini::setting(get, #name, category, value);
+         namespace UIWindowTitle {
+            MYPROGRAM_MAKE_INI_SETTING(bShowFullPath,     "UIWindowTitle", true);
+            MYPROGRAM_MAKE_INI_SETTING(bShowVariantTitle, "UIWindowTitle", true);
+         }
+         #undef MYPROGRAM_MAKE_INI_SETTING
+      }
+*/
 
 namespace cobb {
    namespace ini {
@@ -77,8 +111,8 @@ namespace cobb {
             file(const wchar_t* filepath, const wchar_t* backup, const wchar_t* working);
             //
             void insert_setting(setting* setting);
-            void load();
-            void save();
+            void load(); // if the file doesn't exist, calls (save) to generate a new file and then returns (does not redundantly load the new file)
+            void save(); // preserves the existing file's whitespace, comments, setting order, etc.; writes all setting values including those not changed from the defaults
             void abandon_pending_changes();
             //
             setting* get_setting(std::string& category, std::string& name) const;
@@ -136,9 +170,17 @@ namespace cobb {
             void modify(uint32_t v) noexcept { this->current.u = v; }
             //
             template<typename T> void modify_and_signal(T value) {
-               setting_type t = setting_type_constant_for_type_v<T>;
-               if (t != this->type)
-                  return;
+               if (std::numeric_limits<T>::is_integer && !std::is_same_v<T, bool>) { // any int
+                  if (this->type != setting_type::integer_signed && this->type != setting_type::integer_unsigned)
+                     return;
+               } else if (std::is_floating_point_v<T>) { // float, double
+                  if (this->type != setting_type::float32)
+                     return;
+               } else {
+                  if (setting_type_constant_for_type_v<T> != this->type)
+                     return;
+               }
+               //
                setting_value_union old = this->current;
                this->modify(value);
                this->send_change_event(old);

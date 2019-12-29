@@ -281,7 +281,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, reach::bool_trait> headshotImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<3, uint8_t> vampirism;
          cobb::bitnumber<2, reach::bool_trait> assassinImmune = reach::bool_trait::unchanged;
-         cobb::bitnumber<2, uint8_t> unk09;
+         cobb::bitnumber<2, reach::bool_trait> cannotDieFromDamage;
       } defense;
       struct {
          cobb::bitnumber<4, reach::damage_multiplier> damageMult = reach::damage_multiplier::unchanged;
@@ -293,7 +293,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, reach::bool_trait> grenadeRegen = reach::bool_trait::unchanged;
          cobb::bitnumber<2, reach::bool_trait> weaponPickup = reach::bool_trait::unchanged;
          cobb::bitnumber<2, reach::ability_usage> abilityUsage;
-         cobb::bitnumber<2, uint8_t> abilityUnknown;
+         cobb::bitnumber<2, reach::bool_trait> abilitiesDropOnDeath;
          cobb::bitnumber<2, reach::bool_trait> infiniteAbility;
          cobb::bitnumber<8, reach::ability> ability = reach::ability::unchanged;
       } offense;
