@@ -124,6 +124,7 @@
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
+    <ClCompile Include="helpers\ini.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="helpers\bytewriter.h" />
     <ClInclude Include="helpers\endianness.h" />
     <ClInclude Include="helpers\files.h" />
+    <ClInclude Include="helpers\ini.h" />
     <ClInclude Include="helpers\intrusive_windows_defines.h" />
     <ClInclude Include="helpers\polyfills_cpp20.h" />
     <ClInclude Include="helpers\sha1.h" />

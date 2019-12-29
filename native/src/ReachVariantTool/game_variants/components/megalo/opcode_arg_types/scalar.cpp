@@ -305,16 +305,16 @@ namespace Megalo {
          case _scopes::player_stat:
             which_scope = megalo_players[this->which];
             if (which_scope)
-               cobb::sprintfp(out, "Stat #%2$u for %1$s", which_scope, this->index);
+               cobb::sprintf(out, "Stat #%u for %s", this->index, which_scope);
             else
-               cobb::sprintfp(out, "Stat # % 2$u for INVALID_PLAYER[%1$u]", this->which, this->index);
+               cobb::sprintf(out, "Stat #%u for INVALID_PLAYER[%u]", this->index, which_scope);
             return;
          case _scopes::team_stat:
             which_scope = megalo_teams[this->which];
             if (which_scope)
-               cobb::sprintfp(out, "Stat #%2$u for %1$s", which_scope, this->index);
+               cobb::sprintf(out, "Stat #%u for %s", this->index, which_scope);
             else
-               cobb::sprintfp(out, "Stat # % 2$u for INVALID_TEAM[%1$u]", this->which, this->index);
+               cobb::sprintf(out, "Stat #%u for INVALID_TEAM[%u]", this->index, this->which);
             return;
          case _scopes::current_round:
             out = "Current Round";

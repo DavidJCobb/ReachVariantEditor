@@ -12,6 +12,7 @@
 #include <QWidget>
 #include "editor_state.h"
 #include "game_variants/base.h"
+#include "helpers/ini.h"
 #include "helpers/stream.h"
 #include "services/ini.h"
 #include "ui/generic/QXBLGamertagValidator.h"
@@ -37,13 +38,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    ui.setupUi(this);
    _window = this;
    //
-   ReachINI::RegisterForChanges([](ReachINI::setting* setting, ReachINI::setting_value_union oldValue, ReachINI::setting_value_union newValue) {
+   ReachINI::get().register_for_changes([](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
       if (setting == &ReachINI::UIWindowTitle::bShowFullPath || setting == &ReachINI::UIWindowTitle::bShowVariantTitle) {
          ReachVariantTool::get().refreshWindowTitle();
-         return;
-      }
-      if (setting == &ReachINI::Editing::bAllowUnsafeValues) {
-         ReachVariantTool::get().refreshWidgetsForUnsafeOptions();
          return;
       }
    });
@@ -568,7 +565,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       #undef reach_main_window_setup_flag_checkbox
       #undef reach_main_window_setup_bool_checkbox
    }
-   this->setupWidgetsForUnsafeOptions();
 }
 
 void ReachVariantTool::updateDescriptionCharacterCount() {
@@ -1057,8 +1053,6 @@ void ReachVariantTool::refreshWidgetsForPlayerTraits() {
    }
    #undef reach_traits_pane_update_combobox
    #undef reach_traits_pane_update_spinbox
-   //
-   this->refreshWidgetsForUnsafeOptions();
 }
 void ReachVariantTool::refreshScriptedPlayerTraitList() {
    auto tree   = this->ui.MainTreeview;
@@ -1212,18 +1206,6 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
    }
    auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
    layout->addItem(spacer, options.size(), 0, 1, 2);
-}
-//
-void ReachVariantTool::setupWidgetsForUnsafeOptions() {
-   //this->_setupComboboxForUnsafeOption<0>(this->ui.playerTraitAura); // not actually unsafe; left here as an example
-   //
-   this->refreshWidgetsForUnsafeOptions();
-}
-void ReachVariantTool::setStateForWidgetForUnsafeOption(QWidget* widget, bool disable) {
-   widget->setEnabled(!disable);
-}
-void ReachVariantTool::refreshWidgetsForUnsafeOptions() {
-   //this->_refreshComboboxForUnsafeOption<0>(this->ui.playerTraitAura); // not actually unsafe; left here as an example
 }
 
 void ReachVariantTool::refreshTeamColorWidgets() {

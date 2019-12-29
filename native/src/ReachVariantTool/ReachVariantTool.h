@@ -38,24 +38,6 @@ class ReachVariantTool : public QMainWindow {
       //
       void setupWidgetsForScriptedOptions();
       //
-      template<int N> void _setupComboboxForUnsafeOption(QComboBox* widget) {
-         QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
-            bool allow = true;
-            if (!ReachINI::Editing::bAllowUnsafeValues.current.b)
-               allow = (value != N);
-            ReachVariantTool::get().setStateForWidgetForUnsafeOption(widget, !allow);
-         });
-      }
-      template<int N> inline void _refreshComboboxForUnsafeOption(QComboBox* widget) {
-         bool allow = true;
-         if (!ReachINI::Editing::bAllowUnsafeValues.current.b)
-            allow = (widget->currentIndex() != N);
-         this->setStateForWidgetForUnsafeOption(widget, !allow);
-      }
-      void setupWidgetsForUnsafeOptions();
-      void setStateForWidgetForUnsafeOption(QWidget*, bool disable);
-      void refreshWidgetsForUnsafeOptions();
-      //
       int8_t currentTeam = -1;
       void switchToTeam(int8_t team);
       void refreshTeamColorWidgets();

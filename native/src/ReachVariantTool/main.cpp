@@ -9,7 +9,7 @@
 #include "services/ini.h"
 
 int main(int argc, char *argv[]) {
-   ReachINI::INISettingManager::GetInstance().Load();
+   ReachINI::get().load();
    //
    QApplication a(argc, argv);
    ReachVariantTool w;
@@ -20,6 +20,13 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+//  - cobb::ini
+//
+//     - setting::modify_and_signal will fail if the incoming argument isn't 
+//       EXACTLY one of the setting types, e.g. passing uint8_t instead of 
+//       uint32_t. If we put a bit more work into the templates, we should be 
+//       able to fix this; alternatively, we could just define overloads.
+//
 //  - Make the "engine icon" and "engine category" alterable.
 //
 //  - Verify that the CHDR contentType is "game variant" before proceeding 
@@ -28,17 +35,6 @@ int main(int argc, char *argv[]) {
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 
 //    types.
-//
-//     - Forge variants are just Megalo variants with additional data at 
-//       the end: two bits for flags (the first of which is another "open 
-//       channel voice" flag); two bits for edit mode (enum; probably from 
-//       Halo 3's "only party leader can edit" setting); six bits for the 
-//       respawn time to use in edit mode (seconds); and then player traits 
-//       for players in edit mode.
-//
-//       It'd be trivial to add support for these, and perhaps even to let 
-//       users switch a game variant between Megalo and Forge modes. I wonder 
-//       if that would allow access to Forge via Custom Games.
 //
 //     - Firefight hasn't been decoded (see below).
 //
@@ -64,38 +60,6 @@ int main(int argc, char *argv[]) {
 //    consider making a single class that handles bits and bytes, and offering 
 //    two classes (one for bits and one for bytes) that serve as interfaces 
 //    and accessors to it.
-//
-//  - Fix cobb::sprintfp. IIRC the functions Microsoft provides for printf 
-//    with positional parameter support -- they assert if the buffer is too 
-//    small, rather than returning the number of chars written or the number 
-//    of chars that would've been written.
-//
-//     - We use cobb::sprintfp to stringify OpcodeArgValueScalar when it 
-//       holds a player or team stat index. That's the only place we use it. 
-//       If we do a UI for trigger editing, we'd probably want to use QString 
-//       instead so we can have localization support, and that has its own 
-//       positional parameter implementation.
-//
-//       We might well be able to remove cobb::sprintfp entirely; we could 
-//       just switch it to normal cobb::sprintf for now and then later move 
-//       to QString.
-//
-//  - Consider making INISettingManager consistent with my newer naming and 
-//    coding styles.
-//
-//     - Consider making it configurable such that a program could use it 
-//       to have multiple INI files, and then moving it to helpers. I'm 
-//       thinking that you could template the settings object on a getter 
-//       that returns INISettingManager& such that each settings object 
-//       auto-registers itself with whichever manager [is returned by the 
-//       getter] it's templated on. Then, you could have one manager per 
-//       INI file, each with its own path and contents.
-//
-//       We don't need all that for this program, but that's what it'd 
-//       take for me to want to move the INI stuff to helpers (while 
-//       keeping the actual INI setting definitions separate since those 
-//       are program-specific; ditto for the manager and a setting typedef 
-//       on it).
 //
 //  - Change how we load blocks: we should loop over all blocks in the file, 
 //    instead of assuming that CHDR and MPVR must be at the start. I think 
@@ -157,11 +121,6 @@ int main(int argc, char *argv[]) {
 //
 //        - This will be somewhat easier if we split each page into its 
 //          own widget, I think.
-//
-//     - Remove the option to allow/disallow editing of unsafe Custom Game 
-//       options. I only added it after mistaking the cause of some CTDs I 
-//       was getting; there aren't any actual unsafe options (besides having 
-//       out-of-bounds values in some bitfields).
 //
 // ==========================================================================
 //
