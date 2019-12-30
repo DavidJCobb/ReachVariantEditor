@@ -31,7 +31,7 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
             if (!traits)
                return;
             traits->offense.weaponPrimary = (reach::weapon)widget->currentData().toInt();
-            });
+         });
       }
       {
          auto widget = this->ui.fieldWeaponSecondary;
@@ -40,7 +40,7 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
             if (!traits)
                return;
             traits->offense.weaponSecondary = (reach::weapon)widget->currentData().toInt();
-            });
+         });
       }
       {
          auto widget = this->ui.fieldArmorAbility;
@@ -49,7 +49,7 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
             if (!traits)
                return;
             traits->offense.ability = (reach::ability)widget->currentData().toInt();
-            });
+         });
       }
       reach_traits_pane_setup_combobox(this->ui.fieldGrenadeCount, offense.grenadeCount);
       reach_traits_pane_setup_combobox(this->ui.fieldGrenadeRegen, offense.grenadeRegen);

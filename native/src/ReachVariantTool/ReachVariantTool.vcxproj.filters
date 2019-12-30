@@ -181,6 +181,18 @@
     <ClCompile Include="ui\main_window\page_player_traits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_title_update_1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_forge_settings_general.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_team_specific.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_metadata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -225,6 +237,18 @@
     <QtMoc Include="ui\main_window\page_player_traits.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_title_update_1.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_forge_settings_general.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_team_specific.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_metadata.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
@@ -255,6 +279,18 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\main_window\page_player_traits.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_title_update_1.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_forge_settings_general.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_team_specific.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_metadata.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

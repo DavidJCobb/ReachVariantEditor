@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageMPMetadata</class>
+ <widget class="QWidget" name="PageMPMetadata">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>330</width>
+    <height>475</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="5" column="1" colspan="3">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <widget class="QComboBox" name="engineCategory">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>2</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>The game variant's category.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" rowspan="3" colspan="3">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPlainTextEdit" name="headerDesc">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="tabChangesFocus">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="frame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Sunken</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="headerDescCharacterLimit">
+          <property name="text">
+           <string>0/80</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>5</number>
+          </property>
+          <property name="buddy">
+           <cstring>headerDesc</cstring>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="9" column="1" colspan="3">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Name</string>
+     </property>
+     <property name="buddy">
+      <cstring>headerName</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Description</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="buddy">
+      <cstring>headerDesc</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_80">
+     <property name="text">
+      <string>Categorization</string>
+     </property>
+     <property name="buddy">
+      <cstring>engineIcon</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Author</string>
+     </property>
+     <property name="buddy">
+      <cstring>authorGamertag</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_75">
+     <property name="text">
+      <string>Created At</string>
+     </property>
+     <property name="buddy">
+      <cstring>createdOnDate</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Editor</string>
+     </property>
+     <property name="buddy">
+      <cstring>editorGamertag</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="label_76">
+     <property name="text">
+      <string>Edited At</string>
+     </property>
+     <property name="buddy">
+      <cstring>editedOnDate</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1" colspan="3">
+    <widget class="QLineEdit" name="editorGamertag">
+     <property name="toolTip">
+      <string>Must be an ASCII string.</string>
+     </property>
+     <property name="maxLength">
+      <number>15</number>
+     </property>
+     <property name="placeholderText">
+      <string>Gamertag</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1" colspan="3">
+    <widget class="QPushButton" name="eraseEditorXUID">
+     <property name="text">
+      <string>Erase Xbox LIVE Identifying Data</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1" colspan="3">
+    <widget class="QDateTimeEdit" name="editedOnDate">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="minimumDateTime">
+      <datetime>
+       <hour>0</hour>
+       <minute>0</minute>
+       <second>0</second>
+       <year>1970</year>
+       <month>1</month>
+       <day>1</day>
+      </datetime>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="3">
+    <widget class="QDateTimeEdit" name="createdOnDate">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="minimumDateTime">
+      <datetime>
+       <hour>0</hour>
+       <minute>0</minute>
+       <second>0</second>
+       <year>2010</year>
+       <month>9</month>
+       <day>14</day>
+      </datetime>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1" colspan="3">
+    <widget class="QPushButton" name="eraseAuthorXUID">
+     <property name="text">
+      <string>Erase Xbox LIVE Identifying Data</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" colspan="3">
+    <widget class="QLineEdit" name="authorGamertag">
+     <property name="toolTip">
+      <string>Must be an ASCII string.</string>
+     </property>
+     <property name="maxLength">
+      <number>15</number>
+     </property>
+     <property name="placeholderText">
+      <string>Gamertag</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="GametypeIconCombobox" name="engineIcon">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>The game variant's icon. In MCC, this only shows up in-game and not in the menus.</string>
+     </property>
+     <property name="frame">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="3">
+    <widget class="QLineEdit" name="headerName">
+     <property name="maxLength">
+      <number>127</number>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0" colspan="4">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Expanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>327</width>
+       <height>15</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GametypeIconCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/GametypeIconCombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>headerName</tabstop>
+  <tabstop>headerDesc</tabstop>
+  <tabstop>engineIcon</tabstop>
+  <tabstop>engineCategory</tabstop>
+  <tabstop>authorGamertag</tabstop>
+  <tabstop>eraseAuthorXUID</tabstop>
+  <tabstop>createdOnDate</tabstop>
+  <tabstop>editorGamertag</tabstop>
+  <tabstop>eraseEditorXUID</tabstop>
+  <tabstop>editedOnDate</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

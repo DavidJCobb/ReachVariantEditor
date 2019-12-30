@@ -5,3 +5,7 @@
 
 #undef reach_traits_pane_update_combobox
 #undef reach_traits_pane_update_spinbox
+
+#undef reach_team_pane_update_flag_checkbox
+#undef reach_team_pane_update_combobox
+#undef reach_team_pane_update_spinbox

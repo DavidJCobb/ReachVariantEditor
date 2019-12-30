@@ -17,7 +17,6 @@ class ReachVariantTool : public QMainWindow {
       static ReachVariantTool& get(); // done differently because the usual "static singleton getter" approach causes Qt to crash on exit if applied to the main window
       //
    private slots:
-      void updateDescriptionCharacterCount();
       //
    private:
       void _saveFileImpl(bool saveAs);
@@ -30,17 +29,11 @@ class ReachVariantTool : public QMainWindow {
       void switchToLoadoutPalette(ReachLoadoutPalette*);
       void switchToPlayerTraits(ReachPlayerTraits*);
       //
-      void refreshWidgetsFromVariant();
       void refreshWidgetsForLoadoutPalette();
       void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //
       void setupWidgetsForScriptedOptions();
-      //
-      int8_t currentTeam = -1;
-      void switchToTeam(int8_t team);
-      void refreshTeamColorWidgets();
-      ReachTeamData* _getCurrentTeam() const noexcept;
       //
    private:
       Ui::ReachVariantToolClass ui;

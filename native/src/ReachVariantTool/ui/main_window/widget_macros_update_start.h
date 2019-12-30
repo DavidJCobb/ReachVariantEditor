@@ -24,6 +24,7 @@
       widget->setValue( mp->##field ); \
    };
 #pragma endregion
+
 #pragma region Player traits
 #define reach_traits_pane_update_combobox(w, field) \
    { \
@@ -37,4 +38,25 @@
       const QSignalBlocker blocker(widget); \
       widget->setValue((int)traits->##field ); \
    }
+#pragma endregion
+
+#pragma region Specific team
+#define reach_team_pane_update_flag_checkbox(w, field, mask) \
+   { \
+      QCheckBox* widget = w; \
+      const QSignalBlocker blocker(widget); \
+      widget->setChecked((team->##field & mask) != 0); \
+   };
+#define reach_team_pane_update_combobox(w, field) \
+   { \
+      auto widget = w; \
+      const QSignalBlocker blocker(widget); \
+      widget->setCurrentIndex(team->##field ); \
+   };
+#define reach_team_pane_update_spinbox(w, field) \
+   { \
+      auto widget = w; \
+      const QSignalBlocker blocker(widget); \
+      widget->setValue(team->##field ); \
+   };
 #pragma endregion
