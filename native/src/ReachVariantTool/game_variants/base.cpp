@@ -327,12 +327,24 @@ bool GameVariant::read(cobb::mapped_file& file) {
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
       return false;
    }
+   if (!reader.is_in_bounds()) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+      return false;
+   }
    if (!this->contentHeader.read(reader.bytes)) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
       return false;
    }
    reader.synchronize();
+   if (!reader.is_in_bounds()) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
+      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+      return false;
+   }
    if (this->contentHeader.data.contentType != ReachFileType::game_variant) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::content_type;
@@ -412,4 +424,10 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
    for (int i = 0; i < 5; i++)
       printf("   %08X\n", hasher.hash[i]);
    printf("Test done.\n");
+}
+GameVariantDataMultiplayer* GameVariant::get_multiplayer_data() const noexcept {
+   auto d = this->multiplayer.data;
+   if (!d)
+      return nullptr;
+   return d->as_multiplayer();
 }

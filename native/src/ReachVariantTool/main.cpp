@@ -34,41 +34,18 @@ int main(int argc, char *argv[]) {
 //       if it's even possible at all without totally reimplementing the 
 //       drop-down widget.
 //
-//  - If cobb::bitreader or cobb::bytereader overshoot EOF, they should keep 
-//    track of how much they've overshot it by (i.e. bitreader::_consume_byte 
-//    should add to a tracking value indicating the overshoot). The function 
-//    to check if a reader is in bounds detects if it's at EOF, but not if 
-//    we've blown past EOF.
-//
-//     - We should amend the block code -- _BLF, CHDR, MPVR -- to fail if 
-//       we've overshot EOF (MPVR should check before reading (remainingData); 
-//       we don't care if (remainingData) gets cut off). Ideally we should 
-//       display a specific error message e.g. "The file ended too soon."
-//
 //  - Can we improve our error-reporting system to (at least optionally) store 
 //    the stream bit/byte offset at the time of failure? Every failure point 
 //    has access to the stream object, I believe.
 //
 //  - The engine category drop-down needs to be able to handle the presence 
-//    of an invalid category when loading a file. Our test case is an 360-era 
-//    modded variant, "SvE Mythic Infection," which uses invalid type 21 and 
-//    therefore doesn't show up in MCC's menus; when we load it, the drop-down 
-//    defaults to "Capture the Flag."
+//    of an invalid category when loading a file. Testing shows that custom 
+//    category indices (including "Community") don't work: they don't appear 
+//    in the MCC at all.
 //
 //     - At the very least, we should warn on load and then reset the category 
 //       based on the icon, using the "Insane" category for any unconventional 
 //       icons.
-//
-//        = LET'S NOT GET AHEAD OF OURSELVES. WE SHOULD SAVE A COPY OF SVE 
-//          MYTHIC INFECTION WITH THE CATEGORY FIXED AND SEE IF THAT SHOWS 
-//          UP IN MCC, BEFORE WE ASSUME THE CATEGORY IS THE PROBLEM. THE 
-//          ORIGINAL FILE HAS A BAD BLOCK LENGTH ON MPVR (NOT LONG ENOUGH, 
-//          THOUGH IT'S STILL LONG ENOUGH FOR ALL ACTUAL VALID DATA TO BE 
-//          LOADED) AND THAT COULD PERHAPS BE THE ISSUE (RESAVING WOULD 
-//          FIX THAT AS WELL, OR AT LEAST SHOULD).
-//
-//     - I'm pretty sure the "Community" category is also invalid, and the 
-//       "Halomods.org" one almost certainly is. We should test that.
 //
 //  - We should either disable navigation within the main window when no 
 //    variant is loaded, or start with an empty variant.

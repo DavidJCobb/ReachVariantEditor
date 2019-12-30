@@ -136,6 +136,10 @@
     <ClCompile Include="ui\generic\OptionToggleTable.cpp" />
     <ClCompile Include="ProgramOptionsDialog.cpp" />
     <ClCompile Include="ui\LoadoutForm.cpp" />
+    <ClCompile Include="ui\main_window\editor_state.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_general.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_respawn.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_social.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h" />
@@ -143,6 +147,9 @@
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui" />
     <QtUic Include="ProgramOptionsDialog.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_respawn.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_social.ui" />
     <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -152,7 +159,13 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="editor_state.h" />
+    <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
+    <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
+    <ClInclude Include="ui\main_window\widget_macros_update_end.h" />
+    <ClInclude Include="ui\main_window\widget_macros_update_start.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_social.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_respawn.h" />
+    <QtMoc Include="editor_state.h" />
     <ClInclude Include="formats\bitset.h" />
     <ClInclude Include="formats\block.h" />
     <ClInclude Include="formats\compressed_float.h" />
@@ -218,6 +231,7 @@
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
     <ClInclude Include="ui\GametypeIconCombobox.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />
     <ClInclude Include="ui\generic\LabelForUnsafeOptions.h" />
     <QtMoc Include="ui\LoadoutForm.h" />

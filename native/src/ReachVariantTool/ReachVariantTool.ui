@@ -213,7 +213,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -494,493 +494,22 @@
       </widget>
       <widget class="QWidget" name="PageOptionsGeneral">
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="4" column="1">
-         <widget class="QSpinBox" name="optionsGeneralRoundTimeLimit">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="specialValueText">
-           <string>no limit</string>
-          </property>
-          <property name="suffix">
-           <string> min</string>
-          </property>
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QSpinBox" name="optionsGeneralSuddenDeathTime">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>127</number>
-          </property>
-          <property name="value">
-           <number>90</number>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Round Time Limit</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsGeneralRoundTimeLimit</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsGeneralFlag3">
-          <property name="text">
-           <string>Flag 3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsGeneralNewRoundResetsPlayers">
-          <property name="text">
-           <string>Reset Players on New Round</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Number of Rounds</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsGeneralRoundLimit</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QSpinBox" name="optionsGeneralRoundLimit">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="specialValueText">
-           <string>no limit</string>
-          </property>
-          <property name="maximum">
-           <number>31</number>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Rounds to Win</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsGeneralRoundsToWin</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsGeneralTeamsEnabled">
-          <property name="text">
-           <string>Teams Enabled (Unverified)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsGeneralNewRoundResetsMap">
-          <property name="text">
-           <string>Reset Map on New Round</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QSpinBox" name="optionsGeneralRoundsToWin">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="maximum">
-           <number>15</number>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Sudden Death Time</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsGeneralSuddenDeathTime</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>Grace Period</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsGeneralGracePeriod</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QSpinBox" name="optionsGeneralGracePeriod">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>31</number>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0" colspan="2">
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
+        <item row="0" column="0">
+         <widget class="PageMPSettingsGeneral" name="pageContentGeneral" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="PageOptionsRespawn">
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Respawn Time</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnRespawnTime</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsRespawnSyncWithTeam">
-          <property name="text">
-           <string>Synchronize with Team</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QSpinBox" name="optionsRespawnSuicidePenalty">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>Suicide Penalty</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnSuicidePenalty</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>Betrayal Penalty</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnBetrayalPenalty</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>Team Lives Per Round</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnTeamLivesPerRound</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QSpinBox" name="optionsRespawnRespawnGrowth">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>15</number>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="label_17">
-          <property name="text">
-           <string>Respawn Traits Duration</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnTraitsDuration</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QSpinBox" name="optionsRespawnTeamLivesPerRound">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="specialValueText">
-           <string comment="TeamLivesPerRoundField">unlimited</string>
-          </property>
-          <property name="suffix">
-           <string> lives</string>
-          </property>
-          <property name="maximum">
-           <number>127</number>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="1">
-         <widget class="QSpinBox" name="optionsRespawnLoadoutCamTime">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>15</number>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QSpinBox" name="optionsRespawnBetrayalPenalty">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QSpinBox" name="optionsRespawnRespawnTime">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>255</number>
-          </property>
-          <property name="value">
-           <number>5</number>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Lives Per Round</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnLivesPerRound</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsRespawnFlag1">
-          <property name="text">
-           <string>Respawn With Teammate (Unverified)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>Respawn Time Growth</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnRespawnGrowth</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QSpinBox" name="optionsRespawnLivesPerRound">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="specialValueText">
-           <string comment="LivesPerRoundField">unlimited</string>
-          </property>
-          <property name="suffix">
-           <string> lives</string>
-          </property>
-          <property name="maximum">
-           <number>63</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsRespawnFlag2">
-          <property name="text">
-           <string>Respawn At Location (Unverified)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsRespawnRespawnOnKills">
-          <property name="text">
-           <string>Respawn on Kills</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QSpinBox" name="optionsRespawnTraitsDuration">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="suffix">
-           <string> seconds</string>
-          </property>
-          <property name="maximum">
-           <number>63</number>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="label_16">
-          <property name="text">
-           <string>Loadout Camera Time</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsRespawnLoadoutCamTime</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0" colspan="2">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
+        <item row="13" column="0">
+         <widget class="PageMPSettingsRespawn" name="pageContentRespawn" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="PageOptionsSocial">
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_18">
-          <property name="text">
-           <string>Team Changing</string>
-          </property>
-          <property name="buddy">
-           <cstring>optionsSocialTeamChanging</cstring>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialProximityVoice">
-          <property name="toolTip">
-           <string>Allow players to hear the microphones of nearby enemies.</string>
-          </property>
-          <property name="text">
-           <string>Proximity Voice</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QSpinBox" name="optionsSocialTeamChanging">
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-          <property name="prefix">
-           <string>unknown mode </string>
-          </property>
-          <property name="maximum">
-           <number>3</number>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialObservers">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Enable Observers</string>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialBetrayalBooting">
-          <property name="text">
-           <string>Betrayal Booting</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialGlobalVoice">
-          <property name="text">
-           <string>Don't Team-Restrict Voice Chat</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialDeadPlayerVoice">
-          <property name="text">
-           <string>Allow Dead Players To Talk</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QCheckBox" name="optionsSocialFriendlyFire">
-          <property name="text">
-           <string>Friendly Fire</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0" colspan="2">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
+        <item row="8" column="0">
+         <widget class="PageMPSettingsSocial" name="pageContentSocial" native="true"/>
         </item>
        </layout>
       </widget>
@@ -3209,8 +2738,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>315</width>
-             <height>85</height>
+             <width>65</width>
+             <height>16</height>
             </rect>
            </property>
            <attribute name="label">
@@ -3896,40 +3425,30 @@
    <extends>QComboBox</extends>
    <header>ui/GametypeIconCombobox.h</header>
   </customwidget>
+  <customwidget>
+   <class>PageMPSettingsGeneral</class>
+   <extends>QWidget</extends>
+   <header>ui/main_window/page_multiplayer_settings_general.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageMPSettingsRespawn</class>
+   <extends>QWidget</extends>
+   <header>ui/main_window/page_multiplayer_settings_respawn.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageMPSettingsSocial</class>
+   <extends>QWidget</extends>
+   <header>ui/main_window/page_multiplayer_settings_social.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>MainTreeview</tabstop>
   <tabstop>headerName</tabstop>
   <tabstop>authorGamertag</tabstop>
   <tabstop>editorGamertag</tabstop>
-  <tabstop>optionsGeneralTeamsEnabled</tabstop>
-  <tabstop>optionsGeneralNewRoundResetsPlayers</tabstop>
-  <tabstop>optionsGeneralNewRoundResetsMap</tabstop>
-  <tabstop>optionsGeneralFlag3</tabstop>
-  <tabstop>optionsGeneralRoundTimeLimit</tabstop>
-  <tabstop>optionsGeneralRoundLimit</tabstop>
-  <tabstop>optionsGeneralRoundsToWin</tabstop>
-  <tabstop>optionsGeneralSuddenDeathTime</tabstop>
-  <tabstop>optionsGeneralGracePeriod</tabstop>
-  <tabstop>optionsRespawnSyncWithTeam</tabstop>
-  <tabstop>optionsRespawnFlag1</tabstop>
-  <tabstop>optionsRespawnFlag2</tabstop>
-  <tabstop>optionsRespawnRespawnOnKills</tabstop>
-  <tabstop>optionsRespawnLivesPerRound</tabstop>
-  <tabstop>optionsRespawnTeamLivesPerRound</tabstop>
-  <tabstop>optionsRespawnRespawnTime</tabstop>
-  <tabstop>optionsRespawnSuicidePenalty</tabstop>
-  <tabstop>optionsRespawnBetrayalPenalty</tabstop>
-  <tabstop>optionsRespawnRespawnGrowth</tabstop>
-  <tabstop>optionsRespawnLoadoutCamTime</tabstop>
-  <tabstop>optionsRespawnTraitsDuration</tabstop>
-  <tabstop>optionsSocialObservers</tabstop>
-  <tabstop>optionsSocialTeamChanging</tabstop>
-  <tabstop>optionsSocialFriendlyFire</tabstop>
-  <tabstop>optionsSocialBetrayalBooting</tabstop>
-  <tabstop>optionsSocialProximityVoice</tabstop>
-  <tabstop>optionsSocialGlobalVoice</tabstop>
-  <tabstop>optionsSocialDeadPlayerVoice</tabstop>
   <tabstop>optionsMapAbilitiesEnabled</tabstop>
   <tabstop>optionsMapGrenadesEnabled</tabstop>
   <tabstop>optionsMapShortcutsEnabled</tabstop>

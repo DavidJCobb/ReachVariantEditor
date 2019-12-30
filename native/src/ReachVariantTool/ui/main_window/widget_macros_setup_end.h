@@ -1,0 +1,4 @@
+#undef reach_main_window_setup_spinbox
+#undef reach_main_window_setup_flag_checkbox
+#undef reach_main_window_setup_bool_checkbox
+#undef reach_main_window_setup_spinbox

@@ -63,7 +63,7 @@ ReachLoadout* LoadoutForm::_getLoadout() const noexcept {
    int8_t index = this->loadoutIndex();
    if (index < 0)
       return nullptr;
-   auto palette = ReachEditorState::get().currentLoadoutPalette;
+   auto palette = ReachEditorState::get().loadoutPalette();
    if (!palette)
       return nullptr;
    return &palette->loadouts[index];
@@ -73,7 +73,7 @@ void LoadoutForm::pullFromGameVariant() {
    int8_t index = this->loadoutIndex();
    if (index < 0)
       return;
-   auto palette = ReachEditorState::get().currentLoadoutPalette;
+   auto palette = ReachEditorState::get().loadoutPalette();
    if (!palette)
       return;
    auto& loadout = palette->loadouts[index];

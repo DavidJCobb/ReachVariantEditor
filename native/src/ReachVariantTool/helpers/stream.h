@@ -22,6 +22,10 @@ namespace cobb {
             }
             this->bits.set_bytepos(b);
          }
+         inline bool is_in_bounds() noexcept {
+            this->synchronize();
+            return this->bytes.is_in_bounds();
+         }
          inline bool overshot_eof() noexcept {
             this->synchronize();
             return this->bytes.get_overshoot_bytes() > 0;

@@ -167,4 +167,6 @@ class GameVariant {
       void write(cobb::bit_or_byte_writer& writer) const noexcept;
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
+      //
+      GameVariantDataMultiplayer* get_multiplayer_data() const noexcept;
 };

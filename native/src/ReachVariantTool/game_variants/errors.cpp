@@ -101,9 +101,17 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
       return result;
    switch (this->failure_point) {
       case load_failure_point::block_blam:
-         return QObject::tr("Something went wrong while reading the file header (_blf section).", tr_disambiguator);
+         result = QObject::tr("Something went wrong while reading the file header (_blf section). ", tr_disambiguator);
+         if (this->reason == load_failure_reason::early_eof) {
+            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         }
+         return result;
       case load_failure_point::block_chdr:
-         return QObject::tr("Something went wrong while reading the file header (chdr section).", tr_disambiguator);
+         result = QObject::tr("Something went wrong while reading the file header (chdr section). ", tr_disambiguator);
+         if (this->reason == load_failure_reason::early_eof) {
+            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         }
+         return result;
       case load_failure_point::block_mpvr:
          result = QObject::tr("Something went wrong while reading the multiplayer data. ", tr_disambiguator);
          if (this->reason == load_failure_reason::early_eof) {

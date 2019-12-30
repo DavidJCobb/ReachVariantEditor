@@ -157,6 +157,18 @@
     <ClCompile Include="game_variants\errors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_general.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\editor_state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_respawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_social.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -177,6 +189,18 @@
     <QtMoc Include="ui\generic\IconOnlyCombobox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="editor_state.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_respawn.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_social.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
@@ -186,6 +210,15 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\widget_loadout_options.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_respawn.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_social.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -265,9 +298,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\type_traits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="editor_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="services\ini.h">
@@ -400,6 +430,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\errors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\main_window\widget_macros_setup_start.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\main_window\widget_macros_setup_end.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\main_window\widget_macros_update_start.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\main_window\widget_macros_update_end.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -52,7 +52,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
    #if _DEBUG
       QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, []() {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          __debugbreak();
       });
    #else
@@ -81,13 +81,11 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       widget->addItem(tr("Race", "Engine Category"), QVariant(12));
       widget->addItem(tr("Headhunter", "Engine Category"), QVariant(13));
       widget->addItem(tr("Insane", "Engine Category"), QVariant(16));
-      widget->addItem(tr("Halomods.com", "Engine Category"), QVariant(24)); // for consistency with KSoft
-      widget->addItem(tr("Community", "Engine Category"), QVariant(25));
    }
    //
    {  // Metadata
       QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [this](const QString& text) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto u16s = text.toStdU16String();
@@ -104,7 +102,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       auto descCount = this->ui.headerDescCharacterLimit;
       QObject::connect(this->ui.headerDesc, &QPlainTextEdit::textChanged, [desc, descCount]() {
          auto text    = desc->toPlainText();
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto u16s = text.toStdU16String();
@@ -114,10 +112,10 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       });
       //
       QObject::connect(this->ui.engineIcon, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
-         auto data    = ReachEditorState::get().get_multiplayer_data();
+         auto data = ReachEditorState::get().multiplayerData();
          if (!data)
             return;
          variant->contentHeader.data.engineIcon = value;
@@ -125,10 +123,10 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          data->variantHeader.engineIcon = value;
       });
       QObject::connect(this->ui.engineCategory, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
-         auto data    = ReachEditorState::get().get_multiplayer_data();
+         auto data = ReachEditorState::get().multiplayerData();
          if (!data)
             return;
          variant->contentHeader.data.engineCategory = value;
@@ -137,7 +135,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       });
       //
       QObject::connect(this->ui.authorGamertag, &QLineEdit::textEdited, [](const QString& text) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto latin = text.toLatin1();
@@ -145,7 +143,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          variant->multiplayer.data->as_multiplayer()->variantHeader.createdBy.set_author_name(latin.constData());
       });
       QObject::connect(this->ui.eraseAuthorXUID, &QPushButton::clicked, [this]() {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto& author_c = variant->contentHeader.data.createdBy;
@@ -163,7 +161,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          }
       });
       QObject::connect(this->ui.createdOnDate, &QDateTimeEdit::dateTimeChanged, [](const QDateTime& time) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          uint64_t seconds = time.toSecsSinceEpoch();
@@ -171,7 +169,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          variant->multiplayer.data->as_multiplayer()->variantHeader.createdBy.set_datetime(seconds);
       });
       QObject::connect(this->ui.editorGamertag, &QLineEdit::textEdited, [](const QString& text) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto latin = text.toLatin1();
@@ -179,7 +177,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          variant->multiplayer.data->as_multiplayer()->variantHeader.modifiedBy.set_author_name(latin.constData());
       });
       QObject::connect(this->ui.eraseEditorXUID, &QPushButton::clicked, [this]() {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          auto& author_c = variant->contentHeader.data.modifiedBy;
@@ -197,7 +195,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          }
       });
       QObject::connect(this->ui.editedOnDate, &QDateTimeEdit::dateTimeChanged, [](const QDateTime& time) {
-         auto variant = ReachEditorState::get().currentVariant;
+         auto variant = ReachEditorState::get().variant();
          if (!variant)
             return;
          uint64_t seconds = time.toSecsSinceEpoch();
@@ -221,7 +219,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QComboBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
-               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               auto data = ReachEditorState::get().multiplayerData(); \
                if (!data) \
                   return; \
                data->##field = value; \
@@ -231,7 +229,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QSpinBox* widget = w; \
             QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
-               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               auto data = ReachEditorState::get().multiplayerData(); \
                if (!data) \
                   return; \
                data->##field = value; \
@@ -241,7 +239,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QDoubleSpinBox* widget = w; \
             QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](double value) { \
-               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               auto data = ReachEditorState::get().multiplayerData(); \
                if (!data) \
                   return; \
                data->##field = value; \
@@ -251,7 +249,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               auto data = ReachEditorState::get().multiplayerData(); \
                if (!data) \
                   return; \
                if (widget->isChecked()) \
@@ -264,47 +262,13 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          { \
             QCheckBox* widget = w; \
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) { \
-               auto data = ReachEditorState::get().get_multiplayer_data(); \
+               auto data = ReachEditorState::get().multiplayerData(); \
                if (!data) \
                   return; \
                data->##field = widget->isChecked(); \
             }); \
          };
       #pragma endregion
-      { // General
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          options.misc.flags, 1);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, options.misc.flags, 2);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     options.misc.flags, 4);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsGeneralFlag3,                 options.misc.flags, 8);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundTimeLimit,  options.misc.timeLimit);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundLimit,      options.misc.roundLimit);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralRoundsToWin,     options.misc.roundsToWin);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralSuddenDeathTime, options.misc.suddenDeathTime);
-         reach_main_window_setup_spinbox(this->ui.optionsGeneralGracePeriod,     options.misc.gracePeriod);
-      }
-      {  // Respawn
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   options.respawn.flags, 1);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag1,          options.respawn.flags, 2);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnFlag2,          options.respawn.flags, 4);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, options.respawn.flags, 8);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnLivesPerRound,     options.respawn.livesPerRound);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnTeamLivesPerRound, options.respawn.teamLivesPerRound);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnTime,       options.respawn.respawnTime);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnSuicidePenalty,    options.respawn.suicidePenalty);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnBetrayalPenalty,   options.respawn.betrayalPenalty);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnRespawnGrowth,     options.respawn.respawnGrowth);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnLoadoutCamTime,    options.respawn.loadoutCamTime);
-         reach_main_window_setup_spinbox(this->ui.optionsRespawnTraitsDuration,    options.respawn.traitsDuration);
-      }
-      {  // Social
-         reach_main_window_setup_bool_checkbox(this->ui.optionsSocialObservers, options.social.observers);
-         reach_main_window_setup_spinbox(this->ui.optionsSocialTeamChanging, options.social.teamChanges);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialFriendlyFire,    options.social.flags, 0x01);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialBetrayalBooting, options.social.flags, 0x02);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialProximityVoice,  options.social.flags, 0x04);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialGlobalVoice,     options.social.flags, 0x08);
-         reach_main_window_setup_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, options.social.flags, 0x10);
-      }
       {  // Map and Game
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapGrenadesEnabled, options.map.flags, 0x01);
          reach_main_window_setup_flag_checkbox(this->ui.optionsMapShortcutsEnabled, options.map.flags, 0x02);
@@ -321,7 +285,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             //  1 = Covenant
             //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-               auto data = ReachEditorState::get().get_multiplayer_data();
+               auto data = ReachEditorState::get().multiplayerData();
                if (!data)
                   return;
                int8_t value;
@@ -347,7 +311,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             // 12 = No Vehicles
             //
             QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-               auto data = ReachEditorState::get().get_multiplayer_data();
+               auto data = ReachEditorState::get().multiplayerData();
                if (!data)
                   return;
                int8_t value;
@@ -474,7 +438,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             { \
                auto widget = w; \
                QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
-                  auto traits = ReachEditorState::get().currentTraits; \
+                  auto traits = ReachEditorState::get().playerTraits(); \
                   if (!traits) \
                      return; \
                   traits->##field = value; \
@@ -484,7 +448,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             { \
                auto widget = w; \
                QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
-                  auto traits = ReachEditorState::get().currentTraits; \
+                  auto traits = ReachEditorState::get().playerTraits(); \
                   if (!traits) \
                      return; \
                   traits->##field = value; \
@@ -509,7 +473,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             {
                auto widget = this->ui.playerTraitWeaponPrimary;
                QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
-                  auto traits = ReachEditorState::get().currentTraits;
+                  auto traits = ReachEditorState::get().playerTraits();
                   if (!traits)
                      return;
                   traits->offense.weaponPrimary = (reach::weapon)widget->currentData().toInt();
@@ -518,7 +482,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             {
                auto widget = this->ui.playerTraitWeaponSecondary;
                QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
-                  auto traits = ReachEditorState::get().currentTraits;
+                  auto traits = ReachEditorState::get().playerTraits();
                   if (!traits)
                      return;
                   traits->offense.weaponSecondary = (reach::weapon)widget->currentData().toInt();
@@ -527,7 +491,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             {
                auto widget = this->ui.playerTraitArmorAbility;
                QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
-                  auto traits = ReachEditorState::get().currentTraits;
+                  auto traits = ReachEditorState::get().playerTraits();
                   if (!traits)
                      return;
                   traits->offense.ability = (reach::ability)widget->currentData().toInt();
@@ -575,7 +539,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          {  // Precision Bloom
             QDoubleSpinBox* widget = this->ui.titleUpdatePrecisionBloom;
             QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](int value) {
-               auto data = ReachEditorState::get().get_multiplayer_data();
+               auto data = ReachEditorState::get().multiplayerData();
                if (!data)
                   return;
                data->titleUpdateData.precisionBloom = value * 5.0F / 100.0F; // normalize from percentage of vanilla to internal format
@@ -592,7 +556,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          {
             QCheckBox* widget = this->ui.forgeEnable;
             QObject::connect(widget, &QCheckBox::stateChanged, [widget](int state) {
-               auto data = ReachEditorState::get().get_multiplayer_data();
+               auto data = ReachEditorState::get().multiplayerData();
                if (!data)
                   return;
                data->isForge = widget->isChecked();
@@ -662,7 +626,7 @@ void ReachVariantTool::openFile() {
       }
       return;
    }
-   editor.take_game_variant(variant, s.c_str());
+   editor.takeVariant(variant, s.c_str());
    this->refreshWidgetsFromVariant();
    this->refreshScriptedPlayerTraitList();
    this->setupWidgetsForScriptedOptions();
@@ -677,7 +641,7 @@ void ReachVariantTool::openFile() {
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();
-   if (!editor.currentVariant) {
+   if (!editor.variant()) {
       QMessageBox::information(this, tr("No game variant is open"), tr("We do not currently support creating game variants from scratch. Open a variant and then you can save an edited copy of it."));
       return;
    }
@@ -686,13 +650,13 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
       fileName = QFileDialog::getSaveFileName(
          this,
          tr("Save Game Variant"), // window title
-         QString::fromWCharArray(editor.currentFile.c_str()), // working directory and optionally default-selected file
+         QString::fromWCharArray(editor.variantFilePath()), // working directory and optionally default-selected file
          tr("Game Variant (*.bin);;All Files (*)") // filetype filters
       );
       if (fileName.isEmpty())
          return;
    } else {
-      fileName = QString::fromWCharArray(editor.currentFile.c_str());
+      fileName = QString::fromWCharArray(editor.variantFilePath());
    }
    QFile file(fileName);
    if (!file.open(QIODevice::WriteOnly)) {
@@ -701,14 +665,14 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    }
    if (saveAs) {
       std::wstring temp = fileName.toStdWString();
-      editor.set_variant_file_path(temp.c_str());
+      editor.setVariantFilePath(temp.c_str());
       this->refreshWindowTitle();
    }
    QDataStream out(&file);
    out.setVersion(QDataStream::Qt_4_5);
    //
    cobb::bit_or_byte_writer writer;
-   editor.currentVariant->write(writer);
+   editor.variant()->write(writer);
    out.writeRawData((const char*)writer.bytes.data(), writer.bytes.get_bytespan());
 }
 void ReachVariantTool::onSelectedPageChanged() {
@@ -719,7 +683,7 @@ void ReachVariantTool::onSelectedPageChanged() {
    auto sel     = selections[0];
    auto text    = sel->text(0);
    auto stack   = this->ui.MainContentView;
-   auto variant = ReachEditorState::get().currentVariant;
+   auto variant = ReachEditorState::get().variant();
    auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
    if (text == tr("Metadata", "MainTreeview")) {
       stack->setCurrentWidget(this->ui.PageGameVariantHeader);
@@ -832,7 +796,7 @@ void ReachVariantTool::onSelectedPageChanged() {
 }
 void ReachVariantTool::refreshWidgetsFromVariant() {
    auto& editor = ReachEditorState::get();
-   auto variant = editor.currentVariant;
+   auto variant = editor.variant();
    if (!variant)
       return;
    auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
@@ -898,40 +862,6 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
          widget->setChecked( mp_data->##field ); \
       };
    #pragma endregion
-   {  // General
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralTeamsEnabled,          options.misc.flags, 1);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsPlayers, options.misc.flags, 2);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralNewRoundResetsMap,     options.misc.flags, 4);
-      reach_main_window_update_flag_checkbox(this->ui.optionsGeneralFlag3,                 options.misc.flags, 8);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundTimeLimit,  options.misc.timeLimit);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundLimit,      options.misc.roundLimit);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralRoundsToWin,     options.misc.roundsToWin);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralSuddenDeathTime, options.misc.suddenDeathTime);
-      reach_main_window_update_spinbox(this->ui.optionsGeneralGracePeriod,     options.misc.gracePeriod);
-   }
-   {  // Respawn
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnSyncWithTeam,   options.respawn.flags, 1);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag1,          options.respawn.flags, 2);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnFlag2,          options.respawn.flags, 4);
-      reach_main_window_update_flag_checkbox(this->ui.optionsRespawnRespawnOnKills, options.respawn.flags, 8);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnLivesPerRound,     options.respawn.livesPerRound);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnTeamLivesPerRound, options.respawn.teamLivesPerRound);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnTime,       options.respawn.respawnTime);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnSuicidePenalty,    options.respawn.suicidePenalty);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnBetrayalPenalty,   options.respawn.betrayalPenalty);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnRespawnGrowth,     options.respawn.respawnGrowth);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnLoadoutCamTime,    options.respawn.loadoutCamTime);
-      reach_main_window_update_spinbox(this->ui.optionsRespawnTraitsDuration,    options.respawn.traitsDuration);
-   }
-   {  // Social
-      reach_main_window_update_bool_checkbox(this->ui.optionsSocialObservers, options.social.observers);
-      reach_main_window_update_spinbox(this->ui.optionsSocialTeamChanging, options.social.teamChanges);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialFriendlyFire,    options.social.flags, 0x01);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialBetrayalBooting, options.social.flags, 0x02);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialProximityVoice,  options.social.flags, 0x04);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialGlobalVoice,     options.social.flags, 0x08);
-      reach_main_window_update_flag_checkbox(this->ui.optionsSocialDeadPlayerVoice, options.social.flags, 0x10);
-   }
    {  // Map and Game
       reach_main_window_update_flag_checkbox(this->ui.optionsMapGrenadesEnabled, options.map.flags, 0x01);
       reach_main_window_update_flag_checkbox(this->ui.optionsMapShortcutsEnabled, options.map.flags, 0x02);
@@ -1020,12 +950,12 @@ void ReachVariantTool::refreshWidgetsFromVariant() {
    #undef reach_main_window_update_bool_checkbox
 }
 void ReachVariantTool::switchToLoadoutPalette(ReachLoadoutPalette* palette) {
-   ReachEditorState::get().start_editing_loadouts(palette);
+   ReachEditorState::get().setCurrentLoadoutPalette(palette);
    this->refreshWidgetsForLoadoutPalette();
    this->ui.MainContentView->setCurrentWidget(this->ui.PageLoadoutPalette);
 }
 void ReachVariantTool::switchToPlayerTraits(ReachPlayerTraits* traits) {
-   ReachEditorState::get().start_editing_traits(traits);
+   ReachEditorState::get().setCurrentPlayerTraits(traits);
    this->refreshWidgetsForPlayerTraits();
    this->ui.MainContentView->setCurrentWidget(this->ui.PagePlayerTraits);
 }
@@ -1038,7 +968,7 @@ void ReachVariantTool::refreshWidgetsForLoadoutPalette() {
 }
 void ReachVariantTool::refreshWidgetsForPlayerTraits() {
    auto& editor = ReachEditorState::get();
-   auto  traits = editor.currentTraits;
+   auto  traits = editor.playerTraits();
    if (!traits)
       return;
    #define reach_traits_pane_update_combobox(w, field) \
@@ -1124,7 +1054,7 @@ void ReachVariantTool::refreshScriptedPlayerTraitList() {
    }
    for (QTreeWidgetItem* child : branch->takeChildren())
       delete child;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return;
    auto& t = data->scriptData.traits;
@@ -1142,18 +1072,18 @@ void ReachVariantTool::refreshScriptedPlayerTraitList() {
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();
-   if (!editor.currentVariant) {
+   if (!editor.variant()) {
       this->setWindowTitle("ReachVariantTool");
       return;
    }
-   std::wstring file = editor.currentFile;
+   std::wstring file = editor.variantFilePath();
    if (ReachINI::UIWindowTitle::bShowFullPath.current.b == false) {
       file = std::filesystem::path(file).filename().wstring();
    }
    if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b == true) {
       QString variantTitle;
       //
-      auto mp = editor.get_multiplayer_data();
+      auto mp = editor.multiplayerData();
       if (mp) {
          //
          // Prefer getting the title from the mpvr block when possible, because it's always 
@@ -1164,7 +1094,7 @@ void ReachVariantTool::refreshWindowTitle() {
          //
          variantTitle = QString::fromUtf16(mp->variantHeader.title);
       } else {
-         variantTitle = QString::fromUtf16(editor.currentVariant->contentHeader.data.title);
+         variantTitle = QString::fromUtf16(editor.variant()->contentHeader.data.title);
       }
       this->setWindowTitle(
          QString("%1 <%2> - ReachVariantTool").arg(variantTitle).arg(file)
@@ -1178,7 +1108,7 @@ void ReachVariantTool::refreshWindowTitle() {
 //
 namespace {
    void _onMegaloComboboxChange(QComboBox* widget, int index) {
-      auto data = ReachEditorState::get().get_multiplayer_data();
+      auto data = ReachEditorState::get().multiplayerData();
       if (!data)
          return;
       auto v = widget->property("MegaloOptionIndex");
@@ -1194,7 +1124,7 @@ namespace {
       option.currentValueIndex = index;
    }
    void _onMegaloSliderChange(QSlider* widget, int value) {
-      auto data = ReachEditorState::get().get_multiplayer_data();
+      auto data = ReachEditorState::get().multiplayerData();
       if (!data)
          return;
       auto v = widget->property("MegaloOptionIndex");
@@ -1222,7 +1152,7 @@ void ReachVariantTool::setupWidgetsForScriptedOptions() {
       while ((child = layout->takeAt(0)) != nullptr)
          delete child;
    }
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return;
    const auto& options = data->scriptData.options;
@@ -1345,7 +1275,7 @@ void ReachVariantTool::switchToTeam(int8_t teamIndex) {
 ReachTeamData* ReachVariantTool::_getCurrentTeam() const noexcept {
    if (this->currentTeam < 0)
       return nullptr;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    return &data->options.team.teams[this->currentTeam];

@@ -156,7 +156,7 @@ void OptionToggleTreeModel::clear() {
 
 #pragma region MegaloOptionToggleTreeModel - The model for the Megalo options list; a subclass of OptionToggleTreeModel
 MegaloOptionToggleTreeModel::bitset_type* MegaloOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    auto& flagset = data->optionToggles.megalo;
@@ -169,7 +169,7 @@ MegaloOptionToggleTreeModel::bitset_type* MegaloOptionToggleTreeModel::_getToggl
 bool MegaloOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    return data->optionToggles.megalo.disabled.bits.test(index);
@@ -177,7 +177,7 @@ bool MegaloOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexce
 bool MegaloOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    return data->optionToggles.megalo.hidden.bits.test(index);
@@ -204,7 +204,7 @@ void MegaloOptionToggleTreeModel::modifyAllFlagsOfType(OptionToggleFlagType type
 
 #pragma region EngineOptionToggleTreeModel - The model for the engine options tree; a subclass of OptionToggleTreeModel
 EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggles(OptionToggleFlagType type) const noexcept {
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    auto& flagset = data->optionToggles.engine;
@@ -217,7 +217,7 @@ EngineOptionToggleTreeModel::bitset_type* EngineOptionToggleTreeModel::_getToggl
 bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    return data->optionToggles.engine.disabled.bits.test(index);
@@ -225,7 +225,7 @@ bool EngineOptionToggleTreeModel::checkDisabledFlag(uint16_t index) const noexce
 bool EngineOptionToggleTreeModel::checkHiddenFlag(uint16_t index) const noexcept {
    if (index >= bitset_type::flag_count)
       return false;
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return nullptr;
    return data->optionToggles.engine.hidden.bits.test(index);
@@ -479,7 +479,7 @@ void MegaloOptionToggleTree::updateModelFromGameVariant() {
    if (!model)
       return;
    model->clear();
-   auto data = ReachEditorState::get().get_multiplayer_data();
+   auto data = ReachEditorState::get().multiplayerData();
    if (!data)
       return;
    auto& options = data->scriptData.options;
