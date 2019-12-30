@@ -136,10 +136,14 @@
     <ClCompile Include="ui\generic\OptionToggleTable.cpp" />
     <ClCompile Include="ProgramOptionsDialog.cpp" />
     <ClCompile Include="ui\LoadoutForm.cpp" />
-    <ClCompile Include="ui\main_window\editor_state.cpp" />
+    <ClCompile Include="editor_state.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_general.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_loadout.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_map.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_respawn.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_social.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_team.cpp" />
+    <ClCompile Include="ui\main_window\page_player_traits.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h" />
@@ -148,8 +152,12 @@
     <QtUic Include="ReachVariantTool.ui" />
     <QtUic Include="ProgramOptionsDialog.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_loadout.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_map.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_settings_respawn.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_settings_social.ui" />
+    <QtUic Include="ui\main_window\page_multiplayer_settings_team.ui" />
+    <QtUic Include="ui\main_window\page_player_traits.ui" />
     <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +167,10 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_map.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_team.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_loadout.h" />
+    <QtMoc Include="ui\main_window\page_player_traits.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

@@ -31,6 +31,9 @@
    </property>
    <item row="10" column="1">
     <widget class="QSpinBox" name="fieldLoadoutCamTime">
+     <property name="toolTip">
+      <string>Control how much time players spend on the initial loadout camera. If this is too short, players won't have a chance to pick their loadouts before spawning! The default is ten seconds.</string>
+     </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
@@ -39,6 +42,9 @@
      </property>
      <property name="maximum">
       <number>15</number>
+     </property>
+     <property name="value">
+      <number>10</number>
      </property>
     </widget>
    </item>

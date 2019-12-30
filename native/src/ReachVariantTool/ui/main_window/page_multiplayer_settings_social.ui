@@ -106,6 +106,9 @@
    </item>
    <item row="4" column="0" colspan="2">
     <widget class="QCheckBox" name="fieldProximityVoice">
+     <property name="toolTip">
+      <string>If enabled, players will be able to hear voice chat from any physically nearby enemies during team games.</string>
+     </property>
      <property name="text">
       <string>Proximity Voice</string>
      </property>

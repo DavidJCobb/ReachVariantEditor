@@ -1,3 +1,4 @@
+#pragma region Main window
 #define reach_main_window_setup_combobox(w, field) \
    QObject::connect(w, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
       auto data = ReachEditorState::get().multiplayerData(); \
@@ -29,3 +30,20 @@
          return; \
       data->##field = value; \
    });
+#pragma endregion
+#pragma region Player traits
+#define reach_traits_pane_setup_combobox(w, field) \
+   QObject::connect(w, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) { \
+      auto traits = ReachEditorState::get().playerTraits(); \
+      if (!traits) \
+         return; \
+      traits->##field = value; \
+   });
+#define reach_traits_pane_setup_spinbox(w, field) \
+   QObject::connect(w, QOverload<int>::of(&QSpinBox::valueChanged), [](int value) { \
+      auto traits = ReachEditorState::get().playerTraits(); \
+      if (!traits) \
+         return; \
+      traits->##field = value; \
+   });
+#pragma endregion

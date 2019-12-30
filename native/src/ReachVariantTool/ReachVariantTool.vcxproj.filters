@@ -160,13 +160,25 @@
     <ClCompile Include="ui\main_window\page_multiplayer_settings_general.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\main_window\editor_state.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\main_window\page_multiplayer_settings_respawn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\main_window\page_multiplayer_settings_social.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_team.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="editor_state.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_loadout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\page_player_traits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -201,6 +213,18 @@
     <QtMoc Include="ui\main_window\page_multiplayer_settings_social.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_map.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_team.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_loadout.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_player_traits.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
@@ -219,6 +243,18 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\main_window\page_multiplayer_settings_social.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_map.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_team.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_multiplayer_settings_loadout.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_player_traits.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

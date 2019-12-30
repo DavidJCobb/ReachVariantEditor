@@ -32,7 +32,6 @@ class ReachVariantTool : public QMainWindow {
       //
       void refreshWidgetsFromVariant();
       void refreshWidgetsForLoadoutPalette();
-      void refreshWidgetsForPlayerTraits();
       void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //

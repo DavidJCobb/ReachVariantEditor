@@ -1,3 +1,4 @@
+#pragma region Main window
 #define reach_main_window_update_combobox(w, field) \
    { \
       auto widget = w; \
@@ -22,3 +23,18 @@
       const QSignalBlocker blocker(widget); \
       widget->setValue( mp->##field ); \
    };
+#pragma endregion
+#pragma region Player traits
+#define reach_traits_pane_update_combobox(w, field) \
+   { \
+      auto widget = w; \
+      const QSignalBlocker blocker(widget); \
+      widget->setCurrentIndex((int)traits->##field ); \
+   }
+#define reach_traits_pane_update_spinbox(w, field) \
+   { \
+      auto widget = w; \
+      const QSignalBlocker blocker(widget); \
+      widget->setValue((int)traits->##field ); \
+   }
+#pragma endregion
