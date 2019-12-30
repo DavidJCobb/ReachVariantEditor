@@ -193,6 +193,9 @@
     <ClCompile Include="ui\main_window\page_multiplayer_metadata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_scripted.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -247,6 +250,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\main_window\page_multiplayer_metadata.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

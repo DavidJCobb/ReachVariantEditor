@@ -144,9 +144,13 @@ void OptionToggleTreeModel::insertItem(uint16_t index, QString name, int16_t par
    this->rows[index] = row;
 }
 void OptionToggleTreeModel::clear() {
-   for (auto row : this->rows)
+   this->beginResetModel();
+   for (auto& row : this->rows) {
       delete row;
+      row = nullptr;
+   }
    this->rows.clear();
+   this->endResetModel();
 }
 #pragma endregion
 

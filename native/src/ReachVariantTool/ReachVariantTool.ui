@@ -213,7 +213,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="PageGameVariantHeader">
        <layout class="QGridLayout" name="gridLayout">
@@ -264,7 +264,13 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="PageOptionsScripted"/>
+      <widget class="QWidget" name="PageOptionsScripted">
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <widget class="PageMPSettingsScripted" name="pageContentMegaloOptions" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="PageEditPlayerTraits">
        <layout class="QGridLayout" name="gridLayout_9">
         <property name="topMargin">
@@ -697,6 +703,12 @@
    <class>PageMPMetadata</class>
    <extends>QWidget</extends>
    <header>ui/main_window/page_multiplayer_metadata.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageMPSettingsScripted</class>
+   <extends>QWidget</extends>
+   <header>ui/main_window/page_multiplayer_settings_scripted.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

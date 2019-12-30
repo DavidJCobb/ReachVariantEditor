@@ -143,6 +143,7 @@
     <ClCompile Include="ui\main_window\page_multiplayer_settings_loadout.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_map.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_respawn.cpp" />
+    <ClCompile Include="ui\main_window\page_multiplayer_settings_scripted.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_social.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_team.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_team_specific.cpp" />
@@ -183,6 +184,7 @@
     <QtMoc Include="ui\main_window\page_forge_settings_general.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_team_specific.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_metadata.h" />
+    <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

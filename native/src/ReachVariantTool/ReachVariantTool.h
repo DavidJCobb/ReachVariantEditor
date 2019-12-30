@@ -33,8 +33,6 @@ class ReachVariantTool : public QMainWindow {
       void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //
-      void setupWidgetsForScriptedOptions();
-      //
    private:
       Ui::ReachVariantToolClass ui;
 };
