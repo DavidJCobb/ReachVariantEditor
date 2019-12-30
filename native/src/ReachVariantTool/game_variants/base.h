@@ -20,6 +20,19 @@ enum class ReachGameEngine : uint8_t {
    campaign,
    firefight,
 };
+enum class ReachFileType : int8_t {
+   none = -1,
+   dlc,
+   campaign_save,
+   screenshot,
+   film,
+   film_clip,
+   map_variant,
+   game_variant,
+   playlist,
+};
+
+
 class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
@@ -66,7 +79,7 @@ class GameVariantHeader {
          cobb::bytenumber<uint16_t> major; // chdr-only
          cobb::bytenumber<uint16_t> minor; // chdr-only
       } build;
-      cobb::bitnumber<4, int8_t, true> contentType;
+      cobb::bitnumber<4, ReachFileType, true> contentType;
       // skip 3 bytes
       cobb::bytenumber<uint32_t> fileLength;
       cobb::bytenumber<uint64_t> unk08;

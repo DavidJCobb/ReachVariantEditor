@@ -57,7 +57,7 @@ bool GameVariantHeader::read(cobb::bitreader& stream) noexcept {
    this->title[127] = '\0';
    stream.read_u16string(this->description, 128); // big-endian
    this->description[127] = '\0';
-   if (this->contentType == 6) {
+   if (this->contentType == ReachFileType::game_variant) {
       this->engineIcon.read(stream);
    }
    if (this->activity == 2)
@@ -108,7 +108,7 @@ void GameVariantHeader::write(cobb::bitwriter& stream) const noexcept {
    this->modifiedBy.write(stream);
    stream.write_u16string(this->title,       128); // big-endian
    stream.write_u16string(this->description, 128); // big-endian
-   if (this->contentType == 6) {
+   if (this->contentType == ReachFileType::game_variant) {
       this->engineIcon.write(stream);
    }
    if (this->activity == 2)
@@ -325,6 +325,12 @@ bool GameVariant::read(cobb::mapped_file& file) {
       return false;
    }
    reader.synchronize();
+   if (this->contentHeader.data.contentType != ReachFileType::game_variant) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::content_type;
+      error_report.extra[0]      = (int32_t)this->contentHeader.data.contentType;
+      return false;
+   }
    if (!this->multiplayer.read(reader)) {
       error_report.state = GameEngineVariantLoadError::load_state::failure;
       if (!error_report.has_failure_point())

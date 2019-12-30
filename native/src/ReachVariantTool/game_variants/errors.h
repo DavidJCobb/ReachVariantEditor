@@ -15,6 +15,7 @@ struct GameEngineVariantLoadError {
       block_chdr,
       block_mpvr, // should only appear if we can't identify a more specific cause
       //
+      content_type, // extra[0] is the ReachFileType
       variant_type, // extra[0] is the variant type
       //
       string_table, // ZLIB decompression failure; extra[0] is the ZLIB failure code

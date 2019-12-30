@@ -79,6 +79,19 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
          return QObject::tr("Something went wrong while reading the file header (chdr section).", tr_disambiguator);
       case load_failure_point::block_mpvr:
          return QObject::tr("Something went wrong while reading the multiplayer data.", tr_disambiguator);
+      case load_failure_point::content_type:
+         switch ((ReachFileType)this->extra[0]) {
+            case ReachFileType::film:
+            case ReachFileType::film_clip:
+               return QObject::tr("Saved Theater content is not supported.", tr_disambiguator);
+            case ReachFileType::map_variant:
+               return QObject::tr("Map variants are not supported.", tr_disambiguator);
+            case ReachFileType::screenshot:
+               return QObject::tr("Xbox 360-era screenshots are not supported.", tr_disambiguator);
+            case ReachFileType::none:
+               return QObject::tr("This file's header doesn't specify its type.", tr_disambiguator);
+         }
+         return QObject::tr("The file has an unknown type: %1.", tr_disambiguator).arg(this->extra[0]);
       case load_failure_point::variant_type:
          switch ((ReachGameEngine)this->extra[0]) {
             case ReachGameEngine::campaign:
@@ -89,7 +102,6 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
                return QObject::tr("The game variant doesn't specify its type (campaign, firefight, Forge, multiplayer, etc.); it just says zero.", tr_disambiguator);
          }
          return QObject::tr("The file has an unknown game variant type: %1.", tr_disambiguator).arg(this->extra[0]);
-         break;
       case load_failure_point::string_table:
          return QObject::tr("Failed to decompress a string table. Zlib returned error code %1.", tr_disambiguator).arg(this->extra[0]);
       case load_failure_point::megalo_conditions:

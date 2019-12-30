@@ -49,9 +49,6 @@ int main(int argc, char *argv[]) {
 //    the stream bit/byte offset at the time of failure? Every failure point 
 //    has access to the stream object, I believe.
 //
-//  - Delete (parse_error_reporting.h), which was the old Megalo-specific 
-//    load error reporting system. It's no longer used.
-//
 //  - The engine category drop-down needs to be able to handle the presence 
 //    of an invalid category when loading a file. Our test case is an 360-era 
 //    modded variant, "SvE Mythic Infection," which uses invalid type 21 and 
@@ -72,9 +69,6 @@ int main(int argc, char *argv[]) {
 //
 //     - I'm pretty sure the "Community" category is also invalid, and the 
 //       "Halomods.org" one almost certainly is. We should test that.
-//
-//  - Verify that the CHDR contentType is "game variant" before proceeding 
-//    with loading. Fail if it isn't.
 //
 //  - We should either disable navigation within the main window when no 
 //    variant is loaded, or start with an empty variant.
