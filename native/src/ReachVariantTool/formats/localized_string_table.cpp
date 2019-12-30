@@ -2,6 +2,7 @@
 extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
+#include "../game_variants/errors.h"
 
 #define MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION 1
 
@@ -132,7 +133,11 @@ void* ReachStringTable::_make_buffer(cobb::bitreader& stream) const noexcept {
          if (Z_OK != resultCode) {
             free(final);
             final = nullptr;
-            printf("Failed to decompress zlib stream. Failure code was %d.\n", resultCode);
+            auto& error_report = GameEngineVariantLoadError::get();
+            error_report.state         = GameEngineVariantLoadError::load_state::failure;
+            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::zlib_decompress_error;
+            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::string_table;
+            error_report.extra[0]      = resultCode;
          }
       }
       free(buffer);
@@ -140,7 +145,7 @@ void* ReachStringTable::_make_buffer(cobb::bitreader& stream) const noexcept {
    }
    return buffer;
 }
-void ReachStringTable::read(cobb::bitreader& stream) noexcept {
+bool ReachStringTable::read(cobb::bitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    this->strings.resize(count);
    for (size_t i = 0; i < count; i++)
@@ -151,8 +156,10 @@ void ReachStringTable::read(cobb::bitreader& stream) noexcept {
          for (size_t i = 0; i < count; i++)
             this->strings[i].read_strings(buffer);
          free(buffer);
-      }
+      } else
+         return false;
    }
+   return true;
 }
 void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
    stream.write(this->strings.size(), this->count_bitlength);

@@ -12,6 +12,7 @@
 #include <QWidget>
 #include "editor_state.h"
 #include "game_variants/base.h"
+#include "game_variants/errors.h"
 #include "helpers/ini.h"
 #include "helpers/stream.h"
 #include "services/ini.h"
@@ -653,7 +654,12 @@ void ReachVariantTool::openFile() {
    }
    auto variant = new GameVariant();
    if (!variant->read(file)) {
-      QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data."));
+      auto& error_report = GameEngineVariantLoadError::get();
+      if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
+         QMessageBox::information(this, tr("Unable to open file"), error_report.to_qstring());
+      } else {
+         QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data. The code that failed didn't signal a reason; that would be a programming mistake on my part, so let me know."));
+      }
       return;
    }
    editor.take_game_variant(variant, s.c_str());
@@ -1145,7 +1151,21 @@ void ReachVariantTool::refreshWindowTitle() {
       file = std::filesystem::path(file).filename().wstring();
    }
    if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b == true) {
-      QString variantTitle = QString::fromUtf16(editor.currentVariant->contentHeader.data.title);
+      QString variantTitle;
+      //
+      auto mp = editor.get_multiplayer_data();
+      if (mp) {
+         //
+         // Prefer getting the title from the mpvr block when possible, because it's always 
+         // big-endian there. The endianness is inconsistent in chdr (old modded variants 
+         // packaged for 360 may use little-endian) and the block header doesn't have any 
+         // data that could clue us into when it's little-endian (i.e. the version and flags 
+         // are the same as in big-endian MCC-era blocks).
+         //
+         variantTitle = QString::fromUtf16(mp->variantHeader.title);
+      } else {
+         variantTitle = QString::fromUtf16(editor.currentVariant->contentHeader.data.title);
+      }
       this->setWindowTitle(
          QString("%1 <%2> - ReachVariantTool").arg(variantTitle).arg(file)
       );

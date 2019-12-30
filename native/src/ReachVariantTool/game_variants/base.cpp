@@ -6,6 +6,7 @@
 #include "../helpers/sha1.h"
 
 #include "types/multiplayer.h"
+#include "errors.h"
 
 bool BlamHeader::read(cobb::bytereader& stream) noexcept {
    this->header.read(stream);
@@ -165,11 +166,12 @@ void GameVariantHeader::set_description(const char16_t* value) noexcept {
 }
 
 bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
+   auto& error_report = GameEngineVariantLoadError::get();
+   //
    uint32_t offset_before_hashable;
    uint32_t offset_after_hashable;
    //
    if (!this->header.read(reader.bytes)) {
-      printf("Failed to read MPVR block header.\n");
       return false;
    }
    reader.synchronize();
@@ -185,14 +187,14 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
       case ReachGameEngine::forge:
          this->data = new GameVariantDataMultiplayer(this->type == ReachGameEngine::forge);
          break;
+      case ReachGameEngine::none: // TODO: Ask the user what type we should use.
+         // fall through
       case ReachGameEngine::campaign:
-         printf("Campaign variants are not supported. Where'd you even find one? I'm pretty sure these basically don't exist anymore post-Xbox 360.\n");
-         return false;
+         // fall through
       case ReachGameEngine::firefight:
-         printf("Firefight variants are not supported. The file format is not yet known.\n");
-         return false;
-      case ReachGameEngine::none:
-         printf("Variant has \"none\" type. Can't load it.\n"); // TODO: Ask the user what type we should use.
+         error_report.state         = GameEngineVariantLoadError::load_state::failure;
+         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;
+         error_report.extra[0]      = (int32_t)this->type;
          return false;
       default:
          printf("Variant has unknown type. Can't load it.\n"); // TODO: Ask the user what type we should use.
@@ -200,7 +202,11 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
    }
    this->data->read(reader);
    offset_after_hashable = stream.get_bytespan();
-   this->remainingData.read(stream, this->header.end());
+   this->remainingData.read(stream, this->header.end()); // TODO: this can fail and it'll signal errors to (error_report) appropriately; should we even care?
+      //
+      // Specifically, a 360-era modded gametype, "SvE Mythic Infection," ends its MPVR block early but still has a full-size block length i.e. 0x5028, so 
+      // the _eof block ends up inside of here AND we hit the actual end-of-file early, causing (remainingData.read) to fail. However, we can still read 
+      // the game variant data; I haven't tested whether MCC can.
    //
    {
       auto     hasher   = cobb::sha1();
@@ -303,6 +309,57 @@ void ReachBlockMPVR::write_last_minute_fixup(cobb::bit_or_byte_writer& writer) c
    writer.synchronize();
 }
 
+bool GameVariant::read(cobb::mapped_file& file) {
+   auto& error_report = GameEngineVariantLoadError::get();
+   error_report.reset();
+   //
+   auto reader = cobb::bit_or_byte_reader(file.data(), file.size());
+   if (!this->blamHeader.read(reader.bytes)) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+      return false;
+   }
+   if (!this->contentHeader.read(reader.bytes)) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
+      return false;
+   }
+   reader.synchronize();
+   if (!this->multiplayer.read(reader)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      if (!error_report.has_failure_point())
+         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
+      return false;
+   }
+   reader.synchronize();
+   //
+   while (file.is_in_bounds(reader.bytes.get_bytepos(), 4)) {
+      uint32_t signature = 0;
+      reader.bytes.peek(signature, cobb::endian::big);
+      if (signature == '_eof') {
+         this->eofBlock.read(reader.bytes);
+      } else {
+         auto& block = this->unknownBlocks.emplace_back();
+         if (!block.read(reader.bytes) || !block.header.found.signature) {
+            this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
+            break;
+         }
+      }
+   }
+   return true;
+}
+void GameVariant::write(cobb::bit_or_byte_writer& writer) const noexcept {
+   this->blamHeader.write(writer.bytes);
+   this->contentHeader.write(writer.bytes);
+   writer.synchronize();
+   this->multiplayer.write(writer);
+   for (auto& unknown : this->unknownBlocks)
+      unknown.write(writer.bytes);
+   this->eofBlock.write(writer.bytes);
+   //
+   this->contentHeader.write_last_minute_fixup(writer.bytes);
+   this->multiplayer.write_last_minute_fixup(writer);
+}
 void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
    printf("Testing our hashing algorithm on this game variant...\n");
    //

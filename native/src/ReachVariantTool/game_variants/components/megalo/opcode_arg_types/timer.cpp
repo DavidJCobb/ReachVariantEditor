@@ -1,5 +1,5 @@
 #include "timer.h"
-#include "../parse_error_reporting.h"
+#include "../../../errors.h"
 
 namespace {
    enum class _scopes {
@@ -39,11 +39,12 @@ namespace Megalo {
             break;
          default:
             {
-               auto& error = ParseState::get();
-               error.signalled = true;
-               error.cause     = ParseState::what::bad_variable_subtype;
-               error.extra[0]  = (uint32_t)variable_type::timer;
-               error.extra[1]  = this->scope;
+               auto& error = GameEngineVariantLoadError::get();
+               error.state    = GameEngineVariantLoadError::load_state::failure;
+               error.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+               error.detail   = GameEngineVariantLoadError::load_failure_detail::bad_variable_subtype;
+               error.extra[0] = (int32_t)variable_type::timer;
+               error.extra[1] = this->scope;
             }
             return false;
       }

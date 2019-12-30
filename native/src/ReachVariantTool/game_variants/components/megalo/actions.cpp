@@ -1,11 +1,11 @@
 #include "actions.h"
 #include "opcode_arg_types/all.h"
-#include "parse_error_reporting.h"
+#include "../../errors.h"
 
 #define MEGALO_DISALLOW_NONE_ACTION 0
 #if _DEBUG
    #undef  MEGALO_DISALLOW_NONE_ACTION
-   #define MEGALO_DISALLOW_NONE_ACTION 1
+   //#define MEGALO_DISALLOW_NONE_ACTION 1
 #endif
 
 namespace Megalo {
@@ -932,22 +932,20 @@ namespace Megalo {
          auto&  list  = actionFunctionList;
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));
          if (index >= list.size()) {
-            printf("Bad action function ID %d.\n", index);
-            //
-            auto& error = ParseState::get();
-            error.signalled = true;
-            error.opcode    = ParseState::opcode_type::action;
-            error.cause     = ParseState::what::bad_opcode_id;
-            error.extra[0]  = index;
+            auto& error = GameEngineVariantLoadError::get();
+            error.state         = GameEngineVariantLoadError::load_state::failure;
+            error.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
+            error.reason        = GameEngineVariantLoadError::load_failure_reason::invalid_script_opcode_function_index;
+            error.extra[0]      = index;
             return false;
          }
          this->function = &list[index];
          if (index == 0) { // The "None" condition loads no further data.
             #if MEGALO_DISALLOW_NONE_ACTION == 1
-               auto& error = ParseState::get();
-               error.signalled = true;
-               error.opcode    = ParseState::opcode_type::action;
-               error.cause     = ParseState::what::none_opcode_not_allowed;
+               auto& error = GameEngineVariantLoadError::get();
+               error.state         = GameEngineVariantLoadError::load_state::failure;
+               error.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
+               error.reason        = GameEngineVariantLoadError::load_failure_reason::script_opcode_cannot_be_none;
                return false;
             #endif
             return true;
@@ -964,20 +962,21 @@ namespace Megalo {
             this->arguments[i]->configure_with_base(base[i]);
             if (!this->arguments[i]->read(stream)) {
                printf("Failed to load argument %d for action %s.\n", i, this->function->name);
-               //
-               auto& error = ParseState::get();
-               error.signalled = true;
-               error.opcode    = ParseState::opcode_type::action;
-               error.opcode_arg_index = i;
+               auto& error = GameEngineVariantLoadError::get();
+               error.state            = GameEngineVariantLoadError::load_state::failure;
+               error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_actions;
+               error.reason           = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+               error.failure_subindex = i; // (failure_index) must be set by the caller
                return false;
             }
          } else {
-            printf("Failed to construct argument %d for action %s.\n", i, this->function->name);
-            //
-            auto& error = ParseState::get();
-            error.signalled = true;
-            error.opcode    = ParseState::opcode_type::action;
-            error.opcode_arg_index = i;
+            auto& error = GameEngineVariantLoadError::get();
+            error.state            = GameEngineVariantLoadError::load_state::failure;
+            error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_actions;
+            error.reason           = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+            if (!error.has_detail()) // some arg factory functions may provide specific failure details
+               error.detail = GameEngineVariantLoadError::load_failure_detail::failed_to_construct_script_opcode_arg;
+            error.failure_subindex = i; // (failure_index) must be set by the caller
             return false;
          }
       }

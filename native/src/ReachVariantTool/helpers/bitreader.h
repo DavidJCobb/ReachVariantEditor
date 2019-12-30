@@ -73,7 +73,7 @@ namespace cobb {
             if (std::is_signed_v<T>)
                result = cobb::apply_sign_bit(result, bitcount);
             #if _DEBUG
-               assert(this->offset == pos + bitcount && "Failed to advance by the correct number of bits.");
+               //assert(this->offset == pos + bitcount && "Failed to advance by the correct number of bits."); // asserts if we hit EOF too early
             #endif
             return (T)result;
          }

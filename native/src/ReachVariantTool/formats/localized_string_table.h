@@ -87,7 +87,7 @@ class ReachStringTable {
    protected:
       void* _make_buffer(cobb::bitreader&) const noexcept;
    public:
-      void read(cobb::bitreader&) noexcept;
+      bool read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
       ReachString* get_entry(size_t index) noexcept {

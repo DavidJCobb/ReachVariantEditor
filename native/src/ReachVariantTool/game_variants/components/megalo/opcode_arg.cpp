@@ -7,7 +7,7 @@
 #include "opcode_arg_types/team.h"
 #include "opcode_arg_types/timer.h"
 
-#include "parse_error_reporting.h"
+#include "../../errors.h"
 
 namespace Megalo {
    extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitreader& stream) {
@@ -24,11 +24,12 @@ namespace Megalo {
          case variable_type::object:
             return OpcodeArgValueObject::factory(stream);
       }
-      auto& error = ParseState::get();
-      error.signalled = true;
-      error.cause     = ParseState::what::bad_variable_type;
-      error.extra[0]  = type;
-      return false;
+      auto& error = GameEngineVariantLoadError::get();
+      error.state  = GameEngineVariantLoadError::load_state::failure;
+      error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+      error.detail = GameEngineVariantLoadError::load_failure_detail::bad_opcode_variable_type;
+      error.extra[0] = type;
+      return nullptr;
    }
    extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitreader& stream) {
       uint8_t type = stream.read_bits<uint8_t>(2);
@@ -40,10 +41,11 @@ namespace Megalo {
          case 2: // All Players
             return OpcodeArgValueAllPlayers::factory(stream);
       }
-      auto& error = ParseState::get();
-      error.signalled = true;
-      error.cause     = ParseState::what::bad_player_or_team_var_type;
-      error.extra[0]  = type;
-      return false;
+      auto& error = GameEngineVariantLoadError::get();
+      error.state  = GameEngineVariantLoadError::load_state::failure;
+      error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+      error.detail = GameEngineVariantLoadError::load_failure_detail::bad_opcode_player_or_team_var_type;
+      error.extra[0] = type;
+      return nullptr;
    }
 }

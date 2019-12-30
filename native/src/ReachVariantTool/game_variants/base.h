@@ -150,50 +150,8 @@ class GameVariant {
       EOFBlock       eofBlock;
       std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
       //
-      bool read(cobb::mapped_file& file) {
-         auto reader = cobb::bit_or_byte_reader(file.data(), file.size());
-         if (!this->blamHeader.read(reader.bytes)) {
-            printf("FAILED to read (_blf).\n");
-            return false;
-         }
-         if (!this->contentHeader.read(reader.bytes)) {
-            printf("FAILED to read (chdr).\n");
-            return false;
-         }
-         reader.synchronize();
-         if (!this->multiplayer.read(reader)) {
-            printf("FAILED to read (mpvr).\n");
-            return false;
-         }
-         reader.synchronize();
-         //
-         while (file.is_in_bounds(reader.bytes.get_bytepos(), 4)) {
-            uint32_t signature = 0;
-            reader.bytes.peek(signature, cobb::endian::big);
-            if (signature == '_eof') {
-               this->eofBlock.read(reader.bytes);
-            } else {
-               auto& block = this->unknownBlocks.emplace_back();
-               if (!block.read(reader.bytes) || !block.header.found.signature) {
-                  this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
-                  break;
-               }
-            }
-         }
-         return true;
-      }
-      void write(cobb::bit_or_byte_writer& writer) const noexcept {
-         this->blamHeader.write(writer.bytes);
-         this->contentHeader.write(writer.bytes);
-         writer.synchronize();
-         this->multiplayer.write(writer);
-         for (auto& unknown : this->unknownBlocks)
-            unknown.write(writer.bytes);
-         this->eofBlock.write(writer.bytes);
-         //
-         this->contentHeader.write_last_minute_fixup(writer.bytes);
-         this->multiplayer.write_last_minute_fixup(writer);
-      }
+      bool read(cobb::mapped_file& file);
+      void write(cobb::bit_or_byte_writer& writer) const noexcept;
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
 };

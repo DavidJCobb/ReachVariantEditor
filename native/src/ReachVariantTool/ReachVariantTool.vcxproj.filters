@@ -157,6 +157,9 @@
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\errors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -400,6 +403,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\GametypeIconCombobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\errors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

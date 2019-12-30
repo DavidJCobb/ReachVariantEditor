@@ -65,8 +65,11 @@ bool ReachFileBlockRemainder::read(cobb::bitreader& stream, uint32_t blockEnd) n
    if (bytepos < blockEnd) {
       uint32_t size = blockEnd - bytepos;
       this->remainder = (uint8_t*)malloc(size);
-      for (uint32_t i = 0; i < size; i++)
+      for (uint32_t i = 0; i < size; i++) {
          stream.read(*(uint8_t*)(this->remainder + i));
+         if (!stream.is_in_bounds())
+            return false;
+      }
    }
    return true;
 }

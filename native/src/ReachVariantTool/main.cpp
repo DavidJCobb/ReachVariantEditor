@@ -22,16 +22,19 @@ int main(int argc, char *argv[]) {
 //
 //  - Make the "engine icon" and "engine category" alterable.
 //
-//     - Someone else extracted the original Reach icons IIRC but put numbers 
-//       over them -- useful for knowing which is which, but I think we may 
-//       want to try and screenshot the MCC icons instead.
+//     - Done, but I still need to determine whether I'm allowed to use the 
+//       icons I'm currently using in the icon drop-down box.
 //
-//  - Take (Megalo::ParseState), expand it to cover all load failures, and 
-//    make it thread-local. Then, use it to report specific reasons for any 
-//    failure to load any data (i.e. what failed).
+//     - It'd be nice if the icon drop-down box's popup showed the icons at 
+//       a larger size. However, it's devilishly difficult to do this in Qt, 
+//       if it's even possible at all without totally reimplementing the 
+//       drop-down widget.
 //
-//     - Main goal is to make it so that if the user tries to load a Firefight 
-//       variant, they're told WHY they can't.
+//  - The engine category drop-down needs to be able to handle the presence 
+//    of an invalid category when loading a file. Our test case is an 360-era 
+//    modded variant, "SvE Mythic Infection," which uses invalid type 21 and 
+//    therefore doesn't show up in MCC's menus; when we load it, the drop-down 
+//    defaults to "Capture the Flag."
 //
 //  - Verify that the CHDR contentType is "game variant" before proceeding 
 //    with loading. Fail if it isn't.

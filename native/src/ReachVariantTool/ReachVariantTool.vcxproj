@@ -117,6 +117,7 @@
     <ClCompile Include="game_variants\components\megalo_options.cpp" />
     <ClCompile Include="game_variants\components\player_traits.cpp" />
     <ClCompile Include="game_variants\components\teams.cpp" />
+    <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitreader.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="game_variants\components\powerups.h" />
     <ClInclude Include="game_variants\components\teams.h" />
     <ClInclude Include="game_variants\components\tu1_options.h" />
+    <ClInclude Include="game_variants\errors.h" />
     <ClInclude Include="game_variants\types\multiplayer.h" />
     <ClInclude Include="helpers\bitnumber.h" />
     <ClInclude Include="helpers\bitreader.h" />

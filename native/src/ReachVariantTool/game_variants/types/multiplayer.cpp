@@ -5,13 +5,15 @@
 #include "../components/megalo/actions.h"
 #include "../components/megalo/conditions.h"
 #include "../components/megalo/limits.h"
-#include "../components/megalo/parse_error_reporting.h"
 
 #include "../../formats/sha1.h"
 #include "../../helpers/sha1.h"
 
+#include "../errors.h"
+
 bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept {
-   Megalo::ParseState::reset();
+   auto& error_report = GameEngineVariantLoadError::get();
+   error_report.reset();
    //
    reader.synchronize();
    auto& stream = reader.bits;
@@ -106,7 +108,6 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
    this->scoreToWin.read(stream);
    this->unkF7A6.read(stream);
    this->unkF7A7.read(stream);
-   printf("Stream bit pos: %d\n", stream.get_bitpos());
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;
@@ -120,45 +121,38 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
    }
    {  // Megalo
       int  count;
-      int  i;
-      bool success = true;
       auto& conditions = this->scriptContent.raw.conditions;
       auto& actions    = this->scriptContent.raw.actions;
       auto& triggers   = this->scriptContent.triggers;
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
       conditions.resize(count);
-      for (i = 0; i < count; i++) {
-         if (!(success = conditions[i].read(stream))) {
-            Megalo::ParseState::get().opcode_index = i;
-            break;
+      for (size_t i = 0; i < count; i++) {
+         if (!conditions[i].read(stream)) {
+            error_report.failure_index = i;
+            return false;
          }
-      }
-      Megalo::ParseState::print();
-      if (!success) {
-         return false;
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
       actions.resize(count);
-      for (i = 0; i < count; i++) {
-         if (!(success = actions[i].read(stream))) {
-            Megalo::ParseState::get().opcode_index = i;
-            break;
+      for (size_t i = 0; i < count; i++) {
+         if (!actions[i].read(stream)) {
+            error_report.failure_index = i;
+            return false;
          }
-      }
-      Megalo::ParseState::print();
-      if (!success) {
-         return false;
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
       triggers.resize(count);
-      for (i = 0; i < count; i++) {
-         printf("Reading trigger %d of %d...\n", i, count);
-         triggers[i].read(stream);
+      for (size_t i = 0; i < count; i++) {
+         if (!triggers[i].read(stream)) {
+            error_report.failure_index = i;
+            return false;
+         }
          triggers[i].postprocess_opcodes(conditions, actions);
       }
+      /*//
       printf("\nFull script content:");
       for (size_t i = 0; i < triggers.size(); ++i) {
          auto& trigger = triggers[i];
@@ -170,10 +164,11 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
          printf(out.c_str());
       }
       printf("\n");
+      //*/
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       this->scriptContent.stats.resize(count);
-      for (int i = 0; i < count; i++) {
+      for (size_t i = 0; i < count; i++) {
          this->scriptContent.stats[i].read(stream);
          this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
       }
@@ -213,6 +208,7 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
       fd.respawnTime.read(stream);
       fd.editorTraits.read(stream);
    }
+   error_report.state = GameEngineVariantLoadError::load_state::success;
    return true;
 }
 void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const noexcept {
