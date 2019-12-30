@@ -25,10 +25,32 @@ int main(int argc, char *argv[]) {
 //     - Done, but I still need to determine whether I'm allowed to use the 
 //       icons I'm currently using in the icon drop-down box.
 //
+//        - I've put the icons into my .gitignore until I know for sure, so 
+//          when I get an answer (or if I make replacements that are usable) 
+//          I need to take that back out.
+//
 //     - It'd be nice if the icon drop-down box's popup showed the icons at 
 //       a larger size. However, it's devilishly difficult to do this in Qt, 
 //       if it's even possible at all without totally reimplementing the 
 //       drop-down widget.
+//
+//  - If cobb::bitreader or cobb::bytereader overshoot EOF, they should keep 
+//    track of how much they've overshot it by (i.e. bitreader::_consume_byte 
+//    should add to a tracking value indicating the overshoot). The function 
+//    to check if a reader is in bounds detects if it's at EOF, but not if 
+//    we've blown past EOF.
+//
+//     - We should amend the block code -- _BLF, CHDR, MPVR -- to fail if 
+//       we've overshot EOF (MPVR should check before reading (remainingData); 
+//       we don't care if (remainingData) gets cut off). Ideally we should 
+//       display a specific error message e.g. "The file ended too soon."
+//
+//  - Can we improve our error-reporting system to (at least optionally) store 
+//    the stream bit/byte offset at the time of failure? Every failure point 
+//    has access to the stream object, I believe.
+//
+//  - Delete (parse_error_reporting.h), which was the old Megalo-specific 
+//    load error reporting system. It's no longer used.
 //
 //  - The engine category drop-down needs to be able to handle the presence 
 //    of an invalid category when loading a file. Our test case is an 360-era 
@@ -36,8 +58,29 @@ int main(int argc, char *argv[]) {
 //    therefore doesn't show up in MCC's menus; when we load it, the drop-down 
 //    defaults to "Capture the Flag."
 //
+//     - At the very least, we should warn on load and then reset the category 
+//       based on the icon, using the "Insane" category for any unconventional 
+//       icons.
+//
+//        = LET'S NOT GET AHEAD OF OURSELVES. WE SHOULD SAVE A COPY OF SVE 
+//          MYTHIC INFECTION WITH THE CATEGORY FIXED AND SEE IF THAT SHOWS 
+//          UP IN MCC, BEFORE WE ASSUME THE CATEGORY IS THE PROBLEM. THE 
+//          ORIGINAL FILE HAS A BAD BLOCK LENGTH ON MPVR (NOT LONG ENOUGH, 
+//          THOUGH IT'S STILL LONG ENOUGH FOR ALL ACTUAL VALID DATA TO BE 
+//          LOADED) AND THAT COULD PERHAPS BE THE ISSUE (RESAVING WOULD 
+//          FIX THAT AS WELL, OR AT LEAST SHOULD).
+//
+//     - I'm pretty sure the "Community" category is also invalid, and the 
+//       "Halomods.org" one almost certainly is. We should test that.
+//
 //  - Verify that the CHDR contentType is "game variant" before proceeding 
 //    with loading. Fail if it isn't.
+//
+//  - We should either disable navigation within the main window when no 
+//    variant is loaded, or start with an empty variant.
+//
+//     - An empty variant would have no scripting, so that's probably a bad 
+//       idea.
 //
 //  - Investigate Firefight, Campaign, and Forge variants. Consider splitting 
 //    MPVR up into multiple classes in order to allow us to load the other 

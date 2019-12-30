@@ -110,7 +110,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\team.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.cpp" />
-    <ClCompile Include="game_variants\components\megalo\parse_error_reporting.cpp" />
     <ClCompile Include="game_variants\components\megalo\trigger.cpp" />
     <ClCompile Include="game_variants\components\megalo\variables_and_scopes.cpp" />
     <ClCompile Include="game_variants\components\megalo_game_stats.cpp" />
@@ -187,7 +186,6 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\vector3.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\widget_related.h" />
-    <ClInclude Include="game_variants\components\megalo\parse_error_reporting.h" />
     <ClInclude Include="game_variants\components\megalo\trigger.h" />
     <ClInclude Include="game_variants\components\megalo\variables_and_scopes.h" />
     <ClInclude Include="game_variants\components\megalo\variable_declarations.h" />

@@ -121,9 +121,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\parse_error_reporting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\trigger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -352,9 +349,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\parse_error_reporting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\trigger.h">
