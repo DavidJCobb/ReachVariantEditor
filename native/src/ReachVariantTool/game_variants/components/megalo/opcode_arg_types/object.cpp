@@ -66,10 +66,33 @@ namespace Megalo {
       if (variable_scope) {
          this->which = stream.read_bits<uint16_t>(variable_scope->which_bits());
          this->index = stream.read_bits<uint16_t>(variable_scope->index_bits(variable_type::object));
+         if (!variable_scope->is_valid_which(this->which)) {
+            auto& error = GameEngineVariantLoadError::get();
+            error.state    = GameEngineVariantLoadError::load_state::failure;
+            error.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+            error.detail   = GameEngineVariantLoadError::load_failure_detail::bad_variable_scope;
+            error.extra[0] = (int32_t)getScopeConstantForObject(*variable_scope);
+            error.extra[1] = this->which;
+            error.extra[2] = this->index;
+            error.extra[3] = (int32_t)variable_type::object;
+            return false;
+         }
          return true;
       } else if (slave_var_scope) {
          this->which = stream.read_bits<uint16_t>(slave_var_scope->which_bits());
          this->index = stream.read_bits<uint16_t>(slave_var_scope->index_bits(variable_type::player));
+         if (!slave_var_scope->is_valid_which(this->which)) {
+            auto& error = GameEngineVariantLoadError::get();
+            error.state    = GameEngineVariantLoadError::load_state::failure;
+            error.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+            error.detail   = GameEngineVariantLoadError::load_failure_detail::bad_variable_scope;
+            error.extra[0] = (int32_t)getScopeConstantForObject(*slave_var_scope);
+            error.extra[1] = this->which;
+            error.extra[2] = this->index;
+            error.extra[3] = (int32_t)variable_type::player;
+            error.extra[4] = 1;
+            return false;
+         }
          return true;
       }
       if (which_bits)

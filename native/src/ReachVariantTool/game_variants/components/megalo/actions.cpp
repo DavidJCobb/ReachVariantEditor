@@ -993,7 +993,7 @@ namespace Megalo {
             if (&list[index] == this->function)
                break;
          if (index == list.size()) {
-            assert(false && "Condition with unknown function -- can't serialize!");
+            assert(false && "Action with unknown function -- can't serialize!");
          }
          stream.write(index, cobb::bitcount(list.size() - 1));
          if (index == 0) // The "None" condition loads no further data.

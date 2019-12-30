@@ -9,14 +9,16 @@ namespace cobb {
    class bitreader {
       protected:
          const uint8_t* buffer = nullptr;
-         uint32_t length = 0; // in bytes
-         uint32_t offset = 0; // in bits
+         uint32_t length   = 0; // in bytes
+         uint32_t offset   = 0; // in bits
+         uint32_t overflow = 0; // in bits; distance by which we've passed EOF
          //
       protected:
          void _consume_byte(uint8_t& out, uint8_t bitcount, int& consumed) noexcept {
             auto bytepos = this->get_bytepos();
             if (bytepos >= this->length) {
                out = 0;
+               this->overflow += bitcount;
                return;
             }
             //
@@ -47,8 +49,22 @@ namespace cobb {
          inline uint32_t get_bytepos()  const noexcept { return this->offset / 8; }
          inline uint32_t get_bytespan() const noexcept { return this->get_bytepos() + (this->get_bitshift() ? 1 : 0); }
          inline uint8_t  get_bitshift() const noexcept { return this->offset % 8; }
-         inline void set_bitpos(uint32_t bitpos)   noexcept { this->offset = bitpos; }
-         inline void set_bytepos(uint32_t bytepos) noexcept { this->offset = bytepos * 8; }
+         inline uint32_t get_overshoot_bits()  const noexcept { return this->overflow; }
+         inline uint32_t get_overshoot_bytes() const noexcept { return this->overflow / 8; }
+         inline void set_bitpos(uint32_t bitpos) noexcept {
+            this->offset = bitpos;
+            if (bitpos / 8 > this->length)
+               this->overflow = this->length * 8 - bitpos;
+            else
+               this->overflow = 0;
+         }
+         inline void set_bytepos(uint32_t bytepos) noexcept {
+            this->offset = bytepos * 8;
+            if (bytepos > this->length)
+               this->overflow = (this->length - bytepos) * 8;
+            else
+               this->overflow = 0;
+         }
          inline bool is_in_bounds() const noexcept { return this->offset / 8 < this->length; }
          inline bool is_byte_aligned() const noexcept { return !this->get_bitshift(); }
 

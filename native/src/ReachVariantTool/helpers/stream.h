@@ -22,6 +22,10 @@ namespace cobb {
             }
             this->bits.set_bytepos(b);
          }
+         inline bool overshot_eof() noexcept {
+            this->synchronize();
+            return this->bytes.get_overshoot_bytes() > 0;
+         }
    };
    class bit_or_byte_writer {
       //

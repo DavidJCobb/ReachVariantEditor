@@ -17,6 +17,8 @@ namespace cobb {
          inline const uint8_t* data() const noexcept  { return this->buffer; }
          inline uint32_t get_bitpos()  const noexcept { return this->offset * 8; };
          inline uint32_t get_bytepos() const noexcept { return this->offset; }
+         inline uint32_t get_overshoot_bits()  const noexcept { return this->get_overshoot_bytes() * 8; }
+         inline uint32_t get_overshoot_bytes() const noexcept { return (this->offset > this->length) ? (this->length - this->offset) : 0; }
          inline void set_bytepos(uint32_t bytepos) noexcept { this->offset = bytepos; }
          inline bool is_in_bounds() const noexcept { return this->offset < this->length; }
          //

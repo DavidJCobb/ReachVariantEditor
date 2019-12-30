@@ -9,6 +9,8 @@ namespace Megalo {
       player,
       object,
       team,
+      //
+      not_a_scope = -1,
    };
    enum class variable_type { // must match the game
       scalar = 0,
@@ -66,6 +68,12 @@ namespace Megalo {
             assert(false && "Unrecognized variable type.");
             return 0;
          }
+         //
+         bool is_valid_which(int which) const noexcept {
+            if (this->list.count == 0)
+               return which == 0;
+            return this->list.is_in_bounds(which);
+         }
    };
 
    extern const VariableScope MegaloVariableScopeGlobal;
@@ -74,4 +82,5 @@ namespace Megalo {
    extern const VariableScope MegaloVariableScopeTeam;
 
    const VariableScope& getScopeObjectForConstant(variable_scope) noexcept;
+   variable_scope getScopeConstantForObject(const VariableScope&) noexcept;
 }

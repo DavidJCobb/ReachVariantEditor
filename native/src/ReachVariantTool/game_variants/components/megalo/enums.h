@@ -7,10 +7,11 @@
 namespace Megalo {
    class SmartEnum {
       public:
-         constexpr SmartEnum(const char** v, uint32_t n) : values(v), count(n) {}
+         constexpr SmartEnum(const char** v, uint32_t n, bool o = false) : values(v), count(n), offset(o) {}
          //
          const char** values = nullptr;
          uint32_t     count  = 0;
+         bool         offset = false;
          //
          constexpr inline int count_bits() const noexcept {
             if (!this->count)
@@ -20,7 +21,7 @@ namespace Megalo {
          constexpr inline int index_bits() const noexcept {
             if (!this->count)
                return 0;
-            return cobb::bitcount(this->count - 1);
+            return cobb::bitcount(this->count + (this->offset ? 1 : 0) - 1);
          }
          constexpr inline int index_bits_with_offset(uint32_t offset) const noexcept {
             if (!this->count)
@@ -28,9 +29,20 @@ namespace Megalo {
             return cobb::bitcount(this->count + offset - 1);
          }
          //
+         constexpr bool is_in_bounds(int v) const noexcept {
+            if (v < 0) {
+               if (this->offset)
+                  return v == -1;
+               return false;
+            }
+            return v < this->count;
+         }
+         //
          void to_string(std::string& out, uint32_t value) const noexcept;
          //
          const char* operator[](size_t a) const noexcept {
+            if (this->offset)
+               ++a;
             if (a < this->count)
                return this->values[a];
             return nullptr;
@@ -39,8 +51,8 @@ namespace Megalo {
          int32_t lookup(const char* value) const noexcept {
             for (uint32_t i = 0; i < this->count; i++)
                if (_stricmp(value, this->values[i]) == 0)
-                  return i;
-            return -1;
+                  return i - (this->offset ? 1 : 0);
+            return -1 - (this->offset ? 1 : 0);
          }
          //
          SmartEnum* slice(size_t from, size_t to) const noexcept {

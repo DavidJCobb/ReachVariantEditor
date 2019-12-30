@@ -38,7 +38,7 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
             break;
          case load_failure_detail::bad_variable_subtype:
             {
-               QString varType = QObject::tr("unknown-var-type", tr_disambiguator);
+               QString varType = QObject::tr("unknown-type variable", tr_disambiguator);
                switch ((Megalo::variable_type)this->extra[0]) {
                   case Megalo::variable_type::object: varType = QObject::tr("object variable", tr_disambiguator); break;
                   case Megalo::variable_type::player: varType = QObject::tr("player variable", tr_disambiguator); break;
@@ -47,6 +47,30 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
                   case Megalo::variable_type::team:   varType = QObject::tr("team variable",   tr_disambiguator); break;
                }
                result += QObject::tr("When an argument is a %1, the value is prefixed with a \"subtype\" number indicating precisely what is being accessed. This argument used an invalid subtype: %2.", tr_disambiguator).arg(varType).arg(this->extra[1]);
+            }
+            break;
+         case load_failure_detail::bad_variable_scope:
+            {
+               QString varType = QObject::tr("unknown-type variable", tr_disambiguator);
+               switch ((Megalo::variable_type)this->extra[3]) {
+                  case Megalo::variable_type::object: varType = QObject::tr("object variable", tr_disambiguator); break;
+                  case Megalo::variable_type::player: varType = QObject::tr("player variable", tr_disambiguator); break;
+                  case Megalo::variable_type::scalar: varType = QObject::tr("number variable", tr_disambiguator); break;
+                  case Megalo::variable_type::timer:  varType = QObject::tr("timer variable",  tr_disambiguator); break;
+                  case Megalo::variable_type::team:   varType = QObject::tr("team variable",   tr_disambiguator); break;
+               }
+               QString scopeType = QObject::tr("unknown scope", tr_disambiguator);
+               switch ((Megalo::variable_scope)this->extra[0]) {
+                  case Megalo::variable_scope::global: scopeType = QObject::tr("global scope", tr_disambiguator); break;
+                  case Megalo::variable_scope::object: scopeType = QObject::tr("object scope", tr_disambiguator); break;
+                  case Megalo::variable_scope::player: scopeType = QObject::tr("player scope", tr_disambiguator); break;
+                  case Megalo::variable_scope::team:   scopeType = QObject::tr("team scope",   tr_disambiguator); break;
+               }
+               if (extra[4]) {
+                  result += QObject::tr("The argument is the biped of %1 #%2 in %3 #%4, but there aren't that many of that scope.", tr_disambiguator).arg(varType).arg(this->extra[2]).arg(scopeType).arg(this->extra[1]);
+               } else {
+                  result += QObject::tr("The argument is %1 #%2 in %3 #%4, but there aren't that many of that scope.", tr_disambiguator).arg(varType).arg(this->extra[2]).arg(scopeType).arg(this->extra[1]);
+               }
             }
             break;
          case load_failure_detail::failed_to_construct_script_opcode_arg:
@@ -61,6 +85,9 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
             break;
          case load_failure_reason::invalid_script_opcode_function_index:
             result += QObject::tr("The %1 has function index %2, which is not valid.", tr_disambiguator).arg(noun_single).arg(this->extra[0]);
+            break;
+         case load_failure_reason::early_eof:
+            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
             break;
       }
    }
@@ -78,7 +105,11 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
       case load_failure_point::block_chdr:
          return QObject::tr("Something went wrong while reading the file header (chdr section).", tr_disambiguator);
       case load_failure_point::block_mpvr:
-         return QObject::tr("Something went wrong while reading the multiplayer data.", tr_disambiguator);
+         result = QObject::tr("Something went wrong while reading the multiplayer data. ", tr_disambiguator);
+         if (this->reason == load_failure_reason::early_eof) {
+            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         }
+         return result;
       case load_failure_point::content_type:
          switch ((ReachFileType)this->extra[0]) {
             case ReachFileType::film:
@@ -108,7 +139,11 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
       case load_failure_point::megalo_actions:
          return _explain_opcode_failure();
       case load_failure_point::megalo_triggers:
-         return QObject::tr("Failed to load trigger #%1.", tr_disambiguator).arg(this->failure_index);
+         result = QObject::tr("Failed to load trigger #%1. ", tr_disambiguator).arg(this->failure_index);
+         if (this->reason == load_failure_reason::early_eof) {
+            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         }
+         return result;
    }
    return QObject::tr("An error occurred during read and was caught, but the program wasn't properly updated to display error information; let me know so I can fix that.\n\nRaw failure point: %1\nRaw reason: %2\nRaw detail: %3", tr_disambiguator
    ).arg((uint32_t)this->failure_point).arg((uint32_t)this->reason).arg((uint32_t)this->detail);

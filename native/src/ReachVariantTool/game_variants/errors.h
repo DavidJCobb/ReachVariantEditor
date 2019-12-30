@@ -30,6 +30,7 @@ struct GameEngineVariantLoadError {
       invalid_script_opcode_function_index, // extra[0] is the function index
       script_opcode_cannot_be_none, // should only appear during testing
       bad_script_opcode_argument, // can have load_failure_detail::failed_to_construct_script_opcode_arg
+      early_eof,
    };
    enum class load_failure_detail {
       none,
@@ -37,6 +38,7 @@ struct GameEngineVariantLoadError {
       bad_opcode_variable_type, // extra[0] is the type value
       bad_opcode_player_or_team_var_type, // extra[0] is the type value
       bad_variable_subtype, // extra[0] is the type; extra[1] is the subtype
+      bad_variable_scope, // extra[0] is a (variable_scope) constant; extra[1] is which scope of that type; extra[2] is the variable index; extra[3] is the variable type; extra[4] is 1 if it's a biped variable
    };
 
    load_state          state            = load_state::incomplete;

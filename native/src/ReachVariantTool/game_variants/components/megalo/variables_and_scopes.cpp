@@ -4,6 +4,7 @@ namespace Megalo {
    extern const SmartEnum megalo_scope_does_not_have_specifier = SmartEnum(nullptr, 0);
    //
    #define megalo_define_scope(name, ...) namespace { namespace __scope_members { const char* _##name##[] = { __VA_ARGS__ }; } }; extern const SmartEnum name = SmartEnum(__scope_members::_##name##, std::extent<decltype(__scope_members::_##name##)>::value);
+   #define megalo_define_scope_with_offset(name, ...) namespace { namespace __scope_members { const char* _##name##[] = { __VA_ARGS__ }; } }; extern const SmartEnum name = SmartEnum(__scope_members::_##name##, std::extent<decltype(__scope_members::_##name##)>::value, true);
    //
    megalo_define_scope(megalo_objects,
       "no object",
@@ -59,7 +60,7 @@ namespace Megalo {
       "HUD target",
       "killer player",
    );
-   megalo_define_scope(megalo_teams,
+   megalo_define_scope_with_offset(megalo_teams,
       "no team",
       "Team 1",
       "Team 2",
@@ -103,5 +104,16 @@ namespace Megalo {
       }
       assert(false && "Unknown variable scope!");
       __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
+   }
+   variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
+      if (&s == &MegaloVariableScopeGlobal)
+         return variable_scope::global;
+      if (&s == &MegaloVariableScopePlayer)
+         return variable_scope::player;
+      if (&s == &MegaloVariableScopeObject)
+         return variable_scope::object;
+      if (&s == &MegaloVariableScopeTeam)
+         return variable_scope::team;
+      return variable_scope::not_a_scope;
    }
 }

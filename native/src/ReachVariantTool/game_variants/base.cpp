@@ -200,8 +200,16 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
          printf("Variant has unknown type. Can't load it.\n"); // TODO: Ask the user what type we should use.
          return false;
    }
-   this->data->read(reader);
+   if (!this->data->read(reader)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      return false;
+   }
    offset_after_hashable = stream.get_bytespan();
+   if (reader.overshot_eof()) {
+      error_report.state  = GameEngineVariantLoadError::load_state::failure;
+      error_report.reason = GameEngineVariantLoadError::load_failure_reason::early_eof;
+      return false;
+   }
    this->remainingData.read(stream, this->header.end()); // TODO: this can fail and it'll signal errors to (error_report) appropriately; should we even care?
       //
       // Specifically, a 360-era modded gametype, "SvE Mythic Infection," ends its MPVR block early but still has a full-size block length i.e. 0x5028, so 
