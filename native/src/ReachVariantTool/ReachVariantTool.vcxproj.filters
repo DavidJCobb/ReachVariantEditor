@@ -199,6 +199,9 @@
     <ClCompile Include="ui\main_window\page_loadout_palette.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\tu1_options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">

@@ -41,24 +41,14 @@ class ReachGameVariantTU1Options {
       float magnumDamage              = vanilla_magnum_damage;
       float magnumFireDelay           = vanilla_magnum_fire_delay;
       //
-      void read(cobb::bitreader& stream) noexcept {
-         this->flags.read(stream);
-         this->precisionBloom            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
-         this->armorLockDamageDrain      = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
-         this->armorLockDamageDrainLimit = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
-         this->activeCamoEnergyBonus     = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
-         this->activeCamoEnergy          = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
-         this->magnumDamage              = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
-         this->magnumFireDelay           = stream.read_compressed_float(8, 0.0F, 10.0F, false, true);
-      }
-      void write(cobb::bitwriter& stream) const noexcept {
-         this->flags.write(stream);
-         stream.write_compressed_float(this->precisionBloom,            8, 0.0F, 10.0F, false, true);
-         stream.write_compressed_float(this->armorLockDamageDrain,      8, 0.0F,  2.0F, false, true);
-         stream.write_compressed_float(this->armorLockDamageDrainLimit, 8, 0.0F,  2.0F, false, true);
-         stream.write_compressed_float(this->activeCamoEnergyBonus,     8, 0.0F,  2.0F, false, true);
-         stream.write_compressed_float(this->activeCamoEnergy,          8, 0.0F,  2.0F, false, true);
-         stream.write_compressed_float(this->magnumDamage,              8, 0.0F, 10.0F, false, true);
-         stream.write_compressed_float(this->magnumFireDelay,           8, 0.0F, 10.0F, false, true);
+      void read(cobb::bitreader& stream) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
+
+      void make_vanilla() noexcept;
+      void make_patched() noexcept;
+      void make_anniversary() noexcept;
+      void make_zero_bloom() noexcept {
+         this->make_patched();
+         this->precisionBloom = 0.0F;
       }
 };

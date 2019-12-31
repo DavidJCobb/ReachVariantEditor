@@ -29,13 +29,22 @@ int main(int argc, char *argv[]) {
 //          when I get an answer (or if I make replacements that are usable) 
 //          I need to take that back out.
 //
+//        - Consider just redrawing them by eye, like you did for NorthernUI.
+//
 //     - It'd be nice if the icon drop-down box's popup showed the icons at 
 //       a larger size. However, it's devilishly difficult to do this in Qt, 
 //       if it's even possible at all without totally reimplementing the 
 //       drop-down widget.
 //
-//  - Consider adding buttons to the TU1 options page to reset all values to 
-//    the observed Matchmaking values for vanilla, for TU, and for zero-bloom.
+//  - Consider making it so that you can open files by dragging them onto the 
+//    window.
+//
+//  - We'd benefit from being able to warn on unsaved changes. Easiest way 
+//    would be to keep two copies of a variant in memory, and compare them.
+//
+//  - When we rebuild navigation in the main window, all tree items are expanded. 
+//    This is an ugly hack to make the fact that we don't remember and restore 
+//    their states less noticeable. Can we improve anything in this area?
 //
 //  - Can we improve our error-reporting system to (at least optionally) store 
 //    the stream bit/byte offset at the time of failure? Every failure point 

@@ -49,176 +49,17 @@
         </font>
        </property>
       </column>
-      <item>
-       <property name="text">
-        <string comment="MainTreeview" extracomment="metadata">Metadata</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string comment="MainTreeview">Options</string>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsEnabled</set>
-       </property>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-general">General Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-respawn">Respawn Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-        <item>
-         <property name="text">
-          <string>Respawn Traits</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-social">Social Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-map">Map and Game Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-        <item>
-         <property name="text">
-          <string>Base Player Traits</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Red Powerup Traits</string>
-         </property>
-         <property name="toolTip">
-          <string>Control the player traits applied by the Overshield powerup.</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Blue Powerup Traits</string>
-         </property>
-         <property name="toolTip">
-          <string>Control the player traits applied by the Active Camo powerup.</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Custom Powerup Traits</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-team">Team Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-loadout">Loadout Settings</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-        <item>
-         <property name="text">
-          <string>Spartan Tier 1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spartan Tier 2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spartan Tier 3</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Elite Tier 1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Elite Tier 2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Elite Tier 3</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview" extracomment="options-script">Script-Specific Options</string>
-        </property>
-        <property name="flags">
-         <set>ItemIsSelectable|ItemIsEnabled</set>
-        </property>
-       </item>
-      </item>
-      <item>
-       <property name="text">
-        <string comment="MainTreeview">Option Visibility</string>
-       </property>
-       <property name="toolTip">
-        <string>Control which options are visible and enabled in the in-game menus.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string comment="MainTreeview">Title Update Settings</string>
-       </property>
-       <property name="toolTip">
-        <string>Modify developer-only settings added as part of Title Update 1, including bloom, armor ability configuration, and pistol settings.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string comment="MainTreeview">Forge Settings</string>
-       </property>
-       <item>
-        <property name="text">
-         <string comment="MainTreeview">Editor Traits</string>
-        </property>
-       </item>
-      </item>
      </widget>
     </item>
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="welcomeIcon">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>

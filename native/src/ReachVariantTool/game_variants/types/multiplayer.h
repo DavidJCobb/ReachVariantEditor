@@ -33,10 +33,13 @@ class GameVariantDataMultiplayer : public GameVariantData {
       virtual void write(cobb::bit_or_byte_writer&) const noexcept override;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
       //
+      static constexpr uint8_t encoding_version_vanilla = 0x6A;
+      static constexpr uint8_t encoding_version_tu1     = 0x6B;
+      //
       bool isForge = false;
       //
-      uint32_t encodingVersion;
-      uint32_t engineVersion;
+      mutable uint32_t encodingVersion;
+      mutable uint32_t engineVersion;
       GameVariantHeader variantHeader;
       cobb::bitbool flags;
       struct {

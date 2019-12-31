@@ -116,6 +116,7 @@
     <ClCompile Include="game_variants\components\megalo_options.cpp" />
     <ClCompile Include="game_variants\components\player_traits.cpp" />
     <ClCompile Include="game_variants\components\teams.cpp" />
+    <ClCompile Include="game_variants\components\tu1_options.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitreader.cpp" />

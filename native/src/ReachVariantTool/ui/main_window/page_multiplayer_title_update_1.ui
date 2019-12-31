@@ -32,6 +32,42 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item row="10" column="0">
+    <widget class="QLabel" name="labelArmorLockDamageDrainLimit">
+     <property name="text">
+      <string>Armor Lock Damage Drain Limit</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldArmorLockDamageDrainLimit</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="labelArmorLockDamageDrain">
+     <property name="text">
+      <string>Armor Lock Damage Drain</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldArmorLockDamageDrain</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QDoubleSpinBox" name="fieldActiveCamoEnergy">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>2.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.001000000000000</double>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0" colspan="2">
     <widget class="QCheckBox" name="fieldBleedthrough">
      <property name="text">
@@ -39,34 +75,89 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldArmorLockCantShed">
+   <item row="6" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldFlag6">
      <property name="text">
-      <string>Activating Armor Lock doesn't shed stuck grenades</string>
+      <string>Flag 6</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldArmorLockCanBeStuck">
+   <item row="11" column="0">
+    <widget class="QLabel" name="labelCamoEnergy1">
      <property name="text">
-      <string>Armor Lock can be stuck with plasma grenades</string>
+      <string>Active Camo Energy 1</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldActiveCamoEnergy</cstring>
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldEnableActiveCamoModifiers">
-     <property name="toolTip">
-      <string>If this box is not checked, then the game will not apply the Active Camo modifiers available below.</string>
-     </property>
+   <item row="7" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldFlag7">
      <property name="text">
-      <string>Enable Active Camo modifiers</string>
+      <string>Flag 7</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldLimitSwordBlockToSword">
+   <item row="10" column="1">
+    <widget class="QDoubleSpinBox" name="fieldArmorLockDamageDrainLimit">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>2.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="0">
+    <widget class="QLabel" name="labelMagnumDamage">
      <property name="text">
-      <string>Must have an Energy Sword to sword-block</string>
+      <string>Magnum Damage</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldMagnumDamage</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="1">
+    <widget class="QDoubleSpinBox" name="fieldMagnumFireDelay">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="1">
+    <widget class="QDoubleSpinBox" name="fieldMagnumDamage">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QDoubleSpinBox" name="fieldArmorLockDamageDrain">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>2.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -80,17 +171,40 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldFlag6">
+   <item row="4" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldLimitSwordBlockToSword">
      <property name="text">
-      <string>Flag 6</string>
+      <string>Must have an Energy Sword to sword-block</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldFlag7">
+   <item row="2" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldArmorLockCanBeStuck">
      <property name="text">
-      <string>Flag 7</string>
+      <string>Armor Lock can be stuck with plasma grenades</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QDoubleSpinBox" name="fieldActiveCamoEnergyBonus">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <double>2.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.001000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldArmorLockCantShed">
+     <property name="text">
+      <string>Activating Armor Lock doesn't shed stuck grenades</string>
      </property>
     </widget>
    </item>
@@ -117,78 +231,6 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="labelArmorLockDamageDrain">
-     <property name="text">
-      <string>Armor Lock Damage Drain</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldArmorLockDamageDrain</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="1">
-    <widget class="QDoubleSpinBox" name="fieldArmorLockDamageDrain">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>2.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="0">
-    <widget class="QLabel" name="labelArmorLockDamageDrainLimit">
-     <property name="text">
-      <string>Armor Lock Damage Drain Limit</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldArmorLockDamageDrainLimit</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="1">
-    <widget class="QDoubleSpinBox" name="fieldArmorLockDamageDrainLimit">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>2.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0">
-    <widget class="QLabel" name="labelCamoEnergy1">
-     <property name="text">
-      <string>Active Camo Energy 1</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldActiveCamoEnergy</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="1">
-    <widget class="QDoubleSpinBox" name="fieldActiveCamoEnergy">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>2.000000000000000</double>
-     </property>
-     <property name="singleStep">
-      <double>0.001000000000000</double>
-     </property>
-    </widget>
-   </item>
    <item row="12" column="0">
     <widget class="QLabel" name="labelCamoEnergy2">
      <property name="text">
@@ -196,45 +238,6 @@
      </property>
      <property name="buddy">
       <cstring>fieldActiveCamoEnergyBonus</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="1">
-    <widget class="QDoubleSpinBox" name="fieldActiveCamoEnergyBonus">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>2.000000000000000</double>
-     </property>
-     <property name="singleStep">
-      <double>0.001000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="0">
-    <widget class="QLabel" name="labelMagnumDamage">
-     <property name="text">
-      <string>Magnum Damage</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldMagnumDamage</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="1">
-    <widget class="QDoubleSpinBox" name="fieldMagnumDamage">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>10.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -248,16 +251,13 @@
      </property>
     </widget>
    </item>
-   <item row="14" column="1">
-    <widget class="QDoubleSpinBox" name="fieldMagnumFireDelay">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   <item row="3" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldEnableActiveCamoModifiers">
+     <property name="toolTip">
+      <string>If this box is not checked, then the game will not apply the Active Camo modifiers available below.</string>
      </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>10.000000000000000</double>
+     <property name="text">
+      <string>Enable Active Camo modifiers</string>
      </property>
     </widget>
    </item>
@@ -273,6 +273,60 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="16" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Apply Official Settings:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="presetList">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>Vanilla</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>TU Settings</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Anniversary</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Zero-Bloom</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="presetButtonApply">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

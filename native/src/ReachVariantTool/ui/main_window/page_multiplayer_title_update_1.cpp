@@ -1,10 +1,48 @@
 #include "page_multiplayer_title_update_1.h"
+#include <QMessageBox>
 
 PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
    auto& editor = ReachEditorState::get();
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPTU1Config::updateFromVariant);
+   //
+   QObject::connect(this->ui.presetButtonApply, &QPushButton::clicked, [this]() {
+      auto variant = ReachEditorState::get().variant();
+      if (!variant)
+         return;
+      auto mp = variant->get_multiplayer_data();
+      if (!mp)
+         return;
+      auto& tu = mp->titleUpdateData;
+      //
+      auto    which = this->ui.presetList->currentIndex();
+      QString prompt;
+      switch (which) {
+         case 0: // vanilla
+            prompt = tr("Reset all Title Update settings to match the vanilla values?");
+            break;
+         case 1: // TU
+            prompt = tr("Reset all Title Update settings to match the Matchmaking TU values?");
+            break;
+         case 2: // anniversary
+            prompt = tr("Reset all Title Update settings to match the Matchmaking Anniversary values?");
+            break;
+         case 3: // zero bloom
+            prompt = tr("Reset all Title Update settings to match the Matchmaking Zero Bloom values?");
+            break;
+      }
+      if (QMessageBox::No == QMessageBox::question(this, tr("Apply Title Update setting preset"), prompt, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)) {
+         return;
+      }
+      switch (which) {
+         case 0: tu.make_vanilla(); break;
+         case 1: tu.make_patched(); break;
+         case 2: tu.make_anniversary(); break;
+         case 3: tu.make_zero_bloom(); break;
+      }
+      this->updateFromVariant(variant);
+   });
    //
    #include "widget_macros_setup_start.h"
    reach_main_window_setup_flag_checkbox(this->ui.fieldBleedthrough, titleUpdateData.flags, 0x01);

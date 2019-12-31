@@ -241,6 +241,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const n
    writer.synchronize();
    auto& bits = writer.bits;
    //
+   this->encodingVersion = encoding_version_tu1; // upgrade, so that TU1 settings are always saved
+   //
    bits.write(this->encodingVersion);
    bits.write(this->engineVersion);
    this->variantHeader.write(bits);
