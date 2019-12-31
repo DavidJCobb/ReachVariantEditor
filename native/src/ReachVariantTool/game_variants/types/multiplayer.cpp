@@ -388,3 +388,20 @@ void GameVariantDataMultiplayer::write_last_minute_fixup(cobb::bit_or_byte_write
    this->variantHeader.write_last_minute_fixup(writer.bits);
    writer.synchronize();
 }
+GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
+   auto clone = new GameVariantDataMultiplayer(this->isForge);
+   *clone = *this;
+   //
+   {  // Fix up string table references-by-index.
+      auto& stringTable = clone->scriptData.strings;
+      auto& cd = clone->scriptData;
+      auto& cc = clone->scriptContent;
+      for (auto& option : cd.options)
+         option.postprocess_string_indices(stringTable);
+      for (auto& traits : cd.traits)
+         traits.postprocess_string_indices(stringTable);
+      for (auto& stat : cc.stats)
+         stat.postprocess_string_indices(stringTable);
+   }
+   return clone;
+}

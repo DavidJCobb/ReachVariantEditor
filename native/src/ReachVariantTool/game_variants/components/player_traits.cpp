@@ -1,5 +1,106 @@
 #include "player_traits.h"
 
+#if __cplusplus <= 201703L
+#include <tuple>
+bool ReachPlayerTraits::operator==(const ReachPlayerTraits& o) const noexcept {
+   #pragma region defense
+   if (std::tie(
+      this->defense.damageResist,
+      this->defense.healthMult,
+      this->defense.healthRate,
+      this->defense.shieldMult,
+      this->defense.shieldRate,
+      this->defense.shieldDelay,
+      this->defense.headshotImmune,
+      this->defense.vampirism,
+      this->defense.assassinImmune,
+      this->defense.cannotDieFromDamage
+   ) != std::tie(
+      o.defense.damageResist,
+      o.defense.healthMult,
+      o.defense.healthRate,
+      o.defense.shieldMult,
+      o.defense.shieldRate,
+      o.defense.shieldDelay,
+      o.defense.headshotImmune,
+      o.defense.vampirism,
+      o.defense.assassinImmune,
+      o.defense.cannotDieFromDamage
+   )) return false;
+   #pragma endregion
+   #pragma region offense
+   if (std::tie(
+      this->offense.damageMult,
+      this->offense.meleeMult,
+      this->offense.weaponPrimary,
+      this->offense.weaponSecondary,
+      this->offense.grenadeCount,
+      this->offense.infiniteAmmo,
+      this->offense.grenadeRegen,
+      this->offense.weaponPickup,
+      this->offense.abilityUsage,
+      this->offense.abilitiesDropOnDeath,
+      this->offense.infiniteAbility,
+      this->offense.ability
+   ) != std::tie(
+      o.offense.damageMult,
+      o.offense.meleeMult,
+      o.offense.weaponPrimary,
+      o.offense.weaponSecondary,
+      o.offense.grenadeCount,
+      o.offense.infiniteAmmo,
+      o.offense.grenadeRegen,
+      o.offense.weaponPickup,
+      o.offense.abilityUsage,
+      o.offense.abilitiesDropOnDeath,
+      o.offense.infiniteAbility,
+      o.offense.ability
+   )) return false;
+   #pragma endregion
+   #pragma region movement
+   if (std::tie(
+      this->movement.speed,
+      this->movement.gravity,
+      this->movement.vehicleUsage,
+      this->movement.unknown,
+      this->movement.jumpHeight
+   ) != std::tie(
+      o.movement.speed,
+      o.movement.gravity,
+      o.movement.vehicleUsage,
+      o.movement.unknown,
+      o.movement.jumpHeight
+   )) return false;
+   #pragma endregion
+   #pragma region appearance
+   if (std::tie(
+      this->appearance.activeCamo,
+      this->appearance.waypoint,
+      this->appearance.visibleName,
+      this->appearance.aura,
+      this->appearance.forcedColor
+   ) != std::tie(
+      o.appearance.activeCamo,
+      o.appearance.waypoint,
+      o.appearance.visibleName,
+      o.appearance.aura,
+      o.appearance.forcedColor
+   )) return false;
+   #pragma endregion
+   #pragma region sensors
+   if (std::tie(
+      this->sensors.radarState,
+      this->sensors.radarRange,
+      this->sensors.directionalDamageIndicator
+   ) != std::tie(
+      o.sensors.radarState,
+      o.sensors.radarRange,
+      o.sensors.directionalDamageIndicator
+   )) return false;
+   #pragma endregion
+   return true;
+}
+#endif
 
 void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
    auto& d = this->defense;

@@ -16,3 +16,25 @@ void ReachLoadout::write(cobb::bitwriter& stream) const noexcept {
    this->ability.write(stream);
    this->grenadeCount.write(stream);
 }
+
+#if __cplusplus <= 201703L
+#include <tuple>
+bool ReachLoadout::operator==(const ReachLoadout& o) const noexcept {
+   if (std::tie(
+      this->visible,
+      this->nameIndex,
+      this->weaponPrimary,
+      this->weaponSecondary,
+      this->ability,
+      this->grenadeCount
+   ) != std::tie(
+      o.visible,
+      o.nameIndex,
+      o.weaponPrimary,
+      o.weaponSecondary,
+      o.ability,
+      o.grenadeCount
+   )) return false;
+   return true;
+}
+#endif

@@ -30,4 +30,16 @@ class ReachMapPermissions {
             stream.write(id);
          this->type.write(stream);
       }
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachMapPermissions& other) const noexcept {
+         if (this->type != other.type)
+            return false;
+         return this->mapIDs == other.mapIDs;
+      }
+      bool operator!=(const ReachMapPermissions& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachMapPermissions&) const noexcept = default;
+      bool operator!=(const ReachMapPermissions&) const noexcept = default;
+      #endif
 };

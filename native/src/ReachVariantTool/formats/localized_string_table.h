@@ -57,6 +57,10 @@ class ReachString {
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
       }
+      bool operator==(const ReachString& other) const noexcept {
+         return this->strings == other.strings;
+      }
+      bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
 };
 
 class ReachStringTable {
@@ -95,4 +99,14 @@ class ReachStringTable {
             return &this->strings[index];
          return nullptr;
       }
+      //
+      ReachStringTable& operator=(const ReachStringTable& other) noexcept {
+         // can't copy bitlengths, etc.; shouldn't ever be assigning tables with different bitsizes anyway
+         this->strings = other.strings;
+         return *this;
+      }
+      bool operator==(const ReachStringTable& other) const noexcept {
+         return this->strings == other.strings;
+      }
+      bool operator!=(const ReachStringTable& other) const noexcept { return !(*this == other); }
 };

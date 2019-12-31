@@ -41,7 +41,7 @@ class IconOnlyCombobox : public QComboBox {
       QSize expandedIconSize() const noexcept {
          return this->_expandedIconSize;
       }
-      void setExpandedIconSize(const QSize s) noexcept {
+      void setExpandedIconSize(const QSize s) noexcept { // not yet sure how to, uh, actually implement this
          this->_expandedIconSize = s;
       }
       //

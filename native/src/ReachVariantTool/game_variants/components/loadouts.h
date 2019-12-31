@@ -24,6 +24,14 @@ class ReachLoadout {
       //
       void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachLoadout&) const noexcept;
+      bool operator!=(const ReachLoadout& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachLoadout&) const noexcept = default;
+      bool operator!=(const ReachLoadout&) const noexcept = default;
+      #endif
 };
 class ReachLoadoutPalette {
    public:
@@ -37,4 +45,14 @@ class ReachLoadoutPalette {
          for (auto& loadout : this->loadouts)
             loadout.write(stream);
       }
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachLoadoutPalette& other) const noexcept {
+         return this->loadouts == other.loadouts;
+      }
+      bool operator!=(const ReachLoadoutPalette& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachLoadoutPalette&) const noexcept = default;
+      bool operator!=(const ReachLoadoutPalette&) const noexcept = default;
+      #endif
 };

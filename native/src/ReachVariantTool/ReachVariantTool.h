@@ -21,7 +21,9 @@ class ReachVariantTool : public QMainWindow {
    private:
       void _saveFileImpl(bool saveAs);
       //
-      void openFile();
+      void openFile(); // open-file dialog
+      void openFile(QString fileName = "");
+      //
       void saveFile()   { this->_saveFileImpl(false); }
       void saveFileAs() { this->_saveFileImpl(true); }
       void onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
@@ -32,6 +34,9 @@ class ReachVariantTool : public QMainWindow {
       void switchToPlayerTraits(ReachPlayerTraits*);
       //
       void refreshWindowTitle();
+      //
+      void dragEnterEvent(QDragEnterEvent* event); // override
+      void dropEvent(QDropEvent* event); // override
       //
    private:
       Ui::ReachVariantToolClass ui;

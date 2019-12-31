@@ -16,8 +16,8 @@ enum class ReachTU1Flags : uint8_t {
 };
 class ReachGameVariantTU1Options {
    public:
-      static constexpr float vanilla_precision_bloom = 5.0F; // 100%
-      static constexpr float patched_precision_bloom = 4.2F; //  85%
+      static constexpr float vanilla_precision_bloom = 5.01968479F; // 100%
+      static constexpr float patched_precision_bloom = 4.23228359F; //  85%
       //
       static constexpr float vanilla_active_camo_energy = 0.0669191317F; // TU doesn't change this
       //
@@ -51,4 +51,12 @@ class ReachGameVariantTU1Options {
          this->make_patched();
          this->precisionBloom = 0.0F;
       }
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachGameVariantTU1Options&) const noexcept;
+      bool operator!=(const ReachGameVariantTU1Options& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachGameVariantTU1Options&) const noexcept = default;
+      bool operator!=(const ReachGameVariantTU1Options&) const noexcept = default;
+      #endif
 };

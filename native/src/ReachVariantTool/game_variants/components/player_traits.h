@@ -277,7 +277,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<4, reach::health_rate> healthRate = reach::health_rate::unchanged;
          cobb::bitnumber<3, reach::shield_multiplier> shieldMult = reach::shield_multiplier::unchanged;
          cobb::bitnumber<4, reach::shield_rate> shieldRate = reach::shield_rate::unchanged;
-         cobb::bitnumber<4, uint8_t> shieldDelay;
+         cobb::bitnumber<4, uint8_t> shieldDelay; // not actually regen delay; current meaning unknown
          cobb::bitnumber<2, reach::bool_trait> headshotImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<3, uint8_t> vampirism;
          cobb::bitnumber<2, reach::bool_trait> assassinImmune = reach::bool_trait::unchanged;
@@ -319,6 +319,14 @@ class ReachPlayerTraits {
       //
       void read(cobb::bitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachPlayerTraits&) const noexcept;
+      bool operator!=(const ReachPlayerTraits& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachPlayerTraits&) const noexcept = default;
+      bool operator!=(const ReachPlayerTraits&) const noexcept = default;
+      #endif
 };
 
 class ReachMegaloPlayerTraits : public ReachPlayerTraits {
@@ -342,4 +350,13 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
          this->name = table.get_entry(this->nameIndex);
          this->desc = table.get_entry(this->descIndex);
       }
+      //
+      bool operator==(const ReachMegaloPlayerTraits& other) const noexcept {
+         if (this->nameIndex != other.nameIndex)
+            return false;
+         if (this->descIndex != other.descIndex)
+            return false;
+         return ReachPlayerTraits::operator==(other); // call super
+      }
+      bool operator!=(const ReachMegaloPlayerTraits& other) const noexcept { return !(*this == other); }
 };

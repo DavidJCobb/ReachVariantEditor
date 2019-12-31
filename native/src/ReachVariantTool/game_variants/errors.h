@@ -31,6 +31,7 @@ struct GameEngineVariantLoadError {
       script_opcode_cannot_be_none, // should only appear during testing
       bad_script_opcode_argument, // can have load_failure_detail::failed_to_construct_script_opcode_arg
       early_eof,
+      not_a_blam_file, // can be sent by the "block_blam" failure point
    };
    enum class load_failure_detail {
       none,

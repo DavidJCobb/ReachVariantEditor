@@ -20,27 +20,17 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
-//  - Make the "engine icon" and "engine category" alterable.
-//
-//     - Done, but I still need to determine whether I'm allowed to use the 
-//       icons I'm currently using in the icon drop-down box.
-//
-//        - I've put the icons into my .gitignore until I know for sure, so 
-//          when I get an answer (or if I make replacements that are usable) 
-//          I need to take that back out.
-//
-//        - Consider just redrawing them by eye, like you did for NorthernUI.
-//
-//     - It'd be nice if the icon drop-down box's popup showed the icons at 
-//       a larger size. However, it's devilishly difficult to do this in Qt, 
-//       if it's even possible at all without totally reimplementing the 
-//       drop-down widget.
-//
-//  - Consider making it so that you can open files by dragging them onto the 
-//    window.
-//
 //  - We'd benefit from being able to warn on unsaved changes. Easiest way 
 //    would be to keep two copies of a variant in memory, and compare them.
+//
+//     - To do this, we need operator== for absolutely everything that can 
+//       be in a game variant. Only C++20 lets you quickly declare those.
+//
+//        - Defined for /game_variants/components/*.h, but not for anything 
+//          in the Megalo subfolder. Those'll require virtual operators 
+//          (which are allowed).
+//
+//        - Not defined for top-level game variant structures.
 //
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 
@@ -53,7 +43,8 @@ int main(int argc, char *argv[]) {
 //  - The engine category drop-down needs to be able to handle the presence 
 //    of an invalid category when loading a file. Testing shows that custom 
 //    category indices (including "Community") don't work: they don't appear 
-//    in the MCC at all.
+//    in the MCC at all. Current UI behavior is for the drop-down to stay at 
+//    the first item (CTF).
 //
 //     - At the very least, we should warn on load and then reset the category 
 //       based on the icon, using the "Insane" category for any unconventional 
@@ -133,8 +124,6 @@ int main(int argc, char *argv[]) {
 //
 //           - Can it kill?
 //
-//     - Shield Delay
-//
 //     - Shield Vampirism
 //
 //        - Requires someone to test with.
@@ -144,10 +133,9 @@ int main(int argc, char *argv[]) {
 //
 //     - Sensors: Directional Damage Indicator
 //
-//        - Probably a bool trait. Could try setting off explosives near 
-//          oneself to see.
-//
-//        - May require someone to test with.
+//        - None of the values affect whether I get a DDI on splash damage 
+//          from my own grenades; they probably only affect damage dealt by 
+//          other players.
 //
 //     - Test all engine option toggles
 //

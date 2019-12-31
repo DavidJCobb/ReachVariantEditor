@@ -9,6 +9,3 @@
 *.ini
 *.ini.tmp
 *.ini.bak
-
-# Placeholder assets; do not upload:
-**/Resources/gametype_icons/*.png

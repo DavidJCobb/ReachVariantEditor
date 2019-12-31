@@ -50,10 +50,14 @@ void ReachFileBlock::write_postprocess(cobb::bytewriter& stream) const noexcept 
 }
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {
+   this->discard();
+}
+void ReachFileBlockRemainder::discard() noexcept {
    if (this->remainder) {
       free(this->remainder);
       this->remainder = nullptr;
    }
+   this->size = 0;
 }
 bool ReachFileBlockRemainder::read(cobb::bitreader& stream, uint32_t blockEnd) noexcept {
    this->bitsInFractionalByte = 8 - stream.get_bitshift();
@@ -63,9 +67,9 @@ bool ReachFileBlockRemainder::read(cobb::bitreader& stream, uint32_t blockEnd) n
    assert(stream.is_byte_aligned() && "Failed to align stream to byte boundary!");
    uint32_t bytepos = stream.get_bytepos();
    if (bytepos < blockEnd) {
-      uint32_t size = blockEnd - bytepos;
-      this->remainder = (uint8_t*)malloc(size);
-      for (uint32_t i = 0; i < size; i++) {
+      this->size      = blockEnd - bytepos;
+      this->remainder = (uint8_t*)malloc(this->size);
+      for (uint32_t i = 0; i < this->size; i++) {
          stream.read(*(uint8_t*)(this->remainder + i));
          if (!stream.is_in_bounds())
             return false;
@@ -73,7 +77,24 @@ bool ReachFileBlockRemainder::read(cobb::bitreader& stream, uint32_t blockEnd) n
    }
    return true;
 }
+void ReachFileBlockRemainder::cloneTo(ReachFileBlockRemainder& target) const noexcept {
+   target.discard();
+   target.bitsInFractionalByte = this->bitsInFractionalByte;
+   target.fractionalByte       = this->fractionalByte;
+   target.size      = this->size;
+   target.remainder = (uint8_t*)malloc(this->size);
+   memcpy(target.remainder, this->remainder, this->size);
+}
 
+ReachUnknownBlock::~ReachUnknownBlock() {
+   this->discard();
+}
+void ReachUnknownBlock::discard() noexcept {
+   if (this->data) {
+      free(this->data);
+      this->data = nullptr;
+   }
+}
 bool ReachUnknownBlock::read(cobb::bytereader& stream) noexcept {
    if (!this->header.read(stream))
       return false;
@@ -88,4 +109,12 @@ void ReachUnknownBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.enlarge_by(this->header.found.size);
    stream.write(this->data, this->header.found.size);
    this->header.write_postprocess(stream);
+}
+ReachUnknownBlock& ReachUnknownBlock::operator=(const ReachUnknownBlock& source) noexcept {
+   this->discard();
+   this->header = source.header;
+   auto size = this->header.found.size;
+   this->data = (uint8_t*)malloc(size);
+   memcpy(this->data, source.data, size);
+   return *this;
 }

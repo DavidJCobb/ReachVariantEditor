@@ -65,17 +65,23 @@ PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
       data->engineIcon = value;
       data->variantHeader.engineIcon = value;
    });
-   QObject::connect(this->ui.engineCategory, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
-      auto variant = ReachEditorState::get().variant();
-      if (!variant)
-         return;
-      auto data = ReachEditorState::get().multiplayerData();
-      if (!data)
-         return;
-      variant->contentHeader.data.engineCategory = value;
-      data->engineCategory = value;
-      data->variantHeader.engineCategory = value;
-   });
+   {
+      auto widget = this->ui.engineCategory;
+      QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [widget](int value) {
+         auto variant = ReachEditorState::get().variant();
+         if (!variant)
+            return;
+         auto data = ReachEditorState::get().multiplayerData();
+         if (!data)
+            return;
+         //
+         int cat = widget->currentData().toInt();
+         //
+         variant->contentHeader.data.engineCategory = cat;
+         data->engineCategory = cat;
+         data->variantHeader.engineCategory = cat;
+      });
+   }
    //
    QObject::connect(this->ui.authorGamertag, &QLineEdit::textEdited, [](const QString& text) {
       auto variant = ReachEditorState::get().variant();

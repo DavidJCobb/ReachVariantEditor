@@ -1,6 +1,10 @@
 #include "editor_state.h"
 
 void ReachEditorState::abandonVariant() noexcept {
+   if (this->currentVariantClone) {
+      delete this->currentVariantClone;
+      this->currentVariantClone = nullptr;
+   }
    if (!this->currentVariant)
       return;
    auto v = this->currentVariant;
@@ -31,6 +35,10 @@ void ReachEditorState::takeVariant(GameVariant* other, const wchar_t* path) noex
    this->abandonVariant();
    this->currentVariant = other;
    this->currentFile    = path;
+   //
+   //if (other)
+   //   this->currentVariantClone = other->clone(); // no point until such time as we can implement comparisons quickly
+   //
    emit variantAcquired(other);
    emit switchedMultiplayerTeam(this->currentVariant, this->currentMPTeam, this->multiplayerTeam());
 }

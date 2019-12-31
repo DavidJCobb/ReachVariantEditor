@@ -1,8 +1,11 @@
 #include "ReachVariantTool.h"
 #include <cassert>
 #include <filesystem>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QString>
 #include <QTreeWidget>
 #include <QWidget>
@@ -66,7 +69,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       }
    });
    //
-   QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, &ReachVariantTool::openFile);
+   QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
@@ -88,14 +91,50 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          this->refreshWindowTitle();
    });
    this->regenerateNavigation();
+   //
+   this->setAcceptDrops(true);
+}
+
+void ReachVariantTool::dragEnterEvent(QDragEnterEvent* event) {
+   if (event->mimeData()->hasUrls())
+      event->acceptProposedAction();
+}
+void ReachVariantTool::dropEvent(QDropEvent* event) {
+   auto mime = event->mimeData();
+   if (!mime)
+      return;
+   auto list = mime->urls();
+   if (list.size() == 0)
+      return;
+   if (list.size() > 1) {
+      QMessageBox::information(this, tr("Unable to open files"), tr("This program can only open one file at a time."));
+      return;
+   }
+   QString file;
+   for (const QUrl& url : list) {
+      if (url.isLocalFile()) {
+         file = url.toLocalFile();
+         break;
+      }
+   }
+   if (file.isEmpty())
+      return;
+   event->acceptProposedAction();
+   this->openFile(file);
 }
 
 void ReachVariantTool::openFile() {
-   auto& editor = ReachEditorState::get();
    //
    // TODO: warn on unsaved changes
    //
    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), "", tr("Game Variant (*.bin);;All Files (*)"));
+   this->openFile(fileName);
+}
+void ReachVariantTool::openFile(QString fileName) {
+   auto& editor = ReachEditorState::get();
+   //
+   // TODO: warn on unsaved changes
+   //
    if (fileName.isEmpty())
       return;
    std::wstring s = fileName.toStdWString();

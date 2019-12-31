@@ -20,4 +20,16 @@ class ReachPlayerRatingParams {
             stream.write(f);
          this->flag.write(stream);
       }
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachPlayerRatingParams& other) const noexcept {
+         if (this->flag != other.flag)
+            return false;
+         return this->unknown == other.unknown;
+      }
+      bool operator!=(const ReachPlayerRatingParams& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachPlayerRatingParams&) const noexcept = default;
+      bool operator!=(const ReachPlayerRatingParams&) const noexcept = default;
+      #endif
 };

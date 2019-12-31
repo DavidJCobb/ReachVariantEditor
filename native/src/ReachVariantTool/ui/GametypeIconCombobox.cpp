@@ -1,5 +1,6 @@
 #include "GametypeIconCombobox.h"
 #include <QIcon>
+#include <QAbstractItemView>
 
 namespace {
    const char* _icons[] = {
@@ -34,6 +35,7 @@ namespace {
       "Noble Team Insignia",
       "Covenant Insignia",
       "Capture Waypoint",
+      /*// Inside of MPVR (not including its header), the engine icon is stored as a 5-bit number and -1 means "none," so these icons aren't usable.
       "Defend Waypoint",
       "Resource Waypoint",
       "Triangle Waypoint",
@@ -42,6 +44,7 @@ namespace {
       "Ammo",
       "Campaign Skull",
       "Forge",
+      //*/
    };
 }
 GametypeIconCombobox::GametypeIconCombobox(QWidget* parent = nullptr) : IconOnlyCombobox(parent) {
@@ -49,6 +52,6 @@ GametypeIconCombobox::GametypeIconCombobox(QWidget* parent = nullptr) : IconOnly
       auto name = tr(_icons[i], "Gametype Icon");
       this->addItem(QIcon(QString(":/ReachVariantTool/Resources/gametype_icons/%1.png").arg(i)), name);
       this->setItemData(i, name, Qt::ToolTipRole);
-      this->setExpandedIconSize(QSize(24, 24));
    }
+   this->setExpandedIconSize(QSize(24, 24));
 }

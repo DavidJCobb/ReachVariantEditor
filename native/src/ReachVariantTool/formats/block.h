@@ -50,16 +50,24 @@ class ReachFileBlockRemainder {
       //
       uint8_t  fractionalByte;
       uint8_t  bitsInFractionalByte;
+      uint32_t size = 0;
       uint8_t* remainder = nullptr;
       //
+      void discard() noexcept;
       bool read(cobb::bitreader&, uint32_t blockEnd) noexcept;
+      void cloneTo(ReachFileBlockRemainder&) const noexcept;
 };
 
 class ReachUnknownBlock {
    public:
+      ~ReachUnknownBlock();
+      //
       ReachFileBlock header;
       uint8_t* data = nullptr;
       //
+      void discard() noexcept;
       bool read(cobb::bytereader& stream) noexcept;
       void write(cobb::bytewriter&) const noexcept;
+      //
+      ReachUnknownBlock& operator=(const ReachUnknownBlock& source) noexcept;
 };

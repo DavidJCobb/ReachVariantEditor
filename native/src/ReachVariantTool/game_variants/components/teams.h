@@ -23,4 +23,13 @@ class ReachTeamData {
             return &this->name.strings[0];
          return nullptr;
       }
+      void cloneTo(ReachTeamData&) const noexcept;
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachTeamData&) const noexcept;
+      bool operator!=(const ReachTeamData& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachTeamData&) const noexcept = default;
+      bool operator!=(const ReachTeamData&) const noexcept = default;
+      #endif
 };

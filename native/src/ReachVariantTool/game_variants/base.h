@@ -40,6 +40,7 @@ class GameVariantData {
       virtual bool read(cobb::bit_or_byte_reader&) noexcept = 0;
       virtual void write(cobb::bit_or_byte_writer&) const noexcept = 0;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
+      virtual GameVariantData* clone() const noexcept = 0;
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
          switch (this->get_type()) {
@@ -153,6 +154,7 @@ class ReachBlockMPVR {
       bool read(cobb::bit_or_byte_reader&);
       void write(cobb::bit_or_byte_writer&) const noexcept;
       void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
+      void cloneTo(ReachBlockMPVR&) const noexcept; // deep copy, accounting for pointers
 };
 
 class GameVariant {
@@ -161,7 +163,7 @@ class GameVariant {
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
       EOFBlock       eofBlock;
-      std::vector<ReachUnknownBlock> unknownBlocks; // will include '_eof' block
+      std::vector<ReachUnknownBlock> unknownBlocks;
       //
       bool read(cobb::mapped_file& file);
       void write(cobb::bit_or_byte_writer& writer) const noexcept;
@@ -169,4 +171,6 @@ class GameVariant {
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //
       GameVariantDataMultiplayer* get_multiplayer_data() const noexcept;
+      //
+      GameVariant* clone() const noexcept;
 };

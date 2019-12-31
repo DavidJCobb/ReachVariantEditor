@@ -20,6 +20,7 @@ class ReachEditorState : public QObject {
    private:
       std::wstring         currentFile;
       GameVariant*         currentVariant = nullptr;
+      GameVariant*         currentVariantClone = nullptr; /// checks for unsaved changes aren't yet implemented but when that becomes feasible we can turn this back on
       ReachPlayerTraits*   currentTraits  = nullptr;
       ReachLoadoutPalette* currentLoadoutPalette = nullptr;
       int8_t               currentMPTeam = -1;
@@ -51,11 +52,4 @@ class ReachEditorState : public QObject {
       inline ReachPlayerTraits* playerTraits() noexcept { return this->currentTraits; }
       inline GameVariant*   variant()         noexcept { return this->currentVariant; }
       inline const wchar_t* variantFilePath() noexcept { return this->currentFile.c_str(); }
-
-      //
-      // TODO: Something to consider: if we create a copy of a game variant upon 
-      // loading it, then we can use comparisons to check whether things are 
-      // actually unchanged (rather than just using a simple bool). Might be slow 
-      // though.
-      //
 };

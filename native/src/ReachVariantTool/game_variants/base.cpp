@@ -9,7 +9,8 @@
 #include "errors.h"
 
 bool BlamHeader::read(cobb::bytereader& stream) noexcept {
-   this->header.read(stream);
+   if (!this->header.read(stream))
+      return false;
    stream.read(this->data.unk0C, cobb::endian::big); // endianness assumed but not known
    stream.read(this->data.unk0E, cobb::endian::big); // endianness assumed but not known
    stream.read(this->data.unk2E, cobb::endian::big); // endianness assumed but not known
@@ -25,7 +26,8 @@ void BlamHeader::write(cobb::bytewriter& stream) const noexcept {
 }
 
 bool EOFBlock::read(cobb::bytereader& stream) noexcept {
-   ReachFileBlock::read(stream);
+   if (!ReachFileBlock::read(stream))
+      return false;
    stream.read(this->length);
    stream.read(this->unk04);
    return true;
@@ -316,6 +318,11 @@ void ReachBlockMPVR::write_last_minute_fixup(cobb::bit_or_byte_writer& writer) c
    //
    writer.synchronize();
 }
+void ReachBlockMPVR::cloneTo(ReachBlockMPVR& target) const noexcept {
+   target = *this;
+   target.data = this->data->clone();
+   this->remainingData.cloneTo(target.remainingData);
+}
 
 bool GameVariant::read(cobb::mapped_file& file) {
    auto& error_report = GameEngineVariantLoadError::get();
@@ -325,6 +332,11 @@ bool GameVariant::read(cobb::mapped_file& file) {
    if (!this->blamHeader.read(reader.bytes)) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+      //
+      auto& bh = this->blamHeader.header;
+      if (bh.found.signature && bh.found.signature != bh.expected.signature) {
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::not_a_blam_file;
+      }
       return false;
    }
    if (!reader.is_in_bounds()) {
@@ -430,4 +442,14 @@ GameVariantDataMultiplayer* GameVariant::get_multiplayer_data() const noexcept {
    if (!d)
       return nullptr;
    return d->as_multiplayer();
+}
+
+GameVariant* GameVariant::clone() const noexcept {
+   GameVariant* clone = new GameVariant();
+   clone->blamHeader    = this->blamHeader;
+   clone->contentHeader = this->contentHeader;
+   this->multiplayer.cloneTo(clone->multiplayer);
+   clone->eofBlock      = this->eofBlock;
+   clone->unknownBlocks = this->unknownBlocks;
+   return clone;
 }

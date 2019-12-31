@@ -27,4 +27,12 @@ class ReachMegaloGameStat {
       void read(cobb::bitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      #if __cplusplus <= 201703L
+      bool operator==(const ReachMegaloGameStat&) const noexcept;
+      bool operator!=(const ReachMegaloGameStat& other) const noexcept { return !(*this == other); }
+      #else
+      bool operator==(const ReachMegaloGameStat&) const noexcept = default;
+      bool operator!=(const ReachMegaloGameStat&) const noexcept = default;
+      #endif
 };
