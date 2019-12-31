@@ -138,6 +138,7 @@
     <ClCompile Include="ui\LoadoutForm.cpp" />
     <ClCompile Include="editor_state.cpp" />
     <ClCompile Include="ui\main_window\page_forge_settings_general.cpp" />
+    <ClCompile Include="ui\main_window\page_loadout_palette.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_metadata.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_general.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_settings_loadout.cpp" />
@@ -157,6 +158,7 @@
     <QtUic Include="ReachVariantTool.ui" />
     <QtUic Include="ProgramOptionsDialog.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
+    <QtUic Include="ui\main_window\page_loadout_palette.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_metadata.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_settings_loadout.ui" />
@@ -185,6 +187,7 @@
     <QtMoc Include="ui\main_window\page_multiplayer_settings_team_specific.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_metadata.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h" />
+    <QtMoc Include="ui\main_window\page_loadout_palette.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

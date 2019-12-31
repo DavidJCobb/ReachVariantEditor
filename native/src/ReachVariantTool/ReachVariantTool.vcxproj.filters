@@ -196,6 +196,9 @@
     <ClCompile Include="ui\main_window\page_multiplayer_settings_scripted.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\main_window\page_loadout_palette.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -255,6 +258,9 @@
     <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\main_window\page_loadout_palette.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ReachVariantTool.ui">
@@ -297,6 +303,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\main_window\page_multiplayer_metadata.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window\page_loadout_palette.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

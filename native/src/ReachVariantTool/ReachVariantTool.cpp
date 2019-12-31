@@ -17,6 +17,38 @@
 
 namespace {
    ReachVariantTool* _window = nullptr;
+
+   enum class _page {
+      __do_not_use_zero = 0,
+      //
+      welcome, // only shows when no file is loaded
+      unknown_variant_type, // only shows when a file of an unknown type is (somehow) loaded
+      mp_metadata,
+      mp_options_general,
+      mp_options_respawn,
+      mp_options_social,
+      mp_options_map,
+      mp_options_team,
+      mp_options_loadout,
+      mp_options_scripted,
+      loadout_palette,
+      mp_traits_built_in,
+      mp_traits_scripted,
+      mp_team_configuration, // specific team
+      mp_option_visibility,
+      mp_title_update_1,
+      forge_options_general,
+      //
+      redirect_to_first_child = 0x1000,
+   };
+   enum class _traits_builtin {
+      base,
+      respawn,
+      powerup_red,
+      powerup_blue,
+      powerup_yellow,
+      forge_editor,
+   };
 }
 
 /*static*/ ReachVariantTool& ReachVariantTool::get() {
@@ -49,28 +81,13 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    #endif
    //
    this->ui.MainContentView->setCurrentIndex(0); // Qt Designer makes the last page you were looking at in the editor the default page; let's just switch to the first page here
-   QObject::connect(this->ui.MainTreeview, &QTreeWidget::itemSelectionChanged, this, &ReachVariantTool::onSelectedPageChanged);
+   QObject::connect(this->ui.MainTreeview, &QTreeWidget::currentItemChanged, this, &ReachVariantTool::onSelectedPageChanged);
    //
    QObject::connect(this->ui.pageContentMetadata, &PageMPMetadata::titleChanged, [this](const char16_t* title) {
       if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b)
          this->refreshWindowTitle();
    });
-   {  // Specific Team Settings: Add each team to the navigation
-      auto tree = this->ui.MainTreeview;
-      QTreeWidgetItem* branch;
-      {
-         auto list = tree->findItems(tr("Team Settings", "MainTreeview"), Qt::MatchRecursive, 0);
-         if (!list.size())
-            return;
-         branch = list[0];
-      }
-      for (QTreeWidgetItem* child : branch->takeChildren())
-         delete child;
-      for (size_t i = 0; i < 8; i++) {
-         auto item = new QTreeWidgetItem(branch, QTreeWidgetItem::UserType + i);
-         item->setText(0, QString("Team %1").arg(i + 1));
-      }
-   }
+   this->regenerateNavigation();
 }
 
 void ReachVariantTool::openFile() {
@@ -113,7 +130,6 @@ void ReachVariantTool::openFile() {
       return;
    }
    editor.takeVariant(variant, s.c_str());
-   this->refreshScriptedPlayerTraitList();
    {
       auto i = this->ui.MainTreeview->currentIndex();
       this->ui.MainTreeview->setCurrentItem(nullptr);
@@ -121,6 +137,7 @@ void ReachVariantTool::openFile() {
    }
    this->refreshWindowTitle();
    this->ui.optionTogglesScripted->updateModelFromGameVariant();
+   this->regenerateNavigation();
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();
@@ -158,168 +175,280 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    editor.variant()->write(writer);
    out.writeRawData((const char*)writer.bytes.data(), writer.bytes.get_bytespan());
 }
-void ReachVariantTool::onSelectedPageChanged() {
+
+namespace {
+   QTreeWidgetItem* _makeNavItem(QTreeWidget* parent, QString s, _page p) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole, (uint)p);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      item->setExpanded(true);
+      return item;
+   }
+   QTreeWidgetItem* _makeNavItem(QTreeWidgetItem* parent, QString s, _page p) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole, (uint)p);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      item->setExpanded(true);
+      return item;
+   }
+   QTreeWidgetItem* _makeNavItemMPTraits(QTreeWidgetItem* parent, QString s, _traits_builtin t) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::mp_traits_built_in);
+      item->setData(0, Qt::ItemDataRole::UserRole + 1, (uint)t);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      return item;
+   }
+   QTreeWidgetItem* _makeNavItemMegaloTraits(QTreeWidgetItem* parent, QString s, uint index) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::mp_traits_scripted);
+      item->setData(0, Qt::ItemDataRole::UserRole + 1, index);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      return item;
+   }
+   QTreeWidgetItem* _makeNavItemTeamConfig(QTreeWidgetItem* parent, QString s, uint8_t teamIndex) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::mp_team_configuration);
+      item->setData(0, Qt::ItemDataRole::UserRole + 1, teamIndex);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      return item;
+   }
+}
+void ReachVariantTool::regenerateNavigation() {
+   auto& editor = ReachEditorState::get();
+   auto  widget = this->ui.MainTreeview;
+   //
+   QString priorSelection;
+   if (auto item = widget->currentItem())
+      priorSelection = item->text(0);
+   QTreeWidgetItem* defaultFallback = nullptr; // if the previously-selected item is gone after we rebuild, select this instead; if this is nullptr, select the first item
+   //
+   {
+      const QSignalBlocker blocker(widget);
+      widget->clear();
+      auto variant = editor.variant();
+      if (!variant || !variant->multiplayer.data) {
+         auto item = new QTreeWidgetItem(widget);
+         item->setText(0, tr("Welcome", "main window navigation pane"));
+         item->setData(0, Qt::ItemDataRole::UserRole, (uint)_page::welcome);
+         widget->setCurrentItem(item);
+         return;
+      }
+      auto mp = variant->get_multiplayer_data();
+      if (!mp) {
+         auto item = _makeNavItem(widget, tr("Welcome", "main window navigation pane"), _page::unknown_variant_type);
+         widget->setCurrentItem(item);
+         return;
+      }
+      defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::mp_metadata);
+      {  // Options
+         auto options = _makeNavItem(widget, tr("Options", "main window navigation pane"), _page::redirect_to_first_child);
+         {
+            _makeNavItem(options, tr("General Settings", "main window navigation pane"), _page::mp_options_general);
+            //
+            auto respawn = _makeNavItem(options, tr("Respawn Settings", "main window navigation pane"), _page::mp_options_respawn);
+            _makeNavItemMPTraits(respawn, tr("Respawn Traits", "main window navigation pane"), _traits_builtin::respawn);
+            //
+            _makeNavItem(options, tr("Social Settings", "main window navigation pane"), _page::mp_options_social);
+            //
+            auto map = _makeNavItem(options, tr("Map and Game Settings", "main window navigation pane"), _page::mp_options_map);
+            _makeNavItemMPTraits(map, tr("Base Player Traits", "main window navigation pane"), _traits_builtin::base);
+            _makeNavItemMPTraits(map, tr("Red Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_red);
+            _makeNavItemMPTraits(map, tr("Blue Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_blue);
+            _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_yellow);
+            //
+            auto team = _makeNavItem(options, tr("Team Settings", "main window navigation pane"), _page::mp_options_team);
+            for (uint8_t i = 0; i < 8; i++) {
+               _makeNavItemTeamConfig(team, tr("Team %1", "main window navigation pane").arg(i + 1), i);
+            }
+            //
+            auto loadout = _makeNavItem(options, tr("Loadout Settings", "main window navigation pane"), _page::mp_options_loadout);
+            for (uint8_t i = 0; i < 3; i++) {
+               auto t = new QTreeWidgetItem(loadout);
+               t->setText(0, tr("Spartan Tier %1", "main window navigation pane").arg(i + 1));
+               t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+               t->setData(0, Qt::ItemDataRole::UserRole + 1, i);
+            }
+            for (uint8_t i = 0; i < 3; i++) {
+               auto t = new QTreeWidgetItem(loadout);
+               t->setText(0, tr("Elite Tier %1", "main window navigation pane").arg(i + 1));
+               t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+               t->setData(0, Qt::ItemDataRole::UserRole + 1, 3 + i);
+            }
+            //
+            auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);
+            auto& t = mp->scriptData.traits;
+            for (size_t i = 0; i < t.size(); i++) {
+               auto name = t[i].name;
+               QString text;
+               if (name) {
+                  text = QString::fromUtf8(name->english().c_str());
+               } else {
+                  text = QString("Unnamed Traits %1").arg(i);
+               }
+               auto item = _makeNavItemMegaloTraits(script, text, i);
+               auto desc = t[i].desc;
+               if (desc)
+                  item->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+            }
+         }
+      }
+      _makeNavItem(widget, tr("Option Visibility", "main window navigation pane"), _page::mp_option_visibility);
+      _makeNavItem(widget, tr("Title Update Settings", "main window navigation pane"), _page::mp_title_update_1);
+      if (mp->get_type() == ReachGameEngine::forge) {
+         auto item = _makeNavItem(widget, tr("Forge Settings", "main window navigation pane"), _page::forge_options_general);
+         _makeNavItemMPTraits(item, tr("Editor Traits", "main window navigation pane"), _traits_builtin::forge_editor);
+      }
+   }
+   //
+   // If the item we had selected before still exists, select it again.
+   //
+   bool reselected = false;
+   if (!priorSelection.isEmpty()) {
+      auto list = widget->findItems(priorSelection, Qt::MatchFixedString | Qt::MatchCaseSensitive | Qt::MatchRecursive);
+      if (list.size()) {
+         widget->setCurrentItem(list[0]);
+         reselected = true;
+      }
+   }
+   if (!reselected) {
+      if (defaultFallback)
+         widget->setCurrentItem(defaultFallback);
+      else {
+         auto root = widget->invisibleRootItem();
+         if (root->childCount())
+            widget->setCurrentItem(root->child(0));
+      }
+   }
+}
+
+void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous) {
    auto widget     = this->ui.MainTreeview;
    auto selections = widget->selectedItems();
    if (!selections.size())
       return;
-   auto sel     = selections[0];
-   auto text    = sel->text(0);
+   auto sel     = current;
    auto stack   = this->ui.MainContentView;
    auto variant = ReachEditorState::get().variant();
    auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
-   if (text == tr("Metadata", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageGameVariantHeader);
-      return;
-   }
-   if (text == tr("General Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsGeneral);
-      return;
-   }
-   if (text == tr("Respawn Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsRespawn);
-      return;
-   }
-   if (text == tr("Social Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsSocial);
-      return;
-   }
-   if (text == tr("Map and Game Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsMap);
-      return;
-   }
-   if (text == tr("Team Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsTeam);
-      return;
-   }
-   if (text == tr("Script-Specific Options", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsScripted);
-      return;
-   }
-   if (text == tr("Loadout Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionsLoadout);
-      return;
-   }
-   if (variant && mp_data) { // traits; loadout palettes; scripted traits; teams
-      if (auto p = sel->parent()) {
-         const auto text = p->text(0);
-         if (text == tr("Script-Specific Options", "MainTreeview")) {
-            auto t = sel->type();
-            if (t >= QTreeWidgetItem::UserType) {
-               size_t index = t - QTreeWidgetItem::UserType;
-               this->switchToPlayerTraits(&mp_data->scriptData.traits[index]);
+   if (uint d = sel->data(0, Qt::ItemDataRole::UserRole).toInt()) {
+      uint extra = sel->data(0, Qt::ItemDataRole::UserRole + 1).toInt();
+      switch ((_page)d) {
+         case _page::redirect_to_first_child:
+            if (!sel->childCount()) {
+               if (auto parent = sel->parent()) {
+                  widget->setCurrentItem(parent);
+                  return;
+               }
                return;
             }
-         }
-      }
-      if (auto p = sel->parent()) {
-         const auto text = p->text(0);
-         if (text == tr("Team Settings", "MainTreeview")) {
-            auto t = sel->type();
-            if (t >= QTreeWidgetItem::UserType) {
-               size_t index = t - QTreeWidgetItem::UserType;
-               ReachEditorState::get().setCurrentMultiplayerTeam(index);
-               this->ui.MainContentView->setCurrentWidget(this->ui.PageSpecificTeamConfig);
-               return;
-            }
-         }
-      }
-      //
-      if (text == tr("Respawn Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->options.respawn.traits);
-         return;
-      }
-      if (text == tr("Base Player Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->options.map.baseTraits);
-         return;
-      }
-      if (text == tr("Red Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->options.map.powerups.red.traits);
-         return;
-      }
-      if (text == tr("Blue Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->options.map.powerups.blue.traits);
-         return;
-      }
-      if (text == tr("Custom Powerup Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->options.map.powerups.yellow.traits);
-         return;
-      }
-      if (text == tr("Editor Traits", "MainTreeview")) {
-         this->switchToPlayerTraits(&mp_data->forgeData.editorTraits);
-         return;
-      }
-      //
-      const QString paletteNames[] = {
-         tr("Spartan Tier 1", "MainTreeview"),
-         tr("Spartan Tier 2", "MainTreeview"),
-         tr("Spartan Tier 3", "MainTreeview"),
-         tr("Elite Tier 1", "MainTreeview"),
-         tr("Elite Tier 2", "MainTreeview"),
-         tr("Elite Tier 3", "MainTreeview"),
-      };
-      for (uint8_t i = 0; i < std::extent<decltype(paletteNames)>::value; i++) {
-         if (text == paletteNames[i]) {
-            this->switchToLoadoutPalette(&mp_data->options.loadouts.palettes[i]);
+            widget->setCurrentItem(sel->child(0));
             return;
-         }
+         case _page::welcome: // only shows when no file is loaded
+            stack->setCurrentWidget(this->ui.PageWelcome);
+            return;
+         case _page::unknown_variant_type: // only shows when a file of an unknown type is (somehow) loaded
+            stack->setCurrentWidget(this->ui.PageMessageForUnknownType);
+            return;
+         case _page::mp_metadata:
+            stack->setCurrentWidget(this->ui.PageGameVariantHeader);
+            return;
+         case _page::mp_options_general:
+            stack->setCurrentWidget(this->ui.PageOptionsGeneral);
+            return;
+         case _page::mp_options_respawn:
+            stack->setCurrentWidget(this->ui.PageOptionsRespawn);
+            return;
+         case _page::mp_options_social:
+            stack->setCurrentWidget(this->ui.PageOptionsSocial);
+            return;
+         case _page::mp_options_map:
+            stack->setCurrentWidget(this->ui.PageOptionsMap);
+            return;
+         case _page::mp_options_team:
+            stack->setCurrentWidget(this->ui.PageOptionsTeam);
+            return;
+         case _page::mp_options_loadout:
+            stack->setCurrentWidget(this->ui.PageOptionsLoadout);
+            return;
+         case _page::mp_options_scripted:
+            stack->setCurrentWidget(this->ui.PageOptionsScripted);
+            return;
+         case _page::loadout_palette:
+            if (!mp_data || extra >= mp_data->options.loadouts.palettes.size()) {
+               const QSignalBlocker blocker(widget);
+               widget->setCurrentItem(previous);
+               return;
+            }
+            this->switchToLoadoutPalette(&mp_data->options.loadouts.palettes[extra]);
+            return;
+         case _page::mp_traits_built_in:
+            if (!mp_data) {
+               const QSignalBlocker blocker(widget);
+               widget->setCurrentItem(previous);
+               return;
+            }
+            switch ((_traits_builtin)extra) {
+               case _traits_builtin::base:
+                  this->switchToPlayerTraits(&mp_data->options.map.baseTraits);
+                  return;
+               case _traits_builtin::respawn:
+                  this->switchToPlayerTraits(&mp_data->options.respawn.traits);
+                  return;
+               case _traits_builtin::powerup_red:
+                  this->switchToPlayerTraits(&mp_data->options.map.powerups.red.traits);
+                  return;
+               case _traits_builtin::powerup_blue:
+                  this->switchToPlayerTraits(&mp_data->options.map.powerups.blue.traits);
+                  return;
+               case _traits_builtin::powerup_yellow:
+                  this->switchToPlayerTraits(&mp_data->options.map.powerups.yellow.traits);
+                  return;
+               case _traits_builtin::forge_editor:
+                  this->switchToPlayerTraits(&mp_data->forgeData.editorTraits);
+                  return;
+            }
+            {  // Unknown trait set; disallow selection.
+               const QSignalBlocker blocker(widget);
+               widget->setCurrentItem(previous);
+               return;
+            }
+            break;
+         case _page::mp_traits_scripted:
+            if (!mp_data || extra >= mp_data->scriptData.traits.size()) {
+               const QSignalBlocker blocker(widget);
+               widget->setCurrentItem(previous);
+               return;
+            }
+            this->switchToPlayerTraits(&mp_data->scriptData.traits[extra]);
+            return;
+         case _page::mp_team_configuration: // specific team
+            ReachEditorState::get().setCurrentMultiplayerTeam(extra);
+            this->ui.MainContentView->setCurrentWidget(this->ui.PageSpecificTeamConfig);
+            return;
+         case _page::mp_option_visibility:
+            stack->setCurrentWidget(this->ui.PageOptionToggles);
+            return;
+         case _page::mp_title_update_1:
+            stack->setCurrentWidget(this->ui.PageTitleUpdateConfig);
+            return;
+         case _page::forge_options_general:
+            stack->setCurrentWidget(this->ui.PageForge);
+            return;
       }
-   }
-   if (text == tr("Option Visibility", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageOptionToggles);
-      return;
-   }
-   if (text == tr("Title Update Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageTitleUpdateConfig);
-      return;
-   }
-   if (text == tr("Forge Settings", "MainTreeview")) {
-      stack->setCurrentWidget(this->ui.PageForge);
-      return;
    }
 }
 void ReachVariantTool::switchToLoadoutPalette(ReachLoadoutPalette* palette) {
    ReachEditorState::get().setCurrentLoadoutPalette(palette);
-   this->refreshWidgetsForLoadoutPalette();
    this->ui.MainContentView->setCurrentWidget(this->ui.PageLoadoutPalette);
 }
 void ReachVariantTool::switchToPlayerTraits(ReachPlayerTraits* traits) {
    ReachEditorState::get().setCurrentPlayerTraits(traits);
    this->ui.MainContentView->setCurrentWidget(this->ui.PageEditPlayerTraits);
-}
-void ReachVariantTool::refreshWidgetsForLoadoutPalette() {
-   this->ui.loadout1Content->pullFromGameVariant();
-   this->ui.loadout2Content->pullFromGameVariant();
-   this->ui.loadout3Content->pullFromGameVariant();
-   this->ui.loadout4Content->pullFromGameVariant();
-   this->ui.loadout5Content->pullFromGameVariant();
-}
-void ReachVariantTool::refreshScriptedPlayerTraitList() {
-   auto tree   = this->ui.MainTreeview;
-   QTreeWidgetItem* branch;
-   {
-      auto list = tree->findItems(tr("Script-Specific Options", "MainTreeview"), Qt::MatchRecursive, 0);
-      if (!list.size())
-         return;
-      branch = list[0];
-   }
-   for (QTreeWidgetItem* child : branch->takeChildren())
-      delete child;
-   auto data = ReachEditorState::get().multiplayerData();
-   if (!data)
-      return;
-   auto& t = data->scriptData.traits;
-   for (size_t i = 0; i < t.size(); i++) {
-      auto item = new QTreeWidgetItem(branch, QTreeWidgetItem::UserType + i);
-      auto name = t[i].name;
-      QString text;
-      if (name) {
-         text = QString::fromUtf8(name->english().c_str());
-      } else {
-         text = QString("Unnamed Traits %1").arg(i);
-      }
-      item->setText(0, text);
-   }
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();

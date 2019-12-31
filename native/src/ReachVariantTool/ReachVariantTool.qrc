@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="ReachVariantTool">
+    <file>Resources/icon_128px.png</file>
     <file>Resources/gametype_icons/0.png</file>
     <file>Resources/gametype_icons/1.png</file>
     <file>Resources/gametype_icons/2.png</file>

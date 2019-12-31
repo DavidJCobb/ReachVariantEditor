@@ -14,7 +14,7 @@ class ReachVariantTool : public QMainWindow {
    public:
       ReachVariantTool(QWidget* parent = Q_NULLPTR); // needs to be public for Qt? but do not call; use the static getter
       //
-      static ReachVariantTool& get(); // done differently because the usual "static singleton getter" approach causes Qt to crash on exit if applied to the main window
+      static ReachVariantTool& get(); // done differently because the usual "static singleton getter" approach apparently causes Qt to crash on exit if applied to the main window
       //
    private slots:
       //
@@ -24,13 +24,13 @@ class ReachVariantTool : public QMainWindow {
       void openFile();
       void saveFile()   { this->_saveFileImpl(false); }
       void saveFileAs() { this->_saveFileImpl(true); }
-      void onSelectedPageChanged();
+      void onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+      //
+      void regenerateNavigation();
       //
       void switchToLoadoutPalette(ReachLoadoutPalette*);
       void switchToPlayerTraits(ReachPlayerTraits*);
       //
-      void refreshWidgetsForLoadoutPalette();
-      void refreshScriptedPlayerTraitList();
       void refreshWindowTitle();
       //
    private:
