@@ -319,7 +319,7 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="ReachVariantTool.qrc">
+    <QtRcc Include="ui\main_window.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>
@@ -394,9 +394,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\generic\LabelForUnsafeOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\all.h">
@@ -546,5 +543,11 @@
     <ClInclude Include="helpers\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ReachVariantTool.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
   </ItemGroup>
 </Project>

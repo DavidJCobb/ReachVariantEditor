@@ -1,0 +1,37 @@
+<RCC>
+  <qresource prefix="ReachVariantTool">
+    <file>../Resources/icon_128px.png</file>
+    <file>../Resources/gametype_icons/0.png</file>
+    <file>../Resources/gametype_icons/1.png</file>
+    <file>../Resources/gametype_icons/-1.png</file>
+    <file>../Resources/gametype_icons/2.png</file>
+    <file>../Resources/gametype_icons/3.png</file>
+    <file>../Resources/gametype_icons/4.png</file>
+    <file>../Resources/gametype_icons/5.png</file>
+    <file>../Resources/gametype_icons/6.png</file>
+    <file>../Resources/gametype_icons/7.png</file>
+    <file>../Resources/gametype_icons/8.png</file>
+    <file>../Resources/gametype_icons/9.png</file>
+    <file>../Resources/gametype_icons/10.png</file>
+    <file>../Resources/gametype_icons/11.png</file>
+    <file>../Resources/gametype_icons/12.png</file>
+    <file>../Resources/gametype_icons/13.png</file>
+    <file>../Resources/gametype_icons/14.png</file>
+    <file>../Resources/gametype_icons/15.png</file>
+    <file>../Resources/gametype_icons/16.png</file>
+    <file>../Resources/gametype_icons/17.png</file>
+    <file>../Resources/gametype_icons/18.png</file>
+    <file>../Resources/gametype_icons/19.png</file>
+    <file>../Resources/gametype_icons/20.png</file>
+    <file>../Resources/gametype_icons/21.png</file>
+    <file>../Resources/gametype_icons/22.png</file>
+    <file>../Resources/gametype_icons/23.png</file>
+    <file>../Resources/gametype_icons/24.png</file>
+    <file>../Resources/gametype_icons/25.png</file>
+    <file>../Resources/gametype_icons/26.png</file>
+    <file>../Resources/gametype_icons/27.png</file>
+    <file>../Resources/gametype_icons/28.png</file>
+    <file>../Resources/gametype_icons/29.png</file>
+    <file>../Resources/gametype_icons/30.png</file>
+  </qresource>
+</RCC>

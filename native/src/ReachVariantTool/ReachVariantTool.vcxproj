@@ -175,7 +175,7 @@
     <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="ReachVariantTool.qrc" />
+    <QtRcc Include="ui\main_window.qrc" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ReachVariantTool.rc" />
@@ -268,7 +268,6 @@
     <ClInclude Include="ui\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />
-    <ClInclude Include="ui\generic\LabelForUnsafeOptions.h" />
     <QtMoc Include="ui\LoadoutForm.h" />
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h" />
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h" />
@@ -278,6 +277,12 @@
     <ProjectReference Include="..\zlib\zlib.vcxproj">
       <Project>{8415aba1-0327-40b4-b9ef-8c813969224a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ReachVariantTool.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
