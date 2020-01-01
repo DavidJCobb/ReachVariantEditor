@@ -44,6 +44,23 @@ class ReachFileBlock {
       uint32_t write_end() const noexcept { return this->writeState.pos + this->expected.size; }
 };
 
+class ReachFileBlockCompressed {
+   public:
+      static constexpr uint32_t signature = '_cmp';
+      //
+      ~ReachFileBlockCompressed();
+      //
+      uint16_t version   = 0;
+      uint16_t flags     = 0;
+      uint32_t size_deflated = 0; // compressed
+      uint32_t size_inflated = 0; // uncompressed
+      uint8_t  unk00 = 0;
+      //
+      uint8_t* buffer = nullptr; // uncompressed data: a file block, including the header
+      //
+      bool read(cobb::bytereader&) noexcept; // call just before the (_cmp) signature
+};
+
 class ReachFileBlockRemainder {
    public:
       ~ReachFileBlockRemainder();

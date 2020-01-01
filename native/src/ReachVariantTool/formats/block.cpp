@@ -3,6 +3,9 @@
 #include "../helpers/bytereader.h"
 #include "../helpers/bytewriter.h"
 #include "../helpers/endianness.h"
+extern "C" {
+   #include "../../zlib/zlib.h" // interproject ref
+}
 
 bool ReachFileBlock::read(cobb::bitreader& stream) noexcept {
    this->readState.pos = stream.get_bytepos();
@@ -47,6 +50,44 @@ void ReachFileBlock::write_postprocess(cobb::bytewriter& stream) const noexcept 
       #endif
    }
    stream.write_to_offset(this->writeState.pos + 0x04, size, cobb::endian::big);
+}
+
+ReachFileBlockCompressed::~ReachFileBlockCompressed() {
+   if (this->buffer) {
+      free(this->buffer);
+      this->buffer = nullptr;
+   }
+   this->size_inflated = 0;
+   this->size_deflated = 0;
+}
+bool ReachFileBlockCompressed::read(cobb::bytereader& stream) noexcept {
+   uint32_t sig;
+   stream.read(sig, cobb::endian::big);
+   if (sig != ReachFileBlockCompressed::signature)
+      return false;
+   stream.read(this->size_deflated, cobb::endian::big);
+   stream.read(this->version,       cobb::endian::big);
+   stream.read(this->flags,         cobb::endian::big);
+   //
+   stream.read(this->unk00);
+   stream.read(this->size_inflated, cobb::endian::big);
+   //
+   auto input_buffer = (uint8_t*)malloc(this->size_deflated);
+   for (uint32_t i = 0; i < this->size_deflated; i++) {
+      stream.read(*(uint8_t*)(input_buffer + i));
+      if (!stream.is_in_bounds()) {
+         free(input_buffer);
+         return false;
+      }
+   }
+   //
+   this->buffer = (uint8_t*)malloc(this->size_inflated);
+   uint32_t len = this->size_inflated;
+   int resultCode = uncompress((Bytef*)this->buffer, (uLongf*)&len, input_buffer, this->size_deflated);
+   free(input_buffer);
+   if (resultCode != Z_OK)
+      return false;
+   return true;
 }
 
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {

@@ -20,6 +20,11 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+//  = WE NEED TO HANDLE COMPRESSED BLOCKS. They're (_cmp) blocks encoded as 
+//    a single unknown byte, followed by a uint32_t stating the size of the 
+//    decompressed data, followed by the compressed data (including the zlib 
+//    header).
+//
 //  - We'd benefit from being able to warn on unsaved changes. Easiest way 
 //    would be to keep two copies of a variant in memory, and compare them.
 //

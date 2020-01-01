@@ -363,13 +363,27 @@ bool GameVariant::read(cobb::mapped_file& file) {
       error_report.extra[0]      = (int32_t)this->contentHeader.data.contentType;
       return false;
    }
-   if (!this->multiplayer.read(reader)) {
-      error_report.state = GameEngineVariantLoadError::load_state::failure;
-      if (!error_report.has_failure_point())
-         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
-      return false;
+   {  // mpvr (including as _cmp)
+      bool result = false;
+      uint32_t signature = 0;
+      reader.bytes.peek(signature, cobb::endian::big);
+      if (signature == '_cmp') {
+         ReachFileBlockCompressed cblock;
+         cblock.read(reader.bytes);
+         //
+         auto mpvr_reader = cobb::bit_or_byte_reader(cblock.buffer, cblock.size_inflated);
+         result = this->multiplayer.read(mpvr_reader);
+      } else {
+         result = this->multiplayer.read(reader);
+      }
+      if (!result) {
+         error_report.state = GameEngineVariantLoadError::load_state::failure;
+         if (!error_report.has_failure_point())
+            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
+         return false;
+      }
+      reader.synchronize();
    }
-   reader.synchronize();
    //
    while (file.is_in_bounds(reader.bytes.get_bytepos(), 4)) {
       uint32_t signature = 0;

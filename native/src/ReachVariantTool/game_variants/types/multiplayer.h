@@ -45,7 +45,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       cobb::bitbool flags;
       struct {
          struct {
-            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = teams, reset players on new round, reset map on new round, unknown 3
+            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = unknown 0, reset players on new round, reset map on new round, teams
             cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
             cobb::bitnumber<5, uint8_t> roundLimit;
             cobb::bitnumber<4, uint8_t> roundsToWin;

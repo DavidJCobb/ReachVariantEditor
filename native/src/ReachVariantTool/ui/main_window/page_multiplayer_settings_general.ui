@@ -49,9 +49,9 @@
     </widget>
    </item>
    <item row="0" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldTeamsEnabled">
+    <widget class="QCheckBox" name="fieldFlag0">
      <property name="text">
-      <string>Teams Enabled (Unverified)</string>
+      <string>Unknown Flag 0 (checked for Slayer only?)</string>
      </property>
     </widget>
    </item>
@@ -152,9 +152,9 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldFlag3">
+    <widget class="QCheckBox" name="fieldTeamsEnabled">
      <property name="text">
-      <string>Unknown Flag 3</string>
+      <string>Teams Enabled</string>
      </property>
     </widget>
    </item>
