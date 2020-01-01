@@ -6,7 +6,7 @@ namespace Megalo {
       class name : public OpcodeArgValueBaseEnum { \
          public: \
             name##(); \
-            static OpcodeArgValue* factory(cobb::bitreader&) { \
+            static OpcodeArgValue* factory(cobb::ibitreader&) { \
                return new name##(); \
             } \
       };

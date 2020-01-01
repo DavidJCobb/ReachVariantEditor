@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "../helpers/bitnumber.h"
-#include "../helpers/bytereader.h"
+#include "../helpers/stream.h"
 
 class ReachContentAuthor {
    public:
@@ -10,8 +10,8 @@ class ReachContentAuthor {
       char author[16]; // includes null terminator
       cobb::bitbool isOnlineID;
       //
-      bool read(cobb::bitreader&) noexcept;
-      bool read(cobb::bytereader&) noexcept;
+      bool read(cobb::ibitreader&) noexcept;
+      bool read(cobb::ibytereader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
       //

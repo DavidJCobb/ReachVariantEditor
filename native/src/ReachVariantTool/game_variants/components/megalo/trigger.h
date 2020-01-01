@@ -7,7 +7,7 @@
 #include "limits.h"
 #include "limits_bitnumbers.h"
 #include "../../../helpers/bitnumber.h"
-#include "../../../helpers/bitreader.h"
+#include "../../../helpers/stream.h"
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/bitwise.h"
 
@@ -59,7 +59,7 @@ namespace Megalo {
          //
          std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor
          //
-         bool read(cobb::bitreader& stream) noexcept;
+         bool read(cobb::ibitreader& stream) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          //
@@ -73,7 +73,7 @@ namespace Megalo {
 
    class TriggerEntryPoints {
       protected:
-         static void _stream(cobb::bitreader& stream, int32_t& index) noexcept {
+         static void _stream(cobb::ibitreader& stream, int32_t& index) noexcept {
             index = (int32_t)stream.read_bits(cobb::bitcount(Limits::max_triggers)) - 1;
          }
          static void _stream(cobb::bitwriter& stream, int32_t index) noexcept {
@@ -92,7 +92,7 @@ namespace Megalo {
             // Halo 4 only: incident
          } indices;
          //
-         bool read(cobb::bitreader& stream) noexcept {
+         bool read(cobb::ibitreader& stream) noexcept {
             auto& i = this->indices;
             _stream(stream, i.init);
             _stream(stream, i.localInit);

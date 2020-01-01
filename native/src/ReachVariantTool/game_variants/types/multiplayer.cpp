@@ -1,5 +1,5 @@
 #include "multiplayer.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 
 #include "../components/megalo/actions.h"
@@ -11,11 +11,10 @@
 
 #include "../errors.h"
 
-bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept {
+bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    auto& error_report = GameEngineVariantLoadError::get();
    error_report.reset();
    //
-   reader.synchronize();
    auto& stream = reader.bits;
    //
    stream.read(this->encodingVersion);
@@ -136,7 +135,7 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
             error_report.state         = GameEngineVariantLoadError::load_state::failure;
             error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
             error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
             return false;
          }
       }
@@ -152,7 +151,7 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
             error_report.state         = GameEngineVariantLoadError::load_state::failure;
             error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
             error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
             return false;
          }
       }
@@ -168,7 +167,7 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
             error_report.state         = GameEngineVariantLoadError::load_state::failure;
             error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_triggers;
             error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
             return false;
          }
          triggers[i].postprocess_opcodes(conditions, actions);
@@ -231,7 +230,7 @@ bool GameVariantDataMultiplayer::read(cobb::bit_or_byte_reader& reader) noexcept
    }
    if (stream.get_overshoot_bits() > 0) {
       error_report.state  = GameEngineVariantLoadError::load_state::failure;
-      error_report.reason = GameEngineVariantLoadError::load_failure_reason::early_eof;
+      error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
       return false;
    }
    error_report.state = GameEngineVariantLoadError::load_state::success;

@@ -6,9 +6,7 @@
 #include "../formats/block.h"
 #include "../formats/content_author.h"
 #include "../helpers/bitnumber.h"
-#include "../helpers/bitreader.h"
 #include "../helpers/bitwriter.h"
-#include "../helpers/bytereader.h"
 #include "../helpers/bytewriter.h"
 #include "../helpers/files.h"
 #include "../helpers/stream.h"
@@ -37,7 +35,7 @@ class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
       virtual ReachGameEngine get_type() const noexcept { return ReachGameEngine::none; }
-      virtual bool read(cobb::bit_or_byte_reader&) noexcept = 0;
+      virtual bool read(cobb::reader&) noexcept = 0;
       virtual void write(cobb::bit_or_byte_writer&) const noexcept = 0;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
@@ -61,7 +59,7 @@ class BlamHeader {
          uint16_t unk2E = 0;
       } data;
       //
-      bool read(cobb::bytereader&) noexcept;
+      bool read(reach_block_stream&) noexcept;
       void write(cobb::bytewriter&) const noexcept;
 };
 class EOFBlock : public ReachFileBlock {
@@ -70,7 +68,7 @@ class EOFBlock : public ReachFileBlock {
       uint32_t length = 0;
       uint8_t  unk04  = 0;
       //
-      bool read(cobb::bytereader&) noexcept;
+      bool read(reach_block_stream&) noexcept;
       void write(cobb::bytewriter&) const noexcept;
 };
 
@@ -104,8 +102,8 @@ class GameVariantHeader {
          uint32_t offset_of_file_length = 0;
       } writeData;
       //
-      bool read(cobb::bitreader&) noexcept;
-      bool read(cobb::bytereader&) noexcept;
+      bool read(cobb::ibitreader&) noexcept;
+      bool read(cobb::ibytereader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
       void write_last_minute_fixup(cobb::bitwriter&  stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
@@ -119,12 +117,9 @@ class ReachBlockCHDR {
       ReachFileBlock    header = ReachFileBlock('chdr', 0x2C0);
       GameVariantHeader data;
       //
-      bool read(cobb::bytereader& stream) noexcept {
-         if (this->header.read(stream) && this->data.read(stream)) {
-            stream.set_bytepos(this->header.end()); // CHDR doesn't necessarily use all of its available space
-            return true;
-         }
-         return false;
+      bool read(reach_block_stream& stream) noexcept {
+         auto bytes = stream.bytes;
+         return (this->header.read(bytes) && this->data.read(bytes));
       }
       void write(cobb::bytewriter& stream) const noexcept {
          this->header.write(stream);
@@ -151,7 +146,7 @@ class ReachBlockMPVR {
          uint32_t offset_after_hashable     = 0; // bytes
       } writeData;
       //
-      bool read(cobb::bit_or_byte_reader&);
+      bool read(reach_block_stream&);
       void write(cobb::bit_or_byte_writer&) const noexcept;
       void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
       void cloneTo(ReachBlockMPVR&) const noexcept; // deep copy, accounting for pointers
@@ -163,7 +158,7 @@ class GameVariant {
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
       EOFBlock       eofBlock;
-      std::vector<ReachUnknownBlock> unknownBlocks;
+      std::vector<ReachFileBlockUnknown> unknownBlocks;
       //
       bool read(cobb::mapped_file& file);
       void write(cobb::bit_or_byte_writer& writer) const noexcept;

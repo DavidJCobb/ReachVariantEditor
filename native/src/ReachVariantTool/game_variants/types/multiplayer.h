@@ -5,9 +5,7 @@
 #include "../../formats/content_author.h"
 #include "../../formats/localized_string_table.h"
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
 #include "../../helpers/bitwriter.h"
-#include "../../helpers/bytereader.h"
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
 #include "../../helpers/stream.h"
@@ -29,7 +27,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
-      virtual bool read(cobb::bit_or_byte_reader&) noexcept override;
+      virtual bool read(cobb::reader&) noexcept override;
       virtual void write(cobb::bit_or_byte_writer&) const noexcept override;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override;

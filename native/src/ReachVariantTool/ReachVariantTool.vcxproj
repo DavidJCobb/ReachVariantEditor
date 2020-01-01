@@ -122,9 +122,7 @@
     <ClCompile Include="game_variants\data\mp_object_types.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
-    <ClCompile Include="helpers\bitreader.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
-    <ClCompile Include="helpers\bytereader.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
@@ -252,11 +250,9 @@
     <ClInclude Include="game_variants\errors.h" />
     <ClInclude Include="game_variants\types\multiplayer.h" />
     <ClInclude Include="helpers\bitnumber.h" />
-    <ClInclude Include="helpers\bitreader.h" />
     <ClInclude Include="helpers\bitset.h" />
     <ClInclude Include="helpers\bitwise.h" />
     <ClInclude Include="helpers\bitwriter.h" />
-    <ClInclude Include="helpers\bytereader.h" />
     <ClInclude Include="helpers\bytewriter.h" />
     <ClInclude Include="helpers\endianness.h" />
     <ClInclude Include="helpers\files.h" />

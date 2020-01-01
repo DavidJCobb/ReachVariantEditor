@@ -1,19 +1,17 @@
 #include "block.h"
-#include "../helpers/bitreader.h"
-#include "../helpers/bytereader.h"
 #include "../helpers/bytewriter.h"
 #include "../helpers/endianness.h"
 extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 
-bool ReachFileBlock::read(cobb::bitreader& stream) noexcept {
+bool ReachFileBlock::read(cobb::ibitreader& stream) noexcept {
    this->readState.pos = stream.get_bytepos();
    stream.read(this->found.signature);
    stream.read(this->found.size);
    stream.read(this->found.version);
    stream.read(this->found.flags);
-   // cobb::bitstream basically always reads data as big-endian, so we don't need to swap here.
+   // cobb::bitstream always reads data as big-endian, so we don't need to swap here.
    //
    if (this->expected.signature && this->found.signature != this->expected.signature)
       return false;
@@ -21,7 +19,7 @@ bool ReachFileBlock::read(cobb::bitreader& stream) noexcept {
       return false;
    return true;
 }
-bool ReachFileBlock::read(cobb::bytereader& stream) noexcept {
+bool ReachFileBlock::read(cobb::ibytereader& stream) noexcept {
    this->readState.pos = stream.get_bytepos();
    stream.read(this->found.signature, cobb::endian::big);
    stream.read(this->found.size,      cobb::endian::big);
@@ -52,48 +50,7 @@ void ReachFileBlock::write_postprocess(cobb::bytewriter& stream) const noexcept 
    stream.write_to_offset(this->writeState.pos + 0x04, size, cobb::endian::big);
 }
 
-ReachFileBlockCompressed::~ReachFileBlockCompressed() {
-   if (this->buffer) {
-      free(this->buffer);
-      this->buffer = nullptr;
-   }
-   this->size_inflated = 0;
-   this->size_deflated = 0;
-}
-bool ReachFileBlockCompressed::read(cobb::bytereader& stream) noexcept {
-   uint32_t sig;
-   stream.read(sig, cobb::endian::big);
-   if (sig != ReachFileBlockCompressed::signature)
-      return false;
-   stream.read(this->size_deflated, cobb::endian::big);
-   stream.read(this->version,       cobb::endian::big);
-   stream.read(this->flags,         cobb::endian::big);
-   //
-   stream.read(this->unk00);
-   stream.read(this->size_inflated, cobb::endian::big);
-   //
-   this->size_deflated -= 0xC; // subtract size of block header
-   this->size_deflated -=   1; // subtract size of unk00
-   this->size_deflated -=   4; // subtract size of size_inflated
-   //
-   auto input_buffer = (uint8_t*)malloc(this->size_deflated);
-   for (uint32_t i = 0; i < this->size_deflated; i++) {
-      stream.read(*(uint8_t*)(input_buffer + i));
-      if (!stream.is_in_bounds()) {
-         free(input_buffer);
-         return false;
-      }
-   }
-   //
-   this->buffer = (uint8_t*)malloc(this->size_inflated);
-   uint32_t len = this->size_inflated;
-   int resultCode = uncompress((Bytef*)this->buffer, (uLongf*)&len, input_buffer, this->size_deflated);
-   free(input_buffer);
-   if (resultCode != Z_OK)
-      return false;
-   return true;
-}
-
+#pragma region ReachFileBlockRemainder
 ReachFileBlockRemainder::~ReachFileBlockRemainder() {
    this->discard();
 }
@@ -104,7 +61,7 @@ void ReachFileBlockRemainder::discard() noexcept {
    }
    this->size = 0;
 }
-bool ReachFileBlockRemainder::read(cobb::bitreader& stream, uint32_t blockEnd) noexcept {
+bool ReachFileBlockRemainder::read(cobb::ibitreader& stream, uint32_t blockEnd) noexcept {
    this->bitsInFractionalByte = 8 - stream.get_bitshift();
    if (this->bitsInFractionalByte) {
       this->fractionalByte = stream.read_bits(this->bitsInFractionalByte);
@@ -130,43 +87,40 @@ void ReachFileBlockRemainder::cloneTo(ReachFileBlockRemainder& target) const noe
    target.remainder = (uint8_t*)malloc(this->size);
    memcpy(target.remainder, this->remainder, this->size);
 }
+#pragma endregion
 
-ReachUnknownBlock::~ReachUnknownBlock() {
-   this->discard();
-}
-void ReachUnknownBlock::discard() noexcept {
-   if (this->data) {
-      free(this->data);
-      this->data = nullptr;
-   }
-}
-bool ReachUnknownBlock::read(cobb::bytereader& stream) noexcept {
-   if (!this->header.read(stream))
-      return false;
-   auto size = this->header.found.size;
-   this->data = (uint8_t*)malloc(size);
-   for (uint32_t i = 0; i < size; i++)
-      stream.read(this->data[i]);
+#pragma region ReachFileBlockUnknown
+bool ReachFileBlockUnknown::read(reach_block_stream& stream) noexcept {
+   this->header = stream.header;
+   this->free();
+   this->allocate(this->header.size);
+   memcpy(this->data(), stream.data(), this->size());
    return true;
 }
-void ReachUnknownBlock::write(cobb::bytewriter& stream) const noexcept {
-   this->header.write(stream);
-   stream.enlarge_by(this->header.found.size);
-   stream.write(this->data, this->header.found.size);
-   this->header.write_postprocess(stream);
+void ReachFileBlockUnknown::write(cobb::bytewriter& stream) const noexcept {
+   uint32_t pos = stream.get_bytepos();
+   stream.write(this->header.signature, cobb::endian::big);
+   stream.write(this->header.size,      cobb::endian::big);
+   stream.write(this->header.version,   cobb::endian::big);
+   stream.write(this->header.flags,     cobb::endian::big);
+   stream.enlarge_by(this->header.size);
+   stream.write(this->data(), this->header.size);
+   //stream.write_to_offset(pos + 4, stream.get_bytespan() - pos, cobb::endian::big); // post-process shouldn't actually be needed here
 }
-ReachUnknownBlock& ReachUnknownBlock::operator=(const ReachUnknownBlock& source) noexcept {
-   this->discard();
+ReachFileBlockUnknown& ReachFileBlockUnknown::operator=(const ReachFileBlockUnknown& source) noexcept {
+   this->free();
    this->header = source.header;
-   auto size = this->header.found.size;
-   this->data = (uint8_t*)malloc(size);
-   memcpy(this->data, source.data, size);
+   cobb::generic_buffer::operator=(source); // call super
    return *this;
 }
+#pragma endregion
 
 reach_block_stream ReachFileBlockReader::next() noexcept {
+   if (!this->reader.is_in_bounds()) {
+      return reach_block_stream(reach_block_stream::bad_block);
+   }
    uint32_t signature = 0;
-   auto bytes = this->reader.bytes();
+   auto bytes = this->reader.bytes;
    //
    uint32_t pos_block_start = this->reader.get_bytepos();
    reach_block_stream::header_type header;
@@ -181,10 +135,10 @@ reach_block_stream ReachFileBlockReader::next() noexcept {
       bytes.read(decompressed_unk00);
       bytes.read(decompressed_size, cobb::endian::big);
 
+      if (!this->reader.is_in_bounds(header.size - 0xC - 1 - 4)) // subtract size of block header, size of decompressed_unk00, and size of decompressed_size
+         return reach_block_stream(reach_block_stream::bad_block);
       auto input_buffer = cobb::generic_buffer(header.size - 0xC - 1 - 4); // subtract size of block header, size of decompressed_unk00, and size of decompressed_size
       bytes.read(input_buffer.data(), input_buffer.size());
-      if (!this->reader.is_in_bounds())
-         return reach_block_stream(reach_block_stream::bad_block);
       auto output_buffer = cobb::generic_buffer(decompressed_size);
       uint32_t len = decompressed_size;
       int resultCode = uncompress((Bytef*)output_buffer.data(), (uLongf*)&len, input_buffer.data(), input_buffer.size());
@@ -193,12 +147,13 @@ reach_block_stream ReachFileBlockReader::next() noexcept {
       //
       reach_block_stream result(std::move(output_buffer));
       {
-         auto& bytes  = result.bytes();
+         auto  bytes  = result.bytes;
          auto& header = result.header;
          bytes.read(header.signature, cobb::endian::big);
          bytes.read(header.size,      cobb::endian::big);
          bytes.read(header.version,   cobb::endian::big);
          bytes.read(header.flags,     cobb::endian::big);
+         result.set_bytepos(0); // rewind to start of decompressed header
       }
       result.decompressedUnk00 = decompressed_unk00;
       result.wasCompressed     = true;

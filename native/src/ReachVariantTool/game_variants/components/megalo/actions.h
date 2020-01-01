@@ -40,7 +40,7 @@ namespace Megalo {
          const ActionFunction* function = nullptr;
          std::vector<OpcodeArgValue*> arguments;
          //
-         virtual bool read(cobb::bitreader&) noexcept override;
+         virtual bool read(cobb::ibitreader&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
    };

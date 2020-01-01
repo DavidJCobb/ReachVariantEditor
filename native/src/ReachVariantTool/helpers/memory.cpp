@@ -15,6 +15,12 @@ namespace cobb {
          }
          ::free(this->_data);
       }
+      if (!bytes) {
+         this->_data     = nullptr;
+         this->_size     = 0;
+         this->_capacity = 0;
+         return;
+      }
       this->_data = malloc(bytes);
       if (this->_data) {
          this->_size = bytes;
@@ -40,5 +46,21 @@ namespace cobb {
             this->_capacity = this->_size;
          }
       }
+   }
+   generic_buffer& generic_buffer::operator=(const generic_buffer& other) noexcept {
+      this->free();
+      this->allocate(other.size());
+      memcpy(this->_data, other.data(), this->size());
+      return *this;
+   }
+   generic_buffer& generic_buffer::operator=(generic_buffer&& other) noexcept {
+      this->free();
+      this->_data     = other._data;
+      this->_size     = other._size;
+      this->_capacity = other._capacity;
+      other._data     = nullptr;
+      other._size     = 0;
+      other._capacity = 0;
+      return *this;
    }
 }

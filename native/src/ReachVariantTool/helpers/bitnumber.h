@@ -1,9 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <type_traits>
-#include "bitreader.h"
+#include "stream.h"
 #include "bitwriter.h"
-#include "bytereader.h"
 #include "bytewriter.h"
 #include "type_traits.h"
 
@@ -61,7 +60,7 @@ namespace cobb {
          template<typename = std::enable_if_t<!std::is_same_v<int, underlying_type>>> bitnumber(underlying_type v) : value(v) {};
          //
       protected:
-         bool _read_presence(cobb::bitreader& stream) { // returns bool: value should be read?
+         bool _read_presence(cobb::ibitreader& stream) { // returns bool: value should be read?
             if (!this->uses_presence())
                return true;
             bool bit = stream.read_bits(1);
@@ -96,7 +95,7 @@ namespace cobb {
          }
          inline bool is_present() const noexcept { return !this->is_absent(); }
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             if (!this->_read_presence(stream))
                return;
             this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - (uses_offset ? 1 : 0));
@@ -114,7 +113,7 @@ namespace cobb {
             stream.write((underlying_int)this->value + (uses_offset ? 1 : 0), bitcount, this->write_as_signed());
          }
          //
-         void read(cobb::bytereader& stream) noexcept {
+         void read(cobb::ibytereader& stream) noexcept {
             stream.read(this->value);
          }
          void write(cobb::bytewriter& stream) const noexcept {
@@ -183,10 +182,10 @@ namespace cobb {
          bitbool() {};
          bitbool(bool v) : value(v) {};
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             this->value = stream.read_bits<int>(1);
          }
-         void read(cobb::bytereader& stream) noexcept {
+         void read(cobb::ibytereader& stream) noexcept {
             stream.read(&this->value, 1);
          }
          void write(cobb::bitwriter& stream) const noexcept {

@@ -1,6 +1,6 @@
 #include "teams.h"
 
-void ReachTeamData::read(cobb::bitreader& stream) noexcept {
+void ReachTeamData::read(cobb::ibitreader& stream) noexcept {
    this->flags.read(stream);
    this->name.read(stream);
    this->initialDesignator.read(stream);

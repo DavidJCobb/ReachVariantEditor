@@ -43,13 +43,7 @@
     <ClCompile Include="game_variants\base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="helpers\bitreader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="helpers\bitwriter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="helpers\bytereader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="helpers\bytewriter.cpp">
@@ -357,9 +351,6 @@
     <ClInclude Include="helpers\bitnumber.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helpers\bitreader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\bitset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -367,9 +358,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\bitwriter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\bytereader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\bytewriter.h">

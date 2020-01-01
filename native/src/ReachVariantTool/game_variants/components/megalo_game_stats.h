@@ -1,6 +1,6 @@
 #pragma once
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
 
@@ -24,7 +24,7 @@ class ReachMegaloGameStat {
       Sort   sortOrder   = Sort::ascending;
       bool   groupByTeam = false;
       //
-      void read(cobb::bitreader&) noexcept;
+      void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //

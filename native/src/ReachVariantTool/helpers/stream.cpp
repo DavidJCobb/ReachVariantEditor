@@ -1,4 +1,5 @@
 #include "stream.h"
+#include <cassert>
 #include <cctype>
 #include <cstdio>
 
@@ -62,6 +63,7 @@ namespace cobb {
       if (this->offset > this->length) {
          this->overflow = (this->offset - this->length) * 8 + this->shift;
          this->offset   = this->length;
+         this->shift    = 0;
       }
    }
    void reader::_advance_offset_by_bytes(uint32_t bytes) noexcept {
@@ -93,10 +95,39 @@ namespace cobb {
       }
       out = byte;
    }
-   ibitreader  reader::bits()  const noexcept { return ibitreader(const_cast<reader&>(*this)); }
-   ibytereader reader::bytes() const noexcept { return ibytereader(const_cast<reader&>(*this)); }
+   #pragma endregion
+   #pragma region ireader
+   const uint8_t* ireader::data() const noexcept { return this->owner.data(); }
+   uint32_t ireader::size() const noexcept { return this->owner.size(); }
+   //
+   uint32_t ireader::get_bitpos()   const noexcept { return this->owner.get_bitpos(); }
+   uint32_t ireader::get_bitshift() const noexcept { return this->owner.get_bitshift(); }
+   uint32_t ireader::get_bytepos()  const noexcept { return this->owner.get_bytepos(); }
+   uint32_t ireader::get_bytespan() const noexcept { return this->owner.get_bytespan(); }
+   uint32_t ireader::get_overshoot_bits()  const noexcept { return this->owner.get_overshoot_bits(); }
+   uint32_t ireader::get_overshoot_bytes() const noexcept { return this->owner.get_overshoot_bytes(); }
+   //
+   bool ireader::is_in_bounds(uint32_t bytes) const noexcept { return this->owner.is_in_bounds(bytes); }
+   bool ireader::is_byte_aligned() const noexcept { return this->owner.is_byte_aligned(); }
+   //
+   void ireader::set_bitpos(uint32_t b)  noexcept { this->owner.set_bitpos(b); }
+   void ireader::set_bytepos(uint32_t b) noexcept { this->owner.set_bytepos(b); }
    #pragma endregion
    #pragma region ibitreader
+   uint64_t ibitreader::_read_bits(uint8_t bitcount) noexcept {
+      uint64_t result = 0;
+      uint8_t  bits;
+      int      consumed;
+      this->owner._consume_byte(bits, bitcount, consumed);
+      result = bits;
+      int remaining = bitcount - consumed;
+      while (remaining) {
+         this->owner._consume_byte(bits, remaining, consumed);
+         result = (result << consumed) | bits;
+         remaining -= consumed;
+      }
+      return result;
+   }
    float ibitreader::read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept {
       assert(bitcount <= 8 && "bitstream::read_compressed_float doesn't currently support compressed floats larger than one byte.");
       uint8_t raw = this->read_bits<uint8_t>(bitcount);
@@ -138,6 +169,7 @@ namespace cobb {
             return;
       }
    }
+   void ibitreader::skip(uint32_t bitcount) noexcept { this->owner._advance_offset_by_bits(bitcount); }
    #pragma endregion
    #pragma region ibytereader
    void ibytereader::read(void* out, uint32_t length) noexcept {
@@ -154,6 +186,11 @@ namespace cobb {
    void ibytereader::read_u16string(char16_t* out, uint32_t length, cobb::endian_t endianness) noexcept {
       for (int i = 0; i < length; i++)
          this->read(out[i], endianness);
+   }
+   void ibytereader::pad(uint32_t bytes) { this->owner._advance_offset_by_bytes(bytes); }
+   void ibytereader::skip(uint32_t bytes) { this->owner._advance_offset_by_bytes(bytes); }
+   void ibytereader::peek(void* out, uint32_t length) noexcept {
+      memcpy(out, this->owner.buffer + this->owner.offset, length);
    }
    #pragma endregion
 }

@@ -171,7 +171,7 @@ namespace Megalo {
       ),
    }};
 
-   bool Condition::read(cobb::bitreader& stream) noexcept {
+   bool Condition::read(cobb::ibitreader& stream) noexcept {
       {
          auto&  list  = conditionFunctionList;
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));

@@ -1,6 +1,6 @@
 #include "megalo_options.h"
 
-void ReachMegaloOptionValueEntry::read(cobb::bitreader& stream, ReachMegaloOption& owner) noexcept {
+void ReachMegaloOptionValueEntry::read(cobb::ibitreader& stream, ReachMegaloOption& owner) noexcept {
    this->value.read(stream);
    if (!owner.isRange) {
       this->nameIndex.read(stream);
@@ -19,7 +19,7 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
    }
 }
 
-void ReachMegaloOption::read(cobb::bitreader& stream) noexcept {
+void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
    this->nameIndex.read(stream);
    this->descIndex.read(stream);
    this->isRange.read(stream);

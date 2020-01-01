@@ -102,7 +102,7 @@ bool ReachPlayerTraits::operator==(const ReachPlayerTraits& o) const noexcept {
 }
 #endif
 
-void ReachPlayerTraits::read(cobb::bitreader& stream) noexcept {
+void ReachPlayerTraits::read(cobb::ibitreader& stream) noexcept {
    auto& d = this->defense;
    auto& o = this->offense;
    auto& m = this->movement;

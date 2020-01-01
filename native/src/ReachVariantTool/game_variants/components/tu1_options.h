@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 
 enum class ReachTU1Flags : uint8_t {
@@ -41,7 +41,7 @@ class ReachGameVariantTU1Options {
       float magnumDamage              = vanilla_magnum_damage;
       float magnumFireDelay           = vanilla_magnum_fire_delay;
       //
-      void read(cobb::bitreader& stream) noexcept;
+      void read(cobb::ibitreader& stream) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 
       void make_vanilla() noexcept;

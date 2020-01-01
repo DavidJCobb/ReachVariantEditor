@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
 #include <QObject>
@@ -317,7 +317,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<2, uint8_t> directionalDamageIndicator;
       } sensors;
       //
-      void read(cobb::bitreader&) noexcept;
+      void read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
       #if __cplusplus <= 201703L
@@ -336,7 +336,7 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
-      void read(cobb::bitreader& stream) noexcept {
+      void read(cobb::ibitreader& stream) noexcept {
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);

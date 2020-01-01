@@ -52,7 +52,7 @@ namespace {
    };
 }
 namespace Megalo {
-   /*virtual*/ bool OpcodeArgValueScalar::read(cobb::bitreader& stream) noexcept /*override*/ {
+   /*virtual*/ bool OpcodeArgValueScalar::read(cobb::ibitreader& stream) noexcept /*override*/ {
       this->scope = stream.read_bits(cobb::bitcount((int)_scopes::_count - 1));
       int which_bits = 0;
       int index_bits = 0;

@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include "bitset.h" // block_allocator
 
 namespace cobb {
@@ -11,7 +12,7 @@ namespace cobb {
          uint32_t _size = 0;
          uint32_t _capacity = 0;
       public:
-         void allocate(uint32_t bytes);
+         void allocate(uint32_t bytes); // TODO: rename to (resize)
          void free(); // checks whether (data) is nullptr
          inline void* raw() { return this->_data; }
          void shrink_to_fit();
@@ -36,5 +37,12 @@ namespace cobb {
          ~generic_buffer() {
             this->free();
          }
+
+         generic_buffer(const generic_buffer& other) noexcept { *this = other; }
+         generic_buffer(generic_buffer&& other) noexcept {
+            *this = std::move(other);
+         }
+         generic_buffer& operator=(const generic_buffer& other) noexcept;
+         generic_buffer& operator=(generic_buffer&& other) noexcept;
    };
 }

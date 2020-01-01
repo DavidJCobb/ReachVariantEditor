@@ -89,6 +89,9 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
          case load_failure_reason::early_eof:
             result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
             break;
+         case load_failure_reason::block_ended_early:
+            result += QObject::tr("The containing data block is cut off.", tr_disambiguator);
+            break;
       }
    }
    return result;
@@ -105,20 +108,43 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
             return QObject::tr("This is not a Halo: Reach content file.", tr_disambiguator);
          }
          result = QObject::tr("Something went wrong while reading the file header (_blf section). ", tr_disambiguator);
-         if (this->reason == load_failure_reason::early_eof) {
-            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         switch (this->reason) {
+            case load_failure_reason::early_eof:
+               result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+               break;
+            case load_failure_reason::block_ended_early:
+               result += QObject::tr("The data block is cut off.", tr_disambiguator);
+               break;
+            //
+            // the (_blf) block never sends load_failure_reason::block_missing because if the block is missing, then the file isn't a Reach content file
          }
          return result;
       case load_failure_point::block_chdr:
          result = QObject::tr("Something went wrong while reading the file header (chdr section). ", tr_disambiguator);
-         if (this->reason == load_failure_reason::early_eof) {
-            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         switch (this->reason) {
+            case load_failure_reason::early_eof:
+               result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+               break;
+            case load_failure_reason::block_ended_early:
+               result += QObject::tr("The data block is cut off.", tr_disambiguator);
+               break;
+            case load_failure_reason::block_missing:
+               result += QObject::tr("The data block is missing.", tr_disambiguator);
+               break;
          }
          return result;
       case load_failure_point::block_mpvr:
          result = QObject::tr("Something went wrong while reading the multiplayer data. ", tr_disambiguator);
-         if (this->reason == load_failure_reason::early_eof) {
-            result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+         switch (this->reason) {
+            case load_failure_reason::early_eof:
+               result += QObject::tr("The file ended early; the data is cut off.", tr_disambiguator);
+               break;
+            case load_failure_reason::block_ended_early:
+               result += QObject::tr("The data block is cut off.", tr_disambiguator);
+               break;
+            case load_failure_reason::block_missing:
+               result += QObject::tr("The data block is missing.", tr_disambiguator);
+               break;
          }
          return result;
       case load_failure_point::content_type:

@@ -3,8 +3,7 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
-#include "../helpers/bitreader.h"
-#include "../helpers/bitwriter.h"
+#include "../helpers/stream.h"
 
 namespace reach {
    enum class language {
@@ -49,7 +48,7 @@ class ReachString {
       mutable std::array<int, reach::language_count> offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
       //
-      void read_offsets(cobb::bitreader&, ReachStringTable& table) noexcept;
+      void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) const noexcept;
@@ -89,9 +88,9 @@ class ReachStringTable {
       std::vector<ReachString> strings;
       //
    protected:
-      void* _make_buffer(cobb::bitreader&) const noexcept;
+      void* _make_buffer(cobb::ibitreader&) const noexcept;
    public:
-      bool read(cobb::bitreader&) noexcept;
+      bool read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
       ReachString* get_entry(size_t index) noexcept {

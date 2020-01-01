@@ -1,7 +1,7 @@
 #pragma once
 #include "../../formats/localized_string_table.h"
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 
 class ReachTeamData {
@@ -15,7 +15,7 @@ class ReachTeamData {
       cobb::bytenumber<int32_t>   colorText; // xRGB
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
-      void read(cobb::bitreader&) noexcept;
+      void read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
       ReachString* get_name() noexcept {

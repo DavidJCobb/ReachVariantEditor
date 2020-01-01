@@ -10,7 +10,7 @@
 #include "../../errors.h"
 
 namespace Megalo {
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::bitreader& stream) {
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream) {
       uint8_t type = stream.read_bits<uint8_t>(3);
       switch ((variable_type)type) {
          case variable_type::scalar:
@@ -31,7 +31,7 @@ namespace Megalo {
       error.extra[0] = type;
       return nullptr;
    }
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::bitreader& stream) {
+   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream) {
       uint8_t type = stream.read_bits<uint8_t>(2);
       switch (type) {
          case 0: // Team

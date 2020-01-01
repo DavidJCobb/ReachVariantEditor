@@ -4,7 +4,7 @@
 #include "opcode_arg_types/all_enums.h"
 #include "opcode_arg_types/scalar.h"
 #include "../../../helpers/bitnumber.h"
-#include "../../../helpers/bitreader.h"
+#include "../../../helpers/stream.h"
 #include "../../../helpers/bitwriter.h"
 
 namespace Megalo {
@@ -24,7 +24,7 @@ namespace Megalo {
          network_type networking = network_enum::default;
          OpcodeArgValueScalar initial;
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             if (!this->initial.read(stream))
                return;
             this->networking.read(stream);
@@ -41,7 +41,7 @@ namespace Megalo {
          //
          network_type networking = network_enum::default;
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
@@ -55,7 +55,7 @@ namespace Megalo {
          //
          network_type networking = network_enum::default;
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
@@ -71,7 +71,7 @@ namespace Megalo {
          network_type   networking = network_enum::default;
          team_bitnumber initial    = const_team::none;
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             this->initial.read(stream);
             this->networking.read(stream);
          }
@@ -84,7 +84,7 @@ namespace Megalo {
       public:
          OpcodeArgValueScalar initial;
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             this->initial.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
@@ -103,7 +103,7 @@ namespace Megalo {
          //
          VariableDeclarationSet(variable_scope t) : type(t) {}
          //
-         void read(cobb::bitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream) noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
             //
             #define megalo_variable_declaration_set_read_type(name) \

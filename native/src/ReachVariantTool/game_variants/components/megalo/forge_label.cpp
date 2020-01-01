@@ -1,7 +1,7 @@
 #include "forge_label.h"
 //
 namespace Megalo {
-   void ReachForgeLabel::read(cobb::bitreader& stream) noexcept {
+   void ReachForgeLabel::read(cobb::ibitreader& stream) noexcept {
       this->nameIndex.read(stream);
       this->requirements.read(stream);
       if (this->requires_object_type())

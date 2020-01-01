@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/bitreader.h"
+#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
 
@@ -21,7 +21,7 @@ class ReachMegaloOptionValueEntry {
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
-      void read(cobb::bitreader&, ReachMegaloOption& owner) noexcept;
+      void read(cobb::ibitreader&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept;
 };
@@ -41,7 +41,7 @@ class ReachMegaloOption {
       ReachMegaloOptionValue rangeCurrent;
       ReachMegaloOptionValueIndex currentValueIndex;
       //
-      void read(cobb::bitreader&) noexcept;
+      void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
 };

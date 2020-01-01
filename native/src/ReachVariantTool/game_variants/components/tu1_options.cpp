@@ -1,6 +1,6 @@
 #include "tu1_options.h"
 
-void ReachGameVariantTU1Options::read(cobb::bitreader& stream) noexcept {
+void ReachGameVariantTU1Options::read(cobb::ibitreader& stream) noexcept {
    this->flags.read(stream);
    this->precisionBloom            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true); // decoded value - 0.01968503937007874 is a multiple of 0.039370078740157 (which is 100 / 254) ?
    this->armorLockDamageDrain      = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);

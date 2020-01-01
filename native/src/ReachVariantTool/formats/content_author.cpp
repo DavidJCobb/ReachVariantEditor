@@ -1,17 +1,13 @@
 #include "content_author.h"
-#include "../helpers/bitreader.h"
-#include "../helpers/bitwriter.h"
-#include "../helpers/bytereader.h"
-#include "../helpers/bytewriter.h"
 
-bool ReachContentAuthor::read(cobb::bitreader& stream) noexcept {
+bool ReachContentAuthor::read(cobb::ibitreader& stream) noexcept {
    this->timestamp.read(stream);
    this->xuid.read(stream);
    stream.read_string(this->author, 16);
    this->isOnlineID.read(stream);
    return true;
 }
-bool ReachContentAuthor::read(cobb::bytereader& stream) noexcept {
+bool ReachContentAuthor::read(cobb::ibytereader& stream) noexcept {
    this->timestamp.read(stream);
    this->xuid.read(stream);
    stream.read_string(this->author, 16);

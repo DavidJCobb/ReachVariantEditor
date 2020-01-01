@@ -1,5 +1,5 @@
 #include "base.h"
-#include "../helpers/bitreader.h"
+#include "../helpers/stream.h"
 #include "../helpers/bitwriter.h"
 
 #include "../formats/sha1.h"
@@ -8,12 +8,13 @@
 #include "types/multiplayer.h"
 #include "errors.h"
 
-bool BlamHeader::read(cobb::bytereader& stream) noexcept {
-   if (!this->header.read(stream))
+bool BlamHeader::read(reach_block_stream& stream) noexcept {
+   auto bytes = stream.bytes;
+   if (!this->header.read(bytes))
       return false;
-   stream.read(this->data.unk0C, cobb::endian::big); // endianness assumed but not known
-   stream.read(this->data.unk0E, cobb::endian::big); // endianness assumed but not known
-   stream.read(this->data.unk2E, cobb::endian::big); // endianness assumed but not known
+   bytes.read(this->data.unk0C, cobb::endian::big); // endianness assumed but not known
+   bytes.read(this->data.unk0E, cobb::endian::big); // endianness assumed but not known
+   bytes.read(this->data.unk2E, cobb::endian::big); // endianness assumed but not known
    return true;
 }
 void BlamHeader::write(cobb::bytewriter& stream) const noexcept {
@@ -25,11 +26,12 @@ void BlamHeader::write(cobb::bytewriter& stream) const noexcept {
    this->header.write_postprocess(stream);
 }
 
-bool EOFBlock::read(cobb::bytereader& stream) noexcept {
-   if (!ReachFileBlock::read(stream))
+bool EOFBlock::read(reach_block_stream& stream) noexcept {
+   auto bytes = stream.bytes;
+   if (!ReachFileBlock::read(bytes))
       return false;
-   stream.read(this->length);
-   stream.read(this->unk04);
+   bytes.read(this->length);
+   bytes.read(this->unk04);
    return true;
 }
 void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
@@ -39,7 +41,7 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.write(uint8_t(0));
 }
 
-bool GameVariantHeader::read(cobb::bitreader& stream) noexcept {
+bool GameVariantHeader::read(cobb::ibitreader& stream) noexcept {
    this->build.major = 0; // not in mpvr
    this->build.minor = 0; // not in mpvr
    this->contentType.read(stream);
@@ -66,7 +68,7 @@ bool GameVariantHeader::read(cobb::bitreader& stream) noexcept {
       stream.skip(16); // TODO: hopper ID
    return true;
 }
-bool GameVariantHeader::read(cobb::bytereader& stream) noexcept {
+bool GameVariantHeader::read(cobb::ibytereader& stream) noexcept {
    this->build.major.read(stream);
    this->build.minor.read(stream);
    this->contentType.read(stream);
@@ -167,7 +169,7 @@ void GameVariantHeader::set_description(const char16_t* value) noexcept {
    }
 }
 
-bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
+bool ReachBlockMPVR::read(reach_block_stream& reader) {
    auto& error_report = GameEngineVariantLoadError::get();
    //
    uint32_t offset_before_hashable;
@@ -176,7 +178,6 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
    if (!this->header.read(reader.bytes)) {
       return false;
    }
-   reader.synchronize();
    auto& stream = reader.bits;
    //
    stream.read(this->hashSHA1);
@@ -207,9 +208,9 @@ bool ReachBlockMPVR::read(cobb::bit_or_byte_reader& reader) {
       return false;
    }
    offset_after_hashable = stream.get_bytespan();
-   if (reader.overshot_eof()) {
+   if (!reader.is_in_bounds()) {
       error_report.state  = GameEngineVariantLoadError::load_state::failure;
-      error_report.reason = GameEngineVariantLoadError::load_failure_reason::early_eof;
+      error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
       return false;
    }
    this->remainingData.read(stream, this->header.end()); // TODO: this can fail and it'll signal errors to (error_report) appropriately; should we even care?
@@ -328,76 +329,89 @@ bool GameVariant::read(cobb::mapped_file& file) {
    auto& error_report = GameEngineVariantLoadError::get();
    error_report.reset();
    //
-   auto reader = cobb::bit_or_byte_reader(file.data(), file.size());
-   if (!this->blamHeader.read(reader.bytes)) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
-      //
-      auto& bh = this->blamHeader.header;
-      if (bh.found.signature && bh.found.signature != bh.expected.signature) {
-         error_report.reason = GameEngineVariantLoadError::load_failure_reason::not_a_blam_file;
-      }
-      return false;
-   }
-   if (!reader.is_in_bounds()) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
-      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
-      return false;
-   }
-   if (!this->contentHeader.read(reader.bytes)) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
-      return false;
-   }
-   reader.synchronize();
-   if (!reader.is_in_bounds()) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
-      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
-      return false;
-   }
-   if (this->contentHeader.data.contentType != ReachFileType::game_variant) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::content_type;
-      error_report.extra[0]      = (int32_t)this->contentHeader.data.contentType;
-      return false;
-   }
-   {  // mpvr (including as _cmp)
-      bool result = false;
-      uint32_t signature = 0;
-      reader.bytes.peek(signature, cobb::endian::big);
-      if (signature == '_cmp') {
-         ReachFileBlockCompressed cblock;
-         cblock.read(reader.bytes);
+   auto reader = cobb::reader((const uint8_t*)file.data(), file.size());
+   auto blocks = ReachFileBlockReader(reader);
+   bool blam   = false;
+   bool chdr   = false;
+   bool mpvr   = false;
+   bool _eof   = false;
+   while (auto block = blocks.next()) {
+      if (!blam) {
          //
-         auto mpvr_reader = cobb::bit_or_byte_reader(cblock.buffer, cblock.size_inflated);
-         result = this->multiplayer.read(mpvr_reader);
-      } else {
-         result = this->multiplayer.read(reader);
-      }
-      if (!result) {
-         error_report.state = GameEngineVariantLoadError::load_state::failure;
-         if (!error_report.has_failure_point())
-            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
-         return false;
-      }
-      reader.synchronize();
-   }
-   //
-   while (file.is_in_bounds(reader.bytes.get_bytepos(), 4)) {
-      uint32_t signature = 0;
-      reader.bytes.peek(signature, cobb::endian::big);
-      if (signature == '_eof') {
-         this->eofBlock.read(reader.bytes);
-         break;
-      } else {
-         auto& block = this->unknownBlocks.emplace_back();
-         if (!block.read(reader.bytes) || !block.header.found.signature) {
-            this->unknownBlocks.resize(this->unknownBlocks.size() - 1);
-            break;
+         // _blf must be the first block in the file
+         //
+         if (block.header.signature != '_blf') {
+            error_report.state = GameEngineVariantLoadError::load_state::failure;
+            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+            //
+            auto& bh = this->blamHeader.header;
+            if (bh.found.signature && bh.found.signature != bh.expected.signature) {
+               error_report.reason = GameEngineVariantLoadError::load_failure_reason::not_a_blam_file;
+            }
+            return false;
          }
+         blam = true;
       }
+      switch (block.header.signature) {
+         case '_blf':
+            if (!this->blamHeader.read(block)) {
+               error_report.state         = GameEngineVariantLoadError::load_state::failure;
+               error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+               return false;
+            }
+            if (!reader.is_in_bounds()) {
+               error_report.state         = GameEngineVariantLoadError::load_state::failure;
+               error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_blam;
+               error_report.reason        = GameEngineVariantLoadError::load_failure_reason::early_eof;
+               return false;
+            }
+            break;
+         case 'chdr':
+            if (!this->contentHeader.read(block)) {
+               error_report.state         = GameEngineVariantLoadError::load_state::failure;
+               error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
+               if (!block.is_in_bounds())
+                  error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+               return false;
+            }
+            chdr = true;
+            if (this->contentHeader.data.contentType != ReachFileType::game_variant) {
+               error_report.state = GameEngineVariantLoadError::load_state::failure;
+               error_report.failure_point = GameEngineVariantLoadError::load_failure_point::content_type;
+               error_report.extra[0] = (int32_t)this->contentHeader.data.contentType;
+               return false;
+            }
+            break;
+         case 'mpvr':
+            if (!this->multiplayer.read(block)) {
+               error_report.state = GameEngineVariantLoadError::load_state::failure;
+               if (!error_report.has_failure_point())
+                  error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
+               return false;
+            }
+            mpvr = true;
+            break;
+         case '_eof':
+            this->eofBlock.read(block);
+            _eof = true;
+            break;
+         default:
+            this->unknownBlocks.emplace_back().read(block);
+      }
+      if (_eof) // some files have a TON of empty padding space at their ends
+         break;
+   }
+   if (!chdr) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
+      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
+      return false;
+   }
+   if (!mpvr) {
+      error_report.state         = GameEngineVariantLoadError::load_state::failure;
+      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
+      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
+      return false;
    }
    return true;
 }
