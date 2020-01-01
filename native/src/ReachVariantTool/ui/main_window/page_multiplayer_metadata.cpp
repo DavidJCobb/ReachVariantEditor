@@ -15,6 +15,7 @@ PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
    {  // set up engine categories
       auto widget = this->ui.engineCategory;
       widget->clear();
+      widget->addItem(tr("Forge / None", "Engine Category"), QVariant(-1));
       widget->addItem(tr("Capture the Flag", "Engine Category"), QVariant(0));
       widget->addItem(tr("Slayer", "Engine Category"), QVariant(1));
       widget->addItem(tr("Oddball", "Engine Category"), QVariant(2));

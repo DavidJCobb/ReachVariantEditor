@@ -20,9 +20,6 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
-//  - See about reorganizing all of our UI code -- moving everything into 
-//    the "ui" subfolder, etc..
-//
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 
 //    their states less noticeable. Can we improve anything in this area?
