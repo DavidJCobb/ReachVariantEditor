@@ -2,6 +2,10 @@
 #include <QMessageBox>
 #include "ui/generic/QXBLGamertagValidator.h"
 
+namespace {
+   static constexpr int ce_gametypeCategoryIndexActionSack = 16;
+}
+
 PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
@@ -24,7 +28,7 @@ PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
       widget->addItem(tr("Stockpile", "Engine Category"), QVariant(10));
       widget->addItem(tr("Race", "Engine Category"), QVariant(12));
       widget->addItem(tr("Headhunter", "Engine Category"), QVariant(13));
-      widget->addItem(tr("Insane", "Engine Category"), QVariant(16));
+      widget->addItem(tr("Action Sack", "Engine Category"), QVariant(ce_gametypeCategoryIndexActionSack));
    }
    //
    QObject::connect(this->ui.headerName, &QLineEdit::textEdited, [this](const QString& text) {
@@ -181,12 +185,26 @@ void PageMPMetadata::updateFromVariant(GameVariant* variant) {
    this->ui.editorGamertag->setText(QString::fromLatin1(mp->variantHeader.modifiedBy.author));
    //
    {
-      const QSignalBlocker blocker0(this->ui.engineIcon);
-      const QSignalBlocker blocker1(this->ui.engineCategory);
-      this->ui.engineIcon->setCurrentIndex(mp->engineIcon);
-      int index = this->ui.engineCategory->findData((int)mp->engineCategory);
-      if (index != -1)
-         this->ui.engineCategory->setCurrentIndex(index);
+      int index;
+      {
+         const QSignalBlocker blocker0(this->ui.engineIcon);
+         const QSignalBlocker blocker1(this->ui.engineCategory);
+         this->ui.engineIcon->setCurrentIndex(mp->engineIcon);
+         index = this->ui.engineCategory->findData((int)mp->engineCategory);
+         if (index != -1)
+            this->ui.engineCategory->setCurrentIndex(index);
+      }
+      if (index == -1) {
+         //
+         // The game variant uses an extended category; those don't work in MCC. Alert the user and force 
+         // it to a good value.
+         //
+         index = this->ui.engineCategory->findData(ce_gametypeCategoryIndexActionSack);
+         if (index != -1) {
+            QMessageBox::information(this, tr("Bad gametype category index"), tr("This gametype uses an undefined category number (%1). Although Halo: Reach's Xbox 360 release allowed developers to create custom categories, Halo: The Master Chief Collection only supports the built-in categories as of this writing; game variants in extended categories cannot be located.\n\nThis game variant will be switched to the \"Action Sack\" category.").arg((int)mp->engineCategory));
+            this->ui.engineCategory->setCurrentIndex(index);
+         }
+      }
    }
    //
    QDateTime temp;

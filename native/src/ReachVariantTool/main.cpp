@@ -20,13 +20,16 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
-//  - Improve our I/O one last time.
+//  - See about reorganizing all of our UI code -- moving everything into 
+//    the "ui" subfolder, etc..
 //
-//     - Create objects specifically dedicated to reading and writing Reach 
-//       blocks, with built-in and automatic handling of compressed blocks. 
-//       Then, create interface-accessors to these for bits and bytes, similar 
-//       to the record and subrecord accessors in DovahKit: the accessors 
-//       hold no data of their own and instead manipulate data on their "owner."
+//  - When we rebuild navigation in the main window, all tree items are expanded. 
+//    This is an ugly hack to make the fact that we don't remember and restore 
+//    their states less noticeable. Can we improve anything in this area?
+//
+//  - Can we improve our error-reporting system to (at least optionally) store 
+//    the stream bit/byte offset at the time of failure? Every failure point 
+//    has access to the stream object, I believe.
 //
 //  - We'd benefit from being able to warn on unsaved changes. Easiest way 
 //    would be to keep two copies of a variant in memory, and compare them.
@@ -39,47 +42,6 @@ int main(int argc, char *argv[]) {
 //          (which are allowed).
 //
 //        - Not defined for top-level game variant structures.
-//
-//  - When we rebuild navigation in the main window, all tree items are expanded. 
-//    This is an ugly hack to make the fact that we don't remember and restore 
-//    their states less noticeable. Can we improve anything in this area?
-//
-//  - The engine category drop-down needs to be able to handle the presence 
-//    of an invalid category when loading a file. Testing shows that custom 
-//    category indices (including "Community") don't work: they don't appear 
-//    in the MCC at all. Current UI behavior is for the drop-down to stay at 
-//    the first item (CTF).
-//
-//     - At the very least, we should warn on load and then reset the category 
-//       based on the icon, using the "Insane" category for any unconventional 
-//       icons.
-//
-//  - See about reorganizing all of our UI code -- moving everything into 
-//    the "ui" subfolder, etc..
-//
-//  - Change how we load blocks: we should loop over all blocks in the file, 
-//    instead of assuming that CHDR and MPVR must be at the start. I think 
-//    the game itself makes that assumption but I'm not sure (wouldn't be 
-//    hard to hex-edit a dummy block between them and find out; maybe I 
-//    should).
-//
-//     = CHDR and MPVR can appear in any order, and the game does not care 
-//       about blocks that appear between them. WE NEED TO AMEND OUR TOOL 
-//       TO SUPPORT THIS.
-//
-//        - Unknown blocks between CHDR and MPVR are stripped when resaving 
-//          in-game.
-//
-//     - We could have GameVariant store a std::vector of ReachFileBlock 
-//       instances, and each instance could have a pointer to a "data" 
-//       object with virtual read/save methods. You wouldn't call those 
-//       directly; rather, you'd call read/save on the block, and it would 
-//       call read/save on its data object (and this in turn would allow 
-//       the block to do things like block length fixup after writing).
-//
-//  - Can we improve our error-reporting system to (at least optionally) store 
-//    the stream bit/byte offset at the time of failure? Every failure point 
-//    has access to the stream object, I believe.
 //
 //  - UI
 //

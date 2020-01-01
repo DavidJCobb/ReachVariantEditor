@@ -99,7 +99,7 @@ namespace cobb {
             if (!this->_read_presence(stream))
                return;
             this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - (uses_offset ? 1 : 0));
-            if (std::is_signed_v<underlying_type> && !this->uses_presence())
+            if (this->write_as_signed())
                //
                // We have to apply the sign bit ourselves, or (offset) will break some signed 
                // values. Main example is mpvr::activity, which is incremented by 1 before 
