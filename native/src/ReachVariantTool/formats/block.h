@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include "../helpers/memory.h"
+#include "../helpers/stream.h"
 
 namespace cobb {
    class bitreader;
@@ -77,6 +79,43 @@ class ReachFileBlockRemainder {
       void discard() noexcept;
       bool read(cobb::bitreader&, uint32_t blockEnd) noexcept;
       void cloneTo(ReachFileBlockRemainder&) const noexcept;
+};
+
+class reach_block_stream : public cobb::reader {
+   private:
+      enum class _bad_sentinel {};
+   public:
+      static constexpr _bad_sentinel bad_block = _bad_sentinel();
+   public:
+      reach_block_stream(const uint8_t* data, uint32_t length) : reader(data, length) {};
+      reach_block_stream(cobb::generic_buffer&& source) : reader(source.data(), source.size()) {
+         this->decompressed = source;
+      };
+      reach_block_stream(cobb::generic_buffer& source) = delete; // use std::move on the buffer
+      reach_block_stream(_bad_sentinel) : reader(nullptr, 0), isInvalid(true) {}
+      //
+      struct header_type {
+         uint32_t signature = 0;
+         uint32_t size      = 0;
+         uint16_t version   = 0;
+         uint16_t flags     = 0;
+      } header;
+      bool    wasCompressed     = false;
+      uint8_t decompressedUnk00 = 0;
+      //
+      inline bool is_valid() const noexcept { return !this->isInvalid; }
+      //
+   protected:
+      cobb::generic_buffer decompressed;
+      bool isInvalid = false;
+};
+class ReachFileBlockReader {
+   protected:
+      cobb::reader& reader;
+   public:
+      ReachFileBlockReader(cobb::reader& r) : reader(r) {}
+      //
+      reach_block_stream next() noexcept;
 };
 
 class ReachUnknownBlock {

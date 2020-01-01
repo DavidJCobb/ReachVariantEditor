@@ -211,6 +211,9 @@
     <ClCompile Include="ui\widgets\option_toggles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -550,6 +553,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\data\mp_incidents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

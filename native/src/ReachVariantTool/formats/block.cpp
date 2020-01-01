@@ -163,3 +163,52 @@ ReachUnknownBlock& ReachUnknownBlock::operator=(const ReachUnknownBlock& source)
    memcpy(this->data, source.data, size);
    return *this;
 }
+
+reach_block_stream ReachFileBlockReader::next() noexcept {
+   uint32_t signature = 0;
+   auto bytes = this->reader.bytes();
+   //
+   uint32_t pos_block_start = this->reader.get_bytepos();
+   reach_block_stream::header_type header;
+   bytes.read(header.signature, cobb::endian::big);
+   bytes.read(header.size,      cobb::endian::big);
+   bytes.read(header.version,   cobb::endian::big);
+   bytes.read(header.flags,     cobb::endian::big);
+   uint32_t pos_block_end = pos_block_start + header.size;
+   if (header.signature == '_cmp') {
+      uint8_t  decompressed_unk00 = 0;
+      uint32_t decompressed_size  = 0;
+      bytes.read(decompressed_unk00);
+      bytes.read(decompressed_size, cobb::endian::big);
+
+      auto input_buffer = cobb::generic_buffer(header.size - 0xC - 1 - 4); // subtract size of block header, size of decompressed_unk00, and size of decompressed_size
+      bytes.read(input_buffer.data(), input_buffer.size());
+      if (!this->reader.is_in_bounds())
+         return reach_block_stream(reach_block_stream::bad_block);
+      auto output_buffer = cobb::generic_buffer(decompressed_size);
+      uint32_t len = decompressed_size;
+      int resultCode = uncompress((Bytef*)output_buffer.data(), (uLongf*)&len, input_buffer.data(), input_buffer.size());
+      if (resultCode != Z_OK)
+         return reach_block_stream(reach_block_stream::bad_block);
+      //
+      reach_block_stream result(std::move(output_buffer));
+      {
+         auto& bytes  = result.bytes();
+         auto& header = result.header;
+         bytes.read(header.signature, cobb::endian::big);
+         bytes.read(header.size,      cobb::endian::big);
+         bytes.read(header.version,   cobb::endian::big);
+         bytes.read(header.flags,     cobb::endian::big);
+      }
+      result.decompressedUnk00 = decompressed_unk00;
+      result.wasCompressed     = true;
+      //
+      this->reader.set_bytepos(pos_block_end);
+      //
+      return result;
+   }
+   this->reader.set_bytepos(pos_block_end);
+   reach_block_stream result(this->reader.data() + pos_block_start, header.size);
+   result.header = header;
+   return result;
+}

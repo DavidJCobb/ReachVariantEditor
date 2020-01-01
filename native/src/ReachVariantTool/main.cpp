@@ -44,10 +44,6 @@ int main(int argc, char *argv[]) {
 //    This is an ugly hack to make the fact that we don't remember and restore 
 //    their states less noticeable. Can we improve anything in this area?
 //
-//  - Can we improve our error-reporting system to (at least optionally) store 
-//    the stream bit/byte offset at the time of failure? Every failure point 
-//    has access to the stream object, I believe.
-//
 //  - The engine category drop-down needs to be able to handle the presence 
 //    of an invalid category when loading a file. Testing shows that custom 
 //    category indices (including "Community") don't work: they don't appear 
@@ -67,12 +63,23 @@ int main(int argc, char *argv[]) {
 //    hard to hex-edit a dummy block between them and find out; maybe I 
 //    should).
 //
+//     = CHDR and MPVR can appear in any order, and the game does not care 
+//       about blocks that appear between them. WE NEED TO AMEND OUR TOOL 
+//       TO SUPPORT THIS.
+//
+//        - Unknown blocks between CHDR and MPVR are stripped when resaving 
+//          in-game.
+//
 //     - We could have GameVariant store a std::vector of ReachFileBlock 
 //       instances, and each instance could have a pointer to a "data" 
 //       object with virtual read/save methods. You wouldn't call those 
 //       directly; rather, you'd call read/save on the block, and it would 
 //       call read/save on its data object (and this in turn would allow 
 //       the block to do things like block length fixup after writing).
+//
+//  - Can we improve our error-reporting system to (at least optionally) store 
+//    the stream bit/byte offset at the time of failure? Every failure point 
+//    has access to the stream object, I believe.
 //
 //  - UI
 //
@@ -94,7 +101,9 @@ int main(int argc, char *argv[]) {
 //
 //     - Campaign has been decoded, but I'd be surprised if it were used for 
 //       anything other than Matchmaking. Campaign variants are very minimal; 
-//       there isn't much to load at all.
+//       there isn't much to load at all. I don't have any on hand to test 
+//       with, and I think they were only ever used for Xbox 360 Matchmaking 
+//       anyway.
 //
 // ==========================================================================
 //
