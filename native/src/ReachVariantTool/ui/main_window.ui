@@ -398,90 +398,90 @@
   <customwidget>
    <class>PageMPSettingsGeneral</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_general.h</header>
+   <header>main_window/page_multiplayer_settings_general.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsRespawn</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_respawn.h</header>
+   <header>main_window/page_multiplayer_settings_respawn.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsSocial</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_social.h</header>
+   <header>main_window/page_multiplayer_settings_social.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsMapAndGame</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_map.h</header>
+   <header>main_window/page_multiplayer_settings_map.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsTeamOverall</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_team.h</header>
+   <header>main_window/page_multiplayer_settings_team.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsLoadoutsOverall</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_loadout.h</header>
+   <header>main_window/page_multiplayer_settings_loadout.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PagePlayerTraits</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_player_traits.h</header>
+   <header>main_window/page_player_traits.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPTU1Config</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_title_update_1.h</header>
+   <header>main_window/page_multiplayer_title_update_1.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageForgeSettingsGeneral</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_forge_settings_general.h</header>
+   <header>main_window/page_forge_settings_general.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsTeamSpecific</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_team_specific.h</header>
+   <header>main_window/page_multiplayer_settings_team_specific.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPMetadata</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_metadata.h</header>
+   <header>main_window/page_multiplayer_metadata.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageMPSettingsScripted</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_multiplayer_settings_scripted.h</header>
+   <header>main_window/page_multiplayer_settings_scripted.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PageLoadoutPaletteEditor</class>
    <extends>QWidget</extends>
-   <header>ui/main_window/page_loadout_palette.h</header>
+   <header>main_window/page_loadout_palette.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MegaloOptionToggleTree</class>
    <extends>QTreeView</extends>
-   <header>ui/widgets/option_toggles.h</header>
+   <header>widgets/option_toggles.h</header>
   </customwidget>
   <customwidget>
    <class>EngineOptionToggleTree</class>
    <extends>QTreeView</extends>
-   <header>ui/widgets/option_toggles.h</header>
+   <header>widgets/option_toggles.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

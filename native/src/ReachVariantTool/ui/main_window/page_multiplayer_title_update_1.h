@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/main_window/ui_page_multiplayer_title_update_1.h"
+#include "main_window/ui_page_multiplayer_title_update_1.h"
 #include <QWidget>
 #include "editor_state.h"
 

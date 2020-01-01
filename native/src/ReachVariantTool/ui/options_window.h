@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtWidgets/QDialog>
-#include "ui_ProgramOptionsDialog.h"
+#include "ui_options_window.h"
 
 class ProgramOptionsDialog : public QDialog {
    Q_OBJECT

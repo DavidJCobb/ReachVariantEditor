@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/main_window/ui_page_forge_settings_general.h"
+#include "main_window/ui_page_forge_settings_general.h"
 #include <QWidget>
 #include "editor_state.h"
 

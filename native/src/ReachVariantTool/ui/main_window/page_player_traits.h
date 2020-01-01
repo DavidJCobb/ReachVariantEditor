@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/main_window/ui_page_player_traits.h"
+#include "main_window/ui_page_player_traits.h"
 #include <QWidget>
 #include "editor_state.h"
 

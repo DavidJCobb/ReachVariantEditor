@@ -1,4 +1,4 @@
-#include "ReachVariantTool.h"
+#include "main_window.h"
 #include <cassert>
 #include <filesystem>
 #include <QDragEnterEvent>
@@ -10,14 +10,14 @@
 #include <QTextStream>
 #include <QTreeWidget>
 #include <QWidget>
-#include "editor_state.h"
-#include "game_variants/base.h"
-#include "game_variants/errors.h"
-#include "helpers/ini.h"
-#include "helpers/stream.h"
-#include "services/ini.h"
+#include "../editor_state.h"
+#include "../game_variants/base.h"
+#include "../game_variants/errors.h"
+#include "../helpers/ini.h"
+#include "../helpers/stream.h"
+#include "../services/ini.h"
 
-#include "ProgramOptionsDialog.h"
+#include "options_window.h"
 
 namespace {
    ReachVariantTool* _window = nullptr;

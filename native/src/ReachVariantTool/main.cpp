@@ -1,4 +1,4 @@
-#include "ReachVariantTool.h"
+#include "ui/main_window.h"
 #include <QtWidgets/QApplication>
 
 #include "game_variants/base.h"

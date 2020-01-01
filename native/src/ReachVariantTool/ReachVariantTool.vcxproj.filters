@@ -28,9 +28,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReachVariantTool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="formats\block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -65,9 +62,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="services\ini.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProgramOptionsDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\LoadoutForm.cpp">
@@ -208,14 +202,14 @@
     <ClCompile Include="helpers\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\main_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\options_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="ReachVariantTool.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="ProgramOptionsDialog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -270,14 +264,14 @@
     <QtMoc Include="ui\widgets\option_toggles.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\main_window.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\options_window.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="ReachVariantTool.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="ProgramOptionsDialog.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="ui\widget_loadout_options.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -315,6 +309,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\main_window\page_loadout_palette.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\main_window.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\options_window.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

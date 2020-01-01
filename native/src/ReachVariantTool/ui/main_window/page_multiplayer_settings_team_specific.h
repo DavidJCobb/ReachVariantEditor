@@ -1,5 +1,5 @@
 #pragma once
-#include "ui/main_window/ui_page_multiplayer_settings_team_specific.h"
+#include "main_window/ui_page_multiplayer_settings_team_specific.h"
 #include <QWidget>
 #include "editor_state.h"
 

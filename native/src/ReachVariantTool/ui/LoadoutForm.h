@@ -1,6 +1,6 @@
 #pragma once
 #include <QWidget>
-#include "ui/ui_widget_loadout_options.h"
+#include "ui_widget_loadout_options.h"
 
 class ReachLoadout;
 

@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #include <QtWidgets/QMainWindow>
-#include "ui_ReachVariantTool.h"
+#include "ui_main_window.h"
 
 class ReachLoadoutPalette;
 class ReachPlayerTraits;
