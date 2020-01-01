@@ -46,8 +46,8 @@ namespace reach {
    };
    enum class aura : uint8_t {
       unchanged    = 0,
-      unknown_1    = 1,
-      unknown_2    = 2,
+      none         = 1,
+      team_primary = 2, // primary armor color becomes team color; other colors are unchanged (e.g. forced color)
       darken_armor = 3, // armor color becomes darker and faded
       pastel_armor = 4, // orange armor becomes sulfur yellow
       unknown_5    = 5,

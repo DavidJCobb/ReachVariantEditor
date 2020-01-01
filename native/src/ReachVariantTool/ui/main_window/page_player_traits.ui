@@ -35,7 +35,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="PagePlayerTraitsTabview">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="PagePlayerTraitsTabDefense">
       <attribute name="title">
@@ -1338,12 +1338,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 1</string>
+           <string>None</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>Team Primary Color</string>
           </property>
          </item>
          <item>
