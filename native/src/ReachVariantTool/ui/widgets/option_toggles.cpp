@@ -482,6 +482,79 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
       parent->appendChild(new OptionToggleModelItem(104, tr("Vehicle Set", disambig)));
    }
    {
+      auto base = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Loadouts", disambig));
+      model->invisibleRootItem()->appendChild(base);
+      //
+      constexpr uint8_t options_in_loadout = 6;
+      constexpr uint8_t loadouts_in_palette = 5;
+      constexpr uint8_t palettes_per_species = 3;
+      //
+      // 1092 == Spartan Tier 1 Loadout 1 Hide Loadout
+      // 1093 == Spartan Tier 1 Loadout 1 Name
+      // 1094 == Spartan Tier 1 Loadout 1 Primary Weapon
+      // 1181 == Spartan Tier 3 Loadout 5 Grenade Count
+      // 1182 == Unknown
+      // 1183 == Elite   Tier 1 Loadout 1 Hide Loadout
+      // 1266 == Elite   Tier 3 Loadout 4 Grenade Count
+      // 1267 == Elite   Tier 3 Loadout 5 Hide Loadout
+      // 1272 == Elite   Tier 3 Loadout 5 Grenade Count
+      //
+      uint16_t baseIndex = 1092;
+      for (uint8_t i = 0; i < palettes_per_species; i++) {
+         auto tier = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Spartan Tier %1", disambig).arg(i + 1));
+         base->appendChild(tier);
+         for (uint8_t j = 0; j < loadouts_in_palette; j++) {
+            auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Loadout %1", disambig).arg(j + 1));
+            tier->appendChild(parent);
+            //
+            uint16_t oi = baseIndex + (j * options_in_loadout) + (i * loadouts_in_palette * options_in_loadout);
+            //
+            parent->appendChild(new OptionToggleModelItem(oi + 1, tr("Name", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 2, tr("Primary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 3, tr("Secondary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 4, tr("Armor Ability", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 5, tr("Grenade Count", disambig))); // 1272
+            parent->appendChild(new OptionToggleModelItem(oi + 0, tr("Hide Loadout", disambig)));  // 1267
+         }
+      }
+      // skip 1182; we don't know what it is, but it's a gap between the two species' loadout palettes
+      baseIndex = 1183;
+      for (uint8_t i = 0; i < palettes_per_species; i++) {
+         auto tier = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Tier %1", disambig).arg(i + 1));
+         base->appendChild(tier);
+         for (uint8_t j = 0; j < loadouts_in_palette; j++) {
+            auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Loadout %1", disambig).arg(j + 1));
+            tier->appendChild(parent);
+            //
+            uint16_t oi = baseIndex + (j * options_in_loadout) + (i * loadouts_in_palette * options_in_loadout);
+            //
+            parent->appendChild(new OptionToggleModelItem(oi + 1, tr("Name", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 2, tr("Primary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 3, tr("Secondary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 4, tr("Armor Ability", disambig)));
+            parent->appendChild(new OptionToggleModelItem(oi + 5, tr("Grenade Count", disambig))); // 1272
+            parent->appendChild(new OptionToggleModelItem(oi + 0, tr("Hide Loadout", disambig)));  // 1267
+         }
+      }
+      /*//
+      {
+         auto tier = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Elite Tier 3", disambig));
+         base->appendChild(tier);
+         //
+         {
+            auto parent = new OptionToggleModelItem(OptionToggleModelItem::container_autohide, tr("Loadout Epsilon", disambig));
+            tier->appendChild(parent);
+            //
+            parent->appendChild(new OptionToggleModelItem(1268, tr("Name", disambig)));
+            parent->appendChild(new OptionToggleModelItem(1269, tr("Primary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(1270, tr("Secondary Weapon", disambig)));
+            parent->appendChild(new OptionToggleModelItem(1271, tr("Armor Ability", disambig)));
+            parent->appendChild(new OptionToggleModelItem(1272, tr("Grenade Count", disambig)));
+            parent->appendChild(new OptionToggleModelItem(1267, tr("Hide Loadout", disambig)));
+         }
+      }*/
+   }
+   {
       auto traits = new OptionToggleModelItem(OptionToggleModelItem::container, tr("Player Traits", disambig));
       model->invisibleRootItem()->appendChild(traits);
       //

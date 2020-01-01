@@ -76,11 +76,6 @@ int main(int argc, char *argv[]) {
 //
 //  - UI
 //
-//     - The models I built for the Option Toggles tree-views suck. They were 
-//       good as a "just build one of these for the first time and get it 
-//       working at all" thing but I should redesign them. Among other things, 
-//       I should actually store the model items as real trees.
-//
 //     - Investigate the possibility of linking option-editing fields to 
 //       their toggles, i.e. displaying an indicator if they've been toggled 
 //       to disabled/hidden, and letting the user right-click them and jump 
