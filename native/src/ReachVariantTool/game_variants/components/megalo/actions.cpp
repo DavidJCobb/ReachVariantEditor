@@ -150,7 +150,7 @@ namespace Megalo {
          "Only allow fireteam #%2 to spawn at %1.",
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::factory),
-            OpcodeArgBase("fireteam", OpcodeArgValueConstSInt8::factory),
+            OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::factory), // TODO: -1 == "no fireteam"
          }
       ),
       ActionFunction( // 15

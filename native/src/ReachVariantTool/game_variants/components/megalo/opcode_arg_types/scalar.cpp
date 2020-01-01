@@ -280,39 +280,39 @@ namespace Megalo {
             cobb::sprintf(out, "Script Option #%u", this->index);
             return;
          case _scopes::spawn_sequence:
-            which_scope = megalo_objects[this->which];
+            which_scope = megalo_objects[this->index];
             if (which_scope)
                cobb::sprintf(out, "Spawn Sequence of %s", which_scope);
             else
-               cobb::sprintf(out, "Spawn Sequence of INVALID_OBJECT[%u]", this->which);
+               cobb::sprintf(out, "Spawn Sequence of INVALID_OBJECT[%u]", this->index);
             return;
          case _scopes::team_score:
-            which_scope = megalo_teams[this->which];
+            which_scope = megalo_teams[this->index];
             if (which_scope)
                cobb::sprintf(out, "Score of %s", which_scope);
             else
-               cobb::sprintf(out, "Score of INVALID_TEAM[%u]", this->which);
+               cobb::sprintf(out, "Score of INVALID_TEAM[%u]", this->index);
             return;
          case _scopes::player_score:
-            which_scope = megalo_players[this->which];
+            which_scope = megalo_players[this->index];
             if (which_scope)
                cobb::sprintf(out, "Score of %s", which_scope);
             else
-               cobb::sprintf(out, "Score of INVALID_PLAYER[%u]", this->which);
+               cobb::sprintf(out, "Score of INVALID_PLAYER[%u]", this->index);
             return;
          case _scopes::unknown_09: // unused in Reach? used in Halo 4?
-            which_scope = megalo_players[this->which];
+            which_scope = megalo_players[this->index];
             if (which_scope)
                cobb::sprintf(out, "Unknown-09 of %s", which_scope);
             else
-               cobb::sprintf(out, "Unknown-09 of INVALID_PLAYER[%u]", this->which);
+               cobb::sprintf(out, "Unknown-09 of INVALID_PLAYER[%u]", this->index);
             return;
          case _scopes::player_rating:
-            which_scope = megalo_players[this->which];
+            which_scope = megalo_players[this->index];
             if (which_scope)
                cobb::sprintf(out, "Rating of %s", which_scope);
             else
-               cobb::sprintf(out, "Rating of INVALID_PLAYER[%u]", this->which);
+               cobb::sprintf(out, "Rating of INVALID_PLAYER[%u]", this->index);
             return;
          case _scopes::player_stat:
             which_scope = megalo_players[this->which];

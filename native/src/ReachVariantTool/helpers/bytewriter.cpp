@@ -49,6 +49,8 @@ namespace cobb {
       memcpy(this->_buffer + offset, out, length);
    }
    void bytewriter::pad_to_bytepos(uint32_t bytepos) noexcept {
+      if (bytepos <= this->_offset)
+         return;
       if (bytepos > this->_size)
          this->resize(bytepos);
       memset(this->_buffer + this->_offset, 0, bytepos - this->_offset);

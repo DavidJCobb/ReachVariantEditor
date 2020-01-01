@@ -337,6 +337,7 @@
     </property>
     <addaction name="actionOptions"/>
     <addaction name="actionDebugbreak"/>
+    <addaction name="actionDebugExportTriggersText"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -384,6 +385,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionDebugExportTriggersText">
+   <property name="text">
+    <string>Debug: Export triggers to text</string>
    </property>
   </action>
  </widget>

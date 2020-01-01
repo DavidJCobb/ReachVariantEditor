@@ -202,6 +202,15 @@
     <ClCompile Include="game_variants\components\tu1_options.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\data\mp_object_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\data\mp_object_names.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\data\mp_incidents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h">
@@ -532,6 +541,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\main_window\widget_macros_update_end.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\data\mp_object_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\data\mp_object_names.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\data\mp_incidents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

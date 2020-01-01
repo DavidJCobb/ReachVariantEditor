@@ -390,6 +390,7 @@ bool GameVariant::read(cobb::mapped_file& file) {
       reader.bytes.peek(signature, cobb::endian::big);
       if (signature == '_eof') {
          this->eofBlock.read(reader.bytes);
+         break;
       } else {
          auto& block = this->unknownBlocks.emplace_back();
          if (!block.read(reader.bytes) || !block.header.found.signature) {

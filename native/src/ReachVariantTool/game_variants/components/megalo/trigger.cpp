@@ -96,7 +96,7 @@ namespace Megalo {
          default:
             cobb::sprintf(line, "unknown %u", (uint32_t)this->blockType);
       }
-      out += '\n';
+      out += "\r\n";
       //
       out += indent;
       out += "Entry type: ";
@@ -112,33 +112,39 @@ namespace Megalo {
          default:
             cobb::sprintf(line, "unknown %u", (uint32_t)this->entryType);
       }
-      out += '\n';
+      out += "\r\n";
       //
       if (!this->opcodes.size()) {
          out += indent;
          out += "<Empty Trigger>";
       }
+      int32_t last_condition_or_group = -1;
       for (auto& opcode : this->opcodes) {
          auto condition = dynamic_cast<const Condition*>(opcode);
          if (condition) {
-            cobb::sprintf(line, "%s[C] ", indent.c_str());
+            if (condition->or_group == last_condition_or_group) {
+               cobb::sprintf(line, "%s[ OR] ", indent.c_str());
+            } else {
+               cobb::sprintf(line, "%s[CND] ", indent.c_str());
+            }
+            last_condition_or_group = condition->or_group;
             out += line;
             opcode->to_string(line);
             out += line;
-            out += '\n';
+            out += "\r\n";
             continue;
          }
          auto action    = dynamic_cast<const Action*>(opcode);
          if (action) {
             if (action->function == &actionFunction_runNestedTrigger) {
-               cobb::sprintf(line, "%s[A] Run nested trigger:\n", indent.c_str());
+               cobb::sprintf(line, "%s[ACT] Run nested trigger:\r\n", indent.c_str());
                out += line;
                //
                auto index = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
                if (index) {
                   auto i = index->value;
                   if (i < 0 || i >= allTriggers.size()) {
-                     cobb::sprintf(line, "%s   <INVALID TRIGGER INDEX %d>\n", indent.c_str(), i);
+                     cobb::sprintf(line, "%s   <INVALID TRIGGER INDEX %d>\r\n", indent.c_str(), i);
                      out += line;
                      continue;
                   }
@@ -149,18 +155,18 @@ namespace Megalo {
                   indent.resize(indent.size() - 3);
                   continue;
                }
-               out += "   <INVALID>\n";
+               out += "   <INVALID>\r\n";
                continue;
             }
-            cobb::sprintf(line, "%s[A] ", indent.c_str());
+            cobb::sprintf(line, "%s[ACT] ", indent.c_str());
             out += line;
             opcode->to_string(line);
             out += line;
-            out += '\n';
+            out += "\r\n";
             continue;
          }
          out += indent;
-         out += "Opcode with unrecognized type!\n";
+         out += "Opcode with unrecognized type!\r\n";
       }
    }
 }

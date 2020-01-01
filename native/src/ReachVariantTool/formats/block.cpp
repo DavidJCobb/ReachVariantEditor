@@ -72,6 +72,10 @@ bool ReachFileBlockCompressed::read(cobb::bytereader& stream) noexcept {
    stream.read(this->unk00);
    stream.read(this->size_inflated, cobb::endian::big);
    //
+   this->size_deflated -= 0xC; // subtract size of block header
+   this->size_deflated -=   1; // subtract size of unk00
+   this->size_deflated -=   4; // subtract size of size_inflated
+   //
    auto input_buffer = (uint8_t*)malloc(this->size_deflated);
    for (uint32_t i = 0; i < this->size_deflated; i++) {
       stream.read(*(uint8_t*)(input_buffer + i));

@@ -1,6 +1,9 @@
 #pragma once
 #include "../opcode_arg.h"
 #include "../limits.h"
+#include "../../../data/mp_incidents.h"
+#include "../../../data/mp_object_types.h"
+#include "../../../data/mp_object_names.h"
 
 namespace Megalo {
    class OpcodeArgValueIncidentID : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
@@ -8,6 +11,18 @@ namespace Megalo {
          OpcodeArgValueIncidentID() : OpcodeArgValueBaseIndex("Incident ID", Limits::max_incident_types, index_quirk::offset) {};
          static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueIncidentID();
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            if (this->value == OpcodeArgValueBaseIndex::none) {
+               cobb::sprintf(out, "No %s", this->name);
+               return;
+            }
+            auto& list = MPIncidentList::get();
+            if (this->value < 0 || this->value >= list.size()) {
+               cobb::sprintf(out, "%s #%d", this->name, this->value);
+               return;
+            }
+            out = list[this->value].name;
          }
    };
    class OpcodeArgValueLabelIndex : public OpcodeArgValueBaseIndex {
@@ -30,12 +45,36 @@ namespace Megalo {
          static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueMPObjectTypeIndex();
          }
+         virtual void to_string(std::string& out) const noexcept override {
+            if (this->value == OpcodeArgValueBaseIndex::none) {
+               cobb::sprintf(out, "No %s", this->name);
+               return;
+            }
+            auto& list = MPObjectTypeList::get();
+            if (this->value < 0 || this->value >= list.size()) {
+               cobb::sprintf(out, "%s #%d", this->name, this->value);
+               return;
+            }
+            out = list[this->value].name;
+         }
    };
    class OpcodeArgValueNameIndex : public OpcodeArgValueBaseIndex {
       public:
          OpcodeArgValueNameIndex() : OpcodeArgValueBaseIndex("Name", Limits::max_string_ids, index_quirk::offset) {};
          static OpcodeArgValue* factory(cobb::bitreader&) {
             return new OpcodeArgValueNameIndex();
+         }
+         virtual void to_string(std::string& out) const noexcept override {
+            if (this->value == OpcodeArgValueBaseIndex::none) {
+               cobb::sprintf(out, "No %s", this->name);
+               return;
+            }
+            auto& list = MPObjectNameList::get();
+            if (this->value < 0 || this->value >= list.size()) {
+               cobb::sprintf(out, "%s #%d", this->name, this->value);
+               return;
+            }
+            out = list[this->value].name;
          }
    };
    class OpcodeArgValuePlayerTraits : public OpcodeArgValueBaseIndex {

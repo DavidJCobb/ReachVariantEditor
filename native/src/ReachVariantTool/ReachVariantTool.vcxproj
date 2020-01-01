@@ -117,6 +117,9 @@
     <ClCompile Include="game_variants\components\player_traits.cpp" />
     <ClCompile Include="game_variants\components\teams.cpp" />
     <ClCompile Include="game_variants\components\tu1_options.cpp" />
+    <ClCompile Include="game_variants\data\mp_incidents.cpp" />
+    <ClCompile Include="game_variants\data\mp_object_names.cpp" />
+    <ClCompile Include="game_variants\data\mp_object_types.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitreader.cpp" />
@@ -189,6 +192,9 @@
     <QtMoc Include="ui\main_window\page_multiplayer_metadata.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h" />
     <QtMoc Include="ui\main_window\page_loadout_palette.h" />
+    <ClInclude Include="game_variants\data\mp_incidents.h" />
+    <ClInclude Include="game_variants\data\mp_object_names.h" />
+    <ClInclude Include="game_variants\data\mp_object_types.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

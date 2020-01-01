@@ -40,8 +40,12 @@ class ReachFileBlock {
       void write(cobb::bytewriter&) const noexcept;
       void write_postprocess(cobb::bytewriter&) const noexcept; // rewrites block size, etc.; must be called immediately after the block is done writing
       //
-      uint32_t end() const noexcept { return this->readState.pos + this->expected.size; }
-      uint32_t write_end() const noexcept { return this->writeState.pos + this->expected.size; }
+      uint32_t end() const noexcept {
+         return this->readState.pos + this->expected.size;
+      }
+      uint32_t write_end() const noexcept {
+         return this->writeState.pos + this->expected.size;
+      }
 };
 
 class ReachFileBlockCompressed {

@@ -7,17 +7,13 @@ namespace {
       player,
       object,
       team,
-      player_slave,
-      player_player_slave,
-      object_player_slave,
-      team_player_slave,
+      player_biped, // KSoft.Tool calls these "player_slave"
+      player_player_biped,
+      object_player_biped,
+      team_player_biped,
       //
       _count,
    };
-   //
-   // TODO: Is "slave" being used as a term for "biped?" Because if so, then just calling it 
-   // "biped" would be simpler, more intuitive, and... I dunno -- nicer, I guess.
-   //
 }
 namespace Megalo {
    /*virtual*/ bool OpcodeArgValueObject::read(cobb::bitreader& stream) noexcept /*override*/ {
@@ -39,16 +35,16 @@ namespace Megalo {
          case _scopes::team:
             variable_scope = &MegaloVariableScopeTeam;
             break;
-         case _scopes::player_slave:
+         case _scopes::player_biped:
             which_bits = MegaloVariableScopePlayer.which_bits();
             break;
-         case _scopes::player_player_slave:
+         case _scopes::player_player_biped:
             slave_var_scope = &MegaloVariableScopePlayer;
             break;
-         case _scopes::object_player_slave:
+         case _scopes::object_player_biped:
             slave_var_scope = &MegaloVariableScopeObject;
             break;
-         case _scopes::team_player_slave:
+         case _scopes::team_player_biped:
             slave_var_scope = &MegaloVariableScopeTeam;
             break;
          default:
@@ -120,16 +116,16 @@ namespace Megalo {
          case _scopes::team:
             variable_scope = &MegaloVariableScopeTeam;
             break;
-         case _scopes::player_slave:
+         case _scopes::player_biped:
             which_bits = MegaloVariableScopePlayer.which_bits();
             break;
-         case _scopes::player_player_slave:
+         case _scopes::player_player_biped:
             slave_var_scope = &MegaloVariableScopePlayer;
             break;
-         case _scopes::object_player_slave:
+         case _scopes::object_player_biped:
             slave_var_scope = &MegaloVariableScopeObject;
             break;
-         case _scopes::team_player_slave:
+         case _scopes::team_player_biped:
             slave_var_scope = &MegaloVariableScopeTeam;
             break;
       }
@@ -178,33 +174,33 @@ namespace Megalo {
             else
                cobb::sprintf(out, "INVALID_TEAM[%u].Object[%u]", this->which, this->index);
             return;
-         case _scopes::player_slave:
+         case _scopes::player_biped:
             which_scope = megalo_players[this->which];
             if (which_scope)
-               cobb::sprintf(out, "%s.Slave", which_scope);
+               cobb::sprintf(out, "%s's biped", which_scope);
             else
-               cobb::sprintf(out, "INVALID_PLAYER[%u].Slave", this->which);
+               cobb::sprintf(out, "INVALID_PLAYER[%u]'s biped", this->which);
             return;
-         case _scopes::player_player_slave:
+         case _scopes::player_player_biped:
             which_scope = megalo_players[this->which];
             if (which_scope)
-               cobb::sprintf(out, "%s.Player[%u].Slave", which_scope, this->index);
+               cobb::sprintf(out, "%s.Player[%u]'s biped", which_scope, this->index);
             else
-               cobb::sprintf(out, "INVALID_PLAYER[%u].Player[%u].Slave", this->which, this->index);
+               cobb::sprintf(out, "INVALID_PLAYER[%u].Player[%u]'s biped", this->which, this->index);
             return;
-         case _scopes::object_player_slave:
+         case _scopes::object_player_biped:
             which_scope = megalo_objects[this->which];
             if (which_scope)
-               cobb::sprintf(out, "%s.Player[%u].Slave", which_scope, this->index);
+               cobb::sprintf(out, "%s.Player[%u]'s biped", which_scope, this->index);
             else
-               cobb::sprintf(out, "INVALID_OBJECT[%u].Player[%u].Slave", this->which, this->index);
+               cobb::sprintf(out, "INVALID_OBJECT[%u].Player[%u]'s biped", this->which, this->index);
             return;
-         case _scopes::team_player_slave:
+         case _scopes::team_player_biped:
             which_scope = megalo_teams[this->which];
             if (which_scope)
-               cobb::sprintf(out, "%s.Player[%u].Slave", which_scope, this->index);
+               cobb::sprintf(out, "%s.Player[%u]'s biped", which_scope, this->index);
             else
-               cobb::sprintf(out, "INVALID_TEAM[%u].Player[%u].Slave", this->which, this->index);
+               cobb::sprintf(out, "INVALID_TEAM[%u].Player[%u]'s biped", this->which, this->index);
             return;
       }
    }
