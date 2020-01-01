@@ -137,7 +137,6 @@
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
-    <ClCompile Include="ui\generic\OptionToggleTable.cpp" />
     <ClCompile Include="ProgramOptionsDialog.cpp" />
     <ClCompile Include="ui\LoadoutForm.cpp" />
     <ClCompile Include="editor_state.cpp" />
@@ -154,6 +153,7 @@
     <ClCompile Include="ui\main_window\page_multiplayer_settings_team_specific.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_title_update_1.cpp" />
     <ClCompile Include="ui\main_window\page_player_traits.cpp" />
+    <ClCompile Include="ui\widgets\option_toggles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ReachVariantTool.h" />
@@ -182,6 +182,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ui\widgets\option_toggles.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_map.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_team.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_loadout.h" />
@@ -272,7 +273,6 @@
     <ClInclude Include="ui\generic\LabelForUnsafeOptions.h" />
     <QtMoc Include="ui\LoadoutForm.h" />
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h" />
-    <QtMoc Include="ui\generic\OptionToggleTable.h" />
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h" />
     <QtMoc Include="ProgramOptionsDialog.h" />
   </ItemGroup>

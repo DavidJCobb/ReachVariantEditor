@@ -20,10 +20,13 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
-//  = WE NEED TO HANDLE COMPRESSED BLOCKS. They're (_cmp) blocks encoded as 
-//    a single unknown byte, followed by a uint32_t stating the size of the 
-//    decompressed data, followed by the compressed data (including the zlib 
-//    header).
+//  - Improve our I/O one last time.
+//
+//     - Create objects specifically dedicated to reading and writing Reach 
+//       blocks, with built-in and automatic handling of compressed blocks. 
+//       Then, create interface-accessors to these for bits and bytes, similar 
+//       to the record and subrecord accessors in DovahKit: the accessors 
+//       hold no data of their own and instead manipulate data on their "owner."
 //
 //  - We'd benefit from being able to warn on unsaved changes. Easiest way 
 //    would be to keep two copies of a variant in memory, and compare them.
@@ -55,21 +58,8 @@ int main(int argc, char *argv[]) {
 //       based on the icon, using the "Insane" category for any unconventional 
 //       icons.
 //
-//  - Investigate Firefight, Campaign, and Forge variants.
-//
-//     - Firefight hasn't been decoded (see below).
-//
-//     - Campaign has been decoded, but I'd be surprised if it were used for 
-//       anything other than Matchmaking. Campaign variants are very minimal; 
-//       there isn't much to load at all.
-//
 //  - See about reorganizing all of our UI code -- moving everything into 
 //    the "ui" subfolder, etc..
-//
-//  - Investigate overhauling bit_or_byte_reader and its writer counterpart: 
-//    consider making a single class that handles bits and bytes, and offering 
-//    two classes (one for bits and one for bytes) that serve as interfaces 
-//    and accessors to it.
 //
 //  - Change how we load blocks: we should loop over all blocks in the file, 
 //    instead of assuming that CHDR and MPVR must be at the start. I think 
@@ -102,6 +92,14 @@ int main(int argc, char *argv[]) {
 //
 //           - Yeah, but buddy relationships are one-way; given a field, we 
 //             have no way to find the label.
+//
+//  - Investigate Firefight, Campaign, and Forge variants.
+//
+//     - Firefight hasn't been decoded (see below).
+//
+//     - Campaign has been decoded, but I'd be surprised if it were used for 
+//       anything other than Matchmaking. Campaign variants are very minimal; 
+//       there isn't much to load at all.
 //
 // ==========================================================================
 //

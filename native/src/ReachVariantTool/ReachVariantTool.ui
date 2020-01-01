@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>13</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -396,16 +396,6 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>EngineOptionToggleTree</class>
-   <extends>QTreeView</extends>
-   <header>ui/generic/OptionToggleTable.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MegaloOptionToggleTree</class>
-   <extends>QTreeView</extends>
-   <header>ui/generic/OptionToggleTable.h</header>
-  </customwidget>
-  <customwidget>
    <class>PageMPSettingsGeneral</class>
    <extends>QWidget</extends>
    <header>ui/main_window/page_multiplayer_settings_general.h</header>
@@ -482,6 +472,16 @@
    <extends>QWidget</extends>
    <header>ui/main_window/page_loadout_palette.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MegaloOptionToggleTree</class>
+   <extends>QTreeView</extends>
+   <header>ui/widgets/option_toggles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EngineOptionToggleTree</class>
+   <extends>QTreeView</extends>
+   <header>ui/widgets/option_toggles.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
