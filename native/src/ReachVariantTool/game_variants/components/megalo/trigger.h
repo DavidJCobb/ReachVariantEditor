@@ -19,7 +19,7 @@ namespace Megalo {
       //
       normal, // not a loop, but trigger can still access loop iterators from containing triggers?
       for_each_player,
-      for_each_player_random, // or "for random player X times?"
+      for_each_player_random, // iterates over all players in a random order; use for things like randomly picking initial zombies in infection
       for_each_team,
       for_each_object, // every MP object?
       for_each_object_with_label,

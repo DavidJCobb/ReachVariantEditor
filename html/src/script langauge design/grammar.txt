@@ -1,0 +1,47 @@
+
+// block-scoped:
+alias name = variable
+
+block_type {
+}
+
+block_type (block_arg) : optional_name {
+}
+
+subroutine: name {
+   // statements
+}
+
+subroutine: name {
+   expect variable == const_int // compile-time warning if caller didnt set variable to const_int before the call
+   // statements
+}
+
+variable = const_int
+variable = variable
+variable = variable.property
+variable = variable.variable
+variable = variable.method(args)
+variable <something>= ...
+subroutine_name()
+
+// line breaks are allowed within the condition list
+if (condition_list) {
+}
+
+// condition_list: condition[ join_operator condition[...]]
+// join_operator: && or ||
+// condition:
+//    variable compare_operator variable
+//    variable compare_operator const_int
+//    comparable_property compare_operator operand
+//    variable.condition_method(args)
+
+if (variable <operator> variable) {
+}
+if (variable <operator> const_int) {
+}
+if (variable.comparable_property <operator> operand) {
+}
+
+send_incident(incident_name_or_index, player, player[, const_int])

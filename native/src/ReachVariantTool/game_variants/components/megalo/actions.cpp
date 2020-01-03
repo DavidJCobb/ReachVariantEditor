@@ -119,7 +119,7 @@ namespace Megalo {
       ),
       ActionFunction( // 11
          "Apply Player Traits",
-         "Apply one of the scripted sets of Player Traits to a player.",
+         "Apply one of the scripted sets of Player Traits to a player. There is no trigger action to remove a set of player traits; rather, you must reapply traits on every frame, and you \"remove\" traits by not reapplying them.",
          "Apply %2 to %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),

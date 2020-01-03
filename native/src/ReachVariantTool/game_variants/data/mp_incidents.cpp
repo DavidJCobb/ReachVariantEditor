@@ -360,7 +360,7 @@ namespace {
       MPIncidentDefinition("Unused", ""),
       MPIncidentDefinition("Unused", ""),
       MPIncidentDefinition("dlc_achieve_1", "dlc_achieve_1"),
-      MPIncidentDefinition("dlc_achieve_2", "dlc_achieve_2"),
+      MPIncidentDefinition("dlc_achieve_2", "dlc_achieve_2"), // send with value 63 to unlock Emergency Room; send with value 61 to unlock All Alone
       MPIncidentDefinition("dlc_achieve_3", "dlc_achieve_3"),
       MPIncidentDefinition("dlc_achieve_4", "dlc_achieve_4"),
       MPIncidentDefinition("dlc_achieve_5", "dlc_achieve_5"),

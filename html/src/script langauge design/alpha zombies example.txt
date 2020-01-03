@@ -1,0 +1,312 @@
+alias current_haven     = global.object[1]
+alias infection_spree   = player.number[5]
+alias is_alpha_zombie   = player.number[3]
+alias is_human_in_haven = player.number[2]
+alias is_zombie         = player.number[0]
+
+subroutine: count_survivors {
+   //
+   // The (expect) directive generates a compile-time warning if a call to this subroutine isn't preceded by code 
+   // that's guaranteed to have set this variable to 0, or if the call is be preceded by instructions that might 
+   // have altered the value of the variable to something other than 0.
+   //
+   expect global.number[0] == 0
+   //
+   for each player {
+      if (current_player.is_zombie == 0)
+         global.number[0] += 1
+   }
+}
+
+for each player { // trigger 0
+   if (current_player.killed_by(kill)) {
+      global.player[0] = current_player.killer // implicit opcode: global.player[0] = none; then this
+      global.number[0] = current_player.kill_damage_modifiers // implicit opcode: global.number[0] = none; then this
+      if (global.number[0] == 2) {
+         global.object[0] = current_player.armor_ability // implicit opcode: global.object[0] = none; then this
+         if (global.object[0].has_forge_label(0) && global.object[0].is_in_use) {
+            send_incident(dlc_achieve_2, global.player[0], global.player[0], 65)
+         }
+      }
+   }
+}
+for each player { // trigger 1
+   if (current_player.killed_by(kill)) {
+      global.number[0] = current_player.kill_damage_modifiers
+      if (global.number[0] == 4) {
+         global.player[0] = current_player.killer
+         if (global.player[0].killed_by(suicide))
+            send_incident(dlc_achieve_2, current_player, current_player, 68)
+      }
+   }
+}
+for each player { // trigger 2
+   if (current_player.is_zombie != 1) {
+      if (current_player.species == elite)
+         current_player.loadout_palette = 2
+      else
+         current_player.loadout_palette = 1
+   }
+   if (current_player.is_zombie == 1) {
+      current_player.timer[2].rate = -100
+      if (current_player.species == elite)
+         current_player.loadout_palette = 4
+      else
+         current_player.loadout_palette = 3
+   }
+}
+
+: maintain minimum alpha zombie count { // trigger 9
+   alias alpha_zombie_count   = global.number[0]
+   alias max_possible_zombies = global.number[4] // player count minus one
+   //
+   alpha_zombie_count   =  0
+   max_possible_zombies = -1
+   for each player {
+      max_possible_zombies += 1
+      if (current_player.is_alpha_zombie == 1)
+         alpha_zombie_count += 1
+   }
+   for each player randomly {
+      if (alpha_zombie_count < script_option[0]
+      &&  alpha_zombie_count < max_possible_zombies
+      &&  current_player.number[1] != 1
+      &&  current_player.is_zombie != 1) {
+         current_player.is_zombie = 1
+         current_player.timer[2]  = 3
+         current_player.is_alpha_zombie = 1
+         alpha_zombie_count += 1
+      }
+   }
+   for each player {
+      if (current_player.is_zombie == 1 && current_player.team != team_3) {
+         send_incident(inf_new_infection, current_player, none)
+         current_player.team = team_3 // haven't decided whether I want "team_3" or "team[3]" or "team#3" or "team 3" where "team" is a keyword
+         script_traits[0].apply(current_player)
+         kill(current_player.biped, silent)
+      }
+   }
+}
+
+for each player { // trigger 13
+   hud_widget[0].format(73, global.timer[0]); // format should take a string index or a string literal as its first argument
+   hud_widget[0].hide(current_player);
+}
+
+for each player { // trigger 14
+   current_player.timer[0].rate = -100;
+   for each player {
+      if (current_player.team == team_2)
+         current_player.objective_title = ?;
+   }
+   for each player {
+      if (current_player.team == team_3)
+         current_player.objective_title = ?;
+   }
+}
+
+for each player { // trigger 17
+   if (current_player.number[4] == 0 && current_player.timer[0].is_zero) {
+      send_incident(129, current_player, none);
+      current_player.number[4] = 1;
+   }
+}
+
+for each player { // trigger 18
+   current_player.team = team_2; // human
+   if (current_player.number[0] == 1) {
+      current_player.team = team_3;
+      script_traits[0].apply(current_player); // infected
+      if (current_player.is_alpha_zombie == 1 && script_option[13] == 1) {
+         script_traits[1].apply(current_player); // alpha zombie
+      }
+   }
+}
+
+for each player { // trigger 19
+   if (current_player.killed_by(any)) {
+      alias victim = global.player[0]
+      alias killer = global.player[1]
+      //
+      current_player.number[1] = 0;
+      victim = current_player;
+      killer = current_player.killer;
+      if (current_player.killed_by(kill)
+      &&  victim.is_zombie == 1
+      &&  victim.is_zombie != killer.is_zombie) {
+         killer.score += script_option[7];
+         send_incident(zombie_kill_kill, killer, victim);
+      }
+      if (current_player.killed_by(kill)
+      &&  script_option[2] == 1
+      &&  victim.is_zombie == 1
+      &&  victim.is_zombie != killer.is_zombie
+      &&  killer.is_human_in_haven == 1) {
+         killer.score += script_option[6]; // points for killing a zombie from a Haven
+      }
+      if (current_player.killed_by(kill)
+      &&  killer != none
+      &&  victim.is_zombie == 0) {
+         victim.is_zombie = 1
+         victim.timer[2] = 3
+         send_incident(inf_new_infection, killer, victim)
+         send_incident(infection_kill, killer, victim)
+         killer += script_option[10]
+         killer.stat[1] += 1
+         killer.infection_spree += 1
+         if (killer.infection_spree > 2)
+            send_incident(dlc_achieve_2, killer, killer, 63) // Emergency Room
+      }
+      if (current_player.killed_by(suicide)) {
+         killer.score += script_option[8]
+         if (script_option[12] == 1) // Suicides Become Zombies
+            victim.is_zombie = 1
+      }
+      if (current_player.killed_by(betrayal)
+      &&  killer.timer[2] == 0
+      &&  victim.timer[2] == 0
+      &&  victim.is_zombie == killer.is_zombie) {
+         killer.score += script_option[9]
+      }
+   }
+}
+
+if (round_timer.is_zero && round_time_limit > 0) { // trigger 25
+   for each player {
+      current_player.infection_spree = 0
+   }
+}
+
+if (script_option[2] == 1 && current_haven == none) { // trigger 27
+   // set initial Haven (and handle a Haven despawning)
+   current_haven = unk_96(global.object[2], forge_label[3])
+   if (global.number[2] == 1)
+      send_incident(hill_moved, all_players, all_players);
+   global.number[2] = 1
+}
+
+if (script_option[2] == 1 && global.timer[0].is_zero) : move haven { // trigger 29
+   // move Haven on timer
+   global.timer[0].rate = 0
+   global.timer[0] = script_option[3]
+   current_haven.set_waypoint_visibility(none)
+   current_haven.set_shape_visibility(none)
+   current_haven.set_display_timer(none)
+   current_haven.number[0] = 0
+   global.object[2] = current_haven
+   current_haven = none
+   current_haven = unk_96(global.object[2], forge_label[3])
+}
+
+: maintain haven waypoint { // trigger 30
+   current_haven.set_waypoint_visibility(anyone)
+   current_haven.set_waypoint_icon(crown)
+   current_haven.set_shape_visibility(anyone)
+   current_haven.set_waypoint_priority(high)
+}
+
+if (script_option[2] == 1) { // trigger 31
+   for each player {
+      if (current_haven.shape_contains(current_player.biped)
+      &&  current_player.is_zombie == 0
+      &&  current_haven.number[0] == 0) {
+         // the Haven timer only starts once a human steps inside
+         global.timer[0].rate = -100
+         current_haven.number[0] = 1
+      }
+   }
+   if (current_haven.number[0] == 1) {
+      current_haven.timer[0] = global.timer[0]
+      current_haven.set_display_timer(0)
+      if (current_haven.timer[0] < 6)
+         current_haven.set_waypoint_priority(default)
+   }
+}
+
+if (script_option[1] == 1) { // trigger 33
+   alias survivor_count = global.number[0]
+   //
+   survivor_count = 0
+   if (global.number[1] == 0) {
+      count_survivors()
+      if (survivor_count == 1) { // number of survivors
+         for each player {
+            if (current_player.is_zombie != 1) {
+               script_traits[2].apply(current_player)
+               current_player.biped.set_waypoint_icon(skull)
+               current_player.biped.set_waypoint_priority(high)
+               current_player.number[1] = 1
+               current_player.score += script_option[11]
+               send_incident(inf_last_man, current_player, all_players)
+               send_incident(dlc_achieve_2, current_player, current_player, 61) // All Alone
+            }
+         }
+         global.number[1] = 1
+      }
+   }
+}
+
+for each player { // trigger 36
+   if (current_player.number[1] == 1)
+      script_traits[2].apply(current_player);
+}
+
+for each player : handle survivors in a haven { // trigger 37
+   hud_widget[0].hide(current_player)
+   current_player.is_human_in_haven = 0
+   if (script_option[2] == 1
+   &&  current_haven.shape_contains(current_player)
+   &&  current_player.is_zombie == 0) {
+      current_player.is_human_in_haven = 1
+      script_traits[3].apply(current_player)
+      hud_widget[0].show(current_player)
+   }
+}
+
+for each player : handle zombie victory { // trigger 38
+   global.timer[1].rate = -100
+   if (global.timer[1].is_zero) {
+      alias survivor_count = global.number[0]
+      //
+      survivor_count = 0
+      count_survivors()
+      for each player {
+         if (survivor_count == 1 && current_player.is_zombie == 0 && current_player.killed_by(suicide)) {
+            global.number[0] = 0
+         }
+      }
+      if (global.number[0] == 0) {
+         send_incident(infection_zombie_win, all_players, all_players)
+         for each player {
+            if (current_player.number[1] != 1 && current_player.is_zombie == 1)
+               current_player.score += script_option[4]
+         }
+         end_round
+      }
+   }
+}
+
+if (round_timer.is_zero && round_time_limit > 0) : handle survivor victory { // trigger 42
+   alias survivor_count = global.number[0]
+   //
+   survivor_count = 0
+   count_survivors()
+   if (survivor_count != 0) {
+      send_incident(infection_survivor_win, all_players, all_players)
+      for each player {
+         if (current_player.is_zombie == 0)
+            current_player.score += script_option[5]
+      }
+      end_round
+   }
+}
+
+for each player : update survival time stat { // survival time stat
+   if (current_player.is_zombie == 0) {
+      current_player.timer[1].rate = -100
+      if (current_player.timer[1].is_zero) {
+         current_player.stat[0] += 1
+         current_player.timer[1].reset()
+      }
+   }
+}
