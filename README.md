@@ -1,4 +1,4 @@
-# ReachVariantEditor
+# ReachVariantTool
  
 A tool for editing Halo: Reach game variants, tested on files obtained from Halo: The Master Chief Collection's PC release.
 
