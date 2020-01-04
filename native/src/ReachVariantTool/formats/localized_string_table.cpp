@@ -4,9 +4,9 @@ extern "C" {
 }
 #include "../game_variants/errors.h"
 
-#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1
-#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2
-#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1 // Only optimize single-language strings (Bungie approach)
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2 // If two strings are exactly identical in their entirety, overlap them
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // If one string is exactly identical to the end of another, overlap them (my approach; needs revision for performance)
 #define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
 
 
@@ -112,7 +112,7 @@ void ReachString::write_strings(std::string& out) const noexcept {
             continue;
          }
       #endif
-      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP // TODO: TEST ME
+      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
          //
          // If one string is identical to the end of another string, then they can be overlapped: 
          // the longer string can be encoded in the string table, and the shorter string can 
@@ -123,6 +123,10 @@ void ReachString::write_strings(std::string& out) const noexcept {
          // then compare every string to see which strings are suffixes of other strings. This 
          // is necessary to avoid situations where the shorter string is written to the buffer 
          // first and therefore misses out on optimization.
+         //
+         // Moreover, the performance on this is really bad as-is precisely because we're just 
+         // scanning into a buffer, blindly, and we can only even do a string comparison once 
+         // we find a null char.
          //
          this->offsets[i] = -1;
          size_t j = 0; // current  null char index
@@ -223,7 +227,9 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
       uint32_t uncompressed_size = combined.size();
       if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
          printf("WARNING: TOTAL STRING DATA IS TOO LARGE");
-         __debugbreak();
+         #if _DEBUG
+            __debugbreak();
+         #endif
          assert(false && "String table cannot hold data this large");
       }
       stream.write(uncompressed_size, this->buffer_size_bitlength);
