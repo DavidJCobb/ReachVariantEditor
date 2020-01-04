@@ -8,6 +8,7 @@
 #include <QMimeData>
 #include <QProcess>
 #include <QString>
+#include <QTextCodec>
 #include <QTextStream>
 #include <QTreeWidget>
 #include <QWidget>
@@ -192,11 +193,54 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             out << "\r\n";
          }
       });
+      QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() {
+         auto variant = ReachEditorState::get().variant();
+         if (!variant)
+            return;
+         auto mp = variant->get_multiplayer_data();
+         if (!mp)
+            return;
+         QString fileName = QFileDialog::getSaveFileName(
+            this,
+            tr("Save Strings as Text"), // window title
+            "",
+            tr("Text File (*.txt);;All Files (*)") // filetype filters
+         );
+         if (fileName.isEmpty())
+            return;
+         QFile file(fileName);
+         if (!file.open(QIODevice::WriteOnly)) {
+            QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
+            return;
+         }
+         bool write_offsets = true;
+         if (QMessageBox::No == QMessageBox::question(this, tr("Write offsets?"), tr("Write each string's offset within the string table's buffer? (Note: Data refers to the last file that was loaded OR SAVED.)"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No)) {
+            write_offsets = false;
+         }
+         QTextStream out(&file);
+         out.setCodec(QTextCodec::codecForName("UTF-8"));
+         out << QString::fromUtf16(mp->variantHeader.title);
+         out << "\r\n\r\n";
+         auto& table = mp->scriptData.strings;
+         for (size_t i = 0; i < table.strings.size(); i++) {
+            auto& string = table.strings[i];
+            out << "STRING #" << i << ":\r\n";
+            for (size_t j = 0; j < string.offsets.size(); j++) {
+               out << "   ";
+               if (write_offsets)
+                  out << string.offsets[j] << ": ";
+               out << QString::fromUtf8(string.strings[j].c_str()) << "\r\n";
+            }
+            out << "\r\n";
+         }
+      });
    #else
       this->ui.actionDebugbreak->setEnabled(false);
       this->ui.actionDebugbreak->setVisible(false);
       this->ui.actionDebugExportTriggersText->setEnabled(false);
       this->ui.actionDebugExportTriggersText->setVisible(false);
+      this->ui.actionDebugExportStringsText->setEnabled(false);
+      this->ui.actionDebugExportStringsText->setVisible(false);
    #endif
    //
    this->ui.MainContentView->setCurrentIndex(0); // Qt Designer makes the last page you were looking at in the editor the default page; let's just switch to the first page here

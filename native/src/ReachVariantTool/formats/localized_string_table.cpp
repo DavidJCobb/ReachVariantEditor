@@ -4,7 +4,11 @@ extern "C" {
 }
 #include "../game_variants/errors.h"
 
-#define MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION 1
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3
+#define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
+
 
 //
 // Notes on Bungie's string table compression:
@@ -54,7 +58,7 @@ void ReachString::write_offsets(cobb::bitwriter& stream, const ReachStringTable&
    }
 }
 void ReachString::write_strings(std::string& out) const noexcept {
-   #if MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION == 1
+   #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE
       bool allEqual = true;
       for (size_t i = 1; i < this->offsets.size(); i++) {
          auto& a = this->strings[i - 1];
@@ -75,22 +79,69 @@ void ReachString::write_strings(std::string& out) const noexcept {
    #endif
    for (size_t i = 0; i < this->offsets.size(); i++) {
       auto& s = this->strings[i];
-      if (s.empty()) {
-         this->offsets[i] = -1;
+      //
+      // NOTE: DO NOT serialize empty strings with a -1 offset; Bungie doesn't do that and I assume it's for a 
+      // reason.
+      //
+      if (this->offsets[i] == -1) // string was absent when we read it, so keep it absent (in lieu of the above)
          continue;
-      }
-      #if MEGALO_STRING_TABLE_TRY_MIMIC_ORIGINAL_COMPRESSION != 1
-         if (i > 0) {
-            //
-            // If two consecutive strings are identical, have them overlap.
-            //
-            // TODO: Make all identical strings across the string table overlap
-            //
-            auto& l = this->strings[i - 1];
-            if (s == l) {
-               this->offsets[i] = this->offsets[i - 1];
+      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
+         //
+         // If the string table buffer already contains a string that is exactly identical to 
+         // this string, then use that string's offset instead of adding a duplicate.
+         //
+         this->offsets[i] = -1;
+         size_t j    = 0; // end   of existing string
+         size_t k    = 0; // start of existing string
+         size_t size = s.size();
+         for (; j < out.size(); j++) {
+            if (out[j] != '\0')
                continue;
+            #if _DEBUG
+               std::string existing = out.substr(k, j - k);
+            #endif
+            if (j - k == size) {
+               if (strncmp(s.data(), out.data() + k, size) == 0) {
+                  this->offsets[i] = k;
+                  break;
+               }
             }
+            k = j + 1;
+         }
+         if (this->offsets[i] >= 0) {
+            continue;
+         }
+      #endif
+      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP // TODO: TEST ME
+         //
+         // If one string is identical to the end of another string, then they can be overlapped: 
+         // the longer string can be encoded in the string table, and the shorter string can 
+         // reference its end.
+         //
+         // In practice, we can't do that from here; what we would have to do instead is gather 
+         // every string into a pool with a reference to the (offsets) value in its owner, and 
+         // then compare every string to see which strings are suffixes of other strings. This 
+         // is necessary to avoid situations where the shorter string is written to the buffer 
+         // first and therefore misses out on optimization.
+         //
+         this->offsets[i] = -1;
+         size_t j = 0; // current  null char index
+         size_t k = 0; // previous null char index
+         size_t size = s.size();
+         for (; j < out.size(); j++) {
+            if (out[j] != '\0')
+               continue;
+            if (j - k >= size) {
+               const char* start = out.data() + j - size;
+               if (strncmp(s.data(), start, size) == 0) {
+                  this->offsets[i] = j - s.size();
+                  break;
+               }
+            }
+            k = j;
+         }
+         if (this->offsets[i] >= 0) {
+            continue;
          }
       #endif
       this->offsets[i] = out.size();

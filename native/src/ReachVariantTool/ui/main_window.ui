@@ -167,6 +167,12 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
          </spacer>
         </item>
        </layout>
@@ -339,6 +345,7 @@
     <addaction name="actionEditScript"/>
     <addaction name="actionDebugbreak"/>
     <addaction name="actionDebugExportTriggersText"/>
+    <addaction name="actionDebugExportStringsText"/>
     <addaction name="actionDebugMisc"/>
    </widget>
    <addaction name="menuFile"/>
@@ -405,6 +412,11 @@
    </property>
    <property name="toolTip">
     <string>Whatever test I happen to need to run quickly.</string>
+   </property>
+  </action>
+  <action name="actionDebugExportStringsText">
+   <property name="text">
+    <string>Debug: Export strings to text</string>
    </property>
   </action>
  </widget>

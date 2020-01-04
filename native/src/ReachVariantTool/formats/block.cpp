@@ -5,6 +5,23 @@ extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 
+/*static*/ bool ReachFileBlock::signature_is_suspicious(uint32_t signature) noexcept {
+   for (uint8_t i = 0; i < 4; i++) {
+      unsigned char c = (signature >> (0x08 * i) & 0xFF);
+      if (c < '0')
+         return true;
+      if (c <= '9')
+         continue;
+      if (c < 'A')
+         return true;
+      if (c <= 'Z')
+         continue;
+      if (c < 'a' || c > 'z')
+         return true;
+   }
+   return false;
+}
+
 bool ReachFileBlock::read(cobb::ibitreader& stream) noexcept {
    this->readState.pos = stream.get_bytepos();
    stream.read(this->found.signature);

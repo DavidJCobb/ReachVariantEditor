@@ -45,6 +45,8 @@ class ReachFileBlock {
       uint32_t write_end() const noexcept {
          return this->writeState.pos + this->expected.size;
       }
+      //
+      static bool signature_is_suspicious(uint32_t signature) noexcept;
 };
 
 class ReachFileBlockRemainder {
