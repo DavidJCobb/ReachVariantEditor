@@ -10,12 +10,15 @@
 namespace Megalo {
    class ReachForgeLabel {
       public:
-         enum class requirement_flags : uint8_t {
-            objects_of_type = 0x01,
-            assigned_team   = 0x02,
-            number          = 0x04,
+         struct requirement_flags {
+            requirement_flags() = delete;
+            enum type : uint8_t {
+               objects_of_type = 0x01,
+               assigned_team = 0x02,
+               number = 0x04,
+            };
          };
-         using requirement_int   = std::underlying_type_t<requirement_flags>;
+         using requirement_int   = std::underlying_type_t<requirement_flags::type>;
          //
          ReachString* name = nullptr;
          MegaloStringIndexOptional nameIndex;

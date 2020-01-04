@@ -24,6 +24,9 @@ class ProgramOptionsDialog : public QDialog {
       void refreshWidgetsFromINI();
       void saveAndClose();
       //
+      void defaultLoadTypeChanged();
+      void defaultSaveTypeChanged();
+      //
    private:
       Ui::ProgramOptionsDialog ui;
 };

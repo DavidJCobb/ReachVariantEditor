@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QProcess>
 #include <QString>
 #include <QTextStream>
 #include <QTreeWidget>
@@ -14,10 +15,12 @@
 #include "../game_variants/base.h"
 #include "../game_variants/errors.h"
 #include "../helpers/ini.h"
+#include "../helpers/steam.h"
 #include "../helpers/stream.h"
 #include "../services/ini.h"
 
 #include "options_window.h"
+#include "script_editor.h"
 
 namespace {
    ReachVariantTool* _window = nullptr;
@@ -53,6 +56,10 @@ namespace {
       powerup_yellow,
       forge_editor,
    };
+
+   inline bool _get_mcc_directory(std::wstring& out) {
+      return cobb::steam::get_game_directory(976730, out);
+   }
 }
 
 /*static*/ ReachVariantTool& ReachVariantTool::get() {
@@ -69,11 +76,47 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          return;
       }
    });
+   {
+      std::wstring dir;
+      if (_get_mcc_directory(dir)) {
+         this->dirBuiltInVariants      = QString::fromWCharArray(dir.c_str());
+         this->dirMatchmakingVariants  = this->dirBuiltInVariants;
+         this->dirBuiltInVariants     += "/haloreach/game_variants/";
+         this->dirMatchmakingVariants += "/haloreach/hopper_game_variants/";
+         //
+         this->dirBuiltInVariants     = QDir::cleanPath(this->dirBuiltInVariants);
+         this->dirMatchmakingVariants = QDir::cleanPath(this->dirMatchmakingVariants);
+         //
+         auto env = QProcessEnvironment::systemEnvironment();
+         auto dir = QDir(env.value("USERPROFILE"));
+         dir.cd("AppData/LocalLow/MCC/LocalFiles/");
+         if (dir.exists()) {
+            this->dirSavedVariants = dir.absolutePath();
+         }
+      }
+   }
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
+   #if _DEBUG
+      QObject::connect(this->ui.actionEditScript, &QAction::triggered, &MegaloScriptEditorWindow::get(), &MegaloScriptEditorWindow::open);
+   #else
+      this->ui.actionEditScript->setEnabled(false);
+      this->ui.actionEditScript->setVisible(false);
+   #endif
+   #if _DEBUG
+      QObject::connect(this->ui.actionDebugMisc, &QAction::triggered, [this]() {
+         //
+         // if I need to quickly test something, I can just throw it in here
+         //
+         QMessageBox::information(this, tr("No test currently set up"), tr("..."));
+      });
+   #else
+      this->ui.actionDebugMisc->setEnabled(false);
+      this->ui.actionDebugMisc->setVisible(false);
+   #endif
    #if _DEBUG
       QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, []() {
          auto variant = ReachEditorState::get().variant();
@@ -168,6 +211,65 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    this->setAcceptDrops(true);
 }
 
+void ReachVariantTool::getDefaultLoadDirectory(QString& out) const noexcept {
+   using dir_type = ReachINI::DefaultPathType;
+   out.clear();
+   switch ((dir_type)ReachINI::DefaultLoadPath::uPathType.current.u) {
+      case dir_type::custom:
+         out = QString::fromUtf8(ReachINI::DefaultLoadPath::sCustomPath.currentStr.c_str());
+         return;
+      case dir_type::mcc_built_in_content:
+         out = this->dirBuiltInVariants;
+         return;
+      case dir_type::current_working_directory:
+         out = "";
+         return;
+      case dir_type::mcc_saved_content:
+         out = this->dirSavedVariants;
+         return;
+      default:
+      case dir_type::mcc_matchmaking_content:
+         out = this->dirMatchmakingVariants;
+         return;
+   }
+}
+void ReachVariantTool::getDefaultSaveDirectory(QString& out) const noexcept {
+   using dir_type = ReachINI::DefaultPathType;
+   out.clear();
+   switch ((dir_type)ReachINI::DefaultSavePath::uPathType.current.u) {
+      case dir_type::custom:
+         out = QString::fromUtf8(ReachINI::DefaultSavePath::sCustomPath.currentStr.c_str());
+         return;
+      case dir_type::mcc_built_in_content:
+         out = this->dirBuiltInVariants;
+         return;
+      case dir_type::mcc_matchmaking_content:
+         out = this->dirMatchmakingVariants;
+         return;
+      case dir_type::current_working_directory:
+         out = "";
+         return;
+      default:
+      case dir_type::path_of_open_file:
+         out = QString::fromWCharArray(ReachEditorState::get().variantFilePath());
+         if (!out.isEmpty()) {
+            if (!ReachINI::DefaultSavePath::bExcludeMCCBuiltInFolders.current.b)
+               return;
+            std::wstring path    = out.toStdWString();
+            std::wstring prefix = this->dirBuiltInVariants.toStdWString();
+            if (!cobb::path_starts_with(path, prefix)) {
+               prefix = this->dirMatchmakingVariants.toStdWString();
+               if (!cobb::path_starts_with(path, prefix))
+                  return;
+            }
+            out.clear();
+         }
+      case dir_type::mcc_saved_content:
+         out = this->dirSavedVariants;
+         return;
+   }
+}
+
 void ReachVariantTool::dragEnterEvent(QDragEnterEvent* event) {
    if (event->mimeData()->hasUrls())
       event->acceptProposedAction();
@@ -200,13 +302,20 @@ void ReachVariantTool::openFile() {
    //
    // TODO: warn on unsaved changes
    //
-   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), "", tr("Game Variant (*.bin);;All Files (*)"));
+   QString targetDir = this->lastFileDirectory;
+   if (targetDir.isEmpty())
+      this->getDefaultLoadDirectory(targetDir);
+   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), targetDir, tr("Game Variant (*.bin);;All Files (*)"));
+   if (!fileName.isEmpty()) {
+      QDir dir;
+      this->lastFileDirectory = dir.absoluteFilePath(fileName);
+   }
    this->openFile(fileName);
 }
 void ReachVariantTool::openFile(QString fileName) {
    auto& editor = ReachEditorState::get();
    //
-   // TODO: warn on unsaved changes
+   // TODO: warn on unsaved changes (if not going through the open file dialog)
    //
    if (fileName.isEmpty())
       return;
@@ -259,10 +368,12 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    }
    QString fileName;
    if (saveAs) {
+      QString defaultSave;
+      this->getDefaultSaveDirectory(defaultSave);
       fileName = QFileDialog::getSaveFileName(
          this,
          tr("Save Game Variant"), // window title
-         QString::fromWCharArray(editor.variantFilePath()), // working directory and optionally default-selected file
+         defaultSave, // working directory and optionally default-selected file
          tr("Game Variant (*.bin);;All Files (*)") // filetype filters
       );
       if (fileName.isEmpty())
@@ -383,13 +494,13 @@ void ReachVariantTool::regenerateNavigation() {
                auto t = new QTreeWidgetItem(loadout);
                t->setText(0, tr("Spartan Tier %1", "main window navigation pane").arg(i + 1));
                t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
-               t->setData(0, Qt::ItemDataRole::UserRole + 1, i);
+               t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2);
             }
             for (uint8_t i = 0; i < 3; i++) {
                auto t = new QTreeWidgetItem(loadout);
                t->setText(0, tr("Elite Tier %1", "main window navigation pane").arg(i + 1));
                t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
-               t->setData(0, Qt::ItemDataRole::UserRole + 1, 3 + i);
+               t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2 + 1);
             }
             //
             auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);

@@ -3,12 +3,12 @@
 #include "player_traits.h"
 
 namespace reach {
-   enum class loadout_palette {
+   enum class loadout_palette { // palette data is interleaved for the two species, but option visibility flags for palettes ARE NOT
       spartan_tier_1,
-      spartan_tier_2,
-      spartan_tier_3,
       elite_tier_1,
+      spartan_tier_2,
       elite_tier_2,
+      spartan_tier_3,
       elite_tier_3,
    };
 };

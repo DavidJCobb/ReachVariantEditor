@@ -22,6 +22,7 @@ void ReachGameVariantTU1Options::write(cobb::bitwriter& stream) const noexcept {
 }
 
 void ReachGameVariantTU1Options::make_vanilla() noexcept {
+   this->flags = 0;
    this->precisionBloom            = vanilla_precision_bloom;
    this->activeCamoEnergy          = vanilla_active_camo_energy;
    this->activeCamoEnergyBonus     = vanilla_active_camo_energy_bonus; // drain rate?
@@ -31,6 +32,10 @@ void ReachGameVariantTU1Options::make_vanilla() noexcept {
    this->magnumFireDelay           = vanilla_magnum_fire_delay;
 }
 void ReachGameVariantTU1Options::make_patched() noexcept {
+   {
+      using namespace ReachTU1Flags;
+      this->flags = enable_bleed_through | armor_lock_cant_shed_stickies | armor_lock_can_be_stuck | enable_active_camo_modifiers | limit_sword_block_to_sword;
+   }
    this->precisionBloom            = patched_precision_bloom;
    this->activeCamoEnergy          = vanilla_active_camo_energy;
    this->activeCamoEnergyBonus     = patched_active_camo_energy_bonus; // drain rate?
@@ -40,6 +45,10 @@ void ReachGameVariantTU1Options::make_patched() noexcept {
    this->magnumFireDelay           = vanilla_magnum_fire_delay;
 }
 void ReachGameVariantTU1Options::make_anniversary() noexcept {
+   {
+      using namespace ReachTU1Flags;
+      this->flags = enable_bleed_through | enable_active_camo_modifiers | limit_sword_block_to_sword | enable_automatic_magnum;
+   }
    this->precisionBloom            = patched_precision_bloom;
    this->activeCamoEnergy          = vanilla_active_camo_energy;
    this->activeCamoEnergyBonus     = patched_active_camo_energy_bonus; // drain rate?

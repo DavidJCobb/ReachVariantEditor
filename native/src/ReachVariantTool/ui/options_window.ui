@@ -6,15 +6,38 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
-    <height>89</height>
+    <width>578</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ReachVariantTool Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="0">
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Window title</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="optionFullFilePathsInWindowTitle">
+        <property name="text">
+         <string>Show full file paths in the window title</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="optionVariantNameInWindowTitle">
+        <property name="text">
+         <string>Show the game variant's title in the window title</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer">
@@ -45,18 +68,114 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="optionFullFilePathsInWindowTitle">
-     <property name="text">
-      <string>Show full file paths in the window title</string>
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Default open directory</string>
      </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="5" column="0">
+       <widget class="QRadioButton" name="defaultOpenPathUseCustom">
+        <property name="text">
+         <string>Use custom path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="defaultOpenPathCustom"/>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultOpenPathCWD">
+        <property name="text">
+         <string>Use this program's current working directory</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultOpenPathAutoMCCMM">
+        <property name="text">
+         <string>Auto-detect MCC Matchmaking game variant path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultOpenPathAutoMCCBuiltIn">
+        <property name="text">
+         <string>Auto-detect MCC built-in game variant path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultOpenPathAutoMCCSaved">
+        <property name="text">
+         <string>Auto-detect MCC saved game variant path</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QCheckBox" name="optionVariantNameInWindowTitle">
-     <property name="text">
-      <string>Show the game variant's title in the window title</string>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Default save directory</string>
      </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="1" column="0">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QRadioButton" name="defaultSavePathCurrentFile">
+        <property name="text">
+         <string>Use current file's path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QCheckBox" name="defaultSavePathExcludeMCCNative">
+        <property name="text">
+         <string>...unless it's the folder for MCC's built-in or Matchmaking files</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="defaultSavePathCustom"/>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultSavePathUseCustom">
+        <property name="text">
+         <string>Use custom path:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="QRadioButton" name="defaultSavePathAutoMCCSaved">
+        <property name="text">
+         <string>Auto-detect MCC saved game variant path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QRadioButton" name="defaultSavePathCWD">
+        <property name="text">
+         <string>Use this program's current working directory</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

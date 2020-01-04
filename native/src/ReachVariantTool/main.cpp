@@ -20,6 +20,20 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+//  - Consider adding an in-app help manual explaining the various settings and 
+//    traits.
+//
+//  - Work on script editor
+//
+//     - Map Permissions - DONE
+//     - Forge Labels
+//        - Viewing - DONE
+//        - Implement editing
+//        - Implement adding, removing, and reordering
+//           - Reordering requires updating all trigger conditions and actions
+//           - Not all opcodes can specify a "none" label so removing may not 
+//             be possible if the label is in use -- investigate
+//
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 
 //    their states less noticeable. Can we improve anything in this area?

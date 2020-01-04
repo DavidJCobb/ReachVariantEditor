@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>13</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool</string>
+           <string>ReachVariantTool v1.0.1</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -336,8 +336,10 @@
      <string>Tools</string>
     </property>
     <addaction name="actionOptions"/>
+    <addaction name="actionEditScript"/>
     <addaction name="actionDebugbreak"/>
     <addaction name="actionDebugExportTriggersText"/>
+    <addaction name="actionDebugMisc"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -390,6 +392,19 @@
   <action name="actionDebugExportTriggersText">
    <property name="text">
     <string>Debug: Export triggers to text</string>
+   </property>
+  </action>
+  <action name="actionEditScript">
+   <property name="text">
+    <string>Edit script...</string>
+   </property>
+  </action>
+  <action name="actionDebugMisc">
+   <property name="text">
+    <string>Debug: Miscellaneous test</string>
+   </property>
+   <property name="toolTip">
+    <string>Whatever test I happen to need to run quickly.</string>
    </property>
   </action>
  </widget>

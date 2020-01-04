@@ -1,6 +1,7 @@
 #include "strings.h"
 #include <cstdarg>
 #include <cstdint>
+#include <cwctype>
 
 namespace cobb {
    void sprintf(std::string& out, const char* format, ...) {
@@ -19,7 +20,7 @@ namespace cobb {
       }
       uint32_t s = 256;
       char* b = (char*)malloc(s);
-      uint32_t r = vsnprintf(b, s, format, args);
+      int32_t r = vsnprintf(b, s, format, args);
       while (r > s) {
          va_copy(args, safe);
          s += 20;
@@ -163,6 +164,28 @@ namespace cobb {
       if (errno == ERANGE) // out of range
          return false;
       out = o;
+      return true;
+   }
+   bool path_starts_with(const std::wstring& path, const std::wstring& prefix) {
+      if (prefix.size() > path.size())
+         return false;
+      for (size_t i = 0; i < prefix.size(); i++) {
+         wchar_t c = std::towlower(path[i]);
+         wchar_t d = std::towlower(prefix[i]);
+         if (c == d)
+            continue;
+         if (c == '/')
+            if (d == '\\')
+               continue;
+            else
+               return false;
+         if (c == '\\')
+            if (d == '/')
+               continue;
+            else
+               return false;
+         return false;
+      }
       return true;
    }
 }

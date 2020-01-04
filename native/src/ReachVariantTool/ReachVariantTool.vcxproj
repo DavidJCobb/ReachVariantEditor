@@ -129,6 +129,7 @@
     <ClCompile Include="helpers\ini.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
+    <ClCompile Include="helpers\steam.cpp" />
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
@@ -152,12 +153,15 @@
     <ClCompile Include="ui\main_window\page_multiplayer_settings_team_specific.cpp" />
     <ClCompile Include="ui\main_window\page_multiplayer_title_update_1.cpp" />
     <ClCompile Include="ui\main_window\page_player_traits.cpp" />
+    <ClCompile Include="ui\script_editor.cpp" />
+    <ClCompile Include="ui\widgets\forge_label_editor.cpp" />
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\main_window.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="ui\localized_string_editor.ui" />
     <QtUic Include="ui\main_window.ui" />
     <QtUic Include="ui\options_window.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
@@ -172,6 +176,8 @@
     <QtUic Include="ui\main_window\page_multiplayer_settings_team_specific.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_title_update_1.ui" />
     <QtUic Include="ui\main_window\page_player_traits.ui" />
+    <QtUic Include="ui\script_editor.ui" />
+    <QtUic Include="ui\widgets\forge_label_editor.ui" />
     <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +187,10 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ui\script_editor.h" />
+    <QtMoc Include="ui\widgets\mp_object_type_combobox.h" />
+    <QtMoc Include="ui\widgets\const_team_index_combobox.h" />
+    <QtMoc Include="ui\widgets\forge_label_editor.h" />
     <QtMoc Include="ui\widgets\option_toggles.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_map.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_team.h" />
@@ -196,6 +206,8 @@
     <ClInclude Include="game_variants\data\mp_object_names.h" />
     <ClInclude Include="game_variants\data\mp_object_types.h" />
     <ClInclude Include="helpers\memory.h" />
+    <ClInclude Include="helpers\steam.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

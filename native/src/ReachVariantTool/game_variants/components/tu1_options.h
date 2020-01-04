@@ -4,16 +4,18 @@
 #include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 
-enum class ReachTU1Flags : uint8_t {
-   enable_bleed_through = 0x01,
-   armor_lock_cant_shed_stickies = 0x02,
-   armor_lock_can_be_stuck       = 0x04,
-   enable_active_camo_modifiers  = 0x08,
-   limit_sword_block_to_sword    = 0x10,
-   enable_automatic_magnum       = 0x20,
-   unused_6                      = 0x40,
-   unused_7                      = 0x80,
-};
+namespace ReachTU1Flags {
+   enum type : uint8_t {
+      enable_bleed_through = 0x01,
+      armor_lock_cant_shed_stickies = 0x02,
+      armor_lock_can_be_stuck = 0x04,
+      enable_active_camo_modifiers = 0x08,
+      limit_sword_block_to_sword = 0x10,
+      enable_automatic_magnum = 0x20,
+      unused_6 = 0x40,
+      unused_7 = 0x80,
+   };
+}
 class ReachGameVariantTU1Options {
    public:
       static constexpr float vanilla_precision_bloom = 5.01968479F; // 100%

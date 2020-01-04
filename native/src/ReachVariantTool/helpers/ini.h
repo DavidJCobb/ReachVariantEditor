@@ -46,6 +46,7 @@ namespace cobb {
          float32,
          integer_signed,
          integer_unsigned,
+         string,
       };
       union setting_value_union {
          bool     b;
@@ -67,6 +68,10 @@ namespace cobb {
       template<> struct setting_type_constant_for_type<uint32_t> { static constexpr setting_type value = setting_type::integer_unsigned; };
       template<typename T> static constexpr setting_type setting_type_constant_for_type_v = setting_type_constant_for_type<T>::value;
 
+      //
+      // Type for change-event listeners. Note that as of this writing values are not sent if the changed 
+      // setting is a string.
+      //
       using change_callback = void(*)(setting* s, setting_value_union oldValue, setting_value_union newValue);
 
       class file {
@@ -141,16 +146,19 @@ namespace cobb {
          private:
             void send_change_event(setting_value_union old) noexcept;
          public:
-            setting(manager_getter mg, const char* name, const char* category, bool   v) : owner(mg()), name(name), category(category), default(v), current(v), type(setting_type::boolean) {
+            setting(manager_getter mg, const char* name, const char* category, bool   v) : owner(mg()), name(name), category(category), default(v), current(v), pending(v), type(setting_type::boolean) {
                this->owner.insert_setting(this);
             };
-            setting(manager_getter mg, const char* name, const char* category, float  v) : owner(mg()), name(name), category(category), default(v), current(v), type(setting_type::float32) {
+            setting(manager_getter mg, const char* name, const char* category, float  v) : owner(mg()), name(name), category(category), default(v), current(v), pending(v), type(setting_type::float32) {
                this->owner.insert_setting(this);
             };
-            setting(manager_getter mg, const char* name, const char* category, int32_t v) : owner(mg()), name(name), category(category), default(v), current(v), type(setting_type::integer_signed) {
+            setting(manager_getter mg, const char* name, const char* category, int32_t v) : owner(mg()), name(name), category(category), default(v), current(v), pending(v), type(setting_type::integer_signed) {
                this->owner.insert_setting(this);
             };
-            setting(manager_getter mg, const char* name, const char* category, uint32_t v) : owner(mg()), name(name), category(category), default(v), current(v), type(setting_type::integer_unsigned) {
+            setting(manager_getter mg, const char* name, const char* category, uint32_t v) : owner(mg()), name(name), category(category), default(v), current(v), pending(v), type(setting_type::integer_unsigned) {
+               this->owner.insert_setting(this);
+            };
+            setting(manager_getter mg, const char* name, const char* category, const char* v) : owner(mg()), name(name), category(category), defaultStr(v), currentStr(v), pendingStr(v), type(setting_type::string) {
                this->owner.insert_setting(this);
             };
 
@@ -161,6 +169,9 @@ namespace cobb {
             setting_value_union default; // avoid modifying this at all
             setting_value_union pending; // if you want to edit settings in memory and then commit them when the user presses an "OK" or "Save" button, modify this instead of (current)
             const setting_type type;
+            std::string currentStr;
+            std::string defaultStr;
+            std::string pendingStr;
             //
             std::string to_string() const;
             //
@@ -168,6 +179,7 @@ namespace cobb {
             void modify(float v) noexcept { this->current.f = v; }
             void modify(int32_t v) noexcept { this->current.i = v; }
             void modify(uint32_t v) noexcept { this->current.u = v; }
+            void modify(const char* v) noexcept { this->currentStr = v; }
             //
             template<typename T> void modify_and_signal(T value) {
                if (std::numeric_limits<T>::is_integer && !std::is_same_v<T, bool>) { // any int
@@ -185,6 +197,7 @@ namespace cobb {
                this->modify(value);
                this->send_change_event(old);
             }
+            void modify_and_signal(const char* s);
             //
             void abandon_pending_changes() noexcept;
             void commit_pending_changes() noexcept;

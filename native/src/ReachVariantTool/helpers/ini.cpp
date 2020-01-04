@@ -28,7 +28,7 @@ namespace cobb {
                      std::string line = setting->name;
                      line += '=';
                      line += setting->to_string();
-                     line += "\n"; // MSVC appears to treat '\n' in a const char* as "\r\n", automatically, without asking, so don't add a '\r'
+                     line += "\n"; // MSVC appears to sometimes treat '\n' in a const char* as "\r\n", automatically, without asking, so don't add a '\r'
                      file.write(line.c_str(), line.size());
                   }
                }
@@ -149,7 +149,7 @@ namespace cobb {
             //
             #pragma region INI setting value
             if (current) { // handling for setting values
-               {  // Allow comments on the same line as a setting (but make sure we change this if we add string settings!)
+               if (current->type != setting_type::string) {  // Allow comments on the same line as a setting (unless the setting value is a string)
                   size_t j = i;
                   do {
                      if (buffer[j] == '\0')
@@ -199,6 +199,15 @@ namespace cobb {
                            current->current.u = value;
                      }
                      break;
+                  case setting_type::string:
+                     current->currentStr.clear();
+                     do {
+                        char c = buffer[i];
+                        if (c == '\0')
+                           break;
+                        current->currentStr += c;
+                     } while (++i < sizeof(buffer));
+                     break;
                }
             }
             #pragma endregion
@@ -240,7 +249,7 @@ namespace cobb {
                bool   isValue    = false;
                std::string token;
                do {
-                  char c = line[i];
+                  unsigned char c = line[i];
                   if (!c)
                      break;
                   if (c == c_iniComment) { // comment
@@ -310,12 +319,11 @@ namespace cobb {
             // Write any setting categories that weren't present in the existing file. (If there was 
             // no existing file, then this writes all categories, creating the file from scratch.)
             //
-            auto& list = missingCategories;
-            for (auto it = list.begin(); it != list.end(); ++it) {
+            for (auto& cat : missingCategories) {
                oFile.put('\n'); // MSVC treats std::fstream.put('\n') as .write("\r\n", 2) automatically, without asking, so don't put('\r')
-               std::string cat;
-               cobb::sprintf(cat, "[%s]\n", *it);
-               current = _pending_category(*it, cat);
+               std::string header;
+               cobb::sprintf(header, "[%s]\n", cat.c_str());
+               current = _pending_category(cat, header);
                current.write(this, oFile);
             }
          }
@@ -374,8 +382,17 @@ namespace cobb {
                working[19] = '\0';
                out = working;
                break;
+            case setting_type::string:
+               out = this->currentStr;
+               break;
          }
          return out;
+      }
+      void setting::modify_and_signal(const char* s) {
+         if (this->type != setting_type::string)
+            return;
+         this->currentStr = s;
+         this->send_change_event(0);
       }
       void setting::abandon_pending_changes() noexcept {
          switch (this->type) {
@@ -390,6 +407,9 @@ namespace cobb {
                return;
             case setting_type::integer_unsigned:
                this->pending.u = this->current.u;
+               return;
+            case setting_type::string:
+               this->pendingStr = this->currentStr;
                return;
          }
       }
@@ -410,6 +430,10 @@ namespace cobb {
             case setting_type::integer_unsigned:
                if (this->pending.u != this->current.u)
                   this->modify_and_signal(this->pending.u);
+               return;
+            case setting_type::string:
+               if (this->pendingStr != this->currentStr)
+                  this->modify_and_signal(this->pendingStr.c_str());
                return;
          }
       }

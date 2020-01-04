@@ -208,6 +208,15 @@
     <ClCompile Include="ui\options_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\widgets\forge_label_editor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\script_editor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\steam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -270,6 +279,18 @@
     <QtMoc Include="ui\options_window.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\widgets\forge_label_editor.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\widgets\const_team_index_combobox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\widgets\mp_object_type_combobox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\script_editor.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\widget_loadout_options.ui">
@@ -315,6 +336,15 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\options_window.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\widgets\forge_label_editor.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\localized_string_editor.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -541,6 +571,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\steam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

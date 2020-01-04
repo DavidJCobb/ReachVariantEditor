@@ -16,6 +16,10 @@ class ReachVariantTool : public QMainWindow {
       //
       static ReachVariantTool& get(); // done differently because the usual "static singleton getter" approach apparently causes Qt to crash on exit if applied to the main window
       //
+   public:
+      void getDefaultLoadDirectory(QString& out) const noexcept;
+      void getDefaultSaveDirectory(QString& out) const noexcept;
+      //
    private slots:
       //
    private:
@@ -40,4 +44,9 @@ class ReachVariantTool : public QMainWindow {
       //
    private:
       Ui::ReachVariantToolClass ui;
+      //
+      QString dirSavedVariants;
+      QString dirBuiltInVariants;
+      QString dirMatchmakingVariants;
+      QString lastFileDirectory;
 };

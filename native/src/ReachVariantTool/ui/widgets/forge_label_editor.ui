@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ForgeLabelEditorWidget</class>
+ <widget class="QWidget" name="ForgeLabelEditorWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="fieldName"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="fieldFlagRequireNumber">
+     <property name="text">
+      <string>Require Number</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Name</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldName</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="fieldFlagRequireObjectType">
+     <property name="text">
+      <string>Require Object Type</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="fieldFlagRequireTeam">
+     <property name="text">
+      <string>Require Team</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Map Must Have At Least</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldMapMustHaveAtLeast</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QSpinBox" name="fieldMapMustHaveAtLeast">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="maximum">
+      <number>127</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="MPObjectTypeCombobox" name="fieldRequireObjectType"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="MegaloConstTeamIndexCombobox" name="fieldRequireTeam"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QSpinBox" name="fieldRequireNumber">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="minimum">
+      <number>-32768</number>
+     </property>
+     <property name="maximum">
+      <number>32767</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MegaloConstTeamIndexCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/widgets/const_team_index_combobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MPObjectTypeCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/widgets/mp_object_type_combobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>fieldName</tabstop>
+  <tabstop>fieldFlagRequireObjectType</tabstop>
+  <tabstop>fieldRequireObjectType</tabstop>
+  <tabstop>fieldFlagRequireTeam</tabstop>
+  <tabstop>fieldRequireTeam</tabstop>
+  <tabstop>fieldFlagRequireNumber</tabstop>
+  <tabstop>fieldRequireNumber</tabstop>
+  <tabstop>fieldMapMustHaveAtLeast</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
