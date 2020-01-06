@@ -6,10 +6,14 @@
 #include "conditions.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
+#include "forge_label.h"
 #include "../../../helpers/bitnumber.h"
-#include "../../../helpers/stream.h"
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/bitwise.h"
+#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/stream.h"
+
+class GameVariantDataMultiplayer;
 
 namespace Megalo {
    enum class block_type : uint8_t {
@@ -36,13 +40,16 @@ namespace Megalo {
       // Halo 4: incident
    };
 
-   class Trigger {
+   class Trigger : public cobb::reference_tracked_object {
+      private:
+         using _fli = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t>;
       public:
          ~Trigger();
          //
          cobb::bitnumber<3, block_type> blockType = block_type::normal;
          cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
-         forge_label_index labelIndex = -1; // Forge label index for block_type::for_each_object_with_label; -1 == no label (i.e. loop over unlabeled)
+         mutable _fli         forgeLabelIndex = -1; // Forge label index for block_type::for_each_object_with_label
+         ref<ReachForgeLabel> forgeLabel      = decltype(forgeLabel)::make(*this);
          struct {
             //
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 
@@ -61,10 +68,11 @@ namespace Megalo {
          //
          bool read(cobb::ibitreader& stream) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
+         void postprocess(GameVariantDataMultiplayer*) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          //
-         void to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
-         inline void to_string(const std::vector<Trigger>& allTriggers, std::string& out) const noexcept {
+         void to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
+         inline void to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out) const noexcept {
             out.clear();
             std::string indent;
             this->to_string(allTriggers, out, indent);

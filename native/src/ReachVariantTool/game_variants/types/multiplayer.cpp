@@ -157,9 +157,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
-      triggers.resize(count);
+      triggers.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         if (!triggers[i].read(stream)) {
+         triggers.emplace_back(new Megalo::Trigger);
+         if (!triggers[i]->read(stream)) {
             error_report.failure_index = i;
             return false;
          }
@@ -170,7 +171,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
             error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
             return false;
          }
-         triggers[i].postprocess_opcodes(conditions, actions);
+         triggers[i]->postprocess_opcodes(conditions, actions);
       }
       /*//
       printf("\nFull script content:");
@@ -240,7 +241,8 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    error_report.state = GameEngineVariantLoadError::load_state::success;
    {  // Postprocess
       for (auto& trigger : this->scriptContent.triggers) {
-         for (auto& opcode : trigger.opcodes)
+         trigger->postprocess(this);
+         for (auto& opcode : trigger->opcodes)
             opcode->postprocess(this);
       }
       //
@@ -374,7 +376,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const n
       //
       bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
       for (auto& trigger : content.triggers)
-         trigger.write(bits);
+         trigger->write(bits);
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
       for (auto& stat : content.stats)

@@ -1,6 +1,7 @@
 #include "trigger.h"
 #include "limits.h"
 #include "opcode_arg_types/all_indices.h"
+#include "../../types/multiplayer.h"
 
 namespace Megalo {
    Trigger::~Trigger() {
@@ -13,7 +14,7 @@ namespace Megalo {
       this->blockType.read(stream);
       this->entryType.read(stream);
       if (this->blockType == block_type::for_each_object_with_label)
-         this->labelIndex.read(stream);
+         this->forgeLabelIndex.read(stream);
       this->raw.conditionStart.read(stream);
       this->raw.conditionCount.read(stream);
       this->raw.actionStart.read(stream);
@@ -58,17 +59,30 @@ namespace Megalo {
          }
       }
    }
+   void Trigger::postprocess(GameVariantDataMultiplayer* mp) noexcept {
+      if (this->forgeLabelIndex == -1)
+         return;
+      auto& list = mp->scriptContent.forgeLabels;
+      if (this->forgeLabelIndex >= list.size())
+         return;
+      this->forgeLabel = list[this->forgeLabelIndex].get();
+   }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
       this->blockType.write(stream);
       this->entryType.write(stream);
-      if (this->blockType == block_type::for_each_object_with_label)
-         this->labelIndex.write(stream);
+      if (this->blockType == block_type::for_each_object_with_label) {
+         if (!this->forgeLabel)
+            this->forgeLabelIndex = -1;
+         else
+            this->forgeLabelIndex = this->forgeLabel->index;
+         this->forgeLabelIndex.write(stream);
+      }
       this->raw.conditionStart.write(stream);
       this->raw.conditionCount.write(stream);
       this->raw.actionStart.write(stream);
       this->raw.actionCount.write(stream);
    }
-   void Trigger::to_string(const std::vector<Trigger>& allTriggers, std::string& out, std::string& indent) const noexcept {
+   void Trigger::to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
       //
       out += indent;
@@ -81,10 +95,19 @@ namespace Megalo {
             out += "for each object";
             break;
          case block_type::for_each_object_with_label:
-            if (this->labelIndex == -1) {
-               line = "for each object with no label";
+            if (!this->forgeLabel) {
+               if (this->forgeLabelIndex == -1) {
+                  line = "for each object with no label";
+               } else {
+                  cobb::sprintf(line, "for each object with label #%d", this->forgeLabelIndex);
+               }
             } else {
-               cobb::sprintf(line, "for each object with label #%d", this->labelIndex);
+               ReachForgeLabel* f = this->forgeLabel;
+               if (!f->name) {
+                  cobb::sprintf(line, "label index %u", this->forgeLabelIndex);
+                  break;
+               }
+               cobb::sprintf(line, "for each object with label %s", f->name->english().c_str());
             }
             out += line;
             break;
@@ -138,7 +161,7 @@ namespace Megalo {
             out += "\r\n";
             continue;
          }
-         auto action    = dynamic_cast<const Action*>(opcode);
+         auto action = dynamic_cast<const Action*>(opcode);
          if (action) {
             if (action->function == &actionFunction_runNestedTrigger) {
                cobb::sprintf(line, "%s[ACT] Run nested trigger:\r\n", indent.c_str());
@@ -154,7 +177,7 @@ namespace Megalo {
                   }
                   indent += "   ";
                   line.clear();
-                  allTriggers[i].to_string(allTriggers, line, indent);
+                  allTriggers[i]->to_string(allTriggers, line, indent);
                   out += line;
                   indent.resize(indent.size() - 3);
                   continue;

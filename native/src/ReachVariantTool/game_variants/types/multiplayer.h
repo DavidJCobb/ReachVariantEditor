@@ -121,7 +121,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
             std::vector<Megalo::Condition> conditions;
             std::vector<Megalo::Action>    actions;
          } raw;
-         std::vector<Megalo::Trigger> triggers;
+         std::vector<std::unique_ptr<Megalo::Trigger>> triggers;
          Megalo::TriggerEntryPoints entryPoints;
          std::vector<ReachMegaloGameStat> stats;
          struct {
