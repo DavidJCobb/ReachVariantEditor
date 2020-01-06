@@ -588,6 +588,9 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\standalones\unique_pointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

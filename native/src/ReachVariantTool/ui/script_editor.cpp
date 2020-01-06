@@ -157,6 +157,7 @@ void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
          auto item = new ForgeLabelEditorWidget(i, container);
          layout->addWidget(item, i, 0);
       }
+      layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
    }
    {  // Map permissions
       auto& perms = mp->mapPermissions;

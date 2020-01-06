@@ -23,10 +23,6 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  = SCORE TO WIN ISN'T IN THE UI.
-//
-//     - A value of "0" means "no limit"
-//
 //  - Work on script editor
 //
 //     = MAKE THE EDITOR WINDOW A MODAL
@@ -57,52 +53,9 @@ int main(int argc, char *argv[]) {
 //             possibly cleaned from the variant, and so that we can keep indices 
 //             consistent when resaving a game variant.
 //
-//           - We can take this a step further. Consider:
+//           = THIS IS IMPLEMENTED FOR FORGE LABELS, SO GO FINISH THEIR EDITOR.
 //
-//                class IReferenceTrackedObject {
-//                   protected:
-//                      virtual void _addInboundReference(const IReferenceTrackedObject&)    noexcept = 0;
-//                      virtual void _removeInboundReference(const IReferenceTrackedObject&) noexcept = 0;
-//                      //
-//                      std::vector<IReferenceTrackedObject*> outbound;
-//                      std::vector<IReferenceTrackedObject*> inbound;
-//                      //
-//                      void _addOutboundReference(IReferenceTrackedObject& obj) noexcept { // should be called by subclasses
-//                         this->outbound.push_back(&obj);
-//                         obj._addInboundReference(*this);
-//                      }
-//                      void _replaceOutboundReference(IReferenceTrackedObject* existing, IReferenceTrackedObject* replacement) noexcept {
-//                         if (existing) {
-//                            std::erase(this->outbound, std::remove(this->outbound.begin(), this->outbound.end(), existing));
-//                            existing->_removeInboundReference(*this);
-//                         }
-//                         if (replacement)
-//                            this->_addOutboundReference(*replacement);
-//                      }
-//                      //
-//                   public:
-//                      void severAllOutboundReferences() noexcept; // use when removing/deleting/etc. the object
-//                      bool refersTo(IReferenceTrackedObject*) const noexcept;
-//                      const std::vector<IReferenceTrackedObject*>& getInboundReferences()  const noexcept { return this->inbound; }
-//                      const std::vector<IReferenceTrackedObject*>& getOutboundReferences() const noexcept { return this->outbound; }
-//                }
-//                //
-//                class ForgeLabel : public IReferenceTrackedObject {}
-//                //
-//                class OpcodeArgValueForgeLabel : public IReferenceTrackedObject {
-//                   protected:
-//                      ForgeLabel* target = nullptr;
-//                   public:
-//                      ForgeLabel* get_target() const noexcept { return this->target; }
-//                      void set_target(ForgeLabel* other) {
-//                         this->_replaceOutboundReference(this->target, other);
-//                         this->target = other;
-//                      }
-//                }
-//
-//             It may be possible to refine that EVEN FURTHER by making the pointer 
-//             in our hypothetical OpcodeArgValueForgeLabel a kind of smart pointer 
-//             that calls _replaceOutboundReference automatically.
+//     - Metadata strings
 //
 //     - Map Permissions - DONE
 //
@@ -145,6 +98,10 @@ int main(int argc, char *argv[]) {
 //
 //                 - It might be good to generate Forge label use info in advance 
 //                   and let the user ask to view that.
+//
+//        - If there aren't enough labels to fully fill the window, then the last 
+//          one gets stretched out. I've tried adding a spacer to the bottom of 
+//          the (programmatically generated) layout, but that's not working.
 //
 //     - Scripted stats
 //

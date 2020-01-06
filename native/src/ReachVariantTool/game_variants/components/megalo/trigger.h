@@ -12,6 +12,7 @@
 #include "../../../helpers/bitwise.h"
 #include "../../../helpers/reference_tracked_object.h"
 #include "../../../helpers/stream.h"
+#include "../../../helpers/standalones/unique_pointer.h"
 
 class GameVariantDataMultiplayer;
 
@@ -71,8 +72,8 @@ namespace Megalo {
          void postprocess(GameVariantDataMultiplayer*) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          //
-         void to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
-         inline void to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out) const noexcept {
+         void to_string(const std::vector<cobb::unique_pointer<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
+         inline void to_string(const std::vector<cobb::unique_pointer<Trigger>>& allTriggers, std::string& out) const noexcept {
             out.clear();
             std::string indent;
             this->to_string(allTriggers, out, indent);

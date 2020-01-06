@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include "../base.h"
 #include "../../formats/bitset.h"
 #include "../../formats/block.h"
@@ -10,6 +9,7 @@
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
 #include "../../helpers/stream.h"
+#include "../../helpers/standalones/unique_pointer.h"
 #include "../components/loadouts.h"
 #include "../components/map_permissions.h"
 #include "../components/megalo_game_stats.h"
@@ -121,7 +121,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
             std::vector<Megalo::Condition> conditions;
             std::vector<Megalo::Action>    actions;
          } raw;
-         std::vector<std::unique_ptr<Megalo::Trigger>> triggers;
+         std::vector<cobb::unique_pointer<Megalo::Trigger>> triggers;
          Megalo::TriggerEntryPoints entryPoints;
          std::vector<ReachMegaloGameStat> stats;
          struct {
@@ -132,7 +132,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } variables;
          std::vector<Megalo::HUDWidgetDeclaration> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
-         std::vector<std::unique_ptr<Megalo::ReachForgeLabel>> forgeLabels; // nullptr elements are not allowed (TODO: create a unique_reference class?)
+         std::vector<cobb::unique_pointer<Megalo::ReachForgeLabel>> forgeLabels; // nullptr elements are not allowed (TODO: create a unique_reference class?)
       } scriptContent;
       ReachGameVariantTU1Options titleUpdateData;
       struct {

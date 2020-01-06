@@ -137,16 +137,4 @@ namespace cobb {
                }
          };
    };
-   //
-   namespace _unit_tests {
-      namespace reference_tracked_object {
-         using rto = ::cobb::reference_tracked_object;
-         //
-         class target : public rto {};
-         class subject : public rto {
-            public:
-               ref<target> foo = decltype(foo)::make(*this);
-         };
-      }
-   }
 }

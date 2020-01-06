@@ -60,12 +60,13 @@ namespace Megalo {
       }
    }
    void Trigger::postprocess(GameVariantDataMultiplayer* mp) noexcept {
-      if (this->forgeLabelIndex == -1)
-         return;
-      auto& list = mp->scriptContent.forgeLabels;
-      if (this->forgeLabelIndex >= list.size())
-         return;
-      this->forgeLabel = list[this->forgeLabelIndex].get();
+      if (this->blockType == block_type::for_each_object_with_label) {
+         if (this->forgeLabelIndex != -1) {
+            auto& list = mp->scriptContent.forgeLabels;
+            if (this->forgeLabelIndex < list.size())
+               this->forgeLabel = list[this->forgeLabelIndex].get();
+         }
+      }
    }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
       this->blockType.write(stream);
@@ -82,7 +83,7 @@ namespace Megalo {
       this->raw.actionStart.write(stream);
       this->raw.actionCount.write(stream);
    }
-   void Trigger::to_string(const std::vector<std::unique_ptr<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept {
+   void Trigger::to_string(const std::vector<cobb::unique_pointer<Trigger>>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
       //
       out += indent;

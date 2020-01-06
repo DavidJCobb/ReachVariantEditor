@@ -159,8 +159,8 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
       triggers.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         triggers.emplace_back(new Megalo::Trigger);
-         if (!triggers[i]->read(stream)) {
+         auto trigger = triggers.emplace_back(new Megalo::Trigger).get();
+         if (!trigger->read(stream)) {
             error_report.failure_index = i;
             return false;
          }
@@ -171,7 +171,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
             error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
             return false;
          }
-         triggers[i]->postprocess_opcodes(conditions, actions);
+         trigger->postprocess_opcodes(conditions, actions);
       }
       /*//
       printf("\nFull script content:");
@@ -216,8 +216,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
          list.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            list.emplace_back(new Megalo::ReachForgeLabel);
-            auto label = list[i].get();
+            auto label = list.emplace_back(new Megalo::ReachForgeLabel).get();
             label->index = i;
             label->read(stream);
             label->postprocess_string_indices(this->scriptData.strings);
