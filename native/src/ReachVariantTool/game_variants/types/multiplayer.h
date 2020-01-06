@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "../base.h"
 #include "../../formats/bitset.h"
 #include "../../formats/block.h"
@@ -30,7 +31,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       virtual bool read(cobb::reader&) noexcept override;
       virtual void write(cobb::bit_or_byte_writer&) const noexcept override;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
-      virtual GameVariantData* clone() const noexcept override;
+      virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
       //
       static constexpr uint8_t encoding_version_vanilla = 0x6A;
       static constexpr uint8_t encoding_version_tu1     = 0x6B;
@@ -131,7 +132,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } variables;
          std::vector<Megalo::HUDWidgetDeclaration> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
-         std::vector<Megalo::ReachForgeLabel> forgeLabels;
+         std::vector<std::unique_ptr<Megalo::ReachForgeLabel>> forgeLabels; // nullptr elements are not allowed (TODO: create a unique_reference class?)
       } scriptContent;
       ReachGameVariantTU1Options titleUpdateData;
       struct {

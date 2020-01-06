@@ -211,11 +211,15 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       this->scriptContent.usedMPObjectTypes.read(stream);
       //
       {  // Forge labels
+         auto&  list  = this->scriptContent.forgeLabels;
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
-         this->scriptContent.forgeLabels.resize(count);
-         for (auto& label : this->scriptContent.forgeLabels) {
-            label.read(stream);
-            label.postprocess_string_indices(this->scriptData.strings);
+         list.reserve(count);
+         for (size_t i = 0; i < count; i++) {
+            list.emplace_back(new Megalo::ReachForgeLabel);
+            auto label = list[i].get();
+            label->index = i;
+            label->read(stream);
+            label->postprocess_string_indices(this->scriptData.strings);
          }
       }
    }
@@ -234,6 +238,22 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       return false;
    }
    error_report.state = GameEngineVariantLoadError::load_state::success;
+   {  // Postprocess
+      for (auto& trigger : this->scriptContent.triggers) {
+         for (auto& opcode : trigger.opcodes)
+            opcode->postprocess(this);
+      }
+      //
+      // TODO: We only need to update these for now. Eventually we need to switch to serializing 
+      // from the trigger list instead of serializing the original, raw loaded data; once we've 
+      // made that switch, we should actually delete the next two lists (i.e. they should be 
+      // emptied after a successful load and retained only if the load fails).
+      //
+      for (auto& opcode : this->scriptContent.raw.actions)
+         opcode.postprocess(this);
+      for (auto& opcode : this->scriptContent.raw.conditions)
+         opcode.postprocess(this);
+   }
    return true;
 }
 void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const noexcept {
@@ -241,6 +261,15 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const n
    auto& bits = writer.bits;
    //
    this->encodingVersion = encoding_version_tu1; // upgrade, so that TU1 settings are always saved
+   //
+   {  // Handle indices
+      {  // Forge labels
+         auto&  list = this->scriptContent.forgeLabels;
+         size_t size = list.size();
+         for (size_t i = 0; i < size; i++)
+            list[i]->index = i;
+      }
+   }
    //
    bits.write(this->encodingVersion);
    bits.write(this->engineVersion);
@@ -368,7 +397,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const n
       //
       bits.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
       for (auto& label : content.forgeLabels)
-         label.write(bits);
+         label->write(bits);
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.write(bits);
@@ -389,7 +418,7 @@ void GameVariantDataMultiplayer::write_last_minute_fixup(cobb::bit_or_byte_write
 }
 GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
    auto clone = new GameVariantDataMultiplayer(this->isForge);
-   *clone = *this;
+   //*clone = *this; // TODO: NOT USABLE; UNIQUE_PTR ARRAYS CANNOT BE COPY-ASSIGNED
    //
    {  // Fix up string table references-by-index.
       auto& stringTable = clone->scriptData.strings;

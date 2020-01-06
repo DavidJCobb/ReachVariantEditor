@@ -43,5 +43,9 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override {
+            for (auto& arg : this->arguments)
+               arg->postprocess(newlyLoaded);
+         }
    };
 }

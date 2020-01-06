@@ -38,7 +38,7 @@ namespace Megalo {
             OpcodeArgBase("type",        OpcodeArgValueMPObjectTypeIndex::factory),
             OpcodeArgBase("result",      OpcodeArgValueObject::factory, true),
             OpcodeArgBase("spawn point", OpcodeArgValueObject::factory),
-            OpcodeArgBase("label",       OpcodeArgValueLabelIndex::factory),
+            OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::factory),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::factory),
             OpcodeArgBase("name",        OpcodeArgValueNameIndex::factory),
@@ -233,7 +233,7 @@ namespace Megalo {
       ),
       ActionFunction( // 24
          "Set Object Invincibility",
-         "Set whether an object is invincible.",
+         "Set whether an object is invincible. Invincible objects cannot be destroyed by anything -- even level boundaries.",
          "Modify %1 invincibility: set to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
@@ -257,7 +257,7 @@ namespace Megalo {
       ),
       ActionFunction( // 27
          "Unknown-27",
-         "Retrieve some unknown value from an object, always between 1 and 7 inclusive.",
+         "Retrieve some unknown value from an object, always between 1 and 7 inclusive. This can fail, so you should consider resetting the number variable before calling this.",
          "Set %2 to the Unknown-27 value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
@@ -299,6 +299,14 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
          }
+         //
+         // Known return values:
+         // 1: pummel
+         // 2: assassination (does this include backsmacks or just stabs?)
+         // 3: splatter
+         // 4: stuck with grenade
+         // 5: headshot
+         //
       ),
       ActionFunction( // 32
          "Unknown-32",
@@ -391,9 +399,9 @@ namespace Megalo {
          }
       ),
       ActionFunction( // 42
-         "Set Player Unit", // Used for Halo Chess's bump-possession?
+         "Set Player Biped", // Used for Halo Chess's bump-possession?
          "",
-         "Set %1's unit to %2.",
+         "Set %1's biped to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
@@ -904,7 +912,7 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
-            OpcodeArgBase("label",  OpcodeArgValueLabelIndex::factory),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
          }
       ),
       ActionFunction( // 97

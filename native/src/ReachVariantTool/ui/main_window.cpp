@@ -168,7 +168,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             auto& list = mp->scriptContent.forgeLabels;
             auto  size = list.size();
             for (size_t i = 0; i < size; i++) {
-               auto& label     = list[i];
+               auto& label     = *list[i].get();
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (label.name) {
                   formatted = formatted.arg(QString::fromUtf8(label.name->english().c_str()));

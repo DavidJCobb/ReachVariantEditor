@@ -19,7 +19,7 @@ void ForgeLabelEditorWidget::updateFromVariant(GameVariant* variant) {
    auto& labels = mp->scriptContent.forgeLabels;
    if (this->labelIndex >= labels.size())
       return;
-   auto& label = labels[this->labelIndex];
+   auto& label = *labels[this->labelIndex].get();
    //
    const QSignalBlocker blocker0(this->ui.fieldName);
    const QSignalBlocker blocker1(this->ui.fieldFlagRequireNumber);

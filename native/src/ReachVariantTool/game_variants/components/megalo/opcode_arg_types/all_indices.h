@@ -25,13 +25,6 @@ namespace Megalo {
             out = list[this->value].name;
          }
    };
-   class OpcodeArgValueLabelIndex : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueLabelIndex() : OpcodeArgValueBaseIndex("Forge Label", Limits::max_script_labels, index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueLabelIndex();
-         }
-   };
    class OpcodeArgValueLoadoutPalette : public OpcodeArgValueBaseIndex {
       public:
          OpcodeArgValueLoadoutPalette() : OpcodeArgValueBaseIndex("Loadout Palette", 6, index_quirk::reference) {};

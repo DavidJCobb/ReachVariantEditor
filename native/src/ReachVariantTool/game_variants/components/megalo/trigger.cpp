@@ -81,7 +81,11 @@ namespace Megalo {
             out += "for each object";
             break;
          case block_type::for_each_object_with_label:
-            cobb::sprintf(line, "for each object with label #%d", this->labelIndex);
+            if (this->labelIndex == -1) {
+               line = "for each object with no label";
+            } else {
+               cobb::sprintf(line, "for each object with label #%d", this->labelIndex);
+            }
             out += line;
             break;
          case block_type::for_each_player:

@@ -23,16 +23,226 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
+//  = SCORE TO WIN ISN'T IN THE UI.
+//
+//     - A value of "0" means "no limit"
+//
 //  - Work on script editor
 //
+//     = MAKE THE EDITOR WINDOW A MODAL
+//
+//     - General thoughts
+//
+//        - Right now, we have a lot of disconnected data -- objects that refer 
+//          to each other by index, such that these indices need to be manually 
+//          fixed up when the referred-to objects are removed, reordered, and so 
+//          on. Opcode arguments refer to Forge labels, scripted stats, scripted 
+//          options, string indices, and more all by index. This is unavoidable 
+//          when loading data -- some of these items load after the trigger 
+//          content -- but after everything's loaded, I think we might benefit 
+//          from doing a one-time fix-up on everything, swapping out indices for 
+//          pointers.
+//
+//           - This would also require that we swap out every std::vector<Foo> 
+//             for a std::vector<Foo*> i.e. allocate Forge labels, etc., on the 
+//             heap. As of this writing we currently DO NOT do this for strings 
+//             (see below) despite having a fix-up ("post-process") for them, 
+//             which means that allowing the user to add/remove strings at this 
+//             time WILL cause access violations.
+//
+//           - A one-time fix-up would greatly simplify the process of working 
+//             with all of these objects -- of being able to add, remove, and 
+//             reorder them. We'd still want to keep a central std::vector of 
+//             each item, both so that unused items can be identified and 
+//             possibly cleaned from the variant, and so that we can keep indices 
+//             consistent when resaving a game variant.
+//
+//           - We can take this a step further. Consider:
+//
+//                class IReferenceTrackedObject {
+//                   protected:
+//                      virtual void _addInboundReference(const IReferenceTrackedObject&)    noexcept = 0;
+//                      virtual void _removeInboundReference(const IReferenceTrackedObject&) noexcept = 0;
+//                      //
+//                      std::vector<IReferenceTrackedObject*> outbound;
+//                      std::vector<IReferenceTrackedObject*> inbound;
+//                      //
+//                      void _addOutboundReference(IReferenceTrackedObject& obj) noexcept { // should be called by subclasses
+//                         this->outbound.push_back(&obj);
+//                         obj._addInboundReference(*this);
+//                      }
+//                      void _replaceOutboundReference(IReferenceTrackedObject* existing, IReferenceTrackedObject* replacement) noexcept {
+//                         if (existing) {
+//                            std::erase(this->outbound, std::remove(this->outbound.begin(), this->outbound.end(), existing));
+//                            existing->_removeInboundReference(*this);
+//                         }
+//                         if (replacement)
+//                            this->_addOutboundReference(*replacement);
+//                      }
+//                      //
+//                   public:
+//                      void severAllOutboundReferences() noexcept; // use when removing/deleting/etc. the object
+//                      bool refersTo(IReferenceTrackedObject*) const noexcept;
+//                      const std::vector<IReferenceTrackedObject*>& getInboundReferences()  const noexcept { return this->inbound; }
+//                      const std::vector<IReferenceTrackedObject*>& getOutboundReferences() const noexcept { return this->outbound; }
+//                }
+//                //
+//                class ForgeLabel : public IReferenceTrackedObject {}
+//                //
+//                class OpcodeArgValueForgeLabel : public IReferenceTrackedObject {
+//                   protected:
+//                      ForgeLabel* target = nullptr;
+//                   public:
+//                      ForgeLabel* get_target() const noexcept { return this->target; }
+//                      void set_target(ForgeLabel* other) {
+//                         this->_replaceOutboundReference(this->target, other);
+//                         this->target = other;
+//                      }
+//                }
+//
+//             It may be possible to refine that EVEN FURTHER by making the pointer 
+//             in our hypothetical OpcodeArgValueForgeLabel a kind of smart pointer 
+//             that calls _replaceOutboundReference automatically.
+//
 //     - Map Permissions - DONE
+//
+//     - Player rating parameters
+//
+//        - This doesn't refer to anything external and is not referred to by 
+//          anything external, at least as far as anyone knows, so it should be 
+//          super easy to just add an editor for real quick.
+//
 //     - Forge Labels
+//
 //        - Viewing - DONE
-//        - Implement editing
+//
+//        - Implement editing of basic properties
+//
+//        - Implement editing of names
+//
+//           - The dialog for localized strings needs "Save," "Cancel," and 
+//             "Save as New" buttons. When opened, it needs to be aware of 
+//             what string it's editing (i.e. it needs a MegaloStringIndex* or 
+//             a MegaloStringIndexOptional*) so that in the case of Save As New, 
+//             it can update the incoming index field.
+//
 //        - Implement adding, removing, and reordering
-//           - Reordering requires updating all trigger conditions and actions
-//           - Not all opcodes can specify a "none" label so removing may not 
-//             be possible if the label is in use -- investigate
+//
+//           - Reordering requires updating all trigger conditions and actions. 
+//             Not all opcodes can specify a "none" label so removing may not 
+//             be possible if the label is in use -- investigate.
+//
+//              - We should call a function that gets us a list of every opcode 
+//                argument that uses any Forge label, and then scan that list 
+//                to see if any of them refer to the label we want to delete. If 
+//                so, we fail the deletion (and when we implement script editing, 
+//                we can use this list to let the user jump to any opcode that 
+//                uses the label). If the label is not in use, then we delete it; 
+//                if it's in the middle of the label list, then this will shift 
+//                the indices of all labels that come after it, which is why we 
+//                need a list of ALL opcode arguments that use ANY Forge label: 
+//                so we can adjust the ones whose labels have shifted.
+//
+//                 - It might be good to generate Forge label use info in advance 
+//                   and let the user ask to view that.
+//
+//     - Scripted stats
+//
+//        - Basically all of the same work needs to be done as with Forge labels
+//
+//     - Scripted options
+//
+//        - Viewing
+//
+//        - Editing
+//
+//        - Removing or reordering
+//
+//           - Like with Forge labels, we need to fail if the option to be removed 
+//             is in use by any opcodes, and we need to handle reordering the 
+//             options (and fixing up option indices used in opcodes) that follow 
+//             the one to be deleted. We also need to update the main window in 
+//             response to the options being changed.
+//
+//     - Scripted traits
+//
+//        - Viewing
+//
+//        - Editing
+//
+//        - Removing or reordering
+//
+//           - Like with Forge labels, we need to fail if the traits-et to be removed 
+//             is in use by any opcodes, and we need to handle reordering the 
+//             traits (and fixing up traits indices used in opcodes) that follow 
+//             the one to be deleted. We also need to update the main window in 
+//             response to the traits being changed.
+//
+//     - String table editing
+//
+//        - String tables use a std::vector<ReachString> rather than using a 
+//          std::vector<ReachString*>; that is, the ReachStrings are *in* the 
+//          buffer. There are a lot of objects that have a function to "post-process 
+//          string indices:" after the string table is loaded, it's passed to these 
+//          objects so that they can take their string indices and store a pointer 
+//          to the target ReachString. ALL OF THESE ARE GOING TO BREAK THE SECOND 
+//          WE ALLOW THE CREATION OR REMOVAL OF STRINGS, OR MORE GENERALLY THE 
+//          SECOND WE ALLOW ANYTHING THAT MIGHT INVALIDATE ITERATORS.
+//
+//          ReachStrings need to be heap-allocated. This would offer us a few 
+//          benefits for run-time editing as well (see note above about everything 
+//          being disconnected, and about switching indices for pointers as part of 
+//          a global post-process for all data referred to be index).
+//
+//        - We need to make sure that the total length of all strings falls below 
+//          the string table buffer size.
+//
+//           - When saving, we enforce this with an assert; we should come up with 
+//             an error-handling system for saving files, and possibly be willing 
+//             to devise a file format for projects-in-progress.
+//
+//        - We also need to make sure that the compressed size of the string table 
+//          leaves enough room for script content, and that's more challenging. 
+//          Essentially we either need to be able to tolerate faults when saving 
+//          (without losing user data or forcing the user to fix things before 
+//          saving again -- what if they're short on time?), OR we need to maintain 
+//          bit-aligned copies of all script-related data in memory (as if saving a 
+//          file) and show a warning in the UI when that exceeds some threshold.
+//
+//           - The size of non-scripted data can vary but not enough to matter; 
+//             some player traits and odds and ends use a presence bit, and of 
+//             course the variant metadata can be up to 127 widechars. We should 
+//             just assume the max possible length for all non-scripted data and 
+//             then measure the scripted data against the space that remains. (In 
+//             any case, we have to allow for the maximum length of the title, 
+//             description, author, and editor, or the gametype might be corrupted 
+//             when resaving it in-game with longer metadata text. Similarly we 
+//             should also assume that there will always be TU1 data, both because 
+//             we always add that when saving and because the game may possibly 
+//             add it when resaving.)
+//
+//        - It would be helpful to have something that can alert the user to any 
+//          unused strings.
+//
+//     - Script content
+//
+//        - Need to modify how we handle saving script content: we need to serialize 
+//          from the triggers. Currently we just serialize from the raw data.
+//
+//        - It would also be a good idea to give each opcode argument a pointer 
+//          to its owning opcode. The ideas above -- Use Info for Forge labels and 
+//          such -- require being able to locate a given opcode arg within the 
+//          broader script, after having collected a list of opcode args.
+//
+//           - Sadly, we cannot give nested triggers a reference to their parents, 
+//             because technically, one nested trigger can be called from multiple 
+//             containing blocks (i.e. a subroutine instead of a nested block). I 
+//             haven't paid close enough attention to know if any of Bungie's 
+//             content does this, but the format should allow it.
+//
+//             What we could do instead is have triggers maintain a list of callers. 
+//             Separately we could try and differentiate between a nested block and 
+//             a subroutine while things are in-memory.
 //
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 

@@ -1,8 +1,9 @@
 #pragma once
 #include <cassert>
 #include <string>
-#include "../../../helpers/stream.h"
 #include "../../../helpers/bitwriter.h"
+#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
 #include "enums.h"
 #include "variables_and_scopes.h"
@@ -36,6 +37,8 @@
 // allowed, e.g. a trigger action cannot modify the value of a constant integer).
 //
 
+class GameVariantDataMultiplayer;
+
 namespace Megalo {
    class OpcodeArgBase;
 
@@ -44,9 +47,10 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept = 0;
    };
    
-   class OpcodeArgValue {
+   class OpcodeArgValue : public cobb::reference_tracked_object {
       public:
          virtual bool read(cobb::ibitreader&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
@@ -59,6 +63,16 @@ namespace Megalo {
          }
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
+         }
+         //
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
+            //
+            // OpcodeArgValue subclasses should override this as necessary in order to 
+            // access data that is only reliably available after the full variant has 
+            // loaded. For example, the OpcodeArgValue subclass for a Forge label may 
+            // use this to exchange its numeric label index for a pointer to the Forge 
+            // label data.
+            //
          }
    };
    using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::ibitreader& stream);

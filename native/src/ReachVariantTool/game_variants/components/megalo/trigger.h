@@ -42,7 +42,7 @@ namespace Megalo {
          //
          cobb::bitnumber<3, block_type> blockType = block_type::normal;
          cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
-         forge_label_index labelIndex = -1; // Forge label index for block_type::for_each_object_with_label
+         forge_label_index labelIndex = -1; // Forge label index for block_type::for_each_object_with_label; -1 == no label (i.e. loop over unlabeled)
          struct {
             //
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 

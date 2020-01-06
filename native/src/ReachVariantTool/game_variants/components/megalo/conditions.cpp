@@ -118,7 +118,7 @@ namespace Megalo {
          "%1 %v label %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("label",  OpcodeArgValueLabelIndex::factory),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
          },
          "has", "does not have"
       ),

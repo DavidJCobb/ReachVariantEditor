@@ -16,6 +16,7 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    reach_main_window_setup_spinbox(this->ui.fieldRoundsToWin,     options.misc.roundsToWin);
    reach_main_window_setup_spinbox(this->ui.fieldSuddenDeathTime, options.misc.suddenDeathTime);
    reach_main_window_setup_spinbox(this->ui.fieldGracePeriod,     options.misc.gracePeriod);
+   reach_main_window_setup_spinbox(this->ui.fieldScoreToWin,      scoreToWin);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
@@ -32,5 +33,6 @@ void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
    reach_main_window_update_spinbox(this->ui.fieldRoundsToWin,     options.misc.roundsToWin);
    reach_main_window_update_spinbox(this->ui.fieldSuddenDeathTime, options.misc.suddenDeathTime);
    reach_main_window_update_spinbox(this->ui.fieldGracePeriod,     options.misc.gracePeriod);
+   reach_main_window_update_spinbox(this->ui.fieldScoreToWin,      scoreToWin);
    #include "widget_macros_update_end.h"
 }
