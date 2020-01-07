@@ -155,6 +155,7 @@
     <ClCompile Include="ui\main_window\page_multiplayer_title_update_1.cpp" />
     <ClCompile Include="ui\main_window\page_player_traits.cpp" />
     <ClCompile Include="ui\script_editor.cpp" />
+    <ClCompile Include="ui\script_editor\page_forge_labels.cpp" />
     <ClCompile Include="ui\widgets\forge_label_editor.cpp" />
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
   </ItemGroup>
@@ -178,6 +179,7 @@
     <QtUic Include="ui\main_window\page_multiplayer_title_update_1.ui" />
     <QtUic Include="ui\main_window\page_player_traits.ui" />
     <QtUic Include="ui\script_editor.ui" />
+    <QtUic Include="ui\script_editor\page_forge_labels.ui" />
     <QtUic Include="ui\widgets\forge_label_editor.ui" />
     <QtUic Include="ui\widget_loadout_options.ui" />
   </ItemGroup>
@@ -188,6 +190,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="ui\script_editor\page_forge_labels.h" />
     <QtMoc Include="ui\script_editor.h" />
     <QtMoc Include="ui\widgets\mp_object_type_combobox.h" />
     <QtMoc Include="ui\widgets\const_team_index_combobox.h" />

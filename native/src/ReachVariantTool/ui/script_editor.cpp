@@ -1,5 +1,6 @@
 #include "script_editor.h"
 #include "widgets/forge_label_editor.h"
+#include "../game_variants/data/mp_object_types.h"
 
 namespace {
    struct _MapID {
@@ -78,6 +79,10 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageMapPerms);
          return;
       }
+      if (current->text() == "Required Object Types") {
+         stack->setCurrentWidget(this->ui.pageReqObjectTypes);
+         return;
+      }
       if (current->text() == "Scripted Options") {
          stack->setCurrentWidget(this->ui.pageScriptOptions);
          return;
@@ -86,13 +91,6 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
       // TODO: other pages
       //
    });
-   {  // Forge labels
-      //
-      // TODO: HANDLE CHANGES
-      //
-      // TODO: ADD THE OPTION TO INSERT AND REMOVE (requires script fixup)
-      //
-   }
    {  // Map permissions - map ID list
       auto& widget = this->ui.fieldMapPermsList;
       //
@@ -104,6 +102,12 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
       }
       if (auto m = widget->model())
          m->sort(0);
+      QObject::connect(this->ui.fieldMapPermsType, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
+         auto mp = ReachEditorState::get().multiplayerData();
+         if (!mp)
+            return;
+         mp->mapPermissions.type = (reach::map_permission_type)index;
+      });
       QObject::connect(widget, &QListWidget::itemChanged, [](QListWidgetItem* item) {
          auto data = item->data(Qt::ItemDataRole::UserRole);
          if (!data.isValid())
@@ -125,6 +129,34 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          }
       });
    }
+   {  // MP object type list
+      auto& list   = MPObjectTypeList::get();
+      auto& widget = this->ui.reqObjectTypeList;
+      widget->clear();
+      for (size_t i = 0; i < list.size(); i++) {
+         auto& id  = list[i];
+         auto item = new QListWidgetItem(QString::fromUtf8(id.name.c_str()), widget);
+         item->setData(Qt::ItemDataRole::UserRole, i);
+         item->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsUserCheckable);
+      }
+      if (auto m = widget->model())
+         m->sort(0);
+      QObject::connect(widget, &QListWidget::itemChanged, [](QListWidgetItem* item) {
+         auto data = item->data(Qt::ItemDataRole::UserRole);
+         if (!data.isValid())
+            return;
+         auto index = data.toInt();
+         if (index < 0)
+            return;
+         auto mp    = ReachEditorState::get().multiplayerData();
+         if (!mp)
+            return;
+         auto& list = mp->scriptContent.usedMPObjectTypes;
+         if (index >= list.bits.size())
+            return;
+         list.bits.modify(index, item->data(Qt::ItemDataRole::CheckStateRole) == Qt::CheckState::Checked);
+      });
+   }
 }
 void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
    if (!variant) {
@@ -135,30 +167,6 @@ void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
    auto mp = variant->get_multiplayer_data();
    if (!mp)
       return;
-   {  // Forge labels
-      auto container = this->ui.forgeLabelList;
-      auto layout    = dynamic_cast<QBoxLayout*>(container->layout());
-      if (!layout) {
-         layout = new QBoxLayout(QBoxLayout::TopToBottom);
-         container->setLayout(layout);
-         layout->setContentsMargins(0, 0, 0, 0);
-      }
-      {  // Clear layout
-         QLayoutItem* child;
-         while ((child = layout->takeAt(0)) != nullptr) {
-            auto widget = child->widget();
-            if (widget)
-               delete widget;
-            delete child;
-         }
-      }
-      auto& labels = mp->scriptContent.forgeLabels;
-      for (uint32_t i = 0; i < labels.size(); i++) {
-         auto item = new ForgeLabelEditorWidget(i, container);
-         layout->addWidget(item, i, 0);
-      }
-      layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
-   }
    {  // Map permissions
       auto& perms = mp->mapPermissions;
       this->ui.fieldMapPermsType->setCurrentIndex((int)perms.type);
@@ -182,5 +190,22 @@ void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
          }
       }
    }
-
+   { // MP object type list
+      auto& types = mp->scriptContent.usedMPObjectTypes;
+      //
+      auto list = this->ui.reqObjectTypeList;
+      auto size = list->count();
+      for (uint32_t i = 0; i < size; i++) {
+         auto item = list->item(i);
+         if (!item)
+            continue;
+         item->setCheckState(Qt::CheckState::Unchecked);
+         auto data = item->data(Qt::ItemDataRole::UserRole);
+         if (!data.isValid())
+            continue;
+         auto index = data.toInt();
+         if (index >= 0 && index < types.bits.size() && types.bits.test(index))
+            item->setCheckState(Qt::CheckState::Checked);
+      }
+   }
 }

@@ -15,6 +15,13 @@ PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
    {  // set up engine categories
       auto widget = this->ui.engineCategory;
       widget->clear();
+      //
+      // Halo: Reach's Xbox 360 release allowed you to define basically any category index, but 
+      // the Master Chief Collection is limited to specific indices. It's my understanding that 
+      // that's a consequence of the menu system having been designed to support all gametypes 
+      // across all included Halo games, and that the Action Sack / Insane category is advised 
+      // for any custom/modded gametypes.
+      //
       widget->addItem(tr("Forge / None", "Engine Category"), QVariant(-1));
       widget->addItem(tr("Capture the Flag", "Engine Category"), QVariant(0));
       widget->addItem(tr("Slayer", "Engine Category"), QVariant(1));
@@ -24,11 +31,14 @@ PageMPMetadata::PageMPMetadata(QWidget* parent) : QWidget(parent) {
       widget->addItem(tr("Territories", "Engine Category"), QVariant(5));
       widget->addItem(tr("Assault", "Engine Category"), QVariant(6));
       widget->addItem(tr("Infection", "Engine Category"), QVariant(7));
-      widget->addItem(tr("VIP", "Engine Category"), QVariant(8));
+      widget->addItem(tr("Unknown/Blank (VIP?)", "Engine Category"), QVariant(8));
       widget->addItem(tr("Invasion", "Engine Category"), QVariant(9));
       widget->addItem(tr("Stockpile", "Engine Category"), QVariant(10));
+      // MCC lumps category #11 in with Action Sack
       widget->addItem(tr("Race", "Engine Category"), QVariant(12));
       widget->addItem(tr("Headhunter", "Engine Category"), QVariant(13));
+      // MCC does not display category #14
+      // MCC does not display category #15
       widget->addItem(tr("Action Sack", "Engine Category"), QVariant(ce_gametypeCategoryIndexActionSack));
    }
    //

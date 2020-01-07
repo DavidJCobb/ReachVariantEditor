@@ -220,6 +220,9 @@
     <ClCompile Include="helpers\reference_tracked_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\script_editor\page_forge_labels.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -294,6 +297,9 @@
     <QtMoc Include="ui\script_editor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\script_editor\page_forge_labels.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\widget_loadout_options.ui">
@@ -348,6 +354,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\script_editor.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor\page_forge_labels.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ScriptEditorPageForgeLabels</class>
+ <widget class="QWidget" name="ScriptEditorPageForgeLabels">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>304</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QListWidget" name="list"/>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_5">
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="reqFlagTeam">
+       <property name="text">
+        <string>Require Team</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="reqFlagObjectType">
+       <property name="text">
+        <string>Require Object Type</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QSpinBox" name="minCount">
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="reqFlagNumber">
+       <property name="text">
+        <string>Require Number</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>Map Must Have At Least</string>
+       </property>
+       <property name="buddy">
+        <cstring>minCount</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="MPObjectTypeCombobox" name="reqObjectType"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="MegaloConstTeamIndexCombobox" name="reqTeam"/>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSpinBox" name="reqNumber">
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="buttonAdd">
+       <property name="text">
+        <string>Add New</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonMoveUp">
+       <property name="text">
+        <string>Move Up</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonMoveDown">
+       <property name="text">
+        <string>Move Down</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonDelete">
+       <property name="text">
+        <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MegaloConstTeamIndexCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/widgets/const_team_index_combobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MPObjectTypeCombobox</class>
+   <extends>QComboBox</extends>
+   <header>ui/widgets/mp_object_type_combobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>list</tabstop>
+  <tabstop>buttonAdd</tabstop>
+  <tabstop>buttonMoveUp</tabstop>
+  <tabstop>buttonMoveDown</tabstop>
+  <tabstop>buttonDelete</tabstop>
+  <tabstop>reqFlagObjectType</tabstop>
+  <tabstop>reqObjectType</tabstop>
+  <tabstop>reqFlagTeam</tabstop>
+  <tabstop>reqTeam</tabstop>
+  <tabstop>reqFlagNumber</tabstop>
+  <tabstop>reqNumber</tabstop>
+  <tabstop>minCount</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

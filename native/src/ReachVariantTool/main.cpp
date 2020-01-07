@@ -23,11 +23,12 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  = FIGURE OUT HOW TO SHOW LABELED TICKMARKS ON SCRIPTED OPTION SLIDERS.
+//  - The "VIP" category is considered valid by MCC, but shows up blank. Should 
+//    we note this in the UI?
 //
-//     - Invasion Slayer contains a single slider option; Speedpile contains two. 
-//       Speedpile's options are nameless, and none of the options are readily 
-//       comprehensible because their value range is not visible.
+//     - The list of categories that we have at present isn't contiguous. We 
+//       should test "missing" indices in the middle of the list and see if 
+//       they do anything interesting.
 //
 //  - Work on script editor
 //
@@ -60,6 +61,17 @@ int main(int argc, char *argv[]) {
 //             consistent when resaving a game variant.
 //
 //           = THIS IS IMPLEMENTED FOR FORGE LABELS, SO GO FINISH THEIR EDITOR.
+//
+//              - The UI is going to need to be altered: we need to make the 
+//                Forge label list static -- make it so that you select something 
+//                in the list and click a dialog button to edit it. Alternatively, 
+//                we need to put buttons (move up, move down, remove) on each 
+//                individual list item.
+//
+//                 = DO THIS: Have a listbox in the upper-left with label names; 
+//                   buttons to add/move/remove in the upper-right; and then the 
+//                   bottom portion can show editing fields for whatever label is 
+//                   currently selected in the listbox.
 //
 //     - Metadata strings
 //

@@ -35,4 +35,11 @@ namespace cobb {
       static constexpr unsigned int value = bitcount(std::numeric_limits<std::make_unsigned_t<T>>::max());
    };
    template<typename T> inline constexpr unsigned int bits_in = _bits_in<T>::value;
+
+   template<typename T, typename U> inline constexpr void modify_bit(T& value, U mask, bool state) noexcept {
+      if (state)
+         value |= mask;
+      else
+         value &= ~mask;
+   }
 }
