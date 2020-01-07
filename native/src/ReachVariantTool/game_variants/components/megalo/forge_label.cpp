@@ -15,7 +15,11 @@ namespace Megalo {
    void ReachForgeLabel::postprocess_string_indices(ReachStringTable& table) noexcept {
       this->name = table.get_entry(this->nameIndex);
    }
-   void ReachForgeLabel::write(cobb::bitwriter& stream) const noexcept {
+   void ReachForgeLabel::write(cobb::bitwriter& stream) noexcept {
+      if (this->name) {
+         this->nameIndex = this->name->index();
+      } else
+         this->nameIndex = -1;
       this->nameIndex.write(stream);
       this->requirements.write(stream);
       if (this->requires_object_type())

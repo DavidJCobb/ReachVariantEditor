@@ -14,10 +14,23 @@ class MPObjectTypeCombobox : public QComboBox {
          auto m = this->model();
          if (m)
             m->sort(0);
+         //
+         QObject::connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged), [this]() {
+            this->currentDataChanged(this->value());
+         });
       }
       void setValue(uint32_t t) {
          auto index = this->findData((int)t);
          if (index >= 0)
             this->setCurrentIndex(index);
       }
+      uint32_t value() {
+         auto data = this->currentData();
+         if (!data.isValid())
+            return 0;
+         return data.toInt();
+      }
+      //
+   signals:
+      void currentDataChanged(uint32_t);
 };

@@ -245,7 +245,7 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    //
    return true;
 }
-void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) const noexcept {
+void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
    auto& bytes = writer.bytes;
    auto& bits  = writer.bits;
    auto& wd    = this->writeData;
@@ -415,7 +415,7 @@ bool GameVariant::read(cobb::mapped_file& file) {
    }
    return true;
 }
-void GameVariant::write(cobb::bit_or_byte_writer& writer) const noexcept {
+void GameVariant::write(cobb::bit_or_byte_writer& writer) noexcept {
    this->blamHeader.write(writer.bytes);
    this->contentHeader.write(writer.bytes);
    writer.synchronize();

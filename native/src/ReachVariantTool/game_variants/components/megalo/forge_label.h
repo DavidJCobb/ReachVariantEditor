@@ -21,9 +21,9 @@ namespace Megalo {
          };
          using requirement_int   = std::underlying_type_t<requirement_flags::type>;
          //
-         ReachString* name = nullptr;
+         MegaloStringRef           name = MegaloStringRef::make(*this);
          MegaloStringIndexOptional nameIndex;
-         cobb::bitnumber<3, requirement_int> requirements = 0;
+         cobb::bitnumber<3, requirement_int> requirements = 0; // testing indicates that these actually aren't requirements but I don't know what they are yet
          object_type_index_optional  requiredObjectType = -1;
          const_team_index            requiredTeam       = Megalo::const_team::none;
          cobb::bytenumber<int16_t>   requiredNumber     = 0;
@@ -33,7 +33,7 @@ namespace Megalo {
          //
          void read(cobb::ibitreader&) noexcept;
          void postprocess_string_indices(ReachStringTable& table) noexcept;
-         void write(cobb::bitwriter& stream) const noexcept;
+         void write(cobb::bitwriter& stream) noexcept;
          //
          inline bool requires_object_type()   const noexcept { return this->requirements & (requirement_int)requirement_flags::objects_of_type; }
          inline bool requires_assigned_team() const noexcept { return this->requirements & (requirement_int)requirement_flags::assigned_team; }

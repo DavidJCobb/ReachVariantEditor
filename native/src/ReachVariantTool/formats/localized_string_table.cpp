@@ -30,6 +30,14 @@ namespace reach {
    }
 };
 
+int32_t ReachString::index() const noexcept {
+   auto& list = this->owner.strings;
+   auto  size = list.size();
+   for (size_t i = 0; i < size; i++)
+      if (this == list[i])
+         return i;
+   return -1;
+}
 void ReachString::read_offsets(cobb::ibitreader& stream, ReachStringTable& table) noexcept {
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
@@ -57,7 +65,7 @@ void ReachString::write_offsets(cobb::bitwriter& stream, const ReachStringTable&
       stream.write(offset, table.offset_bitlength);
    }
 }
-void ReachString::write_strings(std::string& out) const noexcept {
+void ReachString::write_strings(std::string& out) noexcept {
    #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE
       bool allEqual = true;
       for (size_t i = 1; i < this->offsets.size(); i++) {
@@ -153,6 +161,14 @@ void ReachString::write_strings(std::string& out) const noexcept {
       out += '\0';
    }
 }
+bool ReachString::can_be_forge_label() const noexcept {
+   auto& first = this->strings[0];
+   for (size_t i = 1; i < reach::language_count; i++) {
+      if (this->strings[i] != first)
+         return false;
+   }
+   return true;
+}
 
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
@@ -202,14 +218,16 @@ void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
 }
 bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
-   this->strings.resize(count);
-   for (size_t i = 0; i < count; i++)
-      this->strings[i].read_offsets(stream, *this);
+   this->strings.reserve(count);
+   for (size_t i = 0; i < count; i++) {
+      auto& string = *this->strings.emplace_back(new ReachString(*this));
+      string.read_offsets(stream, *this);
+   }
    if (count) {
       auto buffer = this->_make_buffer(stream);
       if (buffer) {
          for (size_t i = 0; i < count; i++)
-            this->strings[i].read_strings(buffer);
+            this->strings[i]->read_strings(buffer);
          free(buffer);
       } else
          return false;
@@ -220,7 +238,8 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
    stream.write(this->strings.size(), this->count_bitlength);
    if (this->strings.size()) {
       std::string combined; // UTF-8 buffer holding all string data including null terminators
-      for (auto& string : this->strings) {
+      for (auto& ptr : this->strings) {
+         auto& string = *ptr;
          string.write_strings(combined);
          string.write_offsets(stream, *this);
       }

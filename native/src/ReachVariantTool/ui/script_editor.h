@@ -8,9 +8,9 @@ class MegaloScriptEditorWindow : public QDialog {
    public:
       MegaloScriptEditorWindow(QWidget* parent = nullptr);
       //
-      static MegaloScriptEditorWindow& get() {
-         static MegaloScriptEditorWindow instance;
-         return instance;
+      int exec() Q_DECL_OVERRIDE {
+         this->updateFromVariant();
+         return QDialog::exec();
       }
       void open() Q_DECL_OVERRIDE {
          this->updateFromVariant();

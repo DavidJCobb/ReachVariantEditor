@@ -102,7 +102,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
    #if _DEBUG
-      QObject::connect(this->ui.actionEditScript, &QAction::triggered, &MegaloScriptEditorWindow::get(), &MegaloScriptEditorWindow::open);
+      QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
+         (new MegaloScriptEditorWindow(this))->exec();
+      });
    #else
       this->ui.actionEditScript->setEnabled(false);
       this->ui.actionEditScript->setVisible(false);
@@ -223,7 +225,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          out << "\r\n\r\n";
          auto& table = mp->scriptData.strings;
          for (size_t i = 0; i < table.strings.size(); i++) {
-            auto& string = table.strings[i];
+            auto& string = *table.strings[i];
             out << "STRING #" << i << ":\r\n";
             for (size_t j = 0; j < string.offsets.size(); j++) {
                out << "   ";

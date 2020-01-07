@@ -83,9 +83,9 @@ namespace cobb {
          void _remove_inbound(reference_tracked_object& subject);
          //
       public:
-         const list_type& get_outbound() const noexcept { return this->outbound; }
-         const list_type& get_inbound()  const noexcept { return this->inbound; }
-         void  sever_from_outbound() noexcept; // sever all outbound references (i.e. removes all inbound references from this object to others)
+         const list_type& get_outbound_references() const noexcept { return this->outbound; }
+         const list_type& get_inbound_references()  const noexcept { return this->inbound; }
+         void  sever_from_outbound_references() noexcept; // sever all outbound references (i.e. removes all inbound references from this object to others)
          //
          reference_tracked_object() {};
          reference_tracked_object(const reference_tracked_object& source) = default; // copy-construct
@@ -99,10 +99,10 @@ namespace cobb {
          // We need this (see above: "THIS CLASS IS SELF-REFERENTIAL").
          //
          ~reference_tracked_object() {
-            this->sever_from_outbound();
+            this->sever_from_outbound_references();
          }
          //
-      protected:
+      public:
          template<class C> class ref final {
             private:
                reference_tracked_object& owner;
@@ -118,7 +118,8 @@ namespace cobb {
                      this->owner._remove_outbound(*this->target);
                   }
                   this->target = other;
-                  this->owner._add_outbound(*other);
+                  if (other)
+                     this->owner._add_outbound(*other);
                   return *this;
                }
                C* operator->() const noexcept { return this->target; }

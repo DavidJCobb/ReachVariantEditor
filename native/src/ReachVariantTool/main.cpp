@@ -23,12 +23,32 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  - The "VIP" category is considered valid by MCC, but shows up blank. Should 
-//    we note this in the UI?
+//  - FORGE LABEL EDITING
 //
-//     - The list of categories that we have at present isn't contiguous. We 
-//       should test "missing" indices in the middle of the list and see if 
-//       they do anything interesting.
+//     - Design an editing widget for picking the Forge label's name. I'm 
+//       thinking of a combobox with all eligible strings, and next to it, a 
+//       button labeled "..." which opens a popup modal to edit the current 
+//       string (with the option to "save as new").
+//
+//        - The combobox should have an OPTION to filter it to strings suitable 
+//          for use as Forge labels: strings where all non-absent translations 
+//          are identical.
+//
+//        - The combobox-and-button should be designed as reusable widgets.
+//
+//     - Implement the drop-downs for picking a team and object type, and the 
+//       spinbox for picking a number.
+//
+//        - We should use Forge to test whether the "number" requirement is a 
+//          Spawn Sequence value.
+//
+//        - When a requirement's checkbox is unchecked, the combobox should be 
+//          set to blank (if possible without removing items) or disabled.
+//
+//     - Implement the buttons for adding, reordering, and removing labels. 
+//       The user should not be allowed to remove a label that is in use by any 
+//       part of the gametype script (cobb::reference_tracked_object has member 
+//       functions we can use to check this).
 //
 //  - Work on script editor
 //
@@ -46,32 +66,8 @@ int main(int argc, char *argv[]) {
 //          from doing a one-time fix-up on everything, swapping out indices for 
 //          pointers.
 //
-//           - This would also require that we swap out every std::vector<Foo> 
-//             for a std::vector<Foo*> i.e. allocate Forge labels, etc., on the 
-//             heap. As of this writing we currently DO NOT do this for strings 
-//             (see below) despite having a fix-up ("post-process") for them, 
-//             which means that allowing the user to add/remove strings at this 
-//             time WILL cause access violations.
-//
-//           - A one-time fix-up would greatly simplify the process of working 
-//             with all of these objects -- of being able to add, remove, and 
-//             reorder them. We'd still want to keep a central std::vector of 
-//             each item, both so that unused items can be identified and 
-//             possibly cleaned from the variant, and so that we can keep indices 
-//             consistent when resaving a game variant.
-//
-//           = THIS IS IMPLEMENTED FOR FORGE LABELS, SO GO FINISH THEIR EDITOR.
-//
-//              - The UI is going to need to be altered: we need to make the 
-//                Forge label list static -- make it so that you select something 
-//                in the list and click a dialog button to edit it. Alternatively, 
-//                we need to put buttons (move up, move down, remove) on each 
-//                individual list item.
-//
-//                 = DO THIS: Have a listbox in the upper-left with label names; 
-//                   buttons to add/move/remove in the upper-right; and then the 
-//                   bottom portion can show editing fields for whatever label is 
-//                   currently selected in the listbox.
+//           = THIS IS IMPLEMENTED FOR FORGE LABELS; WE'LL HAVE TO GET AROUND TO 
+//             IMPLEMENTING IT FOR EVERYTHING ELSE.
 //
 //     - Metadata strings
 //
@@ -87,7 +83,7 @@ int main(int argc, char *argv[]) {
 //
 //        - Viewing - DONE
 //
-//        - Implement editing of basic properties
+//        - Implement editing of basic properties - IN PROGRESS
 //
 //        - Implement editing of names
 //

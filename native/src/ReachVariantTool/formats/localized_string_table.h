@@ -3,7 +3,9 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
+#include "../helpers/reference_tracked_object.h"
 #include "../helpers/stream.h"
+#include "../helpers/standalones/unique_pointer.h"
 
 namespace reach {
    enum class language {
@@ -25,12 +27,14 @@ namespace reach {
    extern bool language_is_optional(language l) noexcept;
 };
 
-using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
-using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
-
+class ReachString;
 class ReachStringTable;
 
-class ReachString {
+using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
+using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
+using MegaloStringRef           = cobb::reference_tracked_object::ref<ReachString>;
+
+class ReachString : public cobb::reference_tracked_object {
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 
@@ -45,13 +49,18 @@ class ReachString {
       //
       // Strings are encoded as UTF-8.
       //
-      mutable std::array<int, reach::language_count> offsets;
+      ReachString(ReachStringTable& o) : owner(o) {}
+      //
+      ReachStringTable& owner;
+      std::array<int, reach::language_count>         offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
+      //
+      int32_t index() const noexcept;
       //
       void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
-      void write_strings(std::string& out) const noexcept;
+      void write_strings(std::string& out) noexcept;
       //
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
@@ -60,6 +69,8 @@ class ReachString {
          return this->strings == other.strings;
       }
       bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
+      //
+      bool can_be_forge_label() const noexcept;
 };
 
 class ReachStringTable {
@@ -85,7 +96,7 @@ class ReachStringTable {
          count_bitlength(cobb::bitcount(max_count))
       {}
       //
-      std::vector<ReachString> strings;
+      std::vector<cobb::unique_pointer<ReachString>> strings;
       //
    protected:
       void* _make_buffer(cobb::ibitreader&) const noexcept;
@@ -95,17 +106,7 @@ class ReachStringTable {
       //
       ReachString* get_entry(size_t index) noexcept {
          if (index < this->strings.size())
-            return &this->strings[index];
+            return this->strings[index];
          return nullptr;
       }
-      //
-      ReachStringTable& operator=(const ReachStringTable& other) noexcept {
-         // can't copy bitlengths, etc.; shouldn't ever be assigning tables with different bitsizes anyway
-         this->strings = other.strings;
-         return *this;
-      }
-      bool operator==(const ReachStringTable& other) const noexcept {
-         return this->strings == other.strings;
-      }
-      bool operator!=(const ReachStringTable& other) const noexcept { return !(*this == other); }
 };

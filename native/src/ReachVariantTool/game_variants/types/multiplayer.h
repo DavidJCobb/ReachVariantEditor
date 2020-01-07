@@ -29,7 +29,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
       virtual bool read(cobb::reader&) noexcept override;
-      virtual void write(cobb::bit_or_byte_writer&) const noexcept override;
+      virtual void write(cobb::bit_or_byte_writer&) noexcept override;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
       //

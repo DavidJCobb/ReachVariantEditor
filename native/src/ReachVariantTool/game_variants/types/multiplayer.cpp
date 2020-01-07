@@ -257,7 +257,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    }
    return true;
 }
-void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) const noexcept {
+void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcept {
    writer.synchronize();
    auto& bits = writer.bits;
    //

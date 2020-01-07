@@ -34,7 +34,7 @@
      <item row="2" column="0">
       <widget class="QCheckBox" name="reqFlagTeam">
        <property name="text">
-        <string>Require Team</string>
+        <string>Team</string>
        </property>
       </widget>
      </item>
@@ -48,7 +48,7 @@
      <item row="1" column="0">
       <widget class="QCheckBox" name="reqFlagObjectType">
        <property name="text">
-        <string>Require Object Type</string>
+        <string>Object Type</string>
        </property>
       </widget>
      </item>
@@ -62,7 +62,7 @@
      <item row="3" column="0">
       <widget class="QCheckBox" name="reqFlagNumber">
        <property name="text">
-        <string>Require Number</string>
+        <string>Number</string>
        </property>
       </widget>
      </item>
@@ -95,6 +95,9 @@
         <enum>Qt::Vertical</enum>
        </property>
       </spacer>
+     </item>
+     <item row="0" column="1">
+      <widget class="ReachStringPicker" name="name" native="true"/>
      </item>
     </layout>
    </item>
@@ -161,6 +164,12 @@
    <class>MPObjectTypeCombobox</class>
    <extends>QComboBox</extends>
    <header>ui/widgets/mp_object_type_combobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ReachStringPicker</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/string_picker.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

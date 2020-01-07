@@ -1,8 +1,8 @@
 #pragma once
 #include "../../formats/localized_string_table.h"
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
+#include "../../helpers/stream.h"
 
 class ReachTeamData {
    public:
@@ -20,16 +20,7 @@ class ReachTeamData {
       //
       ReachString* get_name() noexcept {
          if (this->name.strings.size())
-            return &this->name.strings[0];
+            return this->name.strings[0];
          return nullptr;
       }
-      void cloneTo(ReachTeamData&) const noexcept;
-      //
-      #if __cplusplus <= 201703L
-      bool operator==(const ReachTeamData&) const noexcept;
-      bool operator!=(const ReachTeamData& other) const noexcept { return !(*this == other); }
-      #else
-      bool operator==(const ReachTeamData&) const noexcept = default;
-      bool operator!=(const ReachTeamData&) const noexcept = default;
-      #endif
 };

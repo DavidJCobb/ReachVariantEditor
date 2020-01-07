@@ -47,7 +47,7 @@ namespace cobb {
       }
    }
    //
-   void reference_tracked_object::sever_from_outbound() noexcept {
+   void reference_tracked_object::sever_from_outbound_references() noexcept {
       for (auto& entry : this->outbound)
          entry.target->_remove_inbound(*this);
       this->outbound.clear();

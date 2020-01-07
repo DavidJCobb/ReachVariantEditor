@@ -158,6 +158,7 @@
     <ClCompile Include="ui\script_editor\page_forge_labels.cpp" />
     <ClCompile Include="ui\widgets\forge_label_editor.cpp" />
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
+    <ClCompile Include="ui\widgets\string_picker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\main_window.h" />
@@ -190,6 +191,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ui\widgets\string_picker.h" />
     <QtMoc Include="ui\script_editor\page_forge_labels.h" />
     <QtMoc Include="ui\script_editor.h" />
     <QtMoc Include="ui\widgets\mp_object_type_combobox.h" />

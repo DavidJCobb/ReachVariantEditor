@@ -16,10 +16,23 @@ class MegaloConstTeamIndexCombobox : public QComboBox {
          this->addItem(tr("Team 7", "Megalo const team index"), QVariant((int)Megalo::const_team::team_7));
          this->addItem(tr("Team 8", "Megalo const team index"), QVariant((int)Megalo::const_team::team_8));
          this->addItem(tr("Neutral", "Megalo const team index"), QVariant((int)Megalo::const_team::neutral));
+         //
+         QObject::connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged), [this]() {
+            this->currentDataChanged(this->value());
+         });
       }
       void setValue(Megalo::const_team t) {
          auto index = this->findData((int)t);
          if (index >= 0)
             this->setCurrentIndex(index);
       }
+      Megalo::const_team value() {
+         auto data = this->currentData();
+         if (!data.isValid())
+            return Megalo::const_team::none;
+         return (Megalo::const_team)data.toInt();
+      }
+      //
+   signals:
+      void currentDataChanged(Megalo::const_team);
 };

@@ -157,6 +157,8 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          list.bits.modify(index, item->data(Qt::ItemDataRole::CheckStateRole) == Qt::CheckState::Checked);
       });
    }
+   //
+   this->updateFromVariant(nullptr);
 }
 void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
    if (!variant) {
