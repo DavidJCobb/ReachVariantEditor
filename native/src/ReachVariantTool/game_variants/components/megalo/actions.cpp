@@ -802,7 +802,7 @@ namespace Megalo {
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",
-         "Returns a player's armor ability.",
+         "Set whether an object can be garbage-collected.",
          "%2 garbage collection of %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),

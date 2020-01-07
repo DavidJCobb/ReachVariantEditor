@@ -3,6 +3,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QSlider>
+#include <QSpinBox>
 
 PageMPSettingsScripted::PageMPSettingsScripted(QWidget* parent) : QWidget(parent) {
    auto& editor = ReachEditorState::get();
@@ -26,7 +27,7 @@ namespace {
       auto& option = data->scriptData.options[i];
       option.currentValueIndex = index;
    }
-   void _onMegaloSliderChange(QSlider* widget, int value) {
+   void _onMegaloSliderChange(QWidget* widget, int value) {
       auto data = ReachEditorState::get().multiplayerData();
       if (!data)
          return;
@@ -80,19 +81,36 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
          label->setToolTip(QString::fromUtf8(desc->english().c_str()));
       //
       if (option.isRange) {
-         auto slider = new QSlider(Qt::Horizontal, this);
-         slider->setProperty("MegaloOptionIndex", i);
-         slider->setMinimum(option.rangeMin.value);
-         slider->setMaximum(option.rangeMax.value);
-         slider->setValue(option.rangeCurrent);
-         layout->addWidget(slider, i, 1);
+         auto container = new QWidget(this);
+         auto horizontal = new QBoxLayout(QBoxLayout::Direction::LeftToRight);
+         horizontal->setContentsMargins(0, 0, 0, 0);
+         container->setLayout(horizontal);
+         layout->addWidget(container, i, 1);
          //
-         // TODO: display default value?
-         //
-         QObject::connect(slider, QOverload<int>::of(&QSlider::valueChanged), [slider](int v) { _onMegaloSliderChange(slider, v); });
+         auto widget = new QSpinBox(container);
+         widget->setProperty("MegaloOptionIndex", i);
+         widget->setMinimum(option.rangeMin.value);
+         widget->setMaximum(option.rangeMax.value);
+         widget->setSingleStep(1);
+         widget->setValue(option.rangeCurrent);
+         widget->setAlignment(Qt::AlignRight);
+         QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [widget](int v) { _onMegaloSliderChange(widget, v); });
          if (desc)
-            slider->setToolTip(QString::fromUtf8(desc->english().c_str()));
-         label->setBuddy(slider);
+            widget->setToolTip(QString::fromUtf8(desc->english().c_str()));
+         //
+         auto labelMin = new QLabel(container);
+         labelMin->setText(QString::fromUtf8(u8"%1 \u2264 ").arg(option.rangeMin.value));
+         labelMin->setBuddy(widget);
+         labelMin->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+         auto labelMax = new QLabel(container);
+         labelMax->setText(QString::fromUtf8(u8" \u2264 %1").arg(option.rangeMax.value));
+         labelMax->setBuddy(widget);
+         //
+         horizontal->addWidget(labelMin, 2);
+         horizontal->addWidget(widget, 1);
+         horizontal->addWidget(labelMax, 0);
+         //
+         label->setBuddy(widget);
       } else {
          auto combo = new QComboBox(this);
          combo->setProperty("MegaloOptionIndex", i);

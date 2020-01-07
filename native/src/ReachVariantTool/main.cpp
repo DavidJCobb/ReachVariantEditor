@@ -23,6 +23,12 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
+//  = FIGURE OUT HOW TO SHOW LABELED TICKMARKS ON SCRIPTED OPTION SLIDERS.
+//
+//     - Invasion Slayer contains a single slider option; Speedpile contains two. 
+//       Speedpile's options are nameless, and none of the options are readily 
+//       comprehensible because their value range is not visible.
+//
 //  - Work on script editor
 //
 //     = MAKE THE EDITOR WINDOW A MODAL
@@ -120,6 +126,14 @@ int main(int argc, char *argv[]) {
 //             options (and fixing up option indices used in opcodes) that follow 
 //             the one to be deleted. We also need to update the main window in 
 //             response to the options being changed.
+//
+//        = NOTES
+//
+//           - Invasion Slayer is the only gametype I've found with a slider option 
+//             (Vehicle Limit), but that option is flagged as hidden and I'm not sure 
+//             it has a description (so what does it do?). I've tested and verified 
+//             that slider options never display in MCC's UI, even when the disabled 
+//             and hidden flags for them are cleared.
 //
 //     - Scripted traits
 //
