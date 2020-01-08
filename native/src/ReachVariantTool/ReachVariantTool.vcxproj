@@ -134,6 +134,7 @@
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\GametypeIconCombobox.cpp" />
@@ -191,6 +192,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ui\localized_string_editor.h" />
     <ClInclude Include="ui\widgets\string_picker.h" />
     <QtMoc Include="ui\script_editor\page_forge_labels.h" />
     <QtMoc Include="ui\script_editor.h" />

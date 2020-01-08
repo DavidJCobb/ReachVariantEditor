@@ -25,30 +25,35 @@ int main(int argc, char *argv[]) {
 //
 //  - FORGE LABEL EDITING
 //
-//     - Design an editing widget for picking the Forge label's name. I'm 
-//       thinking of a combobox with all eligible strings, and next to it, a 
-//       button labeled "..." which opens a popup modal to edit the current 
-//       string (with the option to "save as new").
+//     - STRING PICKER WIDGET
 //
-//        - The combobox should have an OPTION to filter it to strings suitable 
-//          for use as Forge labels: strings where all non-absent translations 
-//          are identical.
+//        - When the combobox is changed, the widget should send a signal and 
+//          modify the target ReachStringRef.
 //
-//        - The combobox-and-button should be designed as reusable widgets.
+//        - Make it possible to disable specific strings within the list, so 
+//          that you can't set two Forge labels to use the same string.
 //
-//     - Implement the drop-downs for picking a team and object type, and the 
-//       spinbox for picking a number.
-//
-//        - We should use Forge to test whether the "number" requirement is a 
-//          Spawn Sequence value.
-//
-//        - When a requirement's checkbox is unchecked, the combobox should be 
-//          set to blank (if possible without removing items) or disabled.
+//        - Clicking the button should open a string editor modal.
 //
 //     - Implement the buttons for adding, reordering, and removing labels. 
 //       The user should not be allowed to remove a label that is in use by any 
 //       part of the gametype script (cobb::reference_tracked_object has member 
 //       functions we can use to check this).
+//
+//  - STRING TABLE EDITING
+//
+//     - The string list needs to be updated after changes to a string are saved.
+//
+//     - Strings can contain line breaks, but our UI doesn't easily allow for 
+//       this. Modify the localized string editor: replace each QLineEdit with 
+//       a multi-line plaintext box in the dialog box.
+//
+//     - Implement the "New" and "Delete" buttons, and make it so that double-
+//       clicking on a string opens it for editing.
+//
+//        - (Once we have "New" implemented, we can also add a new Forge label 
+//          for testing's sake -- once we get the buttons there implemented as 
+//          well, of course.)
 //
 //  - Work on script editor
 //

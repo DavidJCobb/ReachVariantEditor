@@ -85,16 +85,18 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          t[i].read(stream);
       //
       count = stream.read_bits(cobb::bitcount(16));
-      o.resize(count);
-      for (int i = 0; i < count; i++)
-         o[i].read(stream);
+      o.reserve(count);
+      for (int i = 0; i < count; i++) {
+         auto& option = *o.emplace_back(new ReachMegaloOption);
+         option.read(stream);
+      }
       //
       sd.strings.read(stream);
       //
       for (auto& traits : t)
          traits.postprocess_string_indices(sd.strings);
       for (auto& option : o)
-         option.postprocess_string_indices(sd.strings);
+         option->postprocess_string_indices(sd.strings);
    }
    this->stringTableIndexPointer.read(stream);
    this->localizedName.read(stream);
@@ -337,7 +339,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          traits.write(bits);
       bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
-         option.write(bits);
+         option->write(bits);
       sd.strings.write(bits);
    }
    this->stringTableIndexPointer.write(bits);
@@ -426,7 +428,7 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
       auto& cd = clone->scriptData;
       auto& cc = clone->scriptContent;
       for (auto& option : cd.options)
-         option.postprocess_string_indices(stringTable);
+         option->postprocess_string_indices(stringTable);
       for (auto& traits : cd.traits)
          traits.postprocess_string_indices(stringTable);
       for (auto& stat : cc.stats)

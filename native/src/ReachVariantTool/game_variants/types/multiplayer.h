@@ -92,7 +92,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       } options;
       struct {
          std::vector<ReachMegaloPlayerTraits> traits;
-         std::vector<ReachMegaloOption> options;
+         std::vector<cobb::unique_pointer<ReachMegaloOption>> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
       MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)

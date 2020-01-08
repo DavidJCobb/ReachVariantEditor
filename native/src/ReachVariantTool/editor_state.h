@@ -34,6 +34,7 @@ class ReachEditorState : public QObject {
       void switchedMultiplayerTeam(GameVariant*, int8_t index, ReachTeamData*);
       void switchedPlayerTraits(ReachPlayerTraits* traits);
       //
+      void stringModified(uint32_t index);
       void stringTableModified();
       void teamColorModified(ReachTeamData*); // exists to help with team editing UI, i.e. it's fired from outside, not from inside
       //

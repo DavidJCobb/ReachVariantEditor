@@ -1,6 +1,7 @@
 #include "script_editor.h"
 #include "widgets/forge_label_editor.h"
 #include "../game_variants/data/mp_object_types.h"
+#include "localized_string_editor.h"
 
 namespace {
    struct _MapID {
@@ -65,10 +66,16 @@ namespace {
 MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
    //
+   auto& editor = ReachEditorState::get();
+   //
    QObject::connect(this->ui.navigation, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* current, QListWidgetItem* previous) {
       auto stack = this->ui.stack;
       if (current->text() == "Metadata Strings") {
          stack->setCurrentWidget(this->ui.pageMetadata);
+         return;
+      }
+      if (current->text() == "All Other Strings") {
+         stack->setCurrentWidget(this->ui.pageStringTable);
          return;
       }
       if (current->text() == "Forge Labels") {
@@ -91,6 +98,36 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
       // TODO: other pages
       //
    });
+   {  // String table
+      QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) {
+         //
+         // TODO: refresh string list
+         //
+      });
+      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
+         //
+         // TODO: refresh entire string list
+         //
+      });
+      QObject::connect(this->ui.stringTableButtonEdit, &QPushButton::clicked, [this]() {
+         auto mp = ReachEditorState::get().multiplayerData();
+         if (!mp)
+            return;
+         auto  list  = this->ui.stringTableList;
+         auto& table = mp->scriptData.strings;
+         auto  index = list->currentRow();
+         if (index < 0 || index > table.strings.size())
+            return;
+         auto& string = *table.strings[index];
+         uint32_t flags = 0;
+         // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
+         LocalizedStringEditorModal::startEditing(this, flags, &string);
+      });
+      //
+      // TODO: New button
+      // TODO: Delete button
+      //
+   }
    {  // Map permissions - map ID list
       auto& widget = this->ui.fieldMapPermsList;
       //
@@ -169,6 +206,17 @@ void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
    auto mp = variant->get_multiplayer_data();
    if (!mp)
       return;
+   {  // String table
+      auto  list  = this->ui.stringTableList;
+      list->clear();
+      //
+      auto& table = mp->scriptData.strings;
+      auto  count = table.strings.size();
+      for (size_t i = 0; i < count; i++) {
+         auto& string = *table.strings[i];
+         list->addItem(QString::fromUtf8(string.english().c_str()));
+      }
+   }
    {  // Map permissions
       auto& perms = mp->mapPermissions;
       this->ui.fieldMapPermsType->setCurrentIndex((int)perms.type);

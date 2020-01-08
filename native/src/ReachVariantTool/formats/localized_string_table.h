@@ -27,6 +27,13 @@ namespace reach {
    extern bool language_is_optional(language l) noexcept;
 };
 
+struct ReachStringFlags { // used for UI stuff
+   ReachStringFlags() = delete;
+   enum type {
+      SingleLanguageString = 0x01,
+   };
+};
+
 class ReachString;
 class ReachStringTable;
 

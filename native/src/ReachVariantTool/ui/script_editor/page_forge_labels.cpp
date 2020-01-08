@@ -4,6 +4,7 @@
 ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
+   this->ui.name->setAllowNoString(true);
    this->ui.name->setLimitedToSingleLanguageStrings(true);
    //
    auto& editor = ReachEditorState::get();
@@ -76,12 +77,15 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
    auto& list = mp->scriptContent.forgeLabels;
    container->clear();
    for (size_t i = 0; i < list.size(); i++) {
+      auto  item  = new QListWidgetItem;
       auto& label = *list[i];
       if (label.name) {
-         container->addItem(QString::fromUtf8(label.name->english().c_str()));
+         item->setText(QString::fromUtf8(label.name->english().c_str()));
       } else {
-         container->addItem(tr("<unnamed label %1>").arg(i));
+         item->setText(tr("<unnamed label %1>").arg(i));
       }
+      item->setData(Qt::ItemDataRole::UserRole, i);
+      container->addItem(item);
    }
 }
 void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {

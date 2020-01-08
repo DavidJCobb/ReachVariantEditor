@@ -24,7 +24,7 @@ namespace {
       auto& list   = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = data->scriptData.options[i];
+      auto& option = *data->scriptData.options[i];
       option.currentValueIndex = index;
    }
    void _onMegaloSliderChange(QWidget* widget, int value) {
@@ -40,7 +40,7 @@ namespace {
       auto& list = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = data->scriptData.options[i];
+      auto& option = *data->scriptData.options[i];
       option.rangeCurrent = value;
    }
 }
@@ -66,8 +66,8 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
       return;
    const auto& options = data->scriptData.options;
    for (uint32_t i = 0; i < options.size(); i++) {
-      auto& option = options[i];
-      auto  desc   = option.desc;
+      auto&        option = *options[i];
+      ReachString* desc   = option.desc;
       //
       auto label = new QLabel(this);
       label->setProperty("MegaloOptionIndex", i);
@@ -89,8 +89,8 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
          //
          auto widget = new QSpinBox(container);
          widget->setProperty("MegaloOptionIndex", i);
-         widget->setMinimum(option.rangeMin.value);
-         widget->setMaximum(option.rangeMax.value);
+         widget->setMinimum(option.rangeMin->value);
+         widget->setMaximum(option.rangeMax->value);
          widget->setSingleStep(1);
          widget->setValue(option.rangeCurrent);
          widget->setAlignment(Qt::AlignRight);
@@ -99,11 +99,11 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
             widget->setToolTip(QString::fromUtf8(desc->english().c_str()));
          //
          auto labelMin = new QLabel(container);
-         labelMin->setText(QString::fromUtf8(u8"%1 \u2264 ").arg(option.rangeMin.value));
+         labelMin->setText(QString::fromUtf8(u8"%1 \u2264 ").arg(option.rangeMin->value));
          labelMin->setBuddy(widget);
          labelMin->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
          auto labelMax = new QLabel(container);
-         labelMax->setText(QString::fromUtf8(u8" \u2264 %1").arg(option.rangeMax.value));
+         labelMax->setText(QString::fromUtf8(u8" \u2264 %1").arg(option.rangeMax->value));
          labelMax->setBuddy(widget);
          //
          horizontal->addWidget(labelMin, 2);
@@ -115,7 +115,7 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
          auto combo = new QComboBox(this);
          combo->setProperty("MegaloOptionIndex", i);
          for (uint32_t j = 0; j < option.values.size(); j++) {
-            auto& value = option.values[j];
+            auto& value = *option.values[j];
             if (value.name) {
                combo->addItem(QString::fromUtf8(value.name->english().c_str()), (int16_t)value.value);
             } else {

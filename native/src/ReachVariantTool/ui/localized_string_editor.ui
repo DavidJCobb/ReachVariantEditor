@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>LocalizedStringEditorModal</class>
+ <widget class="QDialog" name="LocalizedStringEditorModal">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -163,16 +163,23 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonCancel">
+      <widget class="QPushButton" name="buttonSave">
        <property name="text">
-        <string>Cancel</string>
+        <string>Save</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonSave">
+      <widget class="QPushButton" name="buttonSaveAsNew">
        <property name="text">
-        <string>OK</string>
+        <string>Save as New</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonCancel">
+       <property name="text">
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
@@ -242,8 +249,6 @@
   <tabstop>fieldChineseSimp</tabstop>
   <tabstop>fieldPortugese</tabstop>
   <tabstop>fieldPolish</tabstop>
-  <tabstop>buttonCancel</tabstop>
-  <tabstop>buttonSave</tabstop>
  </tabstops>
  <resources/>
  <connections/>
