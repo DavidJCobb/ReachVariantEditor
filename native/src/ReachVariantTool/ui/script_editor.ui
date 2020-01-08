@@ -275,45 +275,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QListWidget" name="stringTableList"/>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPushButton" name="stringTableButtonEdit">
-           <property name="text">
-            <string>Edit...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="stringTableButtonNew">
-           <property name="text">
-            <string>New...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="stringTableButtonDelete">
-           <property name="text">
-            <string>Delete</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <widget class="ScriptEditorPageStringTable" name="pageContentStringTable" native="true"/>
        </item>
       </layout>
      </widget>
@@ -396,6 +358,12 @@
    <class>ScriptEditorPageForgeLabels</class>
    <extends>QWidget</extends>
    <header>script_editor/page_forge_labels.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditorPageStringTable</class>
+   <extends>QWidget</extends>
+   <header>script_editor/page_string_table.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -34,6 +34,10 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
       this->reject();
    });
    QObject::connect(this->ui.buttonSave, &QPushButton::clicked, [this]() {
+      if (!this->_target) { // should never happen
+         this->reject();
+         return;
+      }
       auto s = this->_target;
       for (auto& control : this->languageFields) {
          auto lang = control->property("ReachLanguage");
@@ -47,14 +51,46 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
       ReachEditorState::get().stringModified(s->index());
       this->accept();
    });
-   //
-   // TODO: Save button
-   // TODO: Save as New button
-   //
+   QObject::connect(this->ui.buttonSaveAsNew, &QPushButton::clicked, [this]() {
+      if (!this->_target) { // should never happen
+         this->reject();
+         return;
+      }
+      auto s = this->_target->owner.add_new();
+      if (!s)
+         return;
+      auto r = this->_targetRef;
+      for (auto& control : this->languageFields) {
+         auto lang = control->property("ReachLanguage");
+         if (!lang.isValid())
+            continue;
+         auto index = lang.toInt();
+         if (index < 0 || index >= reach::language_count)
+            continue;
+         s->strings[index] = control->text().toUtf8();
+      }
+      if (this->_targetRef) {
+         *this->_targetRef = s;
+      }
+      ReachEditorState::get().stringTableModified();
+      this->accept();
+   });
 }
 /*static*/ void LocalizedStringEditorModal::startEditing(QWidget* parent, uint32_t flags, ReachString* target) {
    LocalizedStringEditorModal modal(parent);
-   modal._target = target;
+   modal._targetRef = nullptr;
+   modal._target    = target;
+   modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
+   //
+   // TODO: anything else?
+   //
+   modal.updateControls();
+   modal.exec();
+}
+/*static*/ void LocalizedStringEditorModal::startEditing(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef) {
+   LocalizedStringEditorModal modal(parent);
+   modal._targetRef = &targetRef;
+   modal._target    = targetRef;
    modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
    // TODO: anything else?
@@ -63,7 +99,9 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    modal.exec();
 }
 void LocalizedStringEditorModal::updateControls() {
-   auto target = this->_target;
+   auto  target = this->_target;
+   auto& editor = ReachEditorState::get();
+   auto  mp     = editor.multiplayerData();
    //
    if (target) {
       this->ui.labelStringIndex->setText(this->ui.labelStringIndex->text().arg(target->index()));
@@ -102,11 +140,11 @@ void LocalizedStringEditorModal::updateControls() {
          }
       });
    }
+   if (mp && mp->scriptData.strings.is_at_count_limit()) {
+      this->ui.buttonSaveAsNew->setDisabled(true);
+   }
 }
 
 // TODO:
-//
-// Send signal ReachEditorState::stringModified with the index of the modified string when saving, but not when using 
-// save as new.
 //
 // Send signal ReachEditorState::stringTableModified when using save as new.

@@ -10,7 +10,12 @@ class ReachStringPicker : public QWidget {
    public:
       ReachStringPicker(QWidget* parent = nullptr, uint32_t flags = 0);
       //
+      void addBlacklistedString(const QString&) noexcept;
+      const QList<QString>& blacklist() const noexcept { return this->_blacklist; }
+      void clearBlacklistedStrings() noexcept;
       void setAllowNoString(bool) noexcept;
+      void setBlacklistedStrings(const QList<QString>&) noexcept;
+      void setBlacklistedStrings(QList<QString>&&) noexcept;
       void setLimitedToSingleLanguageStrings(bool) noexcept;
       void setTarget(MegaloStringRef& r) noexcept {
          this->_targetRef = &r;
@@ -23,6 +28,7 @@ class ReachStringPicker : public QWidget {
       bool _limitToSingleLanguageStrings = false;
       QComboBox* _combobox = nullptr;
       QPushButton* _button = nullptr;
+      QList<QString> _blacklist;
       //
       void refreshList();
       void refreshSelection();

@@ -121,5 +121,17 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    this->ui.reqObjectType->setDisabled(!label.requires_object_type());
    this->ui.reqTeam->setDisabled(!label.requires_assigned_team());
    //
+   {
+      QList<QString> others;
+      for (size_t i = 0; i < labels.size(); i++) {
+         if (i == this->currentForgeLabel)
+            continue;
+         auto& other = *labels[i];
+         if (!other.name)
+            continue;
+         others.push_back(QString::fromUtf8(other.name->english().c_str()));
+      }
+      this->ui.name->setBlacklistedStrings(std::move(others));
+   }
    this->ui.name->setTarget(label.name);
 }

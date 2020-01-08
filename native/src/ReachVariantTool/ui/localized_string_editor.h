@@ -10,13 +10,15 @@ class LocalizedStringEditorModal : public QDialog {
       LocalizedStringEditorModal(QWidget* parent = nullptr);
       //
       static void startEditing(QWidget* parent, uint32_t flags = 0, ReachString* target = nullptr);
+      static void startEditing(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef);
       //
    private:
       Ui::LocalizedStringEditorModal ui;
       //
       std::vector<QLineEdit*> languageFields;
       //
-      ReachString* _target = nullptr;
+      ReachString*     _target    = nullptr;
+      MegaloStringRef* _targetRef = nullptr;
       bool _limitToSingleLanguageStrings = false;
       //
       void updateControls();

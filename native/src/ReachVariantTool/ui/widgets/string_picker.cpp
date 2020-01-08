@@ -45,18 +45,38 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
    //
    auto& editor = ReachEditorState::get();
    QObject::connect(&editor, &ReachEditorState::stringModified, this, &ReachStringPicker::refreshListItem);
+   QObject::connect(&editor, &ReachEditorState::stringTableModified, this, &ReachStringPicker::refreshList);
    //
    this->refreshList();
 }
 
+void ReachStringPicker::addBlacklistedString(const QString& s) noexcept {
+   this->_blacklist.push_back(s);
+   this->refreshList();
+}
+void ReachStringPicker::clearBlacklistedStrings() noexcept {
+   this->_blacklist.clear();
+   this->refreshList();
+}
 void ReachStringPicker::setAllowNoString(bool is) noexcept {
    this->_allowNoString = is;
+   this->refreshList();
+}
+void ReachStringPicker::setBlacklistedStrings(const QList<QString>& list) noexcept {
+   this->_blacklist.clear();
+   this->_blacklist = list;
+   this->refreshList();
+}
+void ReachStringPicker::setBlacklistedStrings(QList<QString>&& list) noexcept {
+   this->_blacklist.clear();
+   this->_blacklist.swap(list);
    this->refreshList();
 }
 void ReachStringPicker::setLimitedToSingleLanguageStrings(bool is) noexcept {
    this->_limitToSingleLanguageStrings = is;
    this->refreshList();
 }
+
 void ReachStringPicker::refreshList() {
    this->_combobox->clear();
    auto mp = ReachEditorState::get().multiplayerData();
@@ -69,13 +89,40 @@ void ReachStringPicker::refreshList() {
    }
    auto& table = mp->scriptData.strings;
    for (size_t i = 0; i < table.strings.size(); i++) {
-      auto& string = *table.strings[i];
+      auto& string  = *table.strings[i];
+      bool  allSame = string.can_be_forge_label();
       //
       if (this->_limitToSingleLanguageStrings)
-         if (!string.can_be_forge_label())
+         if (!allSame)
             continue;
       //
-      this->_combobox->addItem(QString::fromUtf8(string.english().c_str()), QVariant(i));
+      QString text = QString::fromUtf8(string.english().c_str());
+      if (this->_blacklist.size()) {
+         bool skip = false;
+         if (allSame) {
+            for (auto& bl : this->_blacklist) {
+               if (bl == text) {
+                  skip = true;
+                  break;
+               }
+            }
+         } else {
+            for (auto& bl : this->_blacklist) {
+               for (auto& tl : string.strings) {
+                  if (QString::fromUtf8(tl.c_str()) == text) {
+                     skip = true;
+                     break;
+                  }
+               }
+               if (skip)
+                  break;
+            }
+         }
+         if (skip)
+            continue;
+      }
+      //
+      this->_combobox->addItem(text, QVariant(i));
    }
    this->refreshSelection();
 }

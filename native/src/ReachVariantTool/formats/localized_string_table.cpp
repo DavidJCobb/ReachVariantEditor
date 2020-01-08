@@ -287,3 +287,9 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
       }
    }
 }
+ReachString* ReachStringTable::add_new() noexcept {
+   if (this->is_at_count_limit())
+      return nullptr;
+   auto& string = *this->strings.emplace_back(new ReachString(*this));
+   return &string;
+}

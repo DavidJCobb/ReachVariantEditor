@@ -30,19 +30,37 @@ int main(int argc, char *argv[]) {
 //        - When the combobox is changed, the widget should send a signal and 
 //          modify the target ReachStringRef.
 //
-//        - Make it possible to disable specific strings within the list, so 
-//          that you can't set two Forge labels to use the same string.
-//
-//        - Clicking the button should open a string editor modal.
-//
 //     - Implement the buttons for adding, reordering, and removing labels. 
 //       The user should not be allowed to remove a label that is in use by any 
 //       part of the gametype script (cobb::reference_tracked_object has member 
 //       functions we can use to check this).
 //
+//        - Because Forge labels are reference_tracked_objects, we can't create 
+//          them on the stack or directly in an array. This means that we can't 
+//          use a temporary when reordering labels (i.e. tmp = a; a = b; b = tmp). 
+//          Instead, we'll need to specialize std::swap for Forge labels; in fact, 
+//          we'll have to do that for any reference_tracked_object subclass that 
+//          we wish to reorder.
+//
+//           - To make this easier, I should probably create cobb::memswap, which 
+//             uses XOR swapping to swap the contents of two memory addresses, 
+//             i.e. cobb::memswap(a, b, size) in the style of memcpy and memset.
+//
+//     - When we have the ability to create new strings and new Forge labels, 
+//       test to make sure that the string picker works in full:
+//
+//        - Changing the drop-down should change the label name.
+//
+//        - "Save As New" should set the label's name to the newly-created string.
+//
+//        - All changes should save to the game variant file properly.
+//
 //  - STRING TABLE EDITING
 //
-//     - The string list needs to be updated after changes to a string are saved.
+//     - When we finish editing a string, the currently-selected string in the 
+//       list widget is deselected. Why?
+//
+//        - When we Save As New, the list widget should select the new string.
 //
 //     - Strings can contain line breaks, but our UI doesn't easily allow for 
 //       this. Modify the localized string editor: replace each QLineEdit with 
@@ -55,9 +73,22 @@ int main(int argc, char *argv[]) {
 //          for testing's sake -- once we get the buttons there implemented as 
 //          well, of course.)
 //
-//  - Work on script editor
+//        - Grey out the "Edit" and "Delete" buttons when no string is selected.
 //
-//     = MAKE THE EDITOR WINDOW A MODAL
+//     - If we start editing a string that is in use by a Forge label, we should 
+//       be blocked from changing its localizations to different values. This 
+//       requires the ability to check *what* is using a string which in turn 
+//       requires that all cobb::reference_tracked_object subclasses support 
+//       dynamic casts -- we need to add a dummy virtual method to that superclass.
+//
+//     - Consider having a button to prune unreferenced strings. Alternatively, 
+//       consider having a button to list them and let the user select which ones 
+//       to delete; a mod author may wish to embed an unused string into the table 
+//       to sign their work, state the script version, etc.. We may even wish to 
+//       automate that process (a string entry could technically be used for 
+//       binary data as long as we avoid null bytes).
+//
+//  - Work on script editor
 //
 //     - General thoughts
 //
@@ -88,7 +119,7 @@ int main(int argc, char *argv[]) {
 //
 //        - Viewing - DONE
 //
-//        - Implement editing of basic properties - IN PROGRESS
+//        - Implement editing of basic properties - DONE
 //
 //        - Implement editing of names
 //

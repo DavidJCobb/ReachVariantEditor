@@ -116,4 +116,10 @@ class ReachStringTable {
             return this->strings[index];
          return nullptr;
       }
+      //
+      inline size_t capacity() const noexcept { return this->max_count; }
+      inline size_t is_at_count_limit() const noexcept { return this->size() >= this->capacity(); }
+      inline size_t size() const noexcept { return this->strings.size(); }
+      //
+      ReachString* add_new() noexcept; // returns nullptr if the table is full
 };
