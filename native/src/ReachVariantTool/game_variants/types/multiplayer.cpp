@@ -161,7 +161,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
       triggers.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         auto trigger = triggers.emplace_back(new Megalo::Trigger).get();
+         auto trigger = triggers.emplace_back(new Megalo::Trigger);
          if (!trigger->read(stream)) {
             error_report.failure_index = i;
             return false;

@@ -183,7 +183,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          }
          auto& triggers = mp->scriptContent.triggers;
          for (size_t i = 0; i < triggers.size(); ++i) {
-            auto& trigger = *triggers[i].get();
+            auto& trigger = *triggers[i];
             if (trigger.entryType == Megalo::entry_type::subroutine)
                continue;
             std::string formatted;

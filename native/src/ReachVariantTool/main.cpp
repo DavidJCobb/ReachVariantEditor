@@ -23,27 +23,6 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  - FORGE LABEL EDITING
-//
-//     - STRING PICKER WIDGET
-//
-//        - When the combobox is changed, the widget should send a signal and 
-//          modify the target ReachStringRef.
-//
-//     - Implement the buttons for adding, reordering, and removing labels. 
-//       The user should not be allowed to remove a label that is in use by any 
-//       part of the gametype script (cobb::reference_tracked_object has member 
-//       functions we can use to check this).
-//
-//     - When we have the ability to create new strings and new Forge labels, 
-//       test to make sure that the string picker works in full:
-//
-//        - Changing the drop-down should change the label name.
-//
-//        - "Save As New" should set the label's name to the newly-created string.
-//
-//        - All changes should save to the game variant file properly.
-//
 //  - STRING TABLE EDITING
 //
 //     - When we finish editing a string, the currently-selected string in the 
@@ -55,14 +34,7 @@ int main(int argc, char *argv[]) {
 //       this. Modify the localized string editor: replace each QLineEdit with 
 //       a multi-line plaintext box in the dialog box.
 //
-//     - Implement the "New" and "Delete" buttons, and make it so that double-
-//       clicking on a string opens it for editing.
-//
-//        - (Once we have "New" implemented, we can also add a new Forge label 
-//          for testing's sake -- once we get the buttons there implemented as 
-//          well, of course.)
-//
-//        - Grey out the "Edit" and "Delete" buttons when no string is selected.
+//     - Make it so that double-clicking on a string opens it for editing.
 //
 //     - If we start editing a string that is in use by a Forge label, we should 
 //       be blocked from changing its localizations to different values. This 
@@ -70,12 +42,44 @@ int main(int argc, char *argv[]) {
 //       requires that all cobb::reference_tracked_object subclasses support 
 //       dynamic casts -- we need to add a dummy virtual method to that superclass.
 //
+//     = NOTE: Most strings don't properly show up as in-use, but this is because 
+//       not all data that can use a string uses cobb::reference_tracked_object 
+//       yet. While all opcode argument types now subclass it, they don't all use 
+//       its functionality yet. (The same problem will affect scripted options, 
+//       scripted stats, and so on.)
+//
 //     - Consider having a button to prune unreferenced strings. Alternatively, 
 //       consider having a button to list them and let the user select which ones 
 //       to delete; a mod author may wish to embed an unused string into the table 
 //       to sign their work, state the script version, etc.. We may even wish to 
 //       automate that process (a string entry could technically be used for 
 //       binary data as long as we avoid null bytes).
+//
+//  - SCRIPTED TRAIT EDITING
+//
+//     - Fairly easy; the only data associated with each trait set is the name. 
+//       (Obviously the traits themselves have values but that's a main window 
+//       thing.)
+//
+//       Speaking of the main window, however: the editor-state needs a signal 
+//       that we can emit when we change the traits' names, or when we add, 
+//       reorder, or remove them, so that the main window can update appropriately.
+//
+//  - SCRIPTED OPTION EDITING
+//
+//     - Add/Move/Delete buttons.
+//
+//        - Requires that we set up reference_tracked_object functionality for 
+//          anything that can refer to a scripted option (most notably scalar 
+//          opcode argument values).
+//
+//     - When no option/value is selected, all form controls for options/values 
+//       should be set to blank states. This isn't strictly possible for drop-
+//       downs without some special trickery, though.
+//
+//     - Pretty sure we get string editing "for free" thanks to how the string 
+//       picker works, but we need to implement editing of all other properties 
+//       ourselves.
 //
 //  - Work on script editor
 //
@@ -103,44 +107,6 @@ int main(int argc, char *argv[]) {
 //        - This doesn't refer to anything external and is not referred to by 
 //          anything external, at least as far as anyone knows, so it should be 
 //          super easy to just add an editor for real quick.
-//
-//     - Forge Labels
-//
-//        - Viewing - DONE
-//
-//        - Implement editing of basic properties - DONE
-//
-//        - Implement editing of names
-//
-//           - The dialog for localized strings needs "Save," "Cancel," and 
-//             "Save as New" buttons. When opened, it needs to be aware of 
-//             what string it's editing (i.e. it needs a MegaloStringIndex* or 
-//             a MegaloStringIndexOptional*) so that in the case of Save As New, 
-//             it can update the incoming index field.
-//
-//        - Implement adding, removing, and reordering
-//
-//           - Reordering requires updating all trigger conditions and actions. 
-//             Not all opcodes can specify a "none" label so removing may not 
-//             be possible if the label is in use -- investigate.
-//
-//              - We should call a function that gets us a list of every opcode 
-//                argument that uses any Forge label, and then scan that list 
-//                to see if any of them refer to the label we want to delete. If 
-//                so, we fail the deletion (and when we implement script editing, 
-//                we can use this list to let the user jump to any opcode that 
-//                uses the label). If the label is not in use, then we delete it; 
-//                if it's in the middle of the label list, then this will shift 
-//                the indices of all labels that come after it, which is why we 
-//                need a list of ALL opcode arguments that use ANY Forge label: 
-//                so we can adjust the ones whose labels have shifted.
-//
-//                 - It might be good to generate Forge label use info in advance 
-//                   and let the user ask to view that.
-//
-//        - If there aren't enough labels to fully fill the window, then the last 
-//          one gets stretched out. I've tried adding a spacer to the bottom of 
-//          the (programmatically generated) layout, but that's not working.
 //
 //     - Scripted stats
 //

@@ -77,3 +77,45 @@ void ReachMegaloOption::write(cobb::bitwriter& stream) const noexcept {
       this->currentValueIndex.write(stream);
    }
 }
+//
+void ReachMegaloOption::make_range() noexcept {
+   int16_t min = 65535;
+   int16_t max = 0;
+   int16_t def = 0;
+   if (!this->rangeMin || !this->rangeMax) {
+      for (auto& v : this->values) {
+         auto n = v->value;
+         if (n < min)
+            min = n;
+         if (n > max)
+            max = n;
+      }
+   }
+   if (!this->rangeMin) {
+      this->rangeMin = new ReachMegaloOptionValueEntry;
+      auto other = this->rangeMax;
+      if (other && min > other->value)
+         min = other->value;
+      this->rangeMin->value = min;
+   }
+   if (!this->rangeMax) {
+      this->rangeMax = new ReachMegaloOptionValueEntry;
+      auto other = this->rangeMin;
+      if (other && max < other->value)
+         max = other->value;
+      this->rangeMin->value = max;
+   }
+   if (!this->rangeDefault) {
+      this->rangeDefault = new ReachMegaloOptionValueEntry;
+      auto di = this->defaultValueIndex;
+      if (di >= 0 && di < this->values.size()) {
+         auto& v = *this->values[di];
+         if (v.value >= min && v.value <= max)
+            this->rangeDefault->value = v.value;
+         else
+            this->rangeDefault->value = min;
+      } else
+         this->rangeDefault->value = min;
+   }
+   this->isRange = true;
+}

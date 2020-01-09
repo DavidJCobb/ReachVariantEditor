@@ -4,6 +4,7 @@
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
 #include "../../helpers/reference_tracked_object.h"
+#include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 
 using ReachMegaloOptionValue = cobb::bitnumber<10, int16_t>;
@@ -34,10 +35,10 @@ class ReachMegaloOption : public cobb::reference_tracked_object {
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       cobb::bitbool isRange;
-      ReachMegaloOptionValueEntry* rangeDefault = nullptr;
+      ReachMegaloOptionValueEntry* rangeDefault = nullptr; // TODO: ownership; destroy these when the ReachMegaloOption is destroyed
       ReachMegaloOptionValueEntry* rangeMin = nullptr;
       ReachMegaloOptionValueEntry* rangeMax = nullptr;
-      std::vector<ReachMegaloOptionValueEntry*> values;
+      cobb::pointer_list<ReachMegaloOptionValueEntry> values = decltype(values)(true);
       ReachMegaloOptionValueIndex defaultValueIndex;
       ReachMegaloOptionValue rangeCurrent;
       ReachMegaloOptionValueIndex currentValueIndex;
@@ -45,4 +46,6 @@ class ReachMegaloOption : public cobb::reference_tracked_object {
       void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      void make_range() noexcept;
 };

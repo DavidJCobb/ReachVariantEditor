@@ -3,6 +3,13 @@
 
 namespace cobb {
    template<typename T> class pointer_list : public std::vector<T*> {
+      //
+      // A vector of pointers which can optionally be set to own the pointed-to objects, 
+      // destroying them when the vector is destroyed. The main advantage of this over a 
+      // vector of unique pointers is that you can pass (references to) a pointer_list 
+      // around without recipients having to care whether it holds normal or unique 
+      // pointers.
+      //
       protected:
          bool _owner = false;
          //

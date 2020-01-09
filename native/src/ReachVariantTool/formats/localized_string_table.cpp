@@ -293,3 +293,10 @@ ReachString* ReachStringTable::add_new() noexcept {
    auto& string = *this->strings.emplace_back(new ReachString(*this));
    return &string;
 }
+void ReachStringTable::remove(size_t index) noexcept {
+   if (index >= this->size())
+      return;
+   if (this->strings[index]->get_inbound_references().size())
+      return;
+   this->strings.erase(this->strings.begin() + index);
+}

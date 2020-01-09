@@ -1,4 +1,5 @@
 #include "page_string_table.h"
+#include <QMessageBox>
 #include "../localized_string_editor.h"
 
 namespace {
@@ -49,8 +50,24 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       if (!current)
          return;
       auto data = current->data(Qt::ItemDataRole::UserRole);
-      if (data.isValid())
-         this->_selected = (ReachString*)data.value<void*>();
+      if (!data.isValid())
+         return;
+      this->_selected = (ReachString*)data.value<void*>();
+      this->ui.buttonDelete->setDisabled(false);
+      this->ui.buttonEdit->setDisabled(false);
+      //
+      auto index = this->ui.list->row(current);
+      if (index < 0)
+         return;
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto& table = mp->scriptData.strings;
+      if (index >= table.size())
+         return;
+      auto& string = *table.strings[index];
+      if (string.get_inbound_references().size())
+         this->ui.buttonDelete->setDisabled(true);
    });
    QObject::connect(this->ui.buttonEdit, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
@@ -66,10 +83,25 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
       LocalizedStringEditorModal::startEditing(this, flags, &string);
    });
-   //
-   // TODO: New button
-   // TODO: Delete button
-   //
+   QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
+      LocalizedStringEditorModal::startEditing(this, 0, nullptr);
+   });
+   QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto  list  = this->ui.list;
+      auto  index = list->currentRow();
+      auto& table = mp->scriptData.strings;
+      if (index < 0 || index > table.strings.size())
+         return;
+      if (table.strings[index]->get_inbound_references().size()) {
+         QMessageBox::information(this, tr("Cannot remove string"), tr("This string is still in use by the gametype or its script. It cannot be removed at this time."));
+         return;
+      }
+      table.remove(index);
+      ReachEditorState::get().stringTableModified();
+   });
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageStringTable::updateFromVariant);
    this->updateFromVariant(nullptr);
 }

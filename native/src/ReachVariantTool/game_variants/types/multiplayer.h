@@ -122,7 +122,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
             std::vector<Megalo::Condition> conditions;
             std::vector<Megalo::Action>    actions;
          } raw;
-         std::vector<cobb::unique_pointer<Megalo::Trigger>> triggers;
+         cobb::pointer_list<Megalo::Trigger> triggers;
          Megalo::TriggerEntryPoints entryPoints;
          std::vector<ReachMegaloGameStat> stats;
          struct {

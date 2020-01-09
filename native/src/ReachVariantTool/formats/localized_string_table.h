@@ -122,4 +122,5 @@ class ReachStringTable {
       inline size_t size() const noexcept { return this->strings.size(); }
       //
       ReachString* add_new() noexcept; // returns nullptr if the table is full
+      void remove(size_t index) noexcept;
 };
