@@ -64,7 +64,7 @@ namespace Megalo {
          if (this->forgeLabelIndex != -1) {
             auto& list = mp->scriptContent.forgeLabels;
             if (this->forgeLabelIndex < list.size())
-               this->forgeLabel = list[this->forgeLabelIndex].get();
+               this->forgeLabel = list[this->forgeLabelIndex];
          }
       }
    }

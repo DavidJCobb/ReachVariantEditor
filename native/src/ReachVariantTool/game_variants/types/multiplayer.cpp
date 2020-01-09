@@ -218,7 +218,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
          list.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            auto label = list.emplace_back(new Megalo::ReachForgeLabel).get();
+            auto label = list.emplace_back(new Megalo::ReachForgeLabel);
             label->index = i;
             label->read(stream);
             label->postprocess_string_indices(this->scriptData.strings);

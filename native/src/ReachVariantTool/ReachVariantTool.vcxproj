@@ -128,6 +128,7 @@
     <ClCompile Include="helpers\files.cpp" />
     <ClCompile Include="helpers\ini.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
+    <ClCompile Include="helpers\miscellaneous.cpp" />
     <ClCompile Include="helpers\reference_tracked_object.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
     <ClCompile Include="helpers\steam.cpp" />
@@ -194,9 +195,11 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ui\localized_string_editor.h" />
+    <ClInclude Include="helpers\miscellaneous.h" />
+    <ClInclude Include="helpers\pointer_list.h" />
+    <QtMoc Include="ui\localized_string_editor.h" />
     <QtMoc Include="ui\script_editor\page_string_table.h" />
-    <ClInclude Include="ui\widgets\string_picker.h" />
+    <QtMoc Include="ui\widgets\string_picker.h" />
     <QtMoc Include="ui\script_editor\page_forge_labels.h" />
     <QtMoc Include="ui\script_editor.h" />
     <QtMoc Include="ui\widgets\mp_object_type_combobox.h" />

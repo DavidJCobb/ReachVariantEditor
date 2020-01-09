@@ -8,6 +8,7 @@
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
+#include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 #include "../../helpers/standalones/unique_pointer.h"
 #include "../components/loadouts.h"
@@ -132,7 +133,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } variables;
          std::vector<Megalo::HUDWidgetDeclaration> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
-         std::vector<cobb::unique_pointer<Megalo::ReachForgeLabel>> forgeLabels; // nullptr elements are not allowed (TODO: create a unique_reference class?)
+         cobb::pointer_list<Megalo::ReachForgeLabel> forgeLabels = decltype(forgeLabels)(true); // nullptr elements are not allowed
       } scriptContent;
       ReachGameVariantTU1Options titleUpdateData;
       struct {

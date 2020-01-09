@@ -52,11 +52,13 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
       this->accept();
    });
    QObject::connect(this->ui.buttonSaveAsNew, &QPushButton::clicked, [this]() {
-      if (!this->_target) { // should never happen
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp) { // should never happen
          this->reject();
          return;
       }
-      auto s = this->_target->owner.add_new();
+      auto s = mp->scriptData.strings.add_new();
       if (!s)
          return;
       auto r = this->_targetRef;

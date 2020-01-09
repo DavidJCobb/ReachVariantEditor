@@ -18,10 +18,14 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
    layout->addWidget(this->_combobox, 1);
    layout->addWidget(this->_button,   0);
    //
-   QObject::connect(this->_combobox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+   QObject::connect(this->_combobox, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int sel) {
       if (!this->_targetRef)
          return;
-      auto& ref = *this->_targetRef;
+      auto& ref  = *this->_targetRef;
+      auto  data = this->_combobox->currentData(Qt::ItemDataRole::UserRole);
+      if (!data.isValid())
+         return;
+      auto index = data.toInt();
       if (index < 0) {
          ref = nullptr;
          return;
@@ -33,6 +37,8 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
       if (index >= table.strings.size())
          return;
       ref = table.strings[index];
+      //
+      emit selectedStringChanged();
    });
    QObject::connect(this->_button, &QPushButton::clicked, [this]() {
       if (!this->_targetRef) // should never occur
@@ -78,6 +84,8 @@ void ReachStringPicker::setLimitedToSingleLanguageStrings(bool is) noexcept {
 }
 
 void ReachStringPicker::refreshList() {
+   const QSignalBlocker blocker(this->_combobox);
+   //
    this->_combobox->clear();
    auto mp = ReachEditorState::get().multiplayerData();
    if (!mp)

@@ -4,8 +4,9 @@
 #include "../formats/localized_string_table.h"
 
 class LocalizedStringEditorModal : public QDialog {
+   Q_OBJECT
    public:
-   using Flags = ReachStringFlags::type;
+      using Flags = ReachStringFlags::type;
    public:
       LocalizedStringEditorModal(QWidget* parent = nullptr);
       //

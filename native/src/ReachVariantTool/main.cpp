@@ -35,17 +35,6 @@ int main(int argc, char *argv[]) {
 //       part of the gametype script (cobb::reference_tracked_object has member 
 //       functions we can use to check this).
 //
-//        - Because Forge labels are reference_tracked_objects, we can't create 
-//          them on the stack or directly in an array. This means that we can't 
-//          use a temporary when reordering labels (i.e. tmp = a; a = b; b = tmp). 
-//          Instead, we'll need to specialize std::swap for Forge labels; in fact, 
-//          we'll have to do that for any reference_tracked_object subclass that 
-//          we wish to reorder.
-//
-//           - To make this easier, I should probably create cobb::memswap, which 
-//             uses XOR swapping to swap the contents of two memory addresses, 
-//             i.e. cobb::memswap(a, b, size) in the style of memcpy and memset.
-//
 //     - When we have the ability to create new strings and new Forge labels, 
 //       test to make sure that the string picker works in full:
 //

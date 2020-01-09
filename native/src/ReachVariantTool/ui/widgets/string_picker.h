@@ -5,6 +5,7 @@
 #include "../../formats/localized_string_table.h"
 
 class ReachStringPicker : public QWidget {
+   Q_OBJECT
    public:
       using Flags = ReachStringFlags::type;
    public:
@@ -21,6 +22,9 @@ class ReachStringPicker : public QWidget {
          this->_targetRef = &r;
          this->refreshSelection();
       }
+      //
+   signals:
+      void selectedStringChanged();
       //
    protected:
       MegaloStringRef* _targetRef = nullptr;

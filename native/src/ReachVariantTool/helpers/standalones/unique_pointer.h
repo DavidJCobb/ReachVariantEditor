@@ -65,9 +65,15 @@ namespace cobb {
                delete this->_data;
             this->_data = other._data;
             other._data = nullptr;
+            return *this;
          } // move-assign
    };
    template<typename T, class... Args> unique_pointer<T> make_unique(Args&&... args) {
       return unique_pointer<T>(new T(static_cast<Args&&>(args)...)); // the static_cast is what std::forward does; I didn't feel like including <utility>
+   }
+}
+namespace std {
+   template<typename T> constexpr void swap(::cobb::unique_pointer<T>& a, ::cobb::unique_pointer<T>& b) noexcept {
+      a.swap(b);
    }
 }

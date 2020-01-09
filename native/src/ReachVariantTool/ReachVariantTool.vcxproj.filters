@@ -232,6 +232,9 @@
     <ClCompile Include="ui\script_editor\page_string_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\miscellaneous.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -310,6 +313,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\script_editor\page_string_table.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\widgets\string_picker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\localized_string_editor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -615,10 +624,10 @@
     <ClInclude Include="helpers\standalones\unique_pointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui\widgets\string_picker.h">
+    <ClInclude Include="helpers\miscellaneous.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui\localized_string_editor.h">
+    <ClInclude Include="helpers\pointer_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
