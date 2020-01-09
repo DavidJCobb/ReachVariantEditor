@@ -6,6 +6,8 @@
 #include "game_variants/components/teams.h"
 #include "game_variants/types/multiplayer.h"
 
+class ReachMegaloOption;
+
 class ReachEditorState : public QObject {
    Q_OBJECT
    public:
@@ -34,8 +36,11 @@ class ReachEditorState : public QObject {
       void switchedMultiplayerTeam(GameVariant*, int8_t index, ReachTeamData*);
       void switchedPlayerTraits(ReachPlayerTraits* traits);
       //
-      void stringModified(uint32_t index);
-      void stringTableModified();
+      // These are fired by the UI so that different windows/panels/etc. can synch with each other:
+      void scriptOptionModified(ReachMegaloOption*); // a single option has changed (does not include reordering, creation, or deletion)
+      void scriptOptionsModified(); // options have been reordered, created, or deleted
+      void stringModified(uint32_t index); // a single string has changed (does not include reordering, creation, or deletion)
+      void stringTableModified(); // strings have been reordered, created, or deleted
       void teamColorModified(ReachTeamData*); // exists to help with team editing UI, i.e. it's fired from outside, not from inside
       //
    public slots:

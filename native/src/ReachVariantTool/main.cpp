@@ -48,12 +48,17 @@ int main(int argc, char *argv[]) {
 //       its functionality yet. (The same problem will affect scripted options, 
 //       scripted stats, and so on.)
 //
+//        = URGENT; MUST BE COMPLETED BEFORE RELEASE OF ANY SCRIPT EDITOR BETA
+//
 //     - Consider having a button to prune unreferenced strings. Alternatively, 
 //       consider having a button to list them and let the user select which ones 
 //       to delete; a mod author may wish to embed an unused string into the table 
 //       to sign their work, state the script version, etc.. We may even wish to 
 //       automate that process (a string entry could technically be used for 
 //       binary data as long as we avoid null bytes).
+//
+//        - It won't be safe to implement this until we're properly tracking all 
+//          string references.
 //
 //  - SCRIPTED TRAIT EDITING
 //
@@ -66,6 +71,9 @@ int main(int argc, char *argv[]) {
 //       reorder, or remove them, so that the main window can update appropriately.
 //
 //  - SCRIPTED OPTION EDITING
+//
+//     = Whenever an option or its values are changed, we need to emit a signal 
+//       through ReachEditorState so that the main window can update properly.
 //
 //     - Add/Move/Delete buttons.
 //
@@ -80,6 +88,14 @@ int main(int argc, char *argv[]) {
 //     - Pretty sure we get string editing "for free" thanks to how the string 
 //       picker works, but we need to implement editing of all other properties 
 //       ourselves.
+//
+//        = The form still needs to update the option and value lists when an 
+//          option or value has its name changed. Easiest way is to just update 
+//          those whenever the string table changes at all.
+//
+//           - If we wanna be nice, we could set the page up so that it only 
+//             reacts to things when it's visible, and so that it refreshes 
+//             itself whenever it's shown.
 //
 //  - Work on script editor
 //

@@ -1,6 +1,12 @@
 #include "page_script_options.h"
 
 namespace {
+   enum _range_property_to_modify {
+      min,
+      max,
+      default,
+   };
+
    bool _selectByPointerData(QListWidget* widget, void* target) {
       auto count = widget->count();
       for (size_t row = 0; row < count; row++) {
@@ -18,6 +24,33 @@ namespace {
       }
       return false; // not found
    }
+   void _modifyOptionRangeProperty(ReachMegaloOption* option, _range_property_to_modify what, int16_t value) {
+      if (!option)
+         return;
+      ReachMegaloOptionValueEntry* p = nullptr;
+      auto& current = option->rangeCurrent;
+      switch (what) {
+         case _range_property_to_modify::min:
+            p = option->rangeMin;
+            if (p && current < value)
+               current = value;
+            break;
+         case _range_property_to_modify::max:
+            p = option->rangeMax;
+            if (p && current > value)
+               current = value;
+            break;
+         case _range_property_to_modify::default:
+            p = option->rangeDefault;
+            break;
+         default:
+            return;
+      }
+      if (!p)
+         return;
+      p->value = value;
+      ReachEditorState::get().scriptOptionModified(option);
+   }
 }
 ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
@@ -30,19 +63,71 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       this->targetValue  = nullptr;
       this->updateValuesListFromVariant();
    });
+   {  // Handle option/value name changes
+      //
+      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
+      // That's also the laziest way to handle things... :<
+      //
+      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
+         this->updateOptionsListFromVariant();
+         this->updateValuesListFromVariant();
+      });
+      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
+         this->updateOptionsListFromVariant();
+         this->updateValuesListFromVariant();
+      });
+   }
+   //
    QObject::connect(this->ui.listOptions, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOption);
    QObject::connect(this->ui.listValues,  &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOptionValue);
    //
-   QObject::connect(this->ui.optionType, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
-      if (!this->targetOption)
-         return;
-      if (index == 1)
-         this->targetOption->make_range();
-      this->updateOptionFromVariant();
-   });
-   //
-   // TODO: hooks for all other controls having their states changed
-   //
+   {  // Option properties
+      //
+      // Explicit hooks for the name and description aren't needed; once we supply a string ref to the string picker 
+      // widgets, they handle everything from there on out.
+      //
+      QObject::connect(this->ui.optionName, &ReachStringPicker::selectedStringChanged, [this]() {
+         this->updateOptionsListFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.optionDesc, &ReachStringPicker::selectedStringChanged, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // main window shows descriptions as tooltips
+      });
+      QObject::connect(this->ui.optionType, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+         if (!this->targetOption)
+            return;
+         if (index == 1)
+            this->targetOption->make_range();
+         else
+            this->targetOption->isRange = false;
+         this->updateOptionFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.rangeMin, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+         _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::min, value);
+      });
+      QObject::connect(this->ui.rangeMax, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+         _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::max, value);
+      });
+      QObject::connect(this->ui.rangeDefault, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+         _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::default, value);
+      });
+   }
+   {  // Value properties
+      QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
+         this->updateValuesListFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.valueDesc, &ReachStringPicker::selectedStringChanged, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.valueValue, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+         if (!this->targetValue)
+            return;
+         this->targetValue->value = value;
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+   }
    //
    this->updateOptionsListFromVariant(nullptr);
 }
@@ -77,6 +162,8 @@ void ScriptEditorPageScriptOptions::selectOptionValue(int32_t i) {
 }
 
 void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* variant) {
+   const QSignalBlocker blocker(this->ui.listOptions);
+   //
    this->ui.listOptions->clear();
    //
    GameVariantDataMultiplayer* mp = nullptr;
@@ -132,6 +219,8 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    }
 }
 void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
+   const QSignalBlocker blocker(this->ui.listValues);
+   //
    this->ui.listValues->clear();
    if (!this->targetOption)
       return;

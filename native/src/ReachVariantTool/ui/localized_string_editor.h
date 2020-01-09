@@ -10,8 +10,8 @@ class LocalizedStringEditorModal : public QDialog {
    public:
       LocalizedStringEditorModal(QWidget* parent = nullptr);
       //
-      static void startEditing(QWidget* parent, uint32_t flags = 0, ReachString* target = nullptr);
-      static void startEditing(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef);
+      static bool editString(QWidget* parent, uint32_t flags = 0, ReachString* target = nullptr);
+      static bool editString(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef);
       //
    private:
       Ui::LocalizedStringEditorModal ui;

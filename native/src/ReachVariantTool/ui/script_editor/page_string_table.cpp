@@ -81,10 +81,10 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       auto& string = *table.strings[index];
       uint32_t flags = 0;
       // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
-      LocalizedStringEditorModal::startEditing(this, flags, &string);
+      LocalizedStringEditorModal::editString(this, flags, &string);
    });
    QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
-      LocalizedStringEditorModal::startEditing(this, 0, nullptr);
+      LocalizedStringEditorModal::editString(this, 0, nullptr);
    });
    QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();

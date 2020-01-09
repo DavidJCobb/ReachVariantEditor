@@ -24,7 +24,7 @@ class ReachStringPicker : public QWidget {
       }
       //
    signals:
-      void selectedStringChanged();
+      void selectedStringChanged(); // the string is changed via the combobox, or the user clicks "Save" or "Save as New" in the editing dialog box
       //
    protected:
       MegaloStringRef* _targetRef = nullptr;

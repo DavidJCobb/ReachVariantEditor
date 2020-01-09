@@ -46,7 +46,8 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
       uint32_t flags = 0;
       if (this->_limitToSingleLanguageStrings)
          flags |= Flags::SingleLanguageString;
-      LocalizedStringEditorModal::startEditing(this, flags, *this->_targetRef);
+      if (LocalizedStringEditorModal::editString(this, flags, *this->_targetRef))
+         emit selectedStringChanged();
    });
    //
    auto& editor = ReachEditorState::get();

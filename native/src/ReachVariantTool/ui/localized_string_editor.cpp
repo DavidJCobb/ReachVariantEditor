@@ -78,7 +78,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
       this->accept();
    });
 }
-/*static*/ void LocalizedStringEditorModal::startEditing(QWidget* parent, uint32_t flags, ReachString* target) {
+/*static*/ bool LocalizedStringEditorModal::editString(QWidget* parent, uint32_t flags, ReachString* target) {
    LocalizedStringEditorModal modal(parent);
    modal._targetRef = nullptr;
    modal._target    = target;
@@ -87,9 +87,9 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    // TODO: anything else?
    //
    modal.updateControls();
-   modal.exec();
+   return modal.exec() == QDialog::Accepted;
 }
-/*static*/ void LocalizedStringEditorModal::startEditing(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef) {
+/*static*/ bool LocalizedStringEditorModal::editString(QWidget* parent, uint32_t flags, MegaloStringRef& targetRef) {
    LocalizedStringEditorModal modal(parent);
    modal._targetRef = &targetRef;
    modal._target    = targetRef;
@@ -98,7 +98,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    // TODO: anything else?
    //
    modal.updateControls();
-   modal.exec();
+   return modal.exec() == QDialog::Accepted;
 }
 void LocalizedStringEditorModal::updateControls() {
    auto  target = this->_target;

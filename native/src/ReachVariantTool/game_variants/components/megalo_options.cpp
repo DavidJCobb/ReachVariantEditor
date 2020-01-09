@@ -117,5 +117,6 @@ void ReachMegaloOption::make_range() noexcept {
       } else
          this->rangeDefault->value = min;
    }
+   this->rangeCurrent = this->rangeDefault->value;
    this->isRange = true;
 }
