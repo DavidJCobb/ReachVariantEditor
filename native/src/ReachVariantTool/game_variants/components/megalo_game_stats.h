@@ -1,10 +1,11 @@
 #pragma once
 #include "../../helpers/bitnumber.h"
-#include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
+#include "../../helpers/reference_tracked_object.h"
+#include "../../helpers/stream.h"
 
-class ReachMegaloGameStat {
+class ReachMegaloGameStat : public cobb::reference_tracked_object {
    public:
       enum class Format : uint8_t {
          number,
@@ -18,7 +19,7 @@ class ReachMegaloGameStat {
          descending,
          obsolete_2,
       };
-      ReachString* name = nullptr;
+      MegaloStringRef   name = MegaloStringRef::make(*this);
       MegaloStringIndex nameIndex;
       Format format      = Format::number;
       Sort   sortOrder   = Sort::ascending;
@@ -27,12 +28,4 @@ class ReachMegaloGameStat {
       void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
-      //
-      #if __cplusplus <= 201703L
-      bool operator==(const ReachMegaloGameStat&) const noexcept;
-      bool operator!=(const ReachMegaloGameStat& other) const noexcept { return !(*this == other); }
-      #else
-      bool operator==(const ReachMegaloGameStat&) const noexcept = default;
-      bool operator!=(const ReachMegaloGameStat&) const noexcept = default;
-      #endif
 };

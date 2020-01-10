@@ -190,10 +190,11 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       //*/
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
-      this->scriptContent.stats.resize(count);
+      this->scriptContent.stats.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         this->scriptContent.stats[i].read(stream);
-         this->scriptContent.stats[i].postprocess_string_indices(this->scriptData.strings);
+         auto& stat = *this->scriptContent.stats.emplace_back(new ReachMegaloGameStat);
+         stat.read(stream);
+         stat.postprocess_string_indices(this->scriptData.strings);
       }
       //
       {  // Script variable declarations
@@ -380,8 +381,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          trigger->write(bits);
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
-      for (auto& stat : content.stats)
-         stat.write(bits);
+      for (auto stat : content.stats)
+         stat->write(bits);
       //
       {  // Script variable declarations
          auto& v = content.variables;
@@ -431,8 +432,8 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
          option->postprocess_string_indices(stringTable);
       for (auto& traits : cd.traits)
          traits.postprocess_string_indices(stringTable);
-      for (auto& stat : cc.stats)
-         stat.postprocess_string_indices(stringTable);
+      for (auto stat : cc.stats)
+         stat->postprocess_string_indices(stringTable);
    }
    return clone;
 }

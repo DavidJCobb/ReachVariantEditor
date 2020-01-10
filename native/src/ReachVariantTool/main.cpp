@@ -75,27 +75,19 @@ int main(int argc, char *argv[]) {
 //     = Whenever an option or its values are changed, we need to emit a signal 
 //       through ReachEditorState so that the main window can update properly.
 //
-//     - Add/Move/Delete buttons.
-//
-//        - Requires that we set up reference_tracked_object functionality for 
-//          anything that can refer to a scripted option (most notably scalar 
-//          opcode argument values).
+//     - A game variant is not considered valid if it contains any enum option 
+//       with no values; we need to enforce all options having at least one 
+//       value.
 //
 //     - When no option/value is selected, all form controls for options/values 
 //       should be set to blank states. This isn't strictly possible for drop-
 //       downs without some special trickery, though.
 //
-//     - Pretty sure we get string editing "for free" thanks to how the string 
-//       picker works, but we need to implement editing of all other properties 
-//       ourselves.
+//     - The page needs to update itself whenever it's shown, in case the user 
+//       edits option strings from the string table editor.
 //
-//        = The form still needs to update the option and value lists when an 
-//          option or value has its name changed. Easiest way is to just update 
-//          those whenever the string table changes at all.
-//
-//           - If we wanna be nice, we could set the page up so that it only 
-//             reacts to things when it's visible, and so that it refreshes 
-//             itself whenever it's shown.
+//        = Come to think of it, this is gonna be a concern for most of the 
+//          main window, too...
 //
 //  - Work on script editor
 //

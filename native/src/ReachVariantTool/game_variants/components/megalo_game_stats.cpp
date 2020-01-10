@@ -15,21 +15,3 @@ void ReachMegaloGameStat::write(cobb::bitwriter& stream) const noexcept {
    stream.write((uint8_t)this->sortOrder, 2);
    stream.write(this->groupByTeam);
 }
-
-#if __cplusplus <= 201703L
-#include <tuple>
-bool ReachMegaloGameStat::operator==(const ReachMegaloGameStat& o) const noexcept {
-   if (std::tie(
-      this->nameIndex,
-      this->format,
-      this->sortOrder,
-      this->groupByTeam
-   ) != std::tie(
-      o.nameIndex,
-      o.format,
-      o.sortOrder,
-      o.groupByTeam
-   )) return false;
-   return true;
-}
-#endif

@@ -6,10 +6,11 @@
 #include "../../helpers/reference_tracked_object.h"
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
+#include "megalo/limits.h"
 
 using ReachMegaloOptionValue = cobb::bitnumber<10, int16_t>;
-using ReachMegaloOptionValueIndex = cobb::bitnumber<cobb::bitcount(8 - 1), uint8_t>;
-using ReachMegaloOptionValueCount = cobb::bitnumber<cobb::bitcount(8), uint8_t>;
+using ReachMegaloOptionValueIndex = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_script_option_values - 1), uint8_t>;
+using ReachMegaloOptionValueCount = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_script_option_values), uint8_t>;
 
 class ReachBlockMPVR;
 
@@ -25,7 +26,7 @@ class ReachMegaloOptionValueEntry : public cobb::reference_tracked_object {
       //
       void read(cobb::ibitreader&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
-      void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept;
+      void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept;
 };
 
 class ReachMegaloOption : public cobb::reference_tracked_object {
@@ -45,7 +46,9 @@ class ReachMegaloOption : public cobb::reference_tracked_object {
       //
       void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) noexcept;
       //
+      ReachMegaloOptionValueEntry* add_value() noexcept;
+      void delete_value(ReachMegaloOptionValueEntry*) noexcept;
       void make_range() noexcept;
 };

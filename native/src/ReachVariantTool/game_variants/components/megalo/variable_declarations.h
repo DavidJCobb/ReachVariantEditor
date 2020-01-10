@@ -22,15 +22,15 @@ namespace Megalo {
          using network_type = variable_network_priority_t;
          //
          network_type networking = network_enum::default;
-         OpcodeArgValueScalar initial;
+         OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
          //
          void read(cobb::ibitreader& stream) noexcept {
-            if (!this->initial.read(stream))
+            if (!this->initial->read(stream))
                return;
             this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            this->initial.write(stream);
+            this->initial->write(stream);
             this->networking.write(stream);
          }
    };
@@ -82,13 +82,13 @@ namespace Megalo {
    };
    class TimerVariableDeclaration {
       public:
-         OpcodeArgValueScalar initial;
+         OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
          //
          void read(cobb::ibitreader& stream) noexcept {
-            this->initial.read(stream);
+            this->initial->read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
-            this->initial.write(stream);
+            this->initial->write(stream);
          }
    };
 

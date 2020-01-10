@@ -1,4 +1,5 @@
 #include "page_script_options.h"
+#include <QMessageBox>
 
 namespace {
    enum _range_property_to_modify {
@@ -112,6 +113,83 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       QObject::connect(this->ui.rangeDefault, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
          _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::default, value);
       });
+      //
+      QObject::connect(this->ui.buttonOptionsNew, &QPushButton::clicked, [this]() {
+         auto& editor = ReachEditorState::get();
+         auto  mp     = editor.multiplayerData();
+         if (!mp)
+            return;
+         auto& list = mp->scriptData.options;
+         if (list.size() >= Megalo::Limits::max_script_options) {
+            QMessageBox::information(this, tr("Cannot add option"), tr("Game variants cannot have more than %1 options.").arg(Megalo::Limits::max_script_options));
+            return;
+         }
+         this->targetOption = list.emplace_back(new ReachMegaloOption);
+         this->updateOptionFromVariant();
+         this->updateOptionsListFromVariant();
+         ReachEditorState::get().scriptOptionsModified();
+      });
+      QObject::connect(this->ui.buttonOptionsMoveUp, &QPushButton::clicked, [this]() {
+         if (!this->targetOption)
+            return;
+         auto& editor = ReachEditorState::get();
+         auto  mp     = editor.multiplayerData();
+         if (!mp)
+            return;
+         auto& list  = mp->scriptData.options;
+         auto  index = list.index_of(this->targetOption);
+         if (index < 0)
+            return;
+         if (index == 0) // can't move the first item up
+            return;
+         list.swap_items(index, index - 1);
+         this->updateOptionsListFromVariant();
+         ReachEditorState::get().scriptOptionsModified();
+      });
+      QObject::connect(this->ui.buttonOptionsMoveDown, &QPushButton::clicked, [this]() {
+         if (!this->targetOption)
+            return;
+         auto& editor = ReachEditorState::get();
+         auto  mp     = editor.multiplayerData();
+         if (!mp)
+            return;
+         auto& list  = mp->scriptData.options;
+         auto  index = list.index_of(this->targetOption);
+         if (index < 0)
+            return;
+         if (index == list.size() - 1) // can't move the last item down
+            return;
+         list.swap_items(index, index + 1);
+         this->updateOptionsListFromVariant();
+         ReachEditorState::get().scriptOptionsModified();
+      });
+      QObject::connect(this->ui.buttonOptionsDelete, &QPushButton::clicked, [this]() {
+         if (!this->targetOption)
+            return;
+         if (this->targetOption->get_inbound_references().size()) {
+            QMessageBox::information(this, tr("Cannot remove option"), tr("This option is still in use by the gametype's script. It cannot be removed at this time."));
+            return;
+         }
+         auto& editor = ReachEditorState::get();
+         auto  mp     = editor.multiplayerData();
+         if (!mp)
+            return;
+         auto& list   = mp->scriptData.options;
+         auto  it     = std::find(list.begin(), list.end(), this->targetOption);
+         auto  index  = list.index_of(this->targetOption);
+         if (it == list.end())
+            return;
+         list.erase(it);
+         if (index > 0)
+            this->targetOption = list[index - 1];
+         else if (list.size())
+            this->targetOption = list[0];
+         else
+            this->targetOption = nullptr;
+         this->updateOptionFromVariant();
+         this->updateOptionsListFromVariant();
+         ReachEditorState::get().scriptOptionsModified();
+      });
    }
    {  // Value properties
       QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
@@ -125,6 +203,66 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (!this->targetValue)
             return;
          this->targetValue->value = value;
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      //
+      QObject::connect(this->ui.buttonValuesNew, &QPushButton::clicked, [this]() {
+         if (!this->targetOption)
+            return;
+         auto& option = *this->targetOption;
+         if (option.isRange)
+            return;
+         auto* value = option.add_value();
+         if (!value)
+            return;
+         this->targetValue = value;
+         this->updateValueFromVariant();
+         this->updateValuesListFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.buttonValuesMoveUp, &QPushButton::clicked, [this]() {
+         if (!this->targetOption || !this->targetValue)
+            return;
+         auto& option = *this->targetOption;
+         auto  value  = this->targetValue;
+         auto  index  = option.values.index_of(value);
+         if (index < 0)
+            return;
+         if (index == 0) // can't move the first item up
+            return;
+         option.values.swap_items(index, index - 1);
+         this->updateValuesListFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.buttonValuesMoveDown, &QPushButton::clicked, [this]() {
+         if (!this->targetOption || !this->targetValue)
+            return;
+         auto& option = *this->targetOption;
+         auto  value  = this->targetValue;
+         auto  index  = option.values.index_of(value);
+         if (index < 0)
+            return;
+         if (index == option.values.size() - 1) // can't move the last item down
+            return;
+         option.values.swap_items(index, index + 1);
+         this->updateValuesListFromVariant();
+         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      });
+      QObject::connect(this->ui.buttonValuesDelete, &QPushButton::clicked, [this]() {
+         if (!this->targetOption || !this->targetValue)
+            return;
+         auto& option = *this->targetOption;
+         auto  value  = this->targetValue;
+         auto  index  = option.values.index_of(value);
+         option.delete_value(value);
+         if (index > 0)
+            this->targetValue = option.values[index - 1];
+         else if (option.values.size())
+            this->targetValue = option.values[0];
+         else
+            this->targetValue = nullptr;
+         this->updateValueFromVariant();
+         this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
    }

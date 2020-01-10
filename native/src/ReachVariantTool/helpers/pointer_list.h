@@ -24,6 +24,14 @@ namespace cobb {
                   delete ptr;
          }
          //
+         int32_t index_of(T* item) const noexcept {
+            auto& list = *this;
+            auto  s    = this->size();
+            for (size_t i = 0; i < s; i++)
+               if (list[i] == item)
+                  return i;
+            return -1;
+         }
          inline bool is_owner() const noexcept { return this->_owner; }
          void set_is_owner(bool o) noexcept {
             this->_owner = o;

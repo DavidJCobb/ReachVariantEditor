@@ -12,9 +12,20 @@ void ReachMegaloOptionValueEntry::postprocess_string_indices(ReachStringTable& t
    this->name = table.get_entry(this->nameIndex);
    this->desc = table.get_entry(this->descIndex);
 }
-void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMegaloOption& owner) const noexcept {
+void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept {
    this->value.write(stream);
    if (!owner.isRange) {
+      {  // Correct indices
+         if (this->name) {
+            this->nameIndex = this->name->index();
+         } else
+            this->nameIndex = 0;
+         //
+         if (this->desc) {
+            this->descIndex = this->desc->index();
+         } else
+            this->descIndex = 0;
+      }
       this->nameIndex.write(stream);
       this->descIndex.write(stream);
    }
@@ -57,7 +68,18 @@ void ReachMegaloOption::postprocess_string_indices(ReachStringTable& table) noex
    for (auto& value : this->values)
       value->postprocess_string_indices(table);
 }
-void ReachMegaloOption::write(cobb::bitwriter& stream) const noexcept {
+void ReachMegaloOption::write(cobb::bitwriter& stream) noexcept {
+   {  // Correct indices
+      if (this->name) {
+         this->nameIndex = this->name->index();
+      } else
+         this->nameIndex = 0;
+      //
+      if (this->desc) {
+         this->descIndex = this->desc->index();
+      } else
+         this->descIndex = 0;
+   }
    this->nameIndex.write(stream);
    this->descIndex.write(stream);
    this->isRange.write(stream);
@@ -78,6 +100,26 @@ void ReachMegaloOption::write(cobb::bitwriter& stream) const noexcept {
    }
 }
 //
+ReachMegaloOptionValueEntry* ReachMegaloOption::add_value() noexcept {
+   if (this->isRange)
+      return nullptr;
+   auto& list = this->values;
+   if (list.size() >= Megalo::Limits::max_script_option_values)
+      return nullptr;
+   auto& value = *this->values.emplace_back(new ReachMegaloOptionValueEntry);
+   return &value;
+}
+void ReachMegaloOption::delete_value(ReachMegaloOptionValueEntry* target) noexcept {
+   if (!target)
+      return;
+   if (target->get_inbound_references().size()) // shouldn't be possible; nothing external can refer to an option's enum values
+      return;
+   auto& list = this->values;
+   auto  it   = std::find(list.begin(), list.end(), target);
+   if (it == list.end())
+      return;
+   list.erase(it);
+}
 void ReachMegaloOption::make_range() noexcept {
    int16_t min = 65535;
    int16_t max = 0;

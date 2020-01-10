@@ -93,7 +93,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       } options;
       struct {
          std::vector<ReachMegaloPlayerTraits> traits;
-         std::vector<cobb::unique_pointer<ReachMegaloOption>> options;
+         cobb::pointer_list<ReachMegaloOption> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
       MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)
@@ -124,7 +124,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } raw;
          cobb::pointer_list<Megalo::Trigger> triggers;
          Megalo::TriggerEntryPoints entryPoints;
-         std::vector<ReachMegaloGameStat> stats;
+         cobb::pointer_list<ReachMegaloGameStat> stats;
          struct {
             Megalo::VariableDeclarationSet global = Megalo::VariableDeclarationSet(Megalo::variable_scope::global);
             Megalo::VariableDeclarationSet player = Megalo::VariableDeclarationSet(Megalo::variable_scope::player);

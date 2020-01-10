@@ -1,5 +1,6 @@
 #include "scalar.h"
 #include "../../../errors.h"
+#include "../../../types/multiplayer.h"
 
 namespace {
    enum class _scopes {
@@ -159,6 +160,23 @@ namespace Megalo {
       if (index_bits)
          this->index = stream.read_bits<uint16_t>(index_bits);
       return true;
+   }
+   void OpcodeArgValueScalar::postprocess(GameVariantDataMultiplayer* mp) noexcept {
+      auto& sd = mp->scriptData;
+      auto& sc = mp->scriptContent;
+      switch ((_scopes)this->scope) {
+         case _scopes::player_stat:
+         case _scopes::team_stat:
+            if (this->index < 0 || this->index >= sc.stats.size())
+               break;
+            this->target = sc.stats[this->index];
+            break;
+         case _scopes::script_option:
+            if (this->index < 0 || this->index >= sd.options.size())
+               break;
+            this->target = sd.options[this->index];
+            break;
+      }
    }
    void OpcodeArgValueScalar::write(cobb::bitwriter& stream) const noexcept {
       stream.write(this->scope, cobb::bitcount((int)_scopes::_count - 1));

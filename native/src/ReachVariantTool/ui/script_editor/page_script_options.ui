@@ -165,7 +165,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="buttonDelete">
+              <widget class="QPushButton" name="buttonValuesDelete">
                <property name="text">
                 <string>Delete</string>
                </property>
@@ -191,7 +191,11 @@
          <item>
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="2" column="1">
-            <widget class="ReachStringPicker" name="valueDesc" native="true"/>
+            <widget class="ReachStringPicker" name="valueDesc" native="true">
+             <property name="toolTip">
+              <string>When this value is selected, its description will be shown in place of the option description, unless the value description is zero-length.</string>
+             </property>
+            </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_9">
@@ -212,6 +216,9 @@
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_8">
+             <property name="toolTip">
+              <string>When this value is selected, its description will be shown in place of the option description, unless the value description is zero-length.</string>
+             </property>
              <property name="text">
               <string>Value Description</string>
              </property>

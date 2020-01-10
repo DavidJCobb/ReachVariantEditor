@@ -53,6 +53,9 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
    auto& editor = ReachEditorState::get();
    QObject::connect(&editor, &ReachEditorState::stringModified, this, &ReachStringPicker::refreshListItem);
    QObject::connect(&editor, &ReachEditorState::stringTableModified, this, &ReachStringPicker::refreshList);
+   QObject::connect(&editor, &ReachEditorState::variantAbandoned, [this]() {
+      this->_targetRef = nullptr;
+   });
    //
    this->refreshList();
 }
