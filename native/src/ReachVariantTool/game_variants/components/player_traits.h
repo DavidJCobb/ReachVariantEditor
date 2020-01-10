@@ -329,10 +329,10 @@ class ReachPlayerTraits {
       #endif
 };
 
-class ReachMegaloPlayerTraits : public ReachPlayerTraits {
+class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::reference_tracked_object {
    public:
-      ReachString* name = nullptr;
-      ReachString* desc = nullptr;
+      MegaloStringRef name = MegaloStringRef::make(*this);
+      MegaloStringRef desc = MegaloStringRef::make(*this);
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       //
@@ -341,7 +341,18 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);
       }
-      void write(cobb::bitwriter& stream) const noexcept {
+      void write(cobb::bitwriter& stream) noexcept {
+         {  // Correct indices
+            if (this->name) {
+               this->nameIndex = this->name->index();
+            } else
+               this->nameIndex = 0;
+            //
+            if (this->desc) {
+               this->descIndex = this->desc->index();
+            } else
+               this->descIndex = 0;
+         }
          this->nameIndex.write(stream);
          this->descIndex.write(stream);
          ReachPlayerTraits::write(stream);
@@ -350,13 +361,4 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits {
          this->name = table.get_entry(this->nameIndex);
          this->desc = table.get_entry(this->descIndex);
       }
-      //
-      bool operator==(const ReachMegaloPlayerTraits& other) const noexcept {
-         if (this->nameIndex != other.nameIndex)
-            return false;
-         if (this->descIndex != other.descIndex)
-            return false;
-         return ReachPlayerTraits::operator==(other); // call super
-      }
-      bool operator!=(const ReachMegaloPlayerTraits& other) const noexcept { return !(*this == other); }
 };

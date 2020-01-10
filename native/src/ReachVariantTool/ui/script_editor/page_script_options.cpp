@@ -125,6 +125,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          }
          this->targetOption = list.emplace_back(new ReachMegaloOption);
+         this->targetOption->add_value(); // enum-options must have at least one value
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
@@ -231,6 +232,13 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (index == 0) // can't move the first item up
             return;
          option.values.swap_items(index, index - 1);
+         {
+            auto c = option.currentValueIndex;
+            if (c == index)
+               c = index - 1;
+            else if (c == index - 1)
+               c = index;
+         }
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -245,6 +253,13 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (index == option.values.size() - 1) // can't move the last item down
             return;
          option.values.swap_items(index, index + 1);
+         {
+            auto c = option.currentValueIndex;
+            if (c == index)
+               c = index + 1;
+            else if (c == index + 1)
+               c = index;
+         }
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -253,12 +268,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          auto& option = *this->targetOption;
          auto  value  = this->targetValue;
-         auto  index  = option.values.index_of(value);
+         auto& list   = option.values;
+         if (list.size() == 1) {
+            QMessageBox::information(this, tr("Cannot remove option value"), tr("If a game variant contains enum-options with no values, that game variant won't be considered valid; it will not appear in the MCC's menus."));
+            return;
+         }
+         auto  index  = list.index_of(value);
          option.delete_value(value);
          if (index > 0)
-            this->targetValue = option.values[index - 1];
+            this->targetValue = list[index - 1];
          else if (option.values.size())
-            this->targetValue = option.values[0];
+            this->targetValue = list[0];
          else
             this->targetValue = nullptr;
          this->updateValueFromVariant();
@@ -334,6 +354,8 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    const QSignalBlocker blocker5(this->ui.optionType);
    //
    if (!this->targetOption) {
+      this->ui.optionName->clearTarget();
+      this->ui.optionDesc->clearTarget();
       //
       // TOOD: reset controls to a blank state
       //
@@ -375,6 +397,7 @@ void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
    }
    if (this->targetValue)
       _selectByPointerData(this->ui.listValues, this->targetValue);
+   this->ui.buttonValuesDelete->setDisabled(list.size() <= 1);
 }
 void ScriptEditorPageScriptOptions::updateValueFromVariant() {
    const QSignalBlocker blocker0(this->ui.valueName);

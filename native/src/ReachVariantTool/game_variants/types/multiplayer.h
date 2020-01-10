@@ -92,7 +92,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } loadouts;
       } options;
       struct {
-         std::vector<ReachMegaloPlayerTraits> traits;
+         cobb::pointer_list<ReachMegaloPlayerTraits> traits;
          cobb::pointer_list<ReachMegaloOption> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;

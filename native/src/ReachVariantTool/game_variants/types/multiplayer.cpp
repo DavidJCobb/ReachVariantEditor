@@ -80,11 +80,13 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       int count;
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_traits));
-      t.resize(count);
-      for (int i = 0; i < count; i++)
-         t[i].read(stream);
+      t.reserve(count);
+      for (int i = 0; i < count; i++) {
+         auto& traits = *t.emplace_back(new ReachMegaloPlayerTraits);
+         traits.read(stream);
+      }
       //
-      count = stream.read_bits(cobb::bitcount(16));
+      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_options));
       o.reserve(count);
       for (int i = 0; i < count; i++) {
          auto& option = *o.emplace_back(new ReachMegaloOption);
@@ -93,9 +95,9 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       //
       sd.strings.read(stream);
       //
-      for (auto& traits : t)
-         traits.postprocess_string_indices(sd.strings);
-      for (auto& option : o)
+      for (auto traits : t)
+         traits->postprocess_string_indices(sd.strings);
+      for (auto option : o)
          option->postprocess_string_indices(sd.strings);
    }
    this->stringTableIndexPointer.read(stream);
@@ -336,8 +338,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       auto& t = sd.traits;
       auto& o = sd.options;
       bits.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
-      for (auto& traits : t)
-         traits.write(bits);
+      for (auto traits : t)
+         traits->write(bits);
       bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
          option->write(bits);
@@ -428,10 +430,10 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
       auto& stringTable = clone->scriptData.strings;
       auto& cd = clone->scriptData;
       auto& cc = clone->scriptContent;
-      for (auto& option : cd.options)
+      for (auto option : cd.options)
          option->postprocess_string_indices(stringTable);
-      for (auto& traits : cd.traits)
-         traits.postprocess_string_indices(stringTable);
+      for (auto traits : cd.traits)
+         traits->postprocess_string_indices(stringTable);
       for (auto stat : cc.stats)
          stat->postprocess_string_indices(stringTable);
    }

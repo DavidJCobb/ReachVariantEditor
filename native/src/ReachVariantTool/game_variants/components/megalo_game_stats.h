@@ -27,5 +27,5 @@ class ReachMegaloGameStat : public cobb::reference_tracked_object {
       //
       void read(cobb::ibitreader&) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) noexcept;
 };

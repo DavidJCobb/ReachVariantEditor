@@ -71,6 +71,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    ui.setupUi(this);
    _window = this;
    //
+   auto& editor = ReachEditorState::get();
+   //
    ReachINI::get().register_for_changes([](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
       if (setting == &ReachINI::UIWindowTitle::bShowFullPath || setting == &ReachINI::UIWindowTitle::bShowVariantTitle) {
          ReachVariantTool::get().refreshWindowTitle();
@@ -96,6 +98,52 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          }
       }
    }
+   QObject::connect(&editor, &ReachEditorState::scriptTraitsModified, [this](ReachMegaloPlayerTraits* traits) {
+      if (!traits) { // traits were added, reordered, or removed
+         this->regenerateNavigation();
+         return;
+      }
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp) {
+         this->regenerateNavigation();
+         return;
+      }
+      int32_t index = -1;
+      {
+         auto& list = mp->scriptData.traits;
+         auto  size = list.size();
+         for (size_t i = 0; i < size; i++) {
+            if (list[i] == traits) {
+               index = i;
+               break;
+            }
+         }
+         if (index == -1) {
+            this->regenerateNavigation();
+            return;
+         }
+      }
+      QTreeWidgetItem* target = this->getNavItemForScriptTraits(traits, index);
+      if (!target) {
+         this->regenerateNavigation();
+         return;
+      }
+      //
+      ReachString* name = traits->name;
+      QString text;
+      if (name) {
+         text = QString::fromUtf8(name->english().c_str());
+      } else {
+         text = QString("Unnamed Traits %1").arg(index);
+      }
+      target->setText(0, text);
+      ReachString* desc = traits->desc;
+      if (desc)
+         target->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+      else
+         target->setToolTip(0, "");
+   });
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
@@ -154,7 +202,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             auto& list = mp->scriptData.traits;
             auto  size = list.size();
             for (size_t i = 0; i < size; i++) {
-               auto& item      = list[i];
+               auto& item      = *list[i];
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (item.name) {
                   formatted = formatted.arg(QString::fromUtf8(item.name->english().c_str()));
@@ -491,9 +539,17 @@ void ReachVariantTool::regenerateNavigation() {
    auto& editor = ReachEditorState::get();
    auto  widget = this->ui.MainTreeview;
    //
+   int32_t priorScriptTraits = -1;
    QString priorSelection;
-   if (auto item = widget->currentItem())
+   if (auto item = widget->currentItem()) {
       priorSelection = item->text(0);
+      auto data = item->data(0, Qt::ItemDataRole::UserRole);
+      if (data.isValid() && (_page)data.toInt() == _page::mp_traits_scripted) {
+         data = item->data(0, Qt::ItemDataRole::UserRole + 1);
+         if (data.isValid())
+            priorScriptTraits = data.toInt();
+      }
+   }
    QTreeWidgetItem* defaultFallback = nullptr; // if the previously-selected item is gone after we rebuild, select this instead; if this is nullptr, select the first item
    //
    {
@@ -552,7 +608,8 @@ void ReachVariantTool::regenerateNavigation() {
             auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);
             auto& t = mp->scriptData.traits;
             for (size_t i = 0; i < t.size(); i++) {
-               auto name = t[i].name;
+               auto& traits = *t[i];
+               ReachString* name = traits.name;
                QString text;
                if (name) {
                   text = QString::fromUtf8(name->english().c_str());
@@ -560,7 +617,7 @@ void ReachVariantTool::regenerateNavigation() {
                   text = QString("Unnamed Traits %1").arg(i);
                }
                auto item = _makeNavItemMegaloTraits(script, text, i);
-               auto desc = t[i].desc;
+               ReachString* desc = traits.desc;
                if (desc)
                   item->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
             }
@@ -577,7 +634,13 @@ void ReachVariantTool::regenerateNavigation() {
    // If the item we had selected before still exists, select it again.
    //
    bool reselected = false;
-   if (!priorSelection.isEmpty()) {
+   if (priorScriptTraits >= 0) {
+      auto item = this->getNavItemForScriptTraits(nullptr, priorScriptTraits);
+      if (item) {
+         widget->setCurrentItem(item);
+         reselected = true;
+      }
+   } else if (!priorSelection.isEmpty()) {
       auto list = widget->findItems(priorSelection, Qt::MatchFixedString | Qt::MatchCaseSensitive | Qt::MatchRecursive);
       if (list.size()) {
          widget->setCurrentItem(list[0]);
@@ -693,7 +756,7 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
                widget->setCurrentItem(previous);
                return;
             }
-            this->switchToPlayerTraits(&mp_data->scriptData.traits[extra]);
+            this->switchToPlayerTraits(mp_data->scriptData.traits[extra]);
             return;
          case _page::mp_team_configuration: // specific team
             ReachEditorState::get().setCurrentMultiplayerTeam(extra);
@@ -753,4 +816,67 @@ void ReachVariantTool::refreshWindowTitle() {
          QString("%1 - ReachVariantTool").arg(file)
       );
    }
+}
+
+QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTraits* traits, int32_t index) {
+   if (index < 0) {
+      if (!traits)
+         return nullptr;
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp)
+         return nullptr;
+      auto& list = mp->scriptData.traits;
+      auto  size = list.size();
+      for (size_t i = 0; i < size; i++) {
+         if (list[i] == traits) {
+            index = i;
+            break;
+         }
+      }
+      if (index == -1)
+         return nullptr;
+   }
+   //
+   auto widget = this->ui.MainTreeview;
+   QTreeWidgetItem* container = nullptr;
+   {
+      //
+      // TODO: THIS DOESN'T WORK BECAUSE THE "Script-Specific Options" NAV ITEM ISN'T 
+      // ACTUALLY TOP-LEVEL; I BELIEVE IT'S NESTED UNDER A GENERAL "Options" NAV ITEM. 
+      // WE NEED TO MAKE A FILE FOR Qt HELPER FUNCTIONS AND INCLUDE ONE TO RECURSIVELY 
+      // SEARCH A TREE WIDGET FOR DATA (IT SHOULD TAKE A LAMBDA FOR CHECKING THE DATA).
+      //
+      auto size = widget->topLevelItemCount();
+      for (size_t i = 0; i < size; i++) {
+         auto item = widget->topLevelItem(i);
+         auto data = item->data(0, Qt::ItemDataRole::UserRole);
+         if (!data.isValid())
+            continue;
+         if ((_page)data.toInt() == _page::mp_options_scripted) {
+            container = item;
+            break;
+         }
+      }
+      if (!container)
+         return nullptr;
+   }
+   auto size = container->childCount();
+   for (size_t i = 0; i < size; i++) {
+      auto item = container->child(i);
+      if (!item)
+         continue;
+      auto data = item->data(0, Qt::ItemDataRole::UserRole + 0);
+      if (!data.isValid())
+         continue;
+      if ((_page)data.toInt() != _page::mp_traits_scripted)
+         continue;
+      data = item->data(0, Qt::ItemDataRole::UserRole + 1);
+      if (!data.isValid())
+         continue;
+      if (data.toInt() == index) {
+         return item;
+      }
+   }
+   return nullptr;
 }

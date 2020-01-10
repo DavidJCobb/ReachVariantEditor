@@ -8,6 +8,13 @@
 #include "../../helpers/stream.h"
 #include "megalo/limits.h"
 
+//
+// NOTES:
+//
+// If a game variant contains any non-range (i.e. enum) options that have no values, 
+// then the variant is invalid and will not appear in the MCC's menus.
+//
+
 using ReachMegaloOptionValue = cobb::bitnumber<10, int16_t>;
 using ReachMegaloOptionValueIndex = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_script_option_values - 1), uint8_t>;
 using ReachMegaloOptionValueCount = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_script_option_values), uint8_t>;

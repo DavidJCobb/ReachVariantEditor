@@ -36,6 +36,8 @@ int main(int argc, char *argv[]) {
 //
 //     - Make it so that double-clicking on a string opens it for editing.
 //
+//     - Do not allow the user to create new strings if the table is full.
+//
 //     - If we start editing a string that is in use by a Forge label, we should 
 //       be blocked from changing its localizations to different values. This 
 //       requires the ability to check *what* is using a string which in turn 
@@ -72,13 +74,6 @@ int main(int argc, char *argv[]) {
 //
 //  - SCRIPTED OPTION EDITING
 //
-//     = Whenever an option or its values are changed, we need to emit a signal 
-//       through ReachEditorState so that the main window can update properly.
-//
-//     - A game variant is not considered valid if it contains any enum option 
-//       with no values; we need to enforce all options having at least one 
-//       value.
-//
 //     - When no option/value is selected, all form controls for options/values 
 //       should be set to blank states. This isn't strictly possible for drop-
 //       downs without some special trickery, though.
@@ -87,7 +82,8 @@ int main(int argc, char *argv[]) {
 //       edits option strings from the string table editor.
 //
 //        = Come to think of it, this is gonna be a concern for most of the 
-//          main window, too...
+//          main window, too... Actually, it'll be a concern for just about 
+//          everything.
 //
 //  - Work on script editor
 //

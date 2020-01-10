@@ -94,6 +94,10 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageScriptOptions);
          return;
       }
+      if (current->text() == "Scripted Player Traits") {
+         stack->setCurrentWidget(this->ui.pageScriptTraits);
+         return;
+      }
       //
       // TODO: other pages
       //

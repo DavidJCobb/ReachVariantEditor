@@ -5,6 +5,7 @@
 #include "ui_main_window.h"
 
 class ReachLoadoutPalette;
+class ReachMegaloPlayerTraits;
 class ReachPlayerTraits;
 class ReachTeamData;
 
@@ -41,6 +42,8 @@ class ReachVariantTool : public QMainWindow {
       //
       void dragEnterEvent(QDragEnterEvent* event); // override
       void dropEvent(QDropEvent* event); // override
+      //
+      QTreeWidgetItem* getNavItemForScriptTraits(ReachMegaloPlayerTraits*, int32_t index = -1);
       //
    private:
       Ui::ReachVariantToolClass ui;

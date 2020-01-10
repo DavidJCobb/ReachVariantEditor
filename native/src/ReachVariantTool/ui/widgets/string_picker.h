@@ -22,6 +22,10 @@ class ReachStringPicker : public QWidget {
          this->_targetRef = &r;
          this->refreshSelection();
       }
+      void clearTarget() noexcept {
+         this->_targetRef = nullptr;
+         this->refreshSelection();
+      }
       //
    signals:
       void selectedStringChanged(); // the string is changed via the combobox, or the user clicks "Save" or "Save as New" in the editing dialog box

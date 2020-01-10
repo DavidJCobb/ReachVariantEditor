@@ -9,7 +9,11 @@ void ReachMegaloGameStat::read(cobb::ibitreader& stream) noexcept {
 void ReachMegaloGameStat::postprocess_string_indices(ReachStringTable& table) noexcept {
    this->name = table.get_entry(this->nameIndex);
 }
-void ReachMegaloGameStat::write(cobb::bitwriter& stream) const noexcept {
+void ReachMegaloGameStat::write(cobb::bitwriter& stream) noexcept {
+   if (this->name) {
+      this->nameIndex = this->name->index();
+   } else
+      this->nameIndex = 0;
    this->nameIndex.write(stream);
    stream.write((uint8_t)this->format, 2);
    stream.write((uint8_t)this->sortOrder, 2);
