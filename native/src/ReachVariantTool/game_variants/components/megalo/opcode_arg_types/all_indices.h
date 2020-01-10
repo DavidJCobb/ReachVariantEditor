@@ -70,13 +70,6 @@ namespace Megalo {
             out = list[this->value].name;
          }
    };
-   class OpcodeArgValuePlayerTraits : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValuePlayerTraits() : OpcodeArgValueBaseIndex("Scripted Player Traits", Limits::max_script_traits, index_quirk::reference) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValuePlayerTraits();
-         }
-   };
    class OpcodeArgValueRequisitionPalette : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
       public:
          OpcodeArgValueRequisitionPalette() : OpcodeArgValueBaseIndex("Requisition Palette", cobb::bitmax(4), index_quirk::presence) {};

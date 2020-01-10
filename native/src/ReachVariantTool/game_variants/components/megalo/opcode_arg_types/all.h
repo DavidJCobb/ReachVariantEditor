@@ -11,6 +11,7 @@
 //
 #include "forge_label.h"
 #include "player_set.h"
+#include "player_traits.h"
 #include "shape.h"
 #include "specific_variable.h"
 #include "tokens.h"

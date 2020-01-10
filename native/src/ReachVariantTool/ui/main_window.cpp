@@ -18,6 +18,7 @@
 #include "../helpers/ini.h"
 #include "../helpers/steam.h"
 #include "../helpers/stream.h"
+#include "../helpers/qt/tree_widget.h"
 #include "../services/ini.h"
 
 #include "options_window.h"
@@ -539,7 +540,7 @@ void ReachVariantTool::regenerateNavigation() {
    auto& editor = ReachEditorState::get();
    auto  widget = this->ui.MainTreeview;
    //
-   int32_t priorScriptTraits = -1;
+   int32_t priorScriptTraits = -1; // TODO: This doesn't work so well for catching when we reorder traits
    QString priorSelection;
    if (auto item = widget->currentItem()) {
       priorSelection = item->text(0);
@@ -606,6 +607,8 @@ void ReachVariantTool::regenerateNavigation() {
             }
             //
             auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);
+            if (priorScriptTraits >= 0)
+               defaultFallback = script;
             auto& t = mp->scriptData.traits;
             for (size_t i = 0; i < t.size(); i++) {
                auto& traits = *t[i];
@@ -839,28 +842,9 @@ QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTr
    }
    //
    auto widget = this->ui.MainTreeview;
-   QTreeWidgetItem* container = nullptr;
-   {
-      //
-      // TODO: THIS DOESN'T WORK BECAUSE THE "Script-Specific Options" NAV ITEM ISN'T 
-      // ACTUALLY TOP-LEVEL; I BELIEVE IT'S NESTED UNDER A GENERAL "Options" NAV ITEM. 
-      // WE NEED TO MAKE A FILE FOR Qt HELPER FUNCTIONS AND INCLUDE ONE TO RECURSIVELY 
-      // SEARCH A TREE WIDGET FOR DATA (IT SHOULD TAKE A LAMBDA FOR CHECKING THE DATA).
-      //
-      auto size = widget->topLevelItemCount();
-      for (size_t i = 0; i < size; i++) {
-         auto item = widget->topLevelItem(i);
-         auto data = item->data(0, Qt::ItemDataRole::UserRole);
-         if (!data.isValid())
-            continue;
-         if ((_page)data.toInt() == _page::mp_options_scripted) {
-            container = item;
-            break;
-         }
-      }
-      if (!container)
-         return nullptr;
-   }
+   QTreeWidgetItem* container = cobb::qt::tree_widget::find_item_by_data(widget, [](QVariant data) { return (_page)data.toInt() == _page::mp_options_scripted; }, Qt::ItemDataRole::UserRole);
+   if (!container)
+      return nullptr;
    auto size = container->childCount();
    for (size_t i = 0; i < size; i++) {
       auto item = container->child(i);

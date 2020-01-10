@@ -1,4 +1,5 @@
 #include "page_script_traits.h"
+#include <QMessageBox>
 
 namespace {
    bool _selectByPointerData(QListWidget* widget, void* target) {
@@ -40,7 +41,82 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
       ReachEditorState::get().scriptTraitsModified(this->target); // main window shows descriptions as tooltips
    });
    //
-   // TODO: buttons
+   QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp)
+         return;
+      auto& list = mp->scriptData.traits;
+      if (list.size() >= Megalo::Limits::max_script_options) {
+         QMessageBox::information(this, tr("Cannot add player traits"), tr("Game variants cannot have more than %1 sets of player traits.").arg(Megalo::Limits::max_script_traits));
+         return;
+      }
+      this->target = list.emplace_back(new ReachMegaloPlayerTraits);
+      this->updateTraitsFromVariant();
+      this->updateTraitsListFromVariant();
+      ReachEditorState::get().scriptTraitsModified(nullptr);
+   });
+   QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
+      if (!this->target)
+         return;
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp)
+         return;
+      auto& list  = mp->scriptData.traits;
+      auto  index = list.index_of(this->target);
+      if (index < 0)
+         return;
+      if (index == 0) // can't move the first item up
+         return;
+      list.swap_items(index, index - 1);
+      this->updateTraitsListFromVariant();
+      ReachEditorState::get().scriptTraitsModified(nullptr);
+   });
+   QObject::connect(this->ui.buttonMoveDown, &QPushButton::clicked, [this]() {
+      if (!this->target)
+         return;
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp)
+         return;
+      auto& list  = mp->scriptData.traits;
+      auto  index = list.index_of(this->target);
+      if (index < 0)
+         return;
+      if (index == list.size() - 1) // can't move the last item down
+         return;
+      list.swap_items(index, index + 1);
+      this->updateTraitsListFromVariant();
+      ReachEditorState::get().scriptTraitsModified(nullptr);
+   });
+   QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
+      if (!this->target)
+         return;
+      if (this->target->get_inbound_references().size()) {
+         QMessageBox::information(this, tr("Cannot remove player traits"), tr("This set of player traits is still in use by the gametype's script. It cannot be removed at this time."));
+         return;
+      }
+      auto& editor = ReachEditorState::get();
+      auto  mp     = editor.multiplayerData();
+      if (!mp)
+         return;
+      auto& list   = mp->scriptData.traits;
+      auto  it     = std::find(list.begin(), list.end(), this->target);
+      auto  index  = list.index_of(this->target);
+      if (it == list.end())
+         return;
+      list.erase(it);
+      if (index > 0)
+         this->target = list[index - 1];
+      else if (list.size())
+         this->target = list[0];
+      else
+         this->target = nullptr;
+      this->updateTraitsFromVariant();
+      this->updateTraitsListFromVariant();
+      ReachEditorState::get().scriptTraitsModified(nullptr);
+   });
    //
    this->updateTraitsListFromVariant();
 }

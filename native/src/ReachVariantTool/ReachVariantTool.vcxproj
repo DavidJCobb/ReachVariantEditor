@@ -129,6 +129,7 @@
     <ClCompile Include="helpers\ini.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
+    <ClCompile Include="helpers\qt\tree_widget.cpp" />
     <ClCompile Include="helpers\reference_tracked_object.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
     <ClCompile Include="helpers\steam.cpp" />
@@ -199,6 +200,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
     <QtMoc Include="ui\script_editor\page_script_traits.h" />
@@ -227,6 +229,7 @@
     <ClInclude Include="game_variants\data\mp_object_names.h" />
     <ClInclude Include="game_variants\data\mp_object_types.h" />
     <ClInclude Include="helpers\memory.h" />
+    <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\reference_tracked_object.h" />
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />

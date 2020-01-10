@@ -275,6 +275,12 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          for (size_t i = 0; i < size; i++)
             list[i]->index = i;
       }
+      {  // Script traits
+         auto& list = this->scriptData.traits;
+         size_t size = list.size();
+         for (size_t i = 0; i < size; i++)
+            list[i]->index = i;
+      }
    }
    //
    bits.write(this->encodingVersion);

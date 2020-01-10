@@ -62,16 +62,6 @@ int main(int argc, char *argv[]) {
 //        - It won't be safe to implement this until we're properly tracking all 
 //          string references.
 //
-//  - SCRIPTED TRAIT EDITING
-//
-//     - Fairly easy; the only data associated with each trait set is the name. 
-//       (Obviously the traits themselves have values but that's a main window 
-//       thing.)
-//
-//       Speaking of the main window, however: the editor-state needs a signal 
-//       that we can emit when we change the traits' names, or when we add, 
-//       reorder, or remove them, so that the main window can update appropriately.
-//
 //  - SCRIPTED OPTION EDITING
 //
 //     - When no option/value is selected, all form controls for options/values 
@@ -116,27 +106,7 @@ int main(int argc, char *argv[]) {
 //
 //        - Basically all of the same work needs to be done as with Forge labels
 //
-//     - Scripted options
-//
-//        - Viewing
-//
-//        - Editing
-//
-//        - Removing or reordering
-//
-//           - Like with Forge labels, we need to fail if the option to be removed 
-//             is in use by any opcodes, and we need to handle reordering the 
-//             options (and fixing up option indices used in opcodes) that follow 
-//             the one to be deleted. We also need to update the main window in 
-//             response to the options being changed.
-//
-//        = NOTES
-//
-//           - Invasion Slayer is the only gametype I've found with a slider option 
-//             (Vehicle Limit), but that option is flagged as hidden and I'm not sure 
-//             it has a description (so what does it do?). I've tested and verified 
-//             that slider options never display in MCC's UI, even when the disabled 
-//             and hidden flags for them are cleared.
+//     - Scripted options - DONE
 //
 //     - Scripted traits
 //
@@ -152,21 +122,7 @@ int main(int argc, char *argv[]) {
 //             the one to be deleted. We also need to update the main window in 
 //             response to the traits being changed.
 //
-//     - String table editing
-//
-//        - String tables use a std::vector<ReachString> rather than using a 
-//          std::vector<ReachString*>; that is, the ReachStrings are *in* the 
-//          buffer. There are a lot of objects that have a function to "post-process 
-//          string indices:" after the string table is loaded, it's passed to these 
-//          objects so that they can take their string indices and store a pointer 
-//          to the target ReachString. ALL OF THESE ARE GOING TO BREAK THE SECOND 
-//          WE ALLOW THE CREATION OR REMOVAL OF STRINGS, OR MORE GENERALLY THE 
-//          SECOND WE ALLOW ANYTHING THAT MIGHT INVALIDATE ITERATORS.
-//
-//          ReachStrings need to be heap-allocated. This would offer us a few 
-//          benefits for run-time editing as well (see note above about everything 
-//          being disconnected, and about switching indices for pointers as part of 
-//          a global post-process for all data referred to be index).
+//     - String table editing - MAIN FUNCTIONALITY DONE
 //
 //        - We need to make sure that the total length of all strings falls below 
 //          the string table buffer size.
