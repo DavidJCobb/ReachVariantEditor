@@ -98,10 +98,6 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageScriptTraits);
          return;
       }
-      if (current->text() == "Scripted Stats") {
-         stack->setCurrentWidget(this->ui.pageScriptStats);
-         return;
-      }
       //
       // TODO: other pages
       //
