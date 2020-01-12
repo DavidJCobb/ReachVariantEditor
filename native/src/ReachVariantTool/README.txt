@@ -64,3 +64,4 @@ by or affiliated with Microsoft.
 List of assets used:
 
  - Gametype icons (ripped via screenshot)
+ - In-game HUD (via screenshots)

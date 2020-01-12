@@ -34,4 +34,18 @@
     <file>../Resources/gametype_icons/29.png</file>
     <file>../Resources/gametype_icons/30.png</file>
   </qresource>
+  <qresource prefix="ScriptEditor">
+    <file>../Resources/hud_widget_preview/0.png</file>
+    <file>../Resources/hud_widget_preview/1.png</file>
+    <file>../Resources/hud_widget_preview/2.png</file>
+    <file>../Resources/hud_widget_preview/3.png</file>
+    <file>../Resources/hud_widget_preview/4.png</file>
+    <file>../Resources/hud_widget_preview/5.png</file>
+    <file>../Resources/hud_widget_preview/6.png</file>
+    <file>../Resources/hud_widget_preview/7.png</file>
+    <file>../Resources/hud_widget_preview/8.png</file>
+    <file>../Resources/hud_widget_preview/9.png</file>
+    <file>../Resources/hud_widget_preview/10.png</file>
+    <file>../Resources/hud_widget_preview/base_hud.png</file>
+  </qresource>
 </RCC>

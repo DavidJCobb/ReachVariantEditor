@@ -131,7 +131,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
             Megalo::VariableDeclarationSet object = Megalo::VariableDeclarationSet(Megalo::variable_scope::object);
             Megalo::VariableDeclarationSet team   = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
          } variables;
-         std::vector<Megalo::HUDWidgetDeclaration> widgets;
+         cobb::pointer_list<Megalo::HUDWidgetDeclaration> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
          cobb::pointer_list<Megalo::ReachForgeLabel> forgeLabels = decltype(forgeLabels)(true); // nullptr elements are not allowed
       } scriptContent;

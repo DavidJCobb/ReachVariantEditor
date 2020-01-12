@@ -23,6 +23,22 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
+//  - Right now, our code to stringify triggers can't properly handle when indexed 
+//    list items (e.g. HUD widgets) get reordered. This is because indexed list 
+//    items don't have a reference to their containing lists (ReachStrings are an 
+//    exception to this) and therefore can't know their own index; we give them an 
+//    index variable and update that only on read and on write.
+//
+//    Can we create a cobb::managed_pointer_list with the following properties?
+//
+//     - An upper limit on the list's contained items can be set.
+//
+//     - If the templated type has an (index) field, then the list updates that 
+//       field so that the type always knows where it is in the list; alternatively, 
+//       if the templated type has an (owner) field, the list writes a reference to 
+//       itself to that field when constructing list items, so that list items can 
+//       check their own indices on demand.
+//
 //  - STRING TABLE EDITING
 //
 //     - When we finish editing a string, the currently-selected string in the 

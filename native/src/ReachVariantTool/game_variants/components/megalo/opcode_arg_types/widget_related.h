@@ -2,10 +2,31 @@
 #include "../opcode_arg.h"
 #include "scalar.h"
 #include "timer.h"
+#include "../limits.h"
+#include "../widgets.h"
 
-// NOTE: widget index is in all_indices.h
+class GameVariantDataMultiplayer;
 
 namespace Megalo {
+   class OpcodeArgValueWidget : public OpcodeArgValue {
+      public:
+         static constexpr int16_t index_of_none = -1;
+         static constexpr int16_t max_index     = Limits::max_script_widgets;
+         //
+         int16_t                   index = index_of_none;
+         ref<HUDWidgetDeclaration> value = decltype(value)::make(*this);
+         bool postprocessed = false;
+         //
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueWidget;
+         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
+         //
+         virtual void to_string(std::string& out) const noexcept override;
+   };
+
    enum class MeterType {
       none,
       timer,
@@ -18,57 +39,9 @@ namespace Megalo {
          OpcodeArgValueScalar numerator;
          OpcodeArgValueScalar denominator;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->type.read(stream);
-            switch (this->type) {
-               case MeterType::none:
-                  break;
-               case MeterType::timer:
-                  this->timer.read(stream);
-                  break;
-               case MeterType::number:
-                  this->numerator.read(stream);
-                  this->denominator.read(stream);
-                  break;
-               default:
-                  printf("Widget Meter Parameters had bad type %u.\n", (int)this->type);
-                  return false;
-            }
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            this->type.write(stream);
-            switch (this->type) {
-               case MeterType::none:
-                  break;
-               case MeterType::timer:
-                  this->timer.write(stream);
-                  break;
-               case MeterType::number:
-                  this->numerator.write(stream);
-                  this->denominator.write(stream);
-                  break;
-               default:
-                  assert(false && "Widget Meter Parameters had a bad type.");
-            }
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            std::string temp;
-            switch (this->type) {
-               case MeterType::none:
-                  out = "no meter";
-                  return;
-               case MeterType::timer:
-                  this->timer.to_string(out);
-                  out = "timer " + out;
-                  return;
-               case MeterType::number:
-                  this->numerator.to_string(out);
-                  this->denominator.to_string(temp);
-                  cobb::sprintf(out, "%s / %s", out.c_str(), temp.c_str());
-                  return;
-            }
-         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
          //
          static OpcodeArgValue* factory(cobb::ibitreader&) {
             return new OpcodeArgValueMeterParameters;

@@ -110,6 +110,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\team.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\widget_related.cpp" />
     <ClCompile Include="game_variants\components\megalo\trigger.cpp" />
     <ClCompile Include="game_variants\components\megalo\variables_and_scopes.cpp" />
     <ClCompile Include="game_variants\components\megalo_game_stats.cpp" />
@@ -136,6 +137,7 @@
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
@@ -162,6 +164,7 @@
     <ClCompile Include="ui\script_editor\page_script_options.cpp" />
     <ClCompile Include="ui\script_editor\page_script_stats.cpp" />
     <ClCompile Include="ui\script_editor\page_script_traits.cpp" />
+    <ClCompile Include="ui\script_editor\page_script_widgets.cpp" />
     <ClCompile Include="ui\script_editor\page_string_table.cpp" />
     <ClCompile Include="ui\widgets\forge_label_editor.cpp" />
     <ClCompile Include="ui\widgets\option_toggles.cpp" />
@@ -191,6 +194,7 @@
     <QtUic Include="ui\script_editor\page_script_options.ui" />
     <QtUic Include="ui\script_editor\page_script_stats.ui" />
     <QtUic Include="ui\script_editor\page_script_traits.ui" />
+    <QtUic Include="ui\script_editor\page_script_widgets.ui" />
     <QtUic Include="ui\script_editor\page_string_table.ui" />
     <QtUic Include="ui\widgets\forge_label_editor.ui" />
     <QtUic Include="ui\widget_loadout_options.ui" />
@@ -205,6 +209,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <QtMoc Include="ui\script_editor\page_script_widgets.h" />
     <QtMoc Include="ui\script_editor\page_script_stats.h" />
     <QtMoc Include="ui\script_editor\page_script_traits.h" />
     <QtMoc Include="ui\script_editor\page_script_options.h" />
@@ -237,6 +242,7 @@
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />
     <ClInclude Include="resource.h" />
+    <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

@@ -410,6 +410,25 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="pageScriptWidgets">
+      <layout class="QGridLayout" name="gridLayout_8">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="ScriptEditorPageHUDWidgets" name="pageContentScriptWidgets" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -443,6 +462,12 @@
    <class>ScriptEditorPageScriptStats</class>
    <extends>QWidget</extends>
    <header>script_editor/page_script_stats.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditorPageHUDWidgets</class>
+   <extends>QWidget</extends>
+   <header>script_editor/page_script_widgets.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

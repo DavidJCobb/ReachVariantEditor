@@ -207,10 +207,13 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          v.team.read(stream);
       }
       {  // HUD widget declarations
+         count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));
          auto& widgets = this->scriptContent.widgets;
-         widgets.resize(stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets)));
-         for (auto& widget : widgets)
-            widget.read(stream);
+         widgets.reserve(count);
+         for (size_t i = 0; i < count; i++) {
+            auto widget = widgets.emplace_back(new Megalo::HUDWidgetDeclaration);
+            widget->read(stream);
+         }
       }
       if (!this->scriptContent.entryPoints.read(stream))
          return false;
@@ -277,6 +280,12 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       }
       {  // Script traits
          auto& list = this->scriptData.traits;
+         size_t size = list.size();
+         for (size_t i = 0; i < size; i++)
+            list[i]->index = i;
+      }
+      {  // Script HUD widgets
+         auto& list = this->scriptContent.widgets;
          size_t size = list.size();
          for (size_t i = 0; i < size; i++)
             list[i]->index = i;
@@ -401,8 +410,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       }
       //
       bits.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
-      for (auto& widget : content.widgets)
-         widget.write(bits);
+      for (auto widget : content.widgets)
+         widget->write(bits);
       //
       content.entryPoints.write(bits);
       content.usedMPObjectTypes.write(bits);

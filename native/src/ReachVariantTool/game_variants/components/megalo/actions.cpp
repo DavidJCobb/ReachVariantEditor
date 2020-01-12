@@ -907,7 +907,7 @@ namespace Megalo {
       ),
       ActionFunction( // 96
          "Unknown-96",
-         "Used in CTF to return the flag (none, flag, return Forge label).",
+         "Used by Infection to move the active Haven. Will not select the same Haven twice in a row; if the map has only one Haven, then the containing trigger runs on every frame and spams \"Hill Moved\" announcements.",
          "Carry out some unknown (96) action with %1 and %3 and store the result in %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),

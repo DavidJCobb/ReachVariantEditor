@@ -102,6 +102,10 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageScriptStats);
          return;
       }
+      if (current->text() == "Scripted HUD Widgets") {
+         stack->setCurrentWidget(this->ui.pageScriptWidgets);
+         return;
+      }
       //
       // TODO: other pages
       //

@@ -91,15 +91,6 @@ namespace Megalo {
             return new OpcodeArgValueTrigger();
          }
    };
-
-   static_assert(cobb::bitcount(Limits::max_script_widgets - 1) == 2, "Incorrect bitlength for Widget Index opcode arg values!"); // KSoft.Tool specifies this explicitly for some reason
-   class OpcodeArgValueWidget : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueWidget() : OpcodeArgValueBaseIndex("HUD Widget", Limits::max_script_widgets, index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueWidget();
-         }
-   };
    
    class OpcodeArgValueIconIndex6Bits : public OpcodeArgValueBaseIndex {
       public:

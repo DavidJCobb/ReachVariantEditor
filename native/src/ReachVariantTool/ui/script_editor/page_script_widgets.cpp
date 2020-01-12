@@ -1,5 +1,7 @@
-#include "page_script_stats.h"
+#include "page_script_widgets.h"
+#include <QImage>
 #include <QMessageBox>
+#include <QPainter>
 
 namespace {
    bool _selectByPointerData(QListWidget* widget, void* target) {
@@ -20,53 +22,31 @@ namespace {
       return false; // not found
    }
 }
-ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWidget(parent) {
+ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
    auto& editor = ReachEditorState::get();
    //
-   QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageScriptStats::updateStatsListFromVariant);
+   QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageHUDWidgets::updateWidgetsListFromVariant);
    QObject::connect(&editor, &ReachEditorState::variantAbandoned, [this]() {
       this->target = nullptr;
-      this->updateStatsListFromVariant();
+      this->updateWidgetsListFromVariant();
    });
-   {  // Handle option/value name changes
-      //
-      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
-      // That's also the laziest way to handle things... :<
-      //
-      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
-         this->updateStatsListFromVariant();
-      });
-      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
-         this->updateStatsListFromVariant();
-      });
-   }
    //
-   QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptStats::selectStat);
+   this->ui.preview->addImage(QImage(":/ScriptEditor/Resources/hud_widget_preview/base_hud.png"));
    //
-   {  // Option properties
+   QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageHUDWidgets::selectWidget);
+   //
+   {  // HUD widget properties
       //
       // Explicit hooks for the name and description aren't needed; once we supply a string ref to the string picker 
       // widgets, they handle everything from there on out.
       //
-      QObject::connect(this->ui.name, &ReachStringPicker::selectedStringChanged, [this]() {
-         this->updateStatsListFromVariant();
-      });
-      QObject::connect(this->ui.format, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+      QObject::connect(this->ui.position, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
          if (!this->target)
             return;
-         this->target->format = (ReachMegaloGameStat::Format)index;
-      });
-      QObject::connect(this->ui.sortOrder, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
-         if (!this->target)
-            return;
-         this->target->sortOrder = (ReachMegaloGameStat::Sort)index;
-      });
-      QObject::connect(this->ui.groupByTeam, &QCheckBox::stateChanged, [this](int state) {
-         if (!this->target)
-            return;
-         this->target->groupByTeam = state == Qt::Checked;
+         this->target->position = index;
+         this->updateWidgetPreview(index);
       });
       //
       QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
@@ -74,14 +54,14 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list = mp->scriptContent.stats;
-         if (list.size() >= Megalo::Limits::max_script_options) {
-            QMessageBox::information(this, tr("Cannot add stat"), tr("Game variants cannot have more than %1 stats.").arg(Megalo::Limits::max_script_stats));
+         auto& list = mp->scriptContent.widgets;
+         if (list.size() >= Megalo::Limits::max_script_widgets) {
+            QMessageBox::information(this, tr("Cannot add HUD widget"), tr("Game variants cannot have more than %1 HUD widgets.").arg(Megalo::Limits::max_script_widgets));
             return;
          }
-         this->target = list.emplace_back(new ReachMegaloGameStat);
-         this->updateStatFromVariant();
-         this->updateStatsListFromVariant();
+         this->target = list.emplace_back(new Megalo::HUDWidgetDeclaration);
+         this->updateWidgetFromVariant();
+         this->updateWidgetsListFromVariant();
       });
       QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
          if (!this->target)
@@ -90,14 +70,14 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptContent.stats;
+         auto& list  = mp->scriptContent.widgets;
          auto  index = list.index_of(this->target);
          if (index < 0)
             return;
          if (index == 0) // can't move the first item up
             return;
          list.swap_items(index, index - 1);
-         this->updateStatsListFromVariant();
+         this->updateWidgetsListFromVariant();
       });
       QObject::connect(this->ui.buttonMoveDown, &QPushButton::clicked, [this]() {
          if (!this->target)
@@ -106,27 +86,27 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptContent.stats;
+         auto& list  = mp->scriptContent.widgets;
          auto  index = list.index_of(this->target);
          if (index < 0)
             return;
          if (index == list.size() - 1) // can't move the last item down
             return;
          list.swap_items(index, index + 1);
-         this->updateStatsListFromVariant();
+         this->updateWidgetsListFromVariant();
       });
       QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
          if (!this->target)
             return;
          if (this->target->get_inbound_references().size()) {
-            QMessageBox::information(this, tr("Cannot remove stat"), tr("This stat is still in use by the gametype's script. It cannot be removed at this time."));
+            QMessageBox::information(this, tr("Cannot remove HUD widget"), tr("This HUD widget is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }
          auto& editor = ReachEditorState::get();
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list   = mp->scriptContent.stats;
+         auto& list   = mp->scriptContent.widgets;
          auto  it     = std::find(list.begin(), list.end(), this->target);
          auto  index  = list.index_of(this->target);
          if (it == list.end())
@@ -138,30 +118,31 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             this->target = list[0];
          else
             this->target = nullptr;
-         this->updateStatFromVariant();
-         this->updateStatsListFromVariant();
+         this->updateWidgetFromVariant();
+         this->updateWidgetsListFromVariant();
       });
    }
    //
-   this->updateStatsListFromVariant(nullptr);
+   this->updateWidgetsListFromVariant(nullptr);
+   this->updateWidgetFromVariant();
 }
 
-void ScriptEditorPageScriptStats::selectStat(int32_t i) {
+void ScriptEditorPageHUDWidgets::selectWidget(int32_t i) {
    if (i < 0) {
       this->target = nullptr;
    } else {
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
-      auto& list = mp->scriptContent.stats;
+      auto& list = mp->scriptContent.widgets;
       if (i >= list.size())
          return;
       this->target = list[i];
    }
-   this->updateStatFromVariant();
+   this->updateWidgetFromVariant();
 }
 
-void ScriptEditorPageScriptStats::updateStatsListFromVariant(GameVariant* variant) {
+void ScriptEditorPageHUDWidgets::updateWidgetsListFromVariant(GameVariant* variant) {
    const QSignalBlocker blocker(this->ui.list);
    //
    this->ui.list->clear();
@@ -173,37 +154,38 @@ void ScriptEditorPageScriptStats::updateStatsListFromVariant(GameVariant* varian
       mp = ReachEditorState::get().multiplayerData();
    if (!mp)
       return;
-   auto& list = mp->scriptContent.stats;
+   auto& list = mp->scriptContent.widgets;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& option = *list[i];
-      auto  item   = new QListWidgetItem;
-      if (option.name)
-         item->setText(QString::fromUtf8(option.name->english().c_str()));
-      else
-         item->setText(tr("<unnamed stat %1>", "scripted stat editor").arg(i));
-      item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&option));
+      auto& entry = *list[i];
+      auto  item  = new QListWidgetItem;
+      item->setText(tr("HUD Widget #%1", "scripted widget editor").arg(i));
+      item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&entry));
       this->ui.list->addItem(item);
    }
    if (this->target)
       _selectByPointerData(this->ui.list, this->target);
 }
-void ScriptEditorPageScriptStats::updateStatFromVariant() {
-   const QSignalBlocker blocker0(this->ui.name);
-   const QSignalBlocker blocker1(this->ui.format);
-   const QSignalBlocker blocker2(this->ui.sortOrder);
-   const QSignalBlocker blocker3(this->ui.groupByTeam);
+void ScriptEditorPageHUDWidgets::updateWidgetFromVariant() {
+   const QSignalBlocker blocker(this->ui.position);
    //
    if (!this->target) {
-      this->ui.name->clearTarget();
+      this->updateWidgetPreview(-1);
       //
       // TOOD: reset controls to a blank state
       //
-      this->ui.groupByTeam->setChecked(false);
       return;
    }
    auto& s = *this->target;
-   this->ui.name->setTarget(s.name);
-   this->ui.format->setCurrentIndex((int)s.format);
-   this->ui.sortOrder->setCurrentIndex((int)s.sortOrder);
-   this->ui.groupByTeam->setChecked(s.groupByTeam);
+   this->ui.position->setCurrentIndex(s.position);
+   this->updateWidgetPreview(s.position);
+}
+void ScriptEditorPageHUDWidgets::updateWidgetPreview(int8_t position) {
+   auto widget = this->ui.preview;
+   widget->removeImage(1);
+   if (position < 0) {
+      if (!this->target)
+         return;
+      position = this->target->position;
+   }
+   widget->addImage(QImage(QString(":/ScriptEditor/Resources/hud_widget_preview/%1.png").arg(position)));
 }
