@@ -244,6 +244,9 @@
     <ClCompile Include="helpers\qt\tree_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\script_editor\page_script_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -336,6 +339,9 @@
     <QtMoc Include="ui\script_editor\page_script_traits.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\script_editor\page_script_stats.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\widget_loadout_options.ui">
@@ -402,6 +408,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\script_editor\page_script_traits.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor\page_script_stats.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
