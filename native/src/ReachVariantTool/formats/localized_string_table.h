@@ -31,6 +31,7 @@ struct ReachStringFlags { // used for UI stuff
    ReachStringFlags() = delete;
    enum type {
       SingleLanguageString = 0x01,
+      IsNotInStandardTable = 0x02,
    };
 };
 

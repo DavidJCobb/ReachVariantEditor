@@ -19,7 +19,4 @@ class ScriptEditorPageHUDWidgets : public QWidget {
       void updateWidgetPreview(int8_t position = -1);
       //
       Megalo::HUDWidgetDeclaration* target = nullptr;
-      //
-      QLabel* previewBase    = nullptr;
-      QLabel* previewOverlay = nullptr;
 };

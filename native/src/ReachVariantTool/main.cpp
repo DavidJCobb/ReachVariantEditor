@@ -39,6 +39,22 @@ int main(int argc, char *argv[]) {
 //       itself to that field when constructing list items, so that list items can 
 //       check their own indices on demand.
 //
+//  = BUG: "New Value" fails to pop a message box if the option has the max allowed 
+//    values.
+//
+//  - Script metadata strings: some gametypes (Assault is one) don't have a localized 
+//    "name" string. Right now, we just disable the "edit" button; can we make it 
+//    possible to add a string if it's missing? (The localized metadata strings are 
+//    single-string tables.)
+//
+//     - I suspect this may affect team names (accessible through the main window) 
+//       as well.
+//
+//  - GameVariantDataMultiplayer::stringTableIndexPointer is going to break if strings 
+//    are reordered, or if enough strings are removed for the index to be invalid. We 
+//    need to wrap that in a cobb::reference_tracked_object as we have string references 
+//    elsewhere.
+//
 //  - STRING TABLE EDITING
 //
 //     - When we finish editing a string, the currently-selected string in the 
@@ -78,18 +94,10 @@ int main(int argc, char *argv[]) {
 //        - It won't be safe to implement this until we're properly tracking all 
 //          string references.
 //
-//  - SCRIPTED OPTION EDITING
-//
-//     - When no option/value is selected, all form controls for options/values 
-//       should be set to blank states. This isn't strictly possible for drop-
-//       downs without some special trickery, though.
-//
-//     - The page needs to update itself whenever it's shown, in case the user 
-//       edits option strings from the string table editor.
-//
-//        = Come to think of it, this is gonna be a concern for most of the 
-//          main window, too... Actually, it'll be a concern for just about 
-//          everything.
+//    - If a changed string is in use by player traits, the main window needs to 
+//      be updated (i.e. if the user renames player traits through the string 
+//      editor rather than the script traits editor). Ditto for anything else 
+//      that can show up in the main window (script options, etc.).
 //
 //  - Work on script editor
 //
@@ -107,36 +115,6 @@ int main(int argc, char *argv[]) {
 //
 //           = THIS IS IMPLEMENTED FOR FORGE LABELS; WE'LL HAVE TO GET AROUND TO 
 //             IMPLEMENTING IT FOR EVERYTHING ELSE.
-//
-//     - Metadata strings
-//
-//     - Map Permissions - DONE
-//
-//     - Player rating parameters
-//
-//        - This doesn't refer to anything external and is not referred to by 
-//          anything external, at least as far as anyone knows, so it should be 
-//          super easy to just add an editor for real quick.
-//
-//     - Scripted stats
-//
-//        - Basically all of the same work needs to be done as with Forge labels
-//
-//     - Scripted options - DONE
-//
-//     - Scripted traits
-//
-//        - Viewing
-//
-//        - Editing
-//
-//        - Removing or reordering
-//
-//           - Like with Forge labels, we need to fail if the traits-et to be removed 
-//             is in use by any opcodes, and we need to handle reordering the 
-//             traits (and fixing up traits indices used in opcodes) that follow 
-//             the one to be deleted. We also need to update the main window in 
-//             response to the traits being changed.
 //
 //     - String table editing - MAIN FUNCTIONALITY DONE
 //
@@ -204,9 +182,10 @@ int main(int argc, char *argv[]) {
 //     - To do this, we need operator== for absolutely everything that can 
 //       be in a game variant. Only C++20 lets you quickly declare those.
 //
-//        - Defined for /game_variants/components/*.h, but not for anything 
-//          in the Megalo subfolder. Those'll require virtual operators 
-//          (which are allowed).
+//        - First, we need to decide how we're going to distinguish between 
+//          identity checks (are these the same object?) and equality checks 
+//          (are these objects identical?). JavaScript has === but C++ does 
+//          not.
 //
 //        - Not defined for top-level game variant structures.
 //

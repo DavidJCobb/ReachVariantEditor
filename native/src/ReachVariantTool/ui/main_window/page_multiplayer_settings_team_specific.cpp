@@ -1,5 +1,6 @@
 #include "page_multiplayer_settings_team_specific.h"
 #include <QColorDialog>
+#include "../localized_string_editor.h"
 
 namespace {
    QColor _colorFromReach(uint32_t c) {
@@ -16,6 +17,19 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    auto& editor = ReachEditorState::get();
    QObject::connect(&editor, &ReachEditorState::switchedMultiplayerTeam, this, &PageMPSettingsTeamSpecific::updateFromVariant);
    QObject::connect(&editor, &ReachEditorState::teamColorModified,       this, &PageMPSettingsTeamSpecific::updateTeamColor);
+   //
+   QObject::connect(this->ui.buttonName, &QPushButton::clicked, [this]() {
+      auto& editor = ReachEditorState::get();
+      auto  team   = editor.multiplayerTeam();
+      if (!team)
+         return;
+      ReachString* string = team->get_name();
+      if (!string)
+         return;
+      if (LocalizedStringEditorModal::editString(this, ReachStringFlags::SingleLanguageString | ReachStringFlags::IsNotInStandardTable, string)) {
+         this->ui.fieldName->setText(QString::fromUtf8(string->english().c_str()));
+      }
+   });
    //
    #include "widget_macros_setup_start.h"
    reach_team_pane_setup_flag_checkbox(this->ui.fieldEnabled,              flags, 1);
@@ -66,10 +80,13 @@ void PageMPSettingsTeamSpecific::updateFromVariant(GameVariant* variant, int8_t 
    #include "widget_macros_update_start.h"
    {
       auto name = team->get_name();
-      if (name)
+      if (name) {
          this->ui.fieldName->setText(QString::fromUtf8(name->english().c_str()));
-      else
+         this->ui.buttonName->setDisabled(false);
+      } else {
          this->ui.fieldName->setText("");
+         this->ui.buttonName->setDisabled(true);
+      }
    }
    reach_team_pane_update_flag_checkbox(this->ui.fieldEnabled,              flags, 1);
    reach_team_pane_update_flag_checkbox(this->ui.fieldEnableColorPrimary,   flags, 2);

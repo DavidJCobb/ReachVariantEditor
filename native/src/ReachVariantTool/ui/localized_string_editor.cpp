@@ -48,10 +48,13 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
             continue;
          s->strings[index] = control->text().toUtf8();
       }
-      ReachEditorState::get().stringModified(s->index());
+      if (!this->_isNotInStandardStringTable)
+         ReachEditorState::get().stringModified(s->index());
       this->accept();
    });
    QObject::connect(this->ui.buttonSaveAsNew, &QPushButton::clicked, [this]() {
+      if (this->_isNotInStandardStringTable)
+         return;
       auto& editor = ReachEditorState::get();
       auto  mp     = editor.multiplayerData();
       if (!mp) { // should never happen
@@ -82,6 +85,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    LocalizedStringEditorModal modal(parent);
    modal._targetRef = nullptr;
    modal._target    = target;
+   modal._isNotInStandardStringTable   = flags & Flags::IsNotInStandardTable;
    modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
    // TODO: anything else?
@@ -93,6 +97,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    LocalizedStringEditorModal modal(parent);
    modal._targetRef = &targetRef;
    modal._target    = targetRef;
+   modal._isNotInStandardStringTable   = flags & Flags::IsNotInStandardTable;
    modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
    // TODO: anything else?
@@ -142,7 +147,7 @@ void LocalizedStringEditorModal::updateControls() {
          }
       });
    }
-   if (mp && mp->scriptData.strings.is_at_count_limit()) {
+   if (this->_isNotInStandardStringTable || (mp && mp->scriptData.strings.is_at_count_limit())) {
       this->ui.buttonSaveAsNew->setDisabled(true);
    }
 }

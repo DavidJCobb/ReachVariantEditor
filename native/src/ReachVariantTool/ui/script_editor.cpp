@@ -86,6 +86,10 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageMapPerms);
          return;
       }
+      if (current->text() == "Player Rating Parameters") {
+         stack->setCurrentWidget(this->ui.pageRatingParams);
+         return;
+      }
       if (current->text() == "Required Object Types") {
          stack->setCurrentWidget(this->ui.pageReqObjectTypes);
          return;

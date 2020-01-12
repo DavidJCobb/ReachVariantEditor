@@ -20,6 +20,7 @@ class LocalizedStringEditorModal : public QDialog {
       //
       ReachString*     _target    = nullptr;
       MegaloStringRef* _targetRef = nullptr;
+      bool _isNotInStandardStringTable   = false; // for metadata, team names, etc.
       bool _limitToSingleLanguageStrings = false;
       //
       void updateControls();

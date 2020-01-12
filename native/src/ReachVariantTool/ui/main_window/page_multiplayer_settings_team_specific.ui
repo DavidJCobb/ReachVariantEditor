@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>288</width>
-    <height>300</height>
+    <width>374</width>
+    <height>298</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0,0">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -32,6 +32,26 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item row="5" column="0" colspan="2">
+    <widget class="QLabel" name="label_72">
+     <property name="text">
+      <string>Player Species</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldSpecies</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
+    <widget class="QLabel" name="label_71">
+     <property name="text">
+      <string>Initial Designator</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldInitialDesignator</cstring>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label_51">
      <property name="text">
@@ -49,7 +69,67 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="0" column="2">
+    <widget class="QLabel" name="fieldName">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Team Name Here</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <widget class="QLabel" name="label_73">
+     <property name="text">
+      <string>Fireteam Count</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldFireteamCount</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldEnableColorText">
+     <property name="toolTip">
+      <string>If this box is not checked, a game-engine-default color will be used.</string>
+     </property>
+     <property name="text">
+      <string>Set Text Color</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldEnableColorSecondary">
+     <property name="toolTip">
+      <string>If this box is not checked, a game-engine-default color will be used.</string>
+     </property>
+     <property name="text">
+      <string>Set Secondary Color</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QPushButton" name="buttonName">
+     <property name="text">
+      <string>Edit...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QCheckBox" name="fieldEnabled">
+     <property name="text">
+      <string>Enabled</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2">
     <widget class="QPushButton" name="fieldButtonColorPrimary">
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
@@ -65,17 +145,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldEnableColorSecondary">
-     <property name="toolTip">
-      <string>If this box is not checked, a game-engine-default color will be used.</string>
-     </property>
-     <property name="text">
-      <string>Set Secondary Color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
+   <item row="3" column="2" colspan="2">
     <widget class="QPushButton" name="fieldButtonColorSecondary">
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
@@ -91,7 +161,7 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
+   <item row="4" column="2" colspan="2">
     <widget class="QPushButton" name="fieldButtonColorText">
      <property name="contextMenuPolicy">
       <enum>Qt::NoContextMenu</enum>
@@ -110,17 +180,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QLabel" name="label_72">
-     <property name="text">
-      <string>Player Species</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldSpecies</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
+   <item row="5" column="2" colspan="2">
     <widget class="QComboBox" name="fieldSpecies">
      <item>
       <property name="text">
@@ -134,17 +194,7 @@
      </item>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QLabel" name="label_73">
-     <property name="text">
-      <string>Fireteam Count</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldFireteamCount</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="2">
+   <item row="6" column="2" colspan="2">
     <widget class="QSpinBox" name="fieldFireteamCount">
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -157,17 +207,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="0" colspan="2">
-    <widget class="QLabel" name="label_71">
-     <property name="text">
-      <string>Initial Designator</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldInitialDesignator</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="2">
+   <item row="7" column="2" colspan="2">
     <widget class="QSpinBox" name="fieldInitialDesignator">
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -177,7 +217,7 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="0" colspan="3">
+   <item row="9" column="0" colspan="4">
     <widget class="QLabel" name="label_74">
      <property name="text">
       <string>&lt;b&gt;NOTE:&lt;/b&gt; &amp;nbsp; This team's species option will only be used if the &quot;Player Species&quot; option under &quot;Team Settings&quot; is set to &quot;Use Team Species.&quot;</string>
@@ -187,17 +227,7 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldEnableColorText">
-     <property name="toolTip">
-      <string>If this box is not checked, a game-engine-default color will be used.</string>
-     </property>
-     <property name="text">
-      <string>Set Text Color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0" colspan="3">
+   <item row="8" column="0" colspan="4">
     <spacer name="verticalSpacer_15">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -209,29 +239,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="0" column="2">
-    <widget class="QLabel" name="fieldName">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>1</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Team Name Here</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldEnabled">
-     <property name="text">
-      <string>Enabled</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
