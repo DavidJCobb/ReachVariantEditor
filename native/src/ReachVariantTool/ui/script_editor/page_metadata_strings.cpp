@@ -16,11 +16,31 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       if (!mp)
          return;
       auto& table = mp->localizedName;
-      if (!table.size())
-         return;
-      ReachString* string = table.strings[0];
+      //
+      ReachString* string;
+      bool created = false;
+      if (!table.size()) {
+         string  = table.add_new();
+         created = true;
+         if (!string)
+            return;
+      } else
+         string = table.strings[0];
+      //
+      auto index = string->index(); // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         this->ui.labelName->setText(QString::fromUtf8(string->english().c_str()));
+         auto& english = string->english();
+         this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
+         if (!english.size())
+            //
+            // I suspect the game would actually support zero-length text, but don't allow that. If the 
+            // text is cleared, revert to using the engine default.
+            //
+            if (index >= 0)
+               table.remove(0);
+      } else {
+         if (created && index >= 0)
+            table.remove(index);
       }
    });
    QObject::connect(this->ui.buttonDesc, &QPushButton::clicked, [this]() {
@@ -28,11 +48,31 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       if (!mp)
          return;
       auto& table = mp->localizedDesc;
-      if (!table.size())
-         return;
-      ReachString* string = table.strings[0];
+      //
+      ReachString* string;
+      bool created = false;
+      if (!table.size()) {
+         string  = table.add_new();
+         created = true;
+         if (!string)
+            return;
+      } else
+         string = table.strings[0];
+      //
+      auto index = string->index(); // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         this->ui.labelDesc->setText(QString::fromUtf8(string->english().c_str()));
+         auto& english = string->english();
+         this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
+         if (!english.size())
+            //
+            // I suspect the game would actually support zero-length text, but don't allow that. If the 
+            // text is cleared, revert to using the engine default.
+            //
+            if (index >= 0)
+               table.remove(0);
+      } else {
+         if (created && index >= 0)
+            table.remove(index);
       }
    });
    QObject::connect(this->ui.buttonCategory, &QPushButton::clicked, [this]() {
@@ -40,11 +80,31 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       if (!mp)
          return;
       auto& table = mp->localizedCategory;
-      if (!table.size())
-         return;
-      ReachString* string = table.strings[0];
+      //
+      ReachString* string;
+      bool created = false;
+      if (!table.size()) {
+         string  = table.add_new();
+         created = true;
+         if (!string)
+            return;
+      } else
+         string = table.strings[0];
+      //
+      auto index = string->index(); // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         this->ui.labelCategory->setText(QString::fromUtf8(string->english().c_str()));
+         auto& english = string->english();
+         this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
+         if (!english.size())
+            //
+            // I suspect the game would actually support zero-length text, but don't allow that. If the 
+            // text is cleared, revert to using the engine default.
+            //
+            if (index >= 0)
+               table.remove(0);
+      } else {
+         if (created && index >= 0)
+            table.remove(index);
       }
    });
    //
@@ -75,7 +135,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          ReachString* string = table.strings[0];
          widget->setText(QString::fromUtf8(string->english().c_str()));
       }
-      button->setDisabled(table.size() == 0);
+      button->setDisabled(false);
    }
    {
       auto  widget = this->ui.labelDesc;
@@ -87,7 +147,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          ReachString* string = table.strings[0];
          widget->setText(QString::fromUtf8(string->english().c_str()));
       }
-      button->setDisabled(table.size() == 0);
+      button->setDisabled(false);
    }
    {
       auto  widget = this->ui.labelCategory;
@@ -99,6 +159,6 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          ReachString* string = table.strings[0];
          widget->setText(QString::fromUtf8(string->english().c_str()));
       }
-      button->setDisabled(table.size() == 0);
+      button->setDisabled(false);
    }
 }

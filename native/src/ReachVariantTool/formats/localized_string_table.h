@@ -32,6 +32,7 @@ struct ReachStringFlags { // used for UI stuff
    enum type {
       SingleLanguageString = 0x01,
       IsNotInStandardTable = 0x02,
+      DisallowSaveAsNew    = 0x04, // UI flag
    };
 };
 

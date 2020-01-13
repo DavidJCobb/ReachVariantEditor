@@ -39,21 +39,17 @@ int main(int argc, char *argv[]) {
 //       itself to that field when constructing list items, so that list items can 
 //       check their own indices on demand.
 //
-//  = BUG: "New Value" fails to pop a message box if the option has the max allowed 
-//    values.
-//
-//  - Script metadata strings: some gametypes (Assault is one) don't have a localized 
-//    "name" string. Right now, we just disable the "edit" button; can we make it 
-//    possible to add a string if it's missing? (The localized metadata strings are 
-//    single-string tables.)
-//
-//     - I suspect this may affect team names (accessible through the main window) 
-//       as well.
-//
 //  - GameVariantDataMultiplayer::stringTableIndexPointer is going to break if strings 
 //    are reordered, or if enough strings are removed for the index to be invalid. We 
 //    need to wrap that in a cobb::reference_tracked_object as we have string references 
 //    elsewhere.
+//
+//     = URGENT; NEEDS FIXING
+//
+//  - In Alpha Zombies, where are the following strings used? None of our current stuff 
+//    for reference_tracked_object is catching them (the user still has the option to 
+//    delete them). "Humans" "Zombies" "Infection" They're the first three strings in 
+//    the variant.
 //
 //  - STRING TABLE EDITING
 //
@@ -65,10 +61,6 @@ int main(int argc, char *argv[]) {
 //     - Strings can contain line breaks, but our UI doesn't easily allow for 
 //       this. Modify the localized string editor: replace each QLineEdit with 
 //       a multi-line plaintext box in the dialog box.
-//
-//     - Make it so that double-clicking on a string opens it for editing.
-//
-//     - Do not allow the user to create new strings if the table is full.
 //
 //     - If we start editing a string that is in use by a Forge label, we should 
 //       be blocked from changing its localizations to different values. This 

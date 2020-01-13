@@ -213,6 +213,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto& option = *this->targetOption;
          if (option.isRange)
             return;
+         if (option.values.size() >= Megalo::Limits::max_script_option_values) {
+            QMessageBox::information(this, tr("Cannot add option value"), tr("Options cannot have more than %1 values.").arg(Megalo::Limits::max_script_option_values));
+            return;
+         }
          auto* value = option.add_value();
          if (!value)
             return;

@@ -23,11 +23,28 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
       auto  team   = editor.multiplayerTeam();
       if (!team)
          return;
-      ReachString* string = team->get_name();
-      if (!string)
-         return;
+      bool  created = false;
+      auto* string  = team->get_name();
+      if (!string) {
+         created = true;
+         string  = team->name.add_new(); // add a temporary string; if the user confirms changes, then we'll keep it
+         if (!string)
+            return;
+      }
+      auto index = string->index(); // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::SingleLanguageString | ReachStringFlags::IsNotInStandardTable, string)) {
-         this->ui.fieldName->setText(QString::fromUtf8(string->english().c_str()));
+         auto& english = string->english();
+         this->ui.fieldName->setText(QString::fromUtf8(english.c_str()));
+         if (!english.size())
+            //
+            // I suspect the game would actually support zero-length team names, but don't allow that. If the 
+            // name is cleared, revert to using the engine default.
+            //
+            if (index >= 0)
+               team->name.remove(index);
+      } else {
+         if (created && index >= 0)
+            team->name.remove(index);
       }
    });
    //
@@ -75,18 +92,18 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsTeamSpecific::updateFromVariant(GameVariant* variant, int8_t teamIndex, ReachTeamData* team) {
-   if (!team)
+   if (!team) {
+      this->ui.buttonName->setDisabled(true);
       return;
+   }
    #include "widget_macros_update_start.h"
    {
       auto name = team->get_name();
-      if (name) {
+      if (name)
          this->ui.fieldName->setText(QString::fromUtf8(name->english().c_str()));
-         this->ui.buttonName->setDisabled(false);
-      } else {
+      else
          this->ui.fieldName->setText("");
-         this->ui.buttonName->setDisabled(true);
-      }
+      this->ui.buttonName->setDisabled(false);
    }
    reach_team_pane_update_flag_checkbox(this->ui.fieldEnabled,              flags, 1);
    reach_team_pane_update_flag_checkbox(this->ui.fieldEnableColorPrimary,   flags, 2);

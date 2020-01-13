@@ -69,6 +69,11 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       if (string.get_inbound_references().size())
          this->ui.buttonDelete->setDisabled(true);
    });
+   QObject::connect(this->ui.list, &QListWidget::itemDoubleClicked, [this](QListWidgetItem* target) {
+      auto widget = this->ui.list;
+      widget->setCurrentItem(target);
+      this->ui.buttonEdit->clicked();
+   });
    QObject::connect(this->ui.buttonEdit, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
@@ -80,10 +85,20 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
          return;
       auto& string = *table.strings[index];
       uint32_t flags = 0;
+      if (table.is_at_count_limit())
+         flags |= ReachStringFlags::DisallowSaveAsNew;
       // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
       LocalizedStringEditorModal::editString(this, flags, &string);
    });
    QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto& table = mp->scriptData.strings;
+      if (table.is_at_count_limit()) {
+         QMessageBox::information(this, tr("Cannot add string"), tr("The string table contains the maximum number of strings. No more can be added."));
+         return;
+      }
       LocalizedStringEditorModal::editString(this, 0, nullptr);
    });
    QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
