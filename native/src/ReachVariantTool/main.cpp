@@ -37,7 +37,9 @@ int main(int argc, char *argv[]) {
 //       field so that the type always knows where it is in the list; alternatively, 
 //       if the templated type has an (owner) field, the list writes a reference to 
 //       itself to that field when constructing list items, so that list items can 
-//       check their own indices on demand.
+//       check their own indices on demand. Using an (index) field would allow list 
+//       items to be created and to exist outside the list (e.g. for maintaining 
+//       temporary modifications to them and committing those later, if desired).
 //
 //  - GameVariantDataMultiplayer::stringTableIndexPointer is going to break if strings 
 //    are reordered, or if enough strings are removed for the index to be invalid. We 
@@ -51,6 +53,9 @@ int main(int argc, char *argv[]) {
 //    delete them). "Humans" "Zombies" "Infection" They're the first three strings in 
 //    the variant.
 //
+//  - When editing single-string tables, can we use the table's max length to enforce a 
+//    max length on the UI form fields?
+//
 //  - STRING TABLE EDITING
 //
 //     - When we finish editing a string, the currently-selected string in the 
@@ -58,21 +63,16 @@ int main(int argc, char *argv[]) {
 //
 //        - When we Save As New, the list widget should select the new string.
 //
-//     - Strings can contain line breaks, but our UI doesn't easily allow for 
-//       this. Modify the localized string editor: replace each QLineEdit with 
-//       a multi-line plaintext box in the dialog box.
-//
 //     - If we start editing a string that is in use by a Forge label, we should 
 //       be blocked from changing its localizations to different values. This 
 //       requires the ability to check *what* is using a string which in turn 
 //       requires that all cobb::reference_tracked_object subclasses support 
 //       dynamic casts -- we need to add a dummy virtual method to that superclass.
 //
-//     = NOTE: Most strings don't properly show up as in-use, but this is because 
+//     = NOTE: Some strings don't properly show up as in-use, but this is because 
 //       not all data that can use a string uses cobb::reference_tracked_object 
 //       yet. While all opcode argument types now subclass it, they don't all use 
-//       its functionality yet. (The same problem will affect scripted options, 
-//       scripted stats, and so on.)
+//       its functionality yet.
 //
 //        = URGENT; MUST BE COMPLETED BEFORE RELEASE OF ANY SCRIPT EDITOR BETA
 //

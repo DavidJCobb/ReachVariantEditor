@@ -16,7 +16,7 @@ class LocalizedStringEditorModal : public QDialog {
    private:
       Ui::LocalizedStringEditorModal ui;
       //
-      std::vector<QLineEdit*> languageFields;
+      std::vector<QPlainTextEdit*> languageFields;
       //
       ReachString*     _target    = nullptr;
       MegaloStringRef* _targetRef = nullptr;

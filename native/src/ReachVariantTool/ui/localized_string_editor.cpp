@@ -46,7 +46,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          auto index = lang.toInt();
          if (index < 0 || index >= reach::language_count)
             continue;
-         s->strings[index] = control->text().toUtf8();
+         s->strings[index] = control->toPlainText().toUtf8();
       }
       if (!this->_isNotInStandardStringTable)
          ReachEditorState::get().stringModified(s->index());
@@ -72,7 +72,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          auto index = lang.toInt();
          if (index < 0 || index >= reach::language_count)
             continue;
-         s->strings[index] = control->text().toUtf8();
+         s->strings[index] = control->toPlainText().toUtf8();
       }
       if (this->_targetRef) {
          *this->_targetRef = s;
@@ -122,7 +122,8 @@ void LocalizedStringEditorModal::updateControls() {
          auto index = lang.toInt();
          if (index < 0 || index >= reach::language_count)
             continue;
-         control->setText(QString::fromUtf8(target->strings[index].c_str()));
+         const QSignalBlocker blocker(control);
+         control->setPlainText(QString::fromUtf8(target->strings[index].c_str()));
       }
    } else {
       this->ui.labelStringIndex->setText(tr("New string", "string editor"));
@@ -140,12 +141,12 @@ void LocalizedStringEditorModal::updateControls() {
             continue;
          control->setDisabled(true);
       }
-      QObject::connect(this->ui.fieldEnglish, &QLineEdit::textEdited, [this]() {
-         auto text = this->ui.fieldEnglish->text();
+      QObject::connect(this->ui.fieldEnglish, &QPlainTextEdit::textChanged, [this]() {
+         auto text = this->ui.fieldEnglish->toPlainText();
          for (auto& control : this->languageFields) {
             if (control == this->ui.fieldEnglish)
                continue;
-            control->setText(text);
+            control->setPlainText(text); // let this fire a signal so the other strings are actually changed
          }
       });
    }
@@ -153,7 +154,3 @@ void LocalizedStringEditorModal::updateControls() {
       this->ui.buttonSaveAsNew->setDisabled(true);
    }
 }
-
-// TODO:
-//
-// Send signal ReachEditorState::stringTableModified when using save as new.
