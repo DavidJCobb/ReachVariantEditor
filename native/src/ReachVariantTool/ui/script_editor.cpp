@@ -113,44 +113,6 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
       // TODO: other pages
       //
    });
-   {  // Map permissions - map ID list
-      auto& widget = this->ui.fieldMapPermsList;
-      //
-      for (uint32_t i = 0; i < std::extent<decltype(_mapIDList)>::value; i++) {
-         auto& id = _mapIDList[i];
-         auto item = new QListWidgetItem(id.name, widget);
-         item->setData(Qt::ItemDataRole::UserRole, id.index);
-         item->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsUserCheckable);
-      }
-      if (auto m = widget->model())
-         m->sort(0);
-      QObject::connect(this->ui.fieldMapPermsType, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-         auto mp = ReachEditorState::get().multiplayerData();
-         if (!mp)
-            return;
-         mp->mapPermissions.type = (reach::map_permission_type)index;
-      });
-      QObject::connect(widget, &QListWidget::itemChanged, [](QListWidgetItem* item) {
-         auto data = item->data(Qt::ItemDataRole::UserRole);
-         if (!data.isValid())
-            return;
-         auto index = data.toInt();
-         auto mp    = ReachEditorState::get().multiplayerData();
-         if (!mp)
-            return;
-         auto& list = mp->mapPermissions.mapIDs;
-         auto  it   = std::find(list.begin(), list.end(), index);
-         if (item->data(Qt::ItemDataRole::CheckStateRole) == Qt::CheckState::Checked) {
-            if (it != list.end())
-               return;
-            list.push_back(index);
-         } else {
-            if (it == list.end())
-               return;
-            list.erase(it);
-         }
-      });
-   }
    {  // MP object type list
       auto& list   = MPObjectTypeList::get();
       auto& widget = this->ui.reqObjectTypeList;
@@ -191,29 +153,6 @@ void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
    auto mp = variant->get_multiplayer_data();
    if (!mp)
       return;
-   {  // Map permissions
-      auto& perms = mp->mapPermissions;
-      this->ui.fieldMapPermsType->setCurrentIndex((int)perms.type);
-      //
-      auto list = this->ui.fieldMapPermsList;
-      auto size = list->count();
-      for (uint32_t i = 0; i < size; i++) {
-         auto item = list->item(i);
-         if (!item)
-            continue;
-         item->setCheckState(Qt::CheckState::Unchecked);
-         auto data = item->data(Qt::ItemDataRole::UserRole);
-         if (!data.isValid())
-            continue;
-         auto index = data.toInt();
-         for (auto mapID : perms.mapIDs) {
-            if (mapID == index) {
-               item->setCheckState(Qt::CheckState::Checked);
-               break;
-            }
-         }
-      }
-   }
    { // MP object type list
       auto& types = mp->scriptContent.usedMPObjectTypes;
       //

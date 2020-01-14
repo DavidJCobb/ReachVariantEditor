@@ -148,6 +148,9 @@ int main(int argc, char *argv[]) {
 //          (are these objects identical?). JavaScript has === but C++ does 
 //          not.
 //
+//           - OPERATOR== SHOULD BE AN EQUALITY COMPARISON. IF YOU WANT AN 
+//             IDENTITY COMPARISON, THEN COMPARE ADDRESSES I.E. &A == &B.
+//
 //  - UI
 //
 //     - Investigate the possibility of linking option-editing fields to 

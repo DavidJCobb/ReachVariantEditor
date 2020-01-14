@@ -161,6 +161,7 @@
     <ClCompile Include="ui\main_window\page_player_traits.cpp" />
     <ClCompile Include="ui\script_editor.cpp" />
     <ClCompile Include="ui\script_editor\page_forge_labels.cpp" />
+    <ClCompile Include="ui\script_editor\page_map_perms.cpp" />
     <ClCompile Include="ui\script_editor\page_metadata_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_player_rating_params.cpp" />
     <ClCompile Include="ui\script_editor\page_script_options.cpp" />
@@ -192,6 +193,7 @@
     <QtUic Include="ui\main_window\page_player_traits.ui" />
     <QtUic Include="ui\script_editor.ui" />
     <QtUic Include="ui\script_editor\page_forge_labels.ui" />
+    <QtUic Include="ui\script_editor\page_map_perms.ui" />
     <QtUic Include="ui\script_editor\page_metadata_strings.ui" />
     <QtUic Include="ui\script_editor\page_player_rating_params.ui" />
     <QtUic Include="ui\script_editor\page_script_options.ui" />
@@ -213,6 +215,7 @@
     <ClInclude Include="helpers\managed_pointer_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <QtMoc Include="ui\script_editor\page_map_perms.h" />
     <QtMoc Include="ui\script_editor\page_metadata_strings.h" />
     <QtMoc Include="ui\script_editor\page_player_rating_params.h" />
     <QtMoc Include="ui\script_editor\page_script_widgets.h" />
