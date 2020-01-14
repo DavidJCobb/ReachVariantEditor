@@ -593,6 +593,14 @@
    <header>ui/generic/PlayerTraitWidgets.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>loadoutFlagVisible</tabstop>
+  <tabstop>loadoutName</tabstop>
+  <tabstop>loadoutWeaponPrimary</tabstop>
+  <tabstop>loadoutWeaponSecondary</tabstop>
+  <tabstop>loadoutAbility</tabstop>
+  <tabstop>loadoutGrenadeCount</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

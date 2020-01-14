@@ -300,3 +300,11 @@ void ReachStringTable::remove(size_t index) noexcept {
       return;
    this->strings.erase(this->strings.begin() + index);
 }
+uint32_t ReachStringTable::total_bytecount() noexcept {
+   std::string combined; // UTF-8 buffer holding all string data including null terminators
+   for (auto& ptr : this->strings) {
+      auto& string = *ptr;
+      string.write_strings(combined);
+   }
+   return combined.size();
+}

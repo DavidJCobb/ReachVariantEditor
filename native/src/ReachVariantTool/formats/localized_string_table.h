@@ -125,4 +125,6 @@ class ReachStringTable {
       //
       ReachString* add_new() noexcept; // returns nullptr if the table is full
       void remove(size_t index) noexcept;
+      //
+      uint32_t total_bytecount() noexcept; // number of bytes it would take to store all strings (accounting for overlapping and other optimizations)
 };

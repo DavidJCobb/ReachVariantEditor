@@ -23,24 +23,6 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  - Right now, our code to stringify triggers can't properly handle when indexed 
-//    list items (e.g. HUD widgets) get reordered. This is because indexed list 
-//    items don't have a reference to their containing lists (ReachStrings are an 
-//    exception to this) and therefore can't know their own index; we give them an 
-//    index variable and update that only on read and on write.
-//
-//    Can we create a cobb::managed_pointer_list with the following properties?
-//
-//     - An upper limit on the list's contained items can be set.
-//
-//     - If the templated type has an (index) field, then the list updates that 
-//       field so that the type always knows where it is in the list; alternatively, 
-//       if the templated type has an (owner) field, the list writes a reference to 
-//       itself to that field when constructing list items, so that list items can 
-//       check their own indices on demand. Using an (index) field would allow list 
-//       items to be created and to exist outside the list (e.g. for maintaining 
-//       temporary modifications to them and committing those later, if desired).
-//
 //  - GameVariantDataMultiplayer::stringTableIndexPointer is going to break if strings 
 //    are reordered, or if enough strings are removed for the index to be invalid. We 
 //    need to wrap that in a cobb::reference_tracked_object as we have string references 
@@ -56,12 +38,14 @@ int main(int argc, char *argv[]) {
 //  - When editing single-string tables, can we use the table's max length to enforce a 
 //    max length on the UI form fields?
 //
+//     - There's an alternate approach: handle max length for ANY string. When we open a 
+//       string for editing, we can get the containing string table's maximum length, 
+//       and subtract the lengths of all strings except the ones we're editing; that's 
+//       the longest that the string we're editing can be. Of course, we would need to 
+//       indicate this in the UI somehow, in case the length is short (or zero), to 
+//       avoid user confusion.
+//
 //  - STRING TABLE EDITING
-//
-//     - When we finish editing a string, the currently-selected string in the 
-//       list widget is deselected. Why?
-//
-//        - When we Save As New, the list widget should select the new string.
 //
 //     - If we start editing a string that is in use by a Forge label, we should 
 //       be blocked from changing its localizations to different values. This 
@@ -92,21 +76,6 @@ int main(int argc, char *argv[]) {
 //      that can show up in the main window (script options, etc.).
 //
 //  - Work on script editor
-//
-//     - General thoughts
-//
-//        - Right now, we have a lot of disconnected data -- objects that refer 
-//          to each other by index, such that these indices need to be manually 
-//          fixed up when the referred-to objects are removed, reordered, and so 
-//          on. Opcode arguments refer to Forge labels, scripted stats, scripted 
-//          options, string indices, and more all by index. This is unavoidable 
-//          when loading data -- some of these items load after the trigger 
-//          content -- but after everything's loaded, I think we might benefit 
-//          from doing a one-time fix-up on everything, swapping out indices for 
-//          pointers.
-//
-//           = THIS IS IMPLEMENTED FOR FORGE LABELS; WE'LL HAVE TO GET AROUND TO 
-//             IMPLEMENTING IT FOR EVERYTHING ELSE.
 //
 //     - String table editing - MAIN FUNCTIONALITY DONE
 //
@@ -179,8 +148,6 @@ int main(int argc, char *argv[]) {
 //          (are these objects identical?). JavaScript has === but C++ does 
 //          not.
 //
-//        - Not defined for top-level game variant structures.
-//
 //  - UI
 //
 //     - Investigate the possibility of linking option-editing fields to 
@@ -207,18 +174,6 @@ int main(int argc, char *argv[]) {
 //
 // ==========================================================================
 //
-//  - Test whether custom block types between mpvr and _eof are kept in the 
-//    file if it's resaved in-game with changes. I want to know if we can 
-//    use a "cobb" block to store metadata; if we ever do a trigger editor, 
-//    that would come in handy.
-//
-//     = Testing indicates that the game discards all unknown blocks when 
-//       resaving a file. The only way to insert custom metadata would be 
-//       to toss it into unused space in MPVR and hope the game ignores 
-//       that.
-//
-//        - ...Or use a co-save, which would be better.
-//
 //  - Begin testing to identify further unknown information in Reach.
 //
 //     - Unknown values for Health Regen Rate
@@ -235,18 +190,18 @@ int main(int argc, char *argv[]) {
 //
 //        - Requires someone to test with.
 //
-//     - Maximum jump height (game clamps or validates values; 420% did not 
-//       work in-game despite being supported by the format).
-//
 //     - Sensors: Directional Damage Indicator
 //
 //        - None of the values affect whether I get a DDI on splash damage 
 //          from my own grenades; they probably only affect damage dealt by 
 //          other players.
 //
-//     - Test all engine option toggles
-//
 //  = KNOWN INFO:
+//
+//     - Custom blocks are stripped out of the file when re-saved in-game, 
+//       no matter whether they're before or after the _eof block. If we 
+//       want to store extra data alongside a gametype (e.g. for script 
+//       editing purposes), we need to use a co-save.
 //
 //     - The Grenade Regeneration trait is a trait-bool. If enabled for a 
 //       player, that player will receive one frag and one plasma on every 
@@ -254,7 +209,9 @@ int main(int argc, char *argv[]) {
 //
 //     - Active Camo trait:
 //
-//        - 2: Fades very, very slightly on movement; fades on attacks
+//        - 2: Fades very, very slightly on movement; fades on attacks. Note 
+//             that we tested movement with a machine gun turret so we can't 
+//             judge the fade for sure.
 //        - 5: Doesn't fade on movement; fades on attacks
 //
 // ==========================================================================

@@ -80,6 +80,9 @@
      <property name="text">
       <string>Unknown Float 1</string>
      </property>
+     <property name="buddy">
+      <cstring>float00</cstring>
+     </property>
     </widget>
    </item>
    <item row="9" column="1">
@@ -156,12 +159,18 @@
      <property name="text">
       <string>Unknown Float 2</string>
      </property>
+     <property name="buddy">
+      <cstring>float01</cstring>
+     </property>
     </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>Unknown Float 3</string>
+     </property>
+     <property name="buddy">
+      <cstring>float02</cstring>
      </property>
     </widget>
    </item>
@@ -170,12 +179,18 @@
      <property name="text">
       <string>Unknown Float 4</string>
      </property>
+     <property name="buddy">
+      <cstring>float03</cstring>
+     </property>
     </widget>
    </item>
    <item row="5" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
       <string>Unknown Float 5</string>
+     </property>
+     <property name="buddy">
+      <cstring>float04</cstring>
      </property>
     </widget>
    </item>
@@ -184,12 +199,18 @@
      <property name="text">
       <string>Unknown Float 6</string>
      </property>
+     <property name="buddy">
+      <cstring>float05</cstring>
+     </property>
     </widget>
    </item>
    <item row="7" column="0">
     <widget class="QLabel" name="label_7">
      <property name="text">
       <string>Unknown Float 7</string>
+     </property>
+     <property name="buddy">
+      <cstring>float06</cstring>
      </property>
     </widget>
    </item>
@@ -198,12 +219,18 @@
      <property name="text">
       <string>Unknown Float 8</string>
      </property>
+     <property name="buddy">
+      <cstring>float07</cstring>
+     </property>
     </widget>
    </item>
    <item row="9" column="0">
     <widget class="QLabel" name="label_9">
      <property name="text">
       <string>Unknown Float 9</string>
+     </property>
+     <property name="buddy">
+      <cstring>float08</cstring>
      </property>
     </widget>
    </item>
@@ -212,12 +239,18 @@
      <property name="text">
       <string>Unknown Float 10</string>
      </property>
+     <property name="buddy">
+      <cstring>float09</cstring>
+     </property>
     </widget>
    </item>
    <item row="11" column="0">
     <widget class="QLabel" name="label_11">
      <property name="text">
       <string>Unknown Float 11</string>
+     </property>
+     <property name="buddy">
+      <cstring>float10</cstring>
      </property>
     </widget>
    </item>
@@ -226,12 +259,18 @@
      <property name="text">
       <string>Unknown Float 12</string>
      </property>
+     <property name="buddy">
+      <cstring>float11</cstring>
+     </property>
     </widget>
    </item>
    <item row="13" column="0">
     <widget class="QLabel" name="label_13">
      <property name="text">
       <string>Unknown Float 13</string>
+     </property>
+     <property name="buddy">
+      <cstring>float12</cstring>
      </property>
     </widget>
    </item>
@@ -240,12 +279,18 @@
      <property name="text">
       <string>Unknown Float 14</string>
      </property>
+     <property name="buddy">
+      <cstring>float13</cstring>
+     </property>
     </widget>
    </item>
    <item row="15" column="0">
     <widget class="QLabel" name="label_15">
      <property name="text">
       <string>Unknown Float 15</string>
+     </property>
+     <property name="buddy">
+      <cstring>float14</cstring>
      </property>
     </widget>
    </item>
@@ -258,6 +303,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>flag</tabstop>
+  <tabstop>float00</tabstop>
+  <tabstop>float01</tabstop>
+  <tabstop>float02</tabstop>
+  <tabstop>float03</tabstop>
+  <tabstop>float04</tabstop>
+  <tabstop>float05</tabstop>
+  <tabstop>float06</tabstop>
+  <tabstop>float07</tabstop>
+  <tabstop>float08</tabstop>
+  <tabstop>float09</tabstop>
+  <tabstop>float10</tabstop>
+  <tabstop>float11</tabstop>
+  <tabstop>float12</tabstop>
+  <tabstop>float13</tabstop>
+  <tabstop>float14</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

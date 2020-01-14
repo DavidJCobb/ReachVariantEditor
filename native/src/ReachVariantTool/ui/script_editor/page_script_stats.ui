@@ -85,6 +85,9 @@
        <property name="text">
         <string>Format</string>
        </property>
+       <property name="buddy">
+        <cstring>format</cstring>
+       </property>
       </widget>
      </item>
      <item row="0" column="1">
@@ -143,6 +146,9 @@
        <property name="text">
         <string>Name</string>
        </property>
+       <property name="buddy">
+        <cstring>name</cstring>
+       </property>
       </widget>
      </item>
      <item row="3" column="0" colspan="2">
@@ -156,6 +162,9 @@
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>Sort Order</string>
+       </property>
+       <property name="buddy">
+        <cstring>sortOrder</cstring>
        </property>
       </widget>
      </item>
@@ -171,6 +180,16 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>list</tabstop>
+  <tabstop>buttonNew</tabstop>
+  <tabstop>buttonMoveUp</tabstop>
+  <tabstop>buttonMoveDown</tabstop>
+  <tabstop>buttonDelete</tabstop>
+  <tabstop>format</tabstop>
+  <tabstop>sortOrder</tabstop>
+  <tabstop>groupByTeam</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

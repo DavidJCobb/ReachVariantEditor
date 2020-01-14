@@ -1,5 +1,4 @@
 #include "script_editor.h"
-#include "widgets/forge_label_editor.h"
 #include "../game_variants/data/mp_object_types.h"
 #include "localized_string_editor.h"
 

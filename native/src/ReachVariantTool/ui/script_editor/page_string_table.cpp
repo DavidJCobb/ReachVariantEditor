@@ -88,7 +88,14 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       if (table.is_at_count_limit())
          flags |= ReachStringFlags::DisallowSaveAsNew;
       // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
-      LocalizedStringEditorModal::editString(this, flags, &string);
+      if (LocalizedStringEditorModal::editString(this, flags, &string)) {
+         //
+         // The string had changes saved, which will cause us to receive a signal from ReachEditorState 
+         // and redraw the list. We need to reselect what we had selected before.
+         //
+         if (index < list->count()) // sanity check; should always be true
+            list->setCurrentRow(index);
+      }
    });
    QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
@@ -99,7 +106,9 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
          QMessageBox::information(this, tr("Cannot add string"), tr("The string table contains the maximum number of strings. No more can be added."));
          return;
       }
-      LocalizedStringEditorModal::editString(this, 0, nullptr);
+      if (LocalizedStringEditorModal::editString(this, 0, nullptr)) {
+         this->ui.list->setCurrentRow(this->ui.list->count() - 1); // select the newly-added string
+      }
    });
    QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
@@ -126,8 +135,10 @@ void ScriptEditorPageStringTable::updateFromVariant(GameVariant* variant) {
       mp = variant->get_multiplayer_data();
    else
       mp = ReachEditorState::get().multiplayerData();
-   if (!mp)
+   if (!mp) {
+      this->ui.statsReadout->setText(tr("No multiplayer game variant loaded.", "string table editor"));
       return;
+   }
    auto  list = this->ui.list;
    list->clear();
    //
@@ -140,4 +151,5 @@ void ScriptEditorPageStringTable::updateFromVariant(GameVariant* variant) {
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&string));
       list->addItem(item);
    }
+   this->ui.statsReadout->setText(tr("Total string table size: %1 / %2 bytes", "string table editor").arg(table.total_bytecount()).arg(table.max_buffer_size));
 }

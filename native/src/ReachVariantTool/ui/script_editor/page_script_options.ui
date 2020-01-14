@@ -87,12 +87,18 @@
        <property name="text">
         <string>Option Description</string>
        </property>
+       <property name="buddy">
+        <cstring>optionDesc</cstring>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Option Name</string>
+       </property>
+       <property name="buddy">
+        <cstring>optionName</cstring>
        </property>
       </widget>
      </item>
@@ -103,6 +109,9 @@
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Option Type</string>
+       </property>
+       <property name="buddy">
+        <cstring>optionType</cstring>
        </property>
       </widget>
      </item>
@@ -202,6 +211,9 @@
              <property name="text">
               <string>Value</string>
              </property>
+             <property name="buddy">
+              <cstring>valueValue</cstring>
+             </property>
             </widget>
            </item>
            <item row="1" column="1">
@@ -212,6 +224,9 @@
              <property name="text">
               <string>Value Name</string>
              </property>
+             <property name="buddy">
+              <cstring>valueName</cstring>
+             </property>
             </widget>
            </item>
            <item row="2" column="0">
@@ -221,6 +236,9 @@
              </property>
              <property name="text">
               <string>Value Description</string>
+             </property>
+             <property name="buddy">
+              <cstring>valueDesc</cstring>
              </property>
             </widget>
            </item>
@@ -262,12 +280,18 @@
          <property name="text">
           <string>Range Default</string>
          </property>
+         <property name="buddy">
+          <cstring>rangeDefault</cstring>
+         </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>Range Maximum</string>
+         </property>
+         <property name="buddy">
+          <cstring>rangeMax</cstring>
          </property>
         </widget>
        </item>
@@ -288,6 +312,9 @@
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Range Minimum</string>
+         </property>
+         <property name="buddy">
+          <cstring>rangeMin</cstring>
          </property>
         </widget>
        </item>
@@ -344,6 +371,23 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>listOptions</tabstop>
+  <tabstop>buttonOptionsNew</tabstop>
+  <tabstop>buttonOptionsMoveUp</tabstop>
+  <tabstop>buttonOptionsMoveDown</tabstop>
+  <tabstop>buttonOptionsDelete</tabstop>
+  <tabstop>optionType</tabstop>
+  <tabstop>listValues</tabstop>
+  <tabstop>buttonValuesNew</tabstop>
+  <tabstop>buttonValuesMoveUp</tabstop>
+  <tabstop>buttonValuesMoveDown</tabstop>
+  <tabstop>buttonValuesDelete</tabstop>
+  <tabstop>valueValue</tabstop>
+  <tabstop>rangeMin</tabstop>
+  <tabstop>rangeMax</tabstop>
+  <tabstop>rangeDefault</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -43,6 +43,9 @@
        <property name="text">
         <string>Name</string>
        </property>
+       <property name="buddy">
+        <cstring>name</cstring>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
@@ -93,6 +96,12 @@
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
       </spacer>
      </item>
@@ -156,6 +165,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ReachStringPicker</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/string_picker.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>MegaloConstTeamIndexCombobox</class>
    <extends>QComboBox</extends>
    <header>ui/widgets/const_team_index_combobox.h</header>
@@ -164,12 +179,6 @@
    <class>MPObjectTypeCombobox</class>
    <extends>QComboBox</extends>
    <header>ui/widgets/mp_object_type_combobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ReachStringPicker</class>
-   <extends>QWidget</extends>
-   <header>ui/widgets/string_picker.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

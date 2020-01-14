@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>578</width>
-    <height>401</height>
+    <width>588</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -180,6 +180,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>defaultOpenPathAutoMCCSaved</tabstop>
+  <tabstop>defaultOpenPathAutoMCCBuiltIn</tabstop>
+  <tabstop>defaultOpenPathAutoMCCMM</tabstop>
+  <tabstop>defaultOpenPathCWD</tabstop>
+  <tabstop>defaultOpenPathUseCustom</tabstop>
+  <tabstop>defaultOpenPathCustom</tabstop>
+  <tabstop>defaultSavePathCurrentFile</tabstop>
+  <tabstop>defaultSavePathExcludeMCCNative</tabstop>
+  <tabstop>defaultSavePathAutoMCCSaved</tabstop>
+  <tabstop>defaultSavePathCWD</tabstop>
+  <tabstop>defaultSavePathUseCustom</tabstop>
+  <tabstop>defaultSavePathCustom</tabstop>
+  <tabstop>optionFullFilePathsInWindowTitle</tabstop>
+  <tabstop>optionVariantNameInWindowTitle</tabstop>
+  <tabstop>buttonSave</tabstop>
+  <tabstop>buttonCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

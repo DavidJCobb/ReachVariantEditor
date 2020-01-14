@@ -208,9 +208,6 @@
     <ClCompile Include="ui\options_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\widgets\forge_label_editor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\script_editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -324,9 +321,6 @@
     <QtMoc Include="ui\options_window.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="ui\widgets\forge_label_editor.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="ui\widgets\const_team_index_combobox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -414,9 +408,6 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\options_window.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="ui\widgets\forge_label_editor.ui">
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\localized_string_editor.ui">
