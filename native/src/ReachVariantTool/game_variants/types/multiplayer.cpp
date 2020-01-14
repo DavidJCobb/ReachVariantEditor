@@ -82,14 +82,14 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_traits));
       t.reserve(count);
       for (int i = 0; i < count; i++) {
-         auto& traits = *t.emplace_back(new ReachMegaloPlayerTraits);
+         auto& traits = *t.emplace_back();
          traits.read(stream);
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_options));
       o.reserve(count);
       for (int i = 0; i < count; i++) {
-         auto& option = *o.emplace_back(new ReachMegaloOption);
+         auto& option = *o.emplace_back();
          option.read(stream);
       }
       //
@@ -163,7 +163,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
       triggers.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         auto trigger = triggers.emplace_back(new Megalo::Trigger);
+         auto trigger = triggers.emplace_back();
          if (!trigger->read(stream)) {
             error_report.failure_index = i;
             return false;
@@ -194,7 +194,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       this->scriptContent.stats.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         auto& stat = *this->scriptContent.stats.emplace_back(new ReachMegaloGameStat);
+         auto& stat = *this->scriptContent.stats.emplace_back();
          stat.read(stream);
          stat.postprocess_string_indices(this->scriptData.strings);
       }
@@ -211,7 +211,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          auto& widgets = this->scriptContent.widgets;
          widgets.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            auto widget = widgets.emplace_back(new Megalo::HUDWidgetDeclaration);
+            auto widget = widgets.emplace_back();
             widget->read(stream);
          }
       }
@@ -224,7 +224,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
          list.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            auto label = list.emplace_back(new Megalo::ReachForgeLabel);
+            auto label = list.emplace_back();
             label->index = i;
             label->read(stream);
             label->postprocess_string_indices(this->scriptData.strings);
@@ -247,9 +247,9 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    }
    error_report.state = GameEngineVariantLoadError::load_state::success;
    {  // Postprocess
-      for (auto& trigger : this->scriptContent.triggers) {
+      for (auto trigger : this->scriptContent.triggers) {
          trigger->postprocess(this);
-         for (auto& opcode : trigger->opcodes)
+         for (auto opcode : trigger->opcodes)
             opcode->postprocess(this);
       }
       //
@@ -270,27 +270,6 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    auto& bits = writer.bits;
    //
    this->encodingVersion = encoding_version_tu1; // upgrade, so that TU1 settings are always saved
-   //
-   {  // Handle indices
-      {  // Forge labels
-         auto&  list = this->scriptContent.forgeLabels;
-         size_t size = list.size();
-         for (size_t i = 0; i < size; i++)
-            list[i]->index = i;
-      }
-      {  // Script traits
-         auto& list = this->scriptData.traits;
-         size_t size = list.size();
-         for (size_t i = 0; i < size; i++)
-            list[i]->index = i;
-      }
-      {  // Script HUD widgets
-         auto& list = this->scriptContent.widgets;
-         size_t size = list.size();
-         for (size_t i = 0; i < size; i++)
-            list[i]->index = i;
-      }
-   }
    //
    bits.write(this->encodingVersion);
    bits.write(this->engineVersion);
@@ -356,7 +335,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       for (auto traits : t)
          traits->write(bits);
       bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
-      for (auto& option : o)
+      for (auto option : o)
          option->write(bits);
       sd.strings.write(bits);
    }
@@ -394,7 +373,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          opcode.write(bits);
       //
       bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
-      for (auto& trigger : content.triggers)
+      for (auto trigger : content.triggers)
          trigger->write(bits);
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
@@ -417,7 +396,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       content.usedMPObjectTypes.write(bits);
       //
       bits.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
-      for (auto& label : content.forgeLabels)
+      for (auto label : content.forgeLabels)
          label->write(bits);
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)

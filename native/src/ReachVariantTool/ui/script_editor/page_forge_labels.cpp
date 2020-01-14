@@ -21,51 +21,41 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       if (!mp)
          return;
       auto& list  = mp->scriptContent.forgeLabels;
-      auto& label = *list.emplace_back(new Megalo::ReachForgeLabel);
+      auto& label = *list.emplace_back();
       label.index = list.size() - 1;
       this->updateListFromVariant(ReachEditorState::get().variant());
       this->selectLabel(label.index);
    });
    QObject::connect(this->ui.buttonMoveUp, &QPushButton::clicked, [this]() {
-      auto label = this->getLabel();
-      if (!label)
+      auto index = this->currentForgeLabel;
+      if (index < 1) // can't move the last item up
          return;
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
       auto& list = mp->scriptContent.forgeLabels;
       auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         if (list[i] != label)
-            continue;
-         if (i == 0) // can't move the first item up
-            return;
-         list.swap_items(i, i - 1);
-         this->currentForgeLabel = i - 1;
-         break;
-      }
+      if (index >= size)
+         return;
+      list.swap_items(index, index - 1);
+      --this->currentForgeLabel;
       const QSignalBlocker blocker(this->ui.list);
       this->ui.list->setCurrentRow(this->currentForgeLabel);
       this->updateListFromVariant();
    });
    QObject::connect(this->ui.buttonMoveDown, &QPushButton::clicked, [this]() {
-      auto label = this->getLabel();
-      if (!label)
+      auto index = this->currentForgeLabel;
+      if (index < 0)
          return;
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
       auto& list = mp->scriptContent.forgeLabels;
       auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         if (list[i] != label)
-            continue;
-         if (i == size - 1) // can't move the last item down
-            return;
-         list.swap_items(i, i + 1);
-         this->currentForgeLabel = i + 1;
-         break;
-      }
+      if (index >= size - 1) // can't move the last item down
+         return;
+      list.swap_items(index, index + 1);
+      ++this->currentForgeLabel;
       const QSignalBlocker blocker(this->ui.list);
       this->ui.list->setCurrentRow(this->currentForgeLabel);
       this->updateListFromVariant();
@@ -81,11 +71,11 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
-      auto& list = mp->scriptContent.forgeLabels;
-      auto  it   = std::find(list.begin(), list.end(), label);
-      if (it == list.end())
+      auto& list  = mp->scriptContent.forgeLabels;
+      auto  index = list.index_of(label);
+      if (index < 0)
          return;
-      mp->scriptContent.forgeLabels.erase(it);
+      mp->scriptContent.forgeLabels.erase(index);
       this->updateListFromVariant();
    });
    //
@@ -139,7 +129,7 @@ Megalo::ReachForgeLabel* ScriptEditorPageForgeLabels::getLabel() const noexcept 
    auto& list = mp->scriptContent.forgeLabels;
    if (this->currentForgeLabel >= list.size())
       return nullptr;
-   return list[this->currentForgeLabel];
+   return &list[this->currentForgeLabel];
 }
 void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
    if (!variant) {
@@ -157,7 +147,7 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
    container->clear();
    for (size_t i = 0; i < list.size(); i++) {
       auto  item  = new QListWidgetItem;
-      auto& label = *list[i];
+      auto& label = list[i];
       if (label.name) {
          item->setText(QString::fromUtf8(label.name->english().c_str()));
       } else {
@@ -180,7 +170,7 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    auto& labels = mp->scriptContent.forgeLabels;
    if (this->currentForgeLabel >= labels.size())
       return;
-   auto& label = *labels[this->currentForgeLabel];
+   auto& label = labels[this->currentForgeLabel];
    //
    const QSignalBlocker blocker1(this->ui.reqFlagNumber);
    const QSignalBlocker blocker2(this->ui.reqFlagObjectType);
@@ -206,7 +196,7 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
       for (size_t i = 0; i < labels.size(); i++) {
          if (i == this->currentForgeLabel)
             continue;
-         auto& other = *labels[i];
+         auto& other = labels[i];
          if (!other.name)
             continue;
          others.push_back(QString::fromUtf8(other.name->english().c_str()));

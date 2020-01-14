@@ -702,6 +702,12 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\managed_pointer_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\iterators\pointer_based.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

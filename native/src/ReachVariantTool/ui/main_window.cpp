@@ -110,7 +110,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          this->regenerateNavigation();
          return;
       }
-      int32_t index = -1;
+      int32_t index = traits->index;
+      /*int32_t index = -1;
       {
          auto& list = mp->scriptData.traits;
          auto  size = list.size();
@@ -124,7 +125,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             this->regenerateNavigation();
             return;
          }
-      }
+      }*/
       QTreeWidgetItem* target = this->getNavItemForScriptTraits(traits, index);
       if (!target) {
          this->regenerateNavigation();
@@ -203,7 +204,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             auto& list = mp->scriptData.traits;
             auto  size = list.size();
             for (size_t i = 0; i < size; i++) {
-               auto& item      = *list[i];
+               auto& item      = list[i];
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (item.name) {
                   formatted = formatted.arg(QString::fromUtf8(item.name->english().c_str()));
@@ -219,7 +220,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             auto& list = mp->scriptContent.forgeLabels;
             auto  size = list.size();
             for (size_t i = 0; i < size; i++) {
-               auto& label     = *list[i];
+               auto& label     = list[i];
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (label.name) {
                   formatted = formatted.arg(QString::fromUtf8(label.name->english().c_str()));
@@ -232,7 +233,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          }
          auto& triggers = mp->scriptContent.triggers;
          for (size_t i = 0; i < triggers.size(); ++i) {
-            auto& trigger = *triggers[i];
+            auto& trigger = triggers[i];
             if (trigger.entryType == Megalo::entry_type::subroutine)
                continue;
             std::string formatted;
@@ -611,7 +612,7 @@ void ReachVariantTool::regenerateNavigation() {
                defaultFallback = script;
             auto& t = mp->scriptData.traits;
             for (size_t i = 0; i < t.size(); i++) {
-               auto& traits = *t[i];
+               auto& traits = t[i];
                ReachString* name = traits.name;
                QString text;
                if (name) {
@@ -759,7 +760,7 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
                widget->setCurrentItem(previous);
                return;
             }
-            this->switchToPlayerTraits(mp_data->scriptData.traits[extra]);
+            this->switchToPlayerTraits(&mp_data->scriptData.traits[extra]);
             return;
          case _page::mp_team_configuration: // specific team
             ReachEditorState::get().setCurrentMultiplayerTeam(extra);
@@ -825,6 +826,8 @@ QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTr
    if (index < 0) {
       if (!traits)
          return nullptr;
+      index = traits->index;
+      /*
       auto& editor = ReachEditorState::get();
       auto  mp     = editor.multiplayerData();
       if (!mp)
@@ -839,6 +842,7 @@ QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTr
       }
       if (index == -1)
          return nullptr;
+      //*/
    }
    //
    auto widget = this->ui.MainTreeview;

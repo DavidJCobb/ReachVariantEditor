@@ -211,6 +211,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
+    <ClInclude Include="helpers\iterators\pointer_based.h" />
+    <ClInclude Include="helpers\managed_pointer_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
     <QtMoc Include="ui\script_editor\page_metadata_strings.h" />

@@ -25,7 +25,7 @@ namespace Megalo {
       auto& list = newlyLoaded->scriptContent.widgets;
       if (this->index >= list.size())
          return;
-      this->value = list[this->index];
+      this->value = &list[this->index];
    }
    //
    void OpcodeArgValueWidget::to_string(std::string& out) const noexcept {

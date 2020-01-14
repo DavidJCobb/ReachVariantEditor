@@ -13,6 +13,7 @@ namespace cobb {
                iterator() {}
                iterator(std::nullptr_t) : item(nullptr) {}
                iterator(value_type* v) : item(v) {}
+               iterator(void* v) : item((value_type*)v) {}
                iterator(reference r) : item(&r) {}
                value_type operator->() const noexcept { return *item; }
                value_type operator*() const noexcept { return *item; }
@@ -47,6 +48,7 @@ namespace cobb {
                const_iterator() {}
                const_iterator(std::nullptr_t) : item(nullptr) {}
                const_iterator(value_type* v) : item(v) {}
+               const_iterator(void* v) : item((value_type*)v) {}
                const_iterator(reference r) : item(&r) {}
                const value_type operator->() const noexcept { return *item; }
                const value_type operator*() const noexcept { return *item; }

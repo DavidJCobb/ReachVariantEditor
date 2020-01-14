@@ -122,6 +122,7 @@ namespace cobb {
                      this->owner._add_outbound(*other);
                   return *this;
                }
+               ref& operator=(C& other) noexcept = delete; // have to explicitly delete this, or else accidentally assigning an object (instead of a pointer) compiles a call to operator=(ref&&) for some reason
                C* operator->() const noexcept { return this->target; }
                C& operator*() const noexcept { return *this->target; }
                operator C*() const noexcept { return this->target; } // implicitly provides comparison operators

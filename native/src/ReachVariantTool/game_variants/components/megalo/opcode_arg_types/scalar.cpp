@@ -169,12 +169,12 @@ namespace Megalo {
          case _scopes::team_stat:
             if (this->index < 0 || this->index >= sc.stats.size())
                break;
-            this->target = sc.stats[this->index];
+            this->target = &sc.stats[this->index];
             break;
          case _scopes::script_option:
             if (this->index < 0 || this->index >= sd.options.size())
                break;
-            this->target = sd.options[this->index];
+            this->target = &sd.options[this->index];
             break;
       }
    }
@@ -200,8 +200,14 @@ namespace Megalo {
             variable_scope = &MegaloVariableScopeGlobal;
             break;
          case _scopes::script_option:
-            index_bits = cobb::bitcount(16 - 1); // scripted options
-            break;
+            index_bits = cobb::bitcount(Megalo::Limits::max_script_options - 1);
+            if (this->target) {
+               auto option = (ReachMegaloOption*)(void*)this->target; // TODO: make this less ugly
+               stream.write(option->index, index_bits);
+            } else {
+               stream.write(0, index_bits);
+            }
+            return;
          case _scopes::spawn_sequence:
             index_bits = MegaloVariableScopeObject.which_bits();
             break;
@@ -215,12 +221,26 @@ namespace Megalo {
             break;
          case _scopes::player_stat:
             which_bits = MegaloVariableScopePlayer.which_bits();
-            index_bits = cobb::bitcount(4 - 1); // scripted stats
-            break;
+            index_bits = cobb::bitcount(Megalo::Limits::max_script_stats - 1);
+            stream.write(this->which, which_bits);
+            if (this->target) {
+               auto stat = (ReachMegaloGameStat*)(void*)this->target; // TODO: make this less ugly
+               stream.write(stat->index, index_bits);
+            } else {
+               stream.write(0, index_bits);
+            }
+            return;
          case _scopes::team_stat:
             which_bits = MegaloVariableScopeTeam.which_bits();
-            index_bits = cobb::bitcount(4 - 1); // scripted stats
-            break;
+            index_bits = cobb::bitcount(Megalo::Limits::max_script_stats - 1);
+            stream.write(this->which, which_bits);
+            if (this->target) {
+               auto stat = (ReachMegaloGameStat*)(void*)this->target; // TODO: make this less ugly
+               stream.write(stat->index, index_bits);
+            } else {
+               stream.write(0, index_bits);
+            }
+            return;
          case _scopes::current_round:
          case _scopes::symmetry_getter:
          case _scopes::symmetry:
@@ -295,6 +315,14 @@ namespace Megalo {
             cobb::sprintf(out, "Global.Number[%u]", this->index);
             return;
          case _scopes::script_option:
+            if (this->target) {
+               auto option = (ReachMegaloOption*)(void*)this->target; // TODO: make this less ugly
+               if (option->name)
+                  cobb::sprintf(out, "Script Option \"%s\"", option->name->english().c_str());
+               else
+                  cobb::sprintf(out, "Script Option #%u", option->index);
+               return;
+            }
             cobb::sprintf(out, "Script Option #%u", this->index);
             return;
          case _scopes::spawn_sequence:
@@ -334,17 +362,35 @@ namespace Megalo {
             return;
          case _scopes::player_stat:
             which_scope = megalo_players[this->which];
+            if (this->target) {
+               auto stat = (ReachMegaloGameStat*)(void*)this->target; // TODO: make this less ugly
+               if (stat->name)
+                  cobb::sprintf(out, "Stat \"%s\"", stat->name->english().c_str());
+               else
+                  cobb::sprintf(out, "Stat #%u", stat->index);
+            } else {
+               cobb::sprintf(out, "Stat #%u", this->index);
+            }
             if (which_scope)
-               cobb::sprintf(out, "Stat #%u for %s", this->index, which_scope);
+               cobb::sprintf(out, "%s for %s", out.c_str(), which_scope);
             else
-               cobb::sprintf(out, "Stat #%u for INVALID_PLAYER[%u]", this->index, which_scope);
+               cobb::sprintf(out, "%s for INVALID_PLAYER[%u]", out.c_str(), this->which);
             return;
          case _scopes::team_stat:
             which_scope = megalo_teams[this->which];
+            if (this->target) {
+               auto stat = (ReachMegaloGameStat*)(void*)this->target; // TODO: make this less ugly
+               if (stat->name)
+                  cobb::sprintf(out, "Stat \"%s\"", stat->name->english().c_str());
+               else
+                  cobb::sprintf(out, "Stat #%u", stat->index);
+            } else {
+               cobb::sprintf(out, "Stat #%u", this->index);
+            }
             if (which_scope)
-               cobb::sprintf(out, "Stat #%u for %s", this->index, which_scope);
+               cobb::sprintf(out, "%s for %s", out.c_str(), which_scope);
             else
-               cobb::sprintf(out, "Stat #%u for INVALID_TEAM[%u]", this->index, this->which);
+               cobb::sprintf(out, "%s for INVALID_TEAM[%u]", out.c_str(), this->which);
             return;
          case _scopes::current_round:
             out = "Current Round";

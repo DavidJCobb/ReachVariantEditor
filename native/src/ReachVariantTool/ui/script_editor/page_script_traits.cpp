@@ -51,7 +51,7 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
          QMessageBox::information(this, tr("Cannot add player traits"), tr("Game variants cannot have more than %1 sets of player traits.").arg(Megalo::Limits::max_script_traits));
          return;
       }
-      this->target = list.emplace_back(new ReachMegaloPlayerTraits);
+      this->target = list.emplace_back();
       this->updateTraitsFromVariant();
       this->updateTraitsListFromVariant();
       ReachEditorState::get().scriptTraitsModified(nullptr);
@@ -101,16 +101,15 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
       auto  mp     = editor.multiplayerData();
       if (!mp)
          return;
-      auto& list   = mp->scriptData.traits;
-      auto  it     = std::find(list.begin(), list.end(), this->target);
-      auto  index  = list.index_of(this->target);
-      if (it == list.end())
+      auto& list  = mp->scriptData.traits;
+      auto  index = list.index_of(this->target);
+      if (index < 0)
          return;
-      list.erase(it);
+      list.erase(index);
       if (index > 0)
-         this->target = list[index - 1];
+         this->target = &list[index - 1];
       else if (list.size())
-         this->target = list[0];
+         this->target = &list[0];
       else
          this->target = nullptr;
       this->updateTraitsFromVariant();
@@ -131,7 +130,7 @@ void ScriptEditorPageScriptTraits::selectTraits(int32_t i) {
       auto& list = mp->scriptData.traits;
       if (i >= list.size())
          return;
-      this->target = list[i];
+      this->target = &list[i];
    }
    this->updateTraitsFromVariant();
 }
@@ -151,7 +150,7 @@ void ScriptEditorPageScriptTraits::updateTraitsListFromVariant(GameVariant* vari
       return;
    auto& list = mp->scriptData.traits;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& traits = *list[i];
+      auto& traits = list[i];
       auto  item = new QListWidgetItem;
       if (traits.name)
          item->setText(QString::fromUtf8(traits.name->english().c_str()));

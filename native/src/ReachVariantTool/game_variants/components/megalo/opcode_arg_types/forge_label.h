@@ -40,7 +40,7 @@ namespace Megalo {
             auto& list = newlyLoaded->scriptContent.forgeLabels;
             if (this->index >= list.size())
                return;
-            this->value = list[this->index];
+            this->value = &list[this->index];
          }
          //
          virtual void to_string(std::string& out) const noexcept override {

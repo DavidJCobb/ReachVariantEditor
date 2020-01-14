@@ -28,7 +28,7 @@ namespace {
       auto& list   = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = *data->scriptData.options[i];
+      auto& option = data->scriptData.options[i];
       option.currentValueIndex = index;
    }
    void _onMegaloSliderChange(QWidget* widget, int value) {
@@ -44,11 +44,11 @@ namespace {
       auto& list = data->scriptData.options;
       if (i >= list.size())
          return;
-      auto& option = *data->scriptData.options[i];
+      auto& option = data->scriptData.options[i];
       option.rangeCurrent = value;
    }
 }
-void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, ReachMegaloOption& option) {
+void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, const ReachMegaloOption& option) {
    ReachString* desc   = option.desc;
    //
    auto label = new QLabel(this);
@@ -137,7 +137,7 @@ void PageMPSettingsScripted::updateFromVariant(GameVariant* variant) {
       return;
    const auto& options = data->scriptData.options;
    for (uint32_t i = 0; i < options.size(); i++) {
-      auto& option = *options[i];
+      auto& option = options[i];
       this->_renderOptionRow(i, layout, option);
    }
    auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
@@ -149,7 +149,8 @@ void PageMPSettingsScripted::updateFromOption(ReachMegaloOption* option) {
    auto mp = ReachEditorState::get().multiplayerData();
    if (!mp)
       return;
-   int8_t index = -1;
+   int8_t index = option->index;
+   /*int8_t index = -1;
    {
       auto& list = mp->scriptData.options;
       auto  size = list.size();
@@ -162,6 +163,7 @@ void PageMPSettingsScripted::updateFromOption(ReachMegaloOption* option) {
       if (index < 0)
          return;
    }
+   //*/
    auto page   = this;
    auto layout = dynamic_cast<QGridLayout*>(page->layout());
    if (!layout)

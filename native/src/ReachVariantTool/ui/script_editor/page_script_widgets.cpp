@@ -59,7 +59,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
             QMessageBox::information(this, tr("Cannot add HUD widget"), tr("Game variants cannot have more than %1 HUD widgets.").arg(Megalo::Limits::max_script_widgets));
             return;
          }
-         this->target = list.emplace_back(new Megalo::HUDWidgetDeclaration);
+         this->target = list.emplace_back();
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();
       });
@@ -106,16 +106,16 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list   = mp->scriptContent.widgets;
-         auto  it     = std::find(list.begin(), list.end(), this->target);
-         auto  index  = list.index_of(this->target);
-         if (it == list.end())
+         auto& list  = mp->scriptContent.widgets;
+         auto  it    = std::find(list.begin(), list.end(), this->target);
+         auto  index = list.index_of(this->target);
+         if (index < 0)
             return;
-         list.erase(it);
+         list.erase(index);
          if (index > 0)
-            this->target = list[index - 1];
+            this->target = &list[index - 1];
          else if (list.size())
-            this->target = list[0];
+            this->target = &list[0];
          else
             this->target = nullptr;
          this->updateWidgetFromVariant();
@@ -137,7 +137,7 @@ void ScriptEditorPageHUDWidgets::selectWidget(int32_t i) {
       auto& list = mp->scriptContent.widgets;
       if (i >= list.size())
          return;
-      this->target = list[i];
+      this->target = &list[i];
    }
    this->updateWidgetFromVariant();
 }
@@ -156,7 +156,7 @@ void ScriptEditorPageHUDWidgets::updateWidgetsListFromVariant(GameVariant* varia
       return;
    auto& list = mp->scriptContent.widgets;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& entry = *list[i];
+      auto& entry = list[i];
       auto  item  = new QListWidgetItem;
       item->setText(tr("HUD Widget #%1", "scripted widget editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&entry));

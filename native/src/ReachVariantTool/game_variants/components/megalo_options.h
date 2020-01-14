@@ -38,6 +38,7 @@ class ReachMegaloOptionValueEntry : public cobb::reference_tracked_object {
 
 class ReachMegaloOption : public cobb::reference_tracked_object {
    public:
+      int8_t index = -1;
       MegaloStringRef name = MegaloStringRef::make(*this);
       MegaloStringRef desc = MegaloStringRef::make(*this);
       MegaloStringIndex nameIndex;

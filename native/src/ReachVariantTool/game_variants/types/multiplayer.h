@@ -8,6 +8,7 @@
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
+#include "../../helpers/managed_pointer_list.h"
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 #include "../../helpers/standalones/unique_pointer.h"
@@ -16,6 +17,7 @@
 #include "../components/megalo_game_stats.h"
 #include "../components/megalo_options.h"
 #include "../components/megalo/forge_label.h"
+#include "../components/megalo/limits.h"
 #include "../components/megalo/trigger.h"
 #include "../components/megalo/variable_declarations.h"
 #include "../components/megalo/widgets.h"
@@ -92,8 +94,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } loadouts;
       } options;
       struct {
-         cobb::pointer_list<ReachMegaloPlayerTraits> traits;
-         cobb::pointer_list<ReachMegaloOption> options;
+         cobb::managed_list<ReachMegaloPlayerTraits, Megalo::Limits::max_script_traits>  traits;
+         cobb::managed_list<ReachMegaloOption,       Megalo::Limits::max_script_options> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
       MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)
@@ -122,18 +124,18 @@ class GameVariantDataMultiplayer : public GameVariantData {
             std::vector<Megalo::Condition> conditions;
             std::vector<Megalo::Action>    actions;
          } raw;
-         cobb::pointer_list<Megalo::Trigger> triggers;
+         cobb::managed_list<Megalo::Trigger, Megalo::Limits::max_triggers> triggers;
          Megalo::TriggerEntryPoints entryPoints;
-         cobb::pointer_list<ReachMegaloGameStat> stats;
+         cobb::managed_list<ReachMegaloGameStat, Megalo::Limits::max_script_stats> stats;
          struct {
             Megalo::VariableDeclarationSet global = Megalo::VariableDeclarationSet(Megalo::variable_scope::global);
             Megalo::VariableDeclarationSet player = Megalo::VariableDeclarationSet(Megalo::variable_scope::player);
             Megalo::VariableDeclarationSet object = Megalo::VariableDeclarationSet(Megalo::variable_scope::object);
             Megalo::VariableDeclarationSet team   = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
          } variables;
-         cobb::pointer_list<Megalo::HUDWidgetDeclaration> widgets;
+         cobb::managed_list<Megalo::HUDWidgetDeclaration, Megalo::Limits::max_script_widgets> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
-         cobb::pointer_list<Megalo::ReachForgeLabel> forgeLabels = decltype(forgeLabels)(true); // nullptr elements are not allowed
+         cobb::managed_list<Megalo::ReachForgeLabel, Megalo::Limits::max_script_labels> forgeLabels;
       } scriptContent;
       ReachGameVariantTU1Options titleUpdateData;
       struct {

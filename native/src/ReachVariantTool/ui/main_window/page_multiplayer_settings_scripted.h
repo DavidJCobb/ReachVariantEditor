@@ -12,7 +12,7 @@ class PageMPSettingsScripted : public QWidget {
       PageMPSettingsScripted(QWidget* parent = nullptr);
       //
    private:
-      void _renderOptionRow(uint32_t index, QGridLayout* layout, ReachMegaloOption& option);
+      void _renderOptionRow(uint32_t index, QGridLayout* layout, const ReachMegaloOption& option);
       void updateFromVariant(GameVariant*);
       void updateFromOption(ReachMegaloOption*);
 };

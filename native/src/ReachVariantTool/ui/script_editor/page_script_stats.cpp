@@ -79,7 +79,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             QMessageBox::information(this, tr("Cannot add stat"), tr("Game variants cannot have more than %1 stats.").arg(Megalo::Limits::max_script_stats));
             return;
          }
-         this->target = list.emplace_back(new ReachMegaloGameStat);
+         this->target = list.emplace_back();
          this->updateStatFromVariant();
          this->updateStatsListFromVariant();
       });
@@ -126,16 +126,15 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list   = mp->scriptContent.stats;
-         auto  it     = std::find(list.begin(), list.end(), this->target);
-         auto  index  = list.index_of(this->target);
-         if (it == list.end())
+         auto& list  = mp->scriptContent.stats;
+         auto  index = list.index_of(this->target);
+         if (index < 0)
             return;
-         list.erase(it);
+         list.erase(index);
          if (index > 0)
-            this->target = list[index - 1];
+            this->target = &list[index - 1];
          else if (list.size())
-            this->target = list[0];
+            this->target = &list[0];
          else
             this->target = nullptr;
          this->updateStatFromVariant();
@@ -156,7 +155,7 @@ void ScriptEditorPageScriptStats::selectStat(int32_t i) {
       auto& list = mp->scriptContent.stats;
       if (i >= list.size())
          return;
-      this->target = list[i];
+      this->target = &list[i];
    }
    this->updateStatFromVariant();
 }
@@ -175,7 +174,7 @@ void ScriptEditorPageScriptStats::updateStatsListFromVariant(GameVariant* varian
       return;
    auto& list = mp->scriptContent.stats;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& option = *list[i];
+      auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
          item->setText(QString::fromUtf8(option.name->english().c_str()));

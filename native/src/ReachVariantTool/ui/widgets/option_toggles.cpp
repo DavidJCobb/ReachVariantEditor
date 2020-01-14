@@ -648,7 +648,7 @@ void MegaloOptionToggleTree::updateModelFromGameVariant() {
    auto& options = data->scriptData.options;
    auto  root    = model->invisibleRootItem();
    for (uint32_t i = 0; i < options.size(); i++) {
-      auto& option = *options[i];
+      auto& option = options[i];
       QString name;
       if (option.name) {
          name = QString::fromUtf8(option.name->english().c_str());

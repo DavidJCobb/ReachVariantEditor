@@ -19,6 +19,7 @@ class ReachMegaloGameStat : public cobb::reference_tracked_object {
          descending,
          obsolete_2,
       };
+      int8_t index = -1;
       MegaloStringRef   name = MegaloStringRef::make(*this);
       MegaloStringIndex nameIndex;
       Format format      = Format::number;

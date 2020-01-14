@@ -124,7 +124,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             QMessageBox::information(this, tr("Cannot add option"), tr("Game variants cannot have more than %1 options.").arg(Megalo::Limits::max_script_options));
             return;
          }
-         this->targetOption = list.emplace_back(new ReachMegaloOption);
+         this->targetOption = list.emplace_back();
          this->targetOption->add_value(); // enum-options must have at least one value
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
@@ -175,16 +175,15 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list   = mp->scriptData.options;
-         auto  it     = std::find(list.begin(), list.end(), this->targetOption);
-         auto  index  = list.index_of(this->targetOption);
-         if (it == list.end())
+         auto& list  = mp->scriptData.options;
+         auto  index = list.index_of(this->targetOption);
+         if (index < 0)
             return;
-         list.erase(it);
+         list.erase(index);
          if (index > 0)
-            this->targetOption = list[index - 1];
+            this->targetOption = &list[index - 1];
          else if (list.size())
-            this->targetOption = list[0];
+            this->targetOption = &list[0];
          else
             this->targetOption = nullptr;
          this->updateOptionFromVariant();
@@ -304,7 +303,7 @@ void ScriptEditorPageScriptOptions::selectOption(int32_t i) {
       auto& list = mp->scriptData.options;
       if (i >= list.size())
          return;
-      this->targetOption = list[i];
+      this->targetOption = &list[i];
    }
    this->targetValue = nullptr;
    this->updateOptionFromVariant();
@@ -337,7 +336,7 @@ void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* va
       return;
    auto& list = mp->scriptData.options;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& option = *list[i];
+      auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
          item->setText(QString::fromUtf8(option.name->english().c_str()));
