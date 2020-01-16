@@ -4,7 +4,7 @@
       <title>megalo parser test - lua-inspired</title>
    </head>
    <body>
-      <textarea id="in" rows="30">alias current_haven     = global.object[1]
+      <textarea id="in" rows="30" cols="120">alias current_haven     = global.object[1]
 alias infection_spree   = player.number[5] -- for achievements?
 alias is_alpha_zombie   = player.number[3]
 alias is_human_in_haven = player.number[2]
@@ -428,7 +428,7 @@ end</textarea>
       <script src="tests.js"></script>
       <script>
          document.getElementById("go").addEventListener("click", function(e) {
-            parseMegalo(document.getElementById("in").value);
+            console.log(parseMegalo(document.getElementById("in").value));
          });
       </script>
    </body>

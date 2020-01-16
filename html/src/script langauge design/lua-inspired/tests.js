@@ -47,8 +47,9 @@ class ParsedExpression {
    has_assign_operator() {
       for(let i = 0; i < this.items.length; i++) {
          let item = this.items[i];
-         if (item + "" !== item)
+         if (!(item instanceof ParsedOperator))
             continue;
+         item = item.operator || "";
          if (item[item.length - 1] != ASSIGN_OPERATOR)
             continue;
          if (COMPARE_OPERATORS.indexOf(item) >= 0) // likely "==", ">=", or "<="
@@ -154,7 +155,6 @@ class ParsedExpression {
 
 function parseExpression(text) {
    let length  = text.length;
-   let parens  = 0;
    let root    = new ParsedExpression;
    let current = root;
    let i;
@@ -188,7 +188,7 @@ function parseExpression(text) {
          }
          if (c.endsWith(ASSIGN_OPERATOR)) {
             let sub = c.substring(0, c.length - 1);
-            if (MODIFY_OPERATORS.indexOf(sub) >= 0) {
+            if (c == ASSIGN_OPERATOR || MODIFY_OPERATORS.indexOf(sub) >= 0) {
                if (current.has_assign_operator()) {
                   throw new Error(`Invalid expression: second assignment operator ${c} at position ${i - c.length}.`);
                }
