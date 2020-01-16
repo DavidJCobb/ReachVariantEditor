@@ -7,6 +7,82 @@
       </style>
    </head>
    <body>
+      <!--
+         NOTES FOR FUTURE WORK:
+         
+         I think we should retool the parser. The first pass should identify delimiters 
+         and notable operators, and a second pass should then reconstruct blocks from 
+         that.
+         
+         We'd want to define DelimiterTypes:
+          - Parentheses
+          - Quotes (double and single)
+          - Curly braces
+         
+         And we'd want to define StatementSeparators, which can be "guaranteed statement 
+         separators" or "potential statement separators:"
+          - Colons (potential; can indicate a block's name)
+          - Line breaks (potential)
+          - Semi-colons (guaranteed)
+         
+         DelimiterTypes would be able to have configuration options:
+          - Don't parse contents (use for strings)
+          - Cannot contain statement separators (use for parentheses)
+         
+         Once we've split a script into its delimiters and potential statement separators, 
+         it becomes trivial to reconstruct blocks from that. We can work backwards from 
+         each curly brace to find the block name and argument (if present) and type. After 
+         that, we can work backwards from any open-parentheses that haven't been "claimed" 
+         by a block: if one of them is preceded by an "if" statement, then it must be a 
+         braceless if-block: the statement after its close-parentheses must be its sole 
+         contained statement (and possibly after that there may be braceless else-if and 
+         else blocks). That, then, would be the second parser pass.
+         
+         After the second pass, it then becomes trivial to run a third pass just on 
+         the remaining content, to split things into statements and validate syntax and 
+         names.
+         
+         Additionally, for ease of mapping information between script and UI formats, we 
+         should define three types of comments:
+         
+          - Single-line (//)
+          - Multi-line (/* ... */)
+          - Text-only single-line; do not show in UI (///)
+         
+         This would allow for things like:
+         
+            for each object { /// trigger 46
+               //
+               // Check team
+               //
+               if (current_object.team == team_3) {
+               }
+            }
+         
+         We should be explicit about what can be aliased:
+         
+          - Any variable
+          - Built-in teams (e.g. alias zombie_team = team_2)
+          - Integer constants (e.g. alias spree_bonus_threshold = 5)
+         
+         And we need to figure out how we're going to handle indexed objects, like Forge 
+         labels, traits, and script options: do we want to auto-define aliases at the 
+         start of the script, or allow referring to these values by string, or just have 
+         the script contain indices and let the author define aliases (with us mass-
+         replacing the indices when lists change)?
+         
+          - Referring to Forge labels by string would be the most natural, though we need 
+            to validate all such strings to ensure that they refer to existing labels.
+            
+             - But labels don't HAVE to have strings; some labels seem to exist solely 
+               to be manipulated by scripts. How would a user refer to those without a 
+               string literal? We'd have to implement indices anyway.
+         
+          - Other content is more challenging, since a scriptwright might not speak 
+            English. Indices (with the option to manually define aliases) might be the 
+            safest approach.
+         
+      -->
       <textarea id="code">alias current_haven     = global.object[1]
 alias infection_spree   = player.number[5]
 alias is_alpha_zombie   = player.number[3]
@@ -106,11 +182,11 @@ for each player { // trigger 14
    current_player.timer[0].rate = -100;
    for each player {
       if (current_player.team == team_2)
-         current_player.objective_title = ?;
+         current_player.objective_title = 74;
    }
    for each player {
       if (current_player.team == team_3)
-         current_player.objective_title = ?;
+         current_player.objective_title = 75;
    }
 }
 
@@ -319,14 +395,22 @@ for each player : update survival time stat { // survival time stat
       }
    }
 }</textarea>
-      <input type="button" id="go" value="Parse" />
+      <input type="button" id="go1" value="Parse (1)" />
+      <input type="button" id="go2" value="Parse (2)" />
       <hr />
       <div id="output"></div>
       <script src="parser.js"></script>
+      <!-- <script src="parser2.js"></script> -->
+      <script src="parser2.5.js"></script>
       <script>
-document.getElementById("go").addEventListener("click", function(e) {
+document.getElementById("go1").addEventListener("click", function(e) {
    let input = document.getElementById("code");
    let data  = parse_megalo(input.value);
+   console.log(data);
+});
+document.getElementById("go2").addEventListener("click", function(e) {
+   let input = document.getElementById("code");
+   let data  = parse_megalo_2(input.value);
    console.log(data);
 });
       </script>
