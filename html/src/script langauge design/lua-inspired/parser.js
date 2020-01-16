@@ -21,8 +21,46 @@ const OPERATORS_MOD = [
    "&",
 ];
 const OPERATOR_ASSIGN = "="; // can be standalone or appended to any modify-operator
-const OPERATOR_START_CHARS = "=!><+-*/%^~|&";
+const OPERATOR_START_CHARS = "=!><+-*/%^~|&"; // TODO: rename to "operator chars"
 const WHITESPACE_CHARS = " \r\n\t";
+
+function extract_operator(text, i) {
+   let result = "";
+   let length = text.length;
+   for(; i < length; i++) {
+      let c = text[i];
+      if (OPERATOR_START_CHARS.indexOf(c) < 0)
+         break;
+      result += c;
+   }
+   return result;
+}
+function extract_word(text, i) {
+   let result = "";
+   let length = text.length;
+   for(; i < length; i++) {
+      let c = text[i];
+      if (OPERATOR_START_CHARS.indexOf(c) >= 0)
+         break;
+      if (WHITESPACE_CHARS.indexOf(c) >= 0)
+         break;
+      if (c == "(" || c == ")")
+         break;
+      result += c;
+   }
+   return result;
+}
+function find_next_word(text, i) {
+   let length = text.length;
+   for(; i < length; i++) {
+      let c = text[i];
+      if (WHITESPACE_CHARS.indexOf(c) < 0)
+         if (OPERATOR_START_CHARS.indexOf(c) < 0)
+            if (c != "(" && c != ")")
+               return i;
+   }
+   return null;
+}
 
 class MParsedItem {
    constructor() {
@@ -30,10 +68,33 @@ class MParsedItem {
    }
 }
 
+const MBLOCK_TYPE_ROOT                       = 0;
+const MBLOCK_TYPE_IF                         = 1;
+const MBLOCK_TYPE_FOR_EACH_OBJECT            = 2;
+const MBLOCK_TYPE_FOR_EACH_OBJECT_WITH_LABEL = 3;
+const MBLOCK_TYPE_FOR_EACH_PLAYER            = 4;
+const MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY   = 5;
+const MBLOCK_TYPE_FUNCTION                   = 6;
+const MBLOCK_TYPE_ELSE                       = 7;
+const MBLOCK_TYPE_ELSE_IF                    = 8;
+const MBLOCK_TYPE_BARE                       = 9; // do...end
+const MBLOCK_TYPE_FOR_EACH_TEAM              = 10;
+
+class MAlias extends MParsedItem {
+   constructor(name, target) {
+      this.name   = name;
+      this.target = target;
+   }
+}
 class MBlock extends MParsedItem {
-   constructor() {
+   constructor(type) {
       super();
-      this.items = [];
+      this.type        = type || MBLOCK_TYPE_ROOT;
+      this.forge_label = null;
+      this.condition   = null; // for if-statements, an MBlock with no nesting allowed
+      this.items       = [];
+      //
+      this.allow_nesting = true; // use for if-statements' parentheticals
    }
    clean() {
       this.items = this.items.filter(function(e, i, a) {
@@ -43,6 +104,10 @@ class MBlock extends MParsedItem {
       });
    }
    insert_item(item) {
+      if (!this.allow_nesting) {
+         if (item instanceof MBlock)
+            throw new Error("This block doesn't allow nesting.");
+      }
       this.items.push(item);
       item.parent = this;
       return item;
@@ -61,6 +126,12 @@ class MOperator extends MParsedItem {
    constructor(o) {
       super();
       this.operator = o;
+   }
+}
+class MExpressionJoiner extends MParsedItem {
+   constructor(t) {
+      super();
+      this.text = t;
    }
 }
 class MText extends MParsedItem {
@@ -192,94 +263,69 @@ class MExpression extends MParsedItem { // parentheticals
 }
 
 function parseMegalo(text) {
-   function _lookAheadForWord(text, i) {
-      let result = "";
-      let length = text.length;
-      for(; i < length; i++) {
-         let c = text[i];
-         if (OPERATOR_START_CHARS.indexOf(c) >= 0)
-            break;
-         if (("() \r\n\t").indexOf(c) >= 0)
-            break;
-         result += c;
-      }
-      return result;
-   }
-   function _lookAheadForNextWord(text, i) {
-      let length = text.length;
-      for(; i < length; i++) {
-         let c = text[i];
-         if (WHITESPACE_CHARS.indexOf(c) < 0)
-            return i + 1;
-      }
-      return null;
-   }
-   let length  = text.length;
+   let length       = text.length;
    let blockRoot    = new MBlock;
    let blockCurrent = blockRoot;
    let exprCurrent  = blockRoot.insert_item(new MExpression);
-   let comment = false;
+   let comment      = false;
    let i;
    for (i = 0; i < length; i++) {
       let c = text[i];
-      if (comment) {
-         if (c == "\n")
-            comment = false;
-         continue;
-      }
-      let item = null;
-      if (c == "(") {
-         item = new MExpression;
-         // Item will be inserted further below.
-      } else if (c == ")") {
-         exprCurrent = exprCurrent.parent;
-         if (!(exprCurrent instanceof MExpression))
-            throw new Error(`Unexpected/extra closing paren at offset ${i}!`);
-         continue;
-      } else if (c == "-") { // handle comments
-         if (i + 1 < length) {
-            if (text[i + 1] == "-") {
-               comment = true;
-               ++i;
-               continue;
-            }
+      {  // Handle parentheses, comments, and operators
+         if (comment) {
+            if (c == "\n")
+               comment = false;
+            continue;
          }
-      } // DON'T use (else if); c == "-" for comments overlaps next if for operators
-      if (OPERATOR_START_CHARS.indexOf(c) >= 0) {
-         for(let j = i + 1; j < length; j++) {
-            let e = text[j];
-            if (OPERATOR_START_CHARS.indexOf(e) < 0)
-               break;
-            c += e;
-            ++i;
-         }
-         let is_assign = false;
-         if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
-            item = new MOperator(c);
-         } else if (c.endsWith(OPERATOR_ASSIGN)) {
-            let sub = c.substring(0, c.length - 1);
-            if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
-               if (exprCurrent.has_assign_operator()) {
-                  throw new Error(`Invalid expression: second assignment operator ${c} at position ${i - c.length}.`);
+         let item = null;
+         if (c == "(") {
+            item = new MExpression;
+            // Item will be inserted further below.
+         } else if (c == ")") {
+            exprCurrent = exprCurrent.parent;
+            if (!(exprCurrent instanceof MExpression))
+               throw new Error(`Unexpected/extra closing paren at offset ${i}!`);
+            continue;
+         } else if (c == "-") { // handle comments
+            if (i + 1 < length) {
+               if (text[i + 1] == "-") {
+                  comment = true;
+                  ++i;
+                  continue;
                }
+            }
+         } // DON'T use (else if); c == "-" for comments overlaps next if for operators
+         if (OPERATOR_START_CHARS.indexOf(c) >= 0) {
+            c = extract_operator(text, i);
+            i += c.length - 1;
+            let is_assign = false;
+            if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
                item = new MOperator(c);
-            }
-         } else
-            throw new Error(`Unrecognized operator ${c} at position ${i - c.length}.`);
-      }
-      if (item) {
-         if (exprCurrent.can_insert_item(item)) {
-            exprCurrent.insert_item(item);
-         } else {
-            if (exprCurrent.is_parenthetical()) {
-               throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
-            }
-            exprCurrent = blockCurrent.insert_item(new MExpression);
-            exprCurrent.insert_item(item);
+            } else if (c.endsWith(OPERATOR_ASSIGN)) {
+               let sub = c.substring(0, c.length - 1);
+               if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
+                  if (exprCurrent.has_assign_operator()) {
+                     throw new Error(`Invalid expression: second assignment operator ${c} at position ${i - c.length}.`);
+                  }
+                  item = new MOperator(c);
+               }
+            } else
+               throw new Error(`Unrecognized operator ${c} at position ${i - c.length}.`);
          }
-         if (item instanceof MExpression)
-            exprCurrent = item;
-         continue;
+         if (item) {
+            if (exprCurrent.can_insert_item(item)) {
+               exprCurrent.insert_item(item);
+            } else {
+               if (exprCurrent.is_parenthetical()) {
+                  throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+               }
+               exprCurrent = blockCurrent.insert_item(new MExpression);
+               exprCurrent.insert_item(item);
+            }
+            if (item instanceof MExpression)
+               exprCurrent = item;
+            continue;
+         }
       }
       //
       // Keyword processing:
@@ -287,41 +333,132 @@ function parseMegalo(text) {
       if (c == " ") {
          continue;
       }
-      let word = _lookAheadForWord(text, i);
+      let word = extract_word(text, i);
       if (word.length) {
          let range = [i, i + word.length];
-         i += word.length - 1;
          switch (word) {
             case "and":      // expression separator
             case "or":       // expression separator
+               if (exprCurrent.has_assign_operator())
+                  //
+                  // Unlike in Lua, "and" and "or" are expression separators, not operators, 
+                  // and so they cannot appear within an assignment expression. The code 
+                  // "abc = 3 and def" would be a valid statement in Lua but not in this 
+                  // dialect. It just keeps things simpler. For binary OR and binary AND, 
+                  // use "|" and "&".
+                  //
+                  throw new Error(`Cannot OR-link or AND-link expressions when any of them are variable assignment expressions. Error detected near offset ${i}.`);
+               {
+                  let joiner = new MExpressionJoiner(word);
+                  let parent = exprCurrent.parent;
+                  //
+                  // TODO: Consider checking for bad constructions like "a or and b" and 
+                  // "c and and d" here.
+                  //
+                  parent.insert_item(joiner);
+                  exprCurrent = parent.insert_item(new MExpression);
+               }
+               i += word.length - 1; // skip to the end of the word
+               continue;
             case "for":      // start of block-start
+               if (exprCurrent.is_parenthetical())
+                  throw new Error(`Cannot nest a block in a parenthetical expression. Error detected near offset ${i}.`);
+               i += 3;
+               {
+                  function _getNextWord(mandatory) {
+                     let j = find_next_word(text, i);
+                     if (j == null) {
+                        if (mandatory)
+                           throw new Error(`The file ends early, cutting off a for-block.`);
+                        return "";
+                     }
+                     i = j;
+                     let word = _lookAheadForWord(text, i);
+                     if (word.length)
+                        i += word.length;
+                     return word;
+                  }
+                  function _makeBlock(type) {
+                     blockCurrent = blockCurrent.insert_item(new MBlock(type));
+                     exprCurrent  = blockCurrent.insert_item(new MExpression);
+                     //
+                     // The _getNextWord function sets (i) to the end of the found word. However, 
+                     // the parsing loop will increment (i) by one, so when we have all of the 
+                     // words we want to parse, we actually need to move (i) back by one so that 
+                     // at the start of the next parsing loop, it's at the end of the found words.
+                     //
+                     i--;
+                  }
+                  if (_getNextWord(true) != "each")
+                     throw new Error(`Invalid for-loop near offset ${i}. Expected "each"; got "${word}".`);
+                  switch (_getNextWord(true)) {
+                     case "object": {
+                        console.log("for each object...");
+                        word = _getNextWord(true);
+                        if (word == "do") {
+                           _makeBlock(MBLOCK_TYPE_FOR_EACH_OBJECT);
+                        } else if (word == "with") {
+                           word = _getNextWord(true);
+                           if (word == "label") {
+                              //
+                              // TODO: get the label name; then get the "do" keyword
+                              //
+                           } else
+                              throw new Error(`Invalid for-each-object loop near offset ${i}. Expected "do" or "with"; got "${word}".`);
+                        }
+                     }; break;
+                     case "player": {
+                        console.log("for each player...");
+                        word = _getNextWord(true);
+                        if (word == "do") {
+                           _makeBlock(MBLOCK_TYPE_FOR_EACH_PLAYER);
+                        } else if (word == "randomly") {
+                           if (_getNextWord(true) != "do")
+                              throw new Error(`Invalid for-each-player-randomly loop near offset ${i}. Expected "do"; got "${word}".`);
+                           _makeBlock(MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY);
+                        }
+                     }; break;
+                     case "team": {
+                        console.log("for each team...");
+                        if (_getNextWord(true) != "do")
+                           throw new Error(`Invalid for-each-team loop near offset ${i}. Expected "do"; got "${word}".`);
+                        _makeBlock(MBLOCK_TYPE_FOR_EACH_TEAM);
+                     }; break;
+                     default:
+                        throw new Error(`Invalid for-loop near offset ${i}.`);
+                  }
+               }
+               continue;
             case "function": // start of block-start
             case "if":       // start of block-start
                console.warn(`TODO: Handle keyword "${word}".`);
-               break;
+               break; // replace with CONTINUE once code to handle this keyword is written
             case "do":       // end of block-start
                if (exprCurrent.is_parenthetical())
                   throw new Error(`Cannot nest a block in a parenthetical expression. Error detected near offset ${i}.`);
-               blockCurrent = blockCurrent.insert_item(new MBlock);
+               blockCurrent = blockCurrent.insert_item(new MBlock(MBLOCK_TYPE_BARE));
                exprCurrent  = blockCurrent.insert_item(new MExpression);
+               i += word.length - 1; // skip the word "do"
                continue;
             case "then":     // end of block-start
             case "else":     // end of block + start of new block
             case "elseif":   // end of block + start of new block-start
                console.warn(`TODO: Handle keyword "${word}".`);
-               break;
+               break; // replace with CONTINUE once code to handle this keyword is written
             case "end":      // end of block
                blockCurrent.clean();
                blockCurrent = blockCurrent.parent;
                if (!blockCurrent)
                   throw new Error(`Unexpected "end" near offset ${i}.`);
                exprCurrent  = blockCurrent.insert_item(new MExpression);
+               i += word.length - 1; // skip the word "do"
                continue;
             case "alias":    // declaration
             case "expect":   // declaration
                console.warn(`TODO: Handle keyword "${word}".`);
-               break;
+               break; // replace with CONTINUE once code to handle this keyword is written
          }
+         i += word.length - 1;
          let item = new MText(word, range[0], range[1]);
          if (exprCurrent.can_insert_item(item))
             exprCurrent.insert_item(item);
