@@ -343,6 +343,47 @@ end</textarea>
       <!--
          TODO:
          
+         Fix "parseExpression"'s handling of negative numbers. In Lua, bare expressions aren't 
+         allowed; only statements (i.e. assigning or calling); this allows Lua to handle the 
+         following ambiguity:
+         
+            local a = 3 + 2
+            -1
+         
+         Because bare expressions aren't allowed, that MUST be "minus one," part of the prior 
+         line, and not "negative one." Currently our parser doesn't handle negative numbers at 
+         all (it would always view a minus as subtraction); we need to program it so that if 
+         it sees a "-" just before a number and after another operator, it views that "-" as a 
+         number's sign.
+         
+         (Since we're mimicking Lua, we also need to account for "--" being a line comment, 
+         being sure not to accidentally treat "- -" as a comment.)
+         
+         -------------------------------------------------------------------------------------
+         
+         When "parseExpression" is adding text, it should actually use a look-ahead rather 
+         than appending one character at a time. When we see a character that isn't a symbol 
+         (i.e. operator, parenthetical, line break, space), we should read the next characters 
+         until we encounter one that is a symbol. (We should do this by calling a function 
+         that does the look-ahead and returns a full "word." The caller can check the length 
+         of the returned word and advance (i) by (length - 1) -- we subtract one since the 
+         loop will add 1 to (i) as well; if we advance by only one character then we add 0 at 
+         this stage and the loop adds 1. This will make it easier to tell whether we've found 
+         a keyword (e.g. "for" or "and"), and it's the way we'd want to do things in C++ as 
+         well.
+         
+         (Speaking of "symbols:" we should formally define "OPERATOR_CHARS" as any character 
+         that any operator can start with.)
+         
+         We may even want to define a token class for text instead of using bare strings.
+         
+         -------------------------------------------------------------------------------------
+         
+         The "parseExpression" test should fail if (current != root) at the end, as that is a 
+         sign that we didn't close a parenthetical.
+         
+         -------------------------------------------------------------------------------------
+         
          Use the "parseExpression" test as the basis of our parser. Instead of sepearating 
          ParsedExpressions after the fact, separate them in real-time. Make ParsedExpression 
          handle both parentheses and blocks, and set things up so we split from the current 
@@ -374,6 +415,12 @@ end</textarea>
          And error when...
          
           - ParsedOperator, ParsedOperator
+         
+         The parser should keep an eye out for keywords and treat them accordingly (i.e. the 
+         "or" and "and" keywords separate expressions into siblings within a condition; the 
+         "for" and similar keywords mark the start of a block, possibly with additional data). 
+         We should maintain not just variables for the current expression, but also: blockRoot, 
+         blockCurrent, exprRoot, and exprCurrent.
          
       -->
       <input type="button" value="Go!" id="go" />
