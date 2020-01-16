@@ -22,6 +22,7 @@ const OPERATORS_MOD = [
 ];
 const OPERATOR_ASSIGN = "="; // can be standalone or appended to any modify-operator
 const OPERATOR_START_CHARS = "=!><+-*/%^~|&";
+const WHITESPACE_CHARS = " \r\n\t";
 
 class MParsedItem {
    constructor() {
@@ -126,16 +127,16 @@ class MExpression extends MParsedItem { // parentheticals
    }
    //
    can_insert_item(item) { // returns (false) if you should start a new expression instead
-      if (!this.items.length)
+      if (!this.items.length) // an empty expression can always take a first token
          return true;
-      let last = this.index(-1);
+      let last = this.item(-1);
       if (item instanceof MExpression && last instanceof MExpression) // catch "(a) (b)"
          return false;
       if (item instanceof MText) {
          if (last instanceof MText) // catch "a b"
             return false;
          if (last instanceof MExpression) { // catch "(a) b"
-            let prev = this.index(-2);
+            let prev = this.item(-2);
             if (prev instanceof MCallStem) { // allow "func(a).b"
                let glyph = last.text[last.text.length - 1];
                return (glyph == ".");
@@ -146,6 +147,7 @@ class MExpression extends MParsedItem { // parentheticals
       if (last instanceof MText) {
          if (item instanceof MExpression) // allow "a()"
             return true;
+         // MText followed by MText is already checked for above
       }
       return true;
    }
@@ -207,7 +209,7 @@ function parseMegalo(text) {
       let length = text.length;
       for(; i < length; i++) {
          let c = text[i];
-         if ((" \r\n\t").indexOf(c) < 0)
+         if (WHITESPACE_CHARS.indexOf(c) < 0)
             return i + 1;
       }
       return null;
@@ -225,19 +227,16 @@ function parseMegalo(text) {
             comment = false;
          continue;
       }
-      let d = "";
-      if (i > 0)
-         d = text[i - 1];
+      let item = null;
       if (c == "(") {
-         exprCurrent = exprCurrent.insert_item(new MExpression);
-         continue;
+         item = new MExpression;
+         // Item will be inserted further below.
       } else if (c == ")") {
          exprCurrent = exprCurrent.parent;
          if (!(exprCurrent instanceof MExpression))
             throw new Error(`Unexpected/extra closing paren at offset ${i}!`);
          continue;
-      }
-      if (c == "-") { // handle comments
+      } else if (c == "-") { // handle comments
          if (i + 1 < length) {
             if (text[i + 1] == "-") {
                comment = true;
@@ -245,7 +244,7 @@ function parseMegalo(text) {
                continue;
             }
          }
-      }
+      } // DON'T use (else if); c == "-" for comments overlaps next if for operators
       if (OPERATOR_START_CHARS.indexOf(c) >= 0) {
          for(let j = i + 1; j < length; j++) {
             let e = text[j];
@@ -255,25 +254,36 @@ function parseMegalo(text) {
             ++i;
          }
          let is_assign = false;
-         if (OPERATORS_CMP.indexOf(c) >= 0) {
-            exprCurrent.insert_item(new MOperator(c));
-            continue;
-         } else if (OPERATORS_MOD.indexOf(c) >= 0) {
-            exprCurrent.insert_item(new MOperator(c));
-            continue;
-         }
-         if (c.endsWith(OPERATOR_ASSIGN)) {
+         if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
+            item = new MOperator(c);
+         } else if (c.endsWith(OPERATOR_ASSIGN)) {
             let sub = c.substring(0, c.length - 1);
             if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
                if (exprCurrent.has_assign_operator()) {
                   throw new Error(`Invalid expression: second assignment operator ${c} at position ${i - c.length}.`);
                }
-               exprCurrent.insert_item(new MOperator(c));
-               continue;
+               item = new MOperator(c);
             }
-         }
-         throw new Error(`Unrecognized operator ${c} at position ${i - c.length}.`);
+         } else
+            throw new Error(`Unrecognized operator ${c} at position ${i - c.length}.`);
       }
+      if (item) {
+         if (exprCurrent.can_insert_item(item)) {
+            exprCurrent.insert_item(item);
+         } else {
+            if (exprCurrent.is_parenthetical()) {
+               throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+            }
+            exprCurrent = blockCurrent.insert_item(new MExpression);
+            exprCurrent.insert_item(item);
+         }
+         if (item instanceof MExpression)
+            exprCurrent = item;
+         continue;
+      }
+      //
+      // Keyword processing:
+      //
       if (c == " ") {
          continue;
       }
@@ -312,7 +322,16 @@ function parseMegalo(text) {
                console.warn(`TODO: Handle keyword "${word}".`);
                break;
          }
-         exprCurrent.insert_item(new MText(word, range[0], range[1]));
+         let item = new MText(word, range[0], range[1]);
+         if (exprCurrent.can_insert_item(item))
+            exprCurrent.insert_item(item);
+         else {
+            if (exprCurrent.is_parenthetical()) {
+               throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+            }
+            exprCurrent = blockCurrent.insert_item(new MExpression);
+            exprCurrent.insert_item(item);
+         }
       }
    }
    if (blockRoot != blockCurrent) {
