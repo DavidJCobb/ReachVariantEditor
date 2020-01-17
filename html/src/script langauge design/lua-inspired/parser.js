@@ -373,7 +373,7 @@ function parseMegalo(text) {
                         return "";
                      }
                      i = j;
-                     let word = _lookAheadForWord(text, i);
+                     let word = extract_word(text, i);
                      if (word.length)
                         i += word.length;
                      return word;
