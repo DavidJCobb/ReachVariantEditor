@@ -2,9 +2,176 @@
 <html>
    <head>
       <title>megalo parser test - lua-inspired</title>
+      <style>
+textarea{width:800px;height:250px}
+      </style>
    </head>
    <body>
-      <textarea id="in" rows="30" cols="120">alias current_haven     = global.object[1]
+      <textarea id="in" rows="30" cols="120"></textarea>
+      <!--
+      
+         NOTES ON TERMINOLOGY:
+         
+          - Word: Any token that isn't a delimiter or operator. Function names, variable and 
+            property names like player[0].number[1], numeric constants, and keywords are all 
+            words.
+            
+          - Block: A container for expressions. This can include code blocks, but in our 
+            parser the list of conditions for an if-block is also, itself, a non-nestable 
+            block.
+            
+          - Call Stem: The name of a function; any word that precedes a parentheses-delimited 
+            expression.
+            
+          - Expression Joiner: The keywords "or" and "and", used to link multiple conditions 
+            within a single if-statement. For ease of parsing, these are considered special 
+            and are not allowed as general operators. (The bitwise operators are & and |. 
+            Native booleans don't exist in Megalo and must be implemented on top of integer 
+            types, so boolean operators don't exist either.)
+         
+         OTHER NOTES:
+         
+          - Though our syntax is inspired by Lua, we allow compound-assignment operators such 
+            as plus-equals and minus-equals; this is so that assignment matches up with the 
+            "modify variable" Megalo opcode as closely as possible.
+         
+          - The "alias" statement allows you to alias a variable name or integer constant; 
+            this is helpful since variables must otherwise be referred to by their raw names, 
+            like "player[0].number[4]". You can alias top-level variables (e.g. "player[0]"), 
+            nested variables (e.g. "player.number[4]", allowing "player[0].alias_name"), and 
+            options.
+            
+            The assignment operator respects aliasing; "alias_name = value" writes to the 
+            underlying variable rather than rebinding aliases. Aliases are roughly analogous 
+            to references in C++.
+            
+             - One of the things I intend to do with aliases is, during decompilation, auto-
+               generate aliases for script options at the start of the file, mangling the 
+               option names as needed (e.g. "Alpha Zombies" -> "option_alpha_zombies"). We 
+               can do the same for player traits.
+         
+          - The "expect" declaration can only be used in functions; it places constraints on 
+            what a caller must do before calling the function. Specifically, functions can't 
+            return a value and must instead operate on a specific global variable, expecting 
+            their caller to appropriately prepare and use that variable. For example, Alpha 
+            Zombies has a function to count the number of survivors; this function uses the 
+            global.number[0] variable to hold its result and it expects that that variable 
+            will have been set to zero prior to the call. The "expect" declaration is meant 
+            to enforce this as a compile-time directive (though I don't know that I'll be 
+            able to implement that in practice; we'll see).
+      
+         TODO:
+         
+         Add the entry types for triggers: normal, subroutine, init, local init, host migrat-
+         ion, object death, local, and pre-game. Not sure how we want to represent those in 
+         the syntax yet, though.
+         
+         -------------------------------------------------------------------------------------
+         
+         Add an extract_string_literal(text, i) function which searches for a string literal 
+         (single-line or multi-line) at the given point and returns it if found. (In C++, it 
+         would return a bool indicating presence and write to a std::string& argument.) We 
+         want the parser to be able to understand string literals it finds, but we also need 
+         the "for each object with label" handling to be able to "demand" a string literal at 
+         a specific point, so it's best to have a single "extract" function -- or better yet: 
+         a "find and extract" function that skips over whitespace but not anything else.
+         
+         -------------------------------------------------------------------------------------
+         
+         If we convert this from a single function to a state object with methods, then we can 
+         move the handling for each keywords out from the main "parse" function and into other 
+         member functions; parse state will be held as members on the state object, so other 
+         member functions would be able to access it. This will keep the code shorter and more 
+         organized, which will be especially helpful in C++.
+         
+         We should also have "extract_word" and "find_and_extract_word" member functions. We 
+         currently have one function to extract (used during the parse loop) and one function 
+         to find (used during keyword handling, followed by manual code to extract), and we'll 
+         never want to find and *not* extract the next word from the script code.
+         
+         -------------------------------------------------------------------------------------
+         
+         We should endeavor to store location information on blocks, statements, and so on. 
+         This would allow us to do three things:
+         
+          - Smart re-parsing: if we know that the user has only edited content within a block, 
+            then we only have to re-parse that block. This can optimize syntax highlighting.
+         
+          - Friendly displays: I hope to add an overlay that activates when the cursor is set 
+            within any given statement; this overlay would display the statement in plain 
+            English, with drop-downs and textboxes as appropriate to allow editing the opcode.
+         
+          - In turn, keeping metadata about where a token came from would make it easier to 
+            replace tokens when the user makes changes via the friendly displays.
+         
+         It would also make error reporting easier, both at parse time and when going back 
+         through the parsed data to check for other errors (e.g. assigning to a constant or to 
+         a read-only value like a script option, which wouldn't cause a parse error).
+         
+         -------------------------------------------------------------------------------------
+         
+         Use the "parseExpression" test as the basis of our parser. Instead of sepearating 
+         ParsedExpressions after the fact, separate them in real-time. Make ParsedExpression 
+         handle both parentheses and blocks, and set things up so we split from the current 
+         ParsedExpression to a new sibling during parsing when...
+         
+          - string | string
+          
+             = To explain: when we encounter a space, we don't store that in the expression; 
+               instead, we tell the expression that the next text we append (if any) should 
+               not be attached to the current text. So "a + b" is stored as ("a", "+", "b") 
+               and not ("a ", "+", " b"). This means that "a b" is stored as ("a", "b"), and 
+               so two consecutive string entries means a space separating two pieces of text. 
+               In mimicry of Lua we interpret this as a statement separator.
+               
+               TODO: Line breaks and tabs need to also count as spaces, in this regard.
+          
+          - ParsedExpression | string
+          
+          - string | ParsedExpression
+          
+          - ParsedCallStem, ParsedExpression | string not prefixed with "."
+          
+          - ParsedCallStem, ParsedExpression | ParsedExpression
+          
+          - Block keywords (do, else, elseif, function, end, for, if, then)
+          
+          - Other keywords (alias, expect)
+          
+         And error when...
+         
+          - ParsedOperator, ParsedOperator
+         
+         The parser should keep an eye out for keywords and treat them accordingly (i.e. the 
+         "or" and "and" keywords separate expressions into siblings within a condition; the 
+         "for" and similar keywords mark the start of a block, possibly with additional data). 
+         We should maintain not just variables for the current expression, but also: blockRoot, 
+         blockCurrent, exprRoot, and exprCurrent.
+         
+      -->
+      <input type="button" value="Go!" id="go" />
+      <script src="parser.js"></script>
+      <script src="tests.js"></script>
+      <script>
+         document.getElementById("go").addEventListener("click", function(e) {
+            console.log(parseMegalo(document.getElementById("in").value));
+         });
+      </script>
+      
+      <hr />
+      <h2>Test excerpts</h2>
+      <h3>Simple</h3>
+      <textarea>abc = 3 - -1 -- 5
+def = 4
+do
+   ghi = 3
+end
+
+for each player randomly do
+   a = 5
+end</textarea>
+      <h3>Alpha Zombies</h3>
+      <textarea>alias current_haven     = global.object[1]
 alias infection_spree   = player.number[5] -- for achievements?
 alias is_alpha_zombie   = player.number[3]
 alias is_human_in_haven = player.number[2]
@@ -340,96 +507,5 @@ for each player do -- update survival time stat
       end
    end
 end</textarea>
-      <!--
-         TODO:
-         
-         Fix "parseExpression"'s handling of negative numbers. In Lua, bare expressions aren't 
-         allowed; only statements (i.e. assigning or calling); this allows Lua to handle the 
-         following ambiguity:
-         
-            local a = 3 + 2
-            -1
-         
-         Because bare expressions aren't allowed, that MUST be "minus one," part of the prior 
-         line, and not "negative one." Currently our parser doesn't handle negative numbers at 
-         all (it would always view a minus as subtraction); we need to program it so that if 
-         it sees a "-" just before a number and after another operator, it views that "-" as a 
-         number's sign.
-         
-         (Since we're mimicking Lua, we also need to account for "--" being a line comment, 
-         being sure not to accidentally treat "- -" as a comment.)
-         
-         -------------------------------------------------------------------------------------
-         
-         When "parseExpression" is adding text, it should actually use a look-ahead rather 
-         than appending one character at a time. When we see a character that isn't a symbol 
-         (i.e. operator, parenthetical, line break, space), we should read the next characters 
-         until we encounter one that is a symbol. (We should do this by calling a function 
-         that does the look-ahead and returns a full "word." The caller can check the length 
-         of the returned word and advance (i) by (length - 1) -- we subtract one since the 
-         loop will add 1 to (i) as well; if we advance by only one character then we add 0 at 
-         this stage and the loop adds 1. This will make it easier to tell whether we've found 
-         a keyword (e.g. "for" or "and"), and it's the way we'd want to do things in C++ as 
-         well.
-         
-         (Speaking of "symbols:" we should formally define "OPERATOR_CHARS" as any character 
-         that any operator can start with.)
-         
-         We may even want to define a token class for text instead of using bare strings.
-         
-         -------------------------------------------------------------------------------------
-         
-         The "parseExpression" test should fail if (current != root) at the end, as that is a 
-         sign that we didn't close a parenthetical.
-         
-         -------------------------------------------------------------------------------------
-         
-         Use the "parseExpression" test as the basis of our parser. Instead of sepearating 
-         ParsedExpressions after the fact, separate them in real-time. Make ParsedExpression 
-         handle both parentheses and blocks, and set things up so we split from the current 
-         ParsedExpression to a new sibling during parsing when...
-         
-          - string | string
-          
-             = To explain: when we encounter a space, we don't store that in the expression; 
-               instead, we tell the expression that the next text we append (if any) should 
-               not be attached to the current text. So "a + b" is stored as ("a", "+", "b") 
-               and not ("a ", "+", " b"). This means that "a b" is stored as ("a", "b"), and 
-               so two consecutive string entries means a space separating two pieces of text. 
-               In mimicry of Lua we interpret this as a statement separator.
-               
-               TODO: Line breaks and tabs need to also count as spaces, in this regard.
-          
-          - ParsedExpression | string
-          
-          - string | ParsedExpression
-          
-          - ParsedCallStem, ParsedExpression | string not prefixed with "."
-          
-          - ParsedCallStem, ParsedExpression | ParsedExpression
-          
-          - Block keywords (do, else, elseif, function, end, for, if, then)
-          
-          - Other keywords (alias, expect)
-          
-         And error when...
-         
-          - ParsedOperator, ParsedOperator
-         
-         The parser should keep an eye out for keywords and treat them accordingly (i.e. the 
-         "or" and "and" keywords separate expressions into siblings within a condition; the 
-         "for" and similar keywords mark the start of a block, possibly with additional data). 
-         We should maintain not just variables for the current expression, but also: blockRoot, 
-         blockCurrent, exprRoot, and exprCurrent.
-         
-      -->
-      <input type="button" value="Go!" id="go" />
-      <script src="parser.js"></script>
-      <script src="tests.js"></script>
-      <script>
-         document.getElementById("go").addEventListener("click", function(e) {
-            console.log(parseMegalo(document.getElementById("in").value));
-         });
-      </script>
    </body>
 </html>

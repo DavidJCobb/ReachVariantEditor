@@ -378,60 +378,80 @@ function parseMegalo(text) {
                         i += word.length;
                      return word;
                   }
-                  function _makeBlock(type) {
-                     blockCurrent = blockCurrent.insert_item(new MBlock(type));
-                     exprCurrent  = blockCurrent.insert_item(new MExpression);
-                     //
-                     // The _getNextWord function sets (i) to the end of the found word. However, 
-                     // the parsing loop will increment (i) by one, so when we have all of the 
-                     // words we want to parse, we actually need to move (i) back by one so that 
-                     // at the start of the next parsing loop, it's at the end of the found words.
-                     //
-                     i--;
-                  }
+                  let details = { // details to supply to the block we're about to create
+                     type:  null,
+                     label: null,
+                  };
+                  //
+                  // TODO: When we port this to C++, can we represent the different for-loop phrases with 
+                  // tree data of some kind? We'd want a tree and not simply an ordered list so that we can 
+                  // have error messages like "Expected 'do' or 'with'" in the case of a "for each object" 
+                  // phrase followed by a wrong word, where either of the two given words would have been 
+                  // correct.
+                  //
                   if (_getNextWord(true) != "each")
                      throw new Error(`Invalid for-loop near offset ${i}. Expected "each"; got "${word}".`);
                   switch (_getNextWord(true)) {
                      case "object": {
-                        console.log("for each object...");
                         word = _getNextWord(true);
                         if (word == "do") {
-                           _makeBlock(MBLOCK_TYPE_FOR_EACH_OBJECT);
+                           details.type = MBLOCK_TYPE_FOR_EACH_OBJECT;
                         } else if (word == "with") {
-                           word = _getNextWord(true);
-                           if (word == "label") {
-                              //
-                              // TODO: get the label name; then get the "do" keyword
-                              //
-                           } else
-                              throw new Error(`Invalid for-each-object loop near offset ${i}. Expected "do" or "with"; got "${word}".`);
-                        }
+                           if (_getNextWord(true) != "label")
+                              throw new Error(`Invalid for-each-object-with-label loop near offset ${i}. Expected "label"; got "${word}".`);
+                           //
+                           // TODO: get the label name; then get the "do" keyword
+                           //
+                        } else
+                           throw new Error(`Invalid for-each-object loop near offset ${i}. Expected "do" or "with"; got "${word}".`);
                      }; break;
                      case "player": {
-                        console.log("for each player...");
                         word = _getNextWord(true);
                         if (word == "do") {
-                           _makeBlock(MBLOCK_TYPE_FOR_EACH_PLAYER);
+                           details.type = MBLOCK_TYPE_FOR_EACH_PLAYER;
                         } else if (word == "randomly") {
                            if (_getNextWord(true) != "do")
                               throw new Error(`Invalid for-each-player-randomly loop near offset ${i}. Expected "do"; got "${word}".`);
-                           _makeBlock(MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY);
+                           details.type = MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY;
                         }
                      }; break;
                      case "team": {
-                        console.log("for each team...");
                         if (_getNextWord(true) != "do")
                            throw new Error(`Invalid for-each-team loop near offset ${i}. Expected "do"; got "${word}".`);
-                        _makeBlock(MBLOCK_TYPE_FOR_EACH_TEAM);
+                        details.type = MBLOCK_TYPE_FOR_EACH_TEAM;
                      }; break;
-                     default:
-                        throw new Error(`Invalid for-loop near offset ${i}.`);
                   }
+                  if (!details.type) {
+                     throw new Error(`Invalid for-loop near offset ${i}.`);
+                  }
+                  blockCurrent = blockCurrent.insert_item(new MBlock(details.type));
+                  exprCurrent  = blockCurrent.insert_item(new MExpression);
+                  if (details.label)
+                     blockCurrent.forge_label = details.label;
+                  //
+                  // The _getNextWord function sets (i) to the end of the found word. However, 
+                  // the parsing loop will increment (i) by one, so when we have all of the 
+                  // words we want to parse, we actually need to move (i) back by one so that 
+                  // at the start of the next parsing loop, it's at the end of the found words.
+                  //
+                  i--;
                }
                continue;
             case "function": // start of block-start
             case "if":       // start of block-start
                console.warn(`TODO: Handle keyword "${word}".`);
+               //
+               // So the way we're going to handle this is, we'll have an MBlock to represent 
+               // the if-block... but the if-conditions are going to be another MBlock -- one 
+               // that is configured not to allow any further MBlocks to be nested inside. 
+               // This is because MExpression cannot be nested, and an if-condition can hold 
+               // multiple MExpressions separated by "or" and "and." In essence, this would 
+               // mean doing a simple read-ahead (counting parentheses) to find the start and 
+               // end of the if-condition, and then passing the contents to this parser func-
+               // tion as a recursive call. (Of course, we need to set this function up to 
+               // allow for that -- it needs to be able to block nested MBlocks if the root 
+               // doesn't allow them, etc..)
+               //
                break; // replace with CONTINUE once code to handle this keyword is written
             case "do":       // end of block-start
                if (exprCurrent.is_parenthetical())
