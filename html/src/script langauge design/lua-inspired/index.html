@@ -149,12 +149,21 @@ textarea{width:800px;height:250px}
          blockCurrent, exprRoot, and exprCurrent.
          
       -->
+      <br />
       <input type="button" value="Go! (writes to console)" id="go" />
+      <br />
+      <input type="button" value="Go! (parser object; writes to console)" id="go2" />
       <script src="parser.js"></script>
+      <script src="parser2.js"></script>
       <script src="tests.js"></script>
       <script>
          document.getElementById("go").addEventListener("click", function(e) {
             console.log(parseMegalo(document.getElementById("in").value));
+         });
+         document.getElementById("go2").addEventListener("click", function(e) {
+            let parser = new MParser();
+            console.log(parser.parse(document.getElementById("in").value));
+            console.log(parser);
          });
       </script>
       

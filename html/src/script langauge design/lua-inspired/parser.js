@@ -134,6 +134,12 @@ class MExpressionJoiner extends MParsedItem {
       this.text = t;
    }
 }
+class MStringLiteral extends MParsedItem {
+   constructor(text) {
+      super();
+      this.text = text;
+   }
+}
 class MText extends MParsedItem {
    constructor(text, start, end) {
       super();
