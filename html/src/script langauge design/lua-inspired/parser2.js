@@ -2,6 +2,28 @@ const QUOTE_CHARS = "\`\'\"";
 
 const HANDLE_WORD_RESULT_STOP_EARLY = 1;
 
+/*
+
+   TODO:
+   
+   Consider changing "or" and "and" from special "expression joiner" objects to plain 
+   operators. It's already the case that they can't separate every expression (i.e. 
+   {a = b and c = d} is not valid), and it's already the case that an expression can 
+   end up being multiple opcodes (i.e. {a = b + c}, though I'm not sure whether we 
+   want to allow that; we can't reliably select a variable to use as a temporary in 
+   cases like {a += b * c}.).
+   
+   Implement parsing for alias declarations and expect declarations.
+   
+    - An alias declaration is of the form {alias name = target} where target can be 
+      a single variable (using other aliases is allowed), a constant integer, or a 
+      constant expression involving only integers.
+   
+    - An expect declaration is of the form {expect variable = value} where the value 
+      is a constant integer or constant expression involving only integers.
+
+*/
+
 class MParser {
    constructor() {
       this.blockRoot    = null;
@@ -79,20 +101,8 @@ class MParser {
                } else
                   this.throw_error(`Unrecognized operator ${c}.`);
             }
-            if (item) {
-               if (this.exprCurrent.can_insert_item(item)) {
-                  this.exprCurrent.insert_item(item);
-               } else {
-                  if (this.exprCurrent.is_parenthetical()) {
-                     this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
-                  }
-                  this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
-                  this.exprCurrent.insert_item(item);
-               }
-               if (item instanceof MExpression)
-                  this.exprCurrent = item;
+            if (this.tryAppendItem(item))
                continue;
-            }
          }
          //
          // Keyword processing:
@@ -120,6 +130,22 @@ class MParser {
          end:     this.pos,
          endLine: this.line,
       }
+   }
+   tryAppendItem(item) {
+      if (!item)
+         return false;
+      if (this.exprCurrent.can_insert_item(item)) {
+         this.exprCurrent.insert_item(item);
+      } else {
+         if (this.exprCurrent.is_parenthetical()) {
+            this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+         }
+         this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
+         this.exprCurrent.insert_item(item);
+      }
+      if (item instanceof MExpression)
+         this.exprCurrent = item;
+      return true;
    }
    handleWord(word) {
       let range = [this.pos, this.pos + word.length];
@@ -165,15 +191,7 @@ class MParser {
       //
       this.pos += word.length;
       let item = new MText(word, range[0], range[1]);
-      if (this.exprCurrent.can_insert_item(item))
-         this.exprCurrent.insert_item(item);
-      else {
-         if (this.exprCurrent.is_parenthetical()) {
-            this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
-         }
-         this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
-         this.exprCurrent.insert_item(item);
-      }
+      this.tryAppendItem(item);
    }
    extractWord(i) { // does not advance this.pos
       if (isNaN(+i) || i === null)
