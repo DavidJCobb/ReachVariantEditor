@@ -13,28 +13,6 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    want to allow that; we can't reliably select a variable to use as a temporary in 
    cases like {a += b * c}.).
    
-   Create a function, "extractExpression," which attempts to parse a full expression, 
-   stopping when it encounters a token that demands a separate expression -- in 
-   essence, copy the loop out of (parse) and into a separate function, and then have 
-   (parse) loop to call that function and the word-handling one. The motivation for 
-   this is to make it easier to parse alias and expect declarations, which can take 
-   full expressions if those expressions involve only constants.
-   
-    - Essentially, (extractExpression) should use the first half of the loop that 
-      (parse) currently uses, with a local variable instead of (this.exprCurrent). 
-      Upon encountering a keyword or any token for which (MExpression.can_insert_item) 
-      is false, it should return the current expression (or false if that expression 
-      is empty).
-      
-      Then, we should remove the expression-handling logic from (parse) and replace 
-      it with a call to (extractExpression). If that call returns an expression, we 
-      append that expression to the current block and then (continue); otherwise, we 
-      check for keywords. (This has the added benefit that we no longer need to 
-      manually add empty expressions to blocks when creating them.)
-      
-      Then, we have the "alias" and "expect" keywords use (parseExpression) to scan 
-      for an expression after the name and equals sign.
-   
    Implement parsing for alias declarations and expect declarations.
    
     - An alias declaration is of the form {alias name = target} where target can be 
@@ -80,7 +58,10 @@ class MParser {
          //
          let word = this.extractWord();
          if (word.length) {
-            let result = this.handleKeyword(word);
+            let handler = this.getHandlerForKeyword(word);
+            if (!handler)
+               this.error(`No handler exists for keyword "${word}".`);
+            let result = handler.call(this, word);
             if (result == HANDLE_WORD_RESULT_STOP_EARLY) {
                break;
             }
@@ -98,14 +79,6 @@ class MParser {
          end:     this.pos,
          endLine: this.line,
       }
-   }
-   handleComment() {
-      if (comment) {
-         if (c == "\n")
-            comment = false;
-         return true;
-      }
-      return false;
    }
    tryExtractExpression() {
       //
@@ -189,7 +162,7 @@ class MParser {
          if (WHITESPACE_CHARS.indexOf(c) >= 0)
             continue;
          let word = this.extractWord();
-         if (this.isKeyword(word)) {
+         if (this.getHandlerForKeyword(word)) {
             break;
          }
          item = new MText(word, this.pos, this.pos + word.length)
@@ -218,65 +191,33 @@ class MParser {
          expr = item;
       return expr;
    }
-   isKeyword(word) {
+   getHandlerForKeyword(word) {
       switch (word) {
          case "and":
          case "or":
+            return this._handleExpressionJoiner;
          case "do":
+            return this._handleGenericBlockOpen;
          case "end":
+            return this._handleGenericBlockClose;
          case "for":
+            return this._handleForLoop;
          case "function":
+            return null; // TODO
          case "if":
+            return this._handleIf;
          case "then":
+            return this._handleThen;
          case "else":
+            return this._handleElse;
          case "elseif":
+            return this._handleElseIf;
          case "alias":
+            return null; // TODO
          case "expect":
-            return true;
+            return null; // TODO
       }
-      return false;
-   }
-   handleKeyword(word) {
-      let range = [this.pos, this.pos + word.length];
-      switch (word) {
-         case "and":
-         case "or":
-            this._handleExpressionJoiner(word);
-            return;
-         case "do":
-            this._handleGenericBlockOpen(word);
-            return;
-         case "end":
-            this._handleGenericBlockClose(word);
-            return;
-         case "for":
-            this._handleForLoop();
-            return;
-         case "function": // start of block-start
-            console.warn(`TODO: Handle keyword "${word}".`);
-            break;
-         case "if":       // start of block-start
-            this._handleIf(word);
-            return;
-         case "then":     // end of block-start
-            if (!(this.blockRoot instanceof MCondition))
-               this.throw_error(`The "then" keyword is not allowed here.`);
-            this.pos += word.length;
-            return HANDLE_WORD_RESULT_STOP_EARLY;
-         case "else":     // end of block + start of new block
-            this._handleElse(word);
-            return;
-         case "elseif":   // end of block + start of new block-start
-            this._handleGenericBlockClose();
-            this._handleIf(word);
-            return;
-         case "alias":    // declaration
-         case "expect":   // declaration
-            console.warn(`TODO: Handle keyword "${word}".`);
-            break;
-         default:
-            this.throw_error(`Why did the parser think that ${word} is a keyword? isKeyword and hasKeyword are not consistent!`);
-      }
+      return null;
    }
    extractWord(i) { // does not advance this.pos
       if (isNaN(+i) || i === null)
@@ -484,8 +425,18 @@ class MParser {
          bc.condition.items = root.items;
       }
    }
+   _handleElseIf(word) {
+      this._handleGenericBlockClose();
+      this._handleIf(word);
+   }
    _handleElse(word) {
       this._handleGenericBlockClose();
       this._handleGenericBlockOpen(word, MBLOCK_TYPE_ELSE);
+   }
+   _handleThen(word) {
+      if (!(this.blockRoot instanceof MCondition))
+         this.throw_error(`The "then" keyword is not allowed here.`);
+      this.pos += word.length;
+      return HANDLE_WORD_RESULT_STOP_EARLY;
    }
 }
