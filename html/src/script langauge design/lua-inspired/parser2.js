@@ -1,5 +1,7 @@
 const QUOTE_CHARS = "\`\'\"";
 
+const HANDLE_WORD_RESULT_STOP_EARLY = 1;
+
 class MParser {
    constructor() {
       this.blockRoot    = null;
@@ -8,11 +10,15 @@ class MParser {
       this.text         = "";
       this.pos          = 0; // position within the entire stream
       this.line         = 0; // zero-indexed
+      this.last_newline = 0; // zero-indexed
    }
-   parse(text) {
+   throw_error(text) {
+      throw new Error(`Error on or near line ${this.line + 1} col ${this.pos - this.last_newline + 1}: ` + text);
+   }
+   parse(text, root, from) {
       this.text = text;
-      this.pos  = 0;
-      this.blockRoot    = new MBlock;
+      this.pos  = from || 0;
+      this.blockRoot    = root || new MBlock;
       this.blockCurrent = this.blockRoot;
       this.exprCurrent  = this.blockRoot.insert_item(new MExpression);
       let length  = text.length;
@@ -20,8 +26,10 @@ class MParser {
       for(; this.pos < length; ++this.pos) {
          let i = this.pos;
          let c = text[i];
-         if (c == "\n")
+         if (c == "\n") {
             ++this.line;
+            this.last_newline = i;
+         }
          {  // Handle parentheses, comments, and operators
             if (comment) {
                if (c == "\n")
@@ -31,7 +39,7 @@ class MParser {
             if (QUOTE_CHARS.indexOf(c) >= 0) {
                let content = this.findAndExtractStringLiteral(c);
                if (content + "" !== content) // for now this is how we detect anything unclosed if we already know there's an opening quote
-                  throw new Error(`Unclosed string literal beginning at offset ${i}!`);
+                  this.throw_error(`Unclosed string literal beginning at offset ${i}.`);
                this.exprCurrent.insert_item(new MStringLiteral(content));
                this.pos -= 1; // we moved the position to after the string literal, but we're in a loop, so it'll be advanced by 1 more
                continue;
@@ -43,7 +51,7 @@ class MParser {
             } else if (c == ")") {
                this.exprCurrent = this.exprCurrent.parent;
                if (!(this.exprCurrent instanceof MExpression))
-                  throw new Error(`Unexpected/extra closing paren at offset ${i}!`);
+                  this.throw_error(`Unexpected/extra closing paren.`);
                continue;
             } else if (c == "-") { // handle comments
                if (i + 1 < length) {
@@ -64,19 +72,19 @@ class MParser {
                   let sub = c.substring(0, c.length - 1);
                   if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
                      if (this.exprCurrent.has_assign_operator()) {
-                        throw new Error(`Invalid expression: second assignment operator ${c} at position ${i - c.length}.`);
+                        this.throw_error(`Invalid expression: second assignment operator ${c}.`);
                      }
                      item = new MOperator(c);
                   }
                } else
-                  throw new Error(`Unrecognized operator ${c} at position ${i - c.length}.`);
+                  this.throw_error(`Unrecognized operator ${c}.`);
             }
             if (item) {
                if (this.exprCurrent.can_insert_item(item)) {
                   this.exprCurrent.insert_item(item);
                } else {
                   if (this.exprCurrent.is_parenthetical()) {
-                     throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+                     this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
                   }
                   this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
                   this.exprCurrent.insert_item(item);
@@ -94,7 +102,10 @@ class MParser {
          }
          let word = this.extractWord();
          if (word.length) {
-            this.handleWord(word);
+            let result = this.handleWord(word);
+            if (result == HANDLE_WORD_RESULT_STOP_EARLY) {
+               break;
+            }
             this.pos--; // the position was moved to just after the word, but we're in a loop, so it'll be incremented again
          }
       }
@@ -105,7 +116,7 @@ class MParser {
       }
       this.blockRoot.clean();
       return {
-         list:    this.blockRoot,
+         root:    this.blockRoot,
          end:     this.pos,
          endLine: this.line,
       }
@@ -130,42 +141,35 @@ class MParser {
             console.warn(`TODO: Handle keyword "${word}".`);
             break;
          case "if":       // start of block-start
+            this._handleIf(word);
+            return;
          case "then":     // end of block-start
+            if (!(this.blockRoot instanceof MCondition))
+               this.throw_error(`The "then" keyword is not allowed here.`);
+            this.pos += word.length;
+            return HANDLE_WORD_RESULT_STOP_EARLY;
          case "else":     // end of block + start of new block
+            this._handleElse(word);
+            return;
          case "elseif":   // end of block + start of new block-start
-            console.warn(`TODO: Handle keyword "${word}".`);
-            //
-            // So the way we're going to handle this is, we'll have an MBlock to represent 
-            // the if-block... but the if-conditions are going to be another MBlock -- one 
-            // that is configured not to allow any further MBlocks to be nested inside. 
-            // This is because MExpression cannot be nested, and an if-condition can hold 
-            // multiple MExpressions separated by "or" and "and." In essence, this would 
-            // mean doing a simple read-ahead (counting parentheses) to find the start and 
-            // end of the if-condition, and then passing the contents to this parser func-
-            // tion as a recursive call. (Of course, we need to set this function up to 
-            // allow for that -- it needs to be able to block nested MBlocks if the root 
-            // doesn't allow them, etc..)
-            //
-            // TODO: If we decide to treat "or" and "and" as operators rather than special 
-            // "joiners," then it becomes easier to handle if-statements: we reparse but 
-            // only for expressions and not for whole blocks. Making them operators might 
-            // be appropriate; we already don't allow them to join assignments as in the 
-            // case of (a = b and c = d), whereas any operator can join separate assignment 
-            // expressions as in the case of (a = (b = c) + (d = e)).
-            //
-            break;
+            this._handleGenericBlockClose();
+            this._handleIf(word);
+            return;
          case "alias":    // declaration
          case "expect":   // declaration
             console.warn(`TODO: Handle keyword "${word}".`);
             break;
       }
+      //
+      // Handling for non-keywords:
+      //
       this.pos += word.length;
       let item = new MText(word, range[0], range[1]);
       if (this.exprCurrent.can_insert_item(item))
          this.exprCurrent.insert_item(item);
       else {
          if (this.exprCurrent.is_parenthetical()) {
-            throw new Error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
+            this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
          }
          this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
          this.exprCurrent.insert_item(item);
@@ -268,7 +272,7 @@ class MParser {
          // dialect. It just keeps things simpler. For binary OR and binary AND, 
          // use "|" and "&".
          //
-         throw new Error(`Cannot OR-link or AND-link expressions when any of them are variable assignment expressions. Error detected near offset ${this.pos}.`);
+         this.throw_error(`Cannot OR-link or AND-link expressions when any of them are variable assignment expressions.`);
       let joiner = new MExpressionJoiner(word);
       let parent = this.exprCurrent.parent;
       //
@@ -282,14 +286,16 @@ class MParser {
    }
    _handleForLoop() {
       if (this.exprCurrent.is_parenthetical())
-         throw new Error(`Cannot nest a block in a parenthetical expression. Error detected near offset ${this.pos}.`);
+         this.throw_error(`Cannot nest a block in a parenthetical expression.`);
+      if (!this.blockRoot.allow_nesting)
+         this.throw_error(`You cannot open a new block here.`);
       this.pos += 3;
       let details = { // details to supply to the block we're about to create
          type:  null,
          label: null,
       };
       if (this.findAndExtractWord(true) != "each")
-         throw new Error(`Invalid for-loop near offset ${this.pos}. Expected "each"; got "${word}".`);
+         this.throw_error(`Invalid for-loop. Expected "each"; got "${word}".`);
       switch (this.findAndExtractWord(true)) {
          case "object": {
             let word = this.findAndExtractWord(true);
@@ -297,21 +303,21 @@ class MParser {
                details.type = MBLOCK_TYPE_FOR_EACH_OBJECT;
             } else if (word == "with") {
                if (this.findAndExtractWord(true) != "label")
-                  throw new Error(`Invalid for-each-object-with-label loop near offset ${this.pos}. Expected "label"; got "${word}".`);
+                  this.throw_error(`Invalid for-each-object-with-label loop. Expected "label"; got "${word}".`);
                let label_name = this.findAndExtractStringLiteral();
                if (label_name + "" === label_name) {
                   details.label = label_name;
                } else {
                   let label_index = this.findAndExtractIntegerLiteral();
                   if (!label_index && label_index !== 0)
-                     throw new Error(`For-each-object-with-label loop failed to specify a valid Forge label, near offset ${this.pos}.`);
+                     this.throw_error(`For-each-object-with-label loop failed to specify a valid Forge label.`);
                   details.label = label_index;
                }
                if (this.findAndExtractWord(true) != "do")
-                  throw new Error(`Invalid for-each-object-with-label loop near offset ${this.pos}. Expected "do" after the label.`);
+                  this.throw_error(`Invalid for-each-object-with-label loop. Expected "do" after the label.`);
                details.type = MBLOCK_TYPE_FOR_EACH_OBJECT_WITH_LABEL;
             } else
-               throw new Error(`Invalid for-each-object loop near offset ${this.pos}. Expected "do" or "with"; got "${word}".`);
+               this.throw_error(`Invalid for-each-object loop. Expected "do" or "with"; got "${word}".`);
          }; break;
          case "player": {
             let word = this.findAndExtractWord(true);
@@ -319,28 +325,30 @@ class MParser {
                details.type = MBLOCK_TYPE_FOR_EACH_PLAYER;
             } else if (word == "randomly") {
                if (this.findAndExtractWord(true) != "do")
-                  throw new Error(`Invalid for-each-player-randomly loop near offset ${this.pos}. Expected "do"; got "${word}".`);
+                  this.throw_error(`Invalid for-each-player-randomly loop. Expected "do"; got "${word}".`);
                details.type = MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY;
             }
          }; break;
          case "team": {
             if (this.findAndExtractWord(true) != "do")
-               throw new Error(`Invalid for-each-team loop near offset ${this.pos}. Expected "do"; got "${word}".`);
+               this.throw_error(`Invalid for-each-team loop. Expected "do"; got "${word}".`);
             details.type = MBLOCK_TYPE_FOR_EACH_TEAM;
          }; break;
       }
       if (!details.type) {
-         throw new Error(`Invalid for-loop near offset ${this.pos}.`);
+         this.throw_error(`Invalid for-loop.`);
       }
       this.blockCurrent = this.blockCurrent.insert_item(new MBlock(details.type));
       this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
       if (details.label || details.label === 0)
          this.blockCurrent.forge_label = details.label;
    }
-   _handleGenericBlockOpen(word) {
+   _handleGenericBlockOpen(word, type) {
       if (this.exprCurrent.is_parenthetical())
-         throw new Error(`Cannot nest a block in a parenthetical expression. Error detected near offset ${this.pos}.`);
-      this.blockCurrent = this.blockCurrent.insert_item(new MBlock(MBLOCK_TYPE_BARE));
+         this.throw_error(`Cannot nest a block in a parenthetical expression.`);
+      if (!this.blockRoot.allow_nesting)
+         this.throw_error(`You cannot open a new block here.`);
+      this.blockCurrent = this.blockCurrent.insert_item(new MBlock(type || MBLOCK_TYPE_BARE));
       this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
       this.pos += word.length;
    }
@@ -348,8 +356,36 @@ class MParser {
       this.blockCurrent.clean();
       this.blockCurrent = this.blockCurrent.parent;
       if (!this.blockCurrent)
-         throw new Error(`Unexpected "${word}" near offset ${this.pos}.`);
+         this.throw_error(`Unexpected "${word}".`);
       this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
-      this.pos += word.length;
+      if (word)
+         this.pos += word.length;
+   }
+   _handleIf(word) {
+      let type;
+      switch (word) {
+         case "if":     type = MBLOCK_TYPE_IF; break;
+         case "elseif": type = MBLOCK_TYPE_ELSE_IF; break;
+      }
+      this._handleGenericBlockOpen(word, type);
+      //
+      let bc = this.blockCurrent;
+      let cond_parser = new MParser;
+      let cond_root   = new MCondition;
+      let cond_data = cond_parser.parse(this.text, cond_root, this.pos);
+      this.pos = cond_parser.pos;
+      let root = cond_data.root;
+      if (root.items.length == 1 && root.items[0] instanceof MExpression) {
+         bc.condition        = root.items[0];
+         bc.condition.parent = null;
+         bc.condition.owner  = bc;
+      } else {
+         bc.condition       = new MExpression;
+         bc.condition.items = root.items;
+      }
+   }
+   _handleElse(word) {
+      this._handleGenericBlockClose();
+      this._handleGenericBlockOpen(word, MBLOCK_TYPE_ELSE);
    }
 }

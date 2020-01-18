@@ -91,7 +91,7 @@ class MBlock extends MParsedItem {
       super();
       this.type        = type || MBLOCK_TYPE_ROOT;
       this.forge_label = null;
-      this.condition   = null; // for if-statements, an MBlock with no nesting allowed
+      this.condition   = null; // for if-statements, an MExpression
       this.items       = [];
       //
       this.allow_nesting = true; // use for if-statements' parentheticals
@@ -114,6 +114,12 @@ class MBlock extends MParsedItem {
    }
    is_empty() {
       return this.items.length == 0;
+   }
+}
+class MCondition extends MBlock {
+   constructor() {
+      super();
+      this.allow_nesting = false;
    }
 }
 class MCallStem extends MParsedItem {
@@ -166,6 +172,7 @@ class MExpression extends MParsedItem { // parentheticals
    constructor() {
       super();
       this.items = [];
+      this.owner = null; // for when the MExpression is an if-condition
    }
    //
    has_assign_operator() {
