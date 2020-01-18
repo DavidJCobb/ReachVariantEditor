@@ -103,6 +103,15 @@ class MBlock extends MParsedItem {
          return true;
       });
    }
+   item(index) {
+      if (index < 0) {
+         index = this.items.length + index;
+         if (index < 0)
+            return null;
+      } else if (index >= this.items.length)
+         return null;
+      return this.items[index];
+   }
    insert_item(item) {
       if (!this.allow_nesting) {
          if (item instanceof MBlock)

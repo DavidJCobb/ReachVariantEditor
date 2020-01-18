@@ -13,6 +13,28 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    want to allow that; we can't reliably select a variable to use as a temporary in 
    cases like {a += b * c}.).
    
+   Create a function, "extractExpression," which attempts to parse a full expression, 
+   stopping when it encounters a token that demands a separate expression -- in 
+   essence, copy the loop out of (parse) and into a separate function, and then have 
+   (parse) loop to call that function and the word-handling one. The motivation for 
+   this is to make it easier to parse alias and expect declarations, which can take 
+   full expressions if those expressions involve only constants.
+   
+    - Essentially, (extractExpression) should use the first half of the loop that 
+      (parse) currently uses, with a local variable instead of (this.exprCurrent). 
+      Upon encountering a keyword or any token for which (MExpression.can_insert_item) 
+      is false, it should return the current expression (or false if that expression 
+      is empty).
+      
+      Then, we should remove the expression-handling logic from (parse) and replace 
+      it with a call to (extractExpression). If that call returns an expression, we 
+      append that expression to the current block and then (continue); otherwise, we 
+      check for keywords. (This has the added benefit that we no longer need to 
+      manually add empty expressions to blocks when creating them.)
+      
+      Then, we have the "alias" and "expect" keywords use (parseExpression) to scan 
+      for an expression after the name and equals sign.
+   
    Implement parsing for alias declarations and expect declarations.
    
     - An alias declaration is of the form {alias name = target} where target can be 
@@ -28,7 +50,7 @@ class MParser {
    constructor() {
       this.blockRoot    = null;
       this.blockCurrent = null;
-      this.exprCurrent  = null;
+      this.exprCurrent  = null; // last parsed expression
       this.text         = "";
       this.pos          = 0; // position within the entire stream
       this.line         = 0; // zero-indexed
@@ -42,81 +64,27 @@ class MParser {
       this.pos  = from || 0;
       this.blockRoot    = root || new MBlock;
       this.blockCurrent = this.blockRoot;
-      this.exprCurrent  = this.blockRoot.insert_item(new MExpression);
       let length  = text.length;
       let comment = false;
       for(; this.pos < length; ++this.pos) {
          let i = this.pos;
-         let c = text[i];
-         if (c == "\n") {
-            ++this.line;
-            this.last_newline = i;
-         }
-         {  // Handle parentheses, comments, and operators
-            if (comment) {
-               if (c == "\n")
-                  comment = false;
-               continue;
-            }
-            if (QUOTE_CHARS.indexOf(c) >= 0) {
-               let content = this.findAndExtractStringLiteral(c);
-               if (content + "" !== content) // for now this is how we detect anything unclosed if we already know there's an opening quote
-                  this.throw_error(`Unclosed string literal beginning at offset ${i}.`);
-               this.exprCurrent.insert_item(new MStringLiteral(content));
-               this.pos -= 1; // we moved the position to after the string literal, but we're in a loop, so it'll be advanced by 1 more
-               continue;
-            }
-            let item = null;
-            if (c == "(") {
-               item = new MExpression;
-               // Item will be inserted further below.
-            } else if (c == ")") {
-               this.exprCurrent = this.exprCurrent.parent;
-               if (!(this.exprCurrent instanceof MExpression))
-                  this.throw_error(`Unexpected/extra closing paren.`);
-               continue;
-            } else if (c == "-") { // handle comments
-               if (i + 1 < length) {
-                  if (text[i + 1] == "-") {
-                     comment = true;
-                     ++this.pos;
-                     continue;
-                  }
-               }
-            } // DON'T use (else if); c == "-" for comments overlaps next if for operators
-            if (OPERATOR_START_CHARS.indexOf(c) >= 0) {
-               c = extract_operator(text, i);
-               this.pos += c.length - 1;
-               let is_assign = false;
-               if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
-                  item = new MOperator(c);
-               } else if (c.endsWith(OPERATOR_ASSIGN)) {
-                  let sub = c.substring(0, c.length - 1);
-                  if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
-                     if (this.exprCurrent.has_assign_operator()) {
-                        this.throw_error(`Invalid expression: second assignment operator ${c}.`);
-                     }
-                     item = new MOperator(c);
-                  }
-               } else
-                  this.throw_error(`Unrecognized operator ${c}.`);
-            }
-            if (this.tryAppendItem(item))
-               continue;
+         let expr = this.tryExtractExpression();
+         if (expr) {
+            this.blockCurrent.insert_item(expr);
+            this.exprCurrent = expr;
+            --this.pos; // the position was moved to just after the expression, but we're in a loop, so it'll be incremented again
+            continue;
          }
          //
          // Keyword processing:
          //
-         if (c == " ") {
-            continue;
-         }
          let word = this.extractWord();
          if (word.length) {
-            let result = this.handleWord(word);
+            let result = this.handleKeyword(word);
             if (result == HANDLE_WORD_RESULT_STOP_EARLY) {
                break;
             }
-            this.pos--; // the position was moved to just after the word, but we're in a loop, so it'll be incremented again
+            --this.pos; // the position was moved to just after the word, but we're in a loop, so it'll be incremented again
          }
       }
       if (this.blockRoot != this.blockCurrent) {
@@ -131,23 +99,144 @@ class MParser {
          endLine: this.line,
       }
    }
-   tryAppendItem(item) {
+   handleComment() {
+      if (comment) {
+         if (c == "\n")
+            comment = false;
+         return true;
+      }
+      return false;
+   }
+   tryExtractExpression() {
+      //
+      // Loop through the text and extract the contents of a single expression. 
+      // Stop when we encounter a keyword or any term that cannot be appended 
+      // to the current expression (e.g. for "a + b c" we would stop just before 
+      // the "c", since that has to be a new expression). Returns the extracted 
+      // expression if it's not empty, or nothing otherwise.
+      //
+      // This function also handles keeping track of the line number and column 
+      // number, and line comment behavior.
+      //
+      let text    = this.text;
+      let length  = text.length;
+      let comment = false;
+      let current = new MExpression;
+      for(; this.pos < length; ++this.pos) {
+         let i = this.pos;
+         let c = text[i];
+         if (c == "\n") {
+            ++this.line;
+            this.last_newline = i;
+         }
+         if (comment) {
+            if (c == "\n")
+               comment = false;
+            continue;
+         }
+         if (QUOTE_CHARS.indexOf(c) >= 0) {
+            let content = this.findAndExtractStringLiteral(c);
+            if (content + "" !== content) // for now this is how we detect anything unclosed if we already know there's an opening quote
+               this.throw_error(`Unclosed string literal beginning at offset ${i}.`);
+            current.insert_item(new MStringLiteral(content));
+            this.pos -= 1; // we moved the position to after the string literal, but we're in a loop, so it'll be advanced by 1 more
+            break;
+         }
+         let item = null;
+         if (c == "(") {
+            item = new MExpression;
+            // Item will be inserted further below.
+         } else if (c == ")") {
+            current = current.parent;
+            if (!(current instanceof MExpression))
+               this.throw_error(`Unexpected/extra closing paren.`);
+            continue;
+         } else if (c == "-") { // handle comments
+            if (i + 1 < length) {
+               if (text[i + 1] == "-") {
+                  comment = true;
+                  ++this.pos;
+                  continue;
+               }
+            }
+         } // DON'T use (else if); c == "-" for comments overlaps next if for operators
+         if (OPERATOR_START_CHARS.indexOf(c) >= 0) {
+            c = extract_operator(text, i);
+            this.pos += c.length - 1;
+            let is_assign = false;
+            if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
+               item = new MOperator(c);
+            } else if (c.endsWith(OPERATOR_ASSIGN)) {
+               let sub = c.substring(0, c.length - 1);
+               if (c == OPERATOR_ASSIGN || OPERATORS_MOD.indexOf(sub) >= 0) {
+                  if (current.has_assign_operator()) {
+                     this.throw_error(`Invalid expression: second assignment operator ${c}.`);
+                  }
+                  item = new MOperator(c);
+               }
+            } else
+               this.throw_error(`Unrecognized operator ${c}.`);
+         }
+         let result = this.tryAppendItem(item, current);
+         if (result) {
+            current = result;
+            continue;
+         }
+         //
+         // Handle words: if they're not keywords, append them to the expression and skip to 
+         // their end; if they're keywords, then exit.
+         //
+         if (WHITESPACE_CHARS.indexOf(c) >= 0)
+            continue;
+         let word = this.extractWord();
+         if (this.isKeyword(word)) {
+            break;
+         }
+         item = new MText(word, this.pos, this.pos + word.length)
+         if (!this.tryAppendItem(item, current))
+            break;
+         this.pos += word.length;
+      }
+      if (current.is_empty())
+         return;
+      return current;
+   }
+   tryAppendItem(item, expr) {
       if (!item)
-         return false;
-      if (this.exprCurrent.can_insert_item(item)) {
-         this.exprCurrent.insert_item(item);
+         return;
+      if (!expr)
+         expr = this.exprCurrent;
+      if (expr.can_insert_item(item)) {
+         expr.insert_item(item);
       } else {
-         if (this.exprCurrent.is_parenthetical()) {
+         if (expr.is_parenthetical()) {
             this.throw_error(`Cannot have adjacent statements in a parenthetical expression; a joiner ("or"/"and") is needed.`);
          }
-         this.exprCurrent = this.blockCurrent.insert_item(new MExpression);
-         this.exprCurrent.insert_item(item);
+         return;
       }
       if (item instanceof MExpression)
-         this.exprCurrent = item;
-      return true;
+         expr = item;
+      return expr;
    }
-   handleWord(word) {
+   isKeyword(word) {
+      switch (word) {
+         case "and":
+         case "or":
+         case "do":
+         case "end":
+         case "for":
+         case "function":
+         case "if":
+         case "then":
+         case "else":
+         case "elseif":
+         case "alias":
+         case "expect":
+            return true;
+      }
+      return false;
+   }
+   handleKeyword(word) {
       let range = [this.pos, this.pos + word.length];
       switch (word) {
          case "and":
@@ -185,13 +274,9 @@ class MParser {
          case "expect":   // declaration
             console.warn(`TODO: Handle keyword "${word}".`);
             break;
+         default:
+            this.throw_error(`Why did the parser think that ${word} is a keyword? isKeyword and hasKeyword are not consistent!`);
       }
-      //
-      // Handling for non-keywords:
-      //
-      this.pos += word.length;
-      let item = new MText(word, range[0], range[1]);
-      this.tryAppendItem(item);
    }
    extractWord(i) { // does not advance this.pos
       if (isNaN(+i) || i === null)
@@ -357,7 +442,6 @@ class MParser {
          this.throw_error(`Invalid for-loop.`);
       }
       this.blockCurrent = this.blockCurrent.insert_item(new MBlock(details.type));
-      this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
       if (details.label || details.label === 0)
          this.blockCurrent.forge_label = details.label;
    }
@@ -367,7 +451,6 @@ class MParser {
       if (!this.blockRoot.allow_nesting)
          this.throw_error(`You cannot open a new block here.`);
       this.blockCurrent = this.blockCurrent.insert_item(new MBlock(type || MBLOCK_TYPE_BARE));
-      this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
       this.pos += word.length;
    }
    _handleGenericBlockClose(word) {
@@ -375,7 +458,6 @@ class MParser {
       this.blockCurrent = this.blockCurrent.parent;
       if (!this.blockCurrent)
          this.throw_error(`Unexpected "${word}".`);
-      this.exprCurrent  = this.blockCurrent.insert_item(new MExpression);
       if (word)
          this.pos += word.length;
    }
