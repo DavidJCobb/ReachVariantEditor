@@ -146,6 +146,13 @@ class MParser {
             // allow for that -- it needs to be able to block nested MBlocks if the root 
             // doesn't allow them, etc..)
             //
+            // TODO: If we decide to treat "or" and "and" as operators rather than special 
+            // "joiners," then it becomes easier to handle if-statements: we reparse but 
+            // only for expressions and not for whole blocks. Making them operators might 
+            // be appropriate; we already don't allow them to join assignments as in the 
+            // case of (a = b and c = d), whereas any operator can join separate assignment 
+            // expressions as in the case of (a = (b = c) + (d = e)).
+            //
             break;
          case "alias":    // declaration
          case "expect":   // declaration
@@ -281,13 +288,6 @@ class MParser {
          type:  null,
          label: null,
       };
-      //
-      // TODO: When we port this to C++, can we represent the different for-loop phrases with 
-      // tree data of some kind? We'd want a tree and not simply an ordered list so that we can 
-      // have error messages like "Expected 'do' or 'with'" in the case of a "for each object" 
-      // phrase followed by a wrong word, where either of the two given words would have been 
-      // correct.
-      //
       if (this.findAndExtractWord(true) != "each")
          throw new Error(`Invalid for-loop near offset ${this.pos}. Expected "each"; got "${word}".`);
       switch (this.findAndExtractWord(true)) {
