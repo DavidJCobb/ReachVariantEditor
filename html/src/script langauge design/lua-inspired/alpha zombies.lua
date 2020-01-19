@@ -22,7 +22,7 @@ for each player do -- trigger 0
       global.number[0] = current_player.kill_damage_modifiers -- implicit opcode
       if global.number[0] == 2 then
          global.object[0] = current_player.try_get_armor_ability() -- implicit opcode
-         if global.object[0].has_forge_label(0) && global.object[0].is_in_use then
+         if global.object[0].has_forge_label(0) and global.object[0].is_in_use then
             send_incident(dlc_achieve_2, global.player[0], global.player[0], 65)
          end
       end
@@ -241,11 +241,11 @@ if script_option[1] == 1 then -- trigger 33: handle Last Man Standing status acq
    alias survivor_count = global.number[0]
    --
    survivor_count = 0
-   if global.number[1] == 0 do
+   if global.number[1] == 0 then
       count_survivors()
-      if survivor_count == 1 do
+      if survivor_count == 1 then
          for each player do
-            if current_player.is_zombie != 1 do
+            if current_player.is_zombie != 1 then
                script_traits[2].apply(current_player) -- Last Man Standing
                current_player.biped.set_waypoint_icon(skull)
                current_player.biped.set_waypoint_priority(high)
@@ -281,23 +281,23 @@ end
 
 for each player do -- trigger 38: handle zombie victory
    global.timer[1].rate = -100
-   if global.timer[1].is_zero do
+   if global.timer[1].is_zero then
       alias survivor_count = global.number[0]
       --
       survivor_count = 0
       count_survivors()
       for each player do
-         if survivor_count == 1 && current_player.is_zombie == 0 && current_player.killed_by(suicide) then
+         if survivor_count == 1 and current_player.is_zombie == 0 and current_player.killed_by(suicide) then
             --
             -- The Last Man Standing killed themselves.
             --
             survivor_count = 0
          end
       end
-      if global.number[0] == 0 do
+      if global.number[0] == 0 then
          send_incident(infection_zombie_win, all_players, all_players)
          for each player do
-            if current_player.is_last_human != 1 && current_player.is_zombie == 1 then
+            if current_player.is_last_human != 1 and current_player.is_zombie == 1 then
                --
                -- Awared Zombie Victory Points to all zombies except the newly-infected 
                -- Last Man Standing.

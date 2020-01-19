@@ -20,8 +20,9 @@ const OPERATORS_MOD = [
    "|",
    "&",
 ];
+const OPERATOR_COMMA  = ","; // expression joiner
 const OPERATOR_ASSIGN = "="; // can be standalone or appended to any modify-operator
-const OPERATOR_START_CHARS = "=!><+-*/%^~|&"; // TODO: rename to "operator chars"
+const OPERATOR_START_CHARS = ",=!><+-*/%^~|&"; // TODO: rename to "operator chars"
 const WHITESPACE_CHARS = " \r\n\t";
 
 function extract_operator(text, i) {
@@ -246,11 +247,8 @@ class MExpression extends MParsedItem { // parentheticals
          if (last instanceof MText) // catch "a b"
             return false;
          if (last instanceof MExpression) { // catch "(a) b"
-            let prev = this.item(-2);
-            if (prev instanceof MCallStem) { // allow "func(a).b"
-               let glyph = last.text[last.text.length - 1];
-               return (glyph == ".");
-            }
+            if (this.item(-2) instanceof MCallStem) // allow "func(a).b"
+               return (item.text[0] == ".");
             return false;
          }
       }

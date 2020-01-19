@@ -13,17 +13,44 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    want to allow that; we can't reliably select a variable to use as a temporary in 
    cases like {a += b * c}.).
    
-   Implement parsing for alias declarations and expect declarations.
+   It's worth noting that we already treat "," as an operator despite it being an 
+   expression joiner (we needed to handle it so that function calls don't break).
    
-    - An alias declaration is of the form {alias name = target} where target can be 
-      a single variable (using other aliases is allowed), a constant integer, or a 
-      constant expression involving only integers.
-   
-    - An expect declaration is of the form {expect variable = value} where the value 
-      is a constant integer or constant expression involving only integers.
+   ----------------------------------------------------------------------------------
    
    Make it so that all parsed tokens store their start and end positions in the stream, 
    and not just MTexts.
+   
+   ----------------------------------------------------------------------------------
+   
+   Write code to take all the parsed data and write it back out as a string, so we 
+   can more easily check it for correctness.
+   
+   ----------------------------------------------------------------------------------
+   
+   Implement second-stage parsing, where we interpret the data recovered by first-stage 
+   parsing and verify correctness. This should produce warnings as appropriate but not 
+   full-on parse failures (the data should also be flagged as invalid so that it cannot 
+   compile without a manual override).
+    
+    - Validate aliases: the first term in their expression should be a word, followed 
+      by an assign operator. Extract the alias name and keep only the content after 
+      the assign operator as the expression.
+    
+    - Validate variable names. Replace all simple "word" tokens with more structured 
+      tokens that allow us to know every "part" of a variable being referenced, where 
+      a part consists of a name and optionally an index (e.g. player[4].object[1] is 
+      two parts: (player, 4) and (object, 1)).
+   
+    - Validate function calls and property access. (This is the step that requires 
+      opcode definitions and some mapping from the compiled form to the script form.)
+      
+    - Validate assign statements.
+      
+       - Warn on assigning to constants or read-only values.
+      
+       - Warn on assigning values of the wrong type, such as assigning an object 
+         value to a number variable.
 
 */
 
@@ -98,6 +125,7 @@ class MParser {
       let length  = text.length;
       let comment = false;
       let current = new MExpression;
+      let root    = current; // for debugging
       for(; this.pos < length; ++this.pos) {
          let i = this.pos;
          let c = text[i];
@@ -140,7 +168,7 @@ class MParser {
             c = extract_operator(text, i);
             this.pos += c.length - 1;
             let is_assign = false;
-            if (OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
+            if (c == OPERATOR_COMMA || OPERATORS_CMP.indexOf(c) >= 0 || OPERATORS_MOD.indexOf(c) >= 0) {
                item = new MOperator(c);
             } else if (c.endsWith(OPERATOR_ASSIGN)) {
                let sub = c.substring(0, c.length - 1);
@@ -171,7 +199,7 @@ class MParser {
          item = new MText(word, this.pos, this.pos + word.length)
          if (!this.tryAppendItem(item, current))
             break;
-         this.pos += word.length;
+         this.pos += word.length - 1; // we want to jump to the end of the word, but we're in a loop and that'll add one when we're done
       }
       if (current.is_empty())
          return;
@@ -242,10 +270,16 @@ class MParser {
    findAndExtractIntegerLiteral(i) { // advances this.pos if a number is found
       if (isNaN(+i) || i === null)
          i = this.pos;
-      let result = "";
-      let length = this.text.length;
+      let result   = "";
+      let length   = this.text.length;
+      let newlines = 0;
+      let last_new = this.last_newline; // last newline
       for(; i < length; i++) {
          let c = this.text[i];
+         if (c == "\n") {
+            ++newlines;
+            last_new = i;
+         }
          if (!result) {
             if (WHITESPACE_CHARS.indexOf(c) >= 0)
                continue;
@@ -257,6 +291,8 @@ class MParser {
       }
       if (result) {
          this.pos = i;
+         this.line += newlines;
+         this.last_newline = last_new;
          return +result;
       }
       return;
@@ -264,11 +300,17 @@ class MParser {
    findAndExtractStringLiteral(quote, i) { // advances this.pos if a string is found
       if (isNaN(+i) || i === null)
          i = this.pos;
-      let result = "";
-      let length = this.text.length;
-      let inside = false;
+      let result  = "";
+      let length   = this.text.length;
+      let inside   = false;
+      let newlines = 0;
+      let last_new = this.last_newline; // last newline
       for(; i < length; i++) {
          let c = this.text[i];
+         if (c == "\n") {
+            ++newlines;
+            last_new = i;
+         }
          if (!quote) {
             if (WHITESPACE_CHARS.indexOf(c) >= 0)
                continue;
@@ -293,13 +335,21 @@ class MParser {
       if (i == length) // we never found a closing quote; TODO: signal a parse error
          return;
       this.pos = i;
+      this.line += newlines;
+      this.last_newline = last_new;
       return result;
    }
    findAndExtractWord() { // advances this.pos
-      let i      = this.pos;
-      let length = this.text.length;
-      for(; i < length; i++) {
+      let i        = this.pos;
+      let length   = this.text.length;
+      let newlines = 0;
+      let last_new = this.last_newline; // last newline
+      for(; i < length; i++) { // find the start of a word
          let c = this.text[i];
+         if (c == "\n") {
+            ++newlines;
+            last_new = i;
+         }
          if (WHITESPACE_CHARS.indexOf(c) < 0)
             if (OPERATOR_START_CHARS.indexOf(c) < 0)
                if (QUOTE_CHARS.indexOf(c) < 0)
@@ -308,6 +358,10 @@ class MParser {
       }
       let word = this.extractWord(i);
       this.pos = i + word.length;
+      if (word.length) {
+         this.line += newlines;
+         this.last_newline = last_new;
+      }
       return word;
    }
    _handleExpressionJoiner(word) {
