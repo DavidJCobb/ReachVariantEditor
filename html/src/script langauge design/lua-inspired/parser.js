@@ -82,8 +82,10 @@ const MBLOCK_TYPE_FOR_EACH_TEAM              = 10;
 
 class MAlias extends MParsedItem {
    constructor(name, target) {
+      super();
       this.name   = name;
       this.target = target;
+      this.raw    = null; // MExpression; should be (a = b)
    }
 }
 class MBlock extends MParsedItem {
@@ -135,6 +137,21 @@ class MCallStem extends MParsedItem {
    constructor(stem) {
       super();
       this.stem = stem;
+   }
+}
+class MExpect extends MParsedItem {
+   constructor(name, target) {
+      super();
+      this.name   = name;
+      this.target = target;
+      this.raw    = null; // MExpression; should be (a = b)
+   }
+}
+class MFunction extends MBlock {
+   constructor(name, args) {
+      super(MBLOCK_TYPE_FUNCTION);
+      this.name = name || "";
+      this.args = args || null; // MExpression
    }
 }
 class MOperator extends MParsedItem {

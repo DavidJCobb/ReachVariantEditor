@@ -21,6 +21,9 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    
     - An expect declaration is of the form {expect variable = value} where the value 
       is a constant integer or constant expression involving only integers.
+   
+   Make it so that all parsed tokens store their start and end positions in the stream, 
+   and not just MTexts.
 
 */
 
@@ -203,7 +206,7 @@ class MParser {
          case "for":
             return this._handleForLoop;
          case "function":
-            return null; // TODO
+            return this._handleFunction;
          case "if":
             return this._handleIf;
          case "then":
@@ -213,9 +216,9 @@ class MParser {
          case "elseif":
             return this._handleElseIf;
          case "alias":
-            return null; // TODO
+            return this._handleAlias;
          case "expect":
-            return null; // TODO
+            return this._handleExpect;
       }
       return null;
    }
@@ -308,6 +311,8 @@ class MParser {
       return word;
    }
    _handleExpressionJoiner(word) {
+      if (!this.exprCurrent)
+         this.throw_error(`Unexpected ${word} (there is no initial expression to join; this keyword cannot appear at the start of a block).`);
       if (this.exprCurrent.has_assign_operator())
          //
          // Unlike in Lua, "and" and "or" are expression separators, not operators, 
@@ -329,7 +334,7 @@ class MParser {
       this.pos += word.length;
    }
    _handleForLoop() {
-      if (this.exprCurrent.is_parenthetical())
+      if (this.exprCurrent && this.exprCurrent.is_parenthetical())
          this.throw_error(`Cannot nest a block in a parenthetical expression.`);
       if (!this.blockRoot.allow_nesting)
          this.throw_error(`You cannot open a new block here.`);
@@ -387,7 +392,7 @@ class MParser {
          this.blockCurrent.forge_label = details.label;
    }
    _handleGenericBlockOpen(word, type) {
-      if (this.exprCurrent.is_parenthetical())
+      if (this.exprCurrent && this.exprCurrent.is_parenthetical())
          this.throw_error(`Cannot nest a block in a parenthetical expression.`);
       if (!this.blockRoot.allow_nesting)
          this.throw_error(`You cannot open a new block here.`);
@@ -438,5 +443,40 @@ class MParser {
          this.throw_error(`The "then" keyword is not allowed here.`);
       this.pos += word.length;
       return HANDLE_WORD_RESULT_STOP_EARLY;
+   }
+   _handleAlias(word) {
+      if (this.exprCurrent && this.exprCurrent.is_parenthetical())
+         this.throw_error(`Cannot put an alias declaration in a parenthetical expression.`);
+      this.pos += word.length;
+      let expr = this.tryExtractExpression();
+      if (!expr)
+         this.throw_error(`Alias declaration not followed by a valid expression.`);
+      let raw = new MAlias;
+      raw.raw = expr;
+      this.blockCurrent.insert_item(raw);
+   }
+   _handleExpect(word) {
+      if (this.exprCurrent && this.exprCurrent.is_parenthetical())
+         this.throw_error(`Cannot put an expect declaration in a parenthetical expression.`);
+      this.pos += word.length;
+      let expr = this.tryExtractExpression();
+      if (!expr)
+         this.throw_error(`Expect declaration not followed by a valid expression.`);
+      let raw = new MExpect;
+      raw.raw = expr;
+      this.blockCurrent.insert_item(raw);
+   }
+   _handleFunction(word) {
+      if (!this.blockRoot.allow_nesting)
+         this.throw_error(`You cannot define a function here.`);
+      this.pos += word.length;
+      let name = this.findAndExtractWord(true);
+      if (!name)
+         this.throw_error(`Functions must have names.`);
+      let expr = this.tryExtractExpression();
+      if (!expr)
+         this.throw_error(`Functions must have arguments.`);
+      let item = new MFunction(name, expr);
+      this.blockCurrent = this.blockCurrent.insert_item(item);
    }
 }
