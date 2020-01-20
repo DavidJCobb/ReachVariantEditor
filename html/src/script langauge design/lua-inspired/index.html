@@ -4,10 +4,10 @@
       <title>megalo parser test - lua-inspired</title>
       <style>
 textarea{width:800px;height:250px}
+.two-cols{display:flex;flex-flow:row nowrap}
       </style>
    </head>
    <body>
-      <textarea id="in" rows="30" cols="120"></textarea>
       <!--
       
          NOTES ON TERMINOLOGY:
@@ -149,10 +149,20 @@ textarea{width:800px;height:250px}
          blockCurrent, exprRoot, and exprCurrent.
          
       -->
-      <br />
-      <input type="button" value="Go! (writes to console)" id="go" />
-      <br />
-      <input type="button" value="Go! (parser object; writes to console)" id="go2" />
+      <div class="two-cols">
+         <div>
+            <h1>Input</h1>
+            <textarea id="in" rows="30" cols="120"></textarea>
+            <br />
+            <input type="button" value="Go! (writes to console)" id="go" />
+            <br />
+            <input type="button" value="Go! (parser object; writes to console)" id="go2" />
+         </div>
+         <div>
+            <h1>Output</h1>
+            <textarea id="out" rows="30" cols="120"></textarea>
+         </div>
+      </div>
       <script src="parser.js"></script>
       <script src="parser2.js"></script>
       <script src="tests.js"></script>
@@ -162,8 +172,15 @@ textarea{width:800px;height:250px}
          });
          document.getElementById("go2").addEventListener("click", function(e) {
             let parser = new MParser();
-            console.log(parser.parse(document.getElementById("in").value));
+            let result = parser.parse(document.getElementById("in").value);
+            console.log(result);
             console.log(parser);
+            //
+            let node = document.getElementById("out");
+            node.value = "";
+            if (result.root) {
+               node.value = result.root.serialize();
+            }
          });
       </script>
       
@@ -371,7 +388,7 @@ if round_timer.is_zero and game.round_time_limit > 0 then -- trigger 25
 end
 
 if script_option[2] == 1 and current_haven == none then
-   current_haven = unk_96(global.object[2], forge_label[3]
+   current_haven = unk_96(global.object[2], forge_label[3])
    if haven_exists == 1 then
       send_incident(hill_moved, all_players, all_players)
    end

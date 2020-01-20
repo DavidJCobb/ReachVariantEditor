@@ -66,6 +66,7 @@ function find_next_word(text, i) {
 class MParsedItem {
    constructor() {
       this.parent = null;
+      this.range  = [-1, -1];
    }
 }
 
@@ -87,6 +88,14 @@ class MAlias extends MParsedItem {
       this.name   = name;
       this.target = target;
       this.raw    = null; // MExpression; should be (a = b)
+   }
+   serialize() {
+      if (!this.name) {
+         return `alias ${this.raw.serialize()}`;
+      }
+      //
+      // TODO
+      //
    }
 }
 class MBlock extends MParsedItem {
@@ -127,6 +136,69 @@ class MBlock extends MParsedItem {
    is_empty() {
       return this.items.length == 0;
    }
+   serialize(indent) {
+      if (!indent)
+         indent = "";
+      let text = indent;
+      if (this.type) {
+         switch (this.type) {
+            case MBLOCK_TYPE_IF:
+               text += `if ${this.condition.serialize()} then`;
+               break;
+            case MBLOCK_TYPE_FOR_EACH_OBJECT:
+               text += "for each object do";
+               break;
+            case MBLOCK_TYPE_FOR_EACH_OBJECT_WITH_LABEL:
+               text += "for each object with label ";
+               if (this.forge_label + "" === this.forge_label)
+                  text += '"' + this.forge_label + '"';
+               else
+                  text += this.forge_label;
+               text += " do";
+               break;
+            case MBLOCK_TYPE_FOR_EACH_PLAYER:
+               text += "for each player do";
+               break;
+            case MBLOCK_TYPE_FOR_EACH_PLAYER_RANDOMLY:
+               text += "for each player randomly do";
+               break;
+            case MBLOCK_TYPE_FUNCTION:
+               text += `function ${this.name}(${this.args.serialize()})`;
+               break;
+            case MBLOCK_TYPE_ELSE:
+               text += "else";
+               break;
+            case MBLOCK_TYPE_ELSE_IF:
+               text += `elseif ${this.condition.serialize()} then`;
+               break;
+            case MBLOCK_TYPE_BARE:
+               text += "do";
+               break;
+            case MBLOCK_TYPE_FOR_EACH_TEAM:
+               text += "for each team do";
+               break;
+         }
+         text += "\n";
+         indent += "   ";
+      }
+      for(let i = 0; i < this.items.length; i++) {
+         let item = this.items[i];
+         if (item instanceof MExpression || item instanceof MAlias || item instanceof MExpect) {
+            text += `${indent}${item.serialize()}`;
+         } else if (item instanceof MBlock) {
+            text += `${item.serialize(indent)}`;
+         } else {
+            throw new Error("Assertion failed!");
+         }
+         if (i + 1 < this.items.length)
+            text += "\n";
+      }
+      if (this.type) {
+         indent = indent.substring(3);
+         text += `\n${indent}end`;
+      }
+      return text;
+   }
 }
 class MCondition extends MBlock {
    constructor() {
@@ -146,6 +218,14 @@ class MExpect extends MParsedItem {
       this.name   = name;
       this.target = target;
       this.raw    = null; // MExpression; should be (a = b)
+   }
+   serialize() {
+      if (!this.name) {
+         return `expect ${this.raw.serialize()}`;
+      }
+      //
+      // TODO
+      //
    }
 }
 class MFunction extends MBlock {
@@ -296,6 +376,39 @@ class MExpression extends MParsedItem { // parentheticals
       this.items.push(item);
       item.parent = this;
       return item;
+   }
+   //
+   serialize() {
+      let text = "";
+      for(let i = 0; i < this.items.length; i++) {
+         if (i > 0)
+            text += " ";
+         let item = this.items[i];
+         if (item instanceof MExpression) {
+            text += "(" + item.serialize() + ")";
+            continue;
+         }
+         if (item instanceof MText || item instanceof MExpressionJoiner) {
+            text += item.text;
+            continue;
+         }
+         if (item instanceof MCallStem) {
+            text += item.stem;
+            continue;
+         }
+         if (item instanceof MOperator) {
+            text += item.operator;
+            continue;
+         }
+         if (item instanceof MStringLiteral) {
+            let t = item.text;
+            if (t.indexOf("\n") >= 0)
+               text += "`" + item.text + "`";
+            else
+               text += '"' + item.text + '"';
+         }
+      }
+      return text;
    }
 }
 

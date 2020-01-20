@@ -18,6 +18,14 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    
    ----------------------------------------------------------------------------------
    
+   The code {if condition do} is a syntax error (you have to use "then"); we should 
+   try to have a specific warning message for this, since it's an easy-ish mistake to 
+   make.
+   
+    - IMPLEMENTED. NEEDS TESTING.
+   
+   ----------------------------------------------------------------------------------
+   
    Make it so that all parsed tokens store their start and end positions in the stream, 
    and not just MTexts.
    
@@ -149,8 +157,10 @@ class MParser {
          let item = null;
          if (c == "(") {
             item = new MExpression;
+            item.range[0] = i;
             // Item will be inserted further below.
          } else if (c == ")") {
+            current.range[1] = i + 1;
             current = current.parent;
             if (!(current instanceof MExpression))
                this.throw_error(`Unexpected/extra closing paren.`);
@@ -178,6 +188,7 @@ class MParser {
                   }
                   item = new MOperator(c);
                }
+               item.range = [i, this.pos + 1];
             } else
                this.throw_error(`Unrecognized operator ${c}.`);
          }
@@ -201,9 +212,13 @@ class MParser {
             break;
          this.pos += word.length - 1; // we want to jump to the end of the word, but we're in a loop and that'll add one when we're done
       }
-      if (current.is_empty())
+      if (current != root) {
+         this.throw_error("Unclosed expression.");
+      }
+      if (root.is_empty())
          return;
-      return current;
+      root.range[1] = this.pos;
+      return root;
    }
    tryAppendItem(item, expr) {
       if (!item)
@@ -448,13 +463,18 @@ class MParser {
    _handleGenericBlockOpen(word, type) {
       if (this.exprCurrent && this.exprCurrent.is_parenthetical())
          this.throw_error(`Cannot nest a block in a parenthetical expression.`);
-      if (!this.blockRoot.allow_nesting)
+      if (!this.blockRoot.allow_nesting) {
+         if (word == "do " && (this.blockRoot instanceof MCondition))
+            this.throw_error(`If-conditions must end with the "then" keyword, not the "do" keyword.`);
          this.throw_error(`You cannot open a new block here.`);
+      }
       this.blockCurrent = this.blockCurrent.insert_item(new MBlock(type || MBLOCK_TYPE_BARE));
+      this.blockCurrent.range[0] = this.pos;
       this.pos += word.length;
    }
    _handleGenericBlockClose(word) {
       this.blockCurrent.clean();
+      this.blockCurrent.range[1] = this.pos + (word ? word.length : 0);
       this.blockCurrent = this.blockCurrent.parent;
       if (!this.blockCurrent)
          this.throw_error(`Unexpected "${word}".`);
@@ -530,7 +550,9 @@ class MParser {
       let expr = this.tryExtractExpression();
       if (!expr)
          this.throw_error(`Functions must have arguments.`);
-      let item = new MFunction(name, expr);
+      if (!(expr.items[0] instanceof MExpression)) // there is an expression not enclosed in parentheses
+         this.throw_error(`Expected function arguments; got something else.`);
+      let item = new MFunction(name, expr.items[0]);
       this.blockCurrent = this.blockCurrent.insert_item(item);
    }
 }

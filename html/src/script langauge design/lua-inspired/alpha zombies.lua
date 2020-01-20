@@ -189,7 +189,7 @@ if round_timer.is_zero and game.round_time_limit > 0 then -- trigger 25
 end
 
 if script_option[2] == 1 and current_haven == none then
-   current_haven = unk_96(global.object[2], forge_label[3]
+   current_haven = unk_96(global.object[2], forge_label[3])
    if haven_exists == 1 then
       send_incident(hill_moved, all_players, all_players)
    end
