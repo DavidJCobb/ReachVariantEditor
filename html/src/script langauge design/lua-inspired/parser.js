@@ -381,9 +381,17 @@ class MExpression extends MParsedItem { // parentheticals
    serialize() {
       let text = "";
       for(let i = 0; i < this.items.length; i++) {
-         if (i > 0)
-            text += " ";
          let item = this.items[i];
+         let prev = this.items[i - 1]
+         if (i > 0) {
+            let should = !(prev instanceof MCallStem);
+            if (!should) {
+               if (item instanceof MOperator)
+                  should = (item.operator != ","); // not working for some reason; we're getting whitespace on both sides of each comma in a function call... :\ 
+            }
+            if (should)
+               text += " ";
+         }
          if (item instanceof MExpression) {
             text += "(" + item.serialize() + ")";
             continue;
