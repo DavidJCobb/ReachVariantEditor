@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>Simple megalo parser</title>
+      <style>
+textarea{width:800px;height:250px}
+.two-cols{display:flex;flex-flow:row nowrap}
+      </style>
+   </head>
+   <body>
+      <p>
+         The goal with this parser design is to only parse code that maps directly 
+         to the final bitcode, i.e. code we can actually compile. Arbitrary expressions 
+         don't meet that requirement: given something like <code>a += b * 3</code> we 
+         would need to use a temporary to hold the result of <code>b * 3</code>, and we 
+         can't reliably select a variable to serve as a temporary (or rather, a human 
+         programmer could do that better than any automated algorithm).
+      </p>
+      <p>
+         In the compiled bitcode, conditions can only consist of comparisons and function 
+         calls, and actions (i.e. any statement that is not a condition) can only consist 
+         of assignments (including mod-assignment operators like <code>+=</code> and 
+         function calls. The only other things allowed are blocks and declarations. This 
+         "simple" parser is built around these limitations.
+      </p>
+      <script src="simple.js"></script>
+      <div class="two-cols">
+         <div>
+            <h1>Input</h1>
+            <textarea id="in" rows="30" cols="120"></textarea>
+            <br />
+            <input type="button" value="Go! (writes to console)" id="go" />
+         </div>
+         <div>
+            <h1>Output</h1>
+            <textarea id="out" rows="30" cols="120"></textarea>
+         </div>
+      </div>
+      <script>
+         document.getElementById("go").addEventListener("click", function(e) {
+            let parser = new MSimpleParser();
+            let result = parser.parse(document.getElementById("in").value);
+            console.log(result);
+            console.log(parser);
+            /*
+            let node = document.getElementById("out");
+            node.value = "";
+            if (result.root) {
+               node.value = result.root.serialize();
+            }*/
+         });
+      </script>
+   </body>
+</html>

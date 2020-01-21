@@ -59,6 +59,21 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
       
        - Warn on assigning values of the wrong type, such as assigning an object 
          value to a number variable.
+   
+   ----------------------------------------------------------------------------------
+   
+   Implement a decompiler in C++: take a loaded variant and export it in this script 
+   format. Once that's done, test all official gametypes as well as SvE Mythic Slayer 
+   against our parser.
+   
+   ----------------------------------------------------------------------------------
+   
+   Implement a compiler in C++:
+   
+    - Reject assignment statements that would require a temporary: that is, statements 
+      with parenthetical sub-expressions or varying operators like (a += b * c). The 
+      user has to specify temporaries and it'd probably be best to require them to do 
+      so explicitly.
 
 */
 
