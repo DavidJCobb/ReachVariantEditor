@@ -340,16 +340,13 @@ class MSimpleParser {
          this.root = new MBlock;
       let block     = this.root;
       let comment   = false;
-      let statement = null; // current statement
-      let call      = null; // current call (statement or assignment righthand side)
-      let token     = "";
-      let token_end = false;
+      let statement = null;  // current statement
+      let call      = null;  // current call (statement or assignment righthand side)
+      let token     = "";    // current token being parsed (lefthand word / operator / call argument / righthand word)
+      let token_end = false; // whether we hit whitespace, meaning that the current word is "over." if so, then another word character indicates {word word} which is bad syntax (outside of keywords)
       let length    = text.length;
       for(; this.pos < length; ++this.pos) {
-         let c  = text[this.pos];
-         let b  = this.pos > 0 ? text[this.pos - 1] : "\0";
-         let di = this.findNextNonWhitespaceChar();
-         let d  = text[di];
+         let c = text[this.pos];
          if (c == "\n") {
             ++this.line;
             this.last_newline = this.pos;
@@ -360,6 +357,10 @@ class MSimpleParser {
          }
          if (comment)
             continue;
+         if (c == "-" && this.pos < length - 1 && text[this.pos + 1] == "-") {
+            comment = true;
+            continue;
+         }
          //
          // If we're not in a statement, then the next token must be a word. If that word is a 
          // keyword, then we handle it accordingly. If it is not a keyword, then it must be 
@@ -368,7 +369,7 @@ class MSimpleParser {
          //
          if (!statement) {
             if (!token.length) {
-               if (c != "-" && is_operator_char(c))
+               if (c != "-" && is_operator_char(c)) // minus-as-numeric-sign must be special-cased
                   this.throw_error(`Unexpected ${c}. Statements cannot begin with an operator.`);
                if (is_syntax_char(c))
                   this.throw_error(`Unexpected ${c}.`);
@@ -382,7 +383,11 @@ class MSimpleParser {
             if (is_whitespace_char(c)) {
                token_end = true;
                //
-               // TODO: handle keywords here
+               // ==================================================================================
+               //
+               // TODO: Handle keywords here.
+               //
+               // ==================================================================================
                //
                continue;
             }
@@ -412,9 +417,29 @@ class MSimpleParser {
             if (token_end)
                this.throw_error(`Statements of the form {word word} are not valid.`);
             token += c;
+            if (token[0] == "-" && isNaN(+c)) {
+               //
+               // We allowed the word to start with "-" in case it was a number, but it 
+               // has turned out not to be a number. That means that the "-" was an 
+               // operator, not a numeric sign. Wait, that's illegal.
+               //
+               this.throw_error(`Unexpected -. Statements cannot begin with an operator.`);
+            }
             continue;
          }
+         //
+         // If, on the other hand, we're in a statement, then we can finish things up based on 
+         // what kind of statement we're in.
+         //
          if (call) {
+            //
+            // Function calls can exist as standalone statements or as the righthand side of 
+            // assignment statements. In both cases, the end of the function call is the end 
+            // of the statement. (You can assign the result of a function call to a variable 
+            // (or rather, that's the syntax we're going with for specific trigger opcodes), 
+            // but we don't support arbitrary expressions so things like (a = b() + c) won't 
+            // be valid.)
+            //
             if (c == ",") {
                if (!token)
                   this.throw_error(`Unexpected ${c}.`); // func(a, , b) is not valid
@@ -428,24 +453,18 @@ class MSimpleParser {
                // TODO: detect and handle syntax error: func(a, )
                //
                if (token)
+                  //
+                  // The (token) variable is, here, the raw argument, e.g. "3" or "\"abc\"". 
+                  // At some point we should give MFunctionCall an "append argument" method 
+                  // which takes the token and normalizes it into some object (e.g. a class 
+                  // for constant integers, a class for string literals, a class for variables, 
+                  // a class for built-in terms like MP object types, and so on).
+                  //
                   call.args.push(token);
                token     = "";
                token_end = false;
                //
                // End the statement.
-               //
-               // If the call IS the statement (i.e. {a()}) then this is straightforward enough. 
-               // If the call is the righthand side of an assignment statement, however, then we 
-               // still end the statement. Why? Because the following are valid:
-               //
-               //    a = b()
-               //    a = b.c()
-               //
-               // And the following are not:
-               //
-               //    a = b().c()
-               //    a = b() + c
-               //    a = b.c() - d
                //
                block.insert_item(statement);
                call      = null;
@@ -459,20 +478,25 @@ class MSimpleParser {
             }
             if (token_end)
                this.throw_error(`Statements of the form {word word} are not valid.`);
-            //
-            // TODO: handle string literal args
-            //
             token += c;
             continue;
          }
          if (!call && statement instanceof MAssignment) {
             if (!statement.operator) {
+               //
+               // If the statement doesn't have an operator stored, then the operator is currently 
+               // being parsed and exists in (token).
+               //
                if (is_operator_char(c)) {
                   token += c;
                   continue;
                }
                statement.operator = new MOperator(token);
                token = "";
+               //
+               // Fall through to righthand-side handling so we don't miss the first character 
+               // after the operator in cases like {a=b} where there's no whitespace.
+               //
             }
             if ((token.length || c != "-") && is_operator_char(c))
                this.throw_error(`Unexpected ${c} on the righthand side of an assignment statement.`);
@@ -523,12 +547,20 @@ class MSimpleParser {
          }
          if (statement instanceof MComparison) {
             if (!statement.operator) {
+               //
+               // If the statement doesn't have an operator stored, then the operator is currently 
+               // being parsed and exists in (token).
+               //
                if (is_operator_char(c)) {
                   token += c;
                   continue;
                }
                statement.operator = new MOperator(token);
                token = "";
+               //
+               // Fall through to righthand-side handling so we don't miss the first character 
+               // after the operator in cases like {a=b} where there's no whitespace.
+               //
             }
             //
             // Handle righthand side.
