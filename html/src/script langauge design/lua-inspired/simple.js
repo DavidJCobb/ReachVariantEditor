@@ -25,6 +25,17 @@ function is_syntax_char(c) {
 function is_whitespace_char(c) {
    return (" \r\n\t").indexOf(c) >= 0;
 }
+function is_word_char(c) {
+   if (is_whitespace_char(c))
+      return false;
+   if (is_operator_char(c))
+      return false;
+   if (is_quote_char(c))
+      return false;
+   if (is_syntax_char(c))
+      return false;
+   return true;
+}
 
 function string_is_numeric(c) {
    return (!isNaN(+c) && c !== null);
@@ -325,14 +336,14 @@ class MSimpleParser {
    }
    parse(text, is_condition) {
       this.text = text;
-      if (!this.root) {
+      if (!this.root)
          this.root = new MBlock;
-      }
       let block     = this.root;
       let comment   = false;
       let statement = null; // current statement
-      let current   = null; // current word
-      let type      = token_type.none;
+      let call      = null; // current call (statement or assignment righthand side)
+      let token     = "";
+      let token_end = false;
       let length    = text.length;
       for(; this.pos < length; ++this.pos) {
          let c  = text[this.pos];
@@ -349,102 +360,186 @@ class MSimpleParser {
          }
          if (comment)
             continue;
+         //
+         // If we're not in a statement, then the next token must be a word. If that word is a 
+         // keyword, then we handle it accordingly. If it is not a keyword, then it must be 
+         // followed either by an operator (in which case we're in a compare or assign statement) 
+         // or by an opening parentheses (in which case the statement is a function call).
+         //
          if (!statement) {
-            if (!current) {
-               let type  = token_type.none;
-               let token = this.extractWord();
-               if (token) {
-                  type = token_type.word;
-               } else {
-                  if (d == "(")
-                     this.throw_error("Parentheses are only allowed for delimiting function call arguments.");
-                  if (d == ")")
-                     this.throw_error(`Unexpected ).`);
-                  if (is_quote_char(d))
-                     this.throw_error("A string literal cannot appear at the start of a statement.");
-                  if (this.extractOperator() != null)
-                     this.throw_error("An operator cannot appear at the start of a statement.");
+            if (!token.length) {
+               if (c != "-" && is_operator_char(c))
+                  this.throw_error(`Unexpected ${c}. Statements cannot begin with an operator.`);
+               if (is_syntax_char(c))
+                  this.throw_error(`Unexpected ${c}.`);
+               if (is_quote_char(c))
+                  this.throw_error(`Unexpected ${c}. Statements cannot begin with a string literal.`);
+               if (is_whitespace_char(c))
                   continue;
-               }
-               current = token;
-               //
-               // TODO: check for keywords
-               //
-               --this.pos; // extractWord advanced us to the end of the word, but we're in a loop, and that'll advance us one more
+               token += c;
                continue;
             }
-            if (c == "(") { // handle function calls as statements
-               statement = new MFunctionCall;
-               if (!statement.extract_stem(current))
-                  this.throw_error(`Invalid function context and/or name: "${current}".`);
-               ++this.pos;
-               statement.args = this.extractCallArgs(); // should advance to the index of the ")" closing the args; then the loop that we're in advances past that
-               block.insert_item(statement);
-               current   = null;
-               statement = null;
+            if (is_whitespace_char(c)) {
+               token_end = true;
+               //
+               // TODO: handle keywords here
+               //
                continue;
             }
-            let token = this.extractWord();
-            if (token != null) {
-               this.throw_error("Invalid expression.");
+            if (is_quote_char(c))
+               this.throw_error(`Unexpected ${c}. Statements of the form {word "string" ...} are not valid.`);
+            if (c == "(") {
+               statement = call = new MFunctionCall;
+               if (!call.extract_stem(token))
+                  this.throw_error(`Invalid function context and/or name: "${token}".`);
+               token     = "";
+               token_end = false;
+               continue;
             }
-            token = this.extractOperator();
-            if (token != null) {
-               let op = new MOperator(token);
+            if (c == ")" || c == ",")
+               this.throw_error(`Unexpected ${c}.`);
+            if (is_operator_char(c)) {
                if (is_condition) {
                   statement = new MComparison;
-                  if (!op.is_comparison())
-                     this.throw_error(`Operator ${op.text} is not valid here.`);
-                  statement.left     = current;
-                  statement.operator = op;
+                  statement.left = token;
                } else {
                   statement = new MAssignment;
-                  if (!op.is_assignment())
-                     this.throw_error(`Operator ${op.text} is not valid here.`);
-                  statement.target   = current;
-                  statement.operator = op;
+                  statement.target = token;
                }
+               token     = c;
+               token_end = false;
+            }
+            if (token_end)
+               this.throw_error(`Statements of the form {word word} are not valid.`);
+            token += c;
+            continue;
+         }
+         if (call) {
+            if (c == ",") {
+               if (!token)
+                  this.throw_error(`Unexpected ${c}.`); // func(a, , b) is not valid
+               call.args.push(token);
+               token     = "";
+               token_end = false;
                continue;
             }
-         } else {
-            //
-            // Handle comparison statements and assignment statements.
-            //
-            if (statement instanceof MComparison) {
-               let token = this.extractWord();
-               if (token == null)
-                  this.throw_error(`Comparison statement does not have a valid right-hand side.`);
-               statement.right = token;
-               --this.pos; // extractWord put us at the end of the word; our containing loop will advance us by one more
+            if (c == ")") {
+               //
+               // TODO: detect and handle syntax error: func(a, )
+               //
+               if (token)
+                  call.args.push(token);
+               token     = "";
+               token_end = false;
+               //
+               // End the statement.
+               //
+               // If the call IS the statement (i.e. {a()}) then this is straightforward enough. 
+               // If the call is the righthand side of an assignment statement, however, then we 
+               // still end the statement. Why? Because the following are valid:
+               //
+               //    a = b()
+               //    a = b.c()
+               //
+               // And the following are not:
+               //
+               //    a = b().c()
+               //    a = b() + c
+               //    a = b.c() - d
                //
                block.insert_item(statement);
-               current   = null;
+               call      = null;
                statement = null;
                continue;
             }
-            if (statement instanceof MAssignment) {
-               let token = this.extractWord();
-               if (token == null)
-                  this.throw_error(`Assignment statement does not have a valid right-hand side.`);
-               di = this.findNextNonWhitespaceChar();
-               d  = text[di];
-               if (d == "(") { // call args
-                  this.pos = di;
-                  let call = new MFunctionCall;
-                  statement.source = call;
+            if (is_whitespace_char(c)) {
+               if (token.length)
+                  token_end = true;
+               continue;
+            }
+            if (token_end)
+               this.throw_error(`Statements of the form {word word} are not valid.`);
+            //
+            // TODO: handle string literal args
+            //
+            token += c;
+            continue;
+         }
+         if (!call && statement instanceof MAssignment) {
+            if (!statement.operator) {
+               if (is_operator_char(c)) {
+                  token += c;
+                  continue;
+               }
+               statement.operator = new MOperator(token);
+               token = "";
+            }
+            if ((token.length || c != "-") && is_operator_char(c))
+               this.throw_error(`Unexpected ${c} on the righthand side of an assignment statement.`);
+            if (is_quote_char(c))
+               this.throw_error(`Unexpected ${c}. You cannot assign strings to variables.`);
+            if (!token.length) {
+               if (is_whitespace_char(c))
+                  continue;
+               if (c == "(")
+                  this.throw_error(`Unexpected ${c}. Parentheses are only allowed as delimiters for function arguments.`);
+            } else {
+               if (c == "(") {
+                  //
+                  // TODO: handle function call as righthand side
+                  //
+                  call = new MFunctionCall;
                   if (!call.extract_stem(token))
                      this.throw_error(`Invalid function context and/or name: "${token}".`);
-                  ++this.pos;
-                  call.args = this.extractCallArgs(); // should advance to the index of the ")" closing the args; then the loop that we're in advances past that
-               } else {
-                  statement.source = token;
-                  --this.pos; // extractWord put us at the end of the word; our containing loop will advance us by one more
+                  statement.source = call;
+                  token     = "";
+                  token_end = false;
+                  continue;
                }
-               block.insert_item(statement);
-               current   = null;
-               statement = null;
+            }
+            if (c == ")" || c == ",")
+               this.throw_error(`Unexpected ${c}.`);
+            token += c;
+            continue;
+         }
+         if (statement instanceof MComparison) {
+            if (!statement.operator) {
+               if (is_operator_char(c)) {
+                  token += c;
+                  continue;
+               }
+               statement.operator = new MOperator(token);
+               token = "";
+            }
+            //
+            // Handle righthand side.
+            //
+            if ((token.length || c != "-") && is_operator_char(c))
+               this.throw_error(`Unexpected ${c} on the righthand side of a comparison statement.`);
+            if (is_quote_char(c))
+               this.throw_error(`Unexpected ${c}. You cannot compare variables to strings.`);
+            if (!token.length && is_whitespace_char(c))
+               continue;
+            if (c == "(") {
+               if (token)
+                  this.throw_error(`Unexpected ${c}. You cannot compare variables to the result of a function call.`);
+               this.throw_error(`Unexpected ${c}. Parentheses are only allowed as delimiters for function arguments.`);
+            }
+            if (c == ")" || c == ",")
+               this.throw_error(`Unexpected ${c}.`);
+            if (!is_whitespace_char(c)) {
+               token += c;
                continue;
             }
+            //
+            // If we get here, then we've encountered the end of the statement's righthand side.
+            //
+            statement.right = token;
+            block.insert_item(statement);
+            statement = null;
+            token     = "";
+            token_end = false;
+            continue;
          }
       }
       return this.root;
