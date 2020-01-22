@@ -63,6 +63,13 @@ class MParsedItem {
    }
 }
 
+class MAlias extends MParsedItem {
+   constructor(n, v) {
+      super();
+      this.name  = n;
+      this.value = v;
+   }
+}
 class MBlock extends MParsedItem {
    constructor() {
       super();
@@ -75,6 +82,13 @@ class MBlock extends MParsedItem {
       this.items.push(i);
       i.parent = this;
       return i;
+   }
+}
+class MExpect extends MParsedItem {
+   constructor(n, v) {
+      super();
+      this.name  = n;
+      this.value = v;
    }
 }
 class MVariablePart {
@@ -354,13 +368,14 @@ class MSimpleParser {
          //
          // ==================================================================================
          //
-         if (this.token == "end") {
-            this._handleKeywordEnd();
-            this.token     = "";
-            this.token_end = false;
-         }
-         if (this.token == "for") {
-            this._handleKeywordFor();
+         let handler = this.getHandlerForKeyword(this.token);
+         if (handler) {
+            if (is_condition)
+               //
+               // TODO: revise; we need to allow (or) and (and)
+               //
+               this.throw_error(`Keyword ${this.token} cannot appear inside of a condition.`);
+            handler.call(this);
             this.token     = "";
             this.token_end = false;
          }
@@ -597,10 +612,79 @@ class MSimpleParser {
       }).bind(this));
       return word;
    }
+   //
+   getHandlerForKeyword(word) {
+      word = word.toLowerCase();
+      switch (word) {
+         case "alias":    return this._handleKeywordAlias;
+         case "and":      return null; // TODO
+         case "do":       return this._handleKeywordDo;
+         case "else":     return null; // TODO
+         case "elseif":   return null; // TODO
+         case "end":      return this._handleKeywordEnd;
+         case "expect":   return this._handleKeywordExpect;
+         case "for":      return this._handleKeywordFor;
+         case "function": return null; // TODO
+         case "or":       return null; // TODO
+         case "then":     return null; // TODO
+      }
+   }
+   //
+   _handleKeywordAlias() { // call after "alias "
+      let name = this.extractWord();
+      if (!name.length)
+         this.throw_error(`An alias declaration must supply a name.`);
+      {  // find the "=" operator
+         let pos   = this.pos;
+         let found = false;
+         this.scan(function(c) {
+            if (is_whitespace_char(c))
+               return;
+            if (c == "=")
+               found = true;
+            return true;
+         });
+         if (!found)
+            this.throw_error(`Expected "=".`);
+         ++this.pos; // move position to after the "="
+      }
+      let target = this.extractWord();
+      if (!target.length)
+         this.throw_error(`An alias declaration must supply a target.`);
+      this.block.insert_item(new MAlias(name, target));
+   }
+   _handleKeywordDo() {
+      let created = new MBlock;
+      created.type = block_type.basic;
+      this.block = this.block.insert_item(created);
+   }
    _handleKeywordEnd() {
       this.block = this.block.parent;
       if (!this.block)
          this.throw_error(`Unexpected "end".`);
+   }
+   _handleKeywordExpect() { // call after "expect "
+      let name = this.extractWord();
+      if (!name.length)
+         this.throw_error(`An expect declaration must supply a name.`);
+      {  // find the "=" operator
+         let pos   = this.pos;
+         let found = false;
+         this.scan(function(c) {
+            if (is_whitespace_char(c))
+               return;
+            if (c == "=")
+               found = true;
+            return true;
+         });
+         if (!found)
+            this.throw_error(`Expected "=".`);
+         ++this.pos; // move position to after the "="
+      }
+      let target = this.extractWord();
+      if (!target.length)
+         this.throw_error(`An expect declaration must supply a target.`);
+      this.block.insert_item(new MExpect(name, target));
    }
    _handleKeywordFor() { // call after "for "
       if (!this.extractWord("each"))
