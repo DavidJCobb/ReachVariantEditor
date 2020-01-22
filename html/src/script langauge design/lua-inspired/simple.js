@@ -19,22 +19,20 @@ function _make_enum(list) {
    If an assignment or comparison statement ends at EOF, we never end up saving it 
    to the block being parsed; the statement is lost. This needs to be fixed.
    
+    - We could have (scan) iterate to (text.length + 1) and when (this.pos == text.length), 
+      set (c) to " ".
+      
+   If we hit EOF and we have an incompletely-parsed statement (e.g. an assignment 
+   operator with no right-hand side; a set of if-conditions with no "then"), then we 
+   should fail with an error.
+   
    If we hit EOF and the current block isn't the root block, then we should fail with 
    an error (unclosed block(s)).
    
-   Consider splitting the parsing of conditions into a separate function away from 
-   (parse). Condition parsing should forbid blocks, forbid assignments, permit the 
-   "and" and "or" keywords, and stop upon encountering the "then" keyword. The "do" 
-   keyword should cause a unique syntax error reminding authors to use "then" to 
-   open the body of the if-block instead.
-   
-    - Once we have code for this, we can implement the "and", "or", and if-block 
-      keywords. Those are the last remaining keywords.
-      
-    - When handling "elseif" and "else," we should check whether the block we're about 
-      to close is an "if" or "elseif" block; if not, fail with an error. (If the last 
-      element in that block is an if- or elseif block, then the error message should 
-      clarify that you do not use "end elseif" or "end else".)
+   If we encounter an out-of-place "elseif" or "else" block, check if the last item 
+   in the containing block is an if- or elseif-block. If so, that would suggest that 
+   the script author wrote "if a == b then ... end elseif ...", and we should have a 
+   specific error message telling them not to use "end" there.
    
    When an MAssignment or MComparison is committed to a block, the lefthand side 
    and (when not a function call) the righthand side should be "decoded," i.e. 
@@ -72,14 +70,6 @@ function _make_enum(list) {
       functions.
 
 */
-
-const token_type = _make_enum([
-   "none",
-   "constant_int",
-   "constant_string",
-   "word",
-   "variable",
-]);
 
 const block_type = _make_enum([
    "basic",
@@ -127,6 +117,7 @@ function string_is_numeric(c) {
 class MParsedItem {
    constructor() {
       this.parent = null;
+      this.owner  = null; // for items that appear in conditions
       this.range  = [-1, -1];
    }
 }
@@ -147,10 +138,44 @@ class MBlock extends MParsedItem {
       this.forge_label = null; // only for for-each-object-with-label blocks
       this.name        = "";   // only for function blocks
    }
+   insert_condition(c) {
+      if (this.type != block_type.if && this.type != block_type.elseif)
+         throw new Error("This block type cannot have conditions.");
+      let is_code = (c instanceof MFunctionCall) || (c instanceof MComparison);
+      let is_join = (c instanceof MConditionJoiner);
+      if (!is_code && !is_join)
+         throw new Error("Not a condition or condition-joiner.");
+      if (is_code) {
+         if (this.conditions.length) {
+            let last = this.conditions[this.conditions.length - 1];
+            if (!(last instanceof MConditionJoiner))
+               throw new Error(`When using multiple conditions in a single if-block, you must link them with the "or" and "and" keywords.`);
+         }
+      } else if (is_join) {
+         if (!this.conditions.length)
+            throw new Error(`The "or" and "and" keywords must come after a condition.`);
+         //
+         // Check for ("if a == b or or c"). In practice this check shouldn't be necessary -- a 
+         // mistake like that would trip a syntax error before reaching this code because code 
+         // like "word word" is always invalid -- but I prefer to be explicit about this.
+         //
+         let last = this.conditions[this.conditions.length - 1];
+         if (last instanceof MConditionJoiner)
+            throw new Error(`The "or" and "and" keywords must come after a condition.`);
+      }
+      this.conditions.push(c);
+      c.owner = this;
+   }
    insert_item(i) {
       this.items.push(i);
       i.parent = this;
       return i;
+   }
+}
+class MConditionJoiner extends MParsedItem {
+   constructor() {
+      super();
+      this.is_or = false;
    }
 }
 class MExpect extends MParsedItem {
@@ -338,6 +363,10 @@ class MSimpleParser {
    }
    //
    backup_stream_state() {
+      //
+      // If you need to rewind the stream, use this along with restore_stream_state, 
+      // so that our line/col tracking doesn't break.
+      //
       return {
          pos:          this.pos,
          line:         this.line,
@@ -378,21 +407,25 @@ class MSimpleParser {
       }
    }
    //
-   parse(text, is_condition) {
+   parse(text) {
       this.text = text;
       if (!this.root)
          this.root = new MBlock;
       this.block = this.root;
       //
+      this.statement = null;
+      this.call      = null;
+      this.token     = "";
+      this.token_end = false;
       this.scan((function(c) {
          //
          // If we're not in a statement, then the next token must be a word. If that word is a 
          // keyword, then we handle it accordingly. If it is not a keyword, then it must be 
-         // followed either by an operator (in which case we're in a compare or assign statement) 
-         // or by an opening parentheses (in which case the statement is a function call).
+         // followed either by an operator (in which case we're in an assign statement) or by 
+         // an opening parentheses (in which case the statement is a function call).
          //
          if (!this.statement) {
-            this._parseStatementStart(c, is_condition)
+            this._parseActionStart(c)
             return;
          }
          //
@@ -408,22 +441,18 @@ class MSimpleParser {
             // but we don't support arbitrary expressions so things like (a = b() + c) won't 
             // be valid.)
             //
-            this._parseFunctionCall(c);
+            this._parseFunctionCall(c, false);
             return;
          }
          if (!this.call && this.statement instanceof MAssignment) {
             this._parseAssignment(c);
             return;
          }
-         if (this.statement instanceof MComparison) {
-            this._parseComparison(c);
-            return;
-         }
       }).bind(this));
       //
       return this.root;
    }
-   _parseStatementStart(c, is_condition) {
+   _parseActionStart(c, is_condition) {
       if (!this.token.length) {
          if (c != "-" && is_operator_char(c)) // minus-as-numeric-sign must be special-cased
             this.throw_error(`Unexpected ${c}. Statements cannot begin with an operator.`);
@@ -441,6 +470,12 @@ class MSimpleParser {
          //
          // Handle keywords here, if appropriate.
          //
+         switch (this.token) {
+            case "and":
+            case "or":
+            case "then":
+               this.throw_error(`The "${this.token}" keyword cannot appear here.`);
+         }
          let handler = this.getHandlerForKeyword(this.token);
          if (handler) {
             if (is_condition)
@@ -480,13 +515,8 @@ class MSimpleParser {
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (is_operator_char(c)) {
-         if (is_condition) {
-            this.statement = new MComparison;
-            this.statement.left = this.token;
-         } else {
-            this.statement = new MAssignment;
-            this.statement.target = this.token;
-         }
+         this.statement = new MAssignment;
+         this.statement.target = this.token;
          this.token     = c;
          this.token_end = false;
       }
@@ -502,7 +532,117 @@ class MSimpleParser {
          this.throw_error(`Unexpected -. Statements cannot begin with an operator.`);
       }
    }
-   _parseFunctionCall(c) {
+   _parseBlockConditions() {
+      this.statement = null;
+      this.call      = null;
+      this.token     = "";
+      this.token_end = false;
+      this.scan((function(c) {
+         if (!this.statement) {
+            if (this._parseConditionStart(c) == "stop")
+               return true; // stop the loop; we found the "then" keyword
+            return;
+         }
+         // If, on the other hand, we're in a statement, then we can finish things up based on 
+         // what kind of statement we're in.
+         //
+         if (this.call) {
+            //
+            // Function calls can exist as standalone statements or as the righthand side of 
+            // assignment statements. In both cases, the end of the function call is the end 
+            // of the statement. (You can assign the result of a function call to a variable 
+            // (or rather, that's the syntax we're going with for specific trigger opcodes), 
+            // but we don't support arbitrary expressions so things like (a = b() + c) won't 
+            // be valid.)
+            //
+            this._parseFunctionCall(c, true);
+            return;
+         }
+         if (this.statement instanceof MComparison) {
+            this._parseComparison(c);
+            return;
+         }
+      }).bind(this));
+   }
+   _parseConditionStart(c) {
+      if (!this.token.length) {
+         if (c != "-" && is_operator_char(c)) // minus-as-numeric-sign must be special-cased
+            this.throw_error(`Unexpected ${c}. Conditions cannot begin with an operator.`);
+         if (is_syntax_char(c))
+            this.throw_error(`Unexpected ${c}.`);
+         if (is_quote_char(c))
+            this.throw_error(`Unexpected ${c}. Conditions cannot begin with a string literal.`);
+         if (is_whitespace_char(c))
+            return;
+         this.token += c;
+         return;
+      }
+      if (is_whitespace_char(c)) {
+         this.token_end = true;
+         //
+         // Handle keywords here, if appropriate.
+         //
+         if (this.token == "then") {
+            return "stop";
+         }
+         switch (this.token) {
+            case "alias":
+            case "expect":
+               this.throw_error(`You cannot place ${this.token} declarations inside of conditions.`);
+            case "do":
+               this.throw_error(`You cannot open or close blocks inside of conditions. (If the "do" was meant to mark the end of conditions, use "then" instead.)`);
+            case "else":
+            case "elseif":
+            case "end":
+            case "for":
+            case "function":
+            case "if":
+               this.throw_error(`You cannot open or close blocks inside of conditions.`);
+         }
+         if (this.token == "and" || this.token == "or") {
+            let joiner = new MConditionJoiner;
+            joiner.is_or = (this.token == "or");
+            try {
+               this.block.insert_condition(joiner);
+            } catch (e) {
+               this.throw_error(e.message);
+            }
+         }
+         return;
+      }
+      if (is_quote_char(c))
+         this.throw_error(`Unexpected ${c}. Statements of the form {word "string" ...} are not valid.`);
+      if (c == "(") {
+         this.statement = this.call = new MFunctionCall;
+         if (!this.call.extract_stem(this.token))
+            this.throw_error(`Invalid function context and/or name: "${this.token}".`);
+         this.token     = "";
+         this.token_end = false;
+         return;
+      }
+      if (c == ")" || c == ",")
+         this.throw_error(`Unexpected ${c}.`);
+      if (is_operator_char(c)) {
+         this.statement = new MComparison;
+         this.statement.left = this.token;
+         //
+         this.token     = c;
+         this.token_end = false;
+      }
+      if (this.token_end)
+         this.throw_error(`Statements of the form {word word} are not valid.`);
+      this.token += c;
+      if (this.token[0] == "-" && isNaN(+c)) {
+         //
+         // We allowed the word to start with "-" in case it was a number, but it 
+         // has turned out not to be a number. That means that the "-" was an 
+         // operator, not a numeric sign. Wait, that's illegal.
+         //
+         this.throw_error(`Unexpected -. Conditions cannot begin with an operator.`);
+      }
+   }
+   //
+   _parseFunctionCall(c, is_condition) {
       //
       // Function calls can exist as standalone statements or as the righthand side of 
       // assignment statements. In both cases, the end of the function call is the end 
@@ -537,7 +677,14 @@ class MSimpleParser {
          //
          // End the statement.
          //
-         this.block.insert_item(this.statement);
+         if (is_condition) {
+            try {
+               this.block.insert_condition(this.statement);
+            } catch (e) {
+               this.throw_error(e.message);
+            }
+         } else
+            this.block.insert_item(this.statement);
          this.call      = null;
          this.statement = null;
          return;
@@ -657,7 +804,11 @@ class MSimpleParser {
       // TODO: We'll end up "losing" this statement if we hit EOF
       //
       this.statement.right = this.token;
-      this.block.insert_item(this.statement);
+      try {
+         this.block.insert_condition(this.statement);
+      } catch (e) {
+         this.throw_error(e.message);
+      }
       this.statement = null;
       this.token     = "";
       this.token_end = false;
@@ -724,20 +875,21 @@ class MSimpleParser {
       return word;
    }
    //
-   getHandlerForKeyword(word) {
+   getHandlerForKeyword(word) { // for keywords outside of conditions only
       word = word.toLowerCase();
       switch (word) {
          case "alias":    return this._handleKeywordAlias;
-         case "and":      return null; // TODO
+         case "and":      return null; // should be rejected by caller
          case "do":       return this._handleKeywordDo;
-         case "else":     return null; // TODO
-         case "elseif":   return null; // TODO
+         case "else":     return this._handleKeywordElse;
+         case "elseif":   return this._handleKeywordElseIf;
          case "end":      return this._handleKeywordEnd;
          case "expect":   return this._handleKeywordExpect;
          case "for":      return this._handleKeywordFor;
          case "function": return this._handleKeywordFunction;
-         case "or":       return null; // TODO
-         case "then":     return null; // TODO
+         case "if":       return this._handleKeywordIf;
+         case "or":       return null; // should be rejected by caller
+         case "then":     return null; // should be rejected by caller
       }
    }
    //
@@ -757,6 +909,29 @@ class MSimpleParser {
       created.type = block_type.basic;
       this.block = this.block.insert_item(created);
    }
+   _handleKeywordElse() {
+      if (this.block.type != block_type.if && this.block.type != block_type.elseif)
+         this.throw_error(`Unexpected "else".`);
+      this.block = this.block.parent;
+      if (!this.block)
+         this.throw_error(`Unexpected "else".`);
+      let block = new MBlock;
+      block.type = block_type.else;
+      this.block = this.block.insert_item(block);
+   }
+   _handleKeywordElseIf() {
+      if (this.block.type != block_type.if && this.block.type != block_type.elseif)
+         this.throw_error(`Unexpected "elseif".`);
+      this.block = this.block.parent;
+      if (!this.block)
+         this.throw_error(`Unexpected "elseif".`);
+      let block = new MBlock;
+      block.type = block_type.elseif;
+      this.block = this.block.insert_item(block);
+      this._parseBlockConditions();
+      this.token     = "";
+      this.token_end = false;
+   }
    _handleKeywordEnd() {
       this.block = this.block.parent;
       if (!this.block)
@@ -772,6 +947,14 @@ class MSimpleParser {
       if (!target.length)
          this.throw_error(`An expect declaration must supply a target.`);
       this.block.insert_item(new MExpect(name, target));
+   }
+   _handleKeywordIf() {
+      let block = new MBlock;
+      block.type = block_type.if;
+      this.block = this.block.insert_item(block);
+      this._parseBlockConditions();
+      this.token     = "";
+      this.token_end = false;
    }
    _handleKeywordFor() { // call after "for "
       if (!this.extractWord("each"))
