@@ -486,7 +486,7 @@ class MSimpleParser {
             } else {
                if (c == "(") {
                   //
-                  // TODO: handle function call as righthand side
+                  // Handle function call as righthand side.
                   //
                   call = new MFunctionCall;
                   if (!call.extract_stem(token))
@@ -495,11 +495,30 @@ class MSimpleParser {
                   token     = "";
                   token_end = false;
                   continue;
+                  //
+                  // From here on out, the code for parsing function calls will handle what 
+                  // remains. The end of the function call is also the end of this statement, 
+                  // so the code for parsing function calls will "close" this statement just 
+                  // fine.
+                  //
                }
             }
             if (c == ")" || c == ",")
                this.throw_error(`Unexpected ${c}.`);
-            token += c;
+            if (!is_whitespace_char(c)) {
+               token += c;
+               continue;
+            }
+            //
+            // If we get here, then we've encountered the end of the statement's righthand side.
+            //
+            // TODO: We'll end up "losing" this statement if we hit EOF
+            //
+            statement.source = token;
+            block.insert_item(statement);
+            statement = null;
+            token     = "";
+            token_end = false;
             continue;
          }
          if (statement instanceof MComparison) {
@@ -533,6 +552,8 @@ class MSimpleParser {
             }
             //
             // If we get here, then we've encountered the end of the statement's righthand side.
+            //
+            // TODO: We'll end up "losing" this statement if we hit EOF
             //
             statement.right = token;
             block.insert_item(statement);
