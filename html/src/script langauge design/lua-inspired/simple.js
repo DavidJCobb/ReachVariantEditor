@@ -337,6 +337,22 @@ class MSimpleParser {
       throw new Error(`Error on or near line ${this.line + 1} col ${this.pos - this.last_newline + 1}: ` + text);
    }
    //
+   backup_stream_state() {
+      return {
+         pos:          this.pos,
+         line:         this.line,
+         last_newline: this.last_newline,
+      };
+   }
+   restore_stream_state(s) {
+      if (s.pos !== void 0)
+         this.pos = s.pos;
+      if (s.line !== void 0)
+         this.line = s.line;
+      if (s.last_newline !== void 0)
+         this.last_newline = s.last_newline;
+   }
+   //
    scan(functor) {
       let text    = this.text;
       let length  = text.length;
@@ -647,8 +663,8 @@ class MSimpleParser {
       this.token_end = false;
    }
    //
-   extractSpecificChar(required) {
-      let pos   = this.pos;
+   extractSpecificChar(required) { // advances the stream past the char if it is found
+      let state = this.backup_stream_state();
       let found = false;
       this.scan(function(c) {
          if (is_whitespace_char(c))
@@ -658,7 +674,7 @@ class MSimpleParser {
          return true;
       });
       if (!found) {
-         this.pos = pos;
+         this.restore_stream_state(state);
          return false;
       }
       ++this.pos; // move position to after the char
@@ -666,7 +682,11 @@ class MSimpleParser {
    }
    extractWord(desired) {
       if (desired) {
-         let pos   = this.pos;
+         //
+         // If searching for a specific word, advances the stream to the end of that word 
+         // if it is found.
+         //
+         let state = this.backup_stream_state();
          let index = 0;
          let valid = true;
          this.scan((function(c) {
@@ -680,11 +700,15 @@ class MSimpleParser {
             ++index;
          }).bind(this));
          if (!valid) {
-            this.pos = pos;
+            this.restore_stream_state(state);
             return null;
          }
          return desired;
       }
+      //
+      // If searching for any word, advances the stream to the end of the found word or 
+      // to the first non-word character.
+      //
       let word = "";
       this.scan((function(c) {
          if (is_whitespace_char(c))
