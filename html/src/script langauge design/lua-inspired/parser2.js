@@ -31,11 +31,6 @@ const HANDLE_WORD_RESULT_STOP_EARLY = 1;
    
    ----------------------------------------------------------------------------------
    
-   Write code to take all the parsed data and write it back out as a string, so we 
-   can more easily check it for correctness.
-   
-   ----------------------------------------------------------------------------------
-   
    Implement second-stage parsing, where we interpret the data recovered by first-stage 
    parsing and verify correctness. This should produce warnings as appropriate but not 
    full-on parse failures (the data should also be flagged as invalid so that it cannot 

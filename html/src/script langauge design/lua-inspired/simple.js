@@ -5,6 +5,74 @@ function _make_enum(list) {
    return out;
 }
 
+/*
+
+   TODO:
+   
+   Finish implementing for-each-object-with-label loops: we need code to search for 
+   and read either an integer literal or a string literal, which we then need to 
+   commit as the forge label for the new block.
+   
+   We need to improve our parsing of functions so that func(a, ) is a syntax error 
+   (comma not followed by an argument).
+   
+   If an assignment or comparison statement ends at EOF, we never end up saving it 
+   to the block being parsed; the statement is lost. This needs to be fixed.
+   
+   If we hit EOF and the current block isn't the root block, then we should fail with 
+   an error (unclosed block(s)).
+   
+   Consider splitting the parsing of conditions into a separate function away from 
+   (parse). Condition parsing should forbid blocks, forbid assignments, permit the 
+   "and" and "or" keywords, and stop upon encountering the "then" keyword. The "do" 
+   keyword should cause a unique syntax error reminding authors to use "then" to 
+   open the body of the if-block instead.
+   
+    - Once we have code for this, we can implement the "and", "or", and if-block 
+      keywords. Those are the last remaining keywords.
+      
+    - When handling "elseif" and "else," we should check whether the block we're about 
+      to close is an "if" or "elseif" block; if not, fail with an error. (If the last 
+      element in that block is an if- or elseif block, then the error message should 
+      clarify that you do not use "end elseif" or "end else".)
+   
+   When an MAssignment or MComparison is committed to a block, the lefthand side 
+   and (when not a function call) the righthand side should be "decoded," i.e. 
+   converted from string literals to the appropriate object (an instance of a class 
+   representing an integer constant, or an instance of MVariableReference).
+   
+   All tokens should store their start and end positions in the stream, along with 
+   their line numbers. We will need this for error reporting during the second stage 
+   of parsing.
+   
+   ---------------------------------------------------------------------------------
+   
+   REMINDER: The second stage of parsing entails:
+    
+    - Making sure that MVariableReferences all point to valid variables (accounting 
+      for aliases).
+   
+    - Making sure that assignments make sense: do not allow assigning to a constant 
+      or to a read-only variable.
+      
+    - Making sure that function calls and property access make sense in the context 
+      of all Megalo opcodes and their script syntax. (We'll need to bring in the 
+      opcode list from C++ and attach data to normalize it to script.)
+      
+       - An opcode should be able to map the C++ argument order to script.
+       
+       - If an opcode uses function syntax, it should be able to specify an argument 
+         (by C++ index) as the context (the "this") for the function call.
+      
+       - If an opcode has an out-argument, then it gets assignment semantics; we 
+         need to validate assignment statements with this opcode to ensure that the 
+         variable that the script wants to assign to is of the right type.
+   
+    - Making sure that all function calls are to valid opcodes or user-defined 
+      functions.
+
+*/
+
 const token_type = _make_enum([
    "none",
    "constant_int",
@@ -73,10 +141,11 @@ class MAlias extends MParsedItem {
 class MBlock extends MParsedItem {
    constructor() {
       super();
-      this.items       = []; // statements and blocks
+      this.items       = [];   // statements and blocks
       this.type        = block_type.root;
       this.conditions  = [];   // only for if- and elseif-blocks
       this.forge_label = null; // only for for-each-object-with-label blocks
+      this.name        = "";   // only for function blocks
    }
    insert_item(i) {
       this.items.push(i);
@@ -354,19 +423,7 @@ class MSimpleParser {
       if (is_whitespace_char(c)) {
          this.token_end = true;
          //
-         // ==================================================================================
-         //
-         // TODO: Handle keywords here.
-         //
-         //  - (parse) can't recurse since it uses state kept on the object, so how do we parse 
-         //    the conditions on an if-block or elseif-block?
-         //
-         //  - When handling "elseif" and "else," we should check whether the block we're about 
-         //    to close is an "if" or "elseif" block; if not, fail with an error. (If the last 
-         //    element in that block is an if- or elseif block, then the error message should 
-         //    clarify that you do not use "end elseif" or "end else".)
-         //
-         // ==================================================================================
+         // Handle keywords here, if appropriate.
          //
          let handler = this.getHandlerForKeyword(this.token);
          if (handler) {
@@ -375,10 +432,23 @@ class MSimpleParser {
                // TODO: revise; we need to allow (or) and (and)
                //
                this.throw_error(`Keyword ${this.token} cannot appear inside of a condition.`);
+            let prior = this.pos;
             handler.call(this);
             this.token     = "";
             this.token_end = false;
+            if (prior < this.pos) {
+               //
+               // The handler code advanced the position to the end of the keyword's relevant 
+               // content (e.g. the end of a block declaration). However, our containing loop 
+               // will increment the position one more time, so we need to rewind by one.
+               //
+               --this.pos;
+            }
          }
+         //
+         // If (handler) is null, then the word wasn't a keyword. Move to the next iteration 
+         // of the parsing loop; we'll eventually feed the word to a new statement.
+         //
          return;
       }
       if (is_quote_char(c))
@@ -577,6 +647,23 @@ class MSimpleParser {
       this.token_end = false;
    }
    //
+   extractSpecificChar(required) {
+      let pos   = this.pos;
+      let found = false;
+      this.scan(function(c) {
+         if (is_whitespace_char(c))
+            return;
+         if (c == required)
+            found = true;
+         return true;
+      });
+      if (!found) {
+         this.pos = pos;
+         return false;
+      }
+      ++this.pos; // move position to after the char
+      return true;
+   }
    extractWord(desired) {
       if (desired) {
          let pos   = this.pos;
@@ -624,7 +711,7 @@ class MSimpleParser {
          case "end":      return this._handleKeywordEnd;
          case "expect":   return this._handleKeywordExpect;
          case "for":      return this._handleKeywordFor;
-         case "function": return null; // TODO
+         case "function": return this._handleKeywordFunction;
          case "or":       return null; // TODO
          case "then":     return null; // TODO
       }
@@ -634,20 +721,8 @@ class MSimpleParser {
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`An alias declaration must supply a name.`);
-      {  // find the "=" operator
-         let pos   = this.pos;
-         let found = false;
-         this.scan(function(c) {
-            if (is_whitespace_char(c))
-               return;
-            if (c == "=")
-               found = true;
-            return true;
-         });
-         if (!found)
-            this.throw_error(`Expected "=".`);
-         ++this.pos; // move position to after the "="
-      }
+      if (!this.extractSpecificChar("="))
+         this.throw_error(`Expected "=".`);
       let target = this.extractWord();
       if (!target.length)
          this.throw_error(`An alias declaration must supply a target.`);
@@ -667,20 +742,8 @@ class MSimpleParser {
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`An expect declaration must supply a name.`);
-      {  // find the "=" operator
-         let pos   = this.pos;
-         let found = false;
-         this.scan(function(c) {
-            if (is_whitespace_char(c))
-               return;
-            if (c == "=")
-               found = true;
-            return true;
-         });
-         if (!found)
-            this.throw_error(`Expected "=".`);
-         ++this.pos; // move position to after the "="
-      }
+      if (!this.extractSpecificChar("="))
+         this.throw_error(`Expected "=".`);
       let target = this.extractWord();
       if (!target.length)
          this.throw_error(`An expect declaration must supply a target.`);
@@ -737,5 +800,18 @@ class MSimpleParser {
       if (use_label !== null)
          loop.forge_label = use_label;
       this.block = this.block.insert_item(loop);
+   }
+   _handleKeywordFunction() {
+      let name = this.extractWord();
+      if (!name.length)
+         this.throw_error(`A function must have a name.`);
+      if (!this.extractSpecificChar("("))
+         this.throw_error(`Expected "(".`);
+      if (!this.extractSpecificChar(")"))
+         this.throw_error(`Expected ")". User-defined functions cannot have arguments.`);
+      let created = new MBlock;
+      created.type = block_type.function;
+      created.name = name;
+      this.block = this.block.insert_item(created);
    }
 }
