@@ -9,30 +9,8 @@ function _make_enum(list) {
 
    TODO:
    
-   Finish implementing for-each-object-with-label loops: we need code to search for 
-   and read either an integer literal or a string literal, which we then need to 
-   commit as the forge label for the new block.
-   
    We need to improve our parsing of functions so that func(a, ) is a syntax error 
    (comma not followed by an argument).
-   
-   If an assignment or comparison statement ends at EOF, we never end up saving it 
-   to the block being parsed; the statement is lost. This needs to be fixed.
-   
-    - We could have (scan) iterate to (text.length + 1) and when (this.pos == text.length), 
-      set (c) to " ".
-      
-   If we hit EOF and we have an incompletely-parsed statement (e.g. an assignment 
-   operator with no right-hand side; a set of if-conditions with no "then"), then we 
-   should fail with an error.
-   
-   If we hit EOF and the current block isn't the root block, then we should fail with 
-   an error (unclosed block(s)).
-   
-   If we encounter an out-of-place "elseif" or "else" block, check if the last item 
-   in the containing block is an if- or elseif-block. If so, that would suggest that 
-   the script author wrote "if a == b then ... end elseif ...", and we should have a 
-   specific error message telling them not to use "end" there.
    
    When an MAssignment or MComparison is committed to a block, the lefthand side 
    and (when not a function call) the righthand side should be "decoded," i.e. 
@@ -170,6 +148,11 @@ class MBlock extends MParsedItem {
       this.items.push(i);
       i.parent = this;
       return i;
+   }
+   item(i) {
+      if (i < 0)
+         return this.items[this.items.length + i];
+      return this.items[i];
    }
 }
 class MConditionJoiner extends MParsedItem {
@@ -382,12 +365,25 @@ class MSimpleParser {
          this.last_newline = s.last_newline;
    }
    //
-   scan(functor) {
+   scan(functor) { // process the input stream one character at a time, passing the character to some functor
       let text    = this.text;
       let length  = text.length;
-      let comment = false;
-      for(; this.pos < length; ++this.pos) {
-         let c = text[this.pos];
+      let comment = false; // are we inside of a line comment?
+      for(; this.pos < length + 1; ++this.pos) {
+         //
+         // A lot of our parser logic relies on reacting to the character after something, 
+         // e.g. processing a keyword when we encounter the non-word character after it. 
+         // However, this means that if a token ends at EOF (such that there's no character 
+         // after the token), then parsing code can't react to it.
+         //
+         // We solve this problem by just pretending that the input stream is one character 
+         // longer than it really is: we supply a trailing space character in order to be 
+         // sure that any given token's end is processed.
+         //
+         let c = " ";
+         if (this.pos < length)
+            c = text[this.pos];
+         //
          if (c == "\n") {
             ++this.line;
             this.last_newline = this.pos;
@@ -398,7 +394,7 @@ class MSimpleParser {
          }
          if (comment)
             continue;
-         if (c == "-" && this.pos < length - 1 && text[this.pos + 1] == "-") {
+         if (c == "-" && this.pos < length - 1 && text[this.pos + 1] == "-") { // handle line comments
             comment = true;
             continue;
          }
@@ -450,9 +446,19 @@ class MSimpleParser {
          }
       }).bind(this));
       //
+      if (this.block != this.root)
+         this.throw_error(`Unclosed block.`);
+      if (this.statement) {
+         if (this.statement instanceof MAssignment)
+            this.throw_error(`An assignment statement is missing its righthand side.`);
+         if (this.statement instanceof MFunctionCall)
+            this.throw_error(`A function call statement is unterminated.`);
+         this.throw_error(`The file ended before a statement could be fully processed.`);
+      }
+      //
       return this.root;
    }
-   _parseActionStart(c, is_condition) {
+   _parseActionStart(c) {
       if (!this.token.length) {
          if (c != "-" && is_operator_char(c)) // minus-as-numeric-sign must be special-cased
             this.throw_error(`Unexpected ${c}. Statements cannot begin with an operator.`);
@@ -478,11 +484,6 @@ class MSimpleParser {
          }
          let handler = this.getHandlerForKeyword(this.token);
          if (handler) {
-            if (is_condition)
-               //
-               // TODO: revise; we need to allow (or) and (and)
-               //
-               this.throw_error(`Keyword ${this.token} cannot appear inside of a condition.`);
             let prior = this.pos;
             handler.call(this);
             this.token     = "";
@@ -753,8 +754,6 @@ class MSimpleParser {
       //
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
-      // TODO: We'll end up "losing" this statement if we hit EOF
-      //
       this.statement.source = this.token;
       this.block.insert_item(this.statement);
       this.statement = null;
@@ -801,8 +800,6 @@ class MSimpleParser {
       //
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
-      // TODO: We'll end up "losing" this statement if we hit EOF
-      //
       this.statement.right = this.token;
       try {
          this.block.insert_condition(this.statement);
@@ -814,6 +811,32 @@ class MSimpleParser {
       this.token_end = false;
    }
    //
+   extractIntegerLiteral() {
+      let state = this.backup_stream_state();
+      let sign  = "";
+      let found = "";
+      this.scan((function(c) {
+         if (c == "-") { // handle numeric sign
+            if (sign || found.length)
+               return true;
+            sign = c;
+            return;
+         }
+         if (c >= "0" && c <= "9") {
+            found += c;
+            return;
+         }
+         if (is_whitespace_char(c))
+            return found.length > 0; // stop if we have any digits
+         return true;
+      }).bind(this));
+      if (!found.length) {
+         this.restore_stream_state(state);
+         return null;
+      }
+      ++this.pos; // move position to after the number's last char
+      return +(sign + found);
+   }
    extractSpecificChar(required) { // advances the stream past the char if it is found
       let state = this.backup_stream_state();
       let found = false;
@@ -830,6 +853,31 @@ class MSimpleParser {
       }
       ++this.pos; // move position to after the char
       return true;
+   }
+   extractStringLiteral() { // returns contents of string literal or null if none is found; advances the stream past the end-quote if a string literal is found
+      let state  = this.backup_stream_state();
+      let inside = null; // char
+      let result = "";
+      this.scan((function(c) {
+         if (inside) {
+            if (c == inside)
+               return true; // stop
+            result += c;
+            return;
+         }
+         if (is_quote_char(c)) {
+            inside = c;
+            return;
+         }
+         if (!is_whitespace_char(c))
+            return true; // stop
+      }).bind(this));
+      if (!inside) {
+         this.restore_stream_state(state);
+         return null;
+      }
+      ++this.pos; // move position to after the closing-quote
+      return result;
    }
    extractWord(desired) {
       if (desired) {
@@ -910,8 +958,14 @@ class MSimpleParser {
       this.block = this.block.insert_item(created);
    }
    _handleKeywordElse() {
-      if (this.block.type != block_type.if && this.block.type != block_type.elseif)
+      if (this.block.type != block_type.if && this.block.type != block_type.elseif) {
+         let item = this.block.item(-1);
+         if (item instanceof MBlock) {
+            if (item.type == block_type.if || item.type == block_type.elseif)
+               this.throw_error(`Unexpected "else". This keyword should not be preceded by the "end" keyword.`);
+         }
          this.throw_error(`Unexpected "else".`);
+      }
       this.block = this.block.parent;
       if (!this.block)
          this.throw_error(`Unexpected "else".`);
@@ -920,8 +974,14 @@ class MSimpleParser {
       this.block = this.block.insert_item(block);
    }
    _handleKeywordElseIf() {
-      if (this.block.type != block_type.if && this.block.type != block_type.elseif)
+      if (this.block.type != block_type.if && this.block.type != block_type.elseif) {
+         let item = this.block.item(-1);
+         if (item instanceof MBlock) {
+            if (item.type == block_type.if || item.type == block_type.elseif)
+               this.throw_error(`Unexpected "elseif". This keyword should not be preceded by the "end" keyword.`);
+         }
          this.throw_error(`Unexpected "elseif".`);
+      }
       this.block = this.block.parent;
       if (!this.block)
          this.throw_error(`Unexpected "elseif".`);
@@ -993,9 +1053,12 @@ class MSimpleParser {
             use_type = block_type.for_each_object_with_label;
             if (!this.extractWord("label"))
                this.throw_error(`Invalid for-each-object-with-label loop: expected the word "label".`);
-            //
-            // TODO: label as string literal or integer index
-            //
+            use_label = this.extractStringLiteral();
+            if (use_label === null) {
+               use_label = this.extractIntegerLiteral();
+               if (use_label === null)
+                  this.throw_error(`Invalid for-each-object-with-label loop: the label must be a string literal or integer literal.`);
+            }
             if (!this.extractWord("do"))
                this.throw_error(`Invalid for-each-object-with-label loop: expected the word "do".`);
             break;
