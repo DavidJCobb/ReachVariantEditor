@@ -636,8 +636,16 @@ class MSimpleParser {
             c = text[this.pos];
          //
          if (c == "\n") {
-            ++this.line;
-            this.last_newline = this.pos;
+            if (this.pos != this.last_newline) {
+               //
+               // Before we increment the line counter, we want to double-check that we 
+               // haven't seen this specific line break before. This is because if a 
+               // functor chooses to stop scanning on a newline, the next call to (scan) 
+               // will see that same newline again.
+               //
+               ++this.line;
+               this.last_newline = this.pos;
+            }
             if (comment) {
                comment = false;
                continue;
@@ -649,6 +657,7 @@ class MSimpleParser {
             comment = true;
             continue;
          }
+         this.last_scanned = this.pos;
          if (functor(c))
             break;
       }
@@ -656,8 +665,10 @@ class MSimpleParser {
    //
    parse(text) {
       this.text = text;
-      if (!this.root)
+      if (!this.root) {
          this.root = new MBlock;
+         this.root.set_start(this.backup_stream_state());
+      }
       this.block = this.root;
       //
       this.statement = null;
@@ -693,6 +704,7 @@ class MSimpleParser {
          this.throw_error(`The file ended before a statement could be fully processed.`);
       }
       //
+      this.root.set_end(this.pos);
       return this.root;
    }
    _parseActionStart(c) {
@@ -750,6 +762,7 @@ class MSimpleParser {
          this.reset_token();
          ++this.pos; // advance past the open-parentheses
          this._parseFunctionCall(false);
+         --this.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
       }
       if (c == ")" || c == ",")
@@ -818,6 +831,7 @@ class MSimpleParser {
             this.reset_token();
             ++this.pos; // advance past the open-parentheses
             this._parseFunctionCall(false);
+            --this.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
             return;
             //
             // From here on out, the code for parsing function calls will handle what 
@@ -924,6 +938,7 @@ class MSimpleParser {
          this.reset_token();
          ++this.pos; // advance past the open-parentheses
          this._parseFunctionCall(true);
+         --this.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
       }
       if (c == ")" || c == ",")
@@ -1031,7 +1046,13 @@ class MSimpleParser {
    _parseFunctionCall(is_condition) {
       //
       // When this function is called, the stream position should be just after the 
-      // opening parentheses for the call arguments.
+      // opening parentheses for the call arguments. Assuming no syntax errors are 
+      // encountered, this function advances the stream position to just after the 
+      // ")" glyph that marks the end of the call arguments; if you are calling 
+      // this function from inside a functor being run by MSimpleParser.scan, then 
+      // you will need to rewind the stream position by one to avoid skipping the 
+      // glyph after the ")", because the functor is being run in a loop and the 
+      // loop will advance the stream by one more character.
       //
       // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
       //
