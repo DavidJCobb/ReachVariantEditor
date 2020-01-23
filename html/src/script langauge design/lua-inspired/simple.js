@@ -17,9 +17,36 @@ function _make_enum(list) {
    converted from string literals to the appropriate object (an instance of a class 
    representing an integer constant, or an instance of MVariableReference).
    
+   When we commit a function call argument, we need to resolve it accordingly (i.e. 
+   check whether it's an integer, a variable name, or a string literal, and convert 
+   it from a bare string e.g. "\"abc\"" to the correct class). We should also check 
+   for common mistakes (e.g. attempts to write floating-point numbers) and have 
+   specific error messages for them.
+   
+    - ACTUALLY, WE DO NOT PARSE FUNCTION ARGUMENTS CORRECTLY. We're just blindly 
+      looking for commas, so if a string literal contains a comma, we're gonna 
+      choke on it. We need to use the "extract" functions to pull the arguments 
+      instead of reading them the way we currently do. Of course, after doing that, 
+      we'd still need to process extracted words into MVariableReferences.
+      
+       - The function for extracting an integer literal should throw a syntax error 
+         if, after having found any digits, it finds a ".". Property access on an 
+         integer is not valid, and Reach-era Megalo scripts don't support floating-
+         point numbers, so there's no reason for a "." to "touch" a number.
+   
+   The code to resolve variable names needs to detect whether the name (in whole or 
+   any part) is a keyword, and fail if so. You should not be allowed to access names 
+   like "for[3]".
+   
    All tokens should store their start and end positions in the stream, along with 
    their line numbers. We will need this for error reporting during the second stage 
    of parsing.
+   
+    - I *think* I have this properly implemented for most things. I should double-
+      check function calls as the righthand side of assignments.
+   
+    - I should also set this up for the root block and not just the blocks and 
+      statements inside of it.
    
    ---------------------------------------------------------------------------------
    
@@ -96,7 +123,21 @@ class MParsedItem {
    constructor() {
       this.parent = null;
       this.owner  = null; // for items that appear in conditions
+      this.line   = -1;
+      this.col    = -1;
       this.range  = [-1, -1];
+   }
+   set_start(state) {
+      if (!state) {
+         console.warn("MParsedItem::set_start called with no incoming state.");
+         return;
+      }
+      this.line     = state.line;
+      this.col      = state.pos - state.last_newline;
+      this.range[0] = state.pos;
+   }
+   set_end(pos) {
+      this.range[1] = pos;
    }
 }
 
@@ -337,6 +378,7 @@ class MSimpleParser {
       this.root      = null;  // root block
       this.block     = null;  // block we're currently parsing
       this.token     = "";    // current token being parsed (lefthand word / operator / call argument / righthand word)
+      this.token_pos = null;  // stream position of current token (as reported by backup_stream_state)
       this.token_end = false; // whether we hit whitespace, meaning that the current word is "over." if so, then another word character indicates {word word} which is bad syntax (outside of keywords)
       this.statement = null;  // current statement
       this.call      = null;  // current call (statement or assignment righthand side)
@@ -363,6 +405,11 @@ class MSimpleParser {
          this.line = s.line;
       if (s.last_newline !== void 0)
          this.last_newline = s.last_newline;
+   }
+   reset_token() {
+      this.token     = "";
+      this.token_pos = null;
+      this.token_end = false;
    }
    //
    scan(functor) { // process the input stream one character at a time, passing the character to some functor
@@ -411,8 +458,7 @@ class MSimpleParser {
       //
       this.statement = null;
       this.call      = null;
-      this.token     = "";
-      this.token_end = false;
+      this.reset_token();
       this.scan((function(c) {
          //
          // If we're not in a statement, then the next token must be a word. If that word is a 
@@ -469,6 +515,7 @@ class MSimpleParser {
          if (is_whitespace_char(c))
             return;
          this.token += c;
+         this.token_pos = this.backup_stream_state();
          return;
       }
       if (is_whitespace_char(c)) {
@@ -486,8 +533,7 @@ class MSimpleParser {
          if (handler) {
             let prior = this.pos;
             handler.call(this);
-            this.token     = "";
-            this.token_end = false;
+            this.reset_token();
             if (prior < this.pos) {
                //
                // The handler code advanced the position to the end of the keyword's relevant 
@@ -507,6 +553,7 @@ class MSimpleParser {
          this.throw_error(`Unexpected ${c}. Statements of the form {word "string" ...} are not valid.`);
       if (c == "(") {
          this.statement = this.call = new MFunctionCall;
+         this.call.set_start(this.token_pos);
          if (!this.call.extract_stem(this.token))
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
          this.token     = "";
@@ -516,10 +563,11 @@ class MSimpleParser {
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (is_operator_char(c)) {
-         this.statement = new MAssignment;
+         this.statement        = new MAssignment;
          this.statement.target = this.token;
-         this.token     = c;
-         this.token_end = false;
+         this.statement.set_start(this.token_pos);
+         this.reset_token();
+         this.token = c;
       }
       if (this.token_end)
          this.throw_error(`Statements of the form {word word} are not valid.`);
@@ -537,6 +585,7 @@ class MSimpleParser {
       this.statement = null;
       this.call      = null;
       this.token     = "";
+      this.token_pos = 0;
       this.token_end = false;
       this.scan((function(c) {
          if (!this.statement) {
@@ -576,6 +625,7 @@ class MSimpleParser {
          if (is_whitespace_char(c))
             return;
          this.token += c;
+         this.token_pos = this.backup_stream_state();
          return;
       }
       if (is_whitespace_char(c)) {
@@ -602,12 +652,14 @@ class MSimpleParser {
          }
          if (this.token == "and" || this.token == "or") {
             let joiner = new MConditionJoiner;
+            joiner.range = [this.pos - this.token.length, this.pos];
             joiner.is_or = (this.token == "or");
             try {
                this.block.insert_condition(joiner);
             } catch (e) {
                this.throw_error(e.message);
             }
+            this.reset_token();
          }
          return;
       }
@@ -615,20 +667,21 @@ class MSimpleParser {
          this.throw_error(`Unexpected ${c}. Statements of the form {word "string" ...} are not valid.`);
       if (c == "(") {
          this.statement = this.call = new MFunctionCall;
+         this.call.set_start(this.token_pos);
          if (!this.call.extract_stem(this.token))
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
-         this.token     = "";
-         this.token_end = false;
+         this.reset_token();
          return;
       }
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (is_operator_char(c)) {
-         this.statement = new MComparison;
+         this.statement      = new MComparison;
          this.statement.left = this.token;
+         this.statement.set_start(this.token_pos);
          //
-         this.token     = c;
-         this.token_end = false;
+         this.reset_token();
+         this.token = c;
       }
       if (this.token_end)
          this.throw_error(`Statements of the form {word word} are not valid.`);
@@ -656,8 +709,7 @@ class MSimpleParser {
          if (!this.token)
             this.throw_error(`Unexpected ${c}.`); // func(a, , b) is not valid
          this.call.args.push(this.token);
-         this.token     = "";
-         this.token_end = false;
+         this.reset_token();
          return;
       }
       if (c == ")") {
@@ -673,8 +725,7 @@ class MSimpleParser {
             // a class for built-in terms like MP object types, and so on).
             //
             this.call.args.push(this.token);
-         this.token     = "";
-         this.token_end = false;
+         this.reset_token();
          //
          // End the statement.
          //
@@ -686,6 +737,7 @@ class MSimpleParser {
             }
          } else
             this.block.insert_item(this.statement);
+         this.call.set_end(this.pos + 1);
          this.call      = null;
          this.statement = null;
          return;
@@ -710,7 +762,7 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
-         this.token = "";
+         this.reset_token();
          //
          // Fall through to righthand-side handling so we don't miss the first character 
          // after the operator in cases like {a=b} where there's no whitespace.
@@ -734,8 +786,7 @@ class MSimpleParser {
             if (!this.call.extract_stem(this.token))
                this.throw_error(`Invalid function context and/or name: "${this.token}".`);
             this.statement.source = this.call;
-            this.token     = "";
-            this.token_end = false;
+            this.reset_token();
             return;
             //
             // From here on out, the code for parsing function calls will handle what 
@@ -755,10 +806,10 @@ class MSimpleParser {
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
       this.statement.source = this.token;
+      this.statement.set_end(this.pos);
       this.block.insert_item(this.statement);
       this.statement = null;
-      this.token     = "";
-      this.token_end = false;
+      this.reset_token();
    }
    _parseComparison(c) {
       if (!this.statement.operator) {
@@ -771,7 +822,7 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
-         this.token = "";
+         this.reset_token();
          //
          // Fall through to righthand-side handling so we don't miss the first character 
          // after the operator in cases like {a=b} where there's no whitespace.
@@ -801,14 +852,14 @@ class MSimpleParser {
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
       this.statement.right = this.token;
+      this.statement.set_end(this.pos);
       try {
          this.block.insert_condition(this.statement);
       } catch (e) {
          this.throw_error(e.message);
       }
       this.statement = null;
-      this.token     = "";
-      this.token_end = false;
+      this.reset_token();
    }
    //
    extractIntegerLiteral() {
@@ -942,6 +993,8 @@ class MSimpleParser {
    }
    //
    _handleKeywordAlias() { // call after "alias "
+      let start = this.token_pos;
+      //
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`An alias declaration must supply a name.`);
@@ -950,11 +1003,16 @@ class MSimpleParser {
       let target = this.extractWord();
       if (!target.length)
          this.throw_error(`An alias declaration must supply a target.`);
-      this.block.insert_item(new MAlias(name, target));
+      //
+      let item = new MAlias(name, target);
+      item.set_start(start);
+      item.set_end(this.pos);
+      this.block.insert_item(item);
    }
    _handleKeywordDo() {
       let created = new MBlock;
       created.type = block_type.basic;
+      created.set_start(this.token_pos);
       this.block = this.block.insert_item(created);
    }
    _handleKeywordElse() {
@@ -971,6 +1029,7 @@ class MSimpleParser {
          this.throw_error(`Unexpected "else".`);
       let block = new MBlock;
       block.type = block_type.else;
+      block.set_start(this.token_pos);
       this.block = this.block.insert_item(block);
    }
    _handleKeywordElseIf() {
@@ -987,17 +1046,20 @@ class MSimpleParser {
          this.throw_error(`Unexpected "elseif".`);
       let block = new MBlock;
       block.type = block_type.elseif;
+      block.set_start(this.token_pos);
       this.block = this.block.insert_item(block);
       this._parseBlockConditions();
-      this.token     = "";
-      this.token_end = false;
+      this.reset_token();
    }
-   _handleKeywordEnd() {
+   _handleKeywordEnd() { // call after "end "
+      this.block.set_end(this.pos - 1);
       this.block = this.block.parent;
       if (!this.block)
          this.throw_error(`Unexpected "end".`);
    }
    _handleKeywordExpect() { // call after "expect "
+      let start = this.token_pos;
+      //
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`An expect declaration must supply a name.`);
@@ -1006,17 +1068,23 @@ class MSimpleParser {
       let target = this.extractWord();
       if (!target.length)
          this.throw_error(`An expect declaration must supply a target.`);
-      this.block.insert_item(new MExpect(name, target));
+      //
+      let item = new MExpect(name, target);
+      item.set_start(start);
+      item.set_end(this.pos);
+      this.block.insert_item(item);
    }
-   _handleKeywordIf() {
+   _handleKeywordIf() { // call after "if "
       let block = new MBlock;
       block.type = block_type.if;
+      block.set_start(this.token_pos);
       this.block = this.block.insert_item(block);
       this._parseBlockConditions();
-      this.token     = "";
-      this.token_end = false;
+      this.reset_token();
    }
    _handleKeywordFor() { // call after "for "
+      let start = this.token_pos;
+      //
       if (!this.extractWord("each"))
          this.throw_error(`The "for" keyword must be followed by "each".`);
       let word = this.extractWord();
@@ -1069,9 +1137,12 @@ class MSimpleParser {
       loop.type = use_type;
       if (use_label !== null)
          loop.forge_label = use_label;
+      loop.set_start(start);
       this.block = this.block.insert_item(loop);
    }
-   _handleKeywordFunction() {
+   _handleKeywordFunction() { // call after "function "
+      let start = this.token_pos;
+      //
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`A function must have a name.`);
@@ -1082,6 +1153,7 @@ class MSimpleParser {
       let created = new MBlock;
       created.type = block_type.function;
       created.name = name;
+      created.set_start(start);
       this.block = this.block.insert_item(created);
    }
 }
