@@ -9,6 +9,10 @@ function _make_enum(list) {
 
    TODO:
    
+   Expect declarations need to decode both sides to MVariableReferences if possible. 
+   (Aliases can wrap integer constants, so you can have an alias on the righthand 
+   side; and of course the lefthand side must be a variable.)
+   
    All tokens should store their start and end positions in the stream, along with 
    their line numbers. We will need this for error reporting during the second stage 
    of parsing.
@@ -113,10 +117,25 @@ class MParsedItem {
 }
 
 class MAlias extends MParsedItem {
-   constructor(n, v) {
+   constructor(n, rhs) {
       super();
-      this.name  = n;
-      this.value = v;
+      this.name   = n;
+      this.value  = null;
+      this.target = null;
+      let result = token_to_int_or_var(rhs);
+      if (result instanceof MVariableReference)
+         this.target = result;
+      else
+         this.value = result;
+   }
+   serialize() {
+      let result = `alias ${this.name} = `;
+      if (this.target) {
+         result += this.target.serialize();
+      } else {
+         result += this.value;
+      }
+      return result;
    }
 }
 class MBlock extends MParsedItem {
@@ -166,11 +185,87 @@ class MBlock extends MParsedItem {
          return this.items[this.items.length + i];
       return this.items[i];
    }
+   serialize(indent) {
+      if (!indent)
+         indent = "";
+      let text = indent;
+      if (this.type != block_type.root) {
+         switch (this.type) {
+            case block_type.basic:
+               text += "do";
+               break;
+            case block_type.for_each_object:
+               text += "for each object do";
+               break;
+            case block_type.for_each_object_with_label:
+               text += "for each object with label ";
+               if (this.forge_label + "" === this.forge_label)
+                  text += '"' + this.forge_label + '"';
+               else
+                  text += this.forge_label;
+               text += " do";
+               break;
+            case block_type.for_each_player:
+               text += "for each player do";
+               break;
+            case block_type.for_each_player_randomly:
+               text += "for each player randomly do";
+               break;
+            case block_type.for_each_team:
+               text += "for each team do";
+               break;
+            case block_type.function:
+               text += `function ${this.name}()`;
+               break;
+            case block_type.if:
+               text += "if ";
+               for(let i = 0; i < this.conditions.length; i++) {
+                  if (i > 0)
+                     text += " ";
+                  text += this.conditions[i].serialize();
+               }
+               text += " then";
+               break;
+            case block_type.else:
+               text += "else";
+               break;
+            case block_type.elseif:
+               text += "elseif ";
+               for(let i = 0; i < this.conditions.length; i++) {
+                  if (i > 0)
+                     text += " ";
+                  text += this.conditions[i].serialize();
+               }
+               text += " then";
+               break;
+         }
+         text += "\n";
+         indent += "   ";
+      }
+      for(let i = 0; i < this.items.length; i++) {
+         let item = this.items[i];
+         if (item instanceof MBlock) {
+            text += `${item.serialize(indent)}`;
+         } else {
+            text += `${indent}${item.serialize()}`;
+         }
+         if (i + 1 < this.items.length)
+            text += "\n";
+      }
+      if (this.type != block_type.root) {
+         indent = indent.substring(3);
+         text += `\n${indent}end`;
+      }
+      return text;
+   }
 }
 class MConditionJoiner extends MParsedItem {
    constructor() {
       super();
       this.is_or = false;
+   }
+   serialize() {
+      return this.is_or ? "or" : "and";
    }
 }
 class MExpect extends MParsedItem {
@@ -179,11 +274,18 @@ class MExpect extends MParsedItem {
       this.name  = n;
       this.value = v;
    }
+   serialize() {
+      let result = `expect ${this.name} == ${this.value}`;
+      return result;
+   }
 }
 class MStringLiteral extends MParsedItem {
    constructor(text) {
       super();
       this.text = text;
+   }
+   serialize() {
+      return '"' + this.text + '"';
    }
 }
 class MVariablePart {
@@ -196,6 +298,12 @@ class MVariablePart {
          else
             this.index = index;
       }
+   }
+   serialize() {
+      if (+this.index === this.index && this.index < 0) {
+         return this.name;
+      }
+      return `${this.name}[${this.index}]`;
    }
    validate_syntax() {
       if (!this.name.length)
@@ -278,6 +386,10 @@ class MVariableReference {
          this.parts[i].validate_syntax();
       return true;
    }
+   serialize() {
+      let list = this.parts.map(function(v) { return v.serialize(); });
+      return list.join(".");
+   }
 }
 class MFunctionCall extends MParsedItem {
    constructor() {
@@ -305,6 +417,24 @@ class MFunctionCall extends MParsedItem {
          this.context.extract(text.substring(0, i));
       }
       return true;
+   }
+   serialize() {
+      let result = `${this.name}(`;
+      if (this.context)
+         result = `${this.context.serialize()}.${result}`;
+      for(let i = 0; i < this.args.length; i++) {
+         if (i > 0)
+            result += ", ";
+         let arg = this.args[i];
+         if (arg instanceof MVariableReference || arg instanceof MStringLiteral) {
+            result += arg.serialize();
+         } else if (+arg === arg) {
+            result += arg;
+         } else
+            throw new Error("unhandled");
+      }
+      result += ")";
+      return result;
    }
 }
 class MOperator extends MParsedItem {
@@ -343,9 +473,12 @@ class MOperator extends MParsedItem {
       }
       return false;
    }
+   serialize() {
+      return this.text;
+   }
 }
 
-function token_to_object(text) { // used by MAssignment and MComparison
+function token_to_int_or_var(text) { // converts a token to a constant int or to an MVariableReference
    let size = text.length;
    {  // constant integer?
       let found = false;
@@ -381,13 +514,40 @@ class MAssignment extends MParsedItem {
       this.source   = null; // MVariableReference, MFunctionCall, or constant integer
       this.operator = null; // MOperator
    }
+   serialize() {
+      let result = `${this.target.serialize()} ${this.operator.serialize()} `;
+      if (this.source instanceof MVariableReference || this.source instanceof MFunctionCall)
+         result += this.source.serialize();
+      else if (+this.source === this.source)
+         result += this.source;
+      else
+         throw new Error("unhandled");
+      return result;
+   }
 }
 class MComparison extends MParsedItem {
    constructor() {
       super();
-      this.left     = null; // MVariableReference
-      this.right    = null; // MVariableReference
+      this.left     = null; // MVariableReference or constant integer
+      this.right    = null; // MVariableReference or constant integer
       this.operator = null; // MOperator
+   }
+   serialize() {
+      let result = "";
+      if (this.left instanceof MVariableReference)
+         result += this.left.serialize();
+      else if (+this.left === this.left)
+         result += this.left;
+      else
+         throw new Error("unhandled");
+      result += ` ${this.operator.serialize()} `;
+      if (this.right instanceof MVariableReference)
+         result += this.right.serialize();
+      else if (+this.right === this.right)
+         result += this.right;
+      else
+         throw new Error("unhandled");
+      return result;
    }
 }
 
@@ -589,7 +749,7 @@ class MSimpleParser {
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
          this.reset_token();
          ++this.pos; // advance past the open-parentheses
-         this._parseFunctionCall();
+         this._parseFunctionCall(false);
          return;
       }
       if (c == ")" || c == ",")
@@ -598,12 +758,13 @@ class MSimpleParser {
          this.statement = new MAssignment;
          this.statement.set_start(this.token_pos);
          try {
-            this.statement.target = token_to_object(this.token);
+            this.statement.target = token_to_int_or_var(this.token);
          } catch (e) {
             this.throw_error(e.message);
          }
          this.reset_token();
          this.token = c;
+         return;
       }
       if (this.token_end)
          this.throw_error(`Statements of the form {word word} are not valid.`);
@@ -628,6 +789,8 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
+         if (!this.statement.operator.is_assignment())
+            this.throw_error(`Operator ${this.token} is not a valid assignment operator.`);
          this.reset_token();
          //
          // Fall through to righthand-side handling so we don't miss the first character 
@@ -654,7 +817,7 @@ class MSimpleParser {
             this.statement.source = this.call;
             this.reset_token();
             ++this.pos; // advance past the open-parentheses
-            this._parseFunctionCall();
+            this._parseFunctionCall(false);
             return;
             //
             // From here on out, the code for parsing function calls will handle what 
@@ -675,7 +838,7 @@ class MSimpleParser {
       //
       this.statement.set_end(this.pos);
       try {
-         this.statement.source = token_to_object(this.token);
+         this.statement.source = token_to_int_or_var(this.token);
       } catch (e) {
          this.throw_error(e.message);
       }
@@ -760,7 +923,7 @@ class MSimpleParser {
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
          this.reset_token();
          ++this.pos; // advance past the open-parentheses
-         this._parseFunctionCall();
+         this._parseFunctionCall(true);
          return;
       }
       if (c == ")" || c == ",")
@@ -769,12 +932,13 @@ class MSimpleParser {
          this.statement = new MComparison;
          this.statement.set_start(this.token_pos);
          try {
-            this.statement.left = token_to_object(this.token);
+            this.statement.left = token_to_int_or_var(this.token);
          } catch (e) {
             this.throw_error(e.message);
          }
          this.reset_token();
          this.token = c;
+         return;
       }
       if (this.token_end)
          this.throw_error(`Statements of the form {word word} are not valid.`);
@@ -799,6 +963,8 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
+         if (!this.statement.operator.is_comparison())
+            this.throw_error(`Operator ${this.token} is not a valid comparison operator.`);
          this.reset_token();
          //
          // Fall through to righthand-side handling so we don't miss the first character 
@@ -830,7 +996,7 @@ class MSimpleParser {
       //
       this.statement.set_end(this.pos);
       try {
-         this.statement.right = token_to_object(this.token);
+         this.statement.right = token_to_int_or_var(this.token);
       } catch (e) {
          this.throw_error(e.message);
       }
@@ -857,12 +1023,12 @@ class MSimpleParser {
       }
       let word = this.extractWord();
       if (word) {
-         this.call.args.push(token_to_object(word));
+         this.call.args.push(token_to_int_or_var(word));
          return true;
       }
       return false;
    }
-   _parseFunctionCall(c, is_condition) {
+   _parseFunctionCall(is_condition) {
       //
       // When this function is called, the stream position should be just after the 
       // opening parentheses for the call arguments.
@@ -1067,10 +1233,14 @@ class MSimpleParser {
       if (!target.length)
          this.throw_error(`An alias declaration must supply a target.`);
       //
-      let item = new MAlias(name, target);
-      item.set_start(start);
-      item.set_end(this.pos);
-      this.block.insert_item(item);
+      try {
+         let item = new MAlias(name, target);
+         item.set_start(start);
+         item.set_end(this.pos);
+         this.block.insert_item(item);
+      } catch (e) {
+         this.throw_error(e.message);
+      }
    }
    _handleKeywordDo() {
       let created = new MBlock;
@@ -1127,7 +1297,9 @@ class MSimpleParser {
       if (!name.length)
          this.throw_error(`An expect declaration must supply a name.`);
       if (!this.extractSpecificChar("="))
-         this.throw_error(`Expected "=".`);
+         this.throw_error(`Expected "==".`);
+      if (!this.extractSpecificChar("="))
+         this.throw_error(`Expected "==".`);
       let target = this.extractWord();
       if (!target.length)
          this.throw_error(`An expect declaration must supply a target.`);

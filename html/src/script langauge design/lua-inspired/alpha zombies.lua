@@ -22,7 +22,7 @@ for each player do -- trigger 0
       global.number[0] = current_player.kill_damage_modifiers -- implicit opcode
       if global.number[0] == 2 then
          global.object[0] = current_player.try_get_armor_ability() -- implicit opcode
-         if global.object[0].has_forge_label(0) and global.object[0].is_in_use then
+         if global.object[0].has_forge_label(0) and global.object[0].is_in_use() then
             send_incident(dlc_achieve_2, global.player[0], global.player[0], 65)
          end
       end
@@ -100,18 +100,18 @@ for each player do
    current_player.timer[0].rate = -100
    for each player do
       if current_player.team == team_2 then
-         current_player.objective_title = ... -- didn't write this down
+         current_player.objective_title = 12345 -- didn't write this down
       end
    end
    for each player do
       if current_player.team == team_3 then
-         current_player.objective_title = ... -- didn't write this down
+         current_player.objective_title = 12345 -- didn't write this down
       end
    end
 end
 
 for each player do
-   if current_player.number[4] == 0 and current_player.timer[0].is_zero then
+   if current_player.number[4] == 0 and current_player.timer[0].is_zero() then
       send_incident(129, current_player, none)
       current_player.number[4] = 1
    end
@@ -182,7 +182,7 @@ for each player do -- trigger 19: handle kills
    end
 end
 
-if round_timer.is_zero and game.round_time_limit > 0 then -- trigger 25
+if round_timer.is_zero() and game.round_time_limit > 0 then -- trigger 25
    for each player do
       current_player.infection_spree = 0
    end
@@ -196,7 +196,7 @@ if script_option[2] == 1 and current_haven == none then
    haven_exists = 1
 end
 
-if script_option[2] == 1 and global.timer[0].is_zero then -- move haven
+if script_option[2] == 1 and global.timer[0].is_zero() then -- move haven
    global.timer[0].rate = 0
    global.timer[0] = script_option[3]
    current_haven.set_waypoint_visibility(none)
@@ -281,7 +281,7 @@ end
 
 for each player do -- trigger 38: handle zombie victory
    global.timer[1].rate = -100
-   if global.timer[1].is_zero then
+   if global.timer[1].is_zero() then
       alias survivor_count = global.number[0]
       --
       survivor_count = 0
@@ -310,7 +310,7 @@ for each player do -- trigger 38: handle zombie victory
    end
 end
 
-if round_timer.is_zero and game.round_time_limit > 0 then -- trigger 42: handle survivor victory
+if round_timer.is_zero() and game.round_time_limit > 0 then -- trigger 42: handle survivor victory
    alias survivor_count = global.number[0]
    --
    survivor_count = 0
@@ -329,7 +329,7 @@ end
 for each player do -- update survival time stat
    if current_player.is_zombie == 0 then
       current_player.survival_timer.rate = -100
-      if current_player.survival_timer.is_zero then
+      if current_player.survival_timer.is_zero() then
          current_player.stat[0] += 1
          current_player.survival_timer.reset()
       end
