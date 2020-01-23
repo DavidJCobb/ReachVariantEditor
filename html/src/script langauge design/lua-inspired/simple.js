@@ -515,22 +515,9 @@ class MSimpleParser {
             return;
          }
          //
-         // If, on the other hand, we're in a statement, then we can finish things up based on 
-         // what kind of statement we're in.
+         // If, on the other hand, we're in a statement, then we need to finish that up.
          //
-         if (this.call) {
-            //
-            // Function calls can exist as standalone statements or as the righthand side of 
-            // assignment statements. In both cases, the end of the function call is the end 
-            // of the statement. (You can assign the result of a function call to a variable 
-            // (or rather, that's the syntax we're going with for specific trigger opcodes), 
-            // but we don't support arbitrary expressions so things like (a = b() + c) won't 
-            // be valid.)
-            //
-            this._parseFunctionCall(c, false);
-            return;
-         }
-         if (!this.call && this.statement instanceof MAssignment) {
+         if (this.statement instanceof MAssignment) {
             this._parseAssignment(c);
             return;
          }
@@ -600,8 +587,9 @@ class MSimpleParser {
          this.call.set_start(this.token_pos);
          if (!this.call.extract_stem(this.token))
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
-         this.token     = "";
-         this.token_end = false;
+         this.reset_token();
+         ++this.pos; // advance past the open-parentheses
+         this._parseFunctionCall();
          return;
       }
       if (c == ")" || c == ",")
@@ -629,6 +617,73 @@ class MSimpleParser {
          this.throw_error(`Unexpected -. Statements cannot begin with an operator.`);
       }
    }
+   _parseAssignment(c) {
+      if (!this.statement.operator) {
+         //
+         // If the statement doesn't have an operator stored, then the operator is currently 
+         // being parsed and exists in (token).
+         //
+         if (is_operator_char(c)) {
+            this.token += c;
+            return;
+         }
+         this.statement.operator = new MOperator(this.token);
+         this.reset_token();
+         //
+         // Fall through to righthand-side handling so we don't miss the first character 
+         // after the operator in cases like {a=b} where there's no whitespace.
+         //
+      }
+      if ((this.token.length || c != "-") && is_operator_char(c))
+         this.throw_error(`Unexpected ${c} on the righthand side of an assignment statement.`);
+      if (is_quote_char(c))
+         this.throw_error(`Unexpected ${c}. You cannot assign strings to variables.`);
+      if (!this.token.length) {
+         if (is_whitespace_char(c))
+            return;
+         if (c == "(")
+            this.throw_error(`Unexpected ${c}. Parentheses are only allowed as delimiters for function arguments.`);
+      } else {
+         if (c == "(") {
+            //
+            // Handle function call as righthand side.
+            //
+            this.call = new MFunctionCall;
+            if (!this.call.extract_stem(this.token))
+               this.throw_error(`Invalid function context and/or name: "${this.token}".`);
+            this.statement.source = this.call;
+            this.reset_token();
+            ++this.pos; // advance past the open-parentheses
+            this._parseFunctionCall();
+            return;
+            //
+            // From here on out, the code for parsing function calls will handle what 
+            // remains. The end of the function call is also the end of this statement, 
+            // so the code for parsing function calls will "close" this statement just 
+            // fine.
+            //
+         }
+      }
+      if (c == ")" || c == ",")
+         this.throw_error(`Unexpected ${c}.`);
+      if (!is_whitespace_char(c)) {
+         this.token += c;
+         return;
+      }
+      //
+      // If we get here, then we've encountered the end of the statement's righthand side.
+      //
+      this.statement.set_end(this.pos);
+      try {
+         this.statement.source = token_to_object(this.token);
+      } catch (e) {
+         this.throw_error(e.message);
+      }
+      this.block.insert_item(this.statement);
+      this.statement = null;
+      this.reset_token();
+   }
+   //
    _parseBlockConditions() {
       this.statement = null;
       this.call      = null;
@@ -639,21 +694,8 @@ class MSimpleParser {
                return true; // stop the loop; we found the "then" keyword
             return;
          }
-         // If, on the other hand, we're in a statement, then we can finish things up based on 
-         // what kind of statement we're in.
+         // If, on the other hand, we're in a statement, then we need to finish that up.
          //
-         if (this.call) {
-            //
-            // Function calls can exist as standalone statements or as the righthand side of 
-            // assignment statements. In both cases, the end of the function call is the end 
-            // of the statement. (You can assign the result of a function call to a variable 
-            // (or rather, that's the syntax we're going with for specific trigger opcodes), 
-            // but we don't support arbitrary expressions so things like (a = b() + c) won't 
-            // be valid.)
-            //
-            this._parseFunctionCall(c, true);
-            return;
-         }
          if (this.statement instanceof MComparison) {
             this._parseComparison(c);
             return;
@@ -717,6 +759,8 @@ class MSimpleParser {
          if (!this.call.extract_stem(this.token))
             this.throw_error(`Invalid function context and/or name: "${this.token}".`);
          this.reset_token();
+         ++this.pos; // advance past the open-parentheses
+         this._parseFunctionCall();
          return;
       }
       if (c == ")" || c == ",")
@@ -743,134 +787,6 @@ class MSimpleParser {
          //
          this.throw_error(`Unexpected -. Conditions cannot begin with an operator.`);
       }
-   }
-   //
-   _parseFunctionCallArg() {
-      let integer = this.extractIntegerLiteral();
-      if (integer !== null) {
-         this.call.args.push(integer);
-         return true;
-      }
-      let string = this.extractStringLiteral();
-      if (string !== null) {
-         let arg = new MStringLiteral(string);
-         this.call.args.push(arg);
-         return true;
-      }
-      let word = this.extractWord();
-      if (word) {
-         this.call.args.push(token_to_object(word));
-         return true;
-      }
-      return false;
-   }
-   _parseFunctionCall(c, is_condition) {
-      let start = this.backup_stream_state();
-      while (!this.extractSpecificChar(")")) {
-         if (this.call.args.length) {
-            if (!this.extractSpecificChar(","))
-               this.throw_error("Function call arguments must be separated by commas.");
-         }
-         if (this.pos >= this.text.length) {
-            this.restore_stream_state(start);
-            this.throw_error(`Unterminated function call.`);
-         }
-         if (!this._parseFunctionCallArg()) {
-            {  // Check if we have a trailing comma e.g. func(a, )
-               let state = this.backup_stream_state();
-               if (this.extractSpecificChar(")")) {
-                  this.restore_stream_state(state);
-                  this.throw_error(`Commas in function calls can only appear between arguments; func(a,) is not valid.`);
-               }
-            }
-            this.throw_error(`Failed to extract function argument.`);
-         }
-      }
-      //
-      // Function calls can exist as standalone statements or as the righthand side of 
-      // assignment statements. In both cases, the end of the function call is the end 
-      // of the statement. (You can assign the result of a function call to a variable 
-      // (or rather, that's the syntax we're going with for specific trigger opcodes), 
-      // but we don't support arbitrary expressions so things like (a = b() + c) won't 
-      // be valid.)
-      //
-      this.reset_token();
-      if (is_condition) {
-         try {
-            this.block.insert_condition(this.statement);
-         } catch (e) {
-            this.throw_error(e.message);
-         }
-      } else
-         this.block.insert_item(this.statement);
-      this.call.set_end(this.pos + 1);
-      this.call      = null;
-      this.statement = null;
-      return;
-   }
-   _parseAssignment(c) {
-      if (!this.statement.operator) {
-         //
-         // If the statement doesn't have an operator stored, then the operator is currently 
-         // being parsed and exists in (token).
-         //
-         if (is_operator_char(c)) {
-            this.token += c;
-            return;
-         }
-         this.statement.operator = new MOperator(this.token);
-         this.reset_token();
-         //
-         // Fall through to righthand-side handling so we don't miss the first character 
-         // after the operator in cases like {a=b} where there's no whitespace.
-         //
-      }
-      if ((this.token.length || c != "-") && is_operator_char(c))
-         this.throw_error(`Unexpected ${c} on the righthand side of an assignment statement.`);
-      if (is_quote_char(c))
-         this.throw_error(`Unexpected ${c}. You cannot assign strings to variables.`);
-      if (!this.token.length) {
-         if (is_whitespace_char(c))
-            return;
-         if (c == "(")
-            this.throw_error(`Unexpected ${c}. Parentheses are only allowed as delimiters for function arguments.`);
-      } else {
-         if (c == "(") {
-            //
-            // Handle function call as righthand side.
-            //
-            this.call = new MFunctionCall;
-            if (!this.call.extract_stem(this.token))
-               this.throw_error(`Invalid function context and/or name: "${this.token}".`);
-            this.statement.source = this.call;
-            this.reset_token();
-            return;
-            //
-            // From here on out, the code for parsing function calls will handle what 
-            // remains. The end of the function call is also the end of this statement, 
-            // so the code for parsing function calls will "close" this statement just 
-            // fine.
-            //
-         }
-      }
-      if (c == ")" || c == ",")
-         this.throw_error(`Unexpected ${c}.`);
-      if (!is_whitespace_char(c)) {
-         this.token += c;
-         return;
-      }
-      //
-      // If we get here, then we've encountered the end of the statement's righthand side.
-      //
-      this.statement.set_end(this.pos);
-      try {
-         this.statement.source = token_to_object(this.token);
-      } catch (e) {
-         this.throw_error(e.message);
-      }
-      this.block.insert_item(this.statement);
-      this.statement = null;
-      this.reset_token();
    }
    _parseComparison(c) {
       if (!this.statement.operator) {
@@ -925,6 +841,80 @@ class MSimpleParser {
       }
       this.statement = null;
       this.reset_token();
+   }
+   //
+   _parseFunctionCallArg() {
+      let integer = this.extractIntegerLiteral();
+      if (integer !== null) {
+         this.call.args.push(integer);
+         return true;
+      }
+      let string = this.extractStringLiteral();
+      if (string !== null) {
+         let arg = new MStringLiteral(string);
+         this.call.args.push(arg);
+         return true;
+      }
+      let word = this.extractWord();
+      if (word) {
+         this.call.args.push(token_to_object(word));
+         return true;
+      }
+      return false;
+   }
+   _parseFunctionCall(c, is_condition) {
+      //
+      // When this function is called, the stream position should be just after the 
+      // opening parentheses for the call arguments.
+      //
+      // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
+      //
+      let start = this.backup_stream_state();
+      while (!this.extractSpecificChar(")")) {
+         if (this.call.args.length) {
+            if (!this.extractSpecificChar(","))
+               this.throw_error("Function call arguments must be separated by commas.");
+         }
+         if (this.pos >= this.text.length) {
+            this.restore_stream_state(start);
+            this.throw_error(`Unterminated function call.`);
+         }
+         if (!this._parseFunctionCallArg()) {
+            {  // Check if we have a trailing comma e.g. func(a, )
+               let state = this.backup_stream_state();
+               if (this.extractSpecificChar(")")) {
+                  this.restore_stream_state(state);
+                  this.throw_error(`Commas in function calls can only appear between arguments; func(a,) is not valid.`);
+               }
+               if (this.extractSpecificChar("(")) {
+                  this.restore_stream_state(state);
+                  this.throw_error(`Parentheses may only be used to mark the start and end of list of function arguments.`);
+               }
+            }
+            this.throw_error(`Failed to extract function argument.`);
+         }
+      }
+      //
+      // Function calls can exist as standalone statements or as the righthand side of 
+      // assignment statements. In both cases, the end of the function call is the end 
+      // of the statement. (You can assign the result of a function call to a variable 
+      // (or rather, that's the syntax we're going with for specific trigger opcodes), 
+      // but we don't support arbitrary expressions so things like (a = b() + c) won't 
+      // be valid.)
+      //
+      this.reset_token();
+      if (is_condition) {
+         try {
+            this.block.insert_condition(this.statement);
+         } catch (e) {
+            this.throw_error(e.message);
+         }
+      } else
+         this.block.insert_item(this.statement);
+      this.call.set_end(this.pos + 1);
+      this.call      = null;
+      this.statement = null;
+      return;
    }
    //
    extractIntegerLiteral() {
