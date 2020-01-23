@@ -12,11 +12,6 @@ function _make_enum(list) {
    We need to improve our parsing of functions so that func(a, ) is a syntax error 
    (comma not followed by an argument).
    
-   When an MAssignment or MComparison is committed to a block, the lefthand side 
-   and (when not a function call) the righthand side should be "decoded," i.e. 
-   converted from string literals to the appropriate object (an instance of a class 
-   representing an integer constant, or an instance of MVariableReference).
-   
    When we commit a function call argument, we need to resolve it accordingly (i.e. 
    check whether it's an integer, a variable name, or a string literal, and convert 
    it from a bare string e.g. "\"abc\"" to the correct class). We should also check 
@@ -28,15 +23,6 @@ function _make_enum(list) {
       choke on it. We need to use the "extract" functions to pull the arguments 
       instead of reading them the way we currently do. Of course, after doing that, 
       we'd still need to process extracted words into MVariableReferences.
-      
-       - The function for extracting an integer literal should throw a syntax error 
-         if, after having found any digits, it finds a ".". Property access on an 
-         integer is not valid, and Reach-era Megalo scripts don't support floating-
-         point numbers, so there's no reason for a "." to "touch" a number.
-   
-   The code to resolve variable names needs to detect whether the name (in whole or 
-   any part) is a keyword, and fail if so. You should not be allowed to access names 
-   like "for[3]".
    
    All tokens should store their start and end positions in the stream, along with 
    their line numbers. We will need this for error reporting during the second stage 
@@ -220,10 +206,44 @@ class MVariablePart {
             this.index = index;
       }
    }
+   validate_syntax() {
+      if (!this.name.length)
+         throw new Error("Part is nameless.");
+      switch (this.name) {
+         case "alias":
+         case "and":
+         case "do":
+         case "else":
+         case "elseif":
+         case "end":
+         case "expect":
+         case "for":
+         case "function":
+         case "if":
+         case "or":
+            throw new Error("Keywords cannot be used as variable names.");
+      }
+      switch (this.index) {
+         case "alias":
+         case "and":
+         case "do":
+         case "else":
+         case "elseif":
+         case "end":
+         case "expect":
+         case "for":
+         case "function":
+         case "if":
+         case "or":
+            throw new Error("Keywords cannot be used as indices in a collection.");
+      }
+   }
 }
 class MVariableReference {
-   constructor() {
+   constructor(text) {
       this.parts = []; // std::vector<MVariablePart>
+      if (text)
+         this.extract(text);
    }
    extract(text) {
       let size     = text.length;
@@ -237,11 +257,11 @@ class MVariableReference {
          let c = text[i];
          if (is_index) {
             if (BAD_INDEX_CHARS.indexOf(c) >= 0)
-               return false;
+               throw new Error(`Character ${c} is not valid inside of an index.`);
             if (c == "]") {
                is_index = false;
                if (index === "") // "name[]" is a syntax error
-                  return false;
+                  throw new Error(`Variables of the form "name[]" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.`);
                continue;
             }
             index += c;
@@ -260,8 +280,12 @@ class MVariableReference {
          }
       }
       if (!name) // (text) ended in "." or was empty string
-         return false;
+         throw new Error(`Variables cannot end in ".", and cannot be nameless.`);
       this.parts.push(new MVariablePart(name, index));
+      //
+      for(let i = 0; i < this.parts.length; i++)
+         this.parts[i].validate_syntax();
+      return true;
    }
 }
 class MFunctionCall extends MParsedItem {
@@ -328,6 +352,35 @@ class MOperator extends MParsedItem {
       }
       return false;
    }
+}
+
+function token_to_object(text) { // used by MAssignment and MComparison
+   let size = text.length;
+   {  // constant integer?
+      let found = false;
+      let valid = true;
+      for(let i = 0; i < size; i++) {
+         let c = text[i];
+         if (c == ".")
+            throw new Error("Floating-point numbers are not supported. Numbers cannot have a decimal point.");
+         if (c == "-") {
+            if (i > 0) {
+               valid = false;
+               break;
+            }
+         } else {
+            if (c >= '0' && c <= '9') {
+               found = true;
+            } else {
+               valid = false;
+               break;
+            }
+         }
+      }
+      if (found && valid)
+         return +text;
+   }
+   return new MVariableReference(text);
 }
 
 class MAssignment extends MParsedItem {
@@ -563,9 +616,13 @@ class MSimpleParser {
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (is_operator_char(c)) {
-         this.statement        = new MAssignment;
-         this.statement.target = this.token;
+         this.statement = new MAssignment;
          this.statement.set_start(this.token_pos);
+         try {
+            this.statement.target = token_to_object(this.token);
+         } catch (e) {
+            this.throw_error(e.message);
+         }
          this.reset_token();
          this.token = c;
       }
@@ -584,9 +641,7 @@ class MSimpleParser {
    _parseBlockConditions() {
       this.statement = null;
       this.call      = null;
-      this.token     = "";
-      this.token_pos = 0;
-      this.token_end = false;
+      this.reset_token();
       this.scan((function(c) {
          if (!this.statement) {
             if (this._parseConditionStart(c) == "stop")
@@ -676,10 +731,13 @@ class MSimpleParser {
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (is_operator_char(c)) {
-         this.statement      = new MComparison;
-         this.statement.left = this.token;
+         this.statement = new MComparison;
          this.statement.set_start(this.token_pos);
-         //
+         try {
+            this.statement.left = token_to_object(this.token);
+         } catch (e) {
+            this.throw_error(e.message);
+         }
          this.reset_token();
          this.token = c;
       }
@@ -805,8 +863,12 @@ class MSimpleParser {
       //
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
-      this.statement.source = this.token;
       this.statement.set_end(this.pos);
+      try {
+         this.statement.source = token_to_object(this.token);
+      } catch (e) {
+         this.throw_error(e.message);
+      }
       this.block.insert_item(this.statement);
       this.statement = null;
       this.reset_token();
@@ -851,8 +913,12 @@ class MSimpleParser {
       //
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
-      this.statement.right = this.token;
       this.statement.set_end(this.pos);
+      try {
+         this.statement.right = token_to_object(this.token);
+      } catch (e) {
+         this.throw_error(e.message);
+      }
       try {
          this.block.insert_condition(this.statement);
       } catch (e) {
@@ -879,6 +945,8 @@ class MSimpleParser {
          }
          if (is_whitespace_char(c))
             return found.length > 0; // stop if we have any digits
+         if (c == "." && found.length)
+            this.throw_error(`Floating-point numbers are not supported. Numbers cannot have a decimal point.`);
          return true;
       }).bind(this));
       if (!found.length) {
@@ -963,6 +1031,8 @@ class MSimpleParser {
       this.scan((function(c) {
          if (is_whitespace_char(c))
             return word.length > 0;
+         if ((".[]").indexOf(c) >= 0 && !word.length) // these chars are allowed in a word, but not at the start of a word
+            return true;
          if (is_syntax_char(c))
             return true;
          if (is_quote_char(c))
