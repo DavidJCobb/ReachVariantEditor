@@ -9,21 +9,6 @@ function _make_enum(list) {
 
    TODO:
    
-   We need to improve our parsing of functions so that func(a, ) is a syntax error 
-   (comma not followed by an argument).
-   
-   When we commit a function call argument, we need to resolve it accordingly (i.e. 
-   check whether it's an integer, a variable name, or a string literal, and convert 
-   it from a bare string e.g. "\"abc\"" to the correct class). We should also check 
-   for common mistakes (e.g. attempts to write floating-point numbers) and have 
-   specific error messages for them.
-   
-    - ACTUALLY, WE DO NOT PARSE FUNCTION ARGUMENTS CORRECTLY. We're just blindly 
-      looking for commas, so if a string literal contains a comma, we're gonna 
-      choke on it. We need to use the "extract" functions to pull the arguments 
-      instead of reading them the way we currently do. Of course, after doing that, 
-      we'd still need to process extracted words into MVariableReferences.
-   
    All tokens should store their start and end positions in the stream, along with 
    their line numbers. We will need this for error reporting during the second stage 
    of parsing.
@@ -193,6 +178,12 @@ class MExpect extends MParsedItem {
       super();
       this.name  = n;
       this.value = v;
+   }
+}
+class MStringLiteral extends MParsedItem {
+   constructor(text) {
+      super();
+      this.text = text;
    }
 }
 class MVariablePart {
@@ -754,7 +745,47 @@ class MSimpleParser {
       }
    }
    //
+   _parseFunctionCallArg() {
+      let integer = this.extractIntegerLiteral();
+      if (integer !== null) {
+         this.call.args.push(integer);
+         return true;
+      }
+      let string = this.extractStringLiteral();
+      if (string !== null) {
+         let arg = new MStringLiteral(string);
+         this.call.args.push(arg);
+         return true;
+      }
+      let word = this.extractWord();
+      if (word) {
+         this.call.args.push(token_to_object(word));
+         return true;
+      }
+      return false;
+   }
    _parseFunctionCall(c, is_condition) {
+      let start = this.backup_stream_state();
+      while (!this.extractSpecificChar(")")) {
+         if (this.call.args.length) {
+            if (!this.extractSpecificChar(","))
+               this.throw_error("Function call arguments must be separated by commas.");
+         }
+         if (this.pos >= this.text.length) {
+            this.restore_stream_state(start);
+            this.throw_error(`Unterminated function call.`);
+         }
+         if (!this._parseFunctionCallArg()) {
+            {  // Check if we have a trailing comma e.g. func(a, )
+               let state = this.backup_stream_state();
+               if (this.extractSpecificChar(")")) {
+                  this.restore_stream_state(state);
+                  this.throw_error(`Commas in function calls can only appear between arguments; func(a,) is not valid.`);
+               }
+            }
+            this.throw_error(`Failed to extract function argument.`);
+         }
+      }
       //
       // Function calls can exist as standalone statements or as the righthand side of 
       // assignment statements. In both cases, the end of the function call is the end 
@@ -763,51 +794,19 @@ class MSimpleParser {
       // but we don't support arbitrary expressions so things like (a = b() + c) won't 
       // be valid.)
       //
-      if (c == ",") {
-         if (!this.token)
-            this.throw_error(`Unexpected ${c}.`); // func(a, , b) is not valid
-         this.call.args.push(this.token);
-         this.reset_token();
-         return;
-      }
-      if (c == ")") {
-         //
-         // TODO: detect and handle syntax error: func(a, )
-         //
-         if (this.token)
-            //
-            // The (token) variable is, here, the raw argument, e.g. "3" or "\"abc\"". 
-            // At some point we should give MFunctionCall an "append argument" method 
-            // which takes the token and normalizes it into some object (e.g. a class 
-            // for constant integers, a class for string literals, a class for variables, 
-            // a class for built-in terms like MP object types, and so on).
-            //
-            this.call.args.push(this.token);
-         this.reset_token();
-         //
-         // End the statement.
-         //
-         if (is_condition) {
-            try {
-               this.block.insert_condition(this.statement);
-            } catch (e) {
-               this.throw_error(e.message);
-            }
-         } else
-            this.block.insert_item(this.statement);
-         this.call.set_end(this.pos + 1);
-         this.call      = null;
-         this.statement = null;
-         return;
-      }
-      if (is_whitespace_char(c)) {
-         if (this.token.length)
-            this.token_end = true;
-         return;
-      }
-      if (this.token_end)
-         this.throw_error(`Statements of the form {word word} are not valid.`);
-      this.token += c;
+      this.reset_token();
+      if (is_condition) {
+         try {
+            this.block.insert_condition(this.statement);
+         } catch (e) {
+            this.throw_error(e.message);
+         }
+      } else
+         this.block.insert_item(this.statement);
+      this.call.set_end(this.pos + 1);
+      this.call      = null;
+      this.statement = null;
+      return;
    }
    _parseAssignment(c) {
       if (!this.statement.operator) {
@@ -953,7 +952,6 @@ class MSimpleParser {
          this.restore_stream_state(state);
          return null;
       }
-      ++this.pos; // move position to after the number's last char
       return +(sign + found);
    }
    extractSpecificChar(required) { // advances the stream past the char if it is found
@@ -979,8 +977,13 @@ class MSimpleParser {
       let result = "";
       this.scan((function(c) {
          if (inside) {
-            if (c == inside)
+            if (c == inside) {
+               if (this.text[this.pos - 1] == "\\") { // allow backslash-escaping
+                  result += c;
+                  return;
+               }
                return true; // stop
+            }
             result += c;
             return;
          }
