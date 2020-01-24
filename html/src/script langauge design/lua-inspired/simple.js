@@ -13,15 +13,6 @@ function _make_enum(list) {
    that need to check and disallow that. (Ctrl+F first to see which and how many 
    places.)
    
-   Expect declarations need to decode both sides to MVariableReferences if possible. 
-   (Aliases can wrap integer constants, so you can have an alias on the righthand 
-   side; and of course the lefthand side must be a variable.)
-   
-    - If we really do want to allow aliases on the righthand side, then during the 
-      second stage of parsing we need to validate that the alias in question does 
-      actually wrap an integer constant. Moreover, we still need to disallow proper 
-      variable access e.g. "name[1].name[2]".
-   
    ---------------------------------------------------------------------------------
    
    REMINDER: The second stage of parsing entails:
@@ -47,6 +38,10 @@ function _make_enum(list) {
    
     - Making sure that all function calls are to valid opcodes or user-defined 
       functions.
+      
+    - Making sure that all "expect" declarations apply to valid variable names, and 
+      that if their righthand side is an MVariableReference, it points to an alias 
+      of a constant integer.
 
 */
 
@@ -272,9 +267,23 @@ class MExpect extends MParsedItem {
       super();
       this.name  = n;
       this.value = v;
+      //
+      let lhs = token_to_int_or_var(n);
+      if (!(lhs instanceof MVariableReference))
+         throw new Error("Expect declarations must apply to a variable.");
+      this.name = lhs;
+      //
+      let rhs = token_to_int_or_var(v);
+      this.value = rhs; // integer or MVariableReference
    }
    serialize() {
-      let result = `expect ${this.name} == ${this.value}`;
+      let result = `expect ${this.name.serialize()} == `;
+      if (this.value instanceof MVariableReference)
+         result += this.value.serialize();
+      else if (+this.value === this.value)
+         result += this.value;
+      else
+         throw new Error("unimplemented");
       return result;
    }
 }
