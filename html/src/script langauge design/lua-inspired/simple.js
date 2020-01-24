@@ -9,19 +9,18 @@ function _make_enum(list) {
 
    TODO:
    
+   Might be worth having an "is keyword" function; there are more than a few places 
+   that need to check and disallow that. (Ctrl+F first to see which and how many 
+   places.)
+   
    Expect declarations need to decode both sides to MVariableReferences if possible. 
    (Aliases can wrap integer constants, so you can have an alias on the righthand 
    side; and of course the lefthand side must be a variable.)
    
-   All tokens should store their start and end positions in the stream, along with 
-   their line numbers. We will need this for error reporting during the second stage 
-   of parsing.
-   
-    - I *think* I have this properly implemented for most things. I should double-
-      check function calls as the righthand side of assignments.
-   
-    - I should also set this up for the root block and not just the blocks and 
-      statements inside of it.
+    - If we really do want to allow aliases on the righthand side, then during the 
+      second stage of parsing we need to validate that the alias in question does 
+      actually wrap an integer constant. Moreover, we still need to disallow proper 
+      variable access e.g. "name[1].name[2]".
    
    ---------------------------------------------------------------------------------
    
@@ -777,6 +776,7 @@ class MSimpleParser {
          }
          this.reset_token();
          this.token = c;
+         this.token_pos = this.backup_stream_state();
          return;
       }
       if (this.token_end)
@@ -802,6 +802,8 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
+         this.statement.operator.set_start(this.token_pos);
+         this.statement.operator.set_end(this.pos);
          if (!this.statement.operator.is_assignment())
             this.throw_error(`Operator ${this.token} is not a valid assignment operator.`);
          this.reset_token();
@@ -825,6 +827,7 @@ class MSimpleParser {
             // Handle function call as righthand side.
             //
             this.call = new MFunctionCall;
+            this.call.set_start(this.token_pos);
             if (!this.call.extract_stem(this.token))
                this.throw_error(`Invalid function context and/or name: "${this.token}".`);
             this.statement.source = this.call;
@@ -844,6 +847,8 @@ class MSimpleParser {
       if (c == ")" || c == ",")
          this.throw_error(`Unexpected ${c}.`);
       if (!is_whitespace_char(c)) {
+         if (!this.token.length)
+            this.token_pos = this.backup_stream_state();
          this.token += c;
          return;
       }
@@ -953,6 +958,7 @@ class MSimpleParser {
          }
          this.reset_token();
          this.token = c;
+         this.token_pos = this.backup_stream_state();
          return;
       }
       if (this.token_end)
@@ -978,6 +984,8 @@ class MSimpleParser {
             return;
          }
          this.statement.operator = new MOperator(this.token);
+         this.statement.operator.set_start(this.token_pos);
+         this.statement.operator.set_end(this.pos);
          if (!this.statement.operator.is_comparison())
             this.throw_error(`Operator ${this.token} is not a valid comparison operator.`);
          this.reset_token();
@@ -1004,6 +1012,8 @@ class MSimpleParser {
          this.throw_error(`Unexpected ${c}.`);
       if (!is_whitespace_char(c)) {
          this.token += c;
+         if (!this.token.length)
+            this.token_pos = this.backup_stream_state();
          return;
       }
       //
@@ -1098,6 +1108,7 @@ class MSimpleParser {
          }
       } else
          this.block.insert_item(this.statement);
+      this.statement.set_end(this.pos + 1);
       this.call.set_end(this.pos + 1);
       this.call      = null;
       this.statement = null;
