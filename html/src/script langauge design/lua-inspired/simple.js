@@ -20,8 +20,10 @@ function _make_enum(list) {
     - Making sure that MVariableReferences all point to valid variables (accounting 
       for aliases).
    
-    - Making sure that assignments make sense: do not allow assigning to a constant 
-      or to a read-only variable.
+    - Making sure that assignments make sense: do not allow assigning to a read-only 
+      variable.
+      
+       = DONE: Don't allow assigning to a constant.
       
     - Making sure that function calls and property access make sense in the context 
       of all Megalo opcodes and their script syntax. (We'll need to bring in the 
@@ -72,26 +74,11 @@ function is_syntax_char(c) {
 function is_whitespace_char(c) {
    return (" \r\n\t").indexOf(c) >= 0;
 }
-function is_word_char(c) {
-   if (is_whitespace_char(c))
-      return false;
-   if (is_operator_char(c))
-      return false;
-   if (is_quote_char(c))
-      return false;
-   if (is_syntax_char(c))
-      return false;
-   return true;
-}
-
-function string_is_numeric(c) {
-   return (!isNaN(+c) && c !== null);
-}
 
 class MParsedItem {
    constructor() {
       this.parent = null;
-      this.owner  = null; // for items that appear in conditions
+      this.owner  = null; // for items that appear in conditions, etc..
       this.line   = -1;
       this.col    = -1;
       this.range  = [-1, -1];
@@ -108,18 +95,21 @@ class MParsedItem {
    set_end(pos) {
       this.range[1] = pos;
    }
+   validate(validator) {
+   }
 }
 
 class MAlias extends MParsedItem {
    constructor(n, rhs) {
       super();
       this.name   = n;
-      this.value  = null;
-      this.target = null;
+      this.value  = 0;    // integer
+      this.target = null; // MVariableReference
       let result = token_to_int_or_var(rhs);
-      if (result instanceof MVariableReference)
+      if (result instanceof MVariableReference) {
          this.target = result;
-      else
+         result.owner = this;
+      } else
          this.value = result;
    }
    serialize() {
@@ -130,6 +120,10 @@ class MAlias extends MParsedItem {
          result += this.value;
       }
       return result;
+   }
+   validate(validator) {
+      if (this.target)
+         this.target.validate();
    }
 }
 class MBlock extends MParsedItem {
@@ -252,6 +246,10 @@ class MBlock extends MParsedItem {
       }
       return text;
    }
+   validate(validator) {
+      for(let item of this.items)
+         item.validate(validator);
+   }
 }
 class MConditionJoiner extends MParsedItem {
    constructor() {
@@ -272,9 +270,12 @@ class MExpect extends MParsedItem {
       if (!(lhs instanceof MVariableReference))
          throw new Error("Expect declarations must apply to a variable.");
       this.name = lhs;
+      lhs.owner = this;
       //
       let rhs = token_to_int_or_var(v);
       this.value = rhs; // integer or MVariableReference
+      if (rhs instanceof MParsedItem)
+         rhs.owner = this;
    }
    serialize() {
       let result = `expect ${this.name.serialize()} == `;
@@ -285,6 +286,11 @@ class MExpect extends MParsedItem {
       else
          throw new Error("unimplemented");
       return result;
+   }
+   validate(validator) {
+      this.name.validate(validator);
+      if (this.value instanceof MParsedItem)
+         this.value.validate(validator);
    }
 }
 class MStringLiteral extends MParsedItem {
@@ -314,6 +320,9 @@ class MVariablePart {
       return `${this.name}[${this.index}]`;
    }
    validate_syntax() {
+      //
+      // Validation during stage-one parsing.
+      //
       if (!this.name.length)
          throw new Error("Part is nameless.");
       switch (this.name) {
@@ -344,6 +353,11 @@ class MVariablePart {
          case "or":
             throw new Error("Keywords cannot be used as indices in a collection.");
       }
+   }
+   validate(validator) {
+      //
+      // Validation during stage-two parsing.
+      //
    }
 }
 class MVariableReference {
@@ -398,6 +412,11 @@ class MVariableReference {
       let list = this.parts.map(function(v) { return v.serialize(); });
       return list.join(".");
    }
+   validate(validator) {
+      //
+      // TODO: Verify that we're accessing an existing variable or alias.
+      //
+   }
 }
 class MFunctionCall extends MParsedItem {
    constructor() {
@@ -422,6 +441,7 @@ class MFunctionCall extends MParsedItem {
          this.name = text;
       } else {
          this.context = new MVariableReference;
+         this.context.owner = this;
          this.context.extract(text.substring(0, i));
       }
       return true;
@@ -443,6 +463,23 @@ class MFunctionCall extends MParsedItem {
       }
       result += ")";
       return result;
+   }
+   validate(validator) {
+      if (this.context) {
+         this.context.validate();
+         //
+         // TODO: if the context is valid, verify that the member function we're trying 
+         // to call exists.
+         //
+      } else {
+         //
+         // TODO: Verify that the global function we're trying to call exists (i.e. a 
+         // user-defined function or an opcode).
+         //
+      }
+      //
+      // TODO: Verify call arguments.
+      //
    }
 }
 class MOperator extends MParsedItem {
@@ -523,7 +560,14 @@ class MAssignment extends MParsedItem {
       this.operator = null; // MOperator
    }
    serialize() {
-      let result = `${this.target.serialize()} ${this.operator.serialize()} `;
+      let result = "";
+      if (this.target instanceof MVariableReference || this.target instanceof MFunctionCall)
+         result += this.target.serialize();
+      else if (+this.target === this.target)
+         result += this.target;
+      else
+         throw new Error("unhandled");
+      result = `${result} ${this.operator.serialize()} `;
       if (this.source instanceof MVariableReference || this.source instanceof MFunctionCall)
          result += this.source.serialize();
       else if (+this.source === this.source)
@@ -531,6 +575,15 @@ class MAssignment extends MParsedItem {
       else
          throw new Error("unhandled");
       return result;
+   }
+   validate(validator) {
+      if (+this.target === this.target)
+         validator.report(this, "You cannot assign to a constant integer.");
+      else if (this.target instanceof MParsedItem)
+         this.target.validate(validator);
+      //
+      if (this.source instanceof MParsedItem)
+         this.source.validate(validator);
    }
 }
 class MComparison extends MParsedItem {
@@ -556,6 +609,12 @@ class MComparison extends MParsedItem {
       else
          throw new Error("unhandled");
       return result;
+   }
+   validate(validator) {
+      if (this.left instanceof MParsedItem)
+         this.left.validate(validator);
+      if (this.right instanceof MParsedItem)
+         this.right.validate(validator);
    }
 }
 
@@ -779,7 +838,10 @@ class MSimpleParser {
          this.statement = new MAssignment;
          this.statement.set_start(this.token_pos);
          try {
-            this.statement.target = token_to_int_or_var(this.token);
+            let lhs = token_to_int_or_var(this.token);
+            this.statement.target = lhs;
+            if (lhs instanceof MParsedItem)
+               lhs.owner = this.statement;
          } catch (e) {
             this.throw_error(e.message);
          }
@@ -840,6 +902,7 @@ class MSimpleParser {
             if (!this.call.extract_stem(this.token))
                this.throw_error(`Invalid function context and/or name: "${this.token}".`);
             this.statement.source = this.call;
+            this.call.owner = this.statement;
             this.reset_token();
             ++this.pos; // advance past the open-parentheses
             this._parseFunctionCall(false);
@@ -961,7 +1024,10 @@ class MSimpleParser {
          this.statement = new MComparison;
          this.statement.set_start(this.token_pos);
          try {
-            this.statement.left = token_to_int_or_var(this.token);
+            lhs = token_to_int_or_var(this.token);
+            this.statement.left = lhs;
+            if (lhs instanceof MParsedItem)
+               lhs.owner = this.statement;
          } catch (e) {
             this.throw_error(e.message);
          }
@@ -1053,11 +1119,15 @@ class MSimpleParser {
       if (string !== null) {
          let arg = new MStringLiteral(string);
          this.call.args.push(arg);
+         string.owner = this.call;
          return true;
       }
       let word = this.extractWord();
       if (word) {
-         this.call.args.push(token_to_int_or_var(word));
+         let arg = token_to_int_or_var(word);
+         this.call.args.push(arg);
+         if (arg instanceof MParsedItem)
+            arg.owner = this.call;
          return true;
       }
       return false;

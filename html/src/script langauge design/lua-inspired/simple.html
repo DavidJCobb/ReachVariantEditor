@@ -33,6 +33,7 @@ if a then end -- "a" by itself is not a comparison or function call
 a = b().c -- cannot do property access on a function call
 a = b() + 5 -- this is an expression; again, those are not supported</pre>
       <script src="std.js"></script>
+      <script src="simple-validation.js"></script>
       <script src="simple.js"></script>
       <div class="two-cols">
          <div>
@@ -83,6 +84,10 @@ end
             if (result) {
                node.value = result.serialize();
             }
+            //
+            let validator = new MValidator;
+            result.validate(validator);
+            console.log(validator);
          });
       </script>
    </body>
