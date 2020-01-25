@@ -22,8 +22,9 @@ textarea{width:100%;height:250px;box-sizing:border-box}
          In the compiled bitcode, conditions can only consist of comparisons and function 
          calls, and actions (i.e. any statement that is not a condition) can only consist 
          of assignments (including mod-assignment operators like <code>+=</code> and 
-         function calls. The only other things allowed are blocks and declarations. This 
-         "simple" parser is built around these limitations.
+         function calls. You can assign the result of a function call, but you cannot 
+         compare directly to the result of a function call. The only other things allowed 
+         are blocks and declarations. This "simple" parser is built around these limitations.
       </p>
       <p>
          In other words, the following are all syntax errors:
@@ -31,7 +32,8 @@ textarea{width:100%;height:250px;box-sizing:border-box}
       <pre>a += b + 5 -- use a += b a += 5
 if a then end -- "a" by itself is not a comparison or function call
 a = b().c -- cannot do property access on a function call
-a = b() + 5 -- this is an expression; again, those are not supported</pre>
+a = b() + 5 -- this is an expression; again, those are not supported
+if a() == b() then -- function calls cannot appear directly in comparisons; do x = a() and then compare x</pre>
       <script src="std.js"></script>
       <script src="simple-validation.js"></script>
       <script src="simple.js"></script>

@@ -15,6 +15,24 @@ function _make_enum(list) {
    
    ---------------------------------------------------------------------------------
    
+   Currently, invalid alias names (e.g. "name[1]" or integer constants) fail during 
+   first-pass parsing. Consider having them fail during second-pass parsing (i.e. 
+   non-fatal errors, so other problems in the script can also be reported at the 
+   same time) instead.
+   
+   A function name should fail second-pass parsing if it includes square brackets or 
+   periods. (I'm referring here to function declarations, not function calls.)
+   
+   Strongly consider renaming all "validate" member functions to "analyze", since we 
+   also need to do things like resolving MVariableReferences that include aliases, 
+   and tracking what functions are in scope.
+   
+   If an alias targets a variable that doesn't exist, it should fail second-pass 
+   parsing. If there is a function by the targeted name, the error message should 
+   note that functions can't be aliased.
+   
+   ---------------------------------------------------------------------------------
+   
    REMINDER: The second stage of parsing entails:
     
     - Making sure that MVariableReferences all point to valid variables (accounting 
@@ -105,6 +123,16 @@ class MAlias extends MParsedItem {
       this.name   = n;
       this.value  = 0;    // integer
       this.target = null; // MVariableReference
+      {  // Validate name.
+         //
+         // TODO: Do we really want this to be a fatal parse error? Seems like something we could 
+         // just catch during the second-pass parsing.
+         //
+         if (n.match(/[\[\]\.]/))
+            throw new Error(`Invalid alias name "${n}". Alias names cannot contain square brackets or periods.`);
+         if (!n.match(/[^0-9]/))
+            throw new Error(`Invalid alias name "${n}". You cannot alias an integer constant.`);
+      }
       let result = token_to_int_or_var(rhs);
       if (result instanceof MVariableReference) {
          this.target = result;
@@ -247,6 +275,16 @@ class MBlock extends MParsedItem {
       return text;
    }
    validate(validator) {
+      //
+      // TODO: We need to keep track of what aliases are in-scope as we iterate through 
+      // items, so that MVariableReferences can track that properly; we also need to 
+      // keep track of what functions have been defined. The parser doesn't forbid 
+      // nesting functions under blocks at this time, and yeah, I think I'd like to 
+      // keep block-scoped functions even if there isn't much use for them.
+      //
+      // I'm not sure we need to construct that data in advance; instead, the validator 
+      // could potentially handle the tracking for that, I think.
+      //
       for(let item of this.items)
          item.validate(validator);
    }
@@ -324,7 +362,7 @@ class MVariablePart {
       // Validation during stage-one parsing.
       //
       if (!this.name.length)
-         throw new Error("Part is nameless.");
+         throw new Error("Invalid variable name. Did you accidentally type two periods instead of one?");
       switch (this.name) {
          case "alias":
          case "and":
@@ -438,6 +476,8 @@ class MFunctionCall extends MParsedItem {
          }
       }
       if (!this.name) {
+         if (i == size - 1) // "name.()"
+            return false;
          this.name = text;
       } else {
          this.context = new MVariableReference;
@@ -1269,6 +1309,12 @@ class MSimpleParser {
       return result;
    }
    extractWord(desired) {
+      //
+      // For the purposes of the parser, a "word" is any sequence of characters that are 
+      // not whitespace, string delimiters, function syntax characters (i.e. parentheses 
+      // and commas), or operator characters. This includes keywords, variables with 
+      // square brackets and periods, and integer literals.
+      //
       if (desired) {
          //
          // If searching for a specific word, advances the stream to the end of that word 
