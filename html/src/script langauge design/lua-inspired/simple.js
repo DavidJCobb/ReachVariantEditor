@@ -782,7 +782,8 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    one per type per scope, i.e. one MVariable for all Global.Numbers.
       //
       // ACTUALLY, A BETTER IDEA: Use the "POSSIBLE PATTERNS" list below as the basis 
-      // of an approach to doing this.
+      // of an approach to doing this. Retain the list after implementation, to serve 
+      // as documentation.
       //
       
       //
@@ -793,15 +794,15 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // namespace.var.var           // e.g. global.object[0].player[0]       // this doesn't nest further, i.e. there is no (namespace.var.var.var), though (namespace.var.var.property) may exist as noted in this list
       // static                      // e.g. player[0]                        // global-scoped under the hood; you can have static players or teams
       // static.var                  // e.g. player[0].object[0]              //
-      // any_player.biped            // e.g. current_player.biped             // any player e.g. loop, static, var
-      // any_player.team             // e.g. current_player.team              // any player e.g. loop, static, var; is a global-scoped team var under the hood
-      // any_object.team             // e.g. current_object.team              // any object e.g. loop, static, var; is a global-scoped team var under the hood
+      // any_player.biped            // e.g. current_player.biped             // any player e.g. situational, static, var
+      // any_player.team             // e.g. current_player.team              // any player e.g. situational, static, var; is a global-scoped team var under the hood
+      // any_object.team             // e.g. current_object.team              // any object e.g. situational, static, var; is a global-scoped team var under the hood
       // indexed_data                // e.g. script_option[0]                 // options, traits, and stats
       // game.state_value            // e.g. game.round_limit                 // 
       // function_argument_enum      // e.g. basis.create_object(flag, ...)   // MVariableReferences that are function call args need special handling
       // 
       //
-      // DONE (BUT NEEDS TESTING):
+      // SPECIFIC LIST OF ALL VARIABLES (different indices not listed):
       //
       // no_object
       // no_player
@@ -822,9 +823,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // hud_target.team
       // unk_14_team
       // unk_15_team
-      //
-      // REMAINING:
-      //
       // script_option[0]
       // script_stat[0]
       // script_string[0]
