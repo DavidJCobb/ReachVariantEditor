@@ -31,11 +31,68 @@ function _make_enum(list) {
    parsing. If there is a function by the targeted name, the error message should 
    note that functions can't be aliased.
    
+   Add an (owner) property to MVariableReference and have everything that contains 
+   an instance set that property. We need this so that errors caught in second-stage 
+   parsing can actually report line and column numbers; MVariableReference has no 
+   positional information but if we can access an instance's owner, then we can know 
+   roughly where the script error is.
+   
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
-    - Make it case-insensitive.
+    - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
     
     = Can we reduce code duplication on the (non_nested_var.property) handlers?
+    
+    - Now that this is basically done, we need to work on resolving aliases within 
+      MVariableReferences before then handling full resolution/analysis.
+      
+       - It has occurred to me: relative aliases can't be resolved unless we know 
+         the type of the thing using them. Consider:
+         
+            alias is_zombie = player.number[0]
+            global.player[0].is_zombie = 1
+         
+         We need to be able to tell that (global.player[0]) is a player, and that 
+         only becomes known during variable resolution -- *after* we want to have 
+         resolved aliases.
+         
+         Recall that every variable reference involves namespaces, vars, statics, 
+         situationals, and properties. I think we should look into handling this 
+         via OO: have a class representing namespaces and a class representing 
+         types, and use members on these classes:
+         
+          - Namespaces can have a member indicating "extra" values, such as 
+            "round_time_limit" in the "game" namespace. The only valid namespaces 
+            are "global" and "game".
+         
+          - Typenames can have a member indicating whether they can be accessible 
+            as static collections. For the "team" and "player" typenames, this would 
+            be true, and they'd have upper limits of 8 and 16 respectively.
+            
+             - Typenames would also need a member indicating whether they are valid 
+               variable types, and a member indicating whether they can hold other 
+               variables. For (script_option) and (script_traits), both members 
+               would be false; for (number), the former member would be true and 
+               the latter false; for (player), (object), and (team), both members 
+               would be true.
+         
+          - We can define an "unnamed" namespace representing unscoped values, 
+            and give it members like "no_team" and "current_player".
+         
+         Once we've taken this approach, variable *and* alias resolution become 
+         simpler:
+         
+          - If an alias begins with a typename, then it's a relative alias. If we 
+            do it the OO way it becomes easier to allow more qualified relative 
+            aliases (e.g. "alias flag_points = player.object[0].number[0]").
+         
+          - Variable resolution would involve identifying the namespace and then 
+            matching all remaining parts to their typenames. When we know the 
+            previous part's typename, we can check whether the current part is a 
+            valid relative alias on that typename.
+            
+             - Absolute aliases must be singular; given (alias foo = global.number[0]) 
+               you cannot do (foo.bar) nor (bar.foo) nor (foo[0]).
    
    NOTE: We don't have a way to specify event triggers e.g. object death events. I 
    think we should do that with an "on" keyword (only permitted at the top level) 
@@ -384,7 +441,7 @@ class MAlias extends MParsedItem {
    }
    validate(validator) {
       if (this.target)
-         this.target.validate();
+         this.target.validate(validator, true);
    }
 }
 class MBlock extends MParsedItem {
@@ -554,7 +611,7 @@ class MExpect extends MParsedItem {
       //
       let rhs = token_to_int_or_var(v);
       this.value = rhs; // integer or MVariableReference
-      if (rhs instanceof MParsedItem)
+      if (rhs instanceof MParsedItem || rhs instanceof MVariableReference)
          rhs.owner = this;
    }
    serialize() {
@@ -584,6 +641,10 @@ class MStringLiteral extends MParsedItem {
 }
 
 class MSituationalVariableDefinition {
+   //
+   // Used during variable resolution to quickly handle things like "no_team" and 
+   // "current_player".
+   //
    constructor(name, type, is_none) {
       this.name    = name;
       this.type    = type;
@@ -680,6 +741,10 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          index: null,
          aliased_integer_constant: null, // if we turn out to be an alias
          is_read_only: false,
+         //
+         aliased_typename: null, // for relative aliases of the form typename.member[index]
+         aliased_member:   null,
+         aliased_index:    null,
       };
    }
    extract(text) {
@@ -732,6 +797,13 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       return this.serialize();
    }
    //
+   is_read_only() {
+      if (this.analyzed.aliased_integer_constant !== null)
+         return true;
+      if (this.analyzed.type)
+         return this.analyzed.is_read_only;
+      return void 0; // analysis was not yet conducted, so we don't know
+   }
    is_single() {
       return this.parts.length == 1 && !this.parts[0].has_index();
    }
@@ -774,15 +846,17 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //
    }
    //
-   validate(validator) {
+   validate(validator, is_alias_rhs) {
       this.resolve_aliases(validator);
-      //
-      // TODO: See comments in (resolve_aliases): we want to use this function (the function 
-      // that this very comment is inside of) to use custom logic right ***here*** when the 
-      // MVariableReference being resolved is the target for an MAlias.
-      //
       if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
          return true;
+      if (is_alias_rhs) {
+         //
+         // TODO: See comments in (resolve_aliases): we want to use this function (the function 
+         // that this very comment is inside of) to use custom logic right ***here*** when the 
+         // MVariableReference being resolved is the target for an MAlias.
+         //
+      }
       //
       // There are sixty-one possible variables not accounting for indices (i.e. counting 
       // player[0] and player[1] as "the same" variable). However, all such variables fall 
@@ -810,7 +884,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //
       let index = 0;
       let item  = this.parts[index];
-      if (item.name == "global") { // TODO: handle case-insensitivity // namespace.var or namespace.var.var or namespace.var.property or namespace.var.var.property
+      if (item.name == "global") { // namespace.var or namespace.var.var or namespace.var.property or namespace.var.var.property
          if (item.has_index()) {
             validator.report(this, `Namespaces such as "global" cannot be indexed.`);
             return false;
@@ -820,7 +894,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
             validator.report(this, `Namespaces such as "global" cannot be accessed directly.`);
             return false;
          }
-         switch (item.name) { // TODO: handle case-insensitivity
+         switch (item.name) {
             case "number":
             case "timer": // TODO: change syntax (timer.rate = ...) to (timer.set_rate(...)) so that the syntax for timer rate is consistent with other setters
                if (this.parts.length > (index + 1)) {
@@ -1523,13 +1597,17 @@ class MAssignment extends MParsedItem {
    validate(validator) {
       if (+this.target === this.target)
          validator.report(this, "You cannot assign to a constant integer.");
-      else if (this.target instanceof MVariableReference)
+      else if (this.target instanceof MVariableReference) {
          this.target.validate(validator);
+         if (this.target.is_read_only())
+            validator.report(this, "You cannot assign to this variable/property. It is read-only.");
+      }
       //
       // TODO: Fail if assigning to a read-only target.
       //
-      if (this.source instanceof MParsedItem || this.source instanceof MVariableReference)
+      if (this.source instanceof MParsedItem || this.source instanceof MVariableReference) {
          this.source.validate(validator);
+      }
    }
 }
 class MComparison extends MParsedItem {
