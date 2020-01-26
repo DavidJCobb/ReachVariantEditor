@@ -35,28 +35,7 @@ function _make_enum(list) {
    
     - Make it case-insensitive.
     
-    = CURRENTLY, WE ONLY HANDLE THE "team" AND "biped" PROPERTIES ON VARIABLES, 
-      AND WE HANDLE THEM INLINE. WE SHOULD MOVE PROPERTY-HANDLING TO A MEMBER 
-      FUNCTION.
-    
-    - Fix how we handle script_stat[n]. Currently we treat that as a global but it 
-      actually can't be accessed that way; it HAS to be a property on any global 
-      player or team (i.e. namespace.var.stat or situational.stat or static.stat).
-      
-    - Add support for the "score" properties on players and teams. As with script 
-      stats, these can only be accessed on a global player or team (i.e. 
-      namespace.var.score or situational.score or static.score).
-    
-    - Add support for the "unknown09" property on players. As with script stats, 
-      these can only be accessed on a global player (i.e. namespace.player.unk09 
-      or situational.unk09 or static.unk09).
-    
-    - Add support for the "rating" property on players. As with script stats, 
-      these can only be accessed on a global player (i.e. namespace.player.rating 
-      or situational.rating or static.rating).
-      
-    - Add support for the "spawn sequence" property on objects. This can only be 
-      accessed on a global object (i.e. global.object.ss or situational.ss).
+    = Can we reduce code duplication on the (non_nested_var.property) handlers?
    
    NOTE: We don't have a way to specify event triggers e.g. object death events. I 
    think we should do that with an "on" keyword (only permitted at the top level) 
@@ -1068,6 +1047,10 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                // And fall through in order to handle static.property and static.var[.property].
                //
             } else {
+               if (item.name == "object") {
+                  validator.report(this, `Objects must be namespaced; did you mean "global.object[...]"?`);
+                  return false;
+               }
                validator.report(this, `Unrecognized variable root ${item.name}.`);
                return false;
             }
@@ -1101,52 +1084,162 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          // (i.e. situational.property, static.property, and global.var.property).
          //
          case var_type.object:
-            if (item.name == "team") { // situational.team, static.team, global.object[n].team
-               if (this.parts.length > (index + 1)) {
-                  validator.report(this, `Property access of the form (object.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
-                  return false;
-               }
-               this.analyzed.type  = var_type.team;
-               this.analyzed.scope = team_var_scope.object_owner_team;
-               if (this.analyzed.index) {
-                  this.analyzed.which = this.analyzed.index;
-                  this.analyzed.index = null;
-               }
-               return true;
+            switch (item.name) {
+               case "spawn_sequence":
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (object.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.spawn_sequence;
+                  if (this.analyzed.which) { // conform JavaScript data to match C++
+                     this.analyzed.index = this.analyzed.which;
+                     this.analyzed.which = null;
+                  }
+                  return true;
+               case "team":
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (object.property.anything) are invalid. Store the team in a team variable and then access properties through that.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.team;
+                  this.analyzed.scope = team_var_scope.object_owner_team;
+                  if (this.analyzed.index) {
+                     this.analyzed.which = this.analyzed.index;
+                     this.analyzed.index = null;
+                  }
+                  return true;
             }
             break;
          case var_type.player:
-            if (item.name == "team") { // situational.team, static.team, global.player[n].team
-               if (this.parts.length > (index + 1)) {
-                  validator.report(this, `Property access of the form (player.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
-                  return false;
-               }
-               this.analyzed.type  = var_type.team;
-               this.analyzed.scope = team_var_scope.player_owner_team;
-               if (this.analyzed.index) {
-                  this.analyzed.which = this.analyzed.index;
-                  this.analyzed.index = null;
-               }
-               return true;
-            }
-            if (item.name == "biped") { // global.player[n].biped
-               if (this.parts.length > (index + 1)) {
-                  validator.report(this, `Property access of the form (player.biped.anything) is invalid. Store the biped in an object variable and then access properties through that.`);
-                  return false;
-               }
-               //
-               // Right now: 
-               // global.player[0].biped           -> scope: global; type: player // handled here
-               // global.object[0].player[0].biped -> scope: object; type: player // handled below
-               //
-               this.analyzed.type  = var_type.object;
-               this.analyzed.scope = object_var_scope.global_player_biped;
-               this.analyzed.which = this.analyzed.which;
-               this.analyzed.is_read_only = true;
-               return true;
+            switch (item.name) { // global.player[n].property
+               case "biped":
+                  if (item.has_index()) {
+                     validator.report(this, `Player bipeds cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Property access of the form (player.biped.anything) is invalid. Store the biped in an object variable and then access properties through that.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.object;
+                  this.analyzed.scope = object_var_scope.global_player_biped;
+                  this.analyzed.which = this.analyzed.which;
+                  this.analyzed.is_read_only = true;
+                  return true;
+               case "rating":
+                  if (item.has_index()) {
+                     validator.report(this, `Player ratings cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (player.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.player_rating;
+                  if (this.analyzed.which) { // conform JavaScript data to match C++
+                     this.analyzed.index = this.analyzed.which;
+                     this.analyzed.which = null;
+                  }
+                  return true;
+               case "score":
+                  if (item.has_index()) {
+                     validator.report(this, `Player scores cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (player.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.player_score;
+                  if (this.analyzed.which) { // conform JavaScript data to match C++
+                     this.analyzed.index = this.analyzed.which;
+                     this.analyzed.which = null;
+                  }
+                  return true;
+               case "script_stat":
+                  if (!item.has_index()) {
+                     validator.report(this, `You must specify which stat to access.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (player.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.player_stat;
+                  this.analyzed.index = item.index; // TODO: validate that the index is in bounds
+                  this.analyzed.which = null;
+                  return true;
+               case "team":
+                  if (item.has_index()) {
+                     validator.report(this, `Player teams cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Property access of the form (player.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.team;
+                  this.analyzed.scope = team_var_scope.player_owner_team;
+                  if (this.analyzed.index) {
+                     this.analyzed.which = this.analyzed.index;
+                     this.analyzed.index = null;
+                  }
+                  return true;
+               case "unknown_09":
+                  if (item.has_index()) {
+                     validator.report(this, `Player unknown_09s cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (player.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.unknown_09;
+                  if (this.analyzed.which) { // conform JavaScript data to match C++
+                     this.analyzed.index = this.analyzed.which;
+                     this.analyzed.which = null;
+                  }
+                  return true;
             }
             break;
          case var_type.team:
+            switch (item.name) { // global.player[n].property
+               case "score":
+                  if (item.has_index()) {
+                     validator.report(this, `Team scores cannot be indexed.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (team.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.team_score;
+                  if (this.analyzed.which) { // conform JavaScript data to match C++
+                     this.analyzed.index = this.analyzed.which;
+                     this.analyzed.which = null;
+                  }
+                  return true;
+               case "script_stat":
+                  if (!item.has_index()) {
+                     validator.report(this, `You must specify which stat to access.`);
+                     return false;
+                  }
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Accessors of the form (team.property.anything) are invalid.`);
+                     return false;
+                  }
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.scope = number_var_scope.team_stat;
+                  this.analyzed.index = item.index; // TODO: validate that the index is in bounds
+                  this.analyzed.which = null;
+                  return true;
+            }
             break;
          default:
             validator.report(this, `Property access on a variable type that does not support properties.`);
