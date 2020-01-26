@@ -976,25 +976,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                   }
                   return true;
                }
-               if (item.name == "script_stat") { // indexed_data: script stats
-                  //
-                  // TODO: We handle this wrong; stats must be a member on players or teams, not an unscoped variable.
-                  //
-                  if (!item.has_index()) {
-                     validator.report(this, `If you wish to access a script stat, you must specify which one.`);
-                     return false;
-                  }
-                  // TODO: bounds-check the index (we can just do this in C++)
-                  this.analyzed.scope = var_scope.global;
-                  this.analyzed.type  = var_type.number;
-                  this.analyzed.which = "script_stat[" + item.index + "]"; // in C++ we want this to be the "scalar value type" enum
-                  this.analyzed.is_read_only = true;
-                  if (this.parts.length > (index + 1)) {
-                     validator.report(this, `Script stats don't have properties.`);
-                     return false;
-                  }
-                  return true;
-               }
                if (item.name == "script_traits") { // indexed_data: script traits
                   if (!item.has_index()) {
                      validator.report(this, `If you wish to access a set of scripted player traits, you must specify which one.`);
@@ -1170,8 +1151,8 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                   }
                   this.analyzed.type  = var_type.number;
                   this.analyzed.scope = number_var_scope.player_stat;
+                  this.analyzed.which = this.analyzed.which; // which/index handling will likely differ between JavaScript and C++
                   this.analyzed.index = item.index; // TODO: validate that the index is in bounds
-                  this.analyzed.which = null;
                   return true;
                case "team":
                   if (item.has_index()) {
@@ -1236,8 +1217,8 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                   }
                   this.analyzed.type  = var_type.number;
                   this.analyzed.scope = number_var_scope.team_stat;
+                  this.analyzed.which = this.analyzed.which; // which/index handling will likely differ between JavaScript and C++
                   this.analyzed.index = item.index; // TODO: validate that the index is in bounds
-                  this.analyzed.which = null;
                   return true;
             }
             break;
