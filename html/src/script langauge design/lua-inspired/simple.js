@@ -104,6 +104,16 @@ const var_type = _make_enum([
    "team",
    "timer",
 ]);
+function var_type_to_var_scope(type) {
+   switch (type) {
+      case var_type.number: return null;
+      case var_type.object: return var_scope.object;
+      case var_type.player: return var_scope.player;
+      case var_type.team:   return var_scope.team;
+      case var_type.timer:  return null;
+   }
+   return null;
+}
 
 // currently in variables_and_scopes.cpp. need to add real enums alongside these -- messy. :(
 const megalo_objects = _make_enum([
@@ -755,8 +765,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
          return true;
       //
-      
-      //
       // There are sixty-one possible variables not accounting for indices (i.e. counting 
       // player[0] and player[1] as "the same" variable). However, all such variables fall 
       // into one of the following patterns:
@@ -1002,19 +1010,54 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //
       // REMAINING AT THIS POINT: namespace.var.var, situational.var, static.var
       //
+      // Right now, (this.analyzed) refers to the containing variable; for example, if we are 
+      // accessing (global.object[0].player[1]), then (this.analyzed) refers to (global.object[0]).
+      //
       switch (item.name) {
          case "number":
-            // TODO
          case "object":
-            // TODO
          case "player":
-            // TODO
          case "team":
-            // TODO
          case "timer":
-            // TODO
+            break;
+         default:
+            validator.report(this, `Unrecognized variable "${this.serialize()}".`);
+            return false;
       }
-      
+      if (!item.has_index()) {
+         validator.report(this, `You must specify which ${item.name} variable you mean.`);
+         return false;
+      }
+      this.analyzed.scope = var_type_to_var_scope(this.analyzed.type);
+      switch (item.name) {
+         case "number":
+            this.analyzed.which = this.analyzed.index;
+            this.analyzed.index = item.index;
+            this.analyzed.type = var_type.number;
+            break;
+         case "object":
+            this.analyzed.which = this.analyzed.index;
+            this.analyzed.index = item.index;
+            this.analyzed.type = var_type.object;
+            break;
+         case "player":
+            this.analyzed.which = this.analyzed.index;
+            this.analyzed.index = item.index;
+            this.analyzed.type = var_type.player;
+            break;
+         case "team":
+            this.analyzed.which = this.analyzed.index;
+            this.analyzed.index = item.index;
+            this.analyzed.type = var_type.team;
+            break;
+         case "timer":
+            this.analyzed.which = this.analyzed.index;
+            this.analyzed.index = item.index;
+            this.analyzed.type = var_type.timer;
+            break;
+         default: throw new Error("[DEV] You need to keep this switch-case in synch with the one above.");
+      }
+      return true;
       //
       // SPECIFIC LIST OF ALL VARIABLES (different indices not listed):
       //
@@ -1080,8 +1123,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // current_object.team              // object.team (keyword.team) // also for killed_object, etc.
       // global.object[0].team            // object.team (var.team)
       //
-      validator.report(this, `Unrecognized variable "${this.serialize()}".`);
-      return false;
    }
 }
 
