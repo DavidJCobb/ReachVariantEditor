@@ -33,6 +33,31 @@ function _make_enum(list) {
    
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
+    - Make it case-insensitive.
+    
+    = CURRENTLY, WE ONLY HANDLE THE "team" AND "biped" PROPERTIES ON VARIABLES, 
+      AND WE HANDLE THEM INLINE. WE SHOULD MOVE PROPERTY-HANDLING TO A MEMBER 
+      FUNCTION.
+    
+    - Fix how we handle script_stat[n]. Currently we treat that as a global but it 
+      actually can't be accessed that way; it HAS to be a property on any global 
+      player or team (i.e. namespace.var.stat or situational.stat or static.stat).
+      
+    - Add support for the "score" properties on players and teams. As with script 
+      stats, these can only be accessed on a global player or team (i.e. 
+      namespace.var.score or situational.score or static.score).
+    
+    - Add support for the "unknown09" property on players. As with script stats, 
+      these can only be accessed on a global player (i.e. namespace.player.unk09 
+      or situational.unk09 or static.unk09).
+    
+    - Add support for the "rating" property on players. As with script stats, 
+      these can only be accessed on a global player (i.e. namespace.player.rating 
+      or situational.rating or static.rating).
+      
+    - Add support for the "spawn sequence" property on objects. This can only be 
+      accessed on a global object (i.e. global.object.ss or situational.ss).
+   
    NOTE: We don't have a way to specify event triggers e.g. object death events. I 
    think we should do that with an "on" keyword (only permitted at the top level) 
    and a colon, e.g.
@@ -200,8 +225,8 @@ function var_scope_to_biped_scope(vs) {
 //
 const team_var_scope = _make_enum([
    "global",
-   "object",
    "player",
+   "object",
    "team",
    "object_owner_team",
    "player_owner_team",
@@ -215,6 +240,18 @@ function var_scope_to_team_scope(vs) {
    }
    return null;
 }
+//
+const timer_var_scope = _make_enum([
+   "global",
+   "player",
+   "team",
+   "object",
+   "object_owner_team",
+   "player_owner_team",
+   "round_timer",
+   "sudden_death_timer",
+   "grace_period_timer",
+]);
 
 // currently in variables_and_scopes.cpp. need to add real enums alongside these -- messy. :(
 const megalo_objects = _make_enum([
@@ -778,9 +815,9 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    namespace.var.var           // e.g. global.object[0].player[0]       // this doesn't nest further, i.e. there is no (namespace.var.var.var), though (namespace.var.var.property) may exist as noted in this list
       //    static                      // e.g. player[0]                        // global-scoped under the hood; you can have static players or teams
       //    static.var                  // e.g. player[0].object[0]              // 
-      //    any_player.biped            // e.g. current_player.biped             // any player e.g. situational, static, var
-      //    any_player.team             // e.g. current_player.team              // any player e.g. situational, static, var; is a global-scoped team var under the hood
-      //    any_object.team             // e.g. current_object.team              // any object e.g. situational, static, var; is a global-scoped team var under the hood
+      //    global_object.property      // e.g. current_object.spawn_sequence    // any non-nested object e.g. situational, static, global.object
+      //    global_player.property      // e.g. current_player.team              // any non-nested player e.g. situational, static, global.player
+      //    any_player.biped            // e.g. global.object[0].player[0].biped // any player e.g. situational, static, global.var, global.var.var
       //    indexed_data                // e.g. script_option[0]                 // options, traits, and stats
       //
       // There are two additional patterns that can appear in code as well:
@@ -788,7 +825,9 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    game.state_value            // e.g. game.round_limit                 // 
       //    function_argument_enum      // e.g. basis.create_object(flag, ...)   // MVariableReferences that are function call args need special handling; MVariableReference::is_single may help
       // 
-      // As such, if we handle the above patterns, then we handle all variables.
+      // As such, if we handle the above patterns, then we handle all variables. Note that 
+      // throughout this function, we will be using the term "property" to refer to non-
+      // variable fields accessible on variables: biped, spawn_sequence, team, and so on.
       //
       let index = 0;
       let item  = this.parts[index];
@@ -888,6 +927,15 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
             case "death_event_damage_type":
                this.analyzed.type  = var_type.number;
                this.analyzed.scope = number_var_scope[item.name];
+               this.analyzed.which = null;
+               this.analyzed.index = null;
+               this.analyzed.is_read_only = true;
+               break;
+            case "round_timer":
+            case "sudden_death_timer":
+            case "grace_period_timer":
+               this.analyzed.type  = var_type.timer;
+               this.analyzed.scope = timer_var_scope[item.name];
                this.analyzed.which = null;
                this.analyzed.index = null;
                this.analyzed.is_read_only = true;
@@ -1048,8 +1096,9 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       }
       switch (this.analyzed.type) {
          //
-         // This switch-case handles namespace.var.team and namespace.var.biped, and it 
-         // gates execution out on (namespace.var.property) and (namespace.var.var).
+         // Validate property/nested-variable access on a given type (i.e. guard against 
+         // global.number.variable), and handle properties that exist on global variables 
+         // (i.e. situational.property, static.property, and global.var.property).
          //
          case var_type.object:
             if (item.name == "team") { // situational.team, static.team, global.object[n].team
@@ -1139,6 +1188,9 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       if (!item)
          return true;
       switch (item.name) {
+         //
+         // Handle properties that can appear on non-global variables (i.e. global.anything.anything.property).
+         //
          case "biped": // global.anything.player[n].biped
             if (this.analyzed.type == var_type.player) {
                if (this.parts.length > (index + 1)) {
