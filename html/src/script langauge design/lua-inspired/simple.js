@@ -31,6 +31,16 @@ function _make_enum(list) {
    parsing. If there is a function by the targeted name, the error message should 
    note that functions can't be aliased.
    
+   WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
+   
+   NOTE: We don't have a way to specify event triggers e.g. object death events. I 
+   think we should do that with an "on" keyword (only permitted at the top level) 
+   and a colon, e.g.
+   
+      on object death: for each player do
+         -- ...
+      end
+   
    ---------------------------------------------------------------------------------
    
    REMINDER: The second stage of parsing entails:
@@ -771,26 +781,24 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    instance for each variable of a given type in a given scope, but rather 
       //    one per type per scope, i.e. one MVariable for all Global.Numbers.
       //
+      // ACTUALLY, A BETTER IDEA: Use the "POSSIBLE PATTERNS" list below as the basis 
+      // of an approach to doing this.
+      //
       
       //
       // POSSIBLE PATTERNS:
       // 
-      // loop                        // e.g. current_player                   // global-scoped under the hood
-      // loop_player.biped           // e.g. current_player.biped             // global-scoped under the hood
-      // loop_object.owner_team      // e.g. current_object.team              // global-scoped under the hood
-      // loop_player.owner_team      // e.g. current_player.team              // global-scoped under the hood
-      // namespace.var               // e.g. global.object[0]                 // 
-      // namespace.var.var           // e.g. global.object[0].player[0]       // 
-      // namespace.player.biped      // e.g. global.player[0].biped           // 
-      // namespace.var.player.biped  // e.g. global.player[0].player[0].biped // 
-      // namespace.object.owner_team // e.g. global.object[0].team            // global-scoped under the hood
-      // namespace.player.owner_team // e.g. global.player[0].team            // global-scoped under the hood
-      // static                      // e.g. player[0]                        // global-scoped under the hood
+      // situational                 // e.g. current_player; killed_object    // global-scoped under the hood
+      // namespace.var               // e.g. global.object[0]                 // the only valid namespace for variables is "player"
+      // namespace.var.var           // e.g. global.object[0].player[0]       // this doesn't nest further, i.e. there is no (namespace.var.var.var), though (namespace.var.var.property) may exist as noted in this list
+      // static                      // e.g. player[0]                        // global-scoped under the hood; you can have static players or teams
       // static.var                  // e.g. player[0].object[0]              //
-      // static_player.biped         // e.g. player[0].biped                  // global-scoped under the hood
-      // static_player.owner_team    // e.g. player[0].team                   // global-scoped under the hood
-      // data                        // e.g. script_option[0]                 // options, traits, and stats
-      // game_state                  // e.g. game.round_limit                 // 
+      // any_player.biped            // e.g. current_player.biped             // any player e.g. loop, static, var
+      // any_player.team             // e.g. current_player.team              // any player e.g. loop, static, var; is a global-scoped team var under the hood
+      // any_object.team             // e.g. current_object.team              // any object e.g. loop, static, var; is a global-scoped team var under the hood
+      // indexed_data                // e.g. script_option[0]                 // options, traits, and stats
+      // game.state_value            // e.g. game.round_limit                 // 
+      // function_argument_enum      // e.g. basis.create_object(flag, ...)   // MVariableReferences that are function call args need special handling
       // 
       //
       // DONE (BUT NEEDS TESTING):
