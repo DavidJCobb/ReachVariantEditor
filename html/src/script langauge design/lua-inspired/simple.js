@@ -94,6 +94,8 @@ const var_scope = _make_enum([
    "object",
    "player",
    "team",
+   "object_owner_team", // team variables only
+   "player_owner_team", // team variables only
 ]);
 const var_type = _make_enum([
    "number",
@@ -379,6 +381,8 @@ class MBlock extends MParsedItem {
       return text;
    }
    validate(validator) {
+      for(let condition of this.conditions)
+         condition.validate(validator);
       //
       // TODO: We need to keep track of what aliases are in-scope as we iterate through 
       // items, so that MVariableReferences can track that properly; we also need to 
@@ -451,6 +455,29 @@ class MStringLiteral extends MParsedItem {
       return '"' + this.text + '"';
    }
 }
+
+class MSituationalVariableDefinition {
+   constructor(name, type, is_none) {
+      this.name    = name;
+      this.type    = type;
+      this.is_none = is_none;
+   }
+}
+const situational_variables = [
+   new MSituationalVariableDefinition("no_object", var_type.object, true),
+   new MSituationalVariableDefinition("no_player", var_type.player, true),
+   new MSituationalVariableDefinition("no_team",   var_type.team,   true),
+   new MSituationalVariableDefinition("current_object", var_type.object, false),
+   new MSituationalVariableDefinition("current_player", var_type.player, false),
+   new MSituationalVariableDefinition("current_team",   var_type.team,   false),
+   new MSituationalVariableDefinition("hud_player",        var_type.player, false),
+   new MSituationalVariableDefinition("hud_target_object", var_type.object, false), // biped?
+   new MSituationalVariableDefinition("hud_target_player", var_type.player, false),
+   new MSituationalVariableDefinition("killed_object", var_type.object, false),
+   new MSituationalVariableDefinition("killer_object", var_type.object, false),
+   new MSituationalVariableDefinition("killer_player", var_type.player, false),
+   new MSituationalVariableDefinition("neutral_team",  var_type.team, false),
+];
 class MVariablePart {
    constructor(name, index) {
       this.name  = name || "";
@@ -578,6 +605,10 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       return this.serialize();
    }
    //
+   is_single() {
+      return this.parts.length == 1 && !this.parts[0].has_index();
+   }
+   //
    resolve_aliases(validator) {
       //
       // TODO: If there is an alias anywhere in our (parts), convert it to its 
@@ -591,6 +622,28 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    could be useful as a localization aid (picture a foreign-language 
       //    developer pasting a bunch of aliases at the top of the script to 
       //    translate as many names as possible to their language).
+      //
+      // I think the best way to do this is to:
+      //
+      //  - Resolve the MVariableReferences in MAliases.
+      //
+      //     - Modify the MVariableReference resolve function to take an argument 
+      //       indicating whether it's being called for an alias. If so, have it 
+      //       check whether the alias is relative or absolute and if it's relative, 
+      //       resolve that with custom logic and return.
+      //
+      //  - A "relative" alias has as its target (type.member[index]) such that it 
+      //    can be invoked as a member of any variable of that type. For example, 
+      //    (alias is_zombie = player.number[0]) is a relative alias and can be 
+      //    invoked as (current_player.is_zombie), (global.player[0].is_zombie), 
+      //    et cetera.
+      //
+      //    An "absolute" alias refers to a fully-qualified variable.
+      //
+      //  - When all in-scope aliases have been resolved, resolving variable 
+      //    references that may use aliases is simple: simply copy the alias's 
+      //    own resolved variable reference (if it's absolute) or construct an 
+      //    appropriate new reference from its data (if it's relative).
       //
    }
    //
@@ -694,113 +747,274 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
    }
    validate(validator) {
       this.resolve_aliases(validator);
+      //
+      // TODO: See comments in (resolve_aliases): we want to use this function (the function 
+      // that this very comment is inside of) to use custom logic right ***here*** when the 
+      // MVariableReference being resolved is the target for an MAlias.
+      //
       if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
          return true;
       //
-      let first = this.parts[0];
-      switch (first.name) { // handle unscoped built-in variables e.g. current_player
-         case "no_object":
-            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["no object"]);
-         case "no_player":
-            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["no player"]);
-         case "no_team":
-            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["no team"]);
-         case "current_object":
-            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["current object"]);
-         case "current_player":
-            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["current player"]);
-         case "current_team":
-            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["current team"]);
-         case "hud_player":
-            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["HUD player"]);
-         case "hud_target_player":
-            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["HUD target"]);
-         case "hud_target_object":
-            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["HUD target"]);
-         case "killed_object":
-            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["killed object"]);
-         case "killer_object":
-            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["killer object"]);
-         case "killer_player":
-            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_objects["killer player"]);
-         case "unk_14_team":
-            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["unk_14 team"]);
-         case "unk_15_team":
-            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["unk_15 team"]);
-      }
-      if (first.name == "player") {
-         this.analyzed.type  = var_type.player;
-         this.analyzed.scope = var_scope.global;
-         if (!first.has_index()) {
-            validator.report(this, `You must specify which player you mean, e.g. player[0] for Player 1.`);
-            return false;
-         }
-         if (first.index > 15) {
-            validator.report(this, `Index out of range. Halo: Reach only supports up to 16 players.`);
-            return false;
-         }
-         this.analyzed.which = megalo_players["Player " + (index + 1)];
-         //
-         return this.analyze_player_base(1);
-      }
-      if (first.name == "team") {
-         this.analyzed.type  = var_type.team;
-         this.analyzed.scope = var_scope.global;
-         if (!first.has_index()) {
-            validator.report(this, `You must specify which team you mean, e.g. team[0] for Team 1.`);
-            return false;
-         }
-         if (first.index > 8) {
-            validator.report(this, `Index out of range. Halo: Reach only supports up to 8 teams.`);
-            return false;
-         }
-         this.analyzed.which = megalo_teams["Team " + (index + 1)];
-         //
-         return this.analyze_team_base(1);
-      }
-      if (first.name == "neutral_team") {
-         this.analyzed.type  = var_type.team;
-         this.analyzed.scope = var_scope.global;
-         this.analyzed.which = megalo_teams["Neutral Team"];
-         if (first.has_index()) {
-            validator.report(this, `The "neutral_team" variable cannot be indexed.`);
-            return false;
-         }
-         return this.analyze_team_base(1);
-      }
-      //
       
       //
-      // TODO: Consider just creating a class for each possible variable/built-in, with 
-      // fields like "can have properties" (false for "no_object" and friends) and "is 
-      // read only." Instances of the class could offer a function to "decode" a given 
-      // MVariableReference.
+      // There are sixty-one possible variables not accounting for indices (i.e. counting 
+      // player[0] and player[1] as "the same" variable). However, all such variables fall 
+      // into one of the following patterns:
+      // 
+      //    situational                 // e.g. current_player; killed_object    // global-scoped under the hood
+      //    situational.var             // e.g. current_player.number[0]         // 
+      //    namespace.var               // e.g. global.object[0]                 // the only valid namespace for variables is "player"
+      //    namespace.var.var           // e.g. global.object[0].player[0]       // this doesn't nest further, i.e. there is no (namespace.var.var.var), though (namespace.var.var.property) may exist as noted in this list
+      //    static                      // e.g. player[0]                        // global-scoped under the hood; you can have static players or teams
+      //    static.var                  // e.g. player[0].object[0]              // 
+      //    any_player.biped            // e.g. current_player.biped             // any player e.g. situational, static, var
+      //    any_player.team             // e.g. current_player.team              // any player e.g. situational, static, var; is a global-scoped team var under the hood
+      //    any_object.team             // e.g. current_object.team              // any object e.g. situational, static, var; is a global-scoped team var under the hood
+      //    indexed_data                // e.g. script_option[0]                 // options, traits, and stats
       //
-      //  - C++ already has Megalo::VariableScope which just tracks variable indices. 
-      //    If we define this "MVariable" class idea, we wouldn't want an MVariable 
-      //    instance for each variable of a given type in a given scope, but rather 
-      //    one per type per scope, i.e. one MVariable for all Global.Numbers.
+      // There are two additional patterns that can appear in code as well:
       //
-      // ACTUALLY, A BETTER IDEA: Use the "POSSIBLE PATTERNS" list below as the basis 
-      // of an approach to doing this. Retain the list after implementation, to serve 
-      // as documentation.
+      //    game.state_value            // e.g. game.round_limit                 // 
+      //    function_argument_enum      // e.g. basis.create_object(flag, ...)   // MVariableReferences that are function call args need special handling; MVariableReference::is_single may help
+      // 
+      // As such, if we handle the above patterns, then we handle all variables.
       //
+      let index = 0;
+      let item  = this.parts[index];
+      if (item.name == "global") { // TODO: handle case-insensitivity // namespace.var or namespace.var.var or namespace.var.property or namespace.var.var.property
+         if (item.has_index()) {
+            validator.report(this, `Namespaces such as "global" cannot be indexed.`);
+            return false;
+         }
+         item = this.parts[++index];
+         if (!item) {
+            validator.report(this, `Namespaces such as "global" cannot be accessed directly.`);
+            return false;
+         }
+         switch (item.name) { // TODO: handle case-insensitivity
+            case "number":
+            case "timer": // TODO: change syntax (timer.rate = ...) to (timer.set_rate(...)) so that the syntax for timer rate is consistent with other setters
+               if (this.parts.length > (index + 1)) {
+                  validator.report(this, `Variables of type "${item.name}" cannot contain properties or other variables.`);
+                  return false;
+               }
+            case "object":
+            case "player":
+            case "team":
+               if (!item.has_index()) {
+                  validator.report(this, `You must specify which global ${item.name} variable you wish to use, e.g. "global.${item.name}[0]".`);
+                  return false;
+               }
+               break;
+            default:
+               validator.report(this, `The "global" namespace does not contain variables of type ${item.name}.`);
+               return false;
+         }
+         this.analyzed.scope = var_scope.global;
+         switch (item.name) {
+            case "number": this.analyzed.type = var_type.number; break;
+            case "object": this.analyzed.type = var_type.object; break;
+            case "player": this.analyzed.type = var_type.player; break;
+            case "team":   this.analyzed.type = var_type.team;   break;
+            case "timer":  this.analyzed.type = var_type.timer;  break;
+            default: throw new Error("[DEV] You need to keep this switch-case in synch with the one above.");
+         }
+         this.analyzed.index = item.index;
+         item = this.parts[++index];
+         if (!item)
+            return true;
+         //
+         // And fall through in order to handle namespace.var.property and namespace.var.var[.property].
+         //
+      } else if (item.name == "game") {
+         //
+         // TODO
+         //
+      } else {
+         assert(index == 0, "At this point, we should still be looking at the first item.");
+         let found   = false;
+         let is_none = false;
+         for(let situational of situational_variables) {
+            if (item.name == situational.name) {
+               found   = true;
+               is_none = situational.is_none;
+               this.analyzed.scope = var_scope.global;
+               this.analyzed.type  = situational.type;
+               this.analyzed.which = situational.name; // in C++ we want this to be the megalo_XXXXX enums
+               break;
+            }
+         }
+         if (found) {
+            item = this.parts[++index];
+            if (is_none && item) {
+               validator.report(this, `Cannot access properties on a "none" variable.`);
+               return false;
+            }
+            //
+            // And fall through in order to handle situational.property and situational.var[.property].
+            //
+         } else {
+            assert(index == 0, "At this point, we should still be looking at the first item.");
+            //
+            // REMAINING, AT THIS POINT: static; indexed_data
+            //
+            {  // indexed_data
+               if (item.name == "script_option") { // indexed_data: script options
+                  if (!item.has_index()) {
+                     validator.report(this, `If you wish to access a script option, you must specify which one.`);
+                     return false;
+                  }
+                  // TODO: bounds-check the index
+                  this.analyzed.scope = var_scope.global;
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.which = "script_option[" + item.index + "]"; // in C++ we want this to be the "scalar value type" enum
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Script options don't have properties.`);
+                     return false;
+                  }
+                  return true;
+               }
+               if (item.name == "script_stat") { // indexed_data: script stats
+                  if (!item.has_index()) {
+                     validator.report(this, `If you wish to access a script stat, you must specify which one.`);
+                     return false;
+                  }
+                  // TODO: bounds-check the index
+                  this.analyzed.scope = var_scope.global;
+                  this.analyzed.type  = var_type.number;
+                  this.analyzed.which = "script_stat[" + item.index + "]"; // in C++ we want this to be the "scalar value type" enum
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Script stats don't have properties.`);
+                     return false;
+                  }
+                  return true;
+               }
+               if (item.name == "script_traits") { // indexed_data: script traits
+                  if (!item.has_index()) {
+                     validator.report(this, `If you wish to access a set of scripted player traits, you must specify which one.`);
+                     return false;
+                  }
+                  // TODO: bounds-check the index
+                  this.analyzed.scope = var_scope.global;
+                  this.analyzed.type  = var_type.not_a_variable;
+                  this.analyzed.which = "script_traits[" + item.index + "]"; // in C++ we want this to be an enum
+                  if (this.parts.length > (index + 1)) {
+                     validator.report(this, `Scripted player traits don't have properties.`);
+                     return false;
+                  }
+                  return true;
+               }
+            }
+            //
+            // REMAINING, AT THIS POINT: static
+            //
+            if (item.name == "player") { // static player
+               if (!item.has_index()) {
+                  validator.report(this, `If you wish to access a static player, you must specify which one, e.g. player[0] for Player 1.`);
+                  return false;
+               }
+               if (item.index > 16) {
+                  validator.report(this, `Out-of-bounds static player. Halo: Reach only supports up to 16 players, and static players are zero-indexed.`);
+                  return false;
+               }
+               this.analyzed.scope = var_scope.global;
+               this.analyzed.type  = var_type.player;
+               this.analyzed.which = "player[" + item.index + "]"; // in C++ we want this to be the megalo_players enum
+               //
+               // And fall through in order to handle static.property and static.var[.property].
+               //
+            } else if (item.name == "team") { // static team
+               if (!item.has_index()) {
+                  validator.report(this, `If you wish to access a static team, you must specify which one, e.g. team[0] for Team 1.`);
+                  return false;
+               }
+               if (item.index > 8) {
+                  validator.report(this, `Out-of-bounds static team. Halo: Reach only supports up to 8 players, and static teams are zero-indexed.`);
+                  return false;
+               }
+               this.analyzed.scope = var_scope.global;
+               this.analyzed.type  = var_type.team;
+               this.analyzed.which = "team[" + item.index + "]"; // in C++ we want this to be the megalo_teams enum
+               //
+               // And fall through in order to handle static.property and static.var[.property].
+               //
+            } else {
+               validator.report(this, `Unrecognized variable root ${item.name}.`);
+               return false;
+            }
+            item = this.parts[++index];
+            //
+            // And fall through to handle properties.
+            //
+         }
+      }
+      if (!item) // We've reached the end.
+         return true;
+      //
+      // NOW, WE NEED TO HANDLE PROPERTIES:
+      //
+      //    situational.var
+      //    static.var
+      //    namespace.var.var
+      //    any_object.team
+      //    any_player.biped
+      //    any_player.team
+      //
+      if (this.analyzed.type === null) {
+         validator.report(this, `Property access on unknown type.`);
+         return false;
+      }
+      switch (this.analyzed.type) {
+         case var_type.object:
+            if (item.name == "team") { // any_object.team
+               if (this.parts.length > (index + 1)) {
+                  validator.report(this, `Property access of the form (object.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
+                  return false;
+               }
+               this.analyzed.scope = var_scope.object_owner_team;
+               return true;
+            }
+            break;
+         case var_type.player:
+            if (item.name == "team") { // any_player.team
+               if (this.parts.length > (index + 1)) {
+                  validator.report(this, `Property access of the form (player.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
+                  return false;
+               }
+               this.analyzed.scope = var_scope.player_owner_team;
+               return true;
+            }
+            if (item.name == "biped") { // any_player.biped
+               if (this.parts.length > (index + 1)) {
+                  validator.report(this, `Property access of the form (player.biped.anything) is invalid. Store the biped in an object variable and then access properties through that.`);
+                  return false;
+               }
+               this.analyzed.scope = "biped, but on what variable?"; // TODO: use the right scope value
+               return true;
+            }
+            break;
+         case var_type.team:
+            break;
+         default:
+            validator.report(this, `Property access on a variable type that does not support properties.`);
+            return false;
+      }
+      //
+      // REMAINING AT THIS POINT: namespace.var.var, situational.var, static.var
+      //
+      switch (item.name) {
+         case "number":
+            // TODO
+         case "object":
+            // TODO
+         case "player":
+            // TODO
+         case "team":
+            // TODO
+         case "timer":
+            // TODO
+      }
       
-      //
-      // POSSIBLE PATTERNS:
-      // 
-      // situational                 // e.g. current_player; killed_object    // global-scoped under the hood
-      // namespace.var               // e.g. global.object[0]                 // the only valid namespace for variables is "player"
-      // namespace.var.var           // e.g. global.object[0].player[0]       // this doesn't nest further, i.e. there is no (namespace.var.var.var), though (namespace.var.var.property) may exist as noted in this list
-      // static                      // e.g. player[0]                        // global-scoped under the hood; you can have static players or teams
-      // static.var                  // e.g. player[0].object[0]              //
-      // any_player.biped            // e.g. current_player.biped             // any player e.g. situational, static, var
-      // any_player.team             // e.g. current_player.team              // any player e.g. situational, static, var; is a global-scoped team var under the hood
-      // any_object.team             // e.g. current_object.team              // any object e.g. situational, static, var; is a global-scoped team var under the hood
-      // indexed_data                // e.g. script_option[0]                 // options, traits, and stats
-      // game.state_value            // e.g. game.round_limit                 // 
-      // function_argument_enum      // e.g. basis.create_object(flag, ...)   // MVariableReferences that are function call args need special handling
-      // 
       //
       // SPECIFIC LIST OF ALL VARIABLES (different indices not listed):
       //
@@ -870,6 +1084,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       return false;
    }
 }
+
 class MFunctionCall extends MParsedItem {
    constructor() {
       super();
@@ -934,6 +1149,16 @@ class MFunctionCall extends MParsedItem {
       //
       // TODO: Verify call arguments.
       //
+   }
+   //
+   is_condition() {
+      //
+      // I kinda don't like this because it isn't based on any intrinsic property of 
+      // MFunctionCalls, but rather on the behavior of other classes... but eh.
+      //
+      if (this.owner)
+         return this.owner instanceof MBlock; // if instanceof MAssignment, then action
+      return false;
    }
 }
 class MOperator extends MParsedItem {

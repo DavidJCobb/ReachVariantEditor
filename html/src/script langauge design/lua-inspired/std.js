@@ -6,3 +6,8 @@ Array.prototype.item = function(i) {
       return this[this.length + i];
    return this[i];
 }
+
+function assert(cond, message) {
+   if (!cond)
+      throw new Error(`Assertion failed: ${message}.`);
+}
