@@ -79,6 +79,100 @@ const block_type = _make_enum([
    "for_each_team",
    "function",
 ]);
+const var_scope = _make_enum([
+   "global",
+   "object",
+   "player",
+   "team",
+]);
+const var_type = _make_enum([
+   "number",
+   "object",
+   "player",
+   "team",
+   "timer",
+]);
+
+// currently in variables_and_scopes.cpp. need to add real enums alongside these -- messy. :(
+const megalo_objects = _make_enum([
+   "no object",
+   "Global.Object[0]",
+   "Global.Object[1]",
+   "Global.Object[2]",
+   "Global.Object[3]",
+   "Global.Object[4]",
+   "Global.Object[5]",
+   "Global.Object[6]",
+   "Global.Object[7]",
+   "Global.Object[8]",
+   "Global.Object[9]",
+   "Global.Object[10]",
+   "Global.Object[11]",
+   "Global.Object[12]",
+   "Global.Object[13]",
+   "Global.Object[14]",
+   "Global.Object[15]",
+   "current object",
+   "HUD target object",
+   "killed object",
+   "killer object",
+]);
+const megalo_players = _make_enum([
+   "no player",
+   "Player 1",
+   "Player 2",
+   "Player 3",
+   "Player 4",
+   "Player 5",
+   "Player 6",
+   "Player 7",
+   "Player 8",
+   "Player 9",
+   "Player 10",
+   "Player 11",
+   "Player 12",
+   "Player 13",
+   "Player 14",
+   "Player 15",
+   "Player 16",
+   "Global.Player[0]",
+   "Global.Player[1]",
+   "Global.Player[2]",
+   "Global.Player[3]",
+   "Global.Player[4]",
+   "Global.Player[5]",
+   "Global.Player[6]",
+   "Global.Player[7]",
+   "current player",
+   "HUD player",
+   "HUD target",
+   "killer player",
+]);
+const megalo_teams = _make_enum([
+   "no team",
+   "Team 1",
+   "Team 2",
+   "Team 3",
+   "Team 4",
+   "Team 5",
+   "Team 6",
+   "Team 7",
+   "Team 8",
+   "Neutral",
+   "Global.Team[0]",
+   "Global.Team[1]",
+   "Global.Team[2]",
+   "Global.Team[3]",
+   "Global.Team[4]",
+   "Global.Team[5]",
+   "Global.Team[6]",
+   "Global.Team[7]",
+   "current team",
+   "HUD player's team",
+   "HUD target's team",
+   "unk_14 team",
+   "unk_15 team",
+]);
 
 function is_operator_char(c) {
    return ("=<>!+-*/%&|~^").indexOf(c) >= 0;
@@ -285,8 +379,15 @@ class MBlock extends MParsedItem {
       // I'm not sure we need to construct that data in advance; instead, the validator 
       // could potentially handle the tracking for that, I think.
       //
-      for(let item of this.items)
+      let aliases = [];
+      for(let item of this.items) {
+         if (item instanceof MAlias) {
+            aliases.push(item);
+            validator.trackAlias(item);
+         }
          item.validate(validator);
+      }
+      validator.untrackAliases(aliases);
    }
 }
 class MConditionJoiner extends MParsedItem {
@@ -351,6 +452,11 @@ class MVariablePart {
             this.index = index;
       }
    }
+   has_index() {
+      if (+this.index === this.index)
+         return this.index >= 0;
+      return !!this.index;
+   }
    serialize() {
       if (+this.index === this.index && this.index < 0) {
          return this.name;
@@ -398,11 +504,19 @@ class MVariablePart {
       //
    }
 }
-class MVariableReference {
+class MVariableReference { // represents a variable, keyword, or aliased integer
    constructor(text) {
       this.parts = []; // std::vector<MVariablePart>
       if (text)
          this.extract(text);
+      this.analyzed = {
+         type:  null,
+         scope: null,
+         which: null,
+         index: null,
+         aliased_integer_constant: null, // if we turn out to be an alias
+         is_read_only: false,
+      };
    }
    extract(text) {
       let size     = text.length;
@@ -450,10 +564,304 @@ class MVariableReference {
       let list = this.parts.map(function(v) { return v.serialize(); });
       return list.join(".");
    }
+   toString() {
+      return this.serialize();
+   }
+   //
+   resolve_aliases(validator) {
+      //
+      // TODO: If there is an alias anywhere in our (parts), convert it to its 
+      // "real" value.
+      //
+      //  - If you alias (scope.variable[index]), then (scope[index].alias) is a 
+      //    valid invocation of the alias as long as that scope can be indexed.
+      //
+      //  - Currently we want to be as broad with aliases as possible, e.g. 
+      //    allowing the aliasing of scopes and of built-in property names. It 
+      //    could be useful as a localization aid (picture a foreign-language 
+      //    developer pasting a bunch of aliases at the top of the script to 
+      //    translate as many names as possible to their language).
+      //
+   }
+   //
+   analyze_game_state_var(validator) {
+      let first = this.parts[0];
+      if (first.has_index()) {
+         validator.report(this, `The built-in "game" variable cannot be indexed.`);
+         return false;
+      }
+      if (this.parts.length < 2) {
+         validator.report(this, `The built-in "game" variable cannot be referenced directly. Access a property.`);
+         return false;
+      }
+      let second = this.parts[1];
+      switch (second.name) {
+         case "betrayal_booting":
+         case "betrayal_penalty":
+         case "current_round":
+         case "death_event_damage_type":
+         case "friendly_fire":
+         case "grace_period":
+         case "grenades_on_map":
+         case "indestructible_vehicles":
+         case "lives_per_round":
+         case "loadout_cam_time":
+         case "powerup_duration_red":
+         case "powerup_duration_blue":
+         case "powerup_duration_yellow":
+         case "respawn_growth":
+         case "respawn_time":
+         case "respawn_traits_duration":
+         case "round_limit":
+         case "round_time_limit":
+         case "rounds_to_win":
+         case "score_to_win":
+         case "social_flags_bit_2":
+         case "social_flags_bit_3":
+         case "social_flags_bit_4":
+         case "sudden_death_time":
+         case "suicide_penalty":
+         case "symmetry_getter":
+         case "symmetry":
+         case "team_lives_per_round":
+         case "teams_enabled":
+            break;
+         default:
+            validator.report(this, `Property "${second.name}" does not exist on "game".`);
+            return false;
+      }
+      if (second.has_index()) {
+         validator.report(this, `"game.${second.name}" cannot be indexed.`);
+         return false;
+      }
+      if (this.parts.length > 2) {
+         validator.report(this, `"game.${second.name}" has no properties.`);
+         return false;
+      }
+      return true;
+   }
+   analyze_object_base(validator, from_offset) {
+      if (this.analyzed.which == megalo_objects["no object"]) {
+         if (this.parts.length > 1) {
+            validator.report(this, `Cannot access properties on the "no_object" constant.`);
+            return false;
+         }
+      }
+      // TODO
+   }
+   analyze_player_base(validator, from_offset) {
+      if (this.analyzed.which == megalo_players["no player"]) {
+         if (this.parts.length > 1) {
+            validator.report(this, `Cannot access properties on the "no_player" constant.`);
+            return false;
+         }
+      }
+      // TODO
+   }
+   analyze_team_base(validator, from_offset) {
+      if (this.analyzed.which == megalo_teams["no team"]) {
+         if (this.parts.length > 1) {
+            validator.report(this, `Cannot access properties on the "no_team" constant.`);
+            return false;
+         }
+      }
+      // TODO
+   }
+   analyze_unscoped_builtin(validator, type, which) {
+      this.analyzed.type  = type;
+      this.analyzed.which = which;
+      this.analyzed.scope = var_scope.global;
+      let first = this.parts[0];
+      if (first.has_index()) {
+         validator.report(this, `The "${first.name}" variable cannot be indexed.`);
+         return false;
+      }
+      switch (type) {
+         case var_type.object: return this.analyze_object_base(1);
+         case var_type.player: return this.analyze_player_base(1);
+         case var_type.team:   return this.analyze_team_base(1);
+      }
+   }
    validate(validator) {
+      this.resolve_aliases(validator);
+      if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
+         return true;
       //
-      // TODO: Verify that we're accessing an existing variable or alias.
+      let first = this.parts[0];
+      switch (first.name) { // handle unscoped built-in variables e.g. current_player
+         case "no_object":
+            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["no object"]);
+         case "no_player":
+            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["no player"]);
+         case "no_team":
+            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["no team"]);
+         case "current_object":
+            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["current object"]);
+         case "current_player":
+            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["current player"]);
+         case "current_team":
+            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["current team"]);
+         case "hud_player":
+            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["HUD player"]);
+         case "hud_target_player":
+            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_players["HUD target"]);
+         case "hud_target_object":
+            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["HUD target"]);
+         case "killed_object":
+            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["killed object"]);
+         case "killer_object":
+            return this.analyze_unscoped_builtin(validator, var_type.object, megalo_objects["killer object"]);
+         case "killer_player":
+            return this.analyze_unscoped_builtin(validator, var_type.player, megalo_objects["killer player"]);
+         case "unk_14_team":
+            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["unk_14 team"]);
+         case "unk_15_team":
+            return this.analyze_unscoped_builtin(validator, var_type.team, megalo_teams["unk_15 team"]);
+      }
+      if (first.name == "player") {
+         this.analyzed.type  = var_type.player;
+         this.analyzed.scope = var_scope.global;
+         if (!first.has_index()) {
+            validator.report(this, `You must specify which player you mean, e.g. player[0] for Player 1.`);
+            return false;
+         }
+         if (first.index > 15) {
+            validator.report(this, `Index out of range. Halo: Reach only supports up to 16 players.`);
+            return false;
+         }
+         this.analyzed.which = megalo_players["Player " + (index + 1)];
+         //
+         return this.analyze_player_base(1);
+      }
+      if (first.name == "team") {
+         this.analyzed.type  = var_type.team;
+         this.analyzed.scope = var_scope.global;
+         if (!first.has_index()) {
+            validator.report(this, `You must specify which team you mean, e.g. team[0] for Team 1.`);
+            return false;
+         }
+         if (first.index > 8) {
+            validator.report(this, `Index out of range. Halo: Reach only supports up to 8 teams.`);
+            return false;
+         }
+         this.analyzed.which = megalo_teams["Team " + (index + 1)];
+         //
+         return this.analyze_team_base(1);
+      }
+      if (first.name == "neutral_team") {
+         this.analyzed.type  = var_type.team;
+         this.analyzed.scope = var_scope.global;
+         this.analyzed.which = megalo_teams["Neutral Team"];
+         if (first.has_index()) {
+            validator.report(this, `The "neutral_team" variable cannot be indexed.`);
+            return false;
+         }
+         return this.analyze_team_base(1);
+      }
       //
+      
+      //
+      // TODO: Consider just creating a class for each possible variable/built-in, with 
+      // fields like "can have properties" (false for "no_object" and friends) and "is 
+      // read only." Instances of the class could offer a function to "decode" a given 
+      // MVariableReference.
+      //
+      //  - C++ already has Megalo::VariableScope which just tracks variable indices. 
+      //    If we define this "MVariable" class idea, we wouldn't want an MVariable 
+      //    instance for each variable of a given type in a given scope, but rather 
+      //    one per type per scope, i.e. one MVariable for all Global.Numbers.
+      //
+      
+      //
+      // POSSIBLE PATTERNS:
+      // 
+      // loop                        // e.g. current_player                   // global-scoped under the hood
+      // loop_player.biped           // e.g. current_player.biped             // global-scoped under the hood
+      // loop_object.owner_team      // e.g. current_object.team              // global-scoped under the hood
+      // loop_player.owner_team      // e.g. current_player.team              // global-scoped under the hood
+      // namespace.var               // e.g. global.object[0]                 // 
+      // namespace.var.var           // e.g. global.object[0].player[0]       // 
+      // namespace.player.biped      // e.g. global.player[0].biped           // 
+      // namespace.var.player.biped  // e.g. global.player[0].player[0].biped // 
+      // namespace.object.owner_team // e.g. global.object[0].team            // global-scoped under the hood
+      // namespace.player.owner_team // e.g. global.player[0].team            // global-scoped under the hood
+      // static                      // e.g. player[0]                        // global-scoped under the hood
+      // static.var                  // e.g. player[0].object[0]              //
+      // static_player.biped         // e.g. player[0].biped                  // global-scoped under the hood
+      // static_player.owner_team    // e.g. player[0].team                   // global-scoped under the hood
+      // data                        // e.g. script_option[0]                 // options, traits, and stats
+      // game_state                  // e.g. game.round_limit                 // 
+      // 
+      //
+      // DONE (BUT NEEDS TESTING):
+      //
+      // no_object
+      // no_player
+      // no_team
+      // player[0]         // static player
+      // team[0]           // static team
+      // neutral_team      // static team (neutral)
+      // current_object    // loop variable
+      // current_player    // loop variable
+      // current_team      // loop variable
+      // hud_player
+      // hud_target_player
+      // hud_target_object
+      // killed_object
+      // killer_object
+      // killer_player
+      // hud_player.team
+      // hud_target.team
+      // unk_14_team
+      // unk_15_team
+      //
+      // REMAINING:
+      //
+      // script_option[0]
+      // script_stat[0]
+      // script_string[0]
+      // script_traits[0]
+      // global.number[0]  // global.number variable
+      // global.object[0]  // global.object variable
+      // global.player[0]  // global.player variable
+      // global.team[0]    // global.team   variable
+      // global.timer[0]   // global.timer  variable
+      // global.object[0].number[0] // object.number variable (namespace.var)
+      // global.object[0].object[0] // object.object variable (namespace.var)
+      // global.object[0].player[0] // object.player variable (namespace.var)
+      // global.object[0].team[0]   // object.team   variable (namespace.var)
+      // global.object[0].timer[0]  // object.timer  variable (namespace.var)
+      // player[0].number[0]        // player.number variable (static.var)
+      // global.player[0].number[0] // player.number variable (var.var)
+      // player[0].object[0]        // player.object variable (static.var)
+      // global.player[0].object[0] // player.object variable (var.var)
+      // player[0].player[0]        // player.player variable (static.var)
+      // global.player[0].player[0] // player.player variable (var.var)
+      // player[0].team[0]          // player.team   variable (static.var)
+      // global.player[0].team[0]   // player.team   variable (var.var)
+      // player[0].timer[0]         // player.timer  variable (static.var)
+      // global.player[0].timer[0]  // player.timer  variable (var.var)
+      // team[0].number[0]          // team.number   variable (static.var)
+      // global.team[0].number[0]   // team.number   variable (var.var)
+      // team[0].object[0]          // team.object   variable (static.var)
+      // global.team[0].object[0]   // team.object   variable (var.var)
+      // team[0].player[0]          // team.player   variable (static.var)
+      // global.team[0].player[0]   // team.player   variable (var.var)
+      // team[0].team[0]            // team.team     variable (static.var)
+      // global.team[0].team[0]     // team.team     variable (var.var)
+      // team[0].timer[0]           // team.timer    variable (static.var)
+      // global.team[0].timer[0]    // team.timer    variable (var.var)
+      // player[0].biped                  // player.biped        (static.biped)
+      // global.object[0].player[0].biped // object.player.biped (var.var.biped)
+      // global.player[0].player[0].biped // player.player.biped (var.var.biped)
+      // global.team[0].player[0].biped   // team.player.biped   (var.var.biped)
+      // current_player.team              // player.team (keyword.team) // also for hud_player, etc.
+      // player[0].team                   // player.team (static.team)
+      // current_object.team              // object.team (keyword.team) // also for killed_object, etc.
+      // global.object[0].team            // object.team (var.team)
+      //
+      validator.report(this, `Unrecognized variable "${this.serialize()}".`);
+      return false;
    }
 }
 class MFunctionCall extends MParsedItem {
@@ -619,10 +1027,12 @@ class MAssignment extends MParsedItem {
    validate(validator) {
       if (+this.target === this.target)
          validator.report(this, "You cannot assign to a constant integer.");
-      else if (this.target instanceof MParsedItem)
+      else if (this.target instanceof MVariableReference)
          this.target.validate(validator);
       //
-      if (this.source instanceof MParsedItem)
+      // TODO: Fail if assigning to a read-only target.
+      //
+      if (this.source instanceof MParsedItem || this.source instanceof MVariableReference)
          this.source.validate(validator);
    }
 }
