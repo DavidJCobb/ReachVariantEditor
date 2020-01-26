@@ -94,8 +94,6 @@ const var_scope = _make_enum([
    "object",
    "player",
    "team",
-   "object_owner_team", // team variables only
-   "player_owner_team", // team variables only
 ]);
 const var_type = _make_enum([
    "number",
@@ -111,6 +109,109 @@ function var_type_to_var_scope(type) {
       case var_type.player: return var_scope.player;
       case var_type.team:   return var_scope.team;
       case var_type.timer:  return null;
+   }
+   return null;
+}
+//
+const number_var_scope = _make_enum([
+   "constant",
+   "player_number",
+   "object_number",
+   "team_number",
+   "global_number",
+   "script_option",
+   "spawn_sequence",
+   "team_score",
+   "player_score",
+   "unknown_09", // unused in Reach? used in Halo 4?
+   "player_rating",
+   "player_stat",
+   "team_stat",
+   "current_round",
+   "symmetry_getter",
+   "symmetry",
+   "score_to_win",
+   "unkF7A6",
+   "teams_enabled",
+   "round_time_limit",
+   "round_limit",
+   "misc_unk0_bit3",
+   "rounds_to_win",
+   "sudden_death_time",
+   "grace_period",
+   "lives_per_round",
+   "team_lives_per_round",
+   "respawn_time",
+   "suicide_penalty",
+   "betrayal_penalty",
+   "respawn_growth",
+   "loadout_cam_time",
+   "respawn_traits_duration",
+   "friendly_fire",
+   "betrayal_booting",
+   "social_flags_bit_2",
+   "social_flags_bit_3",
+   "social_flags_bit_4",
+   "grenades_on_map",
+   "indestructible_vehicles",
+   "powerup_duration_red",
+   "powerup_duration_blue",
+   "powerup_duration_yellow",
+   "death_event_damage_type",
+]);
+function var_scope_to_number_scope(vs) {
+   switch (vs) {
+      case var_scope.global: return number_var_scope.global_number;
+      case var_scope.object: return number_var_scope.object_number;
+      case var_scope.player: return number_var_scope.player_number;
+      case var_scope.team:   return number_var_scope.team_number;
+   }
+   return null;
+}
+//
+const object_var_scope = _make_enum([
+   "global",
+   "player",
+   "object",
+   "team",
+   "global_player_biped", // KSoft.Tool calls these "player_slave"
+   "player_player_biped",
+   "object_player_biped",
+   "team_player_biped",
+]);
+function var_scope_to_object_scope(vs) {
+   switch (vs) {
+      case var_scope.global: return object_var_scope.global;
+      case var_scope.object: return object_var_scope.object;
+      case var_scope.player: return object_var_scope.player;
+      case var_scope.team:   return object_var_scope.team;
+   }
+   return null;
+}
+function var_scope_to_biped_scope(vs) {
+   switch (vs) {
+      case var_scope.global: return object_var_scope.global_player_biped;
+      case var_scope.object: return object_var_scope.object_player_biped;
+      case var_scope.player: return object_var_scope.player_player_biped;
+      case var_scope.team:   return object_var_scope.team_player_biped;
+   }
+   return null;
+}
+//
+const team_var_scope = _make_enum([
+   "global",
+   "object",
+   "player",
+   "team",
+   "object_owner_team",
+   "player_owner_team",
+]);
+function var_scope_to_team_scope(vs) {
+   switch (vs) {
+      case var_scope.global: return team_var_scope.global;
+      case var_scope.object: return team_var_scope.object;
+      case var_scope.player: return team_var_scope.player;
+      case var_scope.team:   return team_var_scope.team;
    }
    return null;
 }
@@ -558,7 +659,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          this.extract(text);
       this.analyzed = {
          type:  null,
-         scope: null,
+         scope: null, // var_scope OR the _scope enums on the opcode arg value classes
          which: null,
          index: null,
          aliased_integer_constant: null, // if we turn out to be an alias
@@ -657,104 +758,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //
    }
    //
-   analyze_game_state_var(validator) {
-      let first = this.parts[0];
-      if (first.has_index()) {
-         validator.report(this, `The built-in "game" variable cannot be indexed.`);
-         return false;
-      }
-      if (this.parts.length < 2) {
-         validator.report(this, `The built-in "game" variable cannot be referenced directly. Access a property.`);
-         return false;
-      }
-      let second = this.parts[1];
-      switch (second.name) {
-         case "betrayal_booting":
-         case "betrayal_penalty":
-         case "current_round":
-         case "death_event_damage_type":
-         case "friendly_fire":
-         case "grace_period":
-         case "grenades_on_map":
-         case "indestructible_vehicles":
-         case "lives_per_round":
-         case "loadout_cam_time":
-         case "powerup_duration_red":
-         case "powerup_duration_blue":
-         case "powerup_duration_yellow":
-         case "respawn_growth":
-         case "respawn_time":
-         case "respawn_traits_duration":
-         case "round_limit":
-         case "round_time_limit":
-         case "rounds_to_win":
-         case "score_to_win":
-         case "social_flags_bit_2":
-         case "social_flags_bit_3":
-         case "social_flags_bit_4":
-         case "sudden_death_time":
-         case "suicide_penalty":
-         case "symmetry_getter":
-         case "symmetry":
-         case "team_lives_per_round":
-         case "teams_enabled":
-            break;
-         default:
-            validator.report(this, `Property "${second.name}" does not exist on "game".`);
-            return false;
-      }
-      if (second.has_index()) {
-         validator.report(this, `"game.${second.name}" cannot be indexed.`);
-         return false;
-      }
-      if (this.parts.length > 2) {
-         validator.report(this, `"game.${second.name}" has no properties.`);
-         return false;
-      }
-      return true;
-   }
-   analyze_object_base(validator, from_offset) {
-      if (this.analyzed.which == megalo_objects["no object"]) {
-         if (this.parts.length > 1) {
-            validator.report(this, `Cannot access properties on the "no_object" constant.`);
-            return false;
-         }
-      }
-      // TODO
-   }
-   analyze_player_base(validator, from_offset) {
-      if (this.analyzed.which == megalo_players["no player"]) {
-         if (this.parts.length > 1) {
-            validator.report(this, `Cannot access properties on the "no_player" constant.`);
-            return false;
-         }
-      }
-      // TODO
-   }
-   analyze_team_base(validator, from_offset) {
-      if (this.analyzed.which == megalo_teams["no team"]) {
-         if (this.parts.length > 1) {
-            validator.report(this, `Cannot access properties on the "no_team" constant.`);
-            return false;
-         }
-      }
-      // TODO
-   }
-   analyze_unscoped_builtin(validator, type, which) {
-      this.analyzed.type  = type;
-      this.analyzed.which = which;
-      this.analyzed.scope = var_scope.global;
-      let first = this.parts[0];
-      if (first.has_index()) {
-         validator.report(this, `The "${first.name}" variable cannot be indexed.`);
-         return false;
-      }
-      switch (type) {
-         case var_type.object: return this.analyze_object_base(1);
-         case var_type.player: return this.analyze_player_base(1);
-         case var_type.team:   return this.analyze_team_base(1);
-      }
-   }
    validate(validator) {
       this.resolve_aliases(validator);
       //
@@ -829,15 +832,76 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          }
          this.analyzed.index = item.index;
          item = this.parts[++index];
-         if (!item)
+         if (!item) {
+            switch (this.analyzed.type) {
+               case var_type.number: this.analyzed.scope = number_var_scope.global_number; break;
+               case var_type.object: this.analyzed.scope = object_var_scope.global; break;
+               case var_type.team:   this.analyzed.scope = team_var_scope.global;   break;
+               case var_type.timer:  // TODO
+            }
             return true;
+         }
          //
          // And fall through in order to handle namespace.var.property and namespace.var.var[.property].
          //
       } else if (item.name == "game") {
-         //
-         // TODO
-         //
+         if (item.has_index()) {
+            validator.report(this, `Namespaces such as "game" cannot be indexed.`);
+            return false;
+         }
+         item = this.parts[++index];
+         if (!item) {
+            validator.report(this, `Namespaces such as "game" cannot be accessed directly.`);
+            return false;
+         }
+         switch (item.name) {
+            case "current_round":
+            case "symmetry_getter":
+            case "symmetry":
+            case "score_to_win":
+            case "unkF7A6":
+            case "teams_enabled":
+            case "round_time_limit":
+            case "round_limit":
+            case "misc_unk0_bit3":
+            case "rounds_to_win":
+            case "sudden_death_time":
+            case "grace_period":
+            case "lives_per_round":
+            case "team_lives_per_round":
+            case "respawn_time":
+            case "suicide_penalty":
+            case "betrayal_penalty":
+            case "respawn_growth":
+            case "loadout_cam_time":
+            case "respawn_traits_duration":
+            case "friendly_fire":
+            case "betrayal_booting":
+            case "social_flags_bit_2":
+            case "social_flags_bit_3":
+            case "social_flags_bit_4":
+            case "grenades_on_map":
+            case "indestructible_vehicles":
+            case "powerup_duration_red":
+            case "powerup_duration_blue":
+            case "powerup_duration_yellow":
+            case "death_event_damage_type":
+               this.analyzed.type  = var_type.number;
+               this.analyzed.scope = number_var_scope[item.name];
+               this.analyzed.which = null;
+               this.analyzed.index = null;
+               this.analyzed.is_read_only = true;
+               break;
+            default:
+               validator.report(this, `The "game" namespace does not contain a property named "${item.name}".`);
+               return false;
+         }
+         item = this.parts[++index];
+         if (item) {
+            validator.report(this, `Game state values do not, themselves, have properties.`);
+            return false;
+         }
+         return true;
       } else {
          assert(index == 0, "At this point, we should still be looking at the first item.");
          let found   = false;
@@ -849,6 +913,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                this.analyzed.scope = var_scope.global;
                this.analyzed.type  = situational.type;
                this.analyzed.which = situational.name; // in C++ we want this to be the megalo_XXXXX enums
+               this.analyzed.is_read_only = true;
                break;
             }
          }
@@ -872,10 +937,12 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                      validator.report(this, `If you wish to access a script option, you must specify which one.`);
                      return false;
                   }
-                  // TODO: bounds-check the index
-                  this.analyzed.scope = var_scope.global;
+                  // TODO: bounds-check the index (we can just do this in C++)
                   this.analyzed.type  = var_type.number;
-                  this.analyzed.which = "script_option[" + item.index + "]"; // in C++ we want this to be the "scalar value type" enum
+                  this.analyzed.scope = number_var_scope.script_option;
+                  this.analyzed.which = null;
+                  this.analyzed.index = item.index;
+                  this.analyzed.is_read_only = true;
                   if (this.parts.length > (index + 1)) {
                      validator.report(this, `Script options don't have properties.`);
                      return false;
@@ -883,14 +950,18 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                   return true;
                }
                if (item.name == "script_stat") { // indexed_data: script stats
+                  //
+                  // TODO: We handle this wrong; stats must be a member on players or teams, not an unscoped variable.
+                  //
                   if (!item.has_index()) {
                      validator.report(this, `If you wish to access a script stat, you must specify which one.`);
                      return false;
                   }
-                  // TODO: bounds-check the index
+                  // TODO: bounds-check the index (we can just do this in C++)
                   this.analyzed.scope = var_scope.global;
                   this.analyzed.type  = var_type.number;
                   this.analyzed.which = "script_stat[" + item.index + "]"; // in C++ we want this to be the "scalar value type" enum
+                  this.analyzed.is_read_only = true;
                   if (this.parts.length > (index + 1)) {
                      validator.report(this, `Script stats don't have properties.`);
                      return false;
@@ -902,10 +973,12 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                      validator.report(this, `If you wish to access a set of scripted player traits, you must specify which one.`);
                      return false;
                   }
-                  // TODO: bounds-check the index
+                  // TODO: bounds-check the index (we can just do this in C++)
                   this.analyzed.scope = var_scope.global;
                   this.analyzed.type  = var_type.not_a_variable;
-                  this.analyzed.which = "script_traits[" + item.index + "]"; // in C++ we want this to be an enum
+                  this.analyzed.which = "script_traits"; // in C++ we want this to be an enum
+                  this.analyzed.index = item.index;
+                  this.analyzed.is_read_only = true;
                   if (this.parts.length > (index + 1)) {
                      validator.report(this, `Scripted player traits don't have properties.`);
                      return false;
@@ -958,6 +1031,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       }
       if (!item) // We've reached the end.
          return true;
+      this.analyzed.is_read_only = false; // "current_object" would have set this to true, but we want "current_object.number[0]" to be writeable
       //
       // NOW, WE NEED TO HANDLE PROPERTIES:
       //
@@ -973,31 +1047,53 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          return false;
       }
       switch (this.analyzed.type) {
+         //
+         // This switch-case handles namespace.var.team and namespace.var.biped, and it 
+         // gates execution out on (namespace.var.property) and (namespace.var.var).
+         //
          case var_type.object:
-            if (item.name == "team") { // any_object.team
+            if (item.name == "team") { // situational.team, static.team, global.object[n].team
                if (this.parts.length > (index + 1)) {
                   validator.report(this, `Property access of the form (object.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
                   return false;
                }
-               this.analyzed.scope = var_scope.object_owner_team;
+               this.analyzed.type  = var_type.team;
+               this.analyzed.scope = team_var_scope.object_owner_team;
+               if (this.analyzed.index) {
+                  this.analyzed.which = this.analyzed.index;
+                  this.analyzed.index = null;
+               }
                return true;
             }
             break;
          case var_type.player:
-            if (item.name == "team") { // any_player.team
+            if (item.name == "team") { // situational.team, static.team, global.player[n].team
                if (this.parts.length > (index + 1)) {
                   validator.report(this, `Property access of the form (player.team.anything) is invalid. Store the team in a team variable and then access properties through that.`);
                   return false;
                }
-               this.analyzed.scope = var_scope.player_owner_team;
+               this.analyzed.type  = var_type.team;
+               this.analyzed.scope = team_var_scope.player_owner_team;
+               if (this.analyzed.index) {
+                  this.analyzed.which = this.analyzed.index;
+                  this.analyzed.index = null;
+               }
                return true;
             }
-            if (item.name == "biped") { // any_player.biped
+            if (item.name == "biped") { // global.player[n].biped
                if (this.parts.length > (index + 1)) {
                   validator.report(this, `Property access of the form (player.biped.anything) is invalid. Store the biped in an object variable and then access properties through that.`);
                   return false;
                }
-               this.analyzed.scope = "biped, but on what variable?"; // TODO: use the right scope value
+               //
+               // Right now: 
+               // global.player[0].biped           -> scope: global; type: player // handled here
+               // global.object[0].player[0].biped -> scope: object; type: player // handled below
+               //
+               this.analyzed.type  = var_type.object;
+               this.analyzed.scope = object_var_scope.global_player_biped;
+               this.analyzed.which = this.analyzed.which;
+               this.analyzed.is_read_only = true;
                return true;
             }
             break;
@@ -1008,7 +1104,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
             return false;
       }
       //
-      // REMAINING AT THIS POINT: namespace.var.var, situational.var, static.var
+      // REMAINING AT THIS POINT: namespace.var.var, situational.var, static.var (all including properties)
       //
       // Right now, (this.analyzed) refers to the containing variable; for example, if we are 
       // accessing (global.object[0].player[1]), then (this.analyzed) refers to (global.object[0]).
@@ -1029,35 +1125,36 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          return false;
       }
       this.analyzed.scope = var_type_to_var_scope(this.analyzed.type);
+      this.analyzed.which = this.analyzed.index;
+      this.analyzed.index = item.index;
       switch (item.name) {
-         case "number":
-            this.analyzed.which = this.analyzed.index;
-            this.analyzed.index = item.index;
-            this.analyzed.type = var_type.number;
-            break;
-         case "object":
-            this.analyzed.which = this.analyzed.index;
-            this.analyzed.index = item.index;
-            this.analyzed.type = var_type.object;
-            break;
-         case "player":
-            this.analyzed.which = this.analyzed.index;
-            this.analyzed.index = item.index;
-            this.analyzed.type = var_type.player;
-            break;
-         case "team":
-            this.analyzed.which = this.analyzed.index;
-            this.analyzed.index = item.index;
-            this.analyzed.type = var_type.team;
-            break;
-         case "timer":
-            this.analyzed.which = this.analyzed.index;
-            this.analyzed.index = item.index;
-            this.analyzed.type = var_type.timer;
-            break;
+         case "number": this.analyzed.type = var_type.number; this.analyzed.scope = var_scope_to_number_scope(this.analyzed.scope); break;
+         case "object": this.analyzed.type = var_type.object; this.analyzed.scope = var_scope_to_object_scope(this.analyzed.scope); break;
+         case "player": this.analyzed.type = var_type.player; break; // same scope enum as variable scopes in general
+         case "team":   this.analyzed.type = var_type.team;   break;
+         case "timer":  this.analyzed.type = var_type.timer;  break;
          default: throw new Error("[DEV] You need to keep this switch-case in synch with the one above.");
       }
-      return true;
+      item = this.parts[++index];
+      if (!item)
+         return true;
+      switch (item.name) {
+         case "biped": // global.anything.player[n].biped
+            if (this.analyzed.type == var_type.player) {
+               if (this.parts.length > (index + 1)) {
+                  validator.report(this, `Property access of the form (player.biped.anything) is invalid. Store the biped in an object variable and then access properties through that.`);
+                  return false;
+               }
+               this.analyzed.type  = var_type.object;
+               this.analyzed.scope = var_scope_to_biped_scope(this.analyzed.scope);
+               this.analyzed.is_read_only = true;
+               return true;
+            }
+            break;
+      }
+      validator.report(this, `Property access of the form (object.var.var.anything) is invalid. Use an intermediate variable.`);
+      return false;
+      /*//
       //
       // SPECIFIC LIST OF ALL VARIABLES (different indices not listed):
       //
@@ -1123,6 +1220,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // current_object.team              // object.team (keyword.team) // also for killed_object, etc.
       // global.object[0].team            // object.team (var.team)
       //
+      //*/
    }
 }
 
@@ -1333,9 +1431,9 @@ class MComparison extends MParsedItem {
       return result;
    }
    validate(validator) {
-      if (this.left instanceof MParsedItem)
+      if (this.left instanceof MParsedItem || this.left instanceof MVariableReference)
          this.left.validate(validator);
-      if (this.right instanceof MParsedItem)
+      if (this.right instanceof MParsedItem || this.right instanceof MVariableReference)
          this.right.validate(validator);
    }
 }
@@ -1746,7 +1844,7 @@ class MSimpleParser {
          this.statement = new MComparison;
          this.statement.set_start(this.token_pos);
          try {
-            lhs = token_to_int_or_var(this.token);
+            let lhs = token_to_int_or_var(this.token);
             this.statement.left = lhs;
             if (lhs instanceof MParsedItem)
                lhs.owner = this.statement;
