@@ -11,3 +11,20 @@ function assert(cond, message) {
    if (!cond)
       throw new Error(`Assertion failed: ${message}.`);
 }
+
+class Collection {
+   constructor(values) {
+      this.list = values;
+      for(let i in values)
+         this[i] = values[i];
+   }
+   find(functor) {
+      let list = this.list;
+      for(let i in list) {
+         let item = list[i];
+         if (functor(item))
+            return item;
+      }
+      return void 0;
+   }
+}
