@@ -1,3 +1,11 @@
+class MScriptProperty {
+   constructor(details) {
+      this.name              = details.name;
+      this.type              = details.type;
+      this.allow_from_nested = details.allow_from_nested; // allow (namespace.var.var.property)?
+      this.hard_max_index    = details.hard_max_index || 0; // same as on members
+   }
+}
 class MScriptTypename {
    constructor(details) {
       this.name              = details.name;
@@ -7,7 +15,7 @@ class MScriptTypename {
       this.always_read_only  = details.always_read_only || false;
       this.first_static_enum = 0; // TODO: C++ would have this be the enum value for team_1, etc., as an int
       this.static_limit      = details.static_limit || 0; // if > 0, then the limit is constant
-      this.properties        = [];
+      this.properties        = details.properties || [];
    }
 }
 const types = new Collection({
@@ -52,6 +60,23 @@ const types = new Collection({
       always_read_only: true,
    }),
 });
+// in C++, the header/CPP split means that we could define these property lists in the constructors above; the properties could refer to each type because the types would already be declared
+types.object.properties = [
+   new MScriptProperty({ name: "spawn_sequence", type: types.number }),
+   new MScriptProperty({ name: "team",           type: types.team   }),
+];
+types.player.properties = [
+   new MScriptProperty({ name: "biped",       type: types.object, allow_from_nested: true }),
+   new MScriptProperty({ name: "rating",      type: types.number }),
+   new MScriptProperty({ name: "score",       type: types.number }),
+   new MScriptProperty({ name: "script_stat", type: types.number, hard_max_index: 3 }),
+   new MScriptProperty({ name: "team",        type: types.team   }),
+   new MScriptProperty({ name: "unknown_09",  type: types.number }),
+];
+types.team.properties = [
+   new MScriptProperty({ name: "score",       type: types.number }),
+   new MScriptProperty({ name: "script_stat", type: types.number, hard_max_index: 3 }),
+];
 
 class MScriptNamespaceMember {
    constructor(details) {

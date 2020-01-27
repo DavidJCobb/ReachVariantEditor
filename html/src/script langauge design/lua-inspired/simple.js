@@ -759,14 +759,68 @@ class MVariablePart {
       }
    }
    //
+   _extract_as_member(validator, namespace) { // returns true if no errors
+      let name  = this.name;
+      let match = namespace.members.find(function(e) { return e.name == name });
+      if (match) {
+         this.analyzed.archetype = "member";
+         this.analyzed.object    = match;
+         if (match.hard_max_index == 0) {
+            if (this.has_index()) {
+               validator.report(this, `An index is not valid here.`);
+               return false;
+            }
+         } else {
+            if (!this.has_index()) {
+               validator.report(this, `Must specify an index.`);
+               return false;
+            }
+         }
+         return true;
+      }
+      return true;
+   }
+   _extract_as_property(validator, typename) {
+      let name  = this.name;
+      let match = typename.properties.find(function(e) { return e.name == name; });
+      if (match) {
+         this.analyzed.archetype = "property";
+         this.analyzed.object    = match;
+         if (match.hard_max_index == 0) {
+            if (this.has_index()) {
+               validator.report(this, `Property "${match.name}" on ${typename.name} variables cannot be indexed.`);
+               return false;
+            }
+         } else {
+            if (!this.has_index()) {
+               validator.report(this, `Property "${match.name}" on ${typename.name} variables must be indexed.`);
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+   _extract_as_var(validator) { // returns true if no errors
+      let name  = this.name;
+      let match = types.find(function(e) { return e.is_variable && e.name == name; });
+      if (match) {
+         this.analyzed.archetype = "var";
+         this.analyzed.object    = match;
+         if (!this.has_index()) {
+            validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
+            return false;
+         }
+      }
+      return true;
+   }
    validate(validator) {
       //
       // Validation during stage-two parsing.
       //
-      let i     = this.locate_me();
+      let i     = this.locate_me(); // my index within my containing MVariableReference
       let name  = this.name;
       let match = null;
-      if (i == 0) { // my index within my containing MVariableReference
+      if (i == 0) {
          match = namespaces.find(function(e) { return e.name.length && e.name == name; });
          if (match) {
             this.analyzed.archetype = "namespace";
@@ -783,23 +837,10 @@ class MVariablePart {
             }
             return true;
          }
-         match = namespaces.unnamed.members.find(function(e) { return e.name == name });
-         if (match) {
-            this.analyzed.archetype = "member";
-            this.analyzed.object    = match;
-            if (match.hard_max_index == 0) {
-               if (this.has_index()) {
-                  validator.report(this, `An index is not valid here.`);
-                  return false;
-               }
-            } else {
-               if (!this.has_index()) {
-                  validator.report(this, `Must specify an index.`);
-                  return false;
-               }
-            }
+         if (!this._extract_as_member(validator, namespaces.unnamed))
+            return false;
+         if (this.analyzed.archetype) // _extract_as_member did indeed find that we are a namespace member
             return true;
-         }
          validator.report(this, `"${name}" is not a namespace or static-type.`);
          return false;
       }
@@ -811,43 +852,31 @@ class MVariablePart {
             //
             // Check for namespace.member:
             //
-            match = pObj.members.find(function(e) { return e.name == name });
-            if (match) {
-               this.analyzed.archetype = "member";
-               this.analyzed.object    = match;
-               if (member.hard_max_index == 0) {
-                  if (this.has_index()) {
-                     validator.report(this, `An index is not valid here.`);
-                     return false;
-                  }
-               } else {
-                  if (!this.has_index()) {
-                     validator.report(this, `Must specify an index.`);
-                     return false;
-                  }
-               }
+            if (!this._extract_as_member(validator, pObj))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_member did indeed find that we are a namespace member
                return true;
-            }
             //
             // Check for namespace.var:
             //
-            match = types.find(function(e) { return e.is_variable && e.name == name; });
-            if (match) {
-               this.analyzed.archetype = "var";
-               this.analyzed.object    = match;
-               if (!this.has_index()) {
-                  validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
-                  return false;
-               }
+            if (!this._extract_as_var(validator))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_var did indeed find that we are a variable
                return true;
-            }
             validator.report(this, `The "${pObj.name}" namespace does not have a field named "${name}".`);
             return false;
          } break;
-         case "member": { // TODO: we can be a property or a var
+         case "member": { // we can be a property or a var
             let type = pObj.type;
             //
-            // TODO: check for and handle properties here
+            // Check for [namespace.]member.property:
+            //
+            if (!this._extract_as_property(validator, type))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_property did indeed find that we are a property
+               return true;
+            //
+            // Check for [namespace.]member.var:
             //
             if (type.is_nestable) {
                match = types.find(function(e) { return e.is_variable && e.name == name; });
@@ -864,9 +893,16 @@ class MVariablePart {
             validator.report(this, `Objects of type ${type.name} do not have a field named "${name}".`);
             return false;
          } break;
-         case "static": { // TODO: we can be a property or a var
+         case "static": { // we can be a property or a var
             //
-            // TODO: check for and handle properties here
+            // Check for static.property:
+            //
+            if (!this._extract_as_property(validator, pObj))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_property did indeed find that we are a property
+               return true;
+            //
+            // Check for static.var:
             //
             match = types.find(function(e) { return e.is_variable && e.name == name; });
             if (match) {
@@ -889,18 +925,25 @@ class MVariablePart {
             //
             let is_second_var = i == 3;
             //
-            // TODO: check for and handle properties here
+            // Check for namespace.var.property and namespace.var.var.property:
             //
-            match = types.find(function(e) { return e.is_variable && e.name == name; });
-            if (match) {
-               if (is_second_var) {
-                  validator.report(this, `Constructions of the form (namespace.var.var.var) are not allowed; store (namespace.var.var) in a variable and then access through that variable.`);
+            if (!this._extract_as_property(validator, pObj))
+               return false;
+            if (this.analyzed.archetype) { // _extract_as_property did indeed find that we are a property
+               if (is_second_var && !this.analyzed.object.allow_from_nested) {
+                  validator.report(this, `Constructions of the form (namespace.var.var.${this.analyzed.object.name}) are not allowed; store (namespace.var.var) in a variable and then access through that variable.`);
                   return false;
                }
-               this.analyzed.archetype = "var";
-               this.analyzed.object    = match;
-               if (!this.has_index()) {
-                  validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
+               return true;
+            }
+            //
+            // Check for namespace.var.var:
+            //
+            if (!this._extract_as_var(validator))
+               return false;
+            if (this.analyzed.archetype) { // _extract_as_var did indeed find that we are a variable
+               if (is_second_var) {
+                  validator.report(this, `Constructions of the form (namespace.var.var.var) are not allowed; store (namespace.var.var) in a variable and then access through that variable.`);
                   return false;
                }
                return true;
@@ -912,7 +955,8 @@ class MVariablePart {
          } break;
          default: assert(false, `Bad or unknown archetype ${prev.analyzed.archetype}.`);
       }
-      return true;
+      validator.report(this, `Failed to identify part #${i + 1} ("${this.serialize()}") in variable/property.`);
+      return false;
    }
 }
 class MVariableReference { // represents a variable, keyword, or aliased integer
@@ -1042,89 +1086,33 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          if (!result)
             return false;
       }
+      //
+      // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
+      // conclusion we drew from each part.
+      //
+      // member                           | type and index depend on the member; scope is global
+      // member[a]                        | used for script options. member determines the type and scope; no which; index == a
+      // member.var[a]                    | scope and which depend on the member; type depends on the var; index == a
+      // namespace.var[a].var[b]          | var[b] determines the type; var[a] determines the scope; which == a; index == b
+      // namespace.var[a].property        | property determines the scope and type; no which; index == a
+      // namespace.var[a].property[b]     | used for script stats. property determines the scope and type; which == a; index == b
+      // namespace.var[a].var[b].property | property determines the scope and type; which == a; index == b
+      // static[a]                        | type depends on the static; scope is global; no which; index == a
+      // static[a].var[b]                 | var[b] determines the type; static is the scope; which == a; index == b
+      // static[a].property               | property determines the scope and type; no which; index == a
+      // game.property                    | type and scope depend on the property; no which; no index
+      //
+      // FINDINGS:
+      //
+      //  - The last token always determines the type and, consequently, the scope.
+      //
+      //  - If there are two indices, then (which) is the first and (index) is the second.
+      //
+      //  - If there is only one index, then (index) holds it.
+      //
       return true;
       
-      
-      {  // new logic
-         let index     = 0;
-         let item      = this.parts[index];
-         let namespace = namespaces.unnamed;
-         let type      = null;
-         let read_only = false;
-         {  // Check for named namespaces
-            let match = namespaces.find(function(e) { return e.name.length && e.name == item.name; });
-            if (match) {
-               namespace = match;
-               item      = this.parts[++index];
-               if (!item) {
-                  validator.report(this, `A namespace such as "${namespace.name}" cannot be used as a variable.`);
-                  return false;
-               }
-            }
-         }
-         if (namespace.can_have_statics) {  // Check for statics and handle them (e.g. player[0], team[1])
-            let match = types.find(function(e) { return e.is_static && e.name == item.name; });
-            if (match) {
-               type = match;
-               if (!item.has_index()) {
-                  validator.report(this, `You must specify which ${item.name} you mean.`);
-                  return false;
-               }
-               if (type.static_limit && item.index >= type.static_limit) {
-                  validator.report(this, `Index out of bounds. There are only ${type.static_limit} ${type.name}s.`);
-                  return false;
-               }
-               item = this.parts[++index];
-               //
-               // Fall through.
-               //
-            }
-         }
-         if (!type) { // we know we're not a static type, so test for namespace members
-            let member = namespace.members.find(function(e) { return e.name == item.name; });
-            if (member) {
-               type      = m.type;
-               member    = m;
-               read_only = m.is_read_only;
-               if (m.type && m.type.always_read_only)
-                  read_only = true;
-               //
-               // TODO
-               //
-               item = this.parts[++index];
-               //
-               if (member.is_none && item) {
-                  validator.report(this, `Cannot access properties or variables on a none value`);
-                  return false;
-               }
-               if (type && !type.is_nestable && !type.properties.length) {
-                  validator.report(this, `Cannot access properties or variables on type "${type.name}".`);
-                  return false;
-               }
-            } else {
-               if (namespace != namespaces.unnamed) {
-                  if (!namespace.can_have_variables) {
-                     validator.report(this, `The "${namespace.name}" namespace does not have a property or variable named "${item.name}".`);
-                     return false;
-                  }
-               }
-            }
-         }
-         //
-         // TODO:
-         // member.var
-         // member.property
-         // namespace.var
-         // namespace.var.property
-         // namespace.var.var
-         // namespace.var.var.property ("biped" only)
-         // static.var
-         // static.property
-         //
-         return true;
-      }
-      
-      
+      //
       
       this.resolve_aliases(validator);
       if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
