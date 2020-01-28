@@ -113,6 +113,18 @@ const namespaces = new Collection({
          new MScriptNamespaceMember({ name: "no_object", type: types.object, is_read_only: true, is_none: true }),
          new MScriptNamespaceMember({ name: "no_player", type: types.player, is_read_only: true, is_none: true }),
          new MScriptNamespaceMember({ name: "no_team",   type: types.team,   is_read_only: true, is_none: true }),
+         new MScriptNamespaceMember({ name: "current_object", type: types.object, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "current_player", type: types.player, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "current_team",   type: types.team,   is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "neutral_team",   type: types.team,   is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "hud_target_object", type: types.object, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "hud_target_player", type: types.player, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "hud_player", type: types.player, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "killed_object", type: types.object, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "killer_object", type: types.object, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "killer_player", type: types.player, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "unk_14_team", type: types.team, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "unk_15_team", type: types.team, is_read_only: true, is_none: false }),
          new MScriptNamespaceMember({
             name:           "script_option",
             type:           types.script_option,
@@ -120,7 +132,7 @@ const namespaces = new Collection({
             hard_max_index: 15,
          }),
          //
-         // TODO
+         // TODO: Do we want to add script_traits here?
          //
       ]
    }),
@@ -134,10 +146,41 @@ const namespaces = new Collection({
       can_have_statics:   false,
       can_have_variables: false,
       members: [
-         new MScriptNamespaceMember({ name: "round_time_limit", type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "betrayal_booting",        type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "betrayal_penalty",        type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "current_round",           type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "death_event_damage_type", type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "friendly_fire",           type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "grace_period",            type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "grenades_on_map",         type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "indestructible_vehicles", type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "lives_per_round",         type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "loadout_cam_time",        type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "misc_unk0_bit3",          type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "powerup_duration_red",    type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "powerup_duration_blue",   type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "powerup_duration_yellow", type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "respawn_growth",          type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "respawn_time",            type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "respawn_traits_duration", type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "round_limit",             type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "round_time_limit",        type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "rounds_to_win",           type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "score_to_win",            type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "social_flags_bit_2",      type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "social_flags_bit_3",      type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "social_flags_bit_4",      type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "sudden_death_time",       type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "suicide_penalty",         type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "symmetry",                type: types.number, is_read_only: false, is_none: false }),
+         new MScriptNamespaceMember({ name: "symmetry_getter",         type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "team_lives_per_round",    type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "teams_enabled",           type: types.number, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "unkF7A6",                 type: types.number, is_read_only: true, is_none: false }),
          //
-         // TODO
-         //
+         new MScriptNamespaceMember({ name: "round_timer",        type: types.timer, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "sudden_death_timer", type: types.timer, is_read_only: true, is_none: false }),
+         new MScriptNamespaceMember({ name: "grace_period_timer", type: types.timer, is_read_only: true, is_none: false }),
       ]
    }),
 });
