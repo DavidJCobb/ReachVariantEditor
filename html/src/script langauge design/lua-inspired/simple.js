@@ -41,76 +41,15 @@ function _make_enum(list) {
    
     - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
     
-    = Can we reduce code duplication on the (non_nested_var.property) handlers?
-    
-    - Now that this is basically done, we need to work on resolving aliases within 
-      MVariableReferences before then handling full resolution/analysis.
+    - MFunctionCall arguments will need special-case handling to account for format 
+      string tokens, enum values, and so on. We'll need special-case alias handling 
+      here as well; I want it to be possible to alias entries in the built-in enums.
       
-       - It has occurred to me: relative aliases can't be resolved unless we know 
-         the type of the thing using them. Consider:
-         
-            alias is_zombie = player.number[0]
-            global.player[0].is_zombie = 1
-         
-         We need to be able to tell that (global.player[0]) is a player, and that 
-         only becomes known during variable resolution -- *after* we want to have 
-         resolved aliases.
-         
-         Recall that every variable reference involves namespaces, vars, statics, 
-         situationals, and properties. I think we should look into handling this 
-         via OO: have a class representing namespaces and a class representing 
-         types, and use members on these classes. So: MScriptNamespace, 
-         MScriptNamespaceMember, and MScriptTypename.
-         
-          - MScriptNamespace: represents a namespace. There will be three instances: 
-            "game", "global", and unnamed.
-             
-             - A boolean indicating whether this namespace is the "global" namespace 
-               (for parsing purposes, this indicates whether the namespace can hold 
-               variables).
-          
-             - A list of MScriptNamespaceMembers.
-             
-          - MScriptNamespaceMember: represents a built-in variable in a namespace, 
-            such as "round_time_limit" in "game" or "current_player" in unnamed.
-            
-          - MScriptTypename members:
-          
-             - Is a variable?
-             
-                 - Yes for variable types; no for script_option, etc..
-             
-             - Can have nested variables?
-             
-                - Yes for player, object, and team; no for number and timer, and 
-                  for all non-variable typenames.
-             
-             - Can be a static collection?
-             
-                - Yes for player and team (e.g. player[15], team[7]); no otherwise.
-            
-             - Underlying type, scope, and logic for adapting which and index.
-             
-                - This applies to non-variables. "Script option" for example is a 
-                  non-variable with underlying type "number" which uses an index. 
-                  A script stat is a non-variable with underlying type "number", 
-                  which must exist as a member of a team or player (identified 
-                  with which); the stat is identified via the index.
-         
-         Once we've taken this approach, variable *and* alias resolution become 
-         simpler:
-         
-          - If an alias begins with a typename, then it's a relative alias. If we 
-            do it the OO way it becomes easier to allow more qualified relative 
-            aliases (e.g. "alias flag_points = player.object[0].number[0]").
-         
-          - Variable resolution would involve identifying the namespace and then 
-            matching all remaining parts to their typenames. When we know the 
-            previous part's typename, we can check whether the current part is a 
-            valid relative alias on that typename.
-            
-             - Absolute aliases must be singular; given (alias foo = global.number[0]) 
-               you cannot do (foo.bar) nor (bar.foo) nor (foo[0]).
+   WE NEED A SYNTAX FOR FLAGS ARGUMENTS IN FUNCTION CALLS.
+   
+    - player.killed_by is currently notated as varargs with each flag as an argument. 
+      However, that's not a viable syntax for all flags; the create-object-flags 
+      exist alongside other arguments so varargs is not a viable approach there.
    
    NOTE: We don't have a way to specify event triggers e.g. object death events. I 
    think we should do that with an "on" keyword (only permitted at the top level) 
@@ -821,6 +760,13 @@ class MVariablePart {
       let name  = this.name;
       let match = null;
       if (i == 0) {
+         //
+         // TODO, RIGHT HERE: If we're running as the righthand side of an alias, then 
+         // loop over all typenames. If a typename (is_nestable), if we match its name, 
+         // and if there is NO INDEX, then assume that this is a relative alias; set 
+         // the archetype to "relative_alias_base" and the object to the typename, and 
+         // return true.
+         //
          match = namespaces.find(function(e) { return e.name.length && e.name == name; });
          if (match) {
             this.analyzed.archetype = "namespace";
@@ -1082,6 +1028,36 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
    //
    validate(validator, is_alias_rhs) {
       for(let i = 0; i < this.parts.length; i++) {
+         //
+         // TODO: Instead of having MVariablePart.validate report its own errors and return 
+         // false, have it return an error string (or an empty string if no error was found). 
+         // Then, we do this:
+         //
+         // let error = this.parts[i].validate(validator);
+         // if (error.length) {
+         //    let result = this.parts[i].resolve_aliases(validator);
+         //    if (!result) {
+         //       validator.report(error);
+         //       return false;
+         //    }
+         //    this.parts.splice(i, 1, result); // replace the alias (parts[i]) with the alias-resolved contents
+         //    error = this.parts[i].validate(validator);
+         //    if (error) {
+         //       validator.report(error);
+         //       return false;
+         //    }
+         // }
+         //
+         // Also, when we resolve aliases in a variable part, we need to iterate the alias 
+         // list IN REVERSE ORDER, so that if a newer alias shadows an older one, we use 
+         // the newer one. (We don't want to just index aliases by name and straight-up 
+         // overwrite them, because the newer alias could be in an inner block and the 
+         // shadowed alias could be in an outer block; we'd want to go back to using the 
+         // latter once the former's block is closed.)
+         //
+         // Finally: Relative alias resolution requires just a little more setup in the 
+         // MVariablePart.validate function; see comments there.
+         //
          let result = this.parts[i].validate(validator);
          if (!result)
             return false;
@@ -1102,17 +1078,24 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // static[a].property               | property determines the scope and type; no which; index == a
       // game.property                    | type and scope depend on the property; no which; no index
       //
-      // FINDINGS:
+      // Don't bother trying to come up with a generic approach; instead, just give each typename 
+      // object a handler function that takes the MVariableReference as an argument and sets the 
+      // scope, which, and index values on it appropriately.
       //
-      //  - The last token always determines the type and, consequently, the scope.
+      // NOTES:
       //
-      //  - If there are two indices, then (which) is the first and (index) is the second.
-      //
-      //  - If there is only one index, then (index) holds it.
+      //  - We need to verify that any indices are in range. Different variable scopes have different 
+      //    counts of each variable.
       //
       return true;
       
-      //
+      
+      
+      
+      // OLD CODE BELOW
+      
+      
+      
       
       this.resolve_aliases(validator);
       if (this.analyzed.aliased_integer_constant !== null) // if we're actually an integer
