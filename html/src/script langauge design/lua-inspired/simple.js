@@ -41,6 +41,20 @@ function _make_enum(list) {
    
     - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
     
+    - Resolving alias declarations:
+    
+       - Typename constraints must be obeyed; the following alias currently doesn't 
+         flag an error but should:
+         
+         alias foo = player.number[0].player[0]
+      
+    - Resolving alias invocations:
+    
+       - The following invocation doesn't flag an error but should:
+       
+         alias is_zombie = player.number[0]
+         global.player[5].player[0].is_zombie = 3 -- namespace.var.var.var is not allowed
+    
     - MFunctionCall arguments will need special-case handling to account for format 
       string tokens, enum values, and so on. We'll need special-case alias handling 
       here as well; I want it to be possible to alias entries in the built-in enums.
@@ -400,6 +414,33 @@ class MAlias extends MParsedItem {
       if (this.target)
          this.target.validate(validator, true);
    }
+   //
+   get_target_parts() {
+      if (!this.target)
+         return [];
+      return this.target.parts;
+   }
+   get_relative_typename() {
+      if (!this.target)
+         return null;
+      if (!this.target.analyzed.is_relative_alias)
+         return null;
+      let first = this.target.parts[0];
+      return first.get_typename();
+   }
+   is_constant_integer() {
+      if (!this.target)
+         return true;
+      //
+      // TODO: (this.target) could itself point to an alias of a constant integer.
+      //
+      return false;
+   }
+   is_relative() { // requires validation of the RHS
+      if (!this.target)
+         return false;
+      return this.target.analyzed.is_relative_alias;
+   }
 }
 class MBlock extends MParsedItem {
    constructor() {
@@ -536,11 +577,11 @@ class MBlock extends MParsedItem {
       //
       let aliases = [];
       for(let item of this.items) {
-         if (item instanceof MAlias) {
+         item.validate(validator);
+         if (item instanceof MAlias) { // TODO: only if it validates
             aliases.push(item);
             validator.trackAlias(item);
          }
-         item.validate(validator);
       }
       validator.untrackAliases(aliases);
    }
@@ -698,6 +739,86 @@ class MVariablePart {
       }
    }
    //
+   get_typename() {
+      let object = this.analyzed.object;
+      switch (this.analyzed.archetype) {
+         case "namespace":
+            return null;
+         case "member":
+         case "property":
+            return object.type;
+         case "alias_rel_typename":
+         case "static":
+         case "var":
+            return object;
+      }
+      return null;
+   }
+   //
+   resolve_alias(validator) {
+      let i     = this.locate_me();
+      let alias = null;
+      let found = false; // found any matching name, even if it was invoked improperly
+      if (i == 0) { // must be a fully-qualified name
+         //
+         // alias or alias.something: The alias must be an absolute alias, and cannot 
+         // be indexed.
+         //
+         validator.forEachTrackedAlias((function(a) {
+            if (a.is_relative())
+               return;
+            if (a.name == this.name) {
+               found = true;
+               alias = a;
+               return true;
+            }
+         }).bind(this));
+         if (!alias)
+            return false;
+         if (alias.is_constant_integer()) {
+            if (this.owner.parts.length > 1) {
+               validator.report(this, `Alias ${alias.name} refers to a constant integer and is not valid here.`);
+               return false;
+            }
+            //
+            // TODO: Different handling for constant integers; how do we allow an MVariableReference to know 
+            // that that's what it is?
+            //
+         }
+         if (!alias || this.has_index()) {
+            validator.report(this, `Found one or more aliases named ${this.name}, but none were valid here.`);
+            return false;
+         }
+         return alias.get_target_parts();
+      }
+      //
+      // something.alias: The alias must be a relative alias, and cannot be indexed.
+      //
+      let prev = this.owner.parts[i - 1];
+      assert(prev, "There should be a previous part."); // JS only
+      if (prev.analyzed.archetype == "property")
+         return false;
+      let pTyp = prev.get_typename();
+      validator.forEachTrackedAlias((function(a) {
+         if (a.name == this.name) {
+            found = true;
+            if (!a.is_relative()) // absolute aliases are not valid here
+               return;
+            let type = a.get_relative_typename();
+            if (type != pTyp)
+               return;
+            alias = a;
+            return true;
+         }
+      }).bind(this));
+      if (!alias || this.has_index()) {
+         if (found)
+            validator.report(this, `Found one or more aliases named ${this.name}, but none were valid here.`);
+         return false;
+      }
+      return alias.get_target_parts().slice(1);
+   }
+   //
    _extract_as_member(validator, namespace) { // returns true if no errors
       let name  = this.name;
       let match = namespace.members.find(function(e) { return e.name == name });
@@ -752,7 +873,7 @@ class MVariablePart {
       }
       return true;
    }
-   validate(validator) {
+   validate(validator, is_alias_rhs) {
       //
       // Validation during stage-two parsing.
       //
@@ -760,12 +881,21 @@ class MVariablePart {
       let name  = this.name;
       let match = null;
       if (i == 0) {
-         //
-         // TODO, RIGHT HERE: If we're running as the righthand side of an alias, then 
-         // loop over all typenames. If a typename (is_nestable), if we match its name, 
-         // and if there is NO INDEX, then assume that this is a relative alias; set 
-         // the archetype to "relative_alias_base" and the object to the typename, and 
-         // return true.
+         if (is_alias_rhs) {
+            //
+            // We're resolving an alias declaration. We want to support typename-relative 
+            // aliases, such as (alias is_zombie = player.number[0]), where you could 
+            // then access (any_player_reference.is_zombie).
+            //
+            if (!this.has_index()) {
+               match = types.find(function(e) { return e.is_nestable && e.name == name; });
+               if (match) {
+                  this.analyzed.archetype = "alias_rel_typename";
+                  this.analyzed.object    = match;
+                  return true;
+               }
+            }
+         }
          //
          match = namespaces.find(function(e) { return e.name.length && e.name == name; });
          if (match) {
@@ -791,8 +921,8 @@ class MVariablePart {
          return false;
       }
       let prev = this.owner.parts[i - 1];
-      let pObj = prev.analyzed.object;
       assert(prev, "There should be a previous part."); // JS only
+      let pObj = prev.analyzed.object;
       switch (prev.analyzed.archetype) {
          case "namespace": { // we can be a member or a var
             //
@@ -839,6 +969,7 @@ class MVariablePart {
             validator.report(this, `Objects of type ${type.name} do not have a field named "${name}".`);
             return false;
          } break;
+         case "alias_rel_typename":
          case "static": { // we can be a property or a var
             //
             // Check for static.property:
@@ -863,7 +994,7 @@ class MVariablePart {
             validator.report(this, `Objects of type ${pObj.name} do not have a field named "${name}".`);
             return false;
          } break;
-         case "var": { // TODO: we can be a property or, in some cases, a var
+         case "var": { // we can be a property or, in some cases, a var
             //
             // Most properties are available on (namespace.var) but not (namespace.var.var); moreover, 
             // (namespace.var.var.var) is not allowed so we need to know whether the previous var is 
@@ -918,9 +1049,10 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          aliased_integer_constant: null, // if we turn out to be an alias
          is_read_only: false,
          //
-         aliased_typename: null, // for relative aliases of the form typename.member[index]
-         aliased_member:   null,
-         aliased_index:    null,
+         is_relative_alias: false,
+         aliased_typename:  null, // for relative aliases of the form typename.member[index]
+         aliased_member:    null,
+         aliased_index:     null,
       };
    }
    extract(text) {
@@ -1058,9 +1190,28 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          // Finally: Relative alias resolution requires just a little more setup in the 
          // MVariablePart.validate function; see comments there.
          //
-         let result = this.parts[i].validate(validator);
-         if (!result)
-            return false;
+         validator.set_errors_suspended(true); // "suspend" the validator so we can discard error messages if appropriate
+         let result = this.parts[i].validate(validator, is_alias_rhs);
+         if (!result) {
+            result = this.parts[i].resolve_alias(validator);
+            if (!result) {
+               validator.set_errors_suspended(false, false);
+               return false;
+            }
+            //this.parts.splice(i, 1, result);
+            Array.prototype.splice.apply(this.parts, ([i, 1]).concat(result)); // Array.splice is an abomination
+            validator.set_errors_suspended(false, true); // discard errors caught while suspended
+            result = this.parts[i].validate(validator, is_alias_rhs);
+            if (!result) {
+               return false;
+            }
+         }
+      }
+      if (is_alias_rhs) {
+         let first = this.parts[0];
+         if (first.analyzed.archetype == "alias_rel_typename") {
+            this.analyzed.is_relative_alias = true;
+         }
       }
       //
       // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
