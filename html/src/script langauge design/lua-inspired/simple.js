@@ -922,7 +922,12 @@ class MVariablePart {
       }
       let prev = this.owner.parts[i - 1];
       assert(prev, "There should be a previous part."); // JS only
+      let pTyp = prev.get_typename();
       let pObj = prev.analyzed.object;
+      if (pTyp && !pTyp.is_nestable) {
+         validator.report(this, `Variables of type ${pTyp.name} cannot contain nested variables.`);
+         return false;
+      }
       switch (prev.analyzed.archetype) {
          case "namespace": { // we can be a member or a var
             //
@@ -1160,36 +1165,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
    //
    validate(validator, is_alias_rhs) {
       for(let i = 0; i < this.parts.length; i++) {
-         //
-         // TODO: Instead of having MVariablePart.validate report its own errors and return 
-         // false, have it return an error string (or an empty string if no error was found). 
-         // Then, we do this:
-         //
-         // let error = this.parts[i].validate(validator);
-         // if (error.length) {
-         //    let result = this.parts[i].resolve_aliases(validator);
-         //    if (!result) {
-         //       validator.report(error);
-         //       return false;
-         //    }
-         //    this.parts.splice(i, 1, result); // replace the alias (parts[i]) with the alias-resolved contents
-         //    error = this.parts[i].validate(validator);
-         //    if (error) {
-         //       validator.report(error);
-         //       return false;
-         //    }
-         // }
-         //
-         // Also, when we resolve aliases in a variable part, we need to iterate the alias 
-         // list IN REVERSE ORDER, so that if a newer alias shadows an older one, we use 
-         // the newer one. (We don't want to just index aliases by name and straight-up 
-         // overwrite them, because the newer alias could be in an inner block and the 
-         // shadowed alias could be in an outer block; we'd want to go back to using the 
-         // latter once the former's block is closed.)
-         //
-         // Finally: Relative alias resolution requires just a little more setup in the 
-         // MVariablePart.validate function; see comments there.
-         //
          validator.set_errors_suspended(true); // "suspend" the validator so we can discard error messages if appropriate
          let result = this.parts[i].validate(validator, is_alias_rhs);
          if (!result) {
@@ -1198,8 +1173,13 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                validator.set_errors_suspended(false, false);
                return false;
             }
-            //this.parts.splice(i, 1, result);
+            //
+            // Replace the part with the contents of the alias to which it referred:
+            //
             Array.prototype.splice.apply(this.parts, ([i, 1]).concat(result)); // Array.splice is an abomination
+            //
+            // And now validate the first of those contents:
+            //
             validator.set_errors_suspended(false, true); // discard errors caught while suspended
             result = this.parts[i].validate(validator, is_alias_rhs);
             if (!result) {
@@ -1211,8 +1191,21 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          let first = this.parts[0];
          if (first.analyzed.archetype == "alias_rel_typename") {
             this.analyzed.is_relative_alias = true;
+         } else {
+            //
+            // TODO: Validate against namespace.var.var.not_a_property. We have to do that here, 
+            // because alias invocations mess up the attempts at validating that inside of 
+            // MVariablePart.validate (incidentally, we should remove that logic, just blindly 
+            // allow infinite var nesting there, and validate var nesting out here).
+            //
          }
       }
+      //
+      // TODO: Validate against namespace.var.var.not_a_property. We have to do that here, 
+      // because alias invocations mess up the attempts at validating that inside of 
+      // MVariablePart.validate (incidentally, we should remove that logic, just blindly 
+      // allow infinite var nesting there, and validate var nesting out here).
+      //
       //
       // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
       // conclusion we drew from each part.
