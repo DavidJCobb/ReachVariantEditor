@@ -44,12 +44,31 @@ function _make_enum(list) {
     - Resolving alias declarations:
     
        - BASICALLY DONE.
+       
+       - The following fails:
+       
+            alias is_zombie = player.number[0]
+            alias indirect  = is_zombie
+         
+         If we define (alias indirect = player.is_zombie), that works. This may be 
+         for the best, since we can define a non-relative "is_zombie" alias that 
+         neither shadows nor is shadowed by the relative one.
+         
+          = YEAH, MARKING THIS AS WONTFIX/BYDESIGN.
       
     - Resolving alias invocations:
     
        - We need to handle aliases of constant integers. We currently only have 
          incomplete code which specifically checks for (constant_int_alias.something) 
          and (something.constant_int_alias) during MVariablePart.resolve_alias.
+      
+          - I'm almost wondering if we should't just make all constant integers 
+            exist as MVariableReferences just to keep things uniform.
+         
+       - We need to handle aliases in MVariablePart.index fields. This won't use the 
+         usual alias resolution process; we just need to search for any alias of a 
+         constant integer that has the same name, use whatever one we find, and fail 
+         if none are found.
     
     - MFunctionCall arguments will need special-case handling to account for format 
       string tokens, enum values, and so on. We'll need special-case alias handling 
