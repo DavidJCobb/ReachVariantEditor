@@ -41,14 +41,11 @@ function _make_enum(list) {
    
     - I THINK I DID THIS, BUT AUDIT THE CODE TO BE SURE.
     
-   SECOND-PASS VALIDATION ON ALIASES: DO NOT ALLOW ALIASES TO SHADOW TYPENAME PROPERTIES, 
-   E.G. THE RELATIVE ALIAS (spawn_sequence = object.number[0]) SHOULD NOT BE VALID.
-      
-    - Right now, aliases (and other objects) don't have anything to signal successful 
-      validation versus failed validation; invocations can end up matching an invalid 
-      alias, leading to cascading failures. AT A MINIMUM aliases need to remember 
-      whether they are valid, so that invocations of an invalid alias fail with a 
-      SENSIBLE AND INFORMATIVE error message.
+   Right now, aliases (and other objects) don't have anything to signal successful 
+   validation versus failed validation; invocations can end up matching an invalid 
+   alias, leading to cascading failures. AT A MINIMUM aliases need to remember 
+   whether they are valid, so that invocations of an invalid alias fail with a 
+   SENSIBLE AND INFORMATIVE error message.
    
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
@@ -455,8 +452,19 @@ class MAlias extends MParsedItem {
       return `alias ${this.name} = ${this.target.serialize()}`;
    }
    validate(validator) {
-      if (this.target)
+      if (this.target) {
          this.target.validate(validator, true);
+         let typename = this.get_relative_typename();
+         if (typename) {
+            let n = this.name.toLowerCase();
+            for(let property of typename.properties) {
+               if (property.name != n)
+                  continue;
+               validator.report(this, `Invalid alias name "${this.name}". You cannot shadow "${typename.name}.${this.name}" or other built-in properties on built-in types.`);
+               return false;
+            }
+         }
+      }
    }
    //
    get_integer_constant() {
@@ -478,11 +486,7 @@ class MAlias extends MParsedItem {
       return first.get_typename();
    }
    is_integer_constant() {
-      if (!this.target)
-         return true;
-      if (this.target.is_integer_constant())
-         return true;
-      return false;
+      return this.target.is_integer_constant();
    }
    is_relative() { // requires validation of the RHS
       if (!this.target)
@@ -688,7 +692,7 @@ class MStringLiteral extends MParsedItem {
 class MVariablePart {
    constructor(name, index) {
       this.name  = name || "";
-      this.index = -1; // NOTE: string literals allowed, since aliases can be constant ints
+      this.index = null; // NOTE: string literals allowed, since aliases can be constant ints
       if (index !== void 0 && index !== "" && index !== null) {
          if (!isNaN(+index))
             this.index = +index;
@@ -723,11 +727,11 @@ class MVariablePart {
    //
    has_index() {
       if (+this.index === this.index)
-         return this.index >= 0;
+         return true;
       return !!this.index;
    }
    serialize() {
-      if (+this.index === this.index && this.index < 0) {
+      if (!this.index && this.index !== 0) {
          return this.name;
       }
       return `${this.name}[${this.index}]`;
@@ -858,6 +862,33 @@ class MVariablePart {
       }
       return alias.get_target_parts().slice(1);
    }
+   resolve_index(validator) {
+      if (!this.has_index())
+         return;
+      if (+this.index === this.index)
+         return this.index;
+      let found = false;
+      let alias = null;
+      let name  = this.index;
+      validator.forEachTrackedAlias((function(a) {
+         if (a.is_relative())
+            return;
+         if (a.name == name) {
+            found = true;
+            if (a.is_integer_constant())
+               alias = a;
+            return true;
+         }
+      }).bind(this));
+      if (!alias) {
+         if (found)
+            validator.report(this, `The alias named "${this.index}" is not an integer constant and thus can't be used as a variable index.`);
+         else
+            validator.report(this, `Failed to find an alias named "${this.index}".`);
+         return null;
+      }
+      return (this.index = alias.get_integer_constant());
+   }
    //
    _extract_as_member(validator, namespace) { // returns true if no errors
       let name  = this.name;
@@ -875,6 +906,13 @@ class MVariablePart {
                validator.report(this, `Must specify an index.`);
                return false;
             }
+            if (this.index < 0) {
+               validator.report(this, `The index cannot be negative.`);
+               return false;
+            }
+            //
+            // TODO: Apply (match.soft_max_index).
+            //
          }
          return true;
       }
@@ -896,6 +934,13 @@ class MVariablePart {
                validator.report(this, `Property "${match.name}" on ${typename.name} variables must be indexed.`);
                return false;
             }
+            if (this.index < 0) {
+               validator.report(this, `The index cannot be negative.`);
+               return false;
+            }
+            //
+            // TODO: Apply (match.soft_max_index).
+            //
          }
       }
       return true;
@@ -910,10 +955,19 @@ class MVariablePart {
             validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
             return false;
          }
+         if (this.index < 0) {
+            validator.report(this, `The index cannot be negative; you need to indicate which ${match.name} variable you want.`);
+            return false;
+         }
+         //
+         // TODO: Validate the index; ensure it doesn't exceed the upper bound given what 
+         // scope we're accessing (or check that later if it's easier).
+         //
       }
       return true;
    }
    validate(validator, is_alias_rhs) {
+      this.resolve_index(validator);
       //
       // Validation during stage-two parsing.
       //
@@ -949,6 +1003,14 @@ class MVariablePart {
             this.analyzed.object    = match;
             if (!this.has_index()) {
                validator.report(this, `Must specify an index; you need to indicate which static ${match.name} you want.`);
+               return false;
+            }
+            if (this.index < 0) {
+               validator.report(this, `Invalid index ${this.index}: negative ${match.name} indices are not allowed.`);
+               return false;
+            }
+            if (this.index >= match.static_limit) {
+               validator.report(this, `Invalid index ${this.index}: there are only ${match.static_limit} of this object type, and indices start with zero, so the maximum index is ${match.static_limit - 1}.`);
                return false;
             }
             return true;
@@ -999,18 +1061,10 @@ class MVariablePart {
             //
             // Check for [namespace.]member.var:
             //
-            if (type.is_nestable) {
-               match = types.find(function(e) { return e.is_variable && e.name == name; });
-               if (match) {
-                  this.analyzed.archetype = "var";
-                  this.analyzed.object    = match;
-                  if (!this.has_index()) {
-                     validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
-                     return false;
-                  }
-                  return true;
-               }
-            }
+            if (!this._extract_as_var(validator))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_var did indeed find that we are a variable
+               return true;
             validator.report(this, `Objects of type ${type.name} do not have a field named "${name}".`);
             return false;
          } break;
@@ -1026,16 +1080,10 @@ class MVariablePart {
             //
             // Check for static.var:
             //
-            match = types.find(function(e) { return e.is_variable && e.name == name; });
-            if (match) {
-               this.analyzed.archetype = "var";
-               this.analyzed.object    = match;
-               if (!this.has_index()) {
-                  validator.report(this, `Must specify an index; you need to indicate which ${match.name} variable you want.`);
-                  return false;
-               }
+            if (!this._extract_as_var(validator))
+               return false;
+            if (this.analyzed.archetype) // _extract_as_var did indeed find that we are a variable
                return true;
-            }
             validator.report(this, `Objects of type ${pObj.name} do not have a field named "${name}".`);
             return false;
          } break;
@@ -1114,14 +1162,21 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       for(let i = 0; i < size; i++) {
          let c = text[i];
          if (is_index) {
-            if (BAD_INDEX_CHARS.indexOf(c) >= 0)
+            if (BAD_INDEX_CHARS.indexOf(c) >= 0) {
+               if (!index.length && c == "-") { // negative indices are invalid but should not be a fatal parse error
+                  index += c;
+                  continue;
+               }
                throw new Error(`Character ${c} is not valid inside of an index.`);
+            }
             if (c == "]") {
                is_index = false;
                if (index === "") // "name[]" is a syntax error
                   throw new Error(`Variables of the form "name[]" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.`);
                continue;
             }
+            if (!index.length && is_whitespace_char(c))
+               continue;
             index += c;
          } else {
             if (c == "[") {
@@ -1215,6 +1270,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          if (!result) {
             result = this.parts[i].resolve_alias(validator);
             if (+result === result) {
+               validator.set_errors_suspended(false, true); // discard errors caught while suspended
                assert(this.parts.length == 1, "Can't handle integer alias here.");
                this.constant = result;
                this.parts    = [];
@@ -1246,6 +1302,7 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                return false;
             }
          }
+         validator.set_errors_suspended(false, false); // un-suspend
       }
       if (this.parts.length) {
          let last = this.parts[this.parts.length - 1];
@@ -1590,13 +1647,14 @@ class MSimpleParser {
       this.line = 0;
       this.last_newline = 0;
       //
-      this.root      = null;  // root block
-      this.block     = null;  // block we're currently parsing
-      this.token     = "";    // current token being parsed (lefthand word / operator / call argument / righthand word)
-      this.token_pos = null;  // stream position of current token (as reported by backup_stream_state)
-      this.token_end = false; // whether we hit whitespace, meaning that the current word is "over." if so, then another word character indicates {word word} which is bad syntax (outside of keywords)
-      this.statement = null;  // current statement
-      this.call      = null;  // current call (statement or assignment righthand side)
+      this.root        = null;  // root block
+      this.block       = null;  // block we're currently parsing
+      this.token       = "";    // current token being parsed (lefthand word / operator / call argument / righthand word)
+      this.token_pos   = null;  // stream position of current token (as reported by backup_stream_state)
+      this.token_end   = false; // whether we hit whitespace, meaning that the current word is "over." if so, then another word character indicates {word word} which is bad syntax (outside of keywords)
+      this.token_brace = false; // whether we're in square brackets; needed to properly handle constructs like "abc[ d]" or "abc[-1]" at the starts of statements
+      this.statement   = null;  // current statement
+      this.call        = null;  // current call (statement or assignment righthand side)
    }
    throw_error(text) {
       throw new Error(`Error on or near line ${this.line + 1} col ${this.pos - this.last_newline + 1}: ` + text);
@@ -1622,9 +1680,10 @@ class MSimpleParser {
          this.last_newline = s.last_newline;
    }
    reset_token() {
-      this.token     = "";
-      this.token_pos = null;
-      this.token_end = false;
+      this.token       = "";
+      this.token_pos   = null;
+      this.token_end   = false;
+      this.token_brace = false;
    }
    //
    scan(functor) { // process the input stream one character at a time, passing the character to some functor
@@ -1730,6 +1789,17 @@ class MSimpleParser {
             return;
          this.token += c;
          this.token_pos = this.backup_stream_state();
+         return;
+      }
+      if (c == "[") {
+         this.token_brace = true;
+         this.token += c;
+         return;
+      }
+      if (this.token_brace) {
+         if (c == "]")
+            this.token_brace = false;
+         this.token += c;
          return;
       }
       if (is_whitespace_char(c)) {
@@ -1912,6 +1982,17 @@ class MSimpleParser {
             return;
          this.token += c;
          this.token_pos = this.backup_stream_state();
+         return;
+      }
+      if (c == "[") {
+         this.token_brace = true;
+         this.token += c;
+         return;
+      }
+      if (this.token_brace) {
+         if (c == "]")
+            this.token_brace = false;
+         this.token += c;
          return;
       }
       if (is_whitespace_char(c)) {
@@ -2247,12 +2328,23 @@ class MSimpleParser {
       // If searching for any word, advances the stream to the end of the found word or 
       // to the first non-word character.
       //
-      let word = "";
+      let word  = "";
+      let brace = false; // are we in square brackets?
       this.scan((function(c) {
+         if (brace) {
+            if (c == "]") {
+               brace = false;
+            }
+            word += c;
+            return;
+         }
          if (is_whitespace_char(c))
             return word.length > 0;
-         if ((".[]").indexOf(c) >= 0 && !word.length) // these chars are allowed in a word, but not at the start of a word
+         if ((".[]").indexOf(c) >= 0 && !word.length) { // these chars are allowed in a word, but not at the start of a word
+            if (c == "[")
+               brace = true;
             return true;
+         }
          if (is_syntax_char(c))
             return true;
          if (is_quote_char(c))

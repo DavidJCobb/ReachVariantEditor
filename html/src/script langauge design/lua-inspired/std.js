@@ -27,4 +27,13 @@ class Collection {
       }
       return void 0;
    }
+   [Symbol.iterator]() {
+      let keys = Object.keys(this.list);
+      let n    = 0;
+      return {
+         next() {
+            return i < keys.length ? { value: this.list[keys[n++]], done: false } : { done: true };
+         }
+      };
+   }
 }
