@@ -32,14 +32,6 @@ function _make_enum(list) {
    note that functions can't be aliased.
    
     - TODO: DON'T FORGET THIS
-   
-   Add an (owner) property to MVariableReference and have everything that contains 
-   an instance set that property. We need this so that errors caught in second-stage 
-   parsing can actually report line and column numbers; MVariableReference has no 
-   positional information but if we can access an instance's owner, then we can know 
-   roughly where the script error is.
-   
-    - I THINK I DID THIS, BUT AUDIT THE CODE TO BE SURE.
     
    Right now, aliases (and other objects) don't have anything to signal successful 
    validation versus failed validation; invocations can end up matching an invalid 
@@ -80,6 +72,9 @@ function _make_enum(list) {
     - player.killed_by is currently notated as varargs with each flag as an argument. 
       However, that's not a viable syntax for all flags; the create-object-flags 
       exist alongside other arguments so varargs is not a viable approach there.
+      
+      Something with a delimiter would be easiest, since we could just use that to 
+      signal the start and end of some new parsing mode; perhaps [flag | flag]?
    
    NOTE: We don't have a way to specify event triggers e.g. object death events. I 
    think we should do that with an "on" keyword (only permitted at the top level) 
@@ -857,7 +852,7 @@ class MVariablePart {
       }
       return alias.get_target_parts().slice(1);
    }
-   resolve_index(validator) {
+   resolve_index(validator) { // returns: undefined if there is no index; otherwise: the index as a constant integer, OR null if there is no valid index
       if (!this.has_index())
          return;
       if (+this.index === this.index)
@@ -1949,6 +1944,7 @@ class MSimpleParser {
       this.statement.set_end(this.pos);
       try {
          this.statement.source = token_to_int_or_var(this.token);
+         this.statement.source.owner = this.statement;
       } catch (e) {
          this.throw_error(e.message);
       }
@@ -2142,7 +2138,9 @@ class MSimpleParser {
    _parseFunctionCallArg() {
       let integer = this.extractIntegerLiteral();
       if (integer !== null) {
-         this.call.args.push(new MVariableReference(integer));
+         let arg = new MVariableReference(integer);
+         this.call.args.push(arg);
+         arg.owner = this.call;
          return true;
       }
       let string = this.extractStringLiteral();
