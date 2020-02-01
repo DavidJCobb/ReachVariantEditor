@@ -18,10 +18,8 @@ function _make_enum(list) {
    Currently, invalid alias names (e.g. "name[1]" or integer constants) fail during 
    first-pass parsing. Consider having them fail during second-pass parsing (i.e. 
    non-fatal errors, so other problems in the script can also be reported at the 
-   same time) instead.
-   
-   A function name should fail second-pass parsing if it includes square brackets or 
-   periods. (I'm referring here to function declarations, not function calls.)
+   same time) instead. (Aliases that shadow keywords are an exception and should 
+   always fail during first-pass parsing.)
    
    Strongly consider renaming all "validate" member functions to "analyze", since we 
    also need to do things like resolving MVariableReferences that include aliases, 
@@ -42,30 +40,15 @@ function _make_enum(list) {
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
     - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
-    
-    - Resolving alias declarations:
-    
-       - BASICALLY DONE.
-       
-       - The following fails:
-       
-            alias is_zombie = player.number[0]
-            alias indirect  = is_zombie
-         
-         If we define (alias indirect = player.is_zombie), that works. This may be 
-         for the best, since we can define a non-relative "is_zombie" alias that 
-         neither shadows nor is shadowed by the relative one.
-         
-          = YEAH, MARKING THIS AS WONTFIX/BYDESIGN.
       
     - Resolving alias invocations:
     
        - Do we want to allow integer-aliases as forge label indices (i.e. in for-
          each-object-with-label loops)?
     
-    - MFunctionCall arguments will need special-case handling to account for format 
-      string tokens, enum values, and so on. We'll need special-case alias handling 
-      here as well; I want it to be possible to alias entries in the built-in enums.
+   MFunctionCall arguments will need special-case handling to account for format 
+   string tokens, enum values, and so on. We'll need special-case alias handling 
+   here as well; I want it to be possible to alias entries in the built-in enums.
       
    WE NEED A SYNTAX FOR FLAGS ARGUMENTS IN FUNCTION CALLS.
    
@@ -83,6 +66,24 @@ function _make_enum(list) {
       on object death: for each player do
          -- ...
       end
+   
+   ---------------------------------------------------------------------------------
+   
+   NOTES:
+   
+   The following fails by design:
+      
+      alias is_zombie = player.number[0]
+      alias indirect  = is_zombie
+      
+   The reason it fails is because if we define another (is_zombie) alias that is 
+   NOT a relative alias on the "player" typename, then it will neither shadow nor 
+   be shadowed by the (is_zombie) alias in the sample code above; this means that 
+   the only way to be absolutely sure what alias (indirect) is meant to chain is 
+   to specify the typename. In other words, this is the correct syntax:
+      
+      alias is_zombie = player.number[0]
+      alias indirect  = player.is_zombie
    
    ---------------------------------------------------------------------------------
    
@@ -2537,6 +2538,13 @@ class MSimpleParser {
       let name = this.extractWord();
       if (!name.length)
          this.throw_error(`A function must have a name.`);
+      for(let c of name) {
+         if (("[].").indexOf(c) >= 0)
+            this.throw_error(`Unexpected ${c} inside of a function name.`);
+         //
+         // Other characters can occur inside of square brackets, but we don't need to test for 
+         // them, because we're already testing for the brackets themselves.
+      }
       if (!this.extractSpecificChar("("))
          this.throw_error(`Expected "(".`);
       if (!this.extractSpecificChar(")"))
