@@ -70,11 +70,6 @@ function _make_enum(list) {
     
        - Do we want to allow integer-aliases as forge label indices (i.e. in for-
          each-object-with-label loops)?
-         
-       - We need to handle aliases in MVariablePart.index fields. This won't use the 
-         usual alias resolution process; we just need to search for any alias of a 
-         constant integer that has the same name, use whatever one we find, and fail 
-         if none are found.
     
     - MFunctionCall arguments will need special-case handling to account for format 
       string tokens, enum values, and so on. We'll need special-case alias handling 
@@ -870,6 +865,12 @@ class MVariablePart {
       let found = false;
       let alias = null;
       let name  = this.index;
+      //
+      // NOTE: Keywords-as-indices are already checked for during stage-one parsing and are a fatal error. 
+      // Don't bother checking for them here.
+      //
+      // NOTE: Absurd indices e.g. "abc-def-g" are already handled during MVariableReference.extract.
+      //
       validator.forEachTrackedAlias((function(a) {
          if (a.is_relative())
             return;
@@ -967,7 +968,11 @@ class MVariablePart {
       return true;
    }
    validate(validator, is_alias_rhs) {
-      this.resolve_index(validator);
+      {
+         let result = this.resolve_index(validator);
+         if (result === null && this.index !== null) // we have an index but it's not valid
+            return false;
+      }
       //
       // Validation during stage-two parsing.
       //
