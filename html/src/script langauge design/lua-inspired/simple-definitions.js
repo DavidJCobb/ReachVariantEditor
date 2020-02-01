@@ -4,6 +4,7 @@ class MScriptProperty {
       this.type              = details.type;
       this.allow_from_nested = details.allow_from_nested; // allow (namespace.var.var.property)?
       this.hard_max_index    = details.hard_max_index || 0; // same as on members
+      this.is_read_only      = details.is_read_only   || false;
    }
 }
 class MScriptTypename {

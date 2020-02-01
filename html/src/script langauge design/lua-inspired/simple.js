@@ -31,11 +31,30 @@ function _make_enum(list) {
    parsing. If there is a function by the targeted name, the error message should 
    note that functions can't be aliased.
    
+    - TODO: DON'T FORGET THIS
+   
    Add an (owner) property to MVariableReference and have everything that contains 
    an instance set that property. We need this so that errors caught in second-stage 
    parsing can actually report line and column numbers; MVariableReference has no 
    positional information but if we can access an instance's owner, then we can know 
    roughly where the script error is.
+   
+    - I THINK I DID THIS, BUT AUDIT THE CODE TO BE SURE.
+    
+   SECOND-PASS VALIDATION ON ALIASES: DO NOT ALLOW ALIASES TO SHADOW NAMESPACES OR 
+   BUILT-IN PROPERTIES.
+   
+    - MAlias.validate should check if its (target) is single-part; if so, it should 
+      fail if that part is named after a namespace. If the alias is a relative 
+      alias, then we should iterate over all properties on the relative typename; 
+      if we are shadowing them (i.e. the alias is two parts and the latter part 
+      shares a name with a built-in property), then validation should fail.
+      
+    - Right now, aliases (and other objects) don't have anything to signal successful 
+      validation versus failed validation; invocations can end up matching an invalid 
+      alias, leading to cascading failures. AT A MINIMUM aliases need to remember 
+      whether they are valid, so that invocations of an invalid alias fail with a 
+      SENSIBLE AND INFORMATIVE error message.
    
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
@@ -62,8 +81,10 @@ function _make_enum(list) {
          incomplete code which specifically checks for (constant_int_alias.something) 
          and (something.constant_int_alias) during MVariablePart.resolve_alias.
       
-          - I'm almost wondering if we should't just make all constant integers 
-            exist as MVariableReferences just to keep things uniform.
+          - Do we want to allow integer-aliases as forge label indices (i.e. in for-
+            each-object-with-label loops)?
+      
+          - Handle resolving a constant-int alias.
          
        - We need to handle aliases in MVariablePart.index fields. This won't use the 
          usual alias resolution process; we just need to search for any alias of a 
@@ -436,25 +457,24 @@ class MAlias extends MParsedItem {
       return this.target.parts;
    }
    get_relative_typename() {
-      if (!this.target)
+      if (!this.is_relative())
          return null;
-      if (!this.target.analyzed.is_relative_alias)
+      if (this.target.is_integer_constant())
          return null;
       let first = this.target.parts[0];
       return first.get_typename();
    }
-   is_constant_integer() {
+   is_integer_constant() {
       if (!this.target)
          return true;
-      //
-      // TODO: (this.target) could itself point to an alias of a constant integer.
-      //
+      if (this.target.is_integer_constant())
+         return true;
       return false;
    }
    is_relative() { // requires validation of the RHS
       if (!this.target)
          return false;
-      return this.target.analyzed.is_relative_alias;
+      return this.target.is_relative_alias();
    }
 }
 class MBlock extends MParsedItem {
@@ -750,6 +770,20 @@ class MVariablePart {
       }
       return null;
    }
+   is_read_only() {
+      let type = this.get_typename();
+      if (type && type.always_read_only)
+         return true;
+      let object = this.analyzed.object;
+      switch (this.analyzed.archetype) {
+         case "member":
+         case "property":
+            return object.is_read_only;
+         case "static":
+            return true;
+      }
+      return false;
+   }
    //
    resolve_alias(validator) {
       let i     = this.locate_me();
@@ -771,7 +805,7 @@ class MVariablePart {
          }).bind(this));
          if (!alias)
             return false;
-         if (alias.is_constant_integer()) {
+         if (alias.is_integer_constant()) {
             if (this.owner.parts.length > 1) {
                validator.report(this, `Alias ${alias.name} refers to a constant integer and is not valid here.`);
                return false;
@@ -1038,19 +1072,22 @@ class MVariablePart {
    }
 }
 class MVariableReference { // represents a variable, keyword, or aliased integer
-   constructor(text) {
-      this.parts = []; // std::vector<MVariablePart>
-      if (text)
-         this.extract(text);
+   constructor(arg) {
+      this.parts    = []; // std::vector<MVariablePart>
+      this.constant = 0;
+      if (arg) {
+         if (+arg === arg)
+            this.constant = arg;
+         else
+            this.extract(arg);
+      }
       this.analyzed = {
          type:  null,
          scope: null, // var_scope OR the _scope enums on the opcode arg value classes
          which: null,
          index: null,
-         aliased_integer_constant: null, // if we turn out to be an alias
          is_read_only: false,
          //
-         is_relative_alias: false,
          aliased_typename:  null, // for relative aliases of the form typename.member[index]
          aliased_member:    null,
          aliased_index:     null,
@@ -1103,6 +1140,8 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       return true;
    }
    serialize() {
+      if (this.is_integer_constant())
+         return this.constant + "";
       let list = this.parts.map(function(v) { return v.serialize(); });
       return list.join(".");
    }
@@ -1110,56 +1149,31 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       return this.serialize();
    }
    //
+   is_integer_constant() {
+      return !this.parts.length;
+   }
    is_read_only() {
-      if (this.analyzed.aliased_integer_constant !== null)
+      if (this.is_integer_constant())
          return true;
       if (this.analyzed.type)
          return this.analyzed.is_read_only;
       return void 0; // analysis was not yet conducted, so we don't know
    }
+   is_relative_alias() {
+      if (this.parts.length) {
+         let first = this.parts[0];
+         if (first.analyzed.archetype == "alias_rel_typename")
+            return true;
+      }
+      return false;
+   }
    is_single() {
       return this.parts.length == 1 && !this.parts[0].has_index();
    }
    //
-   resolve_aliases(validator) {
-      //
-      // TODO: If there is an alias anywhere in our (parts), convert it to its 
-      // "real" value.
-      //
-      //  - If you alias (scope.variable[index]), then (scope[index].alias) is a 
-      //    valid invocation of the alias as long as that scope can be indexed.
-      //
-      //  - Currently we want to be as broad with aliases as possible, e.g. 
-      //    allowing the aliasing of scopes and of built-in property names. It 
-      //    could be useful as a localization aid (picture a foreign-language 
-      //    developer pasting a bunch of aliases at the top of the script to 
-      //    translate as many names as possible to their language).
-      //
-      // I think the best way to do this is to:
-      //
-      //  - Resolve the MVariableReferences in MAliases.
-      //
-      //     - Modify the MVariableReference resolve function to take an argument 
-      //       indicating whether it's being called for an alias. If so, have it 
-      //       check whether the alias is relative or absolute and if it's relative, 
-      //       resolve that with custom logic and return.
-      //
-      //  - A "relative" alias has as its target (type.member[index]) such that it 
-      //    can be invoked as a member of any variable of that type. For example, 
-      //    (alias is_zombie = player.number[0]) is a relative alias and can be 
-      //    invoked as (current_player.is_zombie), (global.player[0].is_zombie), 
-      //    et cetera.
-      //
-      //    An "absolute" alias refers to a fully-qualified variable.
-      //
-      //  - When all in-scope aliases have been resolved, resolving variable 
-      //    references that may use aliases is simple: simply copy the alias's 
-      //    own resolved variable reference (if it's absolute) or construct an 
-      //    appropriate new reference from its data (if it's relative).
-      //
-   }
-   //
    validate(validator, is_alias_rhs) {
+      if (this.is_integer_constant())
+         return true;
       //
       // There are sixty-one possible variables not accounting for indices (i.e. counting 
       // player[0] and player[1] as "the same" variable). However, all such variables fall 
@@ -1216,6 +1230,11 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
                return false;
             }
          }
+      }
+      if (this.parts.length) {
+         let last = this.parts[this.parts.length - 1];
+         this.analyzed.type         = last.get_typename();
+         this.analyzed.is_read_only = last.is_read_only();
       }
       //
       // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
@@ -1337,6 +1356,9 @@ class MFunctionCall extends MParsedItem {
             return false;
          this.name = text;
       } else {
+         //
+         // TODO: Fail on "1234.func()"
+         //
          this.context = new MVariableReference;
          this.context.owner = this;
          this.context.extract(text.substring(0, i));
@@ -1454,7 +1476,7 @@ function token_to_int_or_var(text) { // converts a token to a constant int or to
          }
       }
       if (found && valid)
-         return +text;
+         return new MVariableReference(+text);
    }
    return new MVariableReference(text);
 }
@@ -1463,37 +1485,30 @@ class MAssignment extends MParsedItem {
    constructor() {
       super();
       this.target   = null; // MVariableReference
-      this.source   = null; // MVariableReference, MFunctionCall, or constant integer
+      this.source   = null; // MVariableReference or MFunctionCall
       this.operator = null; // MOperator
    }
    serialize() {
       let result = "";
       if (this.target instanceof MVariableReference || this.target instanceof MFunctionCall)
          result += this.target.serialize();
-      else if (+this.target === this.target)
-         result += this.target;
       else
          throw new Error("unhandled");
       result = `${result} ${this.operator.serialize()} `;
       if (this.source instanceof MVariableReference || this.source instanceof MFunctionCall)
          result += this.source.serialize();
-      else if (+this.source === this.source)
-         result += this.source;
       else
          throw new Error("unhandled");
       return result;
    }
    validate(validator) {
-      if (+this.target === this.target)
-         validator.report(this, "You cannot assign to a constant integer.");
-      else if (this.target instanceof MVariableReference) {
+      if (this.target instanceof MVariableReference) {
          this.target.validate(validator);
-         if (this.target.is_read_only())
+         if (this.target.is_integer_constant())
+            validator.report(this, "You cannot assign to a constant integer.");
+         else if (this.target.is_read_only())
             validator.report(this, "You cannot assign to this variable/property. It is read-only.");
       }
-      //
-      // TODO: Fail if assigning to a read-only target.
-      //
       if (this.source instanceof MParsedItem || this.source instanceof MVariableReference) {
          this.source.validate(validator);
       }
@@ -1502,23 +1517,19 @@ class MAssignment extends MParsedItem {
 class MComparison extends MParsedItem {
    constructor() {
       super();
-      this.left     = null; // MVariableReference or constant integer
-      this.right    = null; // MVariableReference or constant integer
+      this.left     = null; // MVariableReference
+      this.right    = null; // MVariableReference
       this.operator = null; // MOperator
    }
    serialize() {
       let result = "";
       if (this.left instanceof MVariableReference)
          result += this.left.serialize();
-      else if (+this.left === this.left)
-         result += this.left;
       else
          throw new Error("unhandled");
       result += ` ${this.operator.serialize()} `;
       if (this.right instanceof MVariableReference)
          result += this.right.serialize();
-      else if (+this.right === this.right)
-         result += this.right;
       else
          throw new Error("unhandled");
       return result;
@@ -2025,7 +2036,7 @@ class MSimpleParser {
    _parseFunctionCallArg() {
       let integer = this.extractIntegerLiteral();
       if (integer !== null) {
-         this.call.args.push(integer);
+         this.call.args.push(new MVariableReference(integer));
          return true;
       }
       let string = this.extractStringLiteral();
@@ -2388,7 +2399,7 @@ class MSimpleParser {
                this.throw_error(`Invalid for-each-object-with-label loop: expected the word "label".`);
             use_label = this.extractStringLiteral();
             if (use_label === null) {
-               use_label = this.extractIntegerLiteral();
+               use_label = this.extractIntegerLiteral(); // TODO: Do we want to allow constant integer aliases here?
                if (use_label === null)
                   this.throw_error(`Invalid for-each-object-with-label loop: the label must be a string literal or integer literal.`);
             }
