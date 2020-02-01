@@ -41,14 +41,8 @@ function _make_enum(list) {
    
     - I THINK I DID THIS, BUT AUDIT THE CODE TO BE SURE.
     
-   SECOND-PASS VALIDATION ON ALIASES: DO NOT ALLOW ALIASES TO SHADOW NAMESPACES OR 
-   BUILT-IN PROPERTIES.
-   
-    - MAlias.validate should check if its (target) is single-part; if so, it should 
-      fail if that part is named after a namespace. If the alias is a relative 
-      alias, then we should iterate over all properties on the relative typename; 
-      if we are shadowing them (i.e. the alias is two parts and the latter part 
-      shares a name with a built-in property), then validation should fail.
+   SECOND-PASS VALIDATION ON ALIASES: DO NOT ALLOW ALIASES TO SHADOW TYPENAME PROPERTIES, 
+   E.G. THE RELATIVE ALIAS (spawn_sequence = object.number[0]) SHOULD NOT BE VALID.
       
     - Right now, aliases (and other objects) don't have anything to signal successful 
       validation versus failed validation; invocations can end up matching an invalid 
@@ -77,14 +71,8 @@ function _make_enum(list) {
       
     - Resolving alias invocations:
     
-       - We need to handle aliases of constant integers. We currently only have 
-         incomplete code which specifically checks for (constant_int_alias.something) 
-         and (something.constant_int_alias) during MVariablePart.resolve_alias.
-      
-          - Do we want to allow integer-aliases as forge label indices (i.e. in for-
-            each-object-with-label loops)?
-      
-          - Handle resolving a constant-int alias.
+       - Do we want to allow integer-aliases as forge label indices (i.e. in for-
+         each-object-with-label loops)?
          
        - We need to handle aliases in MVariablePart.index fields. This won't use the 
          usual alias resolution process; we just need to search for any alias of a 
@@ -390,6 +378,27 @@ function is_whitespace_char(c) {
    return (" \r\n\t").indexOf(c) >= 0;
 }
 
+function is_keyword(word) {
+   word = word.toLowerCase();
+   switch (word) {
+      case "alias":
+      case "and":
+      case "do":
+      case "else":
+      case "elseif":
+      case "end":
+      case "expect":
+      case "for":
+      case "function":
+      case "if":
+      case "on":
+      case "or":
+      case "then":
+         return true;
+   }
+   return false;
+}
+
 class MParsedItem {
    constructor() {
       this.parent = null;
@@ -418,17 +427,22 @@ class MAlias extends MParsedItem {
    constructor(n, rhs) {
       super();
       this.name   = n;
-      this.value  = 0;    // integer
       this.target = null; // MVariableReference
       {  // Validate name.
+         if (is_keyword(n))
+            throw new Error(`Keyword "${n}" cannot be used as the name of an alias.`);
          //
-         // TODO: Do we really want this to be a fatal parse error? Seems like something we could 
+         // TODO: Do we really want these next errors to be fatal parse errors? Seems like stuff we could 
          // just catch during the second-pass parsing.
          //
          if (n.match(/[\[\]\.]/))
             throw new Error(`Invalid alias name "${n}". Alias names cannot contain square brackets or periods.`);
          if (!n.match(/[^0-9]/))
             throw new Error(`Invalid alias name "${n}". You cannot alias an integer constant.`);
+         let nl = n.toLowerCase();
+         let f  = function(e) { return e.name == nl; }
+         if (namespaces.find(f) || types.find(f) || namespaces.unnamed.members.find(f))
+            throw new Error(`Invalid alias name "${n}". You cannot shadow a built-in namespace or keyword.`);
       }
       let result = token_to_int_or_var(rhs);
       if (result instanceof MVariableReference) {
@@ -438,19 +452,18 @@ class MAlias extends MParsedItem {
          this.value = result;
    }
    serialize() {
-      let result = `alias ${this.name} = `;
-      if (this.target) {
-         result += this.target.serialize();
-      } else {
-         result += this.value;
-      }
-      return result;
+      return `alias ${this.name} = ${this.target.serialize()}`;
    }
    validate(validator) {
       if (this.target)
          this.target.validate(validator, true);
    }
    //
+   get_integer_constant() {
+      if (this.target.is_integer_constant())
+         return this.target.constant;
+      return void 0;
+   }
    get_target_parts() {
       if (!this.target)
          return [];
@@ -785,7 +798,7 @@ class MVariablePart {
       return false;
    }
    //
-   resolve_alias(validator) {
+   resolve_alias(validator) { // returns: array of MVariablePart OR integer
       let i     = this.locate_me();
       let alias = null;
       let found = false; // found any matching name, even if it was invoked improperly
@@ -810,10 +823,7 @@ class MVariablePart {
                validator.report(this, `Alias ${alias.name} refers to a constant integer and is not valid here.`);
                return false;
             }
-            //
-            // TODO: Different handling for constant integers; how do we allow an MVariableReference to know 
-            // that that's what it is?
-            //
+            return alias.get_integer_constant();
          }
          if (!alias || this.has_index()) {
             validator.report(this, `Found one or more aliases named ${this.name}, but none were valid here.`);
@@ -1204,6 +1214,12 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          let result = this.parts[i].validate(validator, is_alias_rhs);
          if (!result) {
             result = this.parts[i].resolve_alias(validator);
+            if (+result === result) {
+               assert(this.parts.length == 1, "Can't handle integer alias here.");
+               this.constant = result;
+               this.parts    = [];
+               break;
+            }
             if (!result) {
                validator.set_errors_suspended(false, false);
                return false;
@@ -1235,6 +1251,10 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          let last = this.parts[this.parts.length - 1];
          this.analyzed.type         = last.get_typename();
          this.analyzed.is_read_only = last.is_read_only();
+      } else {
+         //
+         // we're an integer
+         //
       }
       //
       // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
