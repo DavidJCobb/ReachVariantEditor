@@ -1,3 +1,10 @@
+function _make_enum(list) {
+   let out = {};
+   for(let entry of list)
+      out[entry] = Symbol(entry);
+   return out;
+}
+
 Array.prototype.last = function() {
    return this[this.length - 1];
 }
@@ -7,9 +14,12 @@ Array.prototype.item = function(i) {
    return this[i];
 }
 
-function assert(cond, message) {
-   if (!cond)
+function assert(cond, message, extra) {
+   if (!cond) {
+      if (extra) // Firefox's debugger is awful and often "loses" the actual stack frame that threw, so use this to dump pertinent locally-scoped objects
+         console.warn(extra);
       throw new Error(`Assertion failed: ${message}.`);
+   }
 }
 
 class Collection {
@@ -28,11 +38,12 @@ class Collection {
       return void 0;
    }
    [Symbol.iterator]() {
-      let keys = Object.keys(this.list);
+      let list = this.list;
+      let keys = Object.keys(list);
       let n    = 0;
       return {
          next() {
-            return i < keys.length ? { value: this.list[keys[n++]], done: false } : { done: true };
+            return n < keys.length ? { value: list[keys[n++]], done: false } : { done: true };
          }
       };
    }

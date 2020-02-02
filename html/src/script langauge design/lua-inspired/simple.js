@@ -1,10 +1,3 @@
-function _make_enum(list) {
-   let out = {};
-   for(let entry of list)
-      out[entry] = Symbol(entry);
-   return out;
-}
-
 /*
 
    TODO:
@@ -39,12 +32,28 @@ function _make_enum(list) {
    
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
+    - We forgot to write the code for the scope, which, and index! Add handlers 
+      to each typename definition.
+   
     - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
+    
+       = ACTUALLY, DON'T BOTHER. WE HAVE CASE-INSENSITIVITY ISSUES THROUGHOUT THE 
+         SCRIPT AND WE'LL RESOLVE THEM WHEN PORTING TO C++ JUST BY USING _stricmp 
+         OR cobb::strieq WHEN THE TIME COMES, SINCE IN MANY/MOST CASES WE HAVE TO 
+         EXPLICITLY SPECIFY "HOW" WE WANT TO COMPARE IN C/C++ ANYWAY.
       
     - Resolving alias invocations:
     
        - Do we want to allow integer-aliases as forge label indices (i.e. in for-
          each-object-with-label loops)?
+         
+   Bring in the opcode database.
+   
+    - Validate all function calls: ensure that calls are to valid functions, be 
+      they built-in or user-defined.
+      
+    - Validate all function declarations: do not allow user-defined functions to 
+      shadow built-in functions.
     
    MFunctionCall arguments will need special-case handling to account for format 
    string tokens, enum values, and so on. We'll need special-case alias handling 
@@ -133,225 +142,7 @@ const block_type = _make_enum([
    "for_each_team",
    "function",
 ]);
-const var_scope = _make_enum([
-   "global",
-   "object",
-   "player",
-   "team",
-]);
-const var_type = _make_enum([
-   "number",
-   "object",
-   "player",
-   "team",
-   "timer",
-]);
-function var_type_to_var_scope(type) {
-   switch (type) {
-      case var_type.number: return null;
-      case var_type.object: return var_scope.object;
-      case var_type.player: return var_scope.player;
-      case var_type.team:   return var_scope.team;
-      case var_type.timer:  return null;
-   }
-   return null;
-}
-//
-const number_var_scope = _make_enum([
-   "constant",
-   "player_number",
-   "object_number",
-   "team_number",
-   "global_number",
-   "script_option",
-   "spawn_sequence",
-   "team_score",
-   "player_score",
-   "unknown_09", // unused in Reach? used in Halo 4?
-   "player_rating",
-   "player_stat",
-   "team_stat",
-   "current_round",
-   "symmetry_getter",
-   "symmetry",
-   "score_to_win",
-   "unkF7A6",
-   "teams_enabled",
-   "round_time_limit",
-   "round_limit",
-   "misc_unk0_bit3",
-   "rounds_to_win",
-   "sudden_death_time",
-   "grace_period",
-   "lives_per_round",
-   "team_lives_per_round",
-   "respawn_time",
-   "suicide_penalty",
-   "betrayal_penalty",
-   "respawn_growth",
-   "loadout_cam_time",
-   "respawn_traits_duration",
-   "friendly_fire",
-   "betrayal_booting",
-   "social_flags_bit_2",
-   "social_flags_bit_3",
-   "social_flags_bit_4",
-   "grenades_on_map",
-   "indestructible_vehicles",
-   "powerup_duration_red",
-   "powerup_duration_blue",
-   "powerup_duration_yellow",
-   "death_event_damage_type",
-]);
-function var_scope_to_number_scope(vs) {
-   switch (vs) {
-      case var_scope.global: return number_var_scope.global_number;
-      case var_scope.object: return number_var_scope.object_number;
-      case var_scope.player: return number_var_scope.player_number;
-      case var_scope.team:   return number_var_scope.team_number;
-   }
-   return null;
-}
-//
-const object_var_scope = _make_enum([
-   "global",
-   "player",
-   "object",
-   "team",
-   "global_player_biped", // KSoft.Tool calls these "player_slave"
-   "player_player_biped",
-   "object_player_biped",
-   "team_player_biped",
-]);
-function var_scope_to_object_scope(vs) {
-   switch (vs) {
-      case var_scope.global: return object_var_scope.global;
-      case var_scope.object: return object_var_scope.object;
-      case var_scope.player: return object_var_scope.player;
-      case var_scope.team:   return object_var_scope.team;
-   }
-   return null;
-}
-function var_scope_to_biped_scope(vs) {
-   switch (vs) {
-      case var_scope.global: return object_var_scope.global_player_biped;
-      case var_scope.object: return object_var_scope.object_player_biped;
-      case var_scope.player: return object_var_scope.player_player_biped;
-      case var_scope.team:   return object_var_scope.team_player_biped;
-   }
-   return null;
-}
-//
-const team_var_scope = _make_enum([
-   "global",
-   "player",
-   "object",
-   "team",
-   "object_owner_team",
-   "player_owner_team",
-]);
-function var_scope_to_team_scope(vs) {
-   switch (vs) {
-      case var_scope.global: return team_var_scope.global;
-      case var_scope.object: return team_var_scope.object;
-      case var_scope.player: return team_var_scope.player;
-      case var_scope.team:   return team_var_scope.team;
-   }
-   return null;
-}
-//
-const timer_var_scope = _make_enum([
-   "global",
-   "player",
-   "team",
-   "object",
-   "object_owner_team",
-   "player_owner_team",
-   "round_timer",
-   "sudden_death_timer",
-   "grace_period_timer",
-]);
 
-// currently in variables_and_scopes.cpp. need to add real enums alongside these -- messy. :(
-const megalo_objects = _make_enum([
-   "no object",
-   "Global.Object[0]",
-   "Global.Object[1]",
-   "Global.Object[2]",
-   "Global.Object[3]",
-   "Global.Object[4]",
-   "Global.Object[5]",
-   "Global.Object[6]",
-   "Global.Object[7]",
-   "Global.Object[8]",
-   "Global.Object[9]",
-   "Global.Object[10]",
-   "Global.Object[11]",
-   "Global.Object[12]",
-   "Global.Object[13]",
-   "Global.Object[14]",
-   "Global.Object[15]",
-   "current object",
-   "HUD target object",
-   "killed object",
-   "killer object",
-]);
-const megalo_players = _make_enum([
-   "no player",
-   "Player 1",
-   "Player 2",
-   "Player 3",
-   "Player 4",
-   "Player 5",
-   "Player 6",
-   "Player 7",
-   "Player 8",
-   "Player 9",
-   "Player 10",
-   "Player 11",
-   "Player 12",
-   "Player 13",
-   "Player 14",
-   "Player 15",
-   "Player 16",
-   "Global.Player[0]",
-   "Global.Player[1]",
-   "Global.Player[2]",
-   "Global.Player[3]",
-   "Global.Player[4]",
-   "Global.Player[5]",
-   "Global.Player[6]",
-   "Global.Player[7]",
-   "current player",
-   "HUD player",
-   "HUD target",
-   "killer player",
-]);
-const megalo_teams = _make_enum([
-   "no team",
-   "Team 1",
-   "Team 2",
-   "Team 3",
-   "Team 4",
-   "Team 5",
-   "Team 6",
-   "Team 7",
-   "Team 8",
-   "Neutral",
-   "Global.Team[0]",
-   "Global.Team[1]",
-   "Global.Team[2]",
-   "Global.Team[3]",
-   "Global.Team[4]",
-   "Global.Team[5]",
-   "Global.Team[6]",
-   "Global.Team[7]",
-   "current team",
-   "HUD player's team",
-   "HUD target's team",
-   "unk_14 team",
-   "unk_15 team",
-]);
 
 function is_operator_char(c) {
    return ("=<>!+-*/%&|~^").indexOf(c) >= 0;
@@ -1146,10 +937,6 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
          which: null,
          index: null,
          is_read_only: false,
-         //
-         aliased_typename:  null, // for relative aliases of the form typename.member[index]
-         aliased_member:    null,
-         aliased_index:     null,
       };
    }
    extract(text) {
@@ -1238,8 +1025,12 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
    }
    //
    validate(validator, is_alias_rhs) {
-      if (this.is_integer_constant())
+      if (this.is_integer_constant()) {
+         this.analyzed.type  = types.number;
+         this.analyzed.scope = number_var_scope.constant;
+         this.analyzed.index = this.constant;
          return true;
+      }
       //
       // There are sixty-one possible variables not accounting for indices (i.e. counting 
       // player[0] and player[1] as "the same" variable). However, all such variables fall 
@@ -1307,12 +1098,18 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       }
       if (this.parts.length) {
          let last = this.parts[this.parts.length - 1];
-         this.analyzed.type         = last.get_typename();
+         let type = last.get_typename();
+         this.analyzed.type         = type;
          this.analyzed.is_read_only = last.is_read_only();
-      } else {
-         //
-         // we're an integer
-         //
+         if (type && !is_alias_rhs) {
+            let func = type.resolve_function;
+            if (!func && type.underlying_type) {
+               this.analyzed.type = type.underlying_type;
+               func = type.underlying_type.resolve_function;
+            }
+            if (func)
+               func(this);
+         }
       }
       //
       // TODO: Set (type), (scope), (which), and (index) on (this.analyzed) according to what 
@@ -1407,6 +1204,85 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       // global.object[0].team            // object.team (var.team)
       //
       //*/
+   }
+   identify_root() {
+      //
+      // Helper function for identifying the (scope), (which), and (index) for certain variables. 
+      // This function will properly identify the root of any MVariableReference that begins with:
+      //
+      //    global.object[n]
+      //    global.player[n]
+      //    global.team[n]
+      //    unnamed_ns_object
+      //    unnamed_ns_player
+      //    unnamed_ns_team
+      //    player[n]
+      //    team[n]
+      //
+      // The sequences above are the "roots" that this function can identify. The function returns: 
+      // the number of parts that the "root" consists of; the typename for the root; and the root's 
+      // identifier within its respective enum (megalo_objects, megalo_players, or megalo_teams).
+      //
+      // This function should be called by (resolve_function) functions provided to MScriptTypename 
+      // instances.
+      //
+      let first  = this.parts[0] ? this.parts[0].analyzed.object : null;
+      let second = this.parts[1] ? this.parts[1].analyzed.object : null;
+      if (first instanceof MScriptNamespace) {
+         if (!second)
+            return { part_count: 0, type: null, id: null };
+         if (first != namespaces.global)
+            return { part_count: 0, type: null, id: null };
+         for(let member of first.members) { // namespace.member
+            if (member.name == second.name) {
+               let id   = null;
+               let type = member.type;
+               switch (type) {
+                  case types.object: id = member.megalo_object; break;
+                  case types.player: id = member.megalo_player; break;
+                  case types.team:   id = member.megalo_team;   break;
+               }
+               return { part_count: 2, type: type, id: id };
+            }
+         }
+         for(let type of types) { // namespace.var
+            if (type.name == second.name) {
+               let part = this.parts[1];
+               let id   = null;
+               switch (type) {
+                  case types.object: id = megalo_objects["global_object_" + part.index]; break; // C++: enum value + index
+                  case types.player: id = megalo_players["global_player_" + part.index]; break; // C++: enum value + index
+                  case types.team:   id = megalo_teams  ["global_team_"   + part.index]; break; // C++: enum value + index
+               }
+               return { part_count: 2, type: type, id: id };
+            }
+         }
+         return { part_count: 0, type: null, id: null };
+      } else {
+         for(let member of namespaces.unnamed.members) { // member
+            if (member.name == first.name) {
+               let id   = null;
+               let type = member.type;
+               switch (type) {
+                  case types.object: id = member.megalo_object; break;
+                  case types.player: id = member.megalo_player; break;
+                  case types.team:   id = member.megalo_team;   break;
+               }
+               return { part_count: 1, type: type, id: id };
+            }
+         }
+         if (first instanceof MScriptTypename) { // static
+            let part  = this.parts[0];
+            let index = part.index;
+            let id    = null;
+            switch (first) {
+               case types.player: id = megalo_players["player_" + (index + 1)]; break; // C++: enum value + index
+               case types.team:   id = megalo_teams["team_" + (index + 1)];     break; // C++: enum value + index
+            }
+            return { part_count: 1, type: first, id: id };
+         }
+      }
+      return { part_count: 0, type: null, id: null };
    }
 }
 
