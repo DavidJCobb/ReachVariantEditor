@@ -1219,7 +1219,8 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
       //    player[n]
       //    team[n]
       //
-      // The sequences above are the "roots" that this function can identify. The function returns: 
+      // The sequences above are the "roots" that this function can identify; that is: they are 
+      // nestable variables that are (internally considered) globally-scoped. The function returns: 
       // the number of parts that the "root" consists of; the typename for the root; and the root's 
       // identifier within its respective enum (megalo_objects, megalo_players, or megalo_teams).
       //
