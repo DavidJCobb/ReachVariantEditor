@@ -55,27 +55,69 @@
    whether they are valid, so that invocations of an invalid alias fail with a 
    SENSIBLE AND INFORMATIVE error message.
    
-   WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
+    - Just fix this when we port to C++.
    
-    - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
-    
-       = ACTUALLY, DON'T BOTHER. WE HAVE CASE-INSENSITIVITY ISSUES THROUGHOUT THE 
-         SCRIPT AND WE'LL RESOLVE THEM WHEN PORTING TO C++ JUST BY USING _stricmp 
-         OR cobb::strieq WHEN THE TIME COMES, SINCE IN MANY/MOST CASES WE HAVE TO 
-         EXPLICITLY SPECIFY "HOW" WE WANT TO COMPARE IN C/C++ ANYWAY.
-      
-    - Resolving alias invocations:
-    
-       - Do we want to allow integer-aliases as forge label indices (i.e. in for-
-         each-object-with-label loops)?
+   Keywords, variable parts, and so on need to be case-insensitive.
+   
+    - Just fix this when we port to C++.
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   
+   Do we want to allow integer-aliases as forge label indices (i.e. in for-each-
+   object-with-label loops)?
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    
    Second-pass parsing should fail if there is more than one of any particular 
    event handler.
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   
+   See if we can replace our custom Collection with Map. Apparently the latter is 
+   supposed to be accessible both by key and by iteration (i.e. for...of).
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   
+   HOW SHOULD WE HANDLE VECTORS, FORMAT STRINGS AND TOKENS, AND SIMILAR MULTI-PART 
+   ARGUMENTS IN FUNCTIONS?
+   
+    - I think we should use nested parentheses: if we encounter an opening paren 
+      while parsing a function call's arguments, then we blindly consume everything 
+      up to the next closing paren, and we store all of that as a string inside of 
+      an "MUndifferentiatedFunctionCallArg". Then, during second-pass parsing, when 
+      we've identified the function and we know what type of argument was supposed 
+      to be there, we can choose a functor to parse that string (e.g. parse it as 
+      a list of flags, or a format string and tokens, or a vector3, etc.).
+      
+      We can use a uniform syntax for all cases I can think of: comma-separated 
+      values inside of the parens. That works for vector coordinates, for flags in 
+      a mask, and for a format string and its tokens.
+      
+       - The function to parse argument types needs to be able to handle aliases.
+       
+       - "Shape" and "format string token" arguments can contain/be variable 
+         references.
+      
+       - Do we want a flags-mask to have to be wrapped in parentheses even when 
+         only one flag is being used?
+      
+       - Do we want a format-string-and-tokens to have to be wrapped in parenthe-
+         ses even when there are no tokens and it's just the one format string?
+      
+       - The Alpha Zombies sample script will need to be updated accordingly; it 
+         calls some functions that use flags masks.
          
    Bring in the opcode database.
    
     - Validate all function calls: ensure that calls are to valid functions, be 
       they built-in or user-defined.
+      
+       - Validate function call arguments.
+       
+          - If a function's only argument is a flags mask, if a call to it has 
+            multiple arguments, and if any argument is the name of a flag, then 
+            have the error message mention that flags masks ALWAYS have to be 
+            wrapped in parentheses, i.e. player.killed_by((kill, suicide)).
       
     - Validate all function declarations: do not allow user-defined functions to 
       shadow built-in functions.
@@ -83,20 +125,23 @@
    MFunctionCall arguments will need special-case handling to account for format 
    string tokens, enum values, and so on. We'll need special-case alias handling 
    here as well; I want it to be possible to alias entries in the built-in enums.
-      
-   WE NEED A SYNTAX FOR FLAGS ARGUMENTS IN FUNCTION CALLS.
    
-    - player.killed_by is currently notated as varargs with each flag as an argument. 
-      However, that's not a viable syntax for all flags; the create-object-flags 
-      exist alongside other arguments so varargs is not a viable approach there.
-      
-      Something with a delimiter would be easiest, since we could just use that to 
-      signal the start and end of some new parsing mode; perhaps [flag | flag]?
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    
    Once the compiler is implemented, we need to test whether it's possible to call 
    a non-subroutine trigger; this will impact whether we allow function declarations 
    to also be event handlers (see comments in the parser's "function" keyword 
    handler).
+   
+   (I mean, we need to test whether it works properly in-game.)
+   
+   ---------------------------------------------------------------------------------
+   
+   C++ TODO: If the (mpvr) block turns out to exceed the allowed size limit, can we 
+   work around that by writing it as a compressed (_cmp) block? (If not, then why 
+   the hell did Bungie ever even compress some mpvr blocks?) A quick way to test 
+   this would be to examine some variants that use compressed blocks, like Halo 
+   Chess, and see if they exceed the 0x5000-odd-byte cap when uncompressed.
    
    ---------------------------------------------------------------------------------
    
