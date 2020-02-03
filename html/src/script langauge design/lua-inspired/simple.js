@@ -1,12 +1,33 @@
 /*
 
+   PARSER OVERVIEW:
+   
+   The first parsing "pass" takes all of the script text and generates instances of 
+   MBlock, MAlias, MVariableReference, MFunctionCall, and so on, representing each 
+   token in the script.
+   
+   The second parsing "pass" iterates over all of these tokens and both analyzes 
+   and validates them:
+   
+    - MVariableReferences are decoded. Each MVariablePart has its "archetype" and 
+      "object" identified (with alias invocations resolved); after this, the 
+      variable reference identifies its type and passes itself to a "resolve" 
+      function on that type. The ultimate aim is to make it so that we have the 
+      data needed to build instances of the correct opcode-arg class in memory: 
+      we need to know the value type and, for variables, the "scope," "which," 
+      and "index."
+   
+    - Function calls are validated to ensure that the script doesn't call non-
+      existent functions, and to ensure that opcodes are called correctly.
+      
+       = TODO
+
+*/
+
+
+/*
+
    TODO:
-   
-   Might be worth having an "is keyword" function; there are more than a few places 
-   that need to check and disallow that. (Ctrl+F first to see which and how many 
-   places.)
-   
-   ---------------------------------------------------------------------------------
    
    Currently, invalid alias names (e.g. "name[1]" or integer constants) fail during 
    first-pass parsing. Consider having them fail during second-pass parsing (i.e. 
@@ -14,9 +35,13 @@
    same time) instead. (Aliases that shadow keywords are an exception and should 
    always fail during first-pass parsing.)
    
+    - Just fix this when we port to C++.
+   
    Strongly consider renaming all "validate" member functions to "analyze", since we 
    also need to do things like resolving MVariableReferences that include aliases, 
    and tracking what functions are in scope.
+   
+    - Just fix this when we port to C++.
    
    If an alias targets a variable that doesn't exist, it should fail second-pass 
    parsing. If there is a function by the targeted name, the error message should 
@@ -32,9 +57,6 @@
    
    WE ARE CURRENTLY WORKING ON RESOLVING NON-ALIAS MVariableReferences.
    
-    - We forgot to write the code for the scope, which, and index! Add handlers 
-      to each typename definition.
-   
     - Make it case-insensitive: (gLoBaL.nUmBeR[0]) should parse properly.
     
        = ACTUALLY, DON'T BOTHER. WE HAVE CASE-INSENSITIVITY ISSUES THROUGHOUT THE 
@@ -46,6 +68,9 @@
     
        - Do we want to allow integer-aliases as forge label indices (i.e. in for-
          each-object-with-label loops)?
+   
+   Second-pass parsing should fail if there is more than one of any particular 
+   event handler.
          
    Bring in the opcode database.
    
@@ -68,13 +93,10 @@
       Something with a delimiter would be easiest, since we could just use that to 
       signal the start and end of some new parsing mode; perhaps [flag | flag]?
    
-   NOTE: We don't have a way to specify event triggers e.g. object death events. I 
-   think we should do that with an "on" keyword (only permitted at the top level) 
-   and a colon, e.g.
-   
-      on object death: for each player do
-         -- ...
-      end
+   Once the compiler is implemented, we need to test whether it's possible to call 
+   a non-subroutine trigger; this will impact whether we allow function declarations 
+   to also be event handlers (see comments in the parser's "function" keyword 
+   handler).
    
    ---------------------------------------------------------------------------------
    
@@ -134,7 +156,6 @@ const block_type = _make_enum([
    "if",
    "elseif",
    "else",
-   "for",
    "for_each_object",
    "for_each_object_with_label",
    "for_each_player",
@@ -142,7 +163,16 @@ const block_type = _make_enum([
    "for_each_team",
    "function",
 ]);
-
+const block_event = _make_enum([
+   "none",
+   "init",
+   "local_init",
+   "host_migration",
+   "double_host_migration",
+   "object_death",
+   "local",
+   "pregame",
+]);
 
 function is_operator_char(c) {
    return ("=<>!+-*/%&|~^").indexOf(c) >= 0;
@@ -151,7 +181,7 @@ function is_quote_char(c) {
    return ("`'\"").indexOf(c) >= 0;
 }
 function is_syntax_char(c) {
-   return ("(),").indexOf(c) >= 0;
+   return ("(),:").indexOf(c) >= 0;
 }
 function is_whitespace_char(c) {
    return (" \r\n\t").indexOf(c) >= 0;
@@ -284,6 +314,7 @@ class MBlock extends MParsedItem {
       this.conditions  = [];   // only for if- and elseif-blocks
       this.forge_label = null; // only for for-each-object-with-label blocks
       this.name        = "";   // only for function blocks
+      this.event       = block_event.none;
    }
    insert_condition(c) {
       if (this.type != block_type.if && this.type != block_type.elseif)
@@ -1527,6 +1558,7 @@ class MSimpleParser {
       //
       this.root        = null;  // root block
       this.block       = null;  // block we're currently parsing
+      this.next_event  = block_event.none; // event for next block
       this.token       = "";    // current token being parsed (lefthand word / operator / call argument / righthand word)
       this.token_pos   = null;  // stream position of current token (as reported by backup_stream_state)
       this.token_end   = false; // whether we hit whitespace, meaning that the current word is "over." if so, then another word character indicates {word word} which is bad syntax (outside of keywords)
@@ -1651,6 +1683,9 @@ class MSimpleParser {
             this.throw_error(`A function call statement is unterminated.`);
          this.throw_error(`The file ended before a statement could be fully processed.`);
       }
+      if (this.next_event != block_event.none) {
+         this.throw_error(`The file ended with an "on" keyword but no following block.`);
+      }
       //
       this.root.set_end(this.pos);
       return this.root;
@@ -1685,13 +1720,24 @@ class MSimpleParser {
          //
          // Handle keywords here, if appropriate.
          //
+         let handler = null;
          switch (this.token) {
             case "and":
             case "or":
             case "then":
                this.throw_error(`The "${this.token}" keyword cannot appear here.`);
+               break;
+            case "alias":    handler = this._handleKeywordAlias;    break;
+            case "do":       handler = this._handleKeywordDo;       break;
+            case "else":     handler = this._handleKeywordElse;     break;
+            case "elseif":   handler = this._handleKeywordElseIf;   break;
+            case "end":      handler = this._handleKeywordEnd;      break;
+            case "expect":   handler = this._handleKeywordExpect;   break;
+            case "for":      handler = this._handleKeywordFor;      break;
+            case "function": handler = this._handleKeywordFunction; break;
+            case "if":       handler = this._handleKeywordIf;       break;
+            case "on":       handler = this._handleKeywordOn;       break;
          }
-         let handler = this.getHandlerForKeyword(this.token);
          if (handler) {
             let prior = this.pos;
             handler.call(this);
@@ -1895,6 +1941,8 @@ class MSimpleParser {
             case "function":
             case "if":
                this.throw_error(`You cannot open or close blocks inside of conditions.`);
+            case "on":
+               this.throw_error(`You cannot mark event handlers inside of conditions.`);
          }
          if (this.token == "and" || this.token == "or") {
             let joiner = new MConditionJoiner;
@@ -2184,7 +2232,9 @@ class MSimpleParser {
       if (desired) {
          //
          // If searching for a specific word, advances the stream to the end of that word 
-         // if it is found.
+         // if it is found. NOTE: square brackets aren't supported in this branch, because 
+         // we should never end up wanting to find a specific parser-mandated variable name 
+         // anywhere.
          //
          let state = this.backup_stream_state();
          let index = 0;
@@ -2237,24 +2287,6 @@ class MSimpleParser {
       return word;
    }
    //
-   getHandlerForKeyword(word) { // for keywords outside of conditions only
-      word = word.toLowerCase();
-      switch (word) {
-         case "alias":    return this._handleKeywordAlias;
-         case "and":      return null; // should be rejected by caller
-         case "do":       return this._handleKeywordDo;
-         case "else":     return this._handleKeywordElse;
-         case "elseif":   return this._handleKeywordElseIf;
-         case "end":      return this._handleKeywordEnd;
-         case "expect":   return this._handleKeywordExpect;
-         case "for":      return this._handleKeywordFor;
-         case "function": return this._handleKeywordFunction;
-         case "if":       return this._handleKeywordIf;
-         case "or":       return null; // should be rejected by caller
-         case "then":     return null; // should be rejected by caller
-      }
-   }
-   //
    _handleKeywordAlias() { // call after "alias "
       let start = this.token_pos;
       //
@@ -2280,6 +2312,10 @@ class MSimpleParser {
       let created = new MBlock;
       created.type = block_type.basic;
       created.set_start(this.token_pos);
+      if (this.next_event) {
+         created.event = this.next_event;
+         this.next_event = block_event.none;
+      }
       this.block = this.block.insert_item(created);
    }
    _handleKeywordElse() {
@@ -2347,6 +2383,10 @@ class MSimpleParser {
       let block = new MBlock;
       block.type = block_type.if;
       block.set_start(this.token_pos);
+      if (this.next_event) {
+         block.event = this.next_event;
+         this.next_event = block_event.none;
+      }
       this.block = this.block.insert_item(block);
       this._parseBlockConditions();
       this.reset_token();
@@ -2407,6 +2447,10 @@ class MSimpleParser {
       if (use_label !== null)
          loop.forge_label = use_label;
       loop.set_start(start);
+      if (this.next_event) {
+         loop.event = this.next_event;
+         this.next_event = block_event.none;
+      }
       this.block = this.block.insert_item(loop);
    }
    _handleKeywordFunction() { // call after "function "
@@ -2422,6 +2466,8 @@ class MSimpleParser {
          // Other characters can occur inside of square brackets, but we don't need to test for 
          // them, because we're already testing for the brackets themselves.
       }
+      if (is_keyword(name))
+         this.throw_error(`Keyword "${n}" cannot be used as the name of a function.`);
       if (!this.extractSpecificChar("("))
          this.throw_error(`Expected "(".`);
       if (!this.extractSpecificChar(")"))
@@ -2430,6 +2476,66 @@ class MSimpleParser {
       created.type = block_type.function;
       created.name = name;
       created.set_start(start);
+      if (this.next_event) {
+         //
+         // TODO: Do we want to allow function bodies as events? I mean, I don't think the file 
+         // format makes that impossible... Functions are basically going to be implemented as 
+         // "subroutine"-entry-type triggers. Event handlers are implemented as a list of trigger 
+         // indices stored top-level AND as entry type values on the individual triggers, which 
+         // makes event handler status mutually exclusive with subroutine status; however, I don't 
+         // yet know whether the game can or can't handle calling a non-subroutine trigger in a 
+         // trigger action.
+         //
+         created.event = this.next_event;
+         this.next_event = block_event.none;
+      }
       this.block = this.block.insert_item(created);
+   }
+   _handleKeywordOn() {
+      if (this.block != this.root)
+         this.throw_error(`Only top-level (non-nested) blocks can be event handlers.`);
+      //
+      // VALID EVENT NAMES:
+      //    double host migration
+      //    host migration
+      //    init
+      //    local
+      //    local init
+      //    object death
+      //    pregame
+      //
+      let words = [];
+      let state = this.backup_stream_state();
+      while (!this.extractSpecificChar(":")) {
+         let word = this.extractWord();
+         if (!word) {
+            this.restore_stream_state(state);
+            this.throw_error(`No valid event name specified.`);
+         }
+         words.push(word);
+      }
+      if (!words.length) {
+         this.restore_stream_state(state);
+         this.throw_error(`No valid event name specified.`);
+      }
+      let phrase = words.join(" ").toLowerCase();
+      let event  = block_event.none;
+      switch (phrase) {
+         case "init":                  event = block_event.init;                  break;
+         case "local init":            event = block_event.local_init;            break;
+         case "host migration":        event = block_event.host_migration;        break;
+         case "double host migration": event = block_event.double_host_migration; break;
+         case "object death":          event = block_event.object_death;          break;
+         case "local":                 event = block_event.local;                 break;
+         case "pregame":               event = block_event.pregame;               break;
+      }
+      if (event == block_event.none) {
+         //
+         // TODO: Is there any chance we can make this a non-fatal parse error i.e. a second-pass error?
+         //
+         this.restore_stream_state(state);
+         this.throw_error(`Invalid event name: "${words.join(" ")}".`);
+      }
+      this.next_event = event;
    }
 }

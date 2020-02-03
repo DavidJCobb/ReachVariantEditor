@@ -33,7 +33,38 @@ textarea{width:100%;height:250px;box-sizing:border-box}
 if a then end -- "a" by itself is not a comparison or function call
 a = b().c -- cannot do property access on a function call
 a = b() + 5 -- this is an expression; again, those are not supported
-if a() == b() then -- function calls cannot appear directly in comparisons; do x = a() and then compare x</pre>
+if a() == b() then -- function calls cannot appear directly in comparisons; do x = a() and then compare x
+a = b and c -- "and" and "or" are keywords for linking conditions in an if-block, and are not allowed in any other context</pre>
+      <p>
+         The following block types are supported:
+      </p>
+      <ul>
+         <li>do ... end</li>
+         <li>function name() ... end</li>
+         <li>if <i>[condition(s)]</i> then ... end</li>
+         <li>if <i>[condition(s)]</i> then ... else ... end</li>
+         <li>if <i>[condition(s)]</i> then ... elseif <i>[condition(s)]</i> then ... end</li>
+         <li>for each object do ... end</li>
+         <li>for each object with label <i>[integer constant]</i> do ... end</li>
+         <li>for each object with label <i>[string literal]</i> do ... end</li>
+         <li>for each player do ... end</li>
+         <li>for each player randomly do ... end</li>
+         <li>for each team do ... end</li>
+      </ul>
+      <p>
+         Top-level blocks may be marked as event handlers; this entails prefixing them with 
+         <code>on <i>event name</i>:</code> where the following are valid event names, and 
+         where you may only have one handler for each event:
+      </p>
+      <ul>
+         <li>init</li>
+         <li>local init</li>
+         <li>host migration</li>
+         <li>double host migration</li>
+         <li>object death</li>
+         <li>local</li>
+         <li>pregame</li>
+      </ul>
       <script src="std.js"></script>
       <script src="simple-validation.js"></script>
       <script src="simple-definitions.js"></script>
