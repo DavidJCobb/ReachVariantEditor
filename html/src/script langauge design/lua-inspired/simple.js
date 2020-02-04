@@ -73,6 +73,18 @@
    
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    
+   WE NEED TO BE ABLE TO HANDLE OPCODES-AS-PROPERTIES. I originally didn't want to 
+   expose any opcodes as properties because I felt it'd be simpler if properties 
+   were always usable in the same places, BUT some opcodes are math operators, e.g. 
+   an opcode to modify the player's health or shields, and these would be best 
+   represented as (player[n].shields += 5) or whatever.
+   
+   As such, the parsing code for MVariableReference needs to search the opcode list 
+   for any action that uses an instance of OpcodeToScriptPropertyMapping as its 
+   script mapping.
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   
    HOW SHOULD WE HANDLE VECTORS, FORMAT STRINGS AND TOKENS, AND SIMILAR MULTI-PART 
    ARGUMENTS IN FUNCTIONS?
    
