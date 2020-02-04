@@ -68,11 +68,6 @@
    
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    
-   Second-pass parsing should fail if there is more than one of any particular 
-   event handler.
-   
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   
    See if we can replace our custom Collection with Map. Apparently the latter is 
    supposed to be accessible both by key and by iteration (i.e. for...of).
    
@@ -93,6 +88,9 @@
       values inside of the parens. That works for vector coordinates, for flags in 
       a mask, and for a format string and its tokens.
       
+       = WE HAVE CREATED THE MUndifferentiatedFunctionCallArg CLASS AND ADDED 
+         SUPPORT FOR IT TO THE FIRST-PASS PARSER.
+      
        - The function to parse argument types needs to be able to handle aliases.
        
        - "Shape" and "format string token" arguments can contain/be variable 
@@ -108,6 +106,53 @@
          calls some functions that use flags masks.
          
    Bring in the opcode database.
+   
+    - We need to map the native representation to the script representation. The 
+      naive approach is to make it so that every opcode is either a function call 
+      or a property; however, some opcodes can be both. For example, the opcode 
+      to identify which player killed another player can be accessed as either of:
+      
+         alias killer = global.player[0]
+         alias victim = global.player[1]
+         
+         -- Function form:
+         killer = no_player
+         killer = victim.try_get_killer()
+         
+         -- Property form:
+         killer = victim.killer
+      
+      where in this case, the property form implicitly sets (killer) to (no_player) 
+      before running the opcode (i.e. we compile an assignment followed by the 
+      opcode, producing identical code to the function form). To effect this, we 
+      need to give every opcode:
+      
+       - Primary function name.
+       
+       - Secondary function name, or blank.
+       
+       - A flag that, if set, causes us to default-initialize the out-argument if 
+         the opcode is used via the secondary function name. "Default initialization" 
+         here means compiling an assign statement before the opcode call, wherein we 
+         set the out-argument to the respective "none" value for its type (no_team, 
+         no_player, no_object).
+         
+          - The goal here is to accommodate the "get player killer" opcode. If it's 
+            invoked as the primary function name, (player.try_get_killer), then we 
+            just call it directly. If it's invoked as the secondary function name, 
+            (player.get_killer), then we zero out the out-variable before calling 
+            it, as a nice convenience thing for script authors.
+      
+      Unrelated to that situation, each opcode also needs:
+      
+       - The native-index of the "this" argument, if any.
+      
+       - An array containing native-indices; this will map argument indices to the 
+         script argument order.
+      
+       - Potentially, a "no discard" flag. We don't yet know if you can pass a 
+         none value as an out-argument (i.e. create object and store it in variable 
+         no_object) and we don't know if this varies from opcode to opcode.
    
     - Validate all function calls: ensure that calls are to valid functions, be 
       they built-in or user-defined.
@@ -473,6 +518,8 @@ class MBlock extends MParsedItem {
       return text;
    }
    validate(validator) {
+      validator.trackEventHandler(this);
+      //
       for(let condition of this.conditions)
          condition.validate(validator);
       //
@@ -1363,6 +1410,25 @@ class MVariableReference { // represents a variable, keyword, or aliased integer
    }
 }
 
+class MUndifferentiatedFunctionCallArg extends MParsedItem {
+   constructor(text) {
+      super();
+      this.content  = text || "";
+      this.resolved = null;
+   }
+   serialize() {
+      if (!this.resolved)
+         return `(${this.content})`;
+      //
+      // TODO
+      //
+   }
+   validate(validator) {
+      //
+      // TODO
+      //
+   }
+}
 class MFunctionCall extends MParsedItem {
    constructor() {
       super();
@@ -1404,10 +1470,8 @@ class MFunctionCall extends MParsedItem {
          if (i > 0)
             result += ", ";
          let arg = this.args[i];
-         if (arg instanceof MVariableReference || arg instanceof MStringLiteral) {
+         if (arg instanceof MVariableReference || arg instanceof MUndifferentiatedFunctionCallArg || arg instanceof MStringLiteral) {
             result += arg.serialize();
-         } else if (+arg === arg) {
-            result += arg;
          } else
             throw new Error("unhandled");
       }
@@ -1415,16 +1479,35 @@ class MFunctionCall extends MParsedItem {
       return result;
    }
    validate(validator) {
+      let func = null;
       if (this.context) {
          this.context.validate(validator);
          //
          // TODO: if the context is valid, verify that the member function we're trying 
-         // to call exists.
+         // to call exists. Identify the function as (func).
          //
       } else {
          //
          // TODO: Verify that the global function we're trying to call exists (i.e. a 
-         // user-defined function or an opcode).
+         // user-defined function or an opcode). Identify the function as (func).
+         //
+         // User-defined functions cannot have arguments, so in that case, fail if we 
+         // have any.
+         //
+      }
+      for(let arg of this.args) {
+         if (arg instanceof MVariableReference) {
+            if (arg.is_single()) {
+               //
+               // TODO: Handle the case of this being an enum value, single flag, etc..
+               //
+            }
+            //
+            // TODO
+            //
+         }
+         //
+         // TODO
          //
       }
       //
@@ -2107,6 +2190,30 @@ class MSimpleParser {
    }
    //
    _parseFunctionCallArg() {
+      if (this.extractSpecificChar("(")) { // find MUndifferentiatedFunctionCallArg
+         let found = "";
+         let state = this.backup_stream_state();
+         this.scan((function(c) {
+            if (c == "(")
+               this.throw_error(`Parentheses can only be used to mark the start and end of a function's arguments, or within arguments to mark the start and end of a multi-part argument.`);
+            if (c == ")")
+               return true;
+            found += c;
+         }).bind(this));
+         if (!found.length) {
+            this.restore_stream_state(state);
+            this.throw_error(`Unterminated multi-part function argument.`);
+         }
+         ++this.pos; // move position to after the closing paren
+         //
+         let arg = new MUndifferentiatedFunctionCallArg(found);
+         this.call.args.push(arg);
+         arg.owner = this.call;
+         arg.set_start(state);
+         arg.set_end(this.pos);
+         return true;
+      }
+      //
       let integer = this.extractIntegerLiteral();
       if (integer !== null) {
          let arg = new MVariableReference(integer);

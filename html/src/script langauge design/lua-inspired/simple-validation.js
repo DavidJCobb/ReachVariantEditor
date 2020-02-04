@@ -9,6 +9,7 @@ class MValidator {
       this.errors  = [];
       this.suspend = false;
       this.pending = []; // pending errors
+      this.event_handlers = {}; // map of event names to MBlock instances
       //
       this.state = {
          aliases: [],
@@ -52,5 +53,14 @@ class MValidator {
          if (functor(alias))
             break;
       }
+   }
+   //
+   trackEventHandler(block) {
+      if (block.event == block_event.none)
+         return;
+      if (this.event_handlers[block.event]) {
+         this.report(block, "You cannot have more than one event of each type.");
+      } else
+         this.event_handlers[block.event] = block;
    }
 }
