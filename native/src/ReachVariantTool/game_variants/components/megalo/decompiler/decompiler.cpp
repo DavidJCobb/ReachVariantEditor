@@ -3,11 +3,11 @@
 namespace Megalo {
    void Decompiler::modify_indent_count(int16_t nesting) noexcept {
       if (nesting >= 0) {
-         size_t spaces = nesting * this->indent_size;
+         size_t spaces = (size_t)nesting * this->indent_size;
          for (size_t i = 0; i < spaces; i++)
             this->current_indent += ' ';
       } else {
-         size_t spaces = -nesting * this->indent_size;
+         size_t spaces = (size_t)(-nesting) * this->indent_size;
          size_t size   = this->current_indent.size();
          if (size < spaces)
             size = 0;

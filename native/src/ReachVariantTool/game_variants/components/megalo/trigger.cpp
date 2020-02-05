@@ -198,6 +198,18 @@ namespace Megalo {
       }
    }
    void Trigger::decompile(Decompiler& out) noexcept {
+      //
+      // We need to handle block structure, line breaks, and similar formatting here. Normally this would be 
+      // pretty straightforward: each trigger is one single code block; we open another code block only when 
+      // we find the opcode to run a nested trigger, right? Well yes, but actually no. Conditions can appear 
+      // in the middle of a trigger and should be written as the start of a new if-block, which should wrap 
+      // everything after those conditions. As such, a single trigger can actually be multiple blocks.
+      //
+      // If the trigger itself is an if-block (i.e. it's not a loop, and its first opcode is a condition), 
+      // then we have to "open" the block not at the start of the trigger but rather when we start iterating 
+      // over opcodes. We need a few bools to help keep track of this -- to know when to insert line breaks 
+      // before "if" statements and so on.
+      //
       auto mp = out.get_variant().get_multiplayer_data();
       if (!mp)
          return;
@@ -209,7 +221,9 @@ namespace Megalo {
       bool     trigger_is_if_block   = false; // we write an initial line break on each trigger; if this trigger is an if-block, then we need to avoid writing another line break when we actually write "if". this variable and (is_first_opcode) are used to facilitate this.
       bool     writing_if_conditions = false; // if we encounter an action and this is (true), then we need to reset (is_first_condition
       //
-      switch (this->entryType) { // TODO: use the list of event handler trigger indices instead of the individual triggers' entry types
+      // Write the initial line break, and write the event handler if any:
+      //
+      switch (this->entryType) { // TODO: use the list of event handler trigger indices instead of the individual triggers' entry types; if a trigger has an event entry type but isn't registered as an event handler, note that with a comment
          case entry_type::normal:
          case entry_type::subroutine:
             out.write_line("");
@@ -233,6 +247,9 @@ namespace Megalo {
             out.write_line(u8"on pregame: ");
             break;
       }
+      //
+      // Write the block type, unless it's an if-block (do...end block whose first opcode is a condition), 
+      // in which case we write the block type when we hit that first opcode.
       //
       switch (this->blockType) {
          case block_type::normal:
@@ -302,6 +319,8 @@ namespace Megalo {
             break;
       }
       //
+      // Write the opcodes:
+      //
       int32_t     last_condition_or_group = -1;
       std::string line;
       for (auto& opcode : this->opcodes) {
@@ -356,6 +375,10 @@ namespace Megalo {
          }
          out.write_line(u8"-- invalid opcode type");
       }
+      //
+      // Close all open blocks. Remember: conditions encountered in the middle of the trigger count 
+      // as new if-blocks that we have to open, so we have to de-indent and write an "end" keyword 
+      // for each of those as well as for the trigger itself.
       //
       while (indent_count-- > 0) {
          out.modify_indent_count(-1);

@@ -53,6 +53,86 @@ namespace Megalo {
             out.write(u8"OPCODE");
          };
    };
+
+   class OpcodeFuncToScriptMapping {
+      public:
+         enum class mapping_type {
+            none,         // only used for the "none" opcodes
+            assign,       // only used for the "modify  variable" opcode; special-case to be handled by the (de)compiler
+            compare,      // only used for the "compare variable" opcode; special-case to be handled by the (de)compiler
+            function,     // the opcode is a function (member or non-member)
+            property_get, // the opcode should be accessed as (result = arg_context.primary_name);   only use this when there is a corresponding (property_set) opcode
+            property_set, // the opcode should be modified as (arg_context.primary_name = argument); only use this when any assign operator (e.g. +=, -=) is allowed
+         };
+         //
+         struct flags {
+            flags() = delete;
+            enum type : uint8_t {
+               secondary_property_zeroes_result = 0x01, // if set, invoking this opcode via its second name sets the result argument to no_object/no_player/no_team/etc. before calling; this is the difference between try_get_killer() and get_killer()
+            };
+         };
+         using flags_type = std::underlying_type_t<flags::type>;
+         //
+         // Values for (context_arg):
+         static constexpr int8_t no_context     = -1;
+         static constexpr int8_t game_namespace = -2; // e.g. "game.end_round()"
+         //
+         static constexpr int8_t no_argument = -1;
+         //
+      public:
+         mapping_type type = mapping_type::none;
+         std::string  primary_name;
+         std::string  secondary_name; // an alternate name through which the opcode can be invoked
+         int8_t       arg_context  = no_context;  // if non-negative, refers to one of the arguments and indicates that the opcode function is a member of that argument type
+         int8_t       arg_name     = no_argument; // only used by property mappings, and only if (primary_name) is blank; indicates that one of the arguments (which must be an enum type) should be treated as a property name
+         int8_t       arg_operator = no_argument; // for comparisons, assignments, and property setters, this indicates which argument is the operator
+         int8_t       arg_index_mappings[8] = { no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument }; // map native argument order to script argument order
+         flags_type   flags = 0;
+         //
+         // TODO: This class needs to be able to access its owning opcode-function, so that it can access the 
+         // argument list (not only to see the types of the function's arguments, but also to identify the 
+         // out-argument if any exists). This requires:
+         //
+         //  - ...that ConditionFunction and ActionFunction inherit from a common base class, and share the 
+         //    argument lists.
+         //
+         //  - ...that this class have an OpcodeFunction* member, which we'll name (owner).
+         //
+         //  - ...that the OpcodeFunction constructor set (this->mapping->owner = this).
+         //
+         // TODO: Constructors.
+         //
+   };
+   class OpcodeArgTypeinfo {
+      //
+      // TODO: This virtual class should hold metadata about each OpcodeArgValue subclass, including whether the 
+      // subclass represents an enum or flags mask; this class should also provide the factory function. Each 
+      // OpcodeArgValue subclass should have a static member that is an instance of this class.
+      //
+      // We need this because...
+      //
+      //  - The parser and compiler need to be able to get a list of all values that are valid for a given enum 
+      //    or flags-mask type, in order to know what values a script author is actually referencing.
+      //
+      //  - The "modify grenade count" opcode will be implemented as a (property_set) mapping with no name, set 
+      //    so that the grenade type provides the property name (i.e. current_player.plasma_grenades += 3). In 
+      //    order to decompile to that output, we need to be able to access the names of the values in the 
+      //    "grenade type" enum.
+      //
+      // Once this is ready, we'll have opcode bases refer to it instead of having them refer directly to each 
+      // factory function, in their argument lists.
+      //
+      // I anticipate that this will also be where we end up storing the functions to parse undifferentiated 
+      // multi-part function arguments (which we will use for flags masks, printfs, vector3s, shapes, and so 
+      // on).
+      //
+      public:
+         bool is_enum  = false;
+         bool is_flags = false;
+         //
+         // TODO: vector of enum or flag strings
+         //
+   };
    
    class OpcodeArgValue : public cobb::reference_tracked_object {
       public:
