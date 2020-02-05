@@ -1,7 +1,7 @@
 #pragma once
 #include <QGridLayout>
 #include <QWidget>
-#include "editor_state.h"
+#include "../../editor_state.h"
 
 class ReachMegaloOption;
 

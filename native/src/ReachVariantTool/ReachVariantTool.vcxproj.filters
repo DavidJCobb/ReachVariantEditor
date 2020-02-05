@@ -64,9 +64,6 @@
     <ClCompile Include="services\ini.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\LoadoutForm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_enums.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,9 +128,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="helpers\ini.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\GametypeIconCombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp">
@@ -262,12 +256,21 @@
     <ClCompile Include="ui\script_editor\page_map_perms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\script_editor\page_script_code.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\widgets\LoadoutForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="ui\LoadoutForm.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\generic\IconOnlyCombobox.h">
@@ -369,11 +372,14 @@
     <QtMoc Include="ui\script_editor\page_map_perms.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\script_editor\page_script_code.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\widgets\LoadoutForm.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="ui\widget_loadout_options.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -447,6 +453,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\script_editor\page_map_perms.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor\page_script_code.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\widgets\LoadoutForm.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -645,9 +657,6 @@
     <ClInclude Include="helpers\ini.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui\GametypeIconCombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\errors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -706,6 +715,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\iterators\pointer_based.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\widgets\GametypeIconCombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

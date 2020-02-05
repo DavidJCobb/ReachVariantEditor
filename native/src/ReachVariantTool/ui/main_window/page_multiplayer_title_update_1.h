@@ -1,7 +1,7 @@
 #pragma once
 #include "main_window/ui_page_multiplayer_title_update_1.h"
 #include <QWidget>
-#include "editor_state.h"
+#include "../../editor_state.h"
 
 class PageMPTU1Config : public QWidget {
    Q_OBJECT

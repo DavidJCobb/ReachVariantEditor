@@ -1,7 +1,7 @@
 #pragma once
 #include "main_window/ui_page_forge_settings_general.h"
 #include <QWidget>
-#include "editor_state.h"
+#include "../../editor_state.h"
 
 class PageForgeSettingsGeneral : public QWidget {
    Q_OBJECT

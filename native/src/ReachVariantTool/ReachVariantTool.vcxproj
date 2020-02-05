@@ -99,6 +99,7 @@
     <ClCompile Include="game_variants\components\loadouts.cpp" />
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
+    <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\forge_label.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg.cpp" />
@@ -141,10 +142,10 @@
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
-    <ClCompile Include="ui\GametypeIconCombobox.cpp" />
+    <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
     <ClCompile Include="ui\options_window.cpp" />
-    <ClCompile Include="ui\LoadoutForm.cpp" />
+    <ClCompile Include="ui\widgets\LoadoutForm.cpp" />
     <ClCompile Include="editor_state.cpp" />
     <ClCompile Include="ui\main_window\page_forge_settings_general.cpp" />
     <ClCompile Include="ui\main_window\page_loadout_palette.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="ui\script_editor\page_map_perms.cpp" />
     <ClCompile Include="ui\script_editor\page_metadata_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_player_rating_params.cpp" />
+    <ClCompile Include="ui\script_editor\page_script_code.cpp" />
     <ClCompile Include="ui\script_editor\page_script_options.cpp" />
     <ClCompile Include="ui\script_editor\page_script_stats.cpp" />
     <ClCompile Include="ui\script_editor\page_script_traits.cpp" />
@@ -196,12 +198,13 @@
     <QtUic Include="ui\script_editor\page_map_perms.ui" />
     <QtUic Include="ui\script_editor\page_metadata_strings.ui" />
     <QtUic Include="ui\script_editor\page_player_rating_params.ui" />
+    <QtUic Include="ui\script_editor\page_script_code.ui" />
     <QtUic Include="ui\script_editor\page_script_options.ui" />
     <QtUic Include="ui\script_editor\page_script_stats.ui" />
     <QtUic Include="ui\script_editor\page_script_traits.ui" />
     <QtUic Include="ui\script_editor\page_script_widgets.ui" />
     <QtUic Include="ui\script_editor\page_string_table.ui" />
-    <QtUic Include="ui\widget_loadout_options.ui" />
+    <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="ui\main_window.qrc" />
@@ -210,11 +213,13 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
     <ClInclude Include="helpers\managed_pointer_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
+    <QtMoc Include="ui\script_editor\page_script_code.h" />
     <QtMoc Include="ui\script_editor\page_map_perms.h" />
     <QtMoc Include="ui\script_editor\page_metadata_strings.h" />
     <QtMoc Include="ui\script_editor\page_player_rating_params.h" />
@@ -320,10 +325,10 @@
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
-    <ClInclude Include="ui\GametypeIconCombobox.h" />
+    <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />
-    <QtMoc Include="ui\LoadoutForm.h" />
+    <QtMoc Include="ui\widgets\LoadoutForm.h" />
     <ClInclude Include="ui\generic\QXBLGamertagValidator.h" />
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h" />
     <QtMoc Include="ui\options_window.h" />

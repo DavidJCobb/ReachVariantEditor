@@ -585,12 +585,12 @@
   <customwidget>
    <class>PlayerTraitWeaponCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
+   <header>../generic/PlayerTraitWidgets.h</header>
   </customwidget>
   <customwidget>
    <class>PlayerTraitArmorAbilityCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
+   <header>../generic/PlayerTraitWidgets.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

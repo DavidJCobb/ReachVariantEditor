@@ -35,7 +35,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="PagePlayerTraitsTabview">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="PagePlayerTraitsTabDefense">
       <attribute name="title">
@@ -1587,24 +1587,24 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlayerTraitBooleanCombobox</class>
-   <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PlayerTraitDamageMultCombobox</class>
-   <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
-  </customwidget>
-  <customwidget>
    <class>PlayerTraitWeaponCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
+   <header>../generic/PlayerTraitWidgets.h</header>
   </customwidget>
   <customwidget>
    <class>PlayerTraitArmorAbilityCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/generic/PlayerTraitWidgets.h</header>
+   <header>../generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitBooleanCombobox</class>
+   <extends>QComboBox</extends>
+   <header>../generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitDamageMultCombobox</class>
+   <extends>QComboBox</extends>
+   <header>../generic/PlayerTraitWidgets.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

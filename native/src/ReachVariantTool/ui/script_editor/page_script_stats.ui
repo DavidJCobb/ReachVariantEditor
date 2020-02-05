@@ -176,7 +176,7 @@
   <customwidget>
    <class>ReachStringPicker</class>
    <extends>QWidget</extends>
-   <header>ui/widgets/string_picker.h</header>
+   <header>../widgets/string_picker.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

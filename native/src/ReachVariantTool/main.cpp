@@ -38,13 +38,6 @@ int main(int argc, char *argv[]) {
 //  - When editing single-string tables, can we use the table's max length to enforce a 
 //    max length on the UI form fields?
 //
-//     - There's an alternate approach: handle max length for ANY string. When we open a 
-//       string for editing, we can get the containing string table's maximum length, 
-//       and subtract the lengths of all strings except the ones we're editing; that's 
-//       the longest that the string we're editing can be. Of course, we would need to 
-//       indicate this in the UI somehow, in case the length is short (or zero), to 
-//       avoid user confusion.
-//
 //  - STRING TABLE EDITING
 //
 //     - If we start editing a string that is in use by a Forge label, we should 

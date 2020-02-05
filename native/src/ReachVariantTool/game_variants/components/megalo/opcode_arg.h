@@ -7,6 +7,7 @@
 #include "../../../helpers/strings.h"
 #include "enums.h"
 #include "variables_and_scopes.h"
+#include "decompiler/decompiler.h"
 
 //
 // Here, an "opcode" is an instruction that can appear in a Megalo trigger, i.e. a 
@@ -48,6 +49,9 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept = 0;
+         virtual void decompile(Decompiler& out) noexcept { // override me!
+            out.write(u8"OPCODE");
+         };
    };
    
    class OpcodeArgValue : public cobb::reference_tracked_object {

@@ -1,7 +1,7 @@
 #pragma once
 #include "main_window/ui_page_multiplayer_settings_team.h"
 #include <QWidget>
-#include "editor_state.h"
+#include "../../editor_state.h"
 
 class PageMPSettingsTeamOverall : public QWidget {
    Q_OBJECT

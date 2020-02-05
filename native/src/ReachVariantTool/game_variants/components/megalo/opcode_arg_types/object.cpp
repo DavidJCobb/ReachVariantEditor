@@ -24,7 +24,7 @@ namespace Megalo {
       const VariableScope* slave_var_scope = nullptr;
       switch ((_scopes)this->scope) {
          case _scopes::global:
-            index_bits = MegaloVariableScopePlayer.which_bits();
+            index_bits = MegaloVariableScopeObject.which_bits();
             break;
          case _scopes::player:
             variable_scope = &MegaloVariableScopePlayer;

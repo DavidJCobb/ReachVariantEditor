@@ -1,5 +1,5 @@
 #include "LoadoutForm.h"
-#include "../editor_state.h"
+#include "../../editor_state.h"
 
 LoadoutForm::LoadoutForm(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

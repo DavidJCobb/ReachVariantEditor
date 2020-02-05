@@ -190,7 +190,7 @@
   <customwidget>
    <class>ImageStackWidget</class>
    <extends>QFrame</extends>
-   <header>ui/generic/ImageStackWidget.h</header>
+   <header>../generic/ImageStackWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

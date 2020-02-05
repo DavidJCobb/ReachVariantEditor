@@ -167,18 +167,18 @@
   <customwidget>
    <class>ReachStringPicker</class>
    <extends>QWidget</extends>
-   <header>ui/widgets/string_picker.h</header>
+   <header>../widgets/string_picker.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MegaloConstTeamIndexCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/widgets/const_team_index_combobox.h</header>
+   <header>../widgets/const_team_index_combobox.h</header>
   </customwidget>
   <customwidget>
    <class>MPObjectTypeCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/widgets/mp_object_type_combobox.h</header>
+   <header>../widgets/mp_object_type_combobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

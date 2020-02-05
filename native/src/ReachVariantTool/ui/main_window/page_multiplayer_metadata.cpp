@@ -1,6 +1,6 @@
 #include "page_multiplayer_metadata.h"
 #include <QMessageBox>
-#include "ui/generic/QXBLGamertagValidator.h"
+#include "../generic/QXBLGamertagValidator.h"
 
 namespace {
    static constexpr int ce_gametypeCategoryIndexActionSack = 16;

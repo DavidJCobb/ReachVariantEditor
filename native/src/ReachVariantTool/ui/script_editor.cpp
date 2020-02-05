@@ -109,9 +109,10 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          stack->setCurrentWidget(this->ui.pageScriptWidgets);
          return;
       }
-      //
-      // TODO: other pages
-      //
+      if (current->text() == "Gametype Code") {
+         stack->setCurrentWidget(this->ui.pageScriptCode);
+         return;
+      }
    });
    {  // MP object type list
       auto& list   = MPObjectTypeList::get();

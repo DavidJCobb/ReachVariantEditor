@@ -79,8 +79,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>69</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -113,8 +113,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>69</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -147,8 +147,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>69</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -181,8 +181,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>69</height>
+        <width>98</width>
+        <height>28</height>
        </rect>
       </property>
       <attribute name="label">
@@ -231,7 +231,7 @@
   <customwidget>
    <class>LoadoutForm</class>
    <extends>QWidget</extends>
-   <header>ui/LoadoutForm.h</header>
+   <header>../widgets/LoadoutForm.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

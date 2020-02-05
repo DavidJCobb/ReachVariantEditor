@@ -314,7 +314,7 @@
   <customwidget>
    <class>GametypeIconCombobox</class>
    <extends>QComboBox</extends>
-   <header>ui/GametypeIconCombobox.h</header>
+   <header>../widgets/GametypeIconCombobox.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

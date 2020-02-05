@@ -12,6 +12,7 @@
 #include "../../../helpers/bitwise.h"
 #include "../../../helpers/reference_tracked_object.h"
 #include "../../../helpers/stream.h"
+#include "decompiler/decompiler.h"
 
 class GameVariantDataMultiplayer;
 
@@ -77,6 +78,7 @@ namespace Megalo {
             std::string indent;
             this->to_string(allTriggers, out, indent);
          }
+         void decompile(Decompiler& out) noexcept;
    };
 
    class TriggerEntryPoints {

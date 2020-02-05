@@ -197,4 +197,169 @@ namespace Megalo {
          out += "Opcode with unrecognized type!\r\n";
       }
    }
+   void Trigger::decompile(Decompiler& out) noexcept {
+      auto mp = out.get_variant().get_multiplayer_data();
+      if (!mp)
+         return;
+      auto& triggers = mp->scriptContent.triggers;
+      //
+      uint16_t indent_count          = 0;     // needed because if-blocks aren't "real;" we "open" one every time we encounter one or more conditions in a row, so we need to remember how many "end"s to write
+      bool     is_first_opcode       = true;  // see comment for (trigger_is_if_block)
+      bool     is_first_condition    = true;  // if we encounter a condition and this is (true), then we need to write "if "
+      bool     trigger_is_if_block   = false; // we write an initial line break on each trigger; if this trigger is an if-block, then we need to avoid writing another line break when we actually write "if". this variable and (is_first_opcode) are used to facilitate this.
+      bool     writing_if_conditions = false; // if we encounter an action and this is (true), then we need to reset (is_first_condition
+      //
+      switch (this->entryType) { // TODO: use the list of event handler trigger indices instead of the individual triggers' entry types
+         case entry_type::normal:
+         case entry_type::subroutine:
+            out.write_line("");
+            break;
+         case entry_type::local:
+            out.write_line(u8"on local: "); // TODO: don't put this on its own line
+            break;
+         case entry_type::on_host_migration:
+            out.write_line(u8"on host migration: ");
+            break;
+         case entry_type::on_init:
+            out.write_line(u8"on init: ");
+            break;
+         case entry_type::on_local_init:
+            out.write_line(u8"on local init: ");
+            break;
+         case entry_type::on_object_death:
+            out.write_line(u8"on object death: ");
+            break;
+         case entry_type::pregame:
+            out.write_line(u8"on pregame: ");
+            break;
+      }
+      //
+      switch (this->blockType) {
+         case block_type::normal:
+            {
+               if (this->opcodes.size()) {
+                  auto* first = this->opcodes[0];
+                  auto* cnd   = dynamic_cast<Condition*>(first);
+                  if (cnd) {
+                     trigger_is_if_block = true;
+                  } else {
+                     out.write(u8"do");
+                     out.modify_indent_count(1);
+                     ++indent_count;
+                  }
+               } else {
+                  out.write(u8"do");
+                  out.modify_indent_count(1);
+                  ++indent_count;
+               }
+            }
+            break;
+         case block_type::for_each_object:
+            out.write("for each object do");
+            out.modify_indent_count(1);
+            ++indent_count;
+            break;
+         case block_type::for_each_object_with_label:
+            {
+               std::string line;
+               if (!this->forgeLabel) {
+                  if (this->forgeLabelIndex == -1)
+                     line = "no label";
+                  else
+                     cobb::sprintf(line, "label %d", this->forgeLabelIndex);
+               } else {
+                  ReachForgeLabel* f = this->forgeLabel;
+                  if (!f->name)
+                     cobb::sprintf(line, "label %u", this->forgeLabelIndex);
+                  else
+                     cobb::sprintf(line, "label \"%s\"", f->name->english().c_str()); // TODO: this will break if a label actually contains a double-quote
+               }
+               cobb::sprintf(line, "for each object with %s do", line.c_str());
+               out.write(line);
+               out.modify_indent_count(1);
+               ++indent_count;
+            }
+            break;
+         case block_type::for_each_player:
+            out.write(u8"for each player do");
+            out.modify_indent_count(1);
+            ++indent_count;
+            break;
+         case block_type::for_each_player_random:
+            out.write(u8"for each player randomly do");
+            out.modify_indent_count(1);
+            ++indent_count;
+            break;
+         case block_type::for_each_team:
+            out.write(u8"for each team do");
+            out.modify_indent_count(1);
+            ++indent_count;
+            break;
+         default:
+            out.write(u8"do -- unknown block type");
+            out.modify_indent_count(1);
+            ++indent_count;
+            break;
+      }
+      //
+      int32_t     last_condition_or_group = -1;
+      std::string line;
+      for (auto& opcode : this->opcodes) {
+         auto condition = dynamic_cast<const Condition*>(opcode);
+         bool _first    = is_first_opcode;
+         is_first_opcode = false;
+         if (condition) {
+            if (is_first_condition) {
+               if (!trigger_is_if_block || !_first) // if this trigger IS an if-block and we're writing the entire block's "if", then don't write a line break because we did that above
+                  out.write_line("");
+               out.write("if ");
+               out.modify_indent_count(1);
+               ++indent_count;
+               is_first_condition    = false;
+               writing_if_conditions = true;
+            } else {
+               if (condition->or_group == last_condition_or_group)
+                  out.write(u8"or ");
+               else
+                  out.write(u8"and ");
+            }
+            last_condition_or_group = condition->or_group;
+            opcode->decompile(out);
+            out.write(' ');
+            continue;
+         }
+         if (writing_if_conditions) {
+            out.write(u8"then ");
+            writing_if_conditions = false;
+            is_first_condition    = true;
+         }
+         auto action = dynamic_cast<const Action*>(opcode);
+         if (action) {
+            if (action->function == &actionFunction_runNestedTrigger) {
+               auto index = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
+               if (index) {
+                  auto i = index->value;
+                  if (i < 0 || i >= triggers.size()) {
+                     cobb::sprintf(line, u8"-- execute nested trigger with invalid index %d", i);
+                     out.write_line(line);
+                     continue;
+                  }
+                  triggers[i].decompile(out);
+                  continue;
+               }
+               out.write_line(u8"-- invalid \"execute nested trigger\" opcode");
+               continue;
+            }
+            out.write_line("");
+            opcode->decompile(out);
+            continue;
+         }
+         out.write_line(u8"-- invalid opcode type");
+      }
+      //
+      while (indent_count-- > 0) {
+         out.modify_indent_count(-1);
+         out.write_line(u8"end");
+      }
+   }
 }

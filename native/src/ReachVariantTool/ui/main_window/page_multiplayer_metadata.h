@@ -1,7 +1,7 @@
 #pragma once
 #include "main_window/ui_page_multiplayer_metadata.h"
 #include <QWidget>
-#include "editor_state.h"
+#include "../../editor_state.h"
 
 class PageMPMetadata : public QWidget {
    Q_OBJECT
