@@ -39,5 +39,6 @@ namespace Megalo {
             for (auto& arg : this->arguments)
                arg->postprocess(newlyLoaded);
          }
+         virtual void decompile(Decompiler& out) noexcept override;
    };
 }

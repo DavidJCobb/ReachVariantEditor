@@ -354,4 +354,9 @@ namespace Megalo {
          }
       }
    }
+   void Condition::decompile(Decompiler& out) noexcept {
+      if (this->inverted)
+         out.write("not ");
+      this->function->decompile(out, this->arguments);
+   }
 }

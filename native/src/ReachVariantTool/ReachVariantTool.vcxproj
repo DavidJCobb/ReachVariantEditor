@@ -102,6 +102,7 @@
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\forge_label.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp" />

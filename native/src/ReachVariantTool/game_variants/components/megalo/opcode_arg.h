@@ -80,6 +80,9 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
+         virtual void decompile(Decompiler& out) noexcept { // override me!
+            out.write(u8"ARG");
+         };
          //
          static OpcodeArgValue* factory(cobb::ibitreader& stream) {
             assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");

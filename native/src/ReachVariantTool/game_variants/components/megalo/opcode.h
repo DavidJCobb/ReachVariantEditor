@@ -1,6 +1,7 @@
 #pragma once
 #include <cassert>
 #include <string>
+#include <vector>
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/reference_tracked_object.h"
 #include "../../../helpers/stream.h"
@@ -115,6 +116,8 @@ namespace Megalo {
          {
             this->mapping.owner = this;
          }
+         //
+         void decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept;
    };
 
    class Opcode { // base class for Condition and Action

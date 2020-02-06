@@ -1171,4 +1171,7 @@ namespace Megalo {
          }
       }
    }
+   void Action::decompile(Decompiler& out) noexcept {
+      this->function->decompile(out, this->arguments);
+   }
 }
