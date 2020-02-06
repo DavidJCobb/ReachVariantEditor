@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "limits_bitnumbers.h"
+#include "opcode.h"
 #include "opcode_arg.h"
 
 // NOTE: conditions.cpp contains a preprocessor flag, MEGALO_DISALLOW_NONE_CONDITION, 
@@ -12,14 +13,10 @@
 // builds.
 
 namespace Megalo {
-   class ConditionFunction {
+   class ConditionFunction : public OpcodeBase {
       public:
-         const char* name;
-         const char* desc = "";
-         const char* format;
          const char* verb_normal = "is";
          const char* verb_invert = "is not";
-         std::vector<OpcodeArgBase> arguments;
          //
          ConditionFunction(
             const char* n,
@@ -29,10 +26,7 @@ namespace Megalo {
             const char* vn = "is",
             const char* vi = "is not"
          ) :
-            name(n),
-            desc(d),
-            format(f),
-            arguments(a),
+            OpcodeBase(n, d, f, a),
             verb_normal(vn),
             verb_invert(vi)
          {}

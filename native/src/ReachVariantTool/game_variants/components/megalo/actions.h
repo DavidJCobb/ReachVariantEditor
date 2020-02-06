@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include "opcode.h"
 #include "opcode_arg.h"
 
 // NOTE: actions.cpp contains a preprocessor flag, MEGALO_DISALLOW_NONE_ACTION, which 
@@ -10,24 +11,14 @@
 // for development/debugging purposes and should not be enabled in release builds.
 
 namespace Megalo {
-   class ActionFunction {
+   class ActionFunction : public OpcodeBase {
       public:
-         const char* name;
-         const char* desc = "";
-         const char* format;
-         std::vector<OpcodeArgBase> arguments;
-         //
          ActionFunction(
             const char* n,
             const char* d,
             const char* f,
             std::initializer_list<OpcodeArgBase> a
-         ) :
-            name(n),
-            desc(d),
-            format(f),
-            arguments(a)
-         {}
+         ) : OpcodeBase(n, d, f, a) {};
    };
    extern std::array<ActionFunction, 99> actionFunctionList;
    extern const ActionFunction& actionFunction_runNestedTrigger;
