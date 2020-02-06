@@ -13,6 +13,8 @@
 class GameVariantDataMultiplayer;
 
 namespace Megalo {
+   class OpcodeBase;
+
    class OpcodeFuncToScriptMapping {
       public:
          enum class mapping_type {
@@ -47,20 +49,47 @@ namespace Megalo {
          int8_t       arg_operator = no_argument; // for comparisons, assignments, and property setters, this indicates which argument is the operator
          int8_t       arg_index_mappings[8] = { no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument }; // map native argument order to script argument order
          flags_type   flags = 0;
+         OpcodeBase*  owner = nullptr;
          //
-         // TODO: This class needs to be able to access its owning opcode-function, so that it can access the 
-         // argument list (not only to see the types of the function's arguments, but also to identify the 
-         // out-argument if any exists). This requires:
-         //
-         //  - ...that ConditionFunction and ActionFunction inherit from a common base class, and share the 
-         //    argument lists.
-         //
-         //  - ...that this class have an OpcodeFunction* member, which we'll name (owner).
-         //
-         //  - ...that the OpcodeFunction constructor set (this->mapping->owner = this).
-         //
-         // TODO: Constructors.
-         //
+         OpcodeFuncToScriptMapping() {}
+         OpcodeFuncToScriptMapping(mapping_type t, std::initializer_list<int8_t> args) : type(t) {
+            size_t i = 0;
+            for (auto it = args.begin(); it != args.end() && i < std::extent<decltype(arg_index_mappings)>::value; ++it, ++i) {
+               this->arg_index_mappings[i] = *it;
+            }
+         }
+         static OpcodeFuncToScriptMapping make_function(const char* pn, const char* sn, std::initializer_list<int8_t> args, int8_t ct = no_context, flags_type flags = 0) {
+            auto instance = OpcodeFuncToScriptMapping(mapping_type::function, args);
+            instance.primary_name   = pn;
+            instance.secondary_name = sn;
+            instance.arg_context    = ct;
+            instance.flags          = flags;
+            return instance;
+         }
+         static OpcodeFuncToScriptMapping make_getter(const char* pn, int8_t ct) {
+            auto instance = OpcodeFuncToScriptMapping(mapping_type::property_get, {});
+            instance.primary_name = pn;
+            instance.arg_context  = ct;
+            return instance;
+         }
+         static OpcodeFuncToScriptMapping make_setter(const char* pn, int8_t ct, int8_t op = no_argument, int8_t name = no_argument) {
+            auto instance = OpcodeFuncToScriptMapping(mapping_type::property_set, {});
+            instance.primary_name = pn;
+            instance.arg_context  = ct;
+            instance.arg_name     = name;
+            instance.arg_operator = op;
+            return instance;
+         }
+         static OpcodeFuncToScriptMapping make_intrinsic_assignment(int8_t op) {
+            auto instance = OpcodeFuncToScriptMapping(mapping_type::assign, {});
+            instance.arg_operator = op;
+            return instance;
+         }
+         static OpcodeFuncToScriptMapping make_intrinsic_comparison(std::initializer_list<int8_t> args, int8_t op) {
+            auto instance = OpcodeFuncToScriptMapping(mapping_type::compare, args);
+            instance.arg_operator = op;
+            return instance;
+         }
    };
 
    class OpcodeBase {
@@ -69,18 +98,23 @@ namespace Megalo {
          const char* desc = "";
          const char* format;
          std::vector<OpcodeArgBase> arguments;
+         OpcodeFuncToScriptMapping mapping;
          //
          OpcodeBase(
             const char* n,
             const char* d,
             const char* f,
-            std::initializer_list<OpcodeArgBase> a
+            std::initializer_list<OpcodeArgBase> a,
+            OpcodeFuncToScriptMapping m
          ) :
             name(n),
             desc(d),
             format(f),
-            arguments(a)
-         {}
+            arguments(a),
+            mapping(m)
+         {
+            this->mapping.owner = this;
+         }
    };
 
    class Opcode { // base class for Condition and Action

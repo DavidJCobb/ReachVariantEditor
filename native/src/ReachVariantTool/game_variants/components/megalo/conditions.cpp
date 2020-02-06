@@ -18,7 +18,8 @@ namespace Megalo {
          "None",
          "This condition does nothing.",
          "None.",
-         {}
+         {},
+         OpcodeFuncToScriptMapping()
       ),
       ConditionFunction( // 1
          "Compare",
@@ -28,7 +29,8 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgAnyVariableFactory),
             OpcodeArgBase("b", OpcodeArgAnyVariableFactory),
             OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::factory)
-         }
+         },
+         OpcodeFuncToScriptMapping::make_intrinsic_comparison({0, 1}, 2)
       ),
       ConditionFunction( // 2
          "Object In Boundary",
@@ -37,7 +39,8 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueObject::factory),
             OpcodeArgBase("b", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("shape_contains", "", {0}, 1)
       ),
       ConditionFunction( // 3
          "Killer Type",
@@ -47,6 +50,7 @@ namespace Megalo {
             OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("killer_type_is", "", {1}, 0),
          "was", "was not"
       ),
       ConditionFunction( // 4
@@ -58,6 +62,7 @@ namespace Megalo {
             OpcodeArgBase("b", OpcodeArgValueTeam::factory),
             OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("has_disposition", "", {1, 2}, 0),
          "has", "does not have"
       ),
       ConditionFunction( // 5
@@ -66,7 +71,8 @@ namespace Megalo {
          "%1 %v at zero.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_zero", "", {}, 0)
       ),
       ConditionFunction( // 6
          "Object Type",
@@ -75,7 +81,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_of_type", "", {1}, 0)
       ),
       ConditionFunction( // 7
          "Team Has Players",
@@ -84,6 +91,7 @@ namespace Megalo {
          {
             OpcodeArgBase("team", OpcodeArgValueTeam::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("has_any_players", "", {}, 0),
          "has", "does not have"
       ),
       ConditionFunction( // 8
@@ -92,7 +100,8 @@ namespace Megalo {
          "%1 %v out of bounds.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_out_of_bounds", "", {}, 0)
       ),
       ConditionFunction( // 9
          "Deprecated-09",
@@ -100,7 +109,8 @@ namespace Megalo {
          "Never. (Unused argument: %1)",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("deprecated_09", "", {}, 0)
       ),
       ConditionFunction( // 10
          "Player Assisted Kill Of",
@@ -110,6 +120,7 @@ namespace Megalo {
             OpcodeArgBase("attacker", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("victim",   OpcodeArgValuePlayer::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("assisted_kill_of", "", {1}, 0),
          "assisted", "did not assist"
       ),
       ConditionFunction( // 11
@@ -120,6 +131,7 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("has_forge_label", "", {1}, 0),
          "has", "does not have"
       ),
       ConditionFunction( // 12
@@ -129,6 +141,7 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
          },
+         OpcodeFuncToScriptMapping::make_function("is_not_respawning", "", {}, 0),
          "is not", "is"
       ),
       ConditionFunction( // 13
@@ -137,7 +150,8 @@ namespace Megalo {
          "%1 %v in use.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_in_use", "", {}, 0)
       ),
       ConditionFunction( // 14
          "Species Is Spartan",
@@ -145,7 +159,8 @@ namespace Megalo {
          "%1 %v a Spartan.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_spartan", "", {}, 0)
       ),
       ConditionFunction( // 15
          "Species Is Elite",
@@ -153,7 +168,8 @@ namespace Megalo {
          "%1 %v an Elite.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_elite", "is_sangheili", {}, 0)
       ),
       ConditionFunction( // 16
          "Species Is Monitor",
@@ -161,13 +177,15 @@ namespace Megalo {
          "%1 %v a Monitor.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("is_monitor", "", {}, 0)
       ),
       ConditionFunction( // 17
          "In Matchmaking",
          "This condition is believed to test whether the current match is taking place in Matchmaking.",
          "This match %v taking place in Matchmaking.",
-         {}
+         {},
+         OpcodeFuncToScriptMapping::make_function("is_in_matchmaking", "", {}, OpcodeFuncToScriptMapping::game_namespace)
       ),
    }};
 

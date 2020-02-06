@@ -17,8 +17,9 @@ namespace Megalo {
             const char* n,
             const char* d,
             const char* f,
-            std::initializer_list<OpcodeArgBase> a
-         ) : OpcodeBase(n, d, f, a) {};
+            std::initializer_list<OpcodeArgBase> a,
+            OpcodeFuncToScriptMapping mapping
+         ) : OpcodeBase(n, d, f, a, mapping) {};
    };
    extern std::array<ActionFunction, 99> actionFunctionList;
    extern const ActionFunction& actionFunction_runNestedTrigger;

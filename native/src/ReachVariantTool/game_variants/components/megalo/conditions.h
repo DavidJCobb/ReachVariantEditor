@@ -23,10 +23,11 @@ namespace Megalo {
             const char* d,
             const char* f,
             std::initializer_list<OpcodeArgBase> a,
+            OpcodeFuncToScriptMapping mapping,
             const char* vn = "is",
             const char* vi = "is not"
          ) :
-            OpcodeBase(n, d, f, a),
+            OpcodeBase(n, d, f, a, mapping),
             verb_normal(vn),
             verb_invert(vi)
          {}

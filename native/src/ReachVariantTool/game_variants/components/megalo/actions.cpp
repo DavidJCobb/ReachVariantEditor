@@ -18,7 +18,8 @@ namespace Megalo {
          "None",
          "This condition does nothing.",
          "None.",
-         {}
+         {},
+         OpcodeFuncToScriptMapping()
       ),
       ActionFunction( // 1
          "Modify Score",
@@ -28,7 +29,8 @@ namespace Megalo {
             OpcodeArgBase("target",   OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory)
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("score", 0, {}, 1)
       ),
       ActionFunction( // 2
          "Create Object",
@@ -42,7 +44,8 @@ namespace Megalo {
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::factory),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::factory),
             OpcodeArgBase("name",        OpcodeArgValueNameIndex::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
       ),
       ActionFunction( // 3
          "Delete Object",
@@ -50,7 +53,8 @@ namespace Megalo {
          "Delete %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("delete", "", {}, 0)
       ),
       ActionFunction( // 4
          "Set Waypoint Visibility",
@@ -59,7 +63,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_visibility", "", {1}, 0)
       ),
       ActionFunction( // 5
          "Set Waypoint Icon",
@@ -68,7 +73,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("icon",   OpcodeArgValueWaypointIcon::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_icon", "", {1}, 0)
       ),
       ActionFunction( // 6
          "Set Waypoint Priority",
@@ -77,7 +83,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::factory),
             OpcodeArgBase("priority", OpcodeArgValueWaypointPriorityEnum::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_priority", "", {1}, 0)
       ),
       ActionFunction( // 7
          "Set Object Displayed Timer",
@@ -86,7 +93,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_displayed_timer", "", {1}, 0)
       ),
       ActionFunction( // 8
          "Set Object Distance Range",
@@ -96,7 +104,8 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("min",    OpcodeArgValueScalar::factory), // should be in the range of [-1, 100]
             OpcodeArgBase("max",    OpcodeArgValueScalar::factory), // should be in the range of [-1, 100]
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_distance_range", "", {1, 2}, 0)
       ),
       ActionFunction( // 9
          "Modify Variable",
@@ -106,7 +115,8 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgAnyVariableFactory, true),
             OpcodeArgBase("b", OpcodeArgAnyVariableFactory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_intrinsic_assignment(2)
       ),
       ActionFunction( // 10
          "Set Object Shape",
@@ -115,7 +125,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("shape",  OpcodeArgValueShape::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_shape", "", {1}, 0)
       ),
       ActionFunction( // 11
          "Apply Player Traits",
@@ -124,7 +135,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
       ),
       ActionFunction( // 12
          "Set Object Interact Permissions",
@@ -133,7 +145,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_interact_permissions", "", {1}, 0)
       ),
       ActionFunction( // 13
          "Set Spawn Location Permissions",
@@ -142,7 +155,8 @@ namespace Megalo {
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::factory),
             OpcodeArgBase("who", OpcodeArgValuePlayerSet::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
       ),
       ActionFunction( // 14
          "Set Spawn Location Fireteam",
@@ -151,7 +165,8 @@ namespace Megalo {
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::factory),
             OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::factory), // TODO: -1 == "no fireteam"
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteam", "", {1}, 0)
       ),
       ActionFunction( // 15
          "Set Object Progress Bar",
@@ -161,7 +176,8 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0)
       ),
       ActionFunction( // 16
          "CHUD Message",
@@ -171,7 +187,8 @@ namespace Megalo {
             OpcodeArgBase("who",   OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("sound", OpcodeArgValueSound::factory),
             OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("show_message_to", "", {0, 1, 2}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 17
          "Set Timer Rate",
@@ -180,7 +197,8 @@ namespace Megalo {
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
             OpcodeArgBase("rate",  OpcodeArgValueTimerRateEnum::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_rate", "", {1}, 0)
       ),
       ActionFunction( // 18
          "Deprecated-18",
@@ -188,7 +206,8 @@ namespace Megalo {
          "Do nothing. (Unused message: %1)",
          {
             OpcodeArgBase("text", OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("deprecated_18", "", {0})
       ),
       ActionFunction( // 19
          "Get Item Owner",
@@ -197,7 +216,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_owner", "", {}, 0)
       ),
       ActionFunction( // 20
          "Run Nested Trigger",
@@ -205,13 +225,15 @@ namespace Megalo {
          "Execute trigger %1.",
          {
             OpcodeArgBase("trigger", OpcodeArgValueTrigger::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping()
       ),
       ActionFunction( // 21
          "End Round With Winner",
          "Ends the round with a winner.",
          "End the current round, and declare the player or team with the highest score the winner of the round.",
-         {}
+         {},
+         OpcodeFuncToScriptMapping::make_function("end_round", "", {}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 22
          "Set Object Shape Visibility",
@@ -220,7 +242,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_shape_visibility", "", {1}, 0)
       ),
       ActionFunction( // 23
          "Kill Object Instantly",
@@ -229,7 +252,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("silent", OpcodeArgValueConstBool::factory, "silently", "loudly"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("kill", "", {1}, 0)
       ),
       ActionFunction( // 24
          "Set Object Invincibility",
@@ -238,7 +262,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("invincible (treated as a bool)", OpcodeArgValueScalar::factory), // treated as a bool
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_invincibility", "", {1}, 0)
       ),
       ActionFunction( // 25
          "Random Number",
@@ -247,13 +272,15 @@ namespace Megalo {
          {
             OpcodeArgBase("seed",   OpcodeArgValueScalar::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("rand", "", {0})
       ),
       ActionFunction( // 26
          "Deprecated-26",
          "Does nothing.",
          "Do nothing.",
-         {}
+         {},
+         OpcodeFuncToScriptMapping::make_function("deprecated_26", "", {})
       ),
       ActionFunction( // 27
          "Unknown-27",
@@ -262,7 +289,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_27", "", {}, 0)
       ),
       ActionFunction( // 28
          "Get Speed",
@@ -271,7 +299,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_speed", "", {}, 0)
       ),
       ActionFunction( // 29
          "Get Killer",
@@ -280,7 +309,8 @@ namespace Megalo {
          {
             OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("killer", OpcodeArgValuePlayer::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_killer", "get_killer", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 30
          "Get Death Damage Type",
@@ -289,7 +319,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_death_damage_type", "get_death_damage_type", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 31
          "Get Death Damage Modifier",
@@ -298,7 +329,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_death_damage_mod", "get_death_damage_mod", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
          //
          // Known return values:
          // 1: pummel
@@ -314,7 +346,8 @@ namespace Megalo {
          "Carry out some unknown action (32) using boolean %1.",
          {
             OpcodeArgBase("bool", OpcodeArgValueConstBool::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_32", "", {0})
       ),
       ActionFunction( // 33
          "Attach Objects",
@@ -325,7 +358,8 @@ namespace Megalo {
             OpcodeArgBase("target",  OpcodeArgValueObject::factory),
             OpcodeArgBase("offset",  OpcodeArgValueVector3::factory),
             OpcodeArgBase("bool",    OpcodeArgValueConstBool::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("attach_to", "", {1, 2, 3}, 0)
       ),
       ActionFunction( // 34
          "Detach Objects",
@@ -333,7 +367,8 @@ namespace Megalo {
          "Detach %1 from whatever other object it is attached to.",
          {
             OpcodeArgBase("subject", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("detach", "", {}, 0)
       ),
       ActionFunction( // 35
          "Get Player Scoreboard Position",
@@ -342,7 +377,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_scoreboard_pos", "", {}, 0)
       ),
       ActionFunction( // 36
          "Get Team Index",
@@ -351,7 +387,8 @@ namespace Megalo {
          {
             OpcodeArgBase("team",   OpcodeArgValueTeam::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_index", "", {}, 0)
       ),
       ActionFunction( // 37
          "Get Player Killstreak",
@@ -360,7 +397,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_spree_count", "", {}, 0)
       ),
       ActionFunction( // 38
          "Unknown-38",
@@ -369,7 +407,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("number", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_38", "", {1}, 0)
       ),
       ActionFunction( // 39
          "Unknown-39",
@@ -378,7 +417,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("flags",  OpcodeArgValuePlayerUnusedModeFlags::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_39", "", {1}, 0)
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
@@ -387,7 +427,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_vehicle", "get_vehicle", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 41
          "Force Player Into Vehicle",
@@ -396,7 +437,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("vehicle", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("force_into_vehicle", "", {1}, 0)
       ),
       ActionFunction( // 42
          "Set Player Biped", // Used for Halo Chess's bump-possession?
@@ -405,7 +447,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_biped", "", {1}, 0)
       ),
       ActionFunction( // 43
          "Reset Timer",
@@ -413,7 +456,8 @@ namespace Megalo {
          "Reset %1.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("reset", "", {}, 0)
       ),
       ActionFunction( // 44
          "Set Weapon Pickup Priority",
@@ -422,7 +466,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("priority", OpcodeArgValuePickupPriorityEnum::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_weapon_pickup_priority", "", {1}, 0)
       ),
       ActionFunction( // 45
          "Push Object Up",
@@ -430,7 +475,8 @@ namespace Megalo {
          "Apply a semi-random amount of upward force to %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("push_upward", "apply_upward_impulse", {}, 0)
       ),
       ActionFunction( // 46
          "Set Widget Text",
@@ -439,7 +485,8 @@ namespace Megalo {
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_text", "", {1}, 0)
       ),
       ActionFunction( // 47
          "Set Widget Text (Unknown)",
@@ -448,7 +495,8 @@ namespace Megalo {
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_text_2", "", {1}, 0)
       ),
       ActionFunction( // 48
          "Set Meter Parameters",
@@ -457,7 +505,8 @@ namespace Megalo {
          {
             OpcodeArgBase("widget",     OpcodeArgValueWidget::factory),
             OpcodeArgBase("parameters", OpcodeArgValueMeterParameters::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_meter_params", "", {1}, 0)
       ),
       ActionFunction( // 49
          "Set Widget Icon",
@@ -466,7 +515,8 @@ namespace Megalo {
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
             OpcodeArgBase("icon",   OpcodeArgValueIconIndex6Bits::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_icon", "", {1}, 0)
       ),
       ActionFunction( // 50
          "Set Widget Visibility",
@@ -476,7 +526,8 @@ namespace Megalo {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::factory),
             OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
             OpcodeArgBase("visible", OpcodeArgValueConstBool::factory, "Show", "Hide"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_visibility", "", {1, 2}, 0)
       ),
       ActionFunction( // 51
          "Play Sound",
@@ -486,7 +537,8 @@ namespace Megalo {
             OpcodeArgBase("sound",  OpcodeArgValueSound::factory),
             OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::factory),
             OpcodeArgBase("who",    OpcodeArgTeamOrPlayerVariableFactory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("play_sound_for", "", {2, 0, 1}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 52
          "Modify Object Scale",
@@ -494,8 +546,9 @@ namespace Megalo {
          "Set %1's scale to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory),
-         }
+            OpcodeArgBase("scale",  OpcodeArgValueScalar::factory),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_scale", "", {1}, 0)
       ),
       ActionFunction( // 53
          "Set Object Display Text",
@@ -504,7 +557,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_display_text", "", {1}, 0)
       ),
       ActionFunction( // 54
          "Get Object Shields",
@@ -513,7 +567,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_getter("shields", 0)
       ),
       ActionFunction( // 55
          "Get Object Health",
@@ -522,7 +577,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_getter("health", 0)
       ),
       ActionFunction( // 56
          "Set Objective Title for Player",
@@ -531,7 +587,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
       ),
       ActionFunction( // 57
          "Set Objective Description for Player",
@@ -540,7 +597,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_round_card_text", "", {1}, 0)
       ),
       ActionFunction( // 58
          "Set Objective Icon for Player",
@@ -549,7 +607,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("icon",   OpcodeArgValueIconIndex7Bits::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
       ),
       ActionFunction( // 59
          "Enable/Disable Fireteam Spawning",
@@ -558,7 +617,8 @@ namespace Megalo {
          {
             OpcodeArgBase("team", OpcodeArgValueTeam::factory),
             OpcodeArgBase("bool", OpcodeArgValueConstBool::factory, "Enable", "Disable"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_fireteam_spawning_enabled", "", {1}, 0)
       ),
       ActionFunction( // 60
          "Set Respawn Object for Team",
@@ -567,7 +627,8 @@ namespace Megalo {
          {
             OpcodeArgBase("team",    OpcodeArgValueTeam::factory),
             OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
       ),
       ActionFunction( // 61
          "Set Respawn Object for Player",
@@ -576,7 +637,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
             OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
       ),
       ActionFunction( // 62
          "Get Player Fireteam",
@@ -585,16 +647,18 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_fireteam", "", {}, 0)
       ),
       ActionFunction( // 63
          "Set Player Fireteam",
          "Sets a player's fireteam number.",
-         "Assign %1 to fireteam %2..",
+         "Assign %1 to fireteam %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory),
-         }
+            OpcodeArgBase("index",  OpcodeArgValueScalar::factory),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_fireteam", "", {1}, 0)
       ),
       ActionFunction( // 64
          "Modify Object Shields",
@@ -604,7 +668,8 @@ namespace Megalo {
             OpcodeArgBase("object",   OpcodeArgValueObject::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("shields", 0, 1)
       ),
       ActionFunction( // 65
          "Modify Object Health",
@@ -614,7 +679,8 @@ namespace Megalo {
             OpcodeArgBase("object",   OpcodeArgValueObject::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("health", 0, 1)
       ),
       ActionFunction( // 66
          "Get Distance",
@@ -624,7 +690,8 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgValueObject::factory),
             OpcodeArgBase("b", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_distance_to", "", {1}, 0)
       ),
       ActionFunction( // 67
          "Modify Object Max Shields",
@@ -634,7 +701,8 @@ namespace Megalo {
             OpcodeArgBase("object",   OpcodeArgValueObject::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("max_shields", 0, 1)
       ),
       ActionFunction( // 68
          "Modify Object Max Health",
@@ -644,7 +712,8 @@ namespace Megalo {
             OpcodeArgBase("object",   OpcodeArgValueObject::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("max_health", 0, 1)
       ),
       ActionFunction( // 69
          "Set Player Requisition Palette",
@@ -653,7 +722,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
             OpcodeArgBase("palette", OpcodeArgValueRequisitionPalette::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_requisition_palette", "", {1}, 0)
       ),
       ActionFunction( // 70
          "Set Device Power",
@@ -662,7 +732,8 @@ namespace Megalo {
          {
             OpcodeArgBase("device", OpcodeArgValueObject::factory),
             OpcodeArgBase("power",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_device_power", "", {1}, 0)
       ),
       ActionFunction( // 71
          "Get Device Power",
@@ -671,7 +742,8 @@ namespace Megalo {
          {
             OpcodeArgBase("device", OpcodeArgValueObject::factory),
             OpcodeArgBase("power",  OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_device_power", "", {}, 0)
       ),
       ActionFunction( // 72
          "Set Device Position",
@@ -680,7 +752,8 @@ namespace Megalo {
          {
             OpcodeArgBase("device",   OpcodeArgValueObject::factory),
             OpcodeArgBase("position", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_device_position", "", {1}, 0)
       ),
       ActionFunction( // 73
          "Get Device Position",
@@ -689,7 +762,8 @@ namespace Megalo {
          {
             OpcodeArgBase("device",   OpcodeArgValueObject::factory),
             OpcodeArgBase("position", OpcodeArgValueScalar::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("get_device_position", "", {}, 0)
       ),
       ActionFunction( // 74
          "Modify Player Grenades",
@@ -700,7 +774,8 @@ namespace Megalo {
             OpcodeArgBase("type",     OpcodeArgValueGrenadeTypeEnum::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_setter("", 0, 2, 1)
       ),
       ActionFunction( // 75
          "Submit Incident",
@@ -710,7 +785,8 @@ namespace Megalo {
             OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
             OpcodeArgBase("cause?",    OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("affected?", OpcodeArgTeamOrPlayerVariableFactory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("send_incident", "", {0, 1, 2})
       ),
       ActionFunction( // 76
          "Submit Incident with value",
@@ -721,7 +797,8 @@ namespace Megalo {
             OpcodeArgBase("cause?",    OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("affected?", OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("value",     OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("send_incident", "", {0, 1, 2, 3})
       ),
       ActionFunction( // 77
          "Set Player Loadout Palette",
@@ -730,7 +807,8 @@ namespace Megalo {
          {
             OpcodeArgBase("team or player",  OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("loadout palette", OpcodeArgValueLoadoutPalette::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_loadout_palette", "", {1}, 0)
       ),
       ActionFunction( // 78
          "Set Device Position Track",
@@ -740,7 +818,8 @@ namespace Megalo {
             OpcodeArgBase("device",    OpcodeArgValueObject::factory),
             OpcodeArgBase("animation", OpcodeArgValueNameIndex::factory),
             OpcodeArgBase("position",  OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_device_animation_position", "", {1, 2}, 0)
       ),
       ActionFunction( // 79
          "Animate Device Position",
@@ -752,7 +831,8 @@ namespace Megalo {
             OpcodeArgBase("unknown number B", OpcodeArgValueScalar::factory),
             OpcodeArgBase("unknown number C", OpcodeArgValueScalar::factory),
             OpcodeArgBase("unknown number D", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("animate_device_position", "", {1, 2, 3, 4}, 0)
       ),
       ActionFunction( // 80
          "Set Device Actual Position",
@@ -761,7 +841,8 @@ namespace Megalo {
          {
             OpcodeArgBase("device",   OpcodeArgValueObject::factory),
             OpcodeArgBase("position", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_device_actual_position", "", {1}, 0)
       ),
       ActionFunction( // 81
          "Unknown-81",
@@ -770,7 +851,8 @@ namespace Megalo {
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::factory),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_81", "", {0, 1})
       ),
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
@@ -779,7 +861,8 @@ namespace Megalo {
          {
             OpcodeArgBase("spawn zone", OpcodeArgValueObject::factory),
             OpcodeArgBase("enable (treated as bool)", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("enable_spawn_zone", "", {1}, 0)
       ),
       ActionFunction( // 83
          "Get Player Weapon",
@@ -789,7 +872,8 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("which", OpcodeArgValueConstBool::factory, "primary", "secondary"),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_weapon", "get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 84
          "Get Player Armor Ability",
@@ -798,7 +882,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("try_get_armor_ability", "get_armor_ability", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",
@@ -807,7 +892,8 @@ namespace Megalo {
          {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("state",  OpcodeArgValueConstBool::factory, "Enable", "Disable"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
       ),
       ActionFunction( // 86
          "Unknown-86",
@@ -816,7 +902,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_86", "", {0, 1})
       ),
       ActionFunction( // 87
          "Create Object Equidistant",
@@ -828,7 +915,8 @@ namespace Megalo {
             OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
             OpcodeArgBase("number", OpcodeArgValueScalar::factory),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {2, 1, 3, 4}, 0)
       ),
       ActionFunction( // 88
          "Deprecated-88",
@@ -836,7 +924,8 @@ namespace Megalo {
          "Do nothing. (Unused argument: %1)",
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("deprecated_88", "", {0})
       ),
       ActionFunction( // 86
          "Unknown-89",
@@ -845,7 +934,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_89", "", {0, 1})
       ),
       ActionFunction( // 90
          "Unknown-90",
@@ -854,7 +944,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("bool",   OpcodeArgValueConstBool::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_90", "", {1}, 0)
       ),
       ActionFunction( // 91
          "Copy Object Rotation",
@@ -864,7 +955,8 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgValueObject::factory),
             OpcodeArgBase("b", OpcodeArgValueObject::factory),
             OpcodeArgBase("axis", OpcodeArgValueConstBool::factory, "axis 1", "axis 0"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
       ),
       ActionFunction( // 92
          "Move Object Relative To", // needs verification
@@ -874,7 +966,8 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgValueObject::factory),
             OpcodeArgBase("b", OpcodeArgValueObject::factory),
             OpcodeArgBase("point", OpcodeArgValueVector3::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("move_to", "", {1, 2}, 0)
       ),
       ActionFunction( // 93
          "Add Weapon To",
@@ -884,7 +977,8 @@ namespace Megalo {
             OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
             OpcodeArgBase("weapon", OpcodeArgValueMPObjectTypeIndex::factory),
             OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("add_weapon", "", {1, 2}, 0)
       ),
       ActionFunction( // 94
          "Remove Weapon From",
@@ -894,7 +988,8 @@ namespace Megalo {
             OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
             OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::factory),
             OpcodeArgBase("delete", OpcodeArgValueConstBool::factory, "and delete it", "but do not delete it"),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("remove_weapon", "", {1, 2}, 0)
       ),
       ActionFunction( // 95
          "Set Scenario Interpolator State",
@@ -903,7 +998,8 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueScalar::factory),
             OpcodeArgBase("b", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_scenario_interpolator_state", "", {0, 1})
       ),
       ActionFunction( // 96
          "Unknown-96",
@@ -913,7 +1009,8 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::factory),
             OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
             OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_96", "", {2, 0})
       ),
       ActionFunction( // 97
          "Unknown-97",
@@ -922,7 +1019,8 @@ namespace Megalo {
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
             OpcodeArgBase("number", OpcodeArgValueScalar::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("unknown_97", "", {1}, 0)
       ),
       ActionFunction( // 98
          "Set Boundary Visibility Filter", // TODO: figure out what this even means; current speculation is based on Halo 4's known actions
@@ -930,7 +1028,8 @@ namespace Megalo {
          "Make an object's boundary visible to one of its player variables?: %1.",
          {
             OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::factory),
-         }
+         },
+         OpcodeFuncToScriptMapping::make_function("set_shape_visibility_filter", "", {0}, 0)
       ),
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];
