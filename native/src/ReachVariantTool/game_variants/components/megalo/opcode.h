@@ -24,7 +24,7 @@ namespace Megalo {
             compare,      // only used for the "compare variable" opcode; special-case to be handled by the (de)compiler
             function,     // the opcode is a function (member or non-member)
             property_get, // the opcode should be accessed as (result = arg_context.primary_name);   only use this when there is a corresponding (property_set) opcode
-            property_set, // the opcode should be modified as (arg_context.primary_name = argument); only use this when any assign operator (e.g. +=, -=) is allowed
+            property_set, // the opcode should be modified as (arg_context.primary_name = argument); only use this when any assign operator (e.g. +=, -=) is allowed; every property_get has a property_set but not every property_set has a property_get
          };
          //
          struct flags {
@@ -43,7 +43,7 @@ namespace Megalo {
          //
       public:
          mapping_type type = mapping_type::none;
-         std::string  primary_name;
+         std::string  primary_name;   // for functions this is NOT required to be unique; we DO support function overloads; the name "send_incident" is shared by two different actions
          std::string  secondary_name; // an alternate name through which the opcode can be invoked
          int8_t       arg_context  = no_context;  // if non-negative, refers to one of the arguments and indicates that the opcode function is a member of that argument type
          int8_t       arg_name     = no_argument; // only used by property mappings, and only if (primary_name) is blank; indicates that one of the arguments (which must be an enum type) should be treated as a property name

@@ -104,7 +104,8 @@ namespace reach {
       white     = 10,
       black     = 11,
       zombie    = 12, // olive drab
-      // bitfield can hold 13, 14, and 15, though they're likely not valid
+      very_marginally_more_vibrant_pink = 13, // seen in Freeze Tag, applied to Red Player Traits; not supported by the game UI (displays as "Unchanged")
+      // bitfield can hold 14 and 15, though they're likely not valid
    };
    enum class grenade_count : uint8_t {
       unchanged   =  0,

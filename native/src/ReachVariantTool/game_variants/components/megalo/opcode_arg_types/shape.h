@@ -37,6 +37,8 @@ namespace Megalo {
                   && this->top.read(stream)
                   && this->bottom.read(stream)
                   );
+               case ShapeType::none:
+                  return true;
             }
             return false;
          }
