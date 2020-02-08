@@ -80,7 +80,7 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
-         virtual void decompile(Decompiler& out) noexcept { // override me!
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept { // override me!
             out.write(u8"ARG");
          };
          //
