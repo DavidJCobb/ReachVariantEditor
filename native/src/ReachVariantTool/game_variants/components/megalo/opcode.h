@@ -46,7 +46,7 @@ namespace Megalo {
          std::string  primary_name;   // for functions this is NOT required to be unique; we DO support function overloads; the name "send_incident" is shared by two different actions
          std::string  secondary_name; // an alternate name through which the opcode can be invoked
          int8_t       arg_context  = no_context;  // if non-negative, refers to one of the arguments and indicates that the opcode function is a member of that argument type
-         int8_t       arg_name     = no_argument; // only used by property mappings, and only if (primary_name) is blank; indicates that one of the arguments (which must be an enum type) should be treated as a property name
+         int8_t       arg_name     = no_argument; // only used by property mappings, and only if (primary_name) is blank; indicates that one of the arguments (which must be an enum type) should be treated as a property name; needed for "modify grenade count" action
          int8_t       arg_operator = no_argument; // for comparisons, assignments, and property setters, this indicates which argument is the operator
          int8_t       arg_index_mappings[8] = { no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument }; // map native argument order to script argument order
          flags_type   flags = 0;

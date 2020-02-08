@@ -20,6 +20,100 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+//  - DECOMPILER
+//
+//     - Finish implementing OpcodeArgTypeinfo, and have all opcodes refer to instances 
+//       of that instead of factory functions.
+//
+//        - OpcodeArgTypeinfo instances need to be able to hold a factory function; they 
+//          should accept a lambda as a constructor argument and store it locally. The 
+//          factory function should NOT be a method; it should be a function pointer 
+//          member, because we want to create OpcodeArgTypeinfo instances, not subclasses.
+//
+//           = Should they also overlap with what the JavaScript parser implementation 
+//             defines as the "MScriptTypename" class?
+//
+//        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
+//          what we'll pass to the opcode functions' argument lists.
+//
+//           - Enums, flags-masks, and similar are an exception; see next bullet point.
+//
+//     - Merge all enums into a single OpcodeArgValue subclass that needs to be construc-
+//       ted with an OpcodeArgTypeinfo& provided. Have the enum pull its values (and by 
+//       implication its bitfield size) from the typeinfo object. We'll have one typeinfo 
+//       instance per enum -- so basically, the OpcodeArgValue just has all of the common 
+//       code/data for all enums, with the typeinfos actually defining different enums.
+//
+//        - And do the same for flags-masks.
+//
+//        - Get all of the index lists -- incidents, MP object types, and so on -- to 
+//          conform to a common pattern so we can do the same for them.
+//
+//     - Once the above is all done, we can begin working on the decompile functions for 
+//       OpcodeArgValue classes. Enums would be a great place to start, especially since 
+//       they include assignment and comparison operators.
+//
+//        - There's a single type that acts as an "object and player variable;" it's 
+//          used by the very last action in the actions list, and appears to serve as 
+//          both that opcode's context and its parameter. We should look at the class 
+//          and see if we can't split this argument in two -- sure, the game engine may 
+//          treat it as "one argument," but if we can "lie" and still have the same 
+//          binary output, then that makes things easier for us.
+//
+//          If that's not possible, we have a fallback: OpcodeArgValue::decompile takes 
+//          a flags parameter that is currently unused. We can define a flag to indicate 
+//          whether the argument is being decompiled as a context (i.e. "this") or as an 
+//          argument; then, we can make the "opcode and player variable" argument both 
+//          the context AND the argument (i.e. same_arg.function(same_arg)).
+//
+//     - Once it's done, test all official gametypes (including Freeze Tag!) against 
+//       the current parser work in JS.
+//
+//  - PARSER
+//
+//     - Port it from JavaScript. The validate/analyze step basically IS compiling and 
+//       should be named as such, though we'll get to the "actually generating triggers 
+//       and opcodes in-memory" step later.
+//
+//     - Test round-trip operation.
+//
+//     - Finish the code for compiling function calls.
+//
+//     - Generate triggers and opcodes.
+//
+//        - We'll need to update the saving code; see multiplayer.cpp line 255.
+//
+//  - IN-GAME TESTS
+//
+//     - Some game-namespace numbers that refer to social options are unknown; identify 
+//       them.
+//
+//     - The opcodes to select a new Hill are listed as unknown; I think one selects by 
+//       Spawn Sequence and the other selects at random. KOTH would be a good way to 
+//       check that.
+//
+//  - POTENTIAL COMPILER IMPROVEMENTS
+//
+//     - We could potentially build a compiler that compiles as it parses, holding only 
+//       the current blocks and the current statement in memory, and generating an opcode 
+//       as appropriate when it finishes parsing a statement. (Trigger objects, on the 
+//       other hand, would be created as non-if-blocks open; we'd also create block 
+//       objects that hold pointers to their owned triggers; and we'd insert the opcodes 
+//       into the triggers as we parse.)
+//
+//       If we hit an invalid opcode that isn't a fatal parse error, then we just stuff 
+//       a "none" opcode into the trigger-under-construction, remember the error, and 
+//       print it at the end before discarding all constructed trigger data.
+//
+//       This would significantly reduce the amount of memory we end up using, since we 
+//       wouldn't need to have two different representations of the script ("parsed" and 
+//       "compiled") existing together in memory; we also wouldn't need to remember pos-
+//       itional data (line numbers, column numbers, and such) for absolutely everything 
+//       from the moment we see it to the moment we're done compiling. It may also be 
+//       simpler, conceptually.
+//
+// ======================================================================================
+//
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
