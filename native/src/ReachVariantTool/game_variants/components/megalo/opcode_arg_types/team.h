@@ -5,6 +5,12 @@
 namespace Megalo {
    class OpcodeArgValueTeam : public OpcodeArgValue {
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
+            return new OpcodeArgValueTeam();
+         }
+         //
+      public:
          static constexpr uint16_t none = -1;
       public:
          uint16_t scope = none; // what kind of team this is (i.e. variable, game state value)
@@ -15,9 +21,6 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          //
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValueTeam();
-         }
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::team;
          }

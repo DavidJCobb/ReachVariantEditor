@@ -271,6 +271,18 @@
     <ClCompile Include="game_variants\components\megalo\opcode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\vector3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\forge_label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_traits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">

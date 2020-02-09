@@ -29,7 +29,6 @@ namespace Megalo {
                for (size_t i = 0; i < count; ++i) {
                   if (list[i].is_out_variable) {
                      args[i]->decompile(out);
-                     out.write('.');
                      break;
                   }
                }
@@ -62,7 +61,6 @@ namespace Megalo {
                for (size_t i = 0; i < count; ++i) {
                   if (list[i].is_out_variable) {
                      args[i]->decompile(out);
-                     out.write('.');
                      break;
                   }
                }

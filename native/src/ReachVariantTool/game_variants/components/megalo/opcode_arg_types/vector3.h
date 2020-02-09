@@ -4,15 +4,18 @@
 namespace Megalo {
    class OpcodeArgValueVector3 : public OpcodeArgValue {
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueVector3;
+         }
+         //
+      public:
          struct {
             int8_t x = 0;
             int8_t y = 0;
             int8_t z = 0;
          } value; // loaded value
          //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueVector3();
-         }
          virtual bool read(cobb::ibitreader& stream) noexcept override {
             stream.read(this->value.x);
             stream.read(this->value.y);

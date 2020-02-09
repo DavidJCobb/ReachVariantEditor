@@ -14,6 +14,12 @@ namespace {
    };
 }
 namespace Megalo {
+   OpcodeArgTypeinfo OpcodeArgValueTeam::typeinfo = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::default,
+      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
+      &OpcodeArgValueTeam::factory
+   );
+   //
    /*virtual*/ bool OpcodeArgValueTeam::read(cobb::ibitreader& stream) noexcept /*override*/ {
       this->scope = stream.read_bits(cobb::bitcount((int)_scopes::_count - 1));
       int which_bits = 0;

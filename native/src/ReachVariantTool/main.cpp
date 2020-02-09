@@ -30,11 +30,17 @@ int main(int argc, char *argv[]) {
 //          factory function should NOT be a method; it should be a function pointer 
 //          member, because we want to create OpcodeArgTypeinfo instances, not subclasses.
 //
-//           = Should they also overlap with what the JavaScript parser implementation 
-//             defines as the "MScriptTypename" class?
+//           = They should also overlap with what the JavaScript parser implementation 
+//             defines as the "MScriptTypename" class.
 //
 //        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
 //          what we'll pass to the opcode functions' argument lists.
+//
+//           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
+//             just wouldn't be practical to keep multi-part -- things like shapes, 
+//             widget meter parameters, and waypoint icons. We may want to consider 
+//             cheating a bit -- splitting these single arguments into multiple arguments. 
+//             The binary representation *should* be equivalent.
 //
 //           - Enums, flags-masks, and similar are an exception; see next bullet point.
 //

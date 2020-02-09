@@ -42,8 +42,28 @@ class GameVariantDataMultiplayer;
 
 namespace Megalo {
    class OpcodeArgBase;
+   class OpcodeArgValue;
+
+   using  OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
+   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
 
    class OpcodeArgTypeinfo {
+      public:
+         enum class typeinfo_type {
+            default,
+            enumeration,
+            flags_mask,
+         };
+         struct flags {
+            flags() = delete;
+            enum type : uint32_t {
+               is_variable        = 0x00000001, // number, object, player, team, timer
+               can_hold_variables = 0x00000002, // object, player, team
+               always_read_only   = 0x00000004, // only relevant for (is_variable); only variables and properties can appear in assign statements, and properties have their own "is read only" attribute
+            };
+         };
+         using flags_type = std::underlying_type_t<flags::type>;
       //
       // TODO: This virtual class should hold metadata about each OpcodeArgValue subclass, including whether the 
       // subclass represents an enum or flags mask; this class should also provide the factory function. Each 
@@ -67,11 +87,15 @@ namespace Megalo {
       // on).
       //
       public:
-         bool is_enum  = false;
-         bool is_flags = false;
+         typeinfo_type            type    = typeinfo_type::default;
+         flags_type               flags   = 0;
+         std::vector<const char*> elements; // ordered list of enum/flag values as strings
+         OpcodeArgValueFactory    factory = nullptr;
+         // TODO: other fields from the JavaScript parser implementation's MScriptTypename
          //
-         // TODO: vector of enum or flag strings
-         //
+         OpcodeArgTypeinfo() {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
    };
    
    class OpcodeArgValue : public cobb::reference_tracked_object {
@@ -102,9 +126,6 @@ namespace Megalo {
             //
          }
    };
-   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
    //
    class OpcodeArgBase {
       public:
