@@ -36,6 +36,8 @@ int main(int argc, char *argv[]) {
 //        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
 //          what we'll pass to the opcode functions' argument lists.
 //
+//           = REMAINING: INDICES.
+//
 //           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
 //             just wouldn't be practical to keep multi-part -- things like shapes, 
 //             widget meter parameters, and waypoint icons. We may want to consider 

@@ -21,4 +21,27 @@ namespace Megalo {
    megalo_opcode_arg_value_enum(OpcodeArgValueTeamDispositionEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueTimerRateEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueWaypointPriorityEnum);
+
+   class OpcodeArgValueGenericEnum : public OpcodeArgValue {
+      public:
+         OpcodeArgValueGenericEnum(const OpcodeArgTypeinfo& ti) : typeinfo(ti) {};
+         //
+         const OpcodeArgTypeinfo& typeinfo;
+         uint32_t value = 0; // loaded value
+         //
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+   };
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoAddWeapon;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCHUDDestination;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCompareOperator;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoDropWeapon;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoGrenadeType;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoMathOperator;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoPickupPriority;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTeamDisposition;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTimerRate;
+   extern OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoWaypointPriority;
 }

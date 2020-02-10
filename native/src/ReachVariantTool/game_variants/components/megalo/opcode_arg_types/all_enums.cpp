@@ -132,4 +132,168 @@ namespace Megalo {
       : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::WaypointPriority)
    {}
    //
+   bool OpcodeArgValueGenericEnum::read(cobb::ibitreader& stream) noexcept {
+      auto& list = this->typeinfo.elements;
+      this->value = stream.read_bits(cobb::bitcount(list.size() - 1));
+      return true;
+   }
+   void OpcodeArgValueGenericEnum::write(cobb::bitwriter& stream) const noexcept {
+      auto& list = this->typeinfo.elements;
+      stream.write(this->value, cobb::bitcount(list.size() - 1));
+   }
+   void OpcodeArgValueGenericEnum::to_string(std::string& out) const noexcept {
+      auto& list = this->typeinfo.elements;
+      if (this->value < list.size()) {
+         out = list[this->value];
+         return;
+      }
+      cobb::sprintf(out, "%u", this->value);
+   }
+   void OpcodeArgValueGenericEnum::decompile(Decompiler& out, uint64_t flags) noexcept {
+      std::string s;
+      this->to_string(s);
+      out.write(s);
+   }
+   //
+   namespace { // factories
+      template<OpcodeArgTypeinfo& ti> OpcodeArgValue* _enumFactory(cobb::ibitreader& stream) {
+         return new OpcodeArgValueGenericEnum(ti);
+      }
+   }
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoAddWeapon = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "add",
+         "unk_1",
+         "swap"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoAddWeapon>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCHUDDestination = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "unk_0",
+         "unk_1"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoCHUDDestination>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCompareOperator = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "<",
+         ">",
+         "==",
+         "<=",
+         ">=",
+         "!=",
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoCompareOperator>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoDropWeapon = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "primary",
+         "secondary"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoDropWeapon>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoGrenadeType = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "frag_grenades",
+         "plasma_grenades"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoGrenadeType>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoMathOperator = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "+=",
+         "-=",
+         "*=",
+         "/=",
+         "=",
+         "%=",
+         "&=",
+         "|=",
+         "^=",
+         "~=",
+         "<<=",
+         ">>=",
+         "<<<=",
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoMathOperator>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoPickupPriority = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "unk_0",
+         "hold_action",
+         "automatic",
+         "unk_3"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoPickupPriority>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTeamDisposition = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "unk_0",
+         "unk_1",
+         "unk_2"
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoTeamDisposition>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTimerRate = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "none",
+         "-10",
+         "-25",
+         "-50",
+         "-75",
+         "-100",
+         "-125",
+         "-150",
+         "-175",
+         "-200",
+         "-300",
+         "-400",
+         "-500",
+         "-1000",
+         "10",
+         "25",
+         "50",
+         "75",
+         "100",
+         "125",
+         "150",
+         "175",
+         "200",
+         "300",
+         "400",
+         "500",
+         "1000",
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoTimerRate>
+   );
+   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoWaypointPriority = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      {
+         "none",
+         "low",
+         "high",
+         "default",
+      },
+      &_enumFactory<OpcodeArgValueEnumTypeinfoWaypointPriority>
+   );
 }

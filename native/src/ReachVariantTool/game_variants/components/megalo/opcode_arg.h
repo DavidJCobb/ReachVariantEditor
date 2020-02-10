@@ -75,10 +75,21 @@ namespace Megalo {
       //  - The parser and compiler need to be able to get a list of all values that are valid for a given enum 
       //    or flags-mask type, in order to know what values a script author is actually referencing.
       //
+      //     - We need this in order to be able to alias enum and flag values. If we handle things as mentioned 
+      //       below (a "compile" member function on OpcodeArgValue), then that's all we need this for.
+      //
       //  - The "modify grenade count" opcode will be implemented as a (property_set) mapping with no name, set 
       //    so that the grenade type provides the property name (i.e. current_player.plasma_grenades += 3). In 
       //    order to decompile to that output, we need to be able to access the names of the values in the 
       //    "grenade type" enum.
+      //
+      //     - I am increasingly coming to believe that we should just compile opcodes by creating all of the 
+      //       the arguments and giving them a "compile" member function, though I'm not sure what that member 
+      //       function should take (e.g. raw string, etc.).
+      //
+      //        - I mean, we kinda need that for any multi-part function arguments, which first-pass parsing 
+      //          needs to load as a string; but enums, variables, and numbers can be handled by the compiler 
+      //          without help from typeinfos.
       //
       // Once this is ready, we'll have opcode bases refer to it instead of having them refer directly to each 
       // factory function, in their argument lists.
