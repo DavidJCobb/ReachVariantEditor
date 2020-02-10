@@ -6,6 +6,7 @@ namespace Megalo {
 
    class OpcodeArgValueWaypointIcon : public OpcodeArgValueScalar {
       public:
+         static OpcodeArgTypeinfo typeinfo;
          static OpcodeArgValue* factory(cobb::ibitreader& stream) {
             return new OpcodeArgValueWaypointIcon();
          }

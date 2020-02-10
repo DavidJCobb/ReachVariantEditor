@@ -33,6 +33,43 @@ namespace Megalo {
       "unknown 27",
    );
    //
+   OpcodeArgTypeinfo OpcodeArgValueWaypointIcon::typeinfo = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::default,
+      OpcodeArgTypeinfo::flags::can_be_multiple,
+      {
+         "none", // -1
+         "microphone",
+         "death_marker",
+         "lightning_bolt",
+         "bullseye",
+         "diamond",
+         "bomb",
+         "flag",
+         "skull",
+         "crown",
+         "vip",
+         "territory_lock",
+         "territory_A",
+         "territory_B",
+         "territory_C",
+         "territory_D",
+         "territory_E",
+         "territory_F",
+         "territory_G",
+         "territory_H",
+         "territory_I",
+         "supply",
+         "supply_health",
+         "supply_air_drop",
+         "supply_ammo",
+         "arrow",
+         "defend",
+         "unknown_26",
+         "unknown_27",
+      },
+      &OpcodeArgValueWaypointIcon::factory
+   );
+   //
    bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream) noexcept {
       this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
       if (this->icon == WaypointIcon.lookup("territory A"))

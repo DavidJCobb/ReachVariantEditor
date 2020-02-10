@@ -42,6 +42,42 @@ int main(int argc, char *argv[]) {
 //             cheating a bit -- splitting these single arguments into multiple arguments. 
 //             The binary representation *should* be equivalent.
 //
+//              - The problem is that if we split these apart, then some opcodes become 
+//                varargs. Splitting them apart *internally* is going to be especially 
+//                nasty, but what would be easier is to just split them apart in the 
+//                script dialect -- so we'd still have a single OpcodeArgValueShape class 
+//                internally, but in the script, you'd write that one argument out as 
+//                multiple arguments.
+//
+//                In that case, opcodes are still varags within the script, so we'll have 
+//                to handle that within the code for compiling function call arguments. 
+//                That code will have to have access to the full list of arguments in the 
+//                current call, it will have to be able to "consume" zero or more arg-
+//                uments, and it will have to return the number consumed. That also means 
+//                that we won't be able to just do a single count check on function call 
+//                arguments; instead, we'll have to consume arguments until done and then 
+//                check if there are extra arguments remaining (if there aren't enough 
+//                arguments, then the consume function should return a negative result -- 
+//                perhaps the number of arguments it did manage to consume, negated).
+//
+//                 = At the same time, we need to make sure that this doesn't cause 
+//                   issues in cases where two opcodes have the same name but different 
+//                   signatures: the two "send_incident" opcodes would be the sole case 
+//                   of this. We should add to OpcodeArgTypeinfo an "is_varargs" bool 
+//                   that would be set on any argument class that represents more than 
+//                   one argument in script, like OpcodeArgValueShape:
+//
+//                    - When matching function names (from scripts) to opcodes, we prefer 
+//                      the opcode with the same name, the same argument count, and no 
+//                      is_varargs arguments. If no such opcode exists, we prefer the 
+//                      opcode with the same name and any is_varargs arguments, and we 
+//                      try to compile for that opcode. If no such opcode exists, then 
+//                      there is an error: the user specified a non-existent opcode or 
+//                      an argument count that matches no overload for the opcode name 
+//                      they used.
+//
+//                    = ADD THE is_varargs FLAG TO OpcodeArgTypeinfo.
+//
 //           - Enums, flags-masks, and similar are an exception; see next bullet point.
 //
 //     - Merge all enums into a single OpcodeArgValue subclass that needs to be construc-

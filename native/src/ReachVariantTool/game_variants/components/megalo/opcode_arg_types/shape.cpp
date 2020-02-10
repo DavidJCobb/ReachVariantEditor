@@ -3,7 +3,8 @@
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueShape::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::can_be_multiple,
+      { "none", "sphere", "cylinder", "box" },
       &OpcodeArgValueShape::factory
    );
    //
