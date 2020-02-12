@@ -262,6 +262,14 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          opcode.postprocess(this);
       for (auto& opcode : this->scriptContent.raw.conditions)
          opcode.postprocess(this);
+      //
+      {  // Script variable declarations (these can be default-initialized to script options, etc.)
+         auto& v = this->scriptContent.variables;
+         v.global.postprocess(this);
+         v.player.postprocess(this);
+         v.object.postprocess(this);
+         v.team.postprocess(this);
+      }
    }
    return true;
 }

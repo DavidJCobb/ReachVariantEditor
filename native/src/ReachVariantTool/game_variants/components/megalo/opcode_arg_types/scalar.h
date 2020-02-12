@@ -5,6 +5,12 @@
 namespace Megalo {
    class OpcodeArgValueScalar : public OpcodeArgValue {
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
+            return new OpcodeArgValueScalar;
+         }
+         //
+      public:
          static constexpr uint16_t none = -1;
       public:
          uint16_t scope = none; // what kind of scalar this is (i.e. constant, variable, game state value)
@@ -17,9 +23,6 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          //
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValueScalar();
-         }
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::scalar;
          }

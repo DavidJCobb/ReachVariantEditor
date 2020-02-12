@@ -31,7 +31,7 @@ namespace Megalo {
    };
    enum class entry_type : uint8_t {
       normal,
-      subroutine, // preserves iterator values?
+      subroutine, // preserves iterator values from outer loops
       on_init,
       on_local_init, // unverified; not used in Bungie gametypes
       on_host_migration, // host migrations and double host migrations
@@ -66,6 +66,9 @@ namespace Megalo {
          } raw;
          //
          std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor
+         #if _DEBUG
+            uint32_t bit_offset = 0;
+         #endif
          //
          bool read(cobb::ibitreader& stream) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;

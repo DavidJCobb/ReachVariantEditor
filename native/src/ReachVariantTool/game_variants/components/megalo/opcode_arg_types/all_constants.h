@@ -4,49 +4,34 @@
 namespace Megalo {
    class OpcodeArgValueConstBool : public OpcodeArgValue {
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueConstBool;
+         }
+         //
+      public:
          const char* baseStringTrue  = "true";
          const char* baseStringFalse = "false";
          bool value = false; // loaded value
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            stream.read(this->value);
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value);
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            out = this->value ? this->baseStringTrue : this->baseStringFalse;
-         }
-         virtual void configure_with_base(const OpcodeArgBase& base) noexcept override {
-            if (base.text_true)
-               this->baseStringTrue  = base.text_true;
-            if (base.text_false)
-               this->baseStringFalse = base.text_false;
-         };
-         //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueConstBool();
-         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
+         virtual void configure_with_base(const OpcodeArgBase& base) noexcept override;
    };
    class OpcodeArgValueConstSInt8 : public OpcodeArgValue {
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueConstSInt8;
+         }
+         //
+      public:
          int8_t value = 0; // loaded value
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            stream.read(this->value);
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value);
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            cobb::sprintf(out, "%d", this->value);
-         }
-         //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueConstSInt8();
-         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
 
 }

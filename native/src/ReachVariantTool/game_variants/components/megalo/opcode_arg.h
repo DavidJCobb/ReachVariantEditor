@@ -42,8 +42,29 @@ class GameVariantDataMultiplayer;
 
 namespace Megalo {
    class OpcodeArgBase;
+   class OpcodeArgValue;
+
+   using  OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
+   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
+   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
 
    class OpcodeArgTypeinfo {
+      public:
+         enum class typeinfo_type {
+            default,
+            enumeration,
+            flags_mask,
+         };
+         struct flags {
+            flags() = delete;
+            enum type : uint32_t {
+               is_variable        = 0x00000001, // number, object, player, team, timer
+               can_hold_variables = 0x00000002, // object, player, team
+               always_read_only   = 0x00000004, // only relevant for (is_variable); only variables and properties can appear in assign statements, and properties have their own "is read only" attribute
+               can_be_multiple    = 0x00000008, // this type represents one argument internally but multiple arguments in script code
+            };
+         };
+         using flags_type = std::underlying_type_t<flags::type>;
       //
       // TODO: This virtual class should hold metadata about each OpcodeArgValue subclass, including whether the 
       // subclass represents an enum or flags mask; this class should also provide the factory function. Each 
@@ -54,10 +75,21 @@ namespace Megalo {
       //  - The parser and compiler need to be able to get a list of all values that are valid for a given enum 
       //    or flags-mask type, in order to know what values a script author is actually referencing.
       //
+      //     - We need this in order to be able to alias enum and flag values. If we handle things as mentioned 
+      //       below (a "compile" member function on OpcodeArgValue), then that's all we need this for.
+      //
       //  - The "modify grenade count" opcode will be implemented as a (property_set) mapping with no name, set 
       //    so that the grenade type provides the property name (i.e. current_player.plasma_grenades += 3). In 
       //    order to decompile to that output, we need to be able to access the names of the values in the 
       //    "grenade type" enum.
+      //
+      //     - I am increasingly coming to believe that we should just compile opcodes by creating all of the 
+      //       the arguments and giving them a "compile" member function, though I'm not sure what that member 
+      //       function should take (e.g. raw string, etc.).
+      //
+      //        - I mean, we kinda need that for any multi-part function arguments, which first-pass parsing 
+      //          needs to load as a string; but enums, variables, and numbers can be handled by the compiler 
+      //          without help from typeinfos.
       //
       // Once this is ready, we'll have opcode bases refer to it instead of having them refer directly to each 
       // factory function, in their argument lists.
@@ -67,11 +99,15 @@ namespace Megalo {
       // on).
       //
       public:
-         bool is_enum  = false;
-         bool is_flags = false;
+         typeinfo_type            type    = typeinfo_type::default;
+         flags_type               flags   = 0;
+         std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
+         OpcodeArgValueFactory    factory = nullptr;
+         // TODO: other fields from the JavaScript parser implementation's MScriptTypename
          //
-         // TODO: vector of enum or flag strings
-         //
+         OpcodeArgTypeinfo() {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
    };
    
    class OpcodeArgValue : public cobb::reference_tracked_object {
@@ -102,9 +138,6 @@ namespace Megalo {
             //
          }
    };
-   using OpcodeArgValueFactory = OpcodeArgValue* (*)(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
    //
    class OpcodeArgBase {
       public:

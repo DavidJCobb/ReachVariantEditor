@@ -11,6 +11,9 @@ namespace Megalo {
    }
    //
    bool Trigger::read(cobb::ibitreader& stream) noexcept {
+      #ifdef _DEBUG
+         this->bit_offset = stream.get_bitpos();
+      #endif
       this->blockType.read(stream);
       this->entryType.read(stream);
       if (this->blockType == block_type::for_each_object_with_label)

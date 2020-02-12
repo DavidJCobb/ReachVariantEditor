@@ -2,6 +2,12 @@
 #include "../../../types/multiplayer.h"
 
 namespace Megalo {
+   OpcodeArgTypeinfo OpcodeArgValueWidget::typeinfo = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::default,
+      0,
+      &OpcodeArgValueWidget::factory
+   );
+   //
    bool OpcodeArgValueWidget::read(cobb::ibitreader& stream) noexcept {
       if (stream.read_bits(1) != 0) { // absence bit
          this->index = index_of_none;
@@ -27,7 +33,6 @@ namespace Megalo {
          return;
       this->value = &list[this->index];
    }
-   //
    void OpcodeArgValueWidget::to_string(std::string& out) const noexcept {
       if (!this->postprocessed) {
          if (this->index == index_of_none) {
@@ -51,6 +56,13 @@ namespace Megalo {
    }
    //
    //
+   //
+   OpcodeArgTypeinfo OpcodeArgValueMeterParameters::typeinfo = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::default,
+      OpcodeArgTypeinfo::flags::can_be_multiple,
+      { "none", "timer", "number" },
+      &OpcodeArgValueMeterParameters::factory
+   );
    //
    bool OpcodeArgValueMeterParameters::read(cobb::ibitreader& stream) noexcept {
       this->type.read(stream);

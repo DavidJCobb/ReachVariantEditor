@@ -1,12 +1,8 @@
 #pragma once
+#include "../../../../formats/localized_string_table.h"
 #include "../../../../helpers/bitnumber.h"
 #include "../limits.h"
 #include "../opcode_arg.h"
-#include "object.h"
-#include "player.h"
-#include "scalar.h"
-#include "team.h"
-#include "timer.h"
 
 namespace Megalo {
    enum class OpcodeStringTokenType : int8_t {
@@ -32,47 +28,12 @@ namespace Megalo {
             }
          }
          //
-         bool read(cobb::ibitreader& stream) noexcept {
-            this->type.read(stream);
-            switch (this->type) {
-               case OpcodeStringTokenType::none:
-                  break;
-               case OpcodeStringTokenType::player:
-                  this->value = new OpcodeArgValuePlayer();
-                  break;
-               case OpcodeStringTokenType::team:
-                  this->value = new OpcodeArgValueTeam();
-                  break;
-               case OpcodeStringTokenType::object:
-                  this->value = new OpcodeArgValueObject();
-                  break;
-               case OpcodeStringTokenType::number:
-               //case OpcodeStringTokenType::number_with_sign:
-                  this->value = new OpcodeArgValueScalar();
-                  break;
-               case OpcodeStringTokenType::timer:
-                  this->value = new OpcodeArgValueTimer();
-                  break;
-               default:
-                  return false;
-            }
-            if (this->value) {
-               this->value->read(stream);
-            }
-            return true;
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->type.write(stream);
-            if (this->value)
-               this->value->write(stream);
-         }
-         void to_string(std::string& out) const noexcept {
-            if (this->value)
-               this->value->to_string(out);
-         }
+         bool read(cobb::ibitreader& stream) noexcept;
+         void write(cobb::bitwriter& stream) const noexcept;
+         void to_string(std::string& out) const noexcept;
    };
 
-   template<int N> class OpcodeArgValueStringTokens : OpcodeArgValue {
+   class OpcodeArgValueStringTokens2 : OpcodeArgValue {
       //
       // An opcode argument which consists of a format string and zero or more tokens to 
       // insert into it. The format string is specified as an index into the string 
@@ -88,65 +49,22 @@ namespace Megalo {
       //       parameters? If so, any script editor will need to validate parameters.
       //
       public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueStringTokens2;
+         }
+         //
+      public:
+         static constexpr int max_token_count = 2;
+      public:
          MegaloStringIndexOptional stringIndex = -1; // format string - index in scriptData::strings
          MegaloStringRef           string      = MegaloStringRef::make(*this);
-         cobb::bitnumber<cobb::bitcount(N), uint8_t> tokenCount = 0;
-         OpcodeStringToken tokens[N];
+         cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
+         OpcodeStringToken tokens[max_token_count];
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->stringIndex.read(stream); // string table index pointer; -1 == none
-            this->tokenCount.read(stream);
-            if (this->tokenCount > N) {
-               printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount.to_int(), N);
-               return false;
-            }
-            for (uint8_t i = 0; i < this->tokenCount; i++)
-               this->tokens[i].read(stream);
-            return true;
-         }
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override {
-            if (this->stringIndex >= 0) {
-               auto& list = newlyLoaded->scriptData.strings;
-               if (this->stringIndex < list.size())
-                  this->string = list.strings[this->stringIndex];
-            }
-            for (uint8_t i = 0; i < this->tokenCount; i++)
-               this->tokens[i].value->postprocess(newlyLoaded);
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            this->stringIndex.write(stream);
-            this->tokenCount.write(stream);
-            for (uint8_t i = 0; i < this->tokenCount; i++)
-               this->tokens[i].write(stream);
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->tokenCount == 0) {
-               if (this->stringIndex == -1) {
-                  out = "no string";
-                  return;
-               }
-               cobb::sprintf(out, "localized string ID %d", this->stringIndex);
-               return;
-            }
-            out.clear();
-            for (uint8_t i = 0; i < this->tokenCount; i++) {
-               std::string temp;
-               //
-               auto& token = this->tokens[i];
-               token.to_string(temp);
-               //
-               if (!out.empty())
-                  out += ", ";
-               out += temp;
-            }
-            cobb::sprintf(out, "format string ID %d and tokens: %s", this->stringIndex, out.c_str());
-         }
-         //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueStringTokens;
-         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
-   using OpcodeArgValueStringTokens1 = OpcodeArgValueStringTokens<1>;
-   using OpcodeArgValueStringTokens2 = OpcodeArgValueStringTokens<2>;
-   using OpcodeArgValueStringTokens3 = OpcodeArgValueStringTokens<3>;
 }

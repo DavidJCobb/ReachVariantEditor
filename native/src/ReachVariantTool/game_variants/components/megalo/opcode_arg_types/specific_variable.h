@@ -3,10 +3,14 @@
 #include "../variables_and_scopes.h"
 #include "object.h"
 
+//
+// TODO: "paired_variable.h" would probably be a better name for this file
+//
+
 namespace Megalo {
-   class OpcodeArgValueSpecificVariableScopeAndType : public OpcodeArgValue {
+   class OpcodeArgValueContextualVariableBaseClass : public OpcodeArgValue {
       public:
-         OpcodeArgValueSpecificVariableScopeAndType(variable_scope scope, variable_type type) : baseScope(scope), baseType(type) {}
+         OpcodeArgValueContextualVariableBaseClass(variable_scope scope, variable_type type) : baseScope(scope), baseType(type) {}
          //
          variable_scope baseScope;
          variable_type  baseType;
@@ -14,90 +18,40 @@ namespace Megalo {
          //
          inline bool is_none() const noexcept { return this->index == -1; }
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            bool absence = stream.read_bits(1) != 0;
-            if (absence)
-               return true;
-            auto scope = getScopeObjectForConstant(this->baseScope);
-            this->index = stream.read_bits(scope.index_bits(this->baseType));
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            if (this->index == -1) {
-               stream.write(1, 1);
-               return;
-            }
-            stream.write(0, 1);
-            auto scope = getScopeObjectForConstant(this->baseScope);
-            stream.write(this->index, scope.index_bits(this->baseType));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            const char* owner = "INVALID";
-            switch (this->baseScope) {
-               case variable_scope::object: owner = "object"; break;
-               case variable_scope::player: owner = "player"; break;
-               case variable_scope::team:   owner = "team";   break;
-            }
-            const char* type  = "INVALID";
-            switch (this->baseType) {
-               case variable_type::object: type = "Object"; break;
-               case variable_type::player: type = "Player"; break;
-               case variable_type::scalar: type = "Number"; break;
-               case variable_type::team:   type = "Team";   break;
-               case variable_type::timer:  type = "Timer";  break;
-            }
-            if (this->index == -1) {
-               cobb::sprintf(out, "the %s in question's %s[None] variable", owner, type);
-               return;
-            }
-            cobb::sprintf(out, "the %s in question's %s[%u] variable", owner, type, this->index);
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
+   };
+   class OpcodeArgValueObjectTimerVariable : public OpcodeArgValueContextualVariableBaseClass {
+      //
+      // The index of a timer variable scoped to any object. Typically, the object in question is 
+      // determined contextually, such as by another argument to the opcode containing this argument.
+      //
+      public:
+         OpcodeArgValueObjectTimerVariable() : OpcodeArgValueContextualVariableBaseClass(variable_scope::object, variable_type::timer) {}
+         //
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueObjectTimerVariable;
          }
    };
-   //
-   #define megalo_make_specific_variable_type(classname, scope, type) \
-      class classname : public OpcodeArgValueSpecificVariableScopeAndType { \
-         public: \
-            classname##() : OpcodeArgValueSpecificVariableScopeAndType( scope, type ) {} \
-            static OpcodeArgValue* factory(cobb::ibitreader&) { \
-               return new classname##(); \
-            } \
-      };
-
-   megalo_make_specific_variable_type(OpcodeArgValueObjectTimerVariable,  variable_scope::object, variable_type::timer);
 
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
+      //
+      // An object variable and the index of a player variable scoped to that object.
+      //
+      public:
+         static OpcodeArgTypeinfo typeinfo;
+         static OpcodeArgValue* factory(cobb::ibitreader&) {
+            return new OpcodeArgValueObjectPlayerVariable();
+         }
+         //
       public:
          OpcodeArgValueObject object;
          int32_t playerIndex = -1;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            if (!this->object.read(stream))
-               return false;
-            bool absence = stream.read_bits(1) != 0;
-            if (absence)
-               return true;
-            this->playerIndex = stream.read_bits(MegaloVariableScopeObject.index_bits(variable_type::player));
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            this->object.write(stream);
-            if (this->playerIndex == -1) {
-               stream.write(1, 1);
-               return;
-            }
-            stream.write(0, 1);
-            stream.write(this->playerIndex, MegaloVariableScopeObject.index_bits(variable_type::player));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            this->object.to_string(out);
-            if (this->playerIndex == -1) {
-               out += " - no/all? players";
-               return;
-            }
-            cobb::sprintf(out, "%s.Player[%d]", out.c_str(), this->playerIndex);
-         }
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueObjectPlayerVariable();
-         }
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
 }

@@ -20,6 +20,16 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+
+
+//
+//  - We need to decompile script variable declarations.
+//
+//  - We need to compile them, too. For that I think we'll need a special keyword -- perhaps 
+//    "declare".
+//
+
+
 //  - DECOMPILER
 //
 //     - Finish implementing OpcodeArgTypeinfo, and have all opcodes refer to instances 
@@ -30,11 +40,68 @@ int main(int argc, char *argv[]) {
 //          factory function should NOT be a method; it should be a function pointer 
 //          member, because we want to create OpcodeArgTypeinfo instances, not subclasses.
 //
-//           = Should they also overlap with what the JavaScript parser implementation 
-//             defines as the "MScriptTypename" class?
+//           = They should also overlap with what the JavaScript parser implementation 
+//             defines as the "MScriptTypename" class.
 //
 //        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
 //          what we'll pass to the opcode functions' argument lists.
+//
+//           = REMAINING: INDICES.
+//
+//              - The more I look at these, the more I think that with the exception of 
+//                trigger and forge label indices, these are all basically just enums. 
+//                The only difference between these and the "generic enums" is that we 
+//                have additional explanatory data for the enum values in some of the 
+//                "indices" (other indices have unknown/unnamed values), and that's not 
+//                a difference that HAS to exist: we could define explanatory data for 
+//                all enums, have it conform to a generic interface, and then treat all 
+//                enums and non-trigger indices the same way.
+//
+//                One potential generic interface would be to have a class for enum 
+//                values that can have up to four "infos" on it; an "info" would have 
+//                a type (e.g. description, map tag, friendly name) and a string.
+//
+//           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
+//             just wouldn't be practical to keep multi-part -- things like shapes, 
+//             widget meter parameters, and waypoint icons. We may want to consider 
+//             cheating a bit -- splitting these single arguments into multiple arguments. 
+//             The binary representation *should* be equivalent.
+//
+//              - The problem is that if we split these apart, then some opcodes become 
+//                varargs. Splitting them apart *internally* is going to be especially 
+//                nasty, but what would be easier is to just split them apart in the 
+//                script dialect -- so we'd still have a single OpcodeArgValueShape class 
+//                internally, but in the script, you'd write that one argument out as 
+//                multiple arguments.
+//
+//                In that case, opcodes are still varags within the script, so we'll have 
+//                to handle that within the code for compiling function call arguments. 
+//                That code will have to have access to the full list of arguments in the 
+//                current call, it will have to be able to "consume" zero or more arg-
+//                uments, and it will have to return the number consumed. That also means 
+//                that we won't be able to just do a single count check on function call 
+//                arguments; instead, we'll have to consume arguments until done and then 
+//                check if there are extra arguments remaining (if there aren't enough 
+//                arguments, then the consume function should return a negative result -- 
+//                perhaps the number of arguments it did manage to consume, negated).
+//
+//                 = At the same time, we need to make sure that this doesn't cause 
+//                   issues in cases where two opcodes have the same name but different 
+//                   signatures: the two "send_incident" opcodes would be the sole case 
+//                   of this. We should add to OpcodeArgTypeinfo an "is_varargs" bool 
+//                   that would be set on any argument class that represents more than 
+//                   one argument in script, like OpcodeArgValueShape:
+//
+//                    - When matching function names (from scripts) to opcodes, we prefer 
+//                      the opcode with the same name, the same argument count, and no 
+//                      is_varargs arguments. If no such opcode exists, we prefer the 
+//                      opcode with the same name and any is_varargs arguments, and we 
+//                      try to compile for that opcode. If no such opcode exists, then 
+//                      there is an error: the user specified a non-existent opcode or 
+//                      an argument count that matches no overload for the opcode name 
+//                      they used.
+//
+//                    = ADD THE is_varargs FLAG TO OpcodeArgTypeinfo.
 //
 //           - Enums, flags-masks, and similar are an exception; see next bullet point.
 //
@@ -111,6 +178,30 @@ int main(int argc, char *argv[]) {
 //       itional data (line numbers, column numbers, and such) for absolutely everything 
 //       from the moment we see it to the moment we're done compiling. It may also be 
 //       simpler, conceptually.
+//
+//     - We could greatly simplify our handling of opcode arguments by removing all of 
+//       the OpcodeArgValue subclasses, and just having OpcodeArgValue store a uint64_t 
+//       of binary data and a OpcodeArgTypeinfo reference; we would then make the 
+//       OpcodeArgTypeinfo responsible for decoding that binary data.
+//
+//       Currently, we have OpcodeArgValue subclasses which are used to decode that 
+//       data on load and retain it indefinitely, but we only really *need* to decode 
+//       the data to accomplish the following:
+//
+//        - Correctness checks during load.
+//
+//        - Serializing to plain English.
+//
+//        - Serializing to script code.
+//
+//        - Inspecting and tampering with data during debugging.
+//
+//       None of those needs require us to actually retain the decoded data. None of 
+//       those needs require us to ever decode the data into an orderly struct (though 
+//       doing so makes debugging a lot easier). If we just load the raw bits and have 
+//       the typeinfo decode them on demand for decompiling, then we remove the need to 
+//       have both OpcodeArgValue subclasses and OpcodeArgTypeinfo instances for every 
+//       argument type.
 //
 // ======================================================================================
 //

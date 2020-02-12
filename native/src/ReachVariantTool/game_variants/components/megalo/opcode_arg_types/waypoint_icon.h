@@ -6,33 +6,17 @@ namespace Megalo {
 
    class OpcodeArgValueWaypointIcon : public OpcodeArgValueScalar {
       public:
-         uint32_t icon = 0;
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
-            if (this->icon == WaypointIcon.lookup("territory A"))
-               return OpcodeArgValueScalar::read(stream); // call super
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->icon, WaypointIcon.index_bits());
-            if (this->icon == WaypointIcon.lookup("territory A"))
-               OpcodeArgValueScalar::write(stream); // call super
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->icon == WaypointIcon.lookup("territory A")) {
-               OpcodeArgValueScalar::to_string(out);
-               std::string icon;
-               WaypointIcon.to_string(icon, this->icon);
-               cobb::sprintf(out, "%s with number %s", icon.c_str(), out.c_str());
-            } else {
-               WaypointIcon.to_string(out, this->icon);
-            }
-         }
-         //
+         static OpcodeArgTypeinfo typeinfo;
          static OpcodeArgValue* factory(cobb::ibitreader& stream) {
             return new OpcodeArgValueWaypointIcon();
          }
+         //
+      public:
+         uint32_t icon = 0;
+         //
+         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
    };
 
 }
