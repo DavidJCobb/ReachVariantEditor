@@ -28,6 +28,7 @@ namespace Megalo {
       public:
          #if _DEBUG
             std::string debug_str;
+            uint32_t    bit_offset = 0;
          #endif
          const ActionFunction* function = nullptr;
          std::vector<OpcodeArgValue*> arguments;

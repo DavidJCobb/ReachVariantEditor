@@ -190,6 +190,9 @@ namespace Megalo {
    }};
 
    bool Condition::read(cobb::ibitreader& stream) noexcept {
+      #ifdef _DEBUG
+         this->bit_offset = stream.get_bitpos();
+      #endif
       {
          auto&  list  = conditionFunctionList;
          size_t index = stream.read_bits<size_t>(cobb::bitcount(list.size() - 1));

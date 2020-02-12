@@ -20,6 +20,16 @@ int main(int argc, char *argv[]) {
 //
 // TODO:
 //
+
+
+//
+//  - We need to decompile script variable declarations.
+//
+//  - We need to compile them, too. For that I think we'll need a special keyword -- perhaps 
+//    "declare".
+//
+
+
 //  - DECOMPILER
 //
 //     - Finish implementing OpcodeArgTypeinfo, and have all opcodes refer to instances 
@@ -37,6 +47,19 @@ int main(int argc, char *argv[]) {
 //          what we'll pass to the opcode functions' argument lists.
 //
 //           = REMAINING: INDICES.
+//
+//              - The more I look at these, the more I think that with the exception of 
+//                trigger and forge label indices, these are all basically just enums. 
+//                The only difference between these and the "generic enums" is that we 
+//                have additional explanatory data for the enum values in some of the 
+//                "indices" (other indices have unknown/unnamed values), and that's not 
+//                a difference that HAS to exist: we could define explanatory data for 
+//                all enums, have it conform to a generic interface, and then treat all 
+//                enums and non-trigger indices the same way.
+//
+//                One potential generic interface would be to have a class for enum 
+//                values that can have up to four "infos" on it; an "info" would have 
+//                a type (e.g. description, map tag, friendly name) and a string.
 //
 //           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
 //             just wouldn't be practical to keep multi-part -- things like shapes, 
@@ -155,6 +178,30 @@ int main(int argc, char *argv[]) {
 //       itional data (line numbers, column numbers, and such) for absolutely everything 
 //       from the moment we see it to the moment we're done compiling. It may also be 
 //       simpler, conceptually.
+//
+//     - We could greatly simplify our handling of opcode arguments by removing all of 
+//       the OpcodeArgValue subclasses, and just having OpcodeArgValue store a uint64_t 
+//       of binary data and a OpcodeArgTypeinfo reference; we would then make the 
+//       OpcodeArgTypeinfo responsible for decoding that binary data.
+//
+//       Currently, we have OpcodeArgValue subclasses which are used to decode that 
+//       data on load and retain it indefinitely, but we only really *need* to decode 
+//       the data to accomplish the following:
+//
+//        - Correctness checks during load.
+//
+//        - Serializing to plain English.
+//
+//        - Serializing to script code.
+//
+//        - Inspecting and tampering with data during debugging.
+//
+//       None of those needs require us to actually retain the decoded data. None of 
+//       those needs require us to ever decode the data into an orderly struct (though 
+//       doing so makes debugging a lot easier). If we just load the raw bits and have 
+//       the typeinfo decode them on demand for decompiling, then we remove the need to 
+//       have both OpcodeArgValue subclasses and OpcodeArgTypeinfo instances for every 
+//       argument type.
 //
 // ======================================================================================
 //

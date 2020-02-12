@@ -36,6 +36,29 @@
    code to interpret them, and manually reconstruct the value with pen and paper -- slow, but an 
    acceptable price to pay for much smaller and simpler code.)
    
+   An additional benefit is the ability to rapidly count the amount of bits that the trigger data 
+   will consume. This will in turn make it easy to indicate space usage in the game variant data.
+   
+   ---
+   
+   PROBLEMS TO SOLVE:
+   
+    - Variable declarations -- number and timer variables can be default-initialized to just about 
+      any variable/value they can be set to at run-time. We'll need OpcodeArgValues to hold those.
+   
+    - Use of cobb::reference_tracked_object to know when script options, player traits, etc., are 
+      in use by any opcodes. We'd need to keep an array of refs, I guess, and of course we need to 
+      make OpcodeArgValue a reference-tracked object itself. The load functor would fill the array.
+      
+       - Actually, this requires postprocessing, because Bungie didn't lay out the file format very 
+         well. A lot of types can be referred to in script content before they're actually loaded 
+         (Forge labels are the simplest example: they appear after all trigger content). So, we'd 
+         need a postprocess functor as well.
+         
+         For simplicity's sake, we should also retool the trigger-loading process so that we can 
+         pass the game variant down to the OpcodeArgValue and have it "register" itself to receive 
+         a postprocess call.
+   
    ---
    
    Some notes:
@@ -49,6 +72,17 @@
       OpcodeArgRawValue and OpcodeArgRawTypeinfo; once all types are defined, we can switch the 
       code to use these "raw" classes; and once that code is confirmed to work properly, we can 
       delete the old classes and find-and-replace "OpcodeArgRaw" with "OpcodeArg".
+   
+    - What approach should we take for enums? Well, I have an idea: first, we define the detailed 
+      enum classes described in our plans in main.cpp; we can call them DetailedEnums. Then, we 
+      create helper functions with the same signatures as the OpcodeArgTypeinfo functors, BUT that 
+      also take a DetailedEnum& as an argument.
+      
+      For each enum, we create a Typeinfo instance with functors that just call those helper 
+      functions, passing the appropriate enum, and return the functions' results. The benefit to 
+      this approach is that we can do the same thing for argument types that contain multiple parts 
+      including enums; for example, shapes' compile functor can just check whether (progress) is 
+      zero and if so, call the enum-compile helper.
 
 */
 
@@ -57,10 +91,12 @@
 namespace cobb {
    class bitvector64 {
       public:
-         uint64_t bits = 0;
-         uint8_t  size = 0;
+         using storage_type = uint64_t;
          //
-         void push(uint64_t bits, uint8_t count) {
+         storage_type bits = 0;
+         uint8_t      size = 0;
+         //
+         void push(storage_type bits, uint8_t count) {
             this->bits = (this->bits << count) | bits;
             this->size += count;
          }
@@ -75,6 +111,8 @@ class OpcodeArgValue {
       OpcodeArgTypeinfo& type;
       uint8_t            progress = 0; // for compiling, when a single argument internally should be rendered as multiple (and possibly a variable number of) arguments in script code
       QString            english; // for debugging; we retain an English representation of the opcode in memory
+      //
+      using bit_storage_type = decltype(data)::storage_type;
 }
 
 enum class arg_consume_result {
@@ -110,6 +148,14 @@ class OpcodeArgTypeinfo {
       // and skip that many bits in the source bitstream (since the functor already processed 
       // those bits).
       //
+      //  = YEAH, DO THIS INSTEAD.
+      //
+      //  - Peek (cobb::bits_in<OpcodeArgValue::bit_storage_type>) bits so we can easily change 
+      //    the max size in bits if necessary (not that it should ever *be* necessary). For 
+      //    similar reasons the load functor should take OpcodeArgValue::bit_storage_type as 
+      //    the argument type rather than uint64_t (this has the benefit of making the relation-
+      //    ships here explicit as well).
+      //
       OpcodeArgTypeinfo(
          QString name,
          QString desc,
@@ -120,4 +166,55 @@ class OpcodeArgTypeinfo {
       )
          : name(name), desc(desc), load(l), to_english(e), decompile(d), compile(c)
       {}
+}
+
+
+//
+// STUFF FOR ENUMS:
+//
+
+
+struct DetailedEnumValueInfo {
+   enum class info_type {
+      none,
+      bare_string,      // std::string
+      localized_string, // QString
+      friendly_name, // QString
+      description,   // QString
+      image,         // bare_string // use for icon enums
+      map_tag_type,  // signature   // use for MP object types
+      map_tag_path,  // bare_string // use for MP object types
+   }
+   //
+   info_type type = info_type::none;
+   union {
+      uint32_t    signature = 0;
+      QString     string;
+      std::string bare_string;
+   }
+   //
+   uint32_t get_signature() {
+      if (this->type == info_type::map_tag_type)
+         return this->signature;
+      return 0;
+   }
+   //
+   // ... etc.
+   //
+   DetailedEnumValueInfo() {}
+   DetailedEnumValueInfo(info_type t, uint32_t s) : type(t), signature(s) {}
+   //
+   static make_map_tag_type(uint32_t signature) {
+      return DetailedEnumValueInfo(info_type::map_tag_type, signature);
+   }
+   //
+   // ... etc.
+   //
+}
+struct DetailedEnumValue {
+   std::string name;
+   DetailedEnumValueInfo infos[4];
+}
+struct DetailedEnum {
+   std::vector<DetailedEnumValue> values;
 }
