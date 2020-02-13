@@ -123,6 +123,9 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\widget_related.cpp" />
     <ClCompile Include="game_variants\components\megalo\trigger.cpp" />
     <ClCompile Include="game_variants\components\megalo\variables_and_scopes.cpp" />
+    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.cpp" />
+    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.cpp" />
+    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.cpp" />
     <ClCompile Include="game_variants\components\megalo_game_stats.cpp" />
     <ClCompile Include="game_variants\components\megalo_options.cpp" />
     <ClCompile Include="game_variants\components\player_traits.cpp" />
@@ -225,6 +228,13 @@
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\detailed_enum.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.h" />
+    <ClInclude Include="helpers\bitvector.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
     <ClInclude Include="helpers\managed_pointer_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />

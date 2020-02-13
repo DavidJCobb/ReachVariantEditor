@@ -50,6 +50,14 @@ class GameVariantData {
       }
 };
 
+class IGameVariantDataObjectNeedingPostprocess {
+   //
+   // TODO: Use this to semi-automate postprocess fixup for MPVR
+   //
+   public:
+      virtual bool postprocess(GameVariantData*) = 0;
+};
+
 class BlamHeader {
    public:
       ReachFileBlock header = ReachFileBlock('_blf', 0x30);
