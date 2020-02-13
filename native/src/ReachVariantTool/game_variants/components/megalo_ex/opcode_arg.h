@@ -71,6 +71,23 @@ namespace MegaloEx {
             return (this->type.postprocess)(*this, data);
          }
          //
+         // TODO: This design -- the bitvector64 -- isn't going to work. A "shape" argument has an enum and up to 
+         // four number-variables; if all four number-variables are integer constants, then they'll be (16 + 6) 
+         // bits each -- the argument as a whole will easily overflow the storage capacity of a uint64_t. I 
+         // think what we need to do instead is heap-allocate the binary content -- essentially, make the 
+         // "bitvector" actually reflect its name by making it resizable. (If we really want to go the extra 
+         // mile, we could store all arguments' binary content in a single pool, but the logistics of managing 
+         // that might get a little complex; let's just stick to the basics for now.)
+         //
+         //  - NOTE: cobb::bitwriter should already be capable of everything we need.
+         //
+         // This will require that loading be coordinated within some central object, i.e. some "script" object 
+         // that groups all triggers and opcodes, coordinating storage as appropriate for opcode arguments.
+         //
+         // It also means that load_functor_t will need to be redesigned. Peeking 64 bits at a time isn't enough 
+         // because again, some arguments can exceed that size. Instead, it's going to need direct access to the 
+         // bitstream we're using to read arguments (which, honestly, is fine, and probably more straightforward).
+         //
          cobb::bitvector64  data;
          OpcodeArgTypeinfo& type;
          uint8_t            compile_step = 0;
