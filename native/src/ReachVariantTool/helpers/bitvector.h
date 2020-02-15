@@ -19,7 +19,7 @@ namespace cobb {
          // TODO: (push_back) and (consume) read bits from the righthand side of the input, and (consume) shears 
          // the read bits off of the righthand side. However, I intend to pass 64 bits' worth of data that we've 
          // peeked from a bitstream, so we should be reading from the lefthand side and shearing off the left-
-         // hand side.
+         // hand side. In fact, everything should be left-side-aligned.
          //
          void push_back(storage_type bits, uint8_t count) noexcept {
             this->bits = (this->bits << count) | (bits & cobb::bitmax(count));
@@ -35,5 +35,8 @@ namespace cobb {
          uint64_t excerpt(uint8_t offset, uint8_t count) const noexcept {
             return (this->bits >> (this->size - offset - count)) & cobb::bitmax(count);
          }
+
+
+         // TODO: operator<<
    };
 }

@@ -66,27 +66,74 @@ namespace MegaloEx {
       // object. The typeinfo object is capable of loading raw bits from a file, compiling a script argument into 
       // raw bits, and decompiling raw bits into a script argument.
       //
+      // The naive approach to handling the different opcode argument types would be to have one class per type, 
+      // decoding the argument values into nice, orderly little structs. For example, the vector3 type would have 
+      // a matching class with x, y, and z fields. The problem with this is that because the compiler needs to 
+      // have the typeinfo instances, we'd end up with a class and an instance per argument type -- just a ton of 
+      // code and confusingly-overlapping objects.
+      //
+      // With the approach we're taking here, we have a single class for loaded opcode arguments, and we rely on 
+      // the typeinfo to interact with the data. You could think of the class as a sort of inside-out union type, 
+      // I suppose. The data is essentially untyped, but you need an external force (the typeinfo) to work with 
+      // it, rather than the data itself being accessible "as" a type.
+      //
       public:
          virtual bool postprocess(GameVariantData* data) override { // IGameVariantDataObjectNeedingPostprocess
             return (this->type.postprocess)(*this, data);
          }
          //
-         // TODO: This design -- the bitvector64 -- isn't going to work. A "shape" argument has an enum and up to 
-         // four number-variables; if all four number-variables are integer constants, then they'll be (16 + 6) 
-         // bits each -- the argument as a whole will easily overflow the storage capacity of a uint64_t. I 
-         // think what we need to do instead is heap-allocate the binary content -- essentially, make the 
-         // "bitvector" actually reflect its name by making it resizable. (If we really want to go the extra 
-         // mile, we could store all arguments' binary content in a single pool, but the logistics of managing 
-         // that might get a little complex; let's just stick to the basics for now.)
+         // TODO: We need to redesign the typeinfo functors. Some argument types include other argument types -- 
+         // for example, shapes can include up to four number variables -- so functors need to be able to call 
+         // each other. If the functors have to take an OpcodeArgValue&, however, then that isn't strictly 
+         // possible. So here's what we do instead:
          //
-         //  - NOTE: cobb::bitwriter should already be capable of everything we need.
+         //  - The functors take a reference to the raw binary data inside of the OpcodeArgValue, instead of to 
+         //    the OpcodeArgValue itself.
          //
-         // This will require that loading be coordinated within some central object, i.e. some "script" object 
-         // that groups all triggers and opcodes, coordinating storage as appropriate for opcode arguments.
+         //     - No no no, wait. We still need to deal with cobb::reference_tracked_object. We either need to 
+         //       pass the (relevant_objects) list as an argument too, or rethink that whole system. Passing 
+         //       the list would be simpler.
          //
-         // It also means that load_functor_t will need to be redesigned. Peeking 64 bits at a time isn't enough 
-         // because again, some arguments can exceed that size. Instead, it's going to need direct access to the 
-         // bitstream we're using to read arguments (which, honestly, is fine, and probably more straightforward).
+         //        - (We need to pass a *reference to* the list, given how reference_tracked_object::ref works.)
+         //
+         //     - When dealing with "nested argument types," like shapes, the outermost argument type can then 
+         //       invoke the inner ones by creating a second bit-buffer, copying the remaining bits into that, 
+         //       passing that to an inner type's functor, and then retrieving the contents; lather, rinse, 
+         //       and repeat for as many inner arguments exist.
+         //
+         //  - We remove OpcodeArgValue::compile_step (which was intended to accommodate argument types that 
+         //    exist as single arguments internally while mapping to arguments in script) and make it so that 
+         //    the compiler itself keeps track of how many times it's calling the same compile functor for an 
+         //    argument. Specifically, the code for compiling a function call should have a uint8_t counter 
+         //    that is initialized to zero before the arguments loop; whenever any compile functor returns the 
+         //    arg_consume_result::success result code, the counter is reset to zero; otherwise the counter is 
+         //    incremented; and that counter is passed as an argument to the compile functor.
+         //
+         //     - As an example, the "Set Object Shape" action has two arguments: the object to act on and the 
+         //       shape to set. Consider setting a box shape on an object, then. First, we call the compile 
+         //       functor for the first script argument, the object variable, passing a counter of 0. That 
+         //       signals a successful completion, so we reset the counter to 0 instead of incrementing it. 
+         //       Then, we call the compile functor for the second script argument, the shape type, passing 
+         //       a counter of 0. That returns arg_consume_result::still_hungry, so we increment the counter, 
+         //       move onto the next script argument (the box width), and call the compile functor with a 
+         //       counter of 1. We'll end up calling that same compile functor on that same argument three 
+         //       more times, with counters of 2, 3, and 4.
+         //
+         // TODO: We need to expand the binary data from 64 bits to 128 bits; similarly, the load functor needs 
+         // to receive 128 bits peeked from the bitstream. While we're at it, let's think of a more fitting name 
+         // than "bitvector64," which wrongly implies that the size of the underlying storage can be expanded.
+         //
+         //  - It's tempting to want to heap-allocate the binary data if it has to be 128 bits, so that we're 
+         //    not using so many extra bits for argument types that will never be larger than just a few bits. 
+         //    However, if we heap-allocate the binary data, then we need a pointer, which burns 8 bytes in 
+         //    addition to the binary data itself; moreover, allocated memory is usually prefixed with heap-
+         //    related bookkeeping information, so the memory usage incurred by an allocation will be even 
+         //    higher. Inlining a 128-bit buffer inside of the OpcodeArgValue instance really is the cheapest 
+         //    way to ensure we have room for all argument types.
+         //
+         //  - "Shape" arguments have a two-bit type enum followed by up to four number avriables; the largest 
+         //    possible number variable is an integer constant, which takes 22 bits (the six-bit scope enum 
+         //    followed by a 16-bit signed integer); so the maximum bitcount for a shape argument is 90 bits.
          //
          cobb::bitvector64  data;
          OpcodeArgTypeinfo& type;
