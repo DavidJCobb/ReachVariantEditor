@@ -13,7 +13,7 @@ namespace MegaloEx {
          QString("A 3D vector. X and Y are the lateral axes; Z, the vertical axis."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](OpcodeArgValue& instance, uint64_t bits) { // loader
+         [](OpcodeArgValue& instance, cobb::uint128_t bits) { // loader
             instance.data.consume(bits, coordinate_bits);
             instance.data.consume(bits, coordinate_bits);
             instance.data.consume(bits, coordinate_bits);

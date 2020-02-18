@@ -1,6 +1,6 @@
 #pragma once
 #include "../../base.h"
-#include "../../../helpers/bitvector.h"
+#include "../../../helpers/bitarray.h"
 #include "../../../helpers/reference_tracked_object.h"
 #include <functional>
 #include <QString>
@@ -77,6 +77,40 @@ namespace MegaloEx {
       // I suppose. The data is essentially untyped, but you need an external force (the typeinfo) to work with 
       // it, rather than the data itself being accessible "as" a type.
       //
+      // ========================================================================================================
+      //
+      // NOTES:
+      //
+      // --------------------------------------------------------------------------------------------------------
+      //
+      // We use 128 bits' worth of storage inside of each opcode argument. This is enough to hold the binary data 
+      // for the longest possible argument: a "shape" argument with the "box" type, using a constant integer for 
+      // each of its dimensions. (That's two bits for the shape type, followed by four number variables; a number 
+      // variable uses a six-bit type enum; constant integers can store 16-bit values; so that's 22 bits per box 
+      // size value, for a grand total of 90 bits for the entire shape argument.)
+      //
+      //  - It's tempting to want to heap-allocate the binary data if it has to be 128 bits, so that we're not 
+      //    using so many extra bits for argument types that will never be larger than just a few bits. However, 
+      //    if we heap-allocate the binary data, then we need a pointer, which burns 8 bytes in addition to the 
+      //    binary data itself; moreover, allocated memory is usually prefixed with heap-related bookkeeping 
+      //    information, so the memory usage incurred by an allocation will be even higher. Inlining a 128-bit 
+      //    buffer inside of the OpcodeArgValue instance really is the cheapest way to ensure we have room for 
+      //    all argument types.
+      //
+      // --------------------------------------------------------------------------------------------------------
+      //
+      // The (relevant_objects) array is only guaranteed to be suitable for reference-tracking. Specific argument 
+      // types may or may not assume that particular indices in this array line up with particular values. The 
+      // "player traits" type, for example, assumes that the 0th array element is always the trait-set, and it 
+      // uses this information both for stringification and for saving. By contrast, however, the "shape" type 
+      // can't assume that any given entry in the array corresponds to any given dimension of the shape; a box 
+      // shape, for example, will have four dimensions, and if all dimensions except the third are integer 
+      // constants and the third is a script option, then that script option will be referred to by the 0th item 
+      // in the (relevant_objects) list.
+      //
+      // In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will vary 
+      // between different argument types, so you probably shouldn't touch it from outside the typeinfo functors.
+      //
       public:
          virtual bool postprocess(GameVariantData* data) override { // IGameVariantDataObjectNeedingPostprocess
             return (this->type.postprocess)(*this, data);
@@ -119,47 +153,31 @@ namespace MegaloEx {
          //       counter of 1. We'll end up calling that same compile functor on that same argument three 
          //       more times, with counters of 2, 3, and 4.
          //
-         // TODO: We need to expand the binary data from 64 bits to 128 bits; similarly, the load functor needs 
-         // to receive 128 bits peeked from the bitstream. While we're at it, let's think of a more fitting name 
-         // than "bitvector64," which wrongly implies that the size of the underlying storage can be expanded.
+         // TODO: We need to rethink how we handle the (relevant_objects) list. The main concern is shape 
+         // arguments (UGH). Consider a box shape whose dimensions are, in order: an integer constant; a 
+         // reference to a script option; a reference to a script option; and then an integer constant. The 
+         // changes planned above are intended to allow the functors for shape-type arguments to directly 
+         // call the functors for number-variable-type arguments, to process the dimensions... but when 
+         // we're saving values, how do we ensure that the number functors handle the proper (relevant_objects)? 
+         // When we're calling the "save" functor (or even the "stringify" functors) on the third dimension, 
+         // how do we ensure that it uses the second relevant-object as it should, and not the first one?
          //
-         //  - It's tempting to want to heap-allocate the binary data if it has to be 128 bits, so that we're 
-         //    not using so many extra bits for argument types that will never be larger than just a few bits. 
-         //    However, if we heap-allocate the binary data, then we need a pointer, which burns 8 bytes in 
-         //    addition to the binary data itself; moreover, allocated memory is usually prefixed with heap-
-         //    related bookkeeping information, so the memory usage incurred by an allocation will be even 
-         //    higher. Inlining a 128-bit buffer inside of the OpcodeArgValue instance really is the cheapest 
-         //    way to ensure we have room for all argument types.
+         // Basically, those above notes about how (relevant_objects) isn't, like, "guaranteed," and how 
+         // indices inside of it may not necessarily be "meaningful?" That has to change.
          //
-         //  - "Shape" arguments have a two-bit type enum followed by up to four number avriables; the largest 
-         //    possible number variable is an integer constant, which takes 22 bits (the six-bit scope enum 
-         //    followed by a 16-bit signed integer); so the maximum bitcount for a shape argument is 90 bits.
+         // I think the only way to fix this is to make it so that all functors -- not just the "compile" 
+         // functor -- take an argument index value. This will generally be zero, but "nested" arguments 
+         // like shapes can use it as needed to ensure that when other functors are called, they access 
+         // elements from (relevant_objects) with the right offset. (Those other functors, then, will also 
+         // need to make sure they use this parameter even if their "personal" types don't. Number variables, 
+         // for example, always need to access relevant_objects[param] rather than relevant_objects[0].)
          //
-         cobb::bitvector64  data;
+         cobb::bitarray128  data;
          OpcodeArgTypeinfo& type;
          uint8_t            compile_step = 0;
          QString            english; // for debugging
          ref<cobb::reference_tracked_object> relevant_objects[4]; // for when this argument refers to something that needs to be reference-tracked, like a Forge label or script option, so other systems can tell whether that something is in use by the script
          //
          using bit_storage_type = decltype(data)::storage_type;
-
-         //
-         // NOTES:
-         //
-         //  - The (relevant_objects) array ONLY exists for reference-tracking. Specific argument types may or 
-         //    may not assume that particular indices in this array line up with particular values. As an exam-
-         //    ple, the "player traits" type assumes that the 0th array element is always the trait-set, but 
-         //    the "shape" type can't assume that any given entry in the array corresponds to any given dimens-
-         //    ion of the shape (i.e. if you have a box shape, that'll have four dimensions; if all dimensions 
-         //    except the third are integer constants and the third is a script option, then the 0th entry in 
-         //    the (relevant_objects) list is going to line up with that third dimension).
-         //
-         //    In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will 
-         //    vary between different argument types, so you probably shouldn't touch it from outside the type-
-         //    info functors.
-         //
-         //    TODO: argument types that guarantee specific objects in specific list indices should note this 
-         //    in documentation comments, for maintenance's sake.
-         //
    };
 }

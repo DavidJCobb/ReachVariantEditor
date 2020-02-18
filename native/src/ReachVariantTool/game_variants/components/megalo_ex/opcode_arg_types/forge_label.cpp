@@ -16,7 +16,7 @@ namespace MegaloEx {
          QString(""),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](OpcodeArgValue& instance, uint64_t bits) { // loader
+         [](OpcodeArgValue& instance, cobb::uint128_t bits) { // loader
             if (instance.data.consume(bits, 1) == 0) // absence bit; 0 means we have a value
                instance.data.consume(bits, index_bits);
             return true;

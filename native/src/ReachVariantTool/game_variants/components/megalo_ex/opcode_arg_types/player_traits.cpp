@@ -15,7 +15,7 @@ namespace MegaloEx {
          QString("Megalo-defined sets of player traits. In Megalo, you don't \"apply\" and \"remove\" traits; rather, you call the \"apply\" function every frame, and the traits vanish when you stop doing that."),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](OpcodeArgValue& instance, uint64_t bits) { // loader
+         [](OpcodeArgValue& instance, cobb::uint128_t bits) { // loader
             instance.data.consume(bits, index_bits);
             return true;
          },
