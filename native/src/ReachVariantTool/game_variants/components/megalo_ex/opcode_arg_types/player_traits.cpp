@@ -10,42 +10,51 @@ namespace {
 }
 namespace MegaloEx {
    namespace types {
+      //
+      // FUNCTOR IMPLEMENTATION NOTES:
+      //
+      //  - The (fragment) argument is used as an index into the (relObjs) list.
+      //
+      //  - Output functors read the bit buffer from the start (offset 0). If you need to call these 
+      //    functors from another functor (i.e. if there is some argument type that includes this 
+      //    type inside of it), then you must pass a copy of the bitarray shifted appropriately.
+      //
       OpcodeArgTypeinfo player_traits = OpcodeArgTypeinfo(
          QString("Player Traits"),
          QString("Megalo-defined sets of player traits. In Megalo, you don't \"apply\" and \"remove\" traits; rather, you call the \"apply\" function every frame, and the traits vanish when you stop doing that."),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](OpcodeArgValue& instance, cobb::uint128_t bits) { // loader
-            instance.data.consume(bits, index_bits);
+         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            data.consume(input_bits, index_bits);
             return true;
          },
-         [](OpcodeArgValue& instance, GameVariantData* vd) { // postprocess
+         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
             auto mp = dynamic_cast<GameVariantDataMultiplayer*>(vd);
             if (!mp)
                return false;
-            uint16_t index = instance.data.excerpt(0, index_bits);
+            uint16_t index = data.excerpt(0, index_bits);
             auto& traits = mp->scriptData.traits;
             if (traits.size() <= index)
                return false;
-            instance.relevant_objects[0] = &traits[index];
+            relObjs[fragment] = &traits[index];
             return true;
          },
-         [](OpcodeArgValue& instance, std::string& out) { // to english
-            if (instance.relevant_objects[0]) {
-               auto f = (ReachMegaloPlayerTraits*)(cobb::reference_tracked_object*)instance.relevant_objects[0];
-               if (f->name) {
-                  out = f->name->english();
+         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            auto obj = (ReachMegaloPlayerTraits*)(cobb::reference_tracked_object*)relObjs[fragment];
+            if (obj) {
+               if (obj->name) {
+                  out = obj->name->english();
                   return true;
                }
-               cobb::sprintf(out, "script traits %u", f->index);
+               cobb::sprintf(out, "script traits %u", obj->index);
                return true;
             }
-            uint16_t index = instance.data.excerpt(0, index_bits);
+            uint16_t index = data.excerpt(0, index_bits);
             cobb::sprintf(out, "missing traits %u", index);
             return true;
          },
-         [](OpcodeArgValue& instance, std::string& out) { // to script code
-            uint16_t index = instance.data.excerpt(0, index_bits);
+         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            uint16_t index = data.excerpt(0, index_bits);
             cobb::sprintf(out, "player_traits[%u]", index);
             return true;
          },

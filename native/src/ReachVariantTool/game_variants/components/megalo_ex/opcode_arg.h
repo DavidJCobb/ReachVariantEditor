@@ -9,6 +9,7 @@ namespace MegaloEx {
    class Compiler;
 
    class OpcodeArgValue;
+   using arg_rel_obj_list_t = cobb::reference_tracked_object::ref<cobb::reference_tracked_object>[4];
 
    enum class arg_consume_result {
       failure,
@@ -17,12 +18,12 @@ namespace MegaloEx {
    };
    class OpcodeArgTypeinfo {
       public:
-         using load_functor_t        = std::function<bool(OpcodeArgValue&, uint64_t bits)>; // loads data from binary stream; returns success/failure
-         using decode_functor_t      = std::function<bool(OpcodeArgValue&, std::string&)>; // returns success/failure
-         using compile_functor_t     = std::function<arg_consume_result(OpcodeArgValue&, const std::string&, Compiler&)>;
-         using postprocess_functor_t = std::function<bool(OpcodeArgValue&, GameVariantData*)>;
+         using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
+         using decode_functor_t      = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
+         using compile_functor_t     = std::function<arg_consume_result(uint8_t fragment, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
+         using postprocess_functor_t = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
          //
-         static bool default_postprocess_functor(OpcodeArgValue&, GameVariantData*) { return true; } // for argument types that don't need postprocessing
+         static bool default_postprocess_functor(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
          //
          struct flags {
             flags() = delete;
@@ -74,12 +75,62 @@ namespace MegaloEx {
       //
       // With the approach we're taking here, we have a single class for loaded opcode arguments, and we rely on 
       // the typeinfo to interact with the data. You could think of the class as a sort of inside-out union type, 
-      // I suppose. The data is essentially untyped, but you need an external force (the typeinfo) to work with 
-      // it, rather than the data itself being accessible "as" a type.
+      // I suppose. A union, being untyped data which can have any of a fixed set of types but which itself has 
+      // no indicator as to which type it currently is, is a value that knows how it can be read but not how it 
+      // should be read; it knows how it "can" be read in that when you access it as a given type, that type's 
+      // behaviors come built-in; yet it doesn't know how it "should" be read. An OpcodeArgValue, by contrast, 
+      // is untyped data that doesn't know how it can be read, but it knows where to find a capable reader and 
+      // by virtue of knowing that, it knows how it should be read.
       //
       // ========================================================================================================
       //
       // NOTES:
+      //
+      // --------------------------------------------------------------------------------------------------------
+      //
+      // Typeinfo functors don't pass references to OpcodeArgValue instances; rather, they pass references to the 
+      // bit-buffer and the relevant-objects lists inside of OpcodeArgValue instances. The reason for this is so 
+      // that functors can be interdependent, in the case where one type includes another type. A "shape"-type 
+      // argument, for example, consists of an enum (indicating whether the shape is a box, sphere, cylinder, or 
+      // none) followed by zero or more number variables -- as in, the exact same data as is used for a number 
+      // variable argument. As such, the functors for "shape"-type arguments need to be able to call the functors 
+      // for number-variable arguments.
+      //
+      // Broadly speaking, "nested" types such as these will work as follows:
+      //
+      //  - If a type can refer to reference-tracked objects, then the functors' "fragment" argument is used to 
+      //    indicate what slot in the (relObjs) array is available to that functor.
+      //
+      //  - Output functors -- that is, functors which read already-loaded data and produce some result, i.e. the 
+      //    functors for decompiling -- will read from the start of the bit-buffer. This means that in the case 
+      //    of "nested" types, the "containing" type's functor will need to copy the loaded data and shift it, 
+      //    and provide the shifted copy to the "contained" type's functor.
+      //
+      // --------------------------------------------------------------------------------------------------------
+      //
+      // Sometimes, a single argument may be represented as multiple arguments in script. A "shape"-type argument 
+      // for example would have each of its constituent parts (the shape type and the number variables) written 
+      // in script code as multiple arguments, e.g. this script code which invokes an opcode that has one object 
+      // variable argument and one shape argument:
+      //
+      //    current_object.set_shape(box, 5, 2, 7, 3)
+      //
+      // To effect this, an argument type's "compile" functor will be called multiple times -- specifically, once 
+      // to start with, and then once more every time it returns (arg_consume_result::still_hungry). When the 
+      // compile functor is invoked directly by the compiler, the (fragment) argument will refer to the number of 
+      // times it has been called for that argument. Looking at our example above, the shape-type compile functor 
+      // would be on fragment 0 when processing the shape type (box), fragment 1 when processing the first size 
+      // (5), fragment 2 when processing the second size (2), fragment 3 when processing the third size (7), and 
+      // fragment 4 when processing the fourth size (3). If that opcode had a second shape argument immediately 
+      // following the first, then when we process the second shape's type enum we would use fragment 0 again.
+      //
+      // Of course, when dealing with "nested" types, a "containing" type's compile functor may invoke a "cont-
+      // ained" type's compile functor and use the (fragment) argument as described above.
+      //
+      // IMPLEMENTATION DETAILS -- MOVE THIS WHEN THE COMPILER IS IMPLEMENTED: The compiler will maintain a local 
+      // variable serving as a counter; this counter will be passed as the (fragment) argument to functors. It is 
+      // initialized to 0, incremented when a functor returns (arg_consume_result::still_hungry), and reset to 0 
+      // instead whenever a functor returns (arg_consume_result::success).
       //
       // --------------------------------------------------------------------------------------------------------
       //
@@ -102,81 +153,20 @@ namespace MegaloEx {
       // The (relevant_objects) array is only guaranteed to be suitable for reference-tracking. Specific argument 
       // types may or may not assume that particular indices in this array line up with particular values. The 
       // "player traits" type, for example, assumes that the 0th array element is always the trait-set, and it 
-      // uses this information both for stringification and for saving. By contrast, however, the "shape" type 
-      // can't assume that any given entry in the array corresponds to any given dimension of the shape; a box 
-      // shape, for example, will have four dimensions, and if all dimensions except the third are integer 
-      // constants and the third is a script option, then that script option will be referred to by the 0th item 
-      // in the (relevant_objects) list.
+      // uses this information both for stringification and for saving; however, it's not required that indices 
+      // "line up" with anything.
       //
       // In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will vary 
       // between different argument types, so you probably shouldn't touch it from outside the typeinfo functors.
       //
       public:
          virtual bool postprocess(GameVariantData* data) override { // IGameVariantDataObjectNeedingPostprocess
-            return (this->type.postprocess)(*this, data);
+            return (this->type.postprocess)(0, this->data, this->relevant_objects, data);
          }
-         //
-         // TODO: We need to redesign the typeinfo functors. Some argument types include other argument types -- 
-         // for example, shapes can include up to four number variables -- so functors need to be able to call 
-         // each other. If the functors have to take an OpcodeArgValue&, however, then that isn't strictly 
-         // possible. So here's what we do instead:
-         //
-         //  - The functors take a reference to the raw binary data inside of the OpcodeArgValue, instead of to 
-         //    the OpcodeArgValue itself.
-         //
-         //     - No no no, wait. We still need to deal with cobb::reference_tracked_object. We either need to 
-         //       pass the (relevant_objects) list as an argument too, or rethink that whole system. Passing 
-         //       the list would be simpler.
-         //
-         //        - (We need to pass a *reference to* the list, given how reference_tracked_object::ref works.)
-         //
-         //     - When dealing with "nested argument types," like shapes, the outermost argument type can then 
-         //       invoke the inner ones by creating a second bit-buffer, copying the remaining bits into that, 
-         //       passing that to an inner type's functor, and then retrieving the contents; lather, rinse, 
-         //       and repeat for as many inner arguments exist.
-         //
-         //  - We remove OpcodeArgValue::compile_step (which was intended to accommodate argument types that 
-         //    exist as single arguments internally while mapping to arguments in script) and make it so that 
-         //    the compiler itself keeps track of how many times it's calling the same compile functor for an 
-         //    argument. Specifically, the code for compiling a function call should have a uint8_t counter 
-         //    that is initialized to zero before the arguments loop; whenever any compile functor returns the 
-         //    arg_consume_result::success result code, the counter is reset to zero; otherwise the counter is 
-         //    incremented; and that counter is passed as an argument to the compile functor.
-         //
-         //     - As an example, the "Set Object Shape" action has two arguments: the object to act on and the 
-         //       shape to set. Consider setting a box shape on an object, then. First, we call the compile 
-         //       functor for the first script argument, the object variable, passing a counter of 0. That 
-         //       signals a successful completion, so we reset the counter to 0 instead of incrementing it. 
-         //       Then, we call the compile functor for the second script argument, the shape type, passing 
-         //       a counter of 0. That returns arg_consume_result::still_hungry, so we increment the counter, 
-         //       move onto the next script argument (the box width), and call the compile functor with a 
-         //       counter of 1. We'll end up calling that same compile functor on that same argument three 
-         //       more times, with counters of 2, 3, and 4.
-         //
-         // TODO: We need to rethink how we handle the (relevant_objects) list. The main concern is shape 
-         // arguments (UGH). Consider a box shape whose dimensions are, in order: an integer constant; a 
-         // reference to a script option; a reference to a script option; and then an integer constant. The 
-         // changes planned above are intended to allow the functors for shape-type arguments to directly 
-         // call the functors for number-variable-type arguments, to process the dimensions... but when 
-         // we're saving values, how do we ensure that the number functors handle the proper (relevant_objects)? 
-         // When we're calling the "save" functor (or even the "stringify" functors) on the third dimension, 
-         // how do we ensure that it uses the second relevant-object as it should, and not the first one?
-         //
-         // Basically, those above notes about how (relevant_objects) isn't, like, "guaranteed," and how 
-         // indices inside of it may not necessarily be "meaningful?" That has to change.
-         //
-         // I think the only way to fix this is to make it so that all functors -- not just the "compile" 
-         // functor -- take an argument index value. This will generally be zero, but "nested" arguments 
-         // like shapes can use it as needed to ensure that when other functors are called, they access 
-         // elements from (relevant_objects) with the right offset. (Those other functors, then, will also 
-         // need to make sure they use this parameter even if their "personal" types don't. Number variables, 
-         // for example, always need to access relevant_objects[param] rather than relevant_objects[0].)
-         //
          cobb::bitarray128  data;
          OpcodeArgTypeinfo& type;
-         uint8_t            compile_step = 0;
+         arg_rel_obj_list_t relevant_objects; // for when this argument refers to something that needs to be reference-tracked, like a Forge label or script option, so other systems can tell whether that something is in use by the script
          QString            english; // for debugging
-         ref<cobb::reference_tracked_object> relevant_objects[4]; // for when this argument refers to something that needs to be reference-tracked, like a Forge label or script option, so other systems can tell whether that something is in use by the script
          //
          using bit_storage_type = decltype(data)::storage_type;
    };
