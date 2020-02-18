@@ -14,20 +14,30 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-#pragma once
-#include <cstdint>
-#include <string>
+#include "int128.h"
+#include "strings.h"
 
 namespace cobb {
-   namespace steam {
+   #ifdef __SIZEOF_INT128__
       //
-      // Functions to get the install directory for Steam, and the install directory for any game with 
-      // a known app ID. These are quick-and-dirty, intended for non-essential uses; they parse Steam 
-      // files very lazily and they return paths with both inconsistent and redundant separators (e.g. 
-      // doubled slashes and whatnot), in lieu of checking whether the paths listed in the relevant 
-      // Steam files have terminating slashes or not.
+      // Using a compiler-provided type, so nothing needed here.
       //
-      bool get_steam_directory(std::wstring& out);
-      bool get_game_directory(uint32_t appID, std::wstring& out);
-   }
+   #else
+      void uint128_t::to_hex(std::string& out) const noexcept {
+         out.clear();
+         uint128_t copy = *this;
+         do {
+            uint64_t rem = copy.div_and_get_remainder(0x10000);
+            cobb::sprintf(out, "%s%0Xd", out.c_str(), rem);
+         } while (copy > 0);
+      }
+      void uint128_t::to_string(std::string& out) const noexcept {
+         out.clear();
+         uint128_t copy = *this;
+         do {
+            uint64_t rem = copy.div_and_get_remainder(10000);
+            cobb::sprintf(out, "%s%05d", out.c_str(), rem);
+         } while (copy > 0);
+      }
+   #endif
 }

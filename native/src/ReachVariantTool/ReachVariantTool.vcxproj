@@ -141,6 +141,7 @@
     <ClCompile Include="helpers\endianness.cpp" />
     <ClCompile Include="helpers\files.cpp" />
     <ClCompile Include="helpers\ini.cpp" />
+    <ClCompile Include="helpers\int128.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
     <ClCompile Include="helpers\qt\tree_widget.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.h" />
     <ClInclude Include="helpers\bitvector.h" />
+    <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
     <ClInclude Include="helpers\managed_pointer_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />

@@ -24,6 +24,8 @@
 #include "options_window.h"
 #include "script_editor.h"
 
+#include "../helpers/int128.h" // for testing
+
 namespace {
    ReachVariantTool* _window = nullptr;
 
@@ -164,7 +166,40 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          //
          // if I need to quickly test something, I can just throw it in here
          //
-         QMessageBox::information(this, tr("No test currently set up"), tr("..."));
+         //QMessageBox::information(this, tr("No test currently set up"), tr("..."));
+
+
+         using uint128_t = cobb::uint128_t;
+         uint128_t a = 0xFFFFFFFFFFFFFFFFI64;
+         a <<= 0x40;
+         //
+         uint128_t b = 0xFFFFFFFFFFFFFFFFI64;
+         b += 1;
+         //
+         uint128_t c = 0x8000000000000000I64;
+         c *= 2;
+         //
+         uint128_t d = uint128_t(0xFFFFFFFFFFFFFFFFI64) << 0x40;
+         //
+         uint128_t e = uint128_t(0xFFFFFFFFFFFFFFFFI64) << 0x40 >> 0x40;
+         //
+         uint128_t f = 0x8000000000000000I64;
+         f *= 2;
+         f /= 2;
+         //
+         uint128_t g = uint128_t(1, 0x0000000000000000I64) / 2;
+         //
+         uint128_t h = uint128_t(0xFFFFFFFFFFFFFFFFI64, 0xFFFFFFFF00000000I64) & uint128_t(0x8000000000000000I64, 0xFFFFFFFFFFFFFFFFI64);
+         //
+         bool i = uint128_t(1, 0) >  uint128_t(0, 0);
+         bool j = uint128_t(1, 0) >= uint128_t(1, 0);
+         bool k = uint128_t(1, 0) == uint128_t(1, 0);
+         bool l = uint128_t(1, 0) != uint128_t(1, 0);
+         bool m = uint128_t(1, 0) == uint128_t(1, 1);
+         bool n = uint128_t(1, 0) != uint128_t(1, 1);
+         bool o = uint128_t(1, 0) <  1;
+         //
+         __debugbreak();
       });
    #else
       this->ui.actionDebugMisc->setEnabled(false);

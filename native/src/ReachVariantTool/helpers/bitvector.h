@@ -3,6 +3,17 @@
 #include "bitwise.h"
 
 namespace cobb {
+
+   //
+   // TODO:
+   //
+   //  - Rename this to bitarray128 and use cobb::uint128_t as the underlying type.
+   //
+   //  - Run unit tests on cobb::uint128_t to ensure proper functionality.
+   //
+   //  - Fix the problems listed below so that this works properly.
+   //
+
    class bitvector64 {
       public:
          using storage_type = uint64_t;

@@ -139,8 +139,27 @@ namespace MegaloEx {
          OpcodeArgTypeinfo& type;
          uint8_t            compile_step = 0;
          QString            english; // for debugging
-         ref<cobb::reference_tracked_object> relevant_objects[4]; // for when this argument refers to something that needs to be reference-tracked, like a Forge label or script option
+         ref<cobb::reference_tracked_object> relevant_objects[4]; // for when this argument refers to something that needs to be reference-tracked, like a Forge label or script option, so other systems can tell whether that something is in use by the script
          //
          using bit_storage_type = decltype(data)::storage_type;
+
+         //
+         // NOTES:
+         //
+         //  - The (relevant_objects) array ONLY exists for reference-tracking. Specific argument types may or 
+         //    may not assume that particular indices in this array line up with particular values. As an exam-
+         //    ple, the "player traits" type assumes that the 0th array element is always the trait-set, but 
+         //    the "shape" type can't assume that any given entry in the array corresponds to any given dimens-
+         //    ion of the shape (i.e. if you have a box shape, that'll have four dimensions; if all dimensions 
+         //    except the third are integer constants and the third is a script option, then the 0th entry in 
+         //    the (relevant_objects) list is going to line up with that third dimension).
+         //
+         //    In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will 
+         //    vary between different argument types, so you probably shouldn't touch it from outside the type-
+         //    info functors.
+         //
+         //    TODO: argument types that guarantee specific objects in specific list indices should note this 
+         //    in documentation comments, for maintenance's sake.
+         //
    };
 }
