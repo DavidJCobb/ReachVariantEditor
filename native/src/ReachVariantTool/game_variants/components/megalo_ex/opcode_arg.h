@@ -71,6 +71,16 @@ namespace MegaloEx {
       //       *just* need to know how many things are referring to an indexed-list item other than the 
       //       list itself.
       //
+      //        - Then again, we should probably revise the managed list class. I think individual element 
+      //          access gets pointers but range-based for-loops gets references? It's inconsistent and I 
+      //          hate that.
+      //
+      //        - Rename the managed list class to "indexed_list", make it consistently return references, 
+      //          and make a variation of it that uses shared_ptr. Then, use the shared_ptr one for all 
+      //          lists along with... Wait, no, because if we can't reach the shared_ptr itself (i.e. we 
+      //          have references to the pointed-to object) then we can't use shared_ptr::usage_count. 
+      //          We'll need a custom refcount system.
+      //
       public:
          using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
          using decode_functor_t      = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
