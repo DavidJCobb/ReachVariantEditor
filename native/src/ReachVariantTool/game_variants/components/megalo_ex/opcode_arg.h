@@ -17,6 +17,47 @@ namespace MegaloEx {
       still_hungry
    };
    class OpcodeArgTypeinfo {
+      //
+      // TODO: WE NEED TO ADD A "REWRITE" FUNCTOR. Some opcode arguments rely on their relevant-objects 
+      // lists to resave their values back to the game variant file. This is mainly the case when dealing 
+      // with objects that exist inside of indexed lists and can be reordered, such as player traits and 
+      // script options: the opcode argument holds a pointer to the object so that when it comes time to 
+      // resave, we can use the index that the object has at the time of saving.
+      //
+      // If we blindly just echo out the originally loaded bits, then we'll break any opcode that refers 
+      // to any object in an indexed list that's been reordered. Accordingly, we need to add a "rewrite" 
+      // functor which takes a cobb::bitarray& and a arg_rel_obj_list_t&; the functor would modify the 
+      // opcode's bits as required in order to account for relevant objects' indices. If an argument 
+      // type doesn't ever use any relevant-objects, then this functor would just be nullptr.
+      //
+      // I'm almost beginning to wonder if we shouldn't modify the opcode arg spec just once more, so 
+      // that for each relevant-object slot, we have a bit offset and a bitcount; if we do it that way, 
+      // then we might not even need to rely on per-typeinfo functors to do index fixup, since the info 
+      // needed for a generic approach is already there. (The bit-range can't be static; it would have 
+      // to be identified and set by the load and compile functors.) To allow for this, however, we'd 
+      // have to redefine arg_rel_obj_list_t as an array of structs each consisting of a (ref) and the 
+      // bit range, and I'm not sure that's possible due to how (ref) is set up. (Our reference-tracking 
+      // system is really ugly in any case. I almost wonder if we shouldn't rely on some sort of global 
+      // handle system a la TESObjectREFRHandleInterface and refcounts in Skyrim; then, we wouldn't need 
+      // these sort of self-maintaining aware-of-their-owner smart pointers, which both reduces overhead 
+      // and redundancy and allows for exactly the solution I'm considering for index fixup here.)
+      //
+      //  - Right now, we don't properly initialize the ...::ref array anyway, so the individual refs 
+      //    aren't aware of their containing/owning object and their behavior is broken.
+      //
+      //  - I think the handle/refcount system is the best bet.
+      //
+      //  - It's tempting to want to store the handle-table on the game variant itself, but that would 
+      //    require that every referring object (i.e. everything that uses a handle to refer to something 
+      //    else) know what game variant it's a part of, and that creates similar overhead and limitations 
+      //    to cobb::reference_tracked_object::ref. Best if we make the handle-table global.
+      //
+      //  - You can have up to 168 data items in a variant that opcodes can refer to (traits, stats, etc.), 
+      //    so that's the minimum number of handles we need per loaded game variant in order to be safe. 
+      //    We need to be able to account for having multiple game variants in memory so that we can even-
+      //    tually implement checks for unsaved changes, plus I want a safety net in case things go wrong 
+      //    somehow, so let's say... eh, let's make room for 1024 handle-tracked objects.
+      //
       public:
          using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
          using decode_functor_t      = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
