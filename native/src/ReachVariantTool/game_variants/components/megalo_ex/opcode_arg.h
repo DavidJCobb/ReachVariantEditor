@@ -45,7 +45,8 @@ namespace MegaloEx {
       //  - Right now, we don't properly initialize the ...::ref array anyway, so the individual refs 
       //    aren't aware of their containing/owning object and their behavior is broken.
       //
-      //  - I think the handle/refcount system is the best bet.
+      //  - I think the handle/refcount system is the best bet. We'd make (arg_rel_obj_list_t) an array 
+      //    of structs consisting of a handle, a bit offset, and a bitcount.
       //
       //  - It's tempting to want to store the handle-table on the game variant itself, but that would 
       //    require that every referring object (i.e. everything that uses a handle to refer to something 
@@ -57,6 +58,18 @@ namespace MegaloEx {
       //    We need to be able to account for having multiple game variants in memory so that we can even-
       //    tually implement checks for unsaved changes, plus I want a safety net in case things go wrong 
       //    somehow, so let's say... eh, let's make room for 1024 handle-tracked objects.
+      //
+      //  = WHOA WHOA WHOA. We need to take a step back. Right now, we use (ref) as a souped-up smart 
+      //    pointer, and we are proposing using handles instead of smart pointers. What if there's an 
+      //    approach in between, though? We only need two things: index fixup and refcounting. So what if 
+      //    we just use std::shared_ptr and rely on the use_count member function to know how many things 
+      //    are using the target object?
+      //
+      //     - Using std::shared_ptr would complicate the "managed list" class that we use to automatically 
+      //       fix up indices on the indexed objects. A custom refcount/smart-pointer system might be more 
+      //       amenable to what we want: we don't actually need "smart" object lifetime management; we 
+      //       *just* need to know how many things are referring to an indexed-list item other than the 
+      //       list itself.
       //
       public:
          using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
