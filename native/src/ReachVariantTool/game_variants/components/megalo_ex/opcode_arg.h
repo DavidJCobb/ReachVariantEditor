@@ -9,7 +9,17 @@ namespace MegaloEx {
    class Compiler;
 
    class OpcodeArgValue;
-   using arg_rel_obj_list_t = cobb::refcount_ptr<cobb::indexed_refcountable>[4];
+
+   struct arg_rel_obj_list_t {
+      static constexpr int count = 4;
+      struct bitrange {
+         uint8_t start = 0;
+         uint8_t count = 0;
+      };
+      //
+      cobb::refcount_ptr<cobb::indexed_refcountable> pointers[count];
+      bitrange ranges[count];
+   };
 
    enum class arg_consume_result {
       failure,
@@ -18,30 +28,19 @@ namespace MegaloEx {
    };
    class OpcodeArgTypeinfo {
       //
-      // TODO: WE NEED TO ADD A "REWRITE" FUNCTOR. Some opcode arguments rely on their relevant-objects 
-      // lists to resave their values back to the game variant file. This is mainly the case when dealing 
-      // with objects that exist inside of indexed lists and can be reordered, such as player traits and 
-      // script options: the opcode argument holds a pointer to the object so that when it comes time to 
-      // resave, we can use the index that the object has at the time of saving.
+      // TODO: WE NEED TO SPEC OUT INDEX-FIXUP BEHAVIOR. Some opcode arguments rely on their relevant-
+      // objects lists to resave their values back to the game variant file. This is mainly the case when 
+      // dealing with objects that exist inside of indexed lists and can be reordered, such as player 
+      // traits and script options: the opcode argument holds a pointer to the object so that when it 
+      // comes time to resave, we can use the index that the object has at the time of saving.
       //
       // If we blindly just echo out the originally loaded bits, then we'll break any opcode that refers 
-      // to any object in an indexed list that's been reordered. Accordingly, we need to add a "rewrite" 
-      // functor which takes a cobb::bitarray& and a arg_rel_obj_list_t&; the functor would modify the 
-      // opcode's bits as required in order to account for relevant objects' indices. If an argument 
-      // type doesn't ever use any relevant-objects, then this functor would just be nullptr.
-      //
-      // I'm almost beginning to wonder if we shouldn't modify the opcode arg spec just once more, so 
-      // that for each relevant-object slot, we have a bit offset and a bitcount; if we do it that way, 
-      // then we might not even need to rely on per-typeinfo functors to do index fixup, since the info 
-      // needed for a generic approach is already there. (The bit-range can't be static; it would have 
-      // to be identified and set by the load and compile functors.)
-      //
-      //  - We'd make (arg_rel_obj_list_t) an array of structs consisting of a cobb::refcount_ptr, a bit 
-      //    offset, and a bitcount.
-      //
-      //     = Actually, it'd be more efficient to make it a single struct containing one array of pointers, 
-      //       and another array of bit-offset/bitcount pairs. That'll pack better in memory, whereas an 
-      //       array of pointers+offsets+counts will have padding bytes between each element.
+      // to any object in an indexed list that's been reordered. Accordingly, we've revised how we store 
+      // relevant-objects (and we should probably rename the field to "indexed_objects") such that each 
+      // pointer is accompanied by a bitrange indicating what portion of the loaded bits specifies the 
+      // index of the object (i.e. start bit offset and number of bits). This approach means that we don't 
+      // need per-typeinfo functors to do index fixup; the info needed for a generic approach is already 
+      // there. We just need to write that generic approach.
       //
       // TODO: Below, we point out that for nested types and decode functors, the containing type's functor 
       // needs to copy the bit-array and shift it before invoking the contained type's functor, since the 
@@ -196,12 +195,24 @@ namespace MegaloEx {
       //
       // --------------------------------------------------------------------------------------------------------
       //
+      // The (relevant_objects) array holds references to indexed-refcountable objects that the opcode argument 
+      // refers to, such as scripted player traits and Forge labels; this allows the rest of the program to know 
+      // which such objects are in use by the gametype script, and it allows the gametype script to properly 
+      // respond when these objects are reordered within their containing lists.
+      //
+      // Each entry in (relevant_objects) consists of a pointer and a bitrange (start offset and bitcount) which 
+      // indicates which bits in the loaded data specify the index of the target object. When the opcode argument 
+      // needs to be written back to a game variant file, the pointer is used to find the indexed-refcountable 
+      // object's current index within its containing list, and the bitrange is used to know what bits in the 
+      // opcode argument data need to be fixed up -- that is, what bits need to be overwritten with the object's 
+      // index at the time of saving.
+      // 
       // The (relevant_objects) array is only guaranteed to be suitable for reference-tracking. Specific argument 
       // types may or may not assume that particular indices in this array line up with particular values. The 
       // "player traits" type, for example, assumes that the 0th array element is always the trait-set, and it 
       // uses this information both for stringification and for saving; however, it's not required that indices 
       // "line up" with anything.
-      //
+      // 
       // In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will vary 
       // between different argument types, so you probably shouldn't touch it from outside the typeinfo functors.
       //

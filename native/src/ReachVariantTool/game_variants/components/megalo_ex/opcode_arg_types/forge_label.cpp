@@ -26,8 +26,11 @@ namespace MegaloEx {
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            if (data.consume(input_bits, 1) == 0) // absence bit; 0 means we have a value
+            if (data.consume(input_bits, 1) == 0) { // absence bit; 0 means we have a value
+               relObjs.ranges[fragment].start = data.size;
+               relObjs.ranges[fragment].count = index_bits;
                data.consume(input_bits, index_bits);
+            }
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
@@ -41,11 +44,11 @@ namespace MegaloEx {
             auto& list = mp->scriptContent.forgeLabels;
             if (list.size() <= index)
                return false;
-            relObjs[fragment] = &list[index];
+            relObjs.pointers[fragment] = &list[index];
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto obj = relObjs[fragment].pointer_cast<Megalo::ReachForgeLabel>();
+            auto obj = relObjs.pointers[fragment].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
@@ -59,7 +62,7 @@ namespace MegaloEx {
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            auto obj = relObjs[fragment].pointer_cast<Megalo::ReachForgeLabel>();
+            auto obj = relObjs.pointers[fragment].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   cobb::sprintf(out, "\"%s\"", obj->name->english()); // TODO: this will break if the name contains double-quotes

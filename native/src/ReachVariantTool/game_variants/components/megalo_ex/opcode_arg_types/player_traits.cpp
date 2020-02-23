@@ -25,6 +25,8 @@ namespace MegaloEx {
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            relObjs.ranges[fragment].start = data.size;
+            relObjs.ranges[fragment].count = index_bits;
             data.consume(input_bits, index_bits);
             return true;
          },
@@ -36,11 +38,11 @@ namespace MegaloEx {
             auto& traits = mp->scriptData.traits;
             if (traits.size() <= index)
                return false;
-            relObjs[fragment] = &traits[index];
+            relObjs.pointers[fragment] = &traits[index];
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto obj = relObjs[fragment].pointer_cast<ReachMegaloPlayerTraits>();
+            auto obj = relObjs.pointers[fragment].pointer_cast<ReachMegaloPlayerTraits>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
