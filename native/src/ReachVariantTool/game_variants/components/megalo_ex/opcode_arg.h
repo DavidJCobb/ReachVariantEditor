@@ -19,6 +19,24 @@ namespace MegaloEx {
       //
       cobb::refcount_ptr<cobb::indexed_refcountable> pointers[count];
       bitrange ranges[count];
+      //
+      inline bool index_is_set(uint8_t i) const noexcept { return this->pointers[i] || this->ranges[i].count; }
+   };
+   struct fragment_specifier {
+      //
+      // State object passed to and between functors, to aid in two cases: argument types that include 
+      // other argument types as members (e.g. shape-arguments including number-arguments); and argument 
+      // types that are represented as one argument internally but multiple arguments in scripted function 
+      // calls (e.g. shape-arguments).
+      //
+      // Fully explained in documentation comments further below.
+      //
+      // This object is passed by-value, so there's no benefit to keeping it less than 8 bytes large (i.e. 
+      // the size of one x64 register); feel free to stuff whatever inter-functor state we need in here.
+      //
+      uint8_t obj_index  = 0; // index into arg_rel_obj_list_t
+      uint8_t bit_offset = 0; // helps with output/decode functors and nested types
+      uint8_t which_arg  = 0; // helps identify which script-argument is currently being compiled
    };
 
    enum class arg_consume_result {
@@ -31,33 +49,17 @@ namespace MegaloEx {
       // TODO: WHEN IMPLEMENTING RESAVING, WE NEED TO CALL OpcodeArgValue::do_index_fixup BEFORE WRITING 
       // THE BINARY ARGUMENT DATA TO THE TARGET FILE.
       //
-      // TODO: Below, we point out that for nested types and decode functors, the containing type's functor 
-      // needs to copy the bit-array and shift it before invoking the contained type's functor, since the 
-      // latter functor will read from the start of the bit-array. If we modify the (fragment) argument on 
-      // the functors, however, then this may become unnecessary. We're passing a whole argument so we have 
-      // the size of an x64 register (i.e. 8 bytes) to work with, so what if we make the (fragment) a struct 
-      // consisting of: an index into the relevant-objects array; and a bit offset? Then, a containing type's 
-      // functor could use the bit-offset in the fragment to tell a contained type's functor, "Hey, read our 
-      // saved bits starting from HERE." The only difficulty is that the decode functor offers no way to know 
-      // how many bits were read (picture a shape functor invoking the number-variable functor: if it has 
-      // more than one number, how does it know what offset to pass to the second number-variable?); we may 
-      // be able to address this by having decode_functor_t return a signed integer indicating the number of 
-      // bits read (with negative values serving as sentinels and failure codes).
-      //
-      //  - The bit-offset would of course be 0 by default, and would be unused in basically every other 
-      //    situation, including when the functors are invoked on the containing type.
-      //
       // NOTE: When we implement compile functors, we need to give opcodes a way to access data on the 
       // containing game variant, i.e. when we're compiling an opcode that refers to a script option, Forge 
       // label, etc., and they need to get a refcounted pointer to the target data.
       //
       public:
-         using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
-         using decode_functor_t      = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
-         using compile_functor_t     = std::function<arg_consume_result(uint8_t fragment, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
-         using postprocess_functor_t = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
+         using load_functor_t        = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
+         using decode_functor_t      = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
+         using compile_functor_t     = std::function<arg_consume_result(fragment_specifier, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
+         using postprocess_functor_t = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
          //
-         static bool default_postprocess_functor(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
+         static bool default_postprocess_functor(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
          //
          struct flags {
             flags() = delete;
@@ -108,13 +110,10 @@ namespace MegaloEx {
       // code and confusingly-overlapping objects.
       //
       // With the approach we're taking here, we have a single class for loaded opcode arguments, and we rely on 
-      // the typeinfo to interact with the data. You could think of the class as a sort of inside-out union type, 
-      // I suppose. A union, being untyped data which can have any of a fixed set of types but which itself has 
-      // no indicator as to which type it currently is, is a value that knows how it can be read but not how it 
-      // should be read; it knows how it "can" be read in that when you access it as a given type, that type's 
-      // behaviors come built-in; yet it doesn't know how it "should" be read. An OpcodeArgValue, by contrast, 
-      // is untyped data that doesn't know how it can be read, but it knows where to find a capable reader and 
-      // by virtue of knowing that, it knows how it should be read.
+      // the typeinfo to interact with the data. You could think of typeinfos as "inside-out classes," where non-
+      // member functions are used to access fields on the value; or you could think of values as "inside-out 
+      // unions," where the value consists of undifferentiated data, but it clearly indicates its type and you 
+      // must refer to some other system to then read that data.
       //
       // ========================================================================================================
       //
@@ -132,13 +131,22 @@ namespace MegaloEx {
       //
       // Broadly speaking, "nested" types such as these will work as follows:
       //
-      //  - If a type can refer to reference-tracked objects, then the functors' "fragment" argument is used to 
-      //    indicate what slot in the (relObjs) array is available to that functor.
+      //  - If a type can refer to indexed-refcountable objects via its (relevant_objects) array, then functors' 
+      //    (fragment_specifier)-type argument is used to indicate the first index in that array that is avail-
+      //    able to the functor. The "outer" type's functor will want to pass a fragment specifier with the app-
+      //    ropriate index to the "inner" type's functor.
       //
-      //  - Output functors -- that is, functors which read already-loaded data and produce some result, i.e. the 
-      //    functors for decompiling -- will read from the start of the bit-buffer. This means that in the case 
-      //    of "nested" types, the "containing" type's functor will need to copy the loaded data and shift it, 
-      //    and provide the shifted copy to the "contained" type's functor.
+      //     = The "outer" type's functor should always receive an obj_index of zero.
+      //
+      //  - The "decode" functors work by reading the already-loaded data and producing some result, e.g. plain-
+      //    English representations of the argument or decompiled script code for the argument. These functors 
+      //    need to know where in the binary data to start reading from; the fragment specifier's (bit_offset) 
+      //    field can be used to indicate this.
+      //
+      //     = The "outer" type's functor should always receive a bit_offset of zero.
+      //
+      //  - The "outer" type's functor is not, as of this writing, required to ferry any other fragment-specifier 
+      //    state to "inner" types' functors.
       //
       // --------------------------------------------------------------------------------------------------------
       //
@@ -151,20 +159,18 @@ namespace MegaloEx {
       //
       // To effect this, an argument type's "compile" functor will be called multiple times -- specifically, once 
       // to start with, and then once more every time it returns (arg_consume_result::still_hungry). When the 
-      // compile functor is invoked directly by the compiler, the (fragment) argument will refer to the number of 
-      // times it has been called for that argument. Looking at our example above, the shape-type compile functor 
-      // would be on fragment 0 when processing the shape type (box), fragment 1 when processing the first size 
-      // (5), fragment 2 when processing the second size (2), fragment 3 when processing the third size (7), and 
-      // fragment 4 when processing the fourth size (3). If that opcode had a second shape argument immediately 
-      // following the first, then when we process the second shape's type enum we would use fragment 0 again.
-      //
-      // Of course, when dealing with "nested" types, a "containing" type's compile functor may invoke a "cont-
-      // ained" type's compile functor and use the (fragment) argument as described above.
+      // compile functor is invoked directly by the compiler, the fragment-specifier argument's (which_arg) field 
+      // will refer to the number of times that functor has been called for that argument. Looking at our example 
+      // above, the shape-type compile functor would be on which_arg 0 when processing the shape type (box), 
+      // which_arg 1 when processing the first size (5), which_arg 2 when processing the second size (2), 
+      // which_arg 3 when processing the third size (7), and which_arg 4 when processing the fourth size (3). If 
+      // that opcode had a second shape argument immediately following the first, then when we process the second 
+      // shape's type enum we would use which_arg 0 again.
       //
       // IMPLEMENTATION DETAILS -- MOVE THIS WHEN THE COMPILER IS IMPLEMENTED: The compiler will maintain a local 
-      // variable serving as a counter; this counter will be passed as the (fragment) argument to functors. It is 
-      // initialized to 0, incremented when a functor returns (arg_consume_result::still_hungry), and reset to 0 
-      // instead whenever a functor returns (arg_consume_result::success).
+      // variable serving as a counter; this counter will be passed as the fragment-specifier which_arg to 
+      // functors. It is initialized to 0, incremented when a functor returns (arg_consume_result::still_hungry), 
+      // and reset to 0 instead whenever a functor returns (arg_consume_result::success).
       //
       // --------------------------------------------------------------------------------------------------------
       //
@@ -221,5 +227,12 @@ namespace MegaloEx {
          using bit_storage_type = decltype(data)::storage_type;
          //
          void do_index_fixup();
+         //
+         inline static uint64_t excerpt_loaded_index(cobb::bitarray128& data, arg_rel_obj_list_t& ro, uint8_t which) noexcept {
+            auto& item = ro[which];
+            if (!item.count)
+               return 0;
+            return data.excerpt(item.start, item.count);
+         }
    };
 }

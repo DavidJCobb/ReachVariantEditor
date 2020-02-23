@@ -25,30 +25,40 @@ namespace MegaloEx {
          QString(""),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
             if (data.consume(input_bits, 1) == 0) { // absence bit; 0 means we have a value
-               relObjs.ranges[fragment].start = data.size;
-               relObjs.ranges[fragment].count = index_bits;
+               relObjs.ranges[fs.obj_index].start = data.size;
+               relObjs.ranges[fs.obj_index].count = index_bits;
                data.consume(input_bits, index_bits);
             }
             return true;
          },
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
-            bool absence = data.size == 1;
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
+            /*// Checking for absence this way would prevent us from ever handling this type if it were nested inside of another type.
+            bool absence = data.size == fs.bit_offset + 1;
             if (absence)
                return true;
+            //*/
+            if (!relObjs.index_is_set(fs.obj_index)) {
+               relObjs.pointers[fs.obj_index] = nullptr;
+               return true;
+            }
             auto mp = dynamic_cast<GameVariantDataMultiplayer*>(vd);
             if (!mp)
                return false;
-            uint16_t index = data.excerpt(1, index_bits);
+            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
             auto& list = mp->scriptContent.forgeLabels;
             if (list.size() <= index)
                return false;
-            relObjs.pointers[fragment] = &list[index];
+            relObjs.pointers[fs.obj_index] = &list[index];
             return true;
          },
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto obj = relObjs.pointers[fragment].pointer_cast<Megalo::ReachForgeLabel>();
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            if (!relObjs.index_is_set(fs.obj_index)) {
+               out = "no Forge label";
+               return true;
+            }
+            auto obj = relObjs.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
@@ -57,12 +67,16 @@ namespace MegaloEx {
                cobb::sprintf(out, "unnamed Forge label %u", obj->index);
                return true;
             }
-            uint16_t index = data.excerpt(1, index_bits);
+            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
             cobb::sprintf(out, "missing Forge label %u", index);
             return true;
          },
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            auto obj = relObjs.pointers[fragment].pointer_cast<Megalo::ReachForgeLabel>();
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            if (!relObjs.index_is_set(fs.obj_index)) {
+               out = "none";
+               return true;
+            }
+            auto obj = relObjs.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   cobb::sprintf(out, "\"%s\"", obj->name->english()); // TODO: this will break if the name contains double-quotes
@@ -71,7 +85,7 @@ namespace MegaloEx {
                cobb::sprintf(out, "%u", obj->index);
                return true;
             }
-            uint16_t index = data.excerpt(1, index_bits);
+            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
             cobb::sprintf(out, "%u", index);
             return true;
          },

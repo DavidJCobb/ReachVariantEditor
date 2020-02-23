@@ -23,24 +23,26 @@ namespace MegaloEx {
          QString("A 3D vector. X and Y are the lateral axes; Z, the vertical axis."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
             data.consume(input_bits, coordinate_bits);
             data.consume(input_bits, coordinate_bits);
             data.consume(input_bits, coordinate_bits);
             return true;
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            coordinate_type x = data.excerpt(coordinate_bits * 0, coordinate_bits);
-            coordinate_type y = data.excerpt(coordinate_bits * 1, coordinate_bits);
-            coordinate_type z = data.excerpt(coordinate_bits * 2, coordinate_bits);
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            auto offset = fs.bit_offset;
+            coordinate_type x = data.excerpt(offset + coordinate_bits * 0, coordinate_bits);
+            coordinate_type y = data.excerpt(offset + coordinate_bits * 1, coordinate_bits);
+            coordinate_type z = data.excerpt(offset + coordinate_bits * 2, coordinate_bits);
             cobb::sprintf(out, "(%d, %d, %d)", x, y, z);
             return true;
          },
-         [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            coordinate_type x = data.excerpt(coordinate_bits * 0, coordinate_bits);
-            coordinate_type y = data.excerpt(coordinate_bits * 1, coordinate_bits);
-            coordinate_type z = data.excerpt(coordinate_bits * 2, coordinate_bits);
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            auto offset = fs.bit_offset;
+            coordinate_type x = data.excerpt(offset + coordinate_bits * 0, coordinate_bits);
+            coordinate_type y = data.excerpt(offset + coordinate_bits * 1, coordinate_bits);
+            coordinate_type z = data.excerpt(offset + coordinate_bits * 2, coordinate_bits);
             cobb::sprintf(out, "(%d, %d, %d)", x, y, z);
             return true;
          },

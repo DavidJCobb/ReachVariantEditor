@@ -53,7 +53,7 @@ namespace cobb {
          }
          void overwrite(uint8_t offset, uint8_t count, storage_type bits) {
             int max_bits = cobb::bitmax(count);
-            int shift_by = this->size - offset - count - 1;
+            int shift_by = this->size - offset - count;
             storage_type mask = storage_type(max_bits) << shift_by;
             mask = ~mask;
             this->bits &= mask;
