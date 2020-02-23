@@ -36,50 +36,50 @@ namespace MegaloEx {
       // needed for a generic approach is already there. (The bit-range can't be static; it would have 
       // to be identified and set by the load and compile functors.) To allow for this, however, we'd 
       // have to redefine arg_rel_obj_list_t as an array of structs each consisting of a (ref) and the 
-      // bit range, and I'm not sure that's possible due to how (ref) is set up. (Our reference-tracking 
-      // system is really ugly in any case. I almost wonder if we shouldn't rely on some sort of global 
-      // handle system a la TESObjectREFRHandleInterface and refcounts in Skyrim; then, we wouldn't need 
-      // these sort of self-maintaining aware-of-their-owner smart pointers, which both reduces overhead 
-      // and redundancy and allows for exactly the solution I'm considering for index fixup here.)
+      // bit range, and I'm not sure that's possible due to how (ref) is set up.
       //
-      //  - Right now, we don't properly initialize the ...::ref array anyway, so the individual refs 
-      //    aren't aware of their containing/owning object and their behavior is broken.
+      // Honestly, we should swap the existing reference-tracking system for a simple refcount. The 
+      // reference-tracking system is only useful if you want to follow references back to their source 
+      // a la the Skyrim Creation Kit's "Use Info," which was an early design goal here but which is 
+      // quickly becoming more trouble than it's worth. A simple refcount accomplishes our more 
+      // immediate goal of knowing when something is in use and preventing its deletion by the user 
+      // until such time as it is no longer referred to by anything.
+      //
+      //  - Right now, we don't properly initialize the cobb::reference_tracked_object::ref array anyway, 
+      //    so the individual refs aren't aware of their containing/owning object and the smart pointer 
+      //    reference-tracking behavior is broken anyway.
+      //
+      //  - We should have all reference-tracked objects inherit from a common base class which contains 
+      //    a refcount and an index, and call this cobb::indexed_refcountable. That way, we can access 
+      //    the objects' indices (when used) without having to know their specific type, which will be 
+      //    necessary for a generic index-fixup system for opcode arguments.
       //
       //  - I think the handle/refcount system is the best bet. We'd make (arg_rel_obj_list_t) an array 
       //    of structs consisting of a handle, a bit offset, and a bitcount.
       //
-      //  - It's tempting to want to store the handle-table on the game variant itself, but that would 
-      //    require that every referring object (i.e. everything that uses a handle to refer to something 
-      //    else) know what game variant it's a part of, and that creates similar overhead and limitations 
-      //    to cobb::reference_tracked_object::ref. Best if we make the handle-table global.
+      //     = Actually, it'd be more efficient to make it a single struct containing one array of handles, 
+      //       and another array of bit-offset/bitcount pairs. That'll pack better in memory, whereas an 
+      //       array of handles+bit-offsets+bitcounts will have padding bytes between each element.
       //
-      //  - You can have up to 168 data items in a variant that opcodes can refer to (traits, stats, etc.), 
-      //    so that's the minimum number of handles we need per loaded game variant in order to be safe. 
-      //    We need to be able to account for having multiple game variants in memory so that we can even-
-      //    tually implement checks for unsaved changes, plus I want a safety net in case things go wrong 
-      //    somehow, so let's say... eh, let's make room for 1024 handle-tracked objects.
+      // TODO: Below, we point out that for nested types and decode functors, the containing type's functor 
+      // needs to copy the bit-array and shift it before invoking the contained type's functor, since the 
+      // latter functor will read from the start of the bit-array. If we modify the (fragment) argument on 
+      // the functors, however, then this may become unnecessary. We're passing a whole argument so we have 
+      // the size of an x64 register (i.e. 8 bytes) to work with, so what if we make the (fragment) a struct 
+      // consisting of: an index into the relevant-objects array; and a bit offset? Then, a containing type's 
+      // functor could use the bit-offset in the fragment to tell a contained type's functor, "Hey, read our 
+      // saved bits starting from HERE." The only difficulty is that the decode functor offers no way to know 
+      // how many bits were read (picture a shape functor invoking the number-variable functor: if it has 
+      // more than one number, how does it know what offset to pass to the second number-variable?); we may 
+      // be able to address this by having decode_functor_t return a signed integer indicating the number of 
+      // bits read (with negative values serving as sentinels and failure codes).
       //
-      //  = WHOA WHOA WHOA. We need to take a step back. Right now, we use (ref) as a souped-up smart 
-      //    pointer, and we are proposing using handles instead of smart pointers. What if there's an 
-      //    approach in between, though? We only need two things: index fixup and refcounting. So what if 
-      //    we just use std::shared_ptr and rely on the use_count member function to know how many things 
-      //    are using the target object?
+      //  - The bit-offset would of course be 0 by default, and would be unused in basically every other 
+      //    situation, including when the functors are invoked on the containing type.
       //
-      //     - Using std::shared_ptr would complicate the "managed list" class that we use to automatically 
-      //       fix up indices on the indexed objects. A custom refcount/smart-pointer system might be more 
-      //       amenable to what we want: we don't actually need "smart" object lifetime management; we 
-      //       *just* need to know how many things are referring to an indexed-list item other than the 
-      //       list itself.
-      //
-      //        - Then again, we should probably revise the managed list class. I think individual element 
-      //          access gets pointers but range-based for-loops gets references? It's inconsistent and I 
-      //          hate that.
-      //
-      //        - Rename the managed list class to "indexed_list", make it consistently return references, 
-      //          and make a variation of it that uses shared_ptr. Then, use the shared_ptr one for all 
-      //          lists along with... Wait, no, because if we can't reach the shared_ptr itself (i.e. we 
-      //          have references to the pointed-to object) then we can't use shared_ptr::usage_count. 
-      //          We'll need a custom refcount system.
+      // NOTE: When we implement compile functors, we need to give opcodes a way to access data on the 
+      // containing game variant, i.e. when we're compiling an opcode that refers to a script option, Forge 
+      // label, etc., and they need to get a refcounted pointer to the target data.
       //
       public:
          using load_functor_t        = std::function<bool(uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure

@@ -107,7 +107,6 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
          if (!mp)
             return;
          auto& list  = mp->scriptContent.widgets;
-         auto  it    = std::find(list.begin(), list.end(), this->target);
          auto  index = list.index_of(this->target);
          if (index < 0)
             return;

@@ -14,7 +14,8 @@ namespace cobb {
    class bitarray128 {
       public:
          using storage_type = uint128_t;
-         static constexpr int storage_bits = bits_in<storage_type>;
+         //static constexpr int storage_bits = bits_in<storage_type>; // doesn't work if using cobb::uint128_t which is a struct
+         static constexpr int storage_bits = 128;
          //
          storage_type bits = 0;
          uint8_t      size = 0; // number of bits we're storing; bits are aligned to the righthand side

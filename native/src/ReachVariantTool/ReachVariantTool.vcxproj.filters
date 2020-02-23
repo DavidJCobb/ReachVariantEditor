@@ -304,6 +304,9 @@
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\int128.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -747,9 +750,6 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helpers\managed_pointer_list.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\iterators\pointer_based.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -760,9 +760,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\bitvector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg.h">
@@ -781,6 +778,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\int128.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\bitarray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\indexed_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

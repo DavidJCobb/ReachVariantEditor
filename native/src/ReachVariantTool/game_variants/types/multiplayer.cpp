@@ -95,10 +95,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       //
       sd.strings.read(stream);
       //
-      for (auto traits : t)
-         traits->postprocess_string_indices(sd.strings);
-      for (auto option : o)
-         option->postprocess_string_indices(sd.strings);
+      for (auto& traits : t)
+         traits.postprocess_string_indices(sd.strings);
+      for (auto& option : o)
+         option.postprocess_string_indices(sd.strings);
    }
    this->stringTableIndexPointer.read(stream);
    this->localizedName.read(stream);
@@ -247,9 +247,9 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    }
    error_report.state = GameEngineVariantLoadError::load_state::success;
    {  // Postprocess
-      for (auto trigger : this->scriptContent.triggers) {
-         trigger->postprocess(this);
-         for (auto opcode : trigger->opcodes)
+      for (auto& trigger : this->scriptContent.triggers) {
+         trigger.postprocess(this);
+         for (auto* opcode : trigger.opcodes)
             opcode->postprocess(this);
       }
       //
@@ -340,11 +340,11 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       auto& t = sd.traits;
       auto& o = sd.options;
       bits.write(t.size(), cobb::bitcount(Megalo::Limits::max_script_traits));
-      for (auto traits : t)
-         traits->write(bits);
+      for (auto& traits : t)
+         traits.write(bits);
       bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
-      for (auto option : o)
-         option->write(bits);
+      for (auto& option : o)
+         option.write(bits);
       sd.strings.write(bits);
    }
    this->stringTableIndexPointer.write(bits);
@@ -381,12 +381,12 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          opcode.write(bits);
       //
       bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
-      for (auto trigger : content.triggers)
-         trigger->write(bits);
+      for (auto& trigger : content.triggers)
+         trigger.write(bits);
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
-      for (auto stat : content.stats)
-         stat->write(bits);
+      for (auto& stat : content.stats)
+         stat.write(bits);
       //
       {  // Script variable declarations
          auto& v = content.variables;
@@ -397,15 +397,15 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       }
       //
       bits.write(content.widgets.size(), cobb::bitcount(Megalo::Limits::max_script_widgets));
-      for (auto widget : content.widgets)
-         widget->write(bits);
+      for (auto& widget : content.widgets)
+         widget.write(bits);
       //
       content.entryPoints.write(bits);
       content.usedMPObjectTypes.write(bits);
       //
       bits.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));
-      for (auto label : content.forgeLabels)
-         label->write(bits);
+      for (auto& label : content.forgeLabels)
+         label.write(bits);
    }
    if (this->encodingVersion >= 0x6B) // TU1 encoding version (stock is 0x6A)
       this->titleUpdateData.write(bits);
@@ -432,12 +432,12 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
       auto& stringTable = clone->scriptData.strings;
       auto& cd = clone->scriptData;
       auto& cc = clone->scriptContent;
-      for (auto option : cd.options)
-         option->postprocess_string_indices(stringTable);
-      for (auto traits : cd.traits)
-         traits->postprocess_string_indices(stringTable);
-      for (auto stat : cc.stats)
-         stat->postprocess_string_indices(stringTable);
+      for (auto& option : cd.options)
+         option.postprocess_string_indices(stringTable);
+      for (auto& traits : cd.traits)
+         traits.postprocess_string_indices(stringTable);
+      for (auto& stat : cc.stats)
+         stat.postprocess_string_indices(stringTable);
    }
    return clone;
 }

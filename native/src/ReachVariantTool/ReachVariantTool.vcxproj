@@ -235,10 +235,10 @@
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.h" />
-    <ClInclude Include="helpers\bitvector.h" />
+    <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
-    <ClInclude Include="helpers\managed_pointer_list.h" />
+    <ClInclude Include="helpers\indexed_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
     <ClInclude Include="helpers\pointer_list.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />

@@ -15,10 +15,10 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
          return;
       Megalo::Decompiler decompiler(*variant);
       auto& triggers = mp->scriptContent.triggers;
-      for (auto* trigger : triggers) {
-         if (trigger->entryType == Megalo::entry_type::subroutine)
+      for (auto& trigger : triggers) {
+         if (trigger.entryType == Megalo::entry_type::subroutine)
             continue;
-         trigger->decompile(decompiler);
+         trigger.decompile(decompiler);
          decompiler.write_line("");
       }
       const QSignalBlocker blocker(this->ui.output);

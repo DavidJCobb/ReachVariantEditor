@@ -10,7 +10,7 @@ namespace cobb {
 
    /*
 
-      MANAGED LIST
+      INDEXED LIST
 
       A vector of pointers with the following features:
 
@@ -25,7 +25,7 @@ namespace cobb {
           - I'm not sure that using functions to swap iterators will work, though...
 
    */
-   template<typename T, size_t max_count = std::numeric_limits<size_t>::max()> class managed_list {
+   template<typename T, size_t max_count = std::numeric_limits<size_t>::max()> class indexed_list {
       protected:
          // Code to check if a type has an (index) member. Changes made to detect and avoid 
          // breaking on non-class/non-struct types.
@@ -48,14 +48,15 @@ namespace cobb {
          //
       public:
          static constexpr bool type_has_index_member = _type_has_index_member_v<T>;
-         using value_type = T*;
+         using value_type = T;
+         using entry_type = T*;
          using size_type  = size_t;
          using reference  = T&;
          using const_reference = const T&;
-         using iterator       = ::cobb::iterators::pointer_based::iterator<value_type>;
-         using const_iterator = ::cobb::iterators::pointer_based::const_iterator<value_type>;
-         using reverse_iterator       = ::cobb::iterators::pointer_based::reverse_iterator<value_type>;
-         using const_reverse_iterator = ::cobb::iterators::pointer_based::const_reverse_iterator<value_type>;
+         using iterator       = ::cobb::iterators::pointer_based::ptr_ref_iterator<value_type>;
+         using const_iterator = ::cobb::iterators::pointer_based::ptr_ref_const_iterator<value_type>;
+         using reverse_iterator = ::cobb::iterators::pointer_based::ptr_ref_reverse_iterator<value_type>;
+         using const_reverse_iterator = ::cobb::iterators::pointer_based::ptr_ref_const_reverse_iterator<value_type>;
          //
       protected:
          template<bool has_index> static void __set_element_index(T& item, size_t i) {}
@@ -71,12 +72,12 @@ namespace cobb {
             return It(&this->_list[i]);
          }
          //
-         value_type* _list     = nullptr;
+         entry_type* _list     = nullptr;
          size_t      _size     = 0;
          size_t      _capacity = 0;
          //
       public:
-         ~managed_list() {
+         ~indexed_list() {
             for (size_type i = 0; i < this->_size; i++)
                delete this->data()[i];
             this->_size = 0;
@@ -103,12 +104,12 @@ namespace cobb {
             if (this->_capacity >= c)
                return;
             auto old = this->_list;
-            auto next = (value_type*)malloc(c * sizeof(value_type));
+            auto next = (entry_type*)malloc(c * sizeof(entry_type));
             for (size_type i = 0; i < c; i++) {
                if (i < this->_size) {
                   next[i] = this->_list[i];
                } else {
-                  next[i] = value_type();
+                  next[i] = entry_type();
                }
             }
             this->_capacity = c;
@@ -122,7 +123,7 @@ namespace cobb {
             if (this->_capacity < newSize) {
                this->reserve(newSize);
                for (size_type i = this->_size; i < newSize; i++)
-                  this->_list[i] = value_type();
+                  this->_list[i] = entry_type();
                this->_size = newSize;
             } else {
                this->_size = newSize;
@@ -132,7 +133,7 @@ namespace cobb {
          }
          void shrink_to_fit() noexcept {
             auto old = this->_list;
-            auto next = (value_type*)malloc(this->_size * sizeof(value_type));
+            auto next = (entry_type*)malloc(this->_size * sizeof(entry_type));
             for (size_type i = 0; i < this->_size; i++)
                if (i < this->_size)
                   next[i] = this->_list[i];
@@ -159,13 +160,19 @@ namespace cobb {
                return true;
             return false;
          }
-         int32_t index_of(value_type item) const noexcept {
+         int32_t index_of(reference item) const noexcept {
+            for (size_type i = 0; i < this->_size; i++)
+               if (this->data()[i] == &item)
+                  return i;
+            return -1;
+         }
+         int32_t index_of(entry_type item) const noexcept {
             for (size_type i = 0; i < this->_size; i++)
                if (this->data()[i] == item)
                   return i;
             return -1;
          }
-         void push_back(value_type item) {
+         void push_back(entry_type item) {
             if (!item || this->full())
                return;
             if (this->_size >= this->_capacity)
@@ -174,10 +181,10 @@ namespace cobb {
             _set_element_index(*item, this->_size);
             ++this->_size;
          }
-         value_type emplace_back() {
+         entry_type emplace_back() {
             if (this->full())
-               return false;
-            T* item = new T;
+               return nullptr;
+            entry_type item = new T;
             this->push_back(item);
             return item;
          }
@@ -191,8 +198,8 @@ namespace cobb {
             _set_element_index(*y, b);
          }
          //
-         inline value_type* data() noexcept { return this->_list; }
-         inline const value_type* data() const noexcept { return this->_list; }
+         inline entry_type* data() noexcept { return this->_list; }
+         inline const entry_type* data() const noexcept { return this->_list; }
          //
          inline reference operator[](size_type i) noexcept { return *this->data()[i]; }
          inline const_reference operator[](size_type i) const noexcept { return *this->data()[i]; }
@@ -222,11 +229,12 @@ namespace cobb {
          inline const_reverse_iterator rbegin() const noexcept { return this->rcbegin(); }
          inline const_reverse_iterator rend()   const noexcept { return this->rcend(); }
          //
-         operator std::vector<T*>() const noexcept {
-            std::vector<T*> result;
+         operator std::vector<entry_type>() const noexcept {
+            auto data = this->data();
+            std::vector<entry_type> result;
             result.reserve(this->size());
-            for (auto item : *this)
-               result.push_back(item);
+            for (size_type i = 0; i < this->_size; i++)
+               result.push_back(data[i]);
             return result;
          }
    };
