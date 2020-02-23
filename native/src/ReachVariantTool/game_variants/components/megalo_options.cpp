@@ -112,8 +112,6 @@ ReachMegaloOptionValueEntry* ReachMegaloOption::add_value() noexcept {
 void ReachMegaloOption::delete_value(ReachMegaloOptionValueEntry* target) noexcept {
    if (!target)
       return;
-   if (target->get_inbound_references().size()) // shouldn't be possible; nothing external can refer to an option's enum values
-      return;
    auto& list = this->values;
    auto  it   = std::find(list.begin(), list.end(), target);
    if (it == list.end())

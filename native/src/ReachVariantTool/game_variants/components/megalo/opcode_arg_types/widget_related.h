@@ -19,8 +19,8 @@ namespace Megalo {
          static constexpr int16_t index_of_none = -1;
          static constexpr int16_t max_index     = Limits::max_script_widgets;
          //
-         int16_t                   index = index_of_none;
-         ref<HUDWidgetDeclaration> value = decltype(value)::make(*this);
+         int16_t index = index_of_none;
+         cobb::refcount_ptr<HUDWidgetDeclaration> value;
          bool postprocessed = false;
          //
          virtual bool read(cobb::ibitreader& stream) noexcept override;

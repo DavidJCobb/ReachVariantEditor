@@ -66,7 +66,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       if (index >= table.size())
          return;
       auto& string = *table.strings[index];
-      if (string.get_inbound_references().size())
+      if (string.get_refcount())
          this->ui.buttonDelete->setDisabled(true);
    });
    QObject::connect(this->ui.list, &QListWidget::itemDoubleClicked, [this](QListWidgetItem* target) {
@@ -119,7 +119,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       auto& table = mp->scriptData.strings;
       if (index < 0 || index > table.strings.size())
          return;
-      if (table.strings[index]->get_inbound_references().size()) {
+      if (table.strings[index]->get_refcount()) {
          QMessageBox::information(this, tr("Cannot remove string"), tr("This string is still in use by the gametype or its script. It cannot be removed at this time."));
          return;
       }

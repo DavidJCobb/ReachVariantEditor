@@ -45,7 +45,7 @@ namespace MegaloEx {
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto obj = (Megalo::ReachForgeLabel*)(cobb::reference_tracked_object*)relObjs[fragment];
+            auto obj = relObjs[fragment].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
@@ -59,7 +59,7 @@ namespace MegaloEx {
             return true;
          },
          [](uint8_t fragment, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            auto obj = (Megalo::ReachForgeLabel*)(cobb::reference_tracked_object*)relObjs[fragment];
+            auto obj = relObjs[fragment].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   cobb::sprintf(out, "\"%s\"", obj->name->english()); // TODO: this will break if the name contains double-quotes

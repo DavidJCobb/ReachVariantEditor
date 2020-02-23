@@ -2,7 +2,7 @@
 #include <cassert>
 #include <string>
 #include "../../../helpers/bitwriter.h"
-#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
 #include "enums.h"
@@ -110,7 +110,7 @@ namespace Megalo {
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
    };
    
-   class OpcodeArgValue : public cobb::reference_tracked_object {
+   class OpcodeArgValue {
       public:
          virtual bool read(cobb::ibitreader&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;

@@ -3,7 +3,7 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
-#include "../helpers/reference_tracked_object.h"
+#include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
 
@@ -41,9 +41,9 @@ class ReachStringTable;
 
 using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
 using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
-using MegaloStringRef           = cobb::reference_tracked_object::ref<ReachString>;
+using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
-class ReachString : public cobb::reference_tracked_object {
+class ReachString : public cobb::refcountable {
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 

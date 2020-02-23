@@ -64,7 +64,7 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       auto label = this->getLabel();
       if (!label)
          return;
-      if (label->get_inbound_references().size()) {
+      if (label->get_refcount()) {
          QMessageBox::information(this, tr("Cannot remove Forge label"), tr("This Forge label is still in use by the gametype script. It cannot be removed at this time."));
          return;
       }

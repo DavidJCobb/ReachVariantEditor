@@ -296,7 +296,7 @@ ReachString* ReachStringTable::add_new() noexcept {
 void ReachStringTable::remove(size_t index) noexcept {
    if (index >= this->size())
       return;
-   if (this->strings[index]->get_inbound_references().size())
+   if (this->strings[index]->get_refcount())
       return;
    this->strings.erase(this->strings.begin() + index);
 }

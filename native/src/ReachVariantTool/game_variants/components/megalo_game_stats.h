@@ -2,10 +2,10 @@
 #include "../../helpers/bitnumber.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
-#include "../../helpers/reference_tracked_object.h"
+#include "../../helpers/refcounting.h"
 #include "../../helpers/stream.h"
 
-class ReachMegaloGameStat : public cobb::reference_tracked_object {
+class ReachMegaloGameStat : public cobb::indexed_refcountable {
    public:
       enum class Format : uint8_t {
          number,
@@ -20,7 +20,7 @@ class ReachMegaloGameStat : public cobb::reference_tracked_object {
          obsolete_2,
       };
       int8_t index = -1;
-      MegaloStringRef   name = MegaloStringRef::make(*this);
+      MegaloStringRef   name;
       MegaloStringIndex nameIndex;
       Format format      = Format::number;
       Sort   sortOrder   = Sort::ascending;

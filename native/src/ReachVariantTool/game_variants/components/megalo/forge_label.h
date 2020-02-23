@@ -3,13 +3,16 @@
 #include "../../../helpers/bitnumber.h"
 #include "../../../helpers/bitwriter.h"
 #include "../../../formats/localized_string_table.h"
-#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
 
 namespace Megalo {
-   class ReachForgeLabel : public cobb::reference_tracked_object {
+   class ReachForgeLabel : public cobb::indexed_refcountable {
+      //
+      // NOTES: This Forge Label's (index) field must be updated at the start of the game variant save process so trigger opcode arguments know what index to refer to each label with
+      //
       public:
          struct requirement_flags {
             requirement_flags() = delete;
@@ -21,15 +24,13 @@ namespace Megalo {
          };
          using requirement_int   = std::underlying_type_t<requirement_flags::type>;
          //
-         MegaloStringRef           name = MegaloStringRef::make(*this);
+         MegaloStringRef           name;
          MegaloStringIndexOptional nameIndex;
          cobb::bitnumber<3, requirement_int> requirements = 0; // testing indicates that these actually aren't requirements but I don't know what they are yet
          object_type_index_optional  requiredObjectType = -1;
          const_team_index            requiredTeam       = Megalo::const_team::none;
          cobb::bytenumber<int16_t>   requiredNumber     = 0;
          cobb::bitnumber<7, uint8_t> mapMustHaveAtLeast = 0;
-         //
-         mutable uint32_t index = -1; // this Forge label's index in the list of all Forge labels; must be updated at the start of the game variant save process so trigger opcode arguments know what index to refer to each label with
          //
          void read(cobb::ibitreader&) noexcept;
          void postprocess_string_indices(ReachStringTable& table) noexcept;

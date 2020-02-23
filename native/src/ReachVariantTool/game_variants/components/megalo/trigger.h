@@ -10,7 +10,6 @@
 #include "../../../helpers/bitnumber.h"
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/bitwise.h"
-#include "../../../helpers/reference_tracked_object.h"
 #include "../../../helpers/stream.h"
 #include "decompiler/decompiler.h"
 
@@ -41,7 +40,7 @@ namespace Megalo {
       // Halo 4: incident
    };
 
-   class Trigger : public cobb::reference_tracked_object {
+   class Trigger {
       private:
          using _fli = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t>;
       public:
@@ -49,8 +48,8 @@ namespace Megalo {
          //
          cobb::bitnumber<3, block_type> blockType = block_type::normal;
          cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
-         mutable _fli         forgeLabelIndex = -1; // Forge label index for block_type::for_each_object_with_label
-         ref<ReachForgeLabel> forgeLabel      = decltype(forgeLabel)::make(*this);
+         mutable _fli forgeLabelIndex = -1; // Forge label index for block_type::for_each_object_with_label
+         cobb::refcount_ptr<ReachForgeLabel> forgeLabel;
          struct {
             //
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 

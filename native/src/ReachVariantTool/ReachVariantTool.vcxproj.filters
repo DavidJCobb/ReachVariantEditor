@@ -208,9 +208,6 @@
     <ClCompile Include="helpers\steam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="helpers\reference_tracked_object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\script_editor\page_forge_labels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -729,9 +726,6 @@
     <ClInclude Include="helpers\steam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helpers\reference_tracked_object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -787,6 +781,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\indexed_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\refcounting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

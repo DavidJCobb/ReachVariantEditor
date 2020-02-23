@@ -1,7 +1,7 @@
 #pragma once
 #include "../../base.h"
 #include "../../../helpers/bitarray.h"
-#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/refcounting.h"
 #include <functional>
 #include <QString>
 
@@ -9,7 +9,7 @@ namespace MegaloEx {
    class Compiler;
 
    class OpcodeArgValue;
-   using arg_rel_obj_list_t = cobb::reference_tracked_object::ref<cobb::reference_tracked_object>[4];
+   using arg_rel_obj_list_t = cobb::refcount_ptr<cobb::indexed_refcountable>[4];
 
    enum class arg_consume_result {
       failure,
@@ -34,32 +34,26 @@ namespace MegaloEx {
       // that for each relevant-object slot, we have a bit offset and a bitcount; if we do it that way, 
       // then we might not even need to rely on per-typeinfo functors to do index fixup, since the info 
       // needed for a generic approach is already there. (The bit-range can't be static; it would have 
-      // to be identified and set by the load and compile functors.) To allow for this, however, we'd 
-      // have to redefine arg_rel_obj_list_t as an array of structs each consisting of a (ref) and the 
-      // bit range, and I'm not sure that's possible due to how (ref) is set up.
-      //
-      // Honestly, we should swap the existing reference-tracking system for a simple refcount. The 
-      // reference-tracking system is only useful if you want to follow references back to their source 
-      // a la the Skyrim Creation Kit's "Use Info," which was an early design goal here but which is 
-      // quickly becoming more trouble than it's worth. A simple refcount accomplishes our more 
-      // immediate goal of knowing when something is in use and preventing its deletion by the user 
-      // until such time as it is no longer referred to by anything.
-      //
-      //  - Right now, we don't properly initialize the cobb::reference_tracked_object::ref array anyway, 
-      //    so the individual refs aren't aware of their containing/owning object and the smart pointer 
-      //    reference-tracking behavior is broken anyway.
+      // to be identified and set by the load and compile functors.)
       //
       //  - We should have all reference-tracked objects inherit from a common base class which contains 
       //    a refcount and an index, and call this cobb::indexed_refcountable. That way, we can access 
       //    the objects' indices (when used) without having to know their specific type, which will be 
       //    necessary for a generic index-fixup system for opcode arguments.
+      //    
+      //     - Hm... This works for everything except string table entries which, by virtue of having 
+      //       references to their owning tables, are able to identify their indices dynamically. They 
+      //       have an (index) member function instead of an (index) member, and they aren't stored in 
+      //       an indexed_list. Currently we just have them inherit from cobb::refcountable but we WILL 
+      //       need to address this one way or another, even if it's just by refactoring the string 
+      //       table class to use indexed_list.
       //
-      //  - I think the handle/refcount system is the best bet. We'd make (arg_rel_obj_list_t) an array 
-      //    of structs consisting of a handle, a bit offset, and a bitcount.
+      //  - We'd make (arg_rel_obj_list_t) an array of structs consisting of a cobb::refcount_ptr, a bit 
+      //    offset, and a bitcount.
       //
-      //     = Actually, it'd be more efficient to make it a single struct containing one array of handles, 
+      //     = Actually, it'd be more efficient to make it a single struct containing one array of pointers, 
       //       and another array of bit-offset/bitcount pairs. That'll pack better in memory, whereas an 
-      //       array of handles+bit-offsets+bitcounts will have padding bytes between each element.
+      //       array of pointers+offsets+counts will have padding bytes between each element.
       //
       // TODO: Below, we point out that for nested types and decode functors, the containing type's functor 
       // needs to copy the bit-array and shift it before invoking the contained type's functor, since the 
@@ -125,7 +119,7 @@ namespace MegaloEx {
          {}
    };
    
-   class OpcodeArgValue : public virtual IGameVariantDataObjectNeedingPostprocess, cobb::reference_tracked_object {
+   class OpcodeArgValue : public virtual IGameVariantDataObjectNeedingPostprocess {
       //
       // This class stores only the raw bits that represent the argument value, and a reference to a "typeinfo" 
       // object. The typeinfo object is capable of loading raw bits from a file, compiling a script argument into 

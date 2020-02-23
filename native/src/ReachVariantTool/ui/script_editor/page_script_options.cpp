@@ -167,7 +167,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       QObject::connect(this->ui.buttonOptionsDelete, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
             return;
-         if (this->targetOption->get_inbound_references().size()) {
+         if (this->targetOption->get_refcount()) {
             QMessageBox::information(this, tr("Cannot remove option"), tr("This option is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }

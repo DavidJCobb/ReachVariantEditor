@@ -15,8 +15,8 @@ namespace Megalo {
       public:
          static constexpr int16_t max_index = Limits::max_script_traits;
          //
-         int16_t                      index = 0;
-         ref<ReachMegaloPlayerTraits> value = decltype(value)::make(*this);
+         int16_t index = 0;
+         cobb::refcount_ptr<ReachMegaloPlayerTraits> value;
          bool postprocessed = false;
          //
          virtual bool read(cobb::ibitreader& stream) noexcept override;

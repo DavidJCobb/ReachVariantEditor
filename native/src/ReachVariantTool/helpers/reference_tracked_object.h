@@ -12,6 +12,10 @@ namespace cobb {
       track of inbound and outbound references from and to other reference_tracked_objects, but 
       only when those references exist as (reference_tracked_object::ref)s.
 
+      This system's main advantage over simple refcounts is that you can follow references bidirec-
+      tionally, i.e. given some object you can identify all of the other objects that refer to it. 
+      The main disadvantages are... well, see below.
+
       USAGE EXAMPLE:
 
       class some_data : public reference_tracked_object {}

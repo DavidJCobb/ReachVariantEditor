@@ -330,13 +330,12 @@ class ReachPlayerTraits {
       #endif
 };
 
-class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::reference_tracked_object {
+class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::indexed_refcountable {
    public:
-      MegaloStringRef name = MegaloStringRef::make(*this);
-      MegaloStringRef desc = MegaloStringRef::make(*this);
+      MegaloStringRef name;
+      MegaloStringRef desc;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
-      uint32_t index = 0; // used for write; should be fixed up before saving any data
       //
       void read(cobb::ibitreader& stream) noexcept {
          this->nameIndex.read(stream);

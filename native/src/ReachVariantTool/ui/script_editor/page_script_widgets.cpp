@@ -98,7 +98,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
       QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
          if (!this->target)
             return;
-         if (this->target->get_inbound_references().size()) {
+         if (this->target->get_refcount()) {
             QMessageBox::information(this, tr("Cannot remove HUD widget"), tr("This HUD widget is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }

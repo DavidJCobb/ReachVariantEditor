@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "../../../helpers/bitwriter.h"
-#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
 #include "enums.h"
