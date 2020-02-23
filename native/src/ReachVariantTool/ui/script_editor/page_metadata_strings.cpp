@@ -25,9 +25,9 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
          if (!string)
             return;
       } else
-         string = table.strings[0];
+         string = &table.strings[0];
       //
-      auto index = string->index(); // should always be zero
+      auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
          this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
@@ -57,9 +57,9 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
          if (!string)
             return;
       } else
-         string = table.strings[0];
+         string = &table.strings[0];
       //
-      auto index = string->index(); // should always be zero
+      auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
          this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
@@ -89,9 +89,9 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
          if (!string)
             return;
       } else
-         string = table.strings[0];
+         string = &table.strings[0];
       //
-      auto index = string->index(); // should always be zero
+      auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
          this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
@@ -132,8 +132,8 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       if (!table.size()) {
          widget->setText("");
       } else {
-         ReachString* string = table.strings[0];
-         widget->setText(QString::fromUtf8(string->english().c_str()));
+         ReachString& string = table.strings[0];
+         widget->setText(QString::fromUtf8(string.english().c_str()));
       }
       button->setDisabled(false);
    }
@@ -144,8 +144,8 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       if (!table.size()) {
          widget->setText("");
       } else {
-         ReachString* string = table.strings[0];
-         widget->setText(QString::fromUtf8(string->english().c_str()));
+         ReachString& string = table.strings[0];
+         widget->setText(QString::fromUtf8(string.english().c_str()));
       }
       button->setDisabled(false);
    }
@@ -156,8 +156,8 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       if (!table.size()) {
          widget->setText("");
       } else {
-         ReachString* string = table.strings[0];
-         widget->setText(QString::fromUtf8(string->english().c_str()));
+         ReachString& string = table.strings[0];
+         widget->setText(QString::fromUtf8(string.english().c_str()));
       }
       button->setDisabled(false);
    }

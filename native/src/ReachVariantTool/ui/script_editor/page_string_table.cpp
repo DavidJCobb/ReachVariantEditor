@@ -65,7 +65,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       auto& table = mp->scriptData.strings;
       if (index >= table.size())
          return;
-      auto& string = *table.strings[index];
+      auto& string = table.strings[index];
       if (string.get_refcount())
          this->ui.buttonDelete->setDisabled(true);
    });
@@ -83,7 +83,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       auto  index = list->currentRow();
       if (index < 0 || index > table.strings.size())
          return;
-      auto& string = *table.strings[index];
+      auto& string = table.strings[index];
       uint32_t flags = 0;
       if (table.is_at_count_limit())
          flags |= ReachStringFlags::DisallowSaveAsNew;
@@ -119,7 +119,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       auto& table = mp->scriptData.strings;
       if (index < 0 || index > table.strings.size())
          return;
-      if (table.strings[index]->get_refcount()) {
+      if (table.strings[index].get_refcount()) {
          QMessageBox::information(this, tr("Cannot remove string"), tr("This string is still in use by the gametype or its script. It cannot be removed at this time."));
          return;
       }
@@ -145,7 +145,7 @@ void ScriptEditorPageStringTable::updateFromVariant(GameVariant* variant) {
    auto& table = mp->scriptData.strings;
    auto  count = table.strings.size();
    for (size_t i = 0; i < count; i++) {
-      auto& string = *table.strings[i];
+      auto& string = table.strings[i];
       auto  item   = new QListWidgetItem();
       item->setText(QString::fromUtf8(string.english().c_str()));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&string));

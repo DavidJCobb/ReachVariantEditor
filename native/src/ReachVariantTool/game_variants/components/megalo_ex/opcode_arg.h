@@ -36,18 +36,6 @@ namespace MegaloEx {
       // needed for a generic approach is already there. (The bit-range can't be static; it would have 
       // to be identified and set by the load and compile functors.)
       //
-      //  - We should have all reference-tracked objects inherit from a common base class which contains 
-      //    a refcount and an index, and call this cobb::indexed_refcountable. That way, we can access 
-      //    the objects' indices (when used) without having to know their specific type, which will be 
-      //    necessary for a generic index-fixup system for opcode arguments.
-      //    
-      //     - Hm... This works for everything except string table entries which, by virtue of having 
-      //       references to their owning tables, are able to identify their indices dynamically. They 
-      //       have an (index) member function instead of an (index) member, and they aren't stored in 
-      //       an indexed_list. Currently we just have them inherit from cobb::refcountable but we WILL 
-      //       need to address this one way or another, even if it's just by refactoring the string 
-      //       table class to use indexed_list.
-      //
       //  - We'd make (arg_rel_obj_list_t) an array of structs consisting of a cobb::refcount_ptr, a bit 
       //    offset, and a bitcount.
       //

@@ -24,6 +24,12 @@ namespace cobb {
 
           - I'm not sure that using functions to swap iterators will work, though...
 
+       - The vector owns all contained pointers and its destructor will delete the pointed-
+         to objects.
+
+       - One of the template parameters is a maximum count; the vector will reject attempts 
+         to insert elements if that would push the current size past that maximum.
+
    */
    template<typename T, size_t max_count = std::numeric_limits<size_t>::max()> class indexed_list {
       protected:
@@ -172,16 +178,17 @@ namespace cobb {
                   return i;
             return -1;
          }
-         void push_back(entry_type item) {
+         entry_type push_back(entry_type item) {
             if (!item || this->full())
-               return;
+               return nullptr;
             if (this->_size >= this->_capacity)
                this->reserve(this->_size + 1);
             this->data()[this->_size] = item;
             _set_element_index(*item, this->_size);
             ++this->_size;
+            return item;
          }
-         entry_type emplace_back() {
+         entry_type emplace_back() { // TODO: take and forward constructor args
             if (this->full())
                return nullptr;
             entry_type item = new T;

@@ -69,12 +69,15 @@ namespace Megalo {
       if (this->stringIndex >= 0) {
          auto& list = newlyLoaded->scriptData.strings;
          if (this->stringIndex < list.size())
-            this->string = list.strings[this->stringIndex];
+            this->string = list.get_entry(this->stringIndex);
       }
       for (uint8_t i = 0; i < this->tokenCount; i++)
          this->tokens[i].value->postprocess(newlyLoaded);
    }
    void OpcodeArgValueStringTokens2::write(cobb::bitwriter& stream) const noexcept {
+      if (this->string) {
+         this->stringIndex = this->string->index;
+      }
       this->stringIndex.write(stream);
       this->tokenCount.write(stream);
       for (uint8_t i = 0; i < this->tokenCount; i++)

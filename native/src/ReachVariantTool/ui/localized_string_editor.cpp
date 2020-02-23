@@ -49,7 +49,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          s->strings[index] = control->toPlainText().toUtf8();
       }
       if (!this->_isNotInStandardStringTable)
-         ReachEditorState::get().stringModified(s->index());
+         ReachEditorState::get().stringModified(s->index);
       this->accept();
    });
    QObject::connect(this->ui.buttonSaveAsNew, &QPushButton::clicked, [this]() {
@@ -113,7 +113,7 @@ void LocalizedStringEditorModal::updateControls() {
    auto  mp     = editor.multiplayerData();
    //
    if (target) {
-      this->ui.labelStringIndex->setText(this->ui.labelStringIndex->text().arg(target->index()));
+      this->ui.labelStringIndex->setText(this->ui.labelStringIndex->text().arg(target->index));
       //
       for (auto& control : this->languageFields) {
          auto lang = control->property("ReachLanguage");

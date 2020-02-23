@@ -17,7 +17,7 @@ namespace Megalo {
    }
    void ReachForgeLabel::write(cobb::bitwriter& stream) noexcept {
       if (this->name) {
-         this->nameIndex = this->name->index();
+         this->nameIndex = this->name->index;
       } else
          this->nameIndex = -1;
       this->nameIndex.write(stream);

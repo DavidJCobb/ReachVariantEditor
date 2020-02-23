@@ -203,6 +203,12 @@ int main(int argc, char *argv[]) {
 //       have both OpcodeArgValue subclasses and OpcodeArgTypeinfo instances for every 
 //       argument type.
 //
+//  - POTENTIAL EDITOR IMPROVEMENTS:
+//
+//     - String table: warn when loaded count exceeds max count
+//
+//     - String table: offer option to recover work if string buffer is too large to save
+//
 // ======================================================================================
 //
 //  - Consider adding an in-app help manual explaining the various settings and 

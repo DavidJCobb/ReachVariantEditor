@@ -3,6 +3,7 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
+#include "../helpers/indexed_list.h"
 #include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
@@ -43,7 +44,7 @@ using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8
 using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
 using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
-class ReachString : public cobb::refcountable {
+class ReachString : public cobb::indexed_refcountable {
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 
@@ -63,8 +64,6 @@ class ReachString : public cobb::refcountable {
       ReachStringTable& owner;
       std::array<int, reach::language_count>         offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
-      //
-      int32_t index() const noexcept;
       //
       void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
@@ -105,17 +104,17 @@ class ReachStringTable {
          count_bitlength(cobb::bitcount(max_count))
       {}
       //
-      std::vector<cobb::unique_pointer<ReachString>> strings;
+      cobb::indexed_list<ReachString> strings;
       //
    protected:
       void* _make_buffer(cobb::ibitreader&) const noexcept;
    public:
       bool read(cobb::ibitreader&) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) noexcept;
       //
       ReachString* get_entry(size_t index) noexcept {
          if (index < this->strings.size())
-            return this->strings[index];
+            return &this->strings[index];
          return nullptr;
       }
       //

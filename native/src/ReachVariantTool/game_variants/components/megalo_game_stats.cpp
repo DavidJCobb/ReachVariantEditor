@@ -11,7 +11,7 @@ void ReachMegaloGameStat::postprocess_string_indices(ReachStringTable& table) no
 }
 void ReachMegaloGameStat::write(cobb::bitwriter& stream) noexcept {
    if (this->name) {
-      this->nameIndex = this->name->index();
+      this->nameIndex = this->name->index;
    } else
       this->nameIndex = 0;
    this->nameIndex.write(stream);

@@ -113,7 +113,7 @@ namespace cobb {
                ptr_ref_iterator(value_type*& v) : item(&v) {}
                ptr_ref_iterator(value_type** v) : item(v) {}
                ptr_ref_iterator(void* v) : item((value_type**)v) {}
-               reference operator->() const noexcept { return **item; }
+               value_type* operator->() const noexcept { return *item; }
                reference operator*() const noexcept { return **item; }
                reference operator[](size_t i) const noexcept { return **(item + i); }
                ptr_ref_iterator& operator+=(size_t i) noexcept { this->item += i; return *this; }
@@ -140,7 +140,7 @@ namespace cobb {
             protected:
                const value_type** item = nullptr;
                //
-               using reference = value_type&;
+               using reference = const value_type&;
                //
             public:
                ptr_ref_const_iterator() {}
@@ -148,9 +148,9 @@ namespace cobb {
                ptr_ref_const_iterator(value_type*& v) : item(&v) {}
                ptr_ref_const_iterator(value_type** v) : item(v) {}
                ptr_ref_const_iterator(void* v) : item((value_type*)v) {}
-               const reference operator->() const noexcept { return **item; }
-               const reference operator*() const noexcept { return **item; }
-               const reference operator[](size_t i) const noexcept { return **(item + i); }
+               const value_type* operator->() const noexcept { return *item; }
+               reference operator*() const noexcept { return **item; }
+               reference operator[](size_t i) const noexcept { return **(item + i); }
                ptr_ref_const_iterator& operator+=(size_t i) noexcept { this->item += i; return *this; }
                ptr_ref_const_iterator& operator-=(size_t i) noexcept { this->item -= i; return *this; }
                ptr_ref_const_iterator operator+(size_t i) const noexcept {

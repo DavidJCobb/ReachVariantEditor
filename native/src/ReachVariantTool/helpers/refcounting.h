@@ -39,6 +39,12 @@ namespace cobb {
             this->_inc();
             return *this;
          }
+         refcount_ptr& operator=(T& v) noexcept {
+            this->_dec();
+            this->target = &v;
+            this->_inc();
+            return *this;
+         }
          refcount_ptr& operator=(const refcount_ptr& other) noexcept {
             this->_dec();
             this->target = other.target;

@@ -345,12 +345,12 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::indexed_r
       void write(cobb::bitwriter& stream) noexcept {
          {  // Correct indices
             if (this->name) {
-               this->nameIndex = this->name->index();
+               this->nameIndex = this->name->index;
             } else
                this->nameIndex = 0;
             //
             if (this->desc) {
-               this->descIndex = this->desc->index();
+               this->descIndex = this->desc->index;
             } else
                this->descIndex = 0;
          }

@@ -17,12 +17,12 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
    if (!owner.isRange) {
       {  // Correct indices
          if (this->name) {
-            this->nameIndex = this->name->index();
+            this->nameIndex = this->name->index;
          } else
             this->nameIndex = 0;
          //
          if (this->desc) {
-            this->descIndex = this->desc->index();
+            this->descIndex = this->desc->index;
          } else
             this->descIndex = 0;
       }
@@ -71,12 +71,12 @@ void ReachMegaloOption::postprocess_string_indices(ReachStringTable& table) noex
 void ReachMegaloOption::write(cobb::bitwriter& stream) noexcept {
    {  // Correct indices
       if (this->name) {
-         this->nameIndex = this->name->index();
+         this->nameIndex = this->name->index;
       } else
          this->nameIndex = 0;
       //
       if (this->desc) {
-         this->descIndex = this->desc->index();
+         this->descIndex = this->desc->index;
       } else
          this->descIndex = 0;
    }

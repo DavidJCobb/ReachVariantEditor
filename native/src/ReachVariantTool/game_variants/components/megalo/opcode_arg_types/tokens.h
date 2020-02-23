@@ -57,7 +57,7 @@ namespace Megalo {
       public:
          static constexpr int max_token_count = 2;
       public:
-         MegaloStringIndexOptional stringIndex = -1; // format string - index in scriptData::strings
+         mutable MegaloStringIndexOptional stringIndex = -1; // format string - index in scriptData::strings
          MegaloStringRef           string;
          cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[max_token_count];

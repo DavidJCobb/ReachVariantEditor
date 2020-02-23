@@ -275,7 +275,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          out << "\r\n\r\n";
          auto& table = mp->scriptData.strings;
          for (size_t i = 0; i < table.strings.size(); i++) {
-            auto& string = *table.strings[i];
+            auto& string = table.strings[i];
             out << "STRING #" << i << ":\r\n";
             for (size_t j = 0; j < string.offsets.size(); j++) {
                out << "   ";

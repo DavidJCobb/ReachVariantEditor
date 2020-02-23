@@ -10,7 +10,7 @@ void ReachTeamData::read(cobb::ibitreader& stream) noexcept {
    this->colorText.read(stream);
    this->fireteamCount.read(stream);
 }
-void ReachTeamData::write(cobb::bitwriter& stream) const noexcept {
+void ReachTeamData::write(cobb::bitwriter& stream) noexcept {
    this->flags.write(stream);
    this->name.write(stream);
    this->initialDesignator.write(stream);
