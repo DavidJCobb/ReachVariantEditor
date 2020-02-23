@@ -51,5 +51,13 @@ namespace cobb {
             uint64_t result = (uint64_t) ((this->bits >> (this->size - offset - count)) & cobb::bitmax(count));
             return result;
          }
+         void overwrite(uint8_t offset, uint8_t count, storage_type bits) {
+            int max_bits = cobb::bitmax(count);
+            int shift_by = this->size - offset - count - 1;
+            storage_type mask = storage_type(max_bits) << shift_by;
+            mask = ~mask;
+            this->bits &= mask;
+            this->bits |= (bits & max_bits) << shift_by;
+         }
    };
 }

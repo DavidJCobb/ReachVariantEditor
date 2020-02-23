@@ -28,19 +28,8 @@ namespace MegaloEx {
    };
    class OpcodeArgTypeinfo {
       //
-      // TODO: WE NEED TO SPEC OUT INDEX-FIXUP BEHAVIOR. Some opcode arguments rely on their relevant-
-      // objects lists to resave their values back to the game variant file. This is mainly the case when 
-      // dealing with objects that exist inside of indexed lists and can be reordered, such as player 
-      // traits and script options: the opcode argument holds a pointer to the object so that when it 
-      // comes time to resave, we can use the index that the object has at the time of saving.
-      //
-      // If we blindly just echo out the originally loaded bits, then we'll break any opcode that refers 
-      // to any object in an indexed list that's been reordered. Accordingly, we've revised how we store 
-      // relevant-objects (and we should probably rename the field to "indexed_objects") such that each 
-      // pointer is accompanied by a bitrange indicating what portion of the loaded bits specifies the 
-      // index of the object (i.e. start bit offset and number of bits). This approach means that we don't 
-      // need per-typeinfo functors to do index fixup; the info needed for a generic approach is already 
-      // there. We just need to write that generic approach.
+      // TODO: WHEN IMPLEMENTING RESAVING, WE NEED TO CALL OpcodeArgValue::do_index_fixup BEFORE WRITING 
+      // THE BINARY ARGUMENT DATA TO THE TARGET FILE.
       //
       // TODO: Below, we point out that for nested types and decode functors, the containing type's functor 
       // needs to copy the bit-array and shift it before invoking the contained type's functor, since the 
@@ -216,6 +205,10 @@ namespace MegaloEx {
       // In other words: whether it's "kosher" to actually use the pointers in (relevant_objects) will vary 
       // between different argument types, so you probably shouldn't touch it from outside the typeinfo functors.
       //
+      // IMPLEMENTATION DETAILS -- MOVE THIS WHEN RESAVING IS IMPLEMENTED: The (do_index_fixup) member function 
+      // must be called early in the save process, before writing any opcode argument binary data to the target 
+      // file.
+      //
       public:
          virtual bool postprocess(GameVariantData* data) override { // IGameVariantDataObjectNeedingPostprocess
             return (this->type.postprocess)(0, this->data, this->relevant_objects, data);
@@ -226,5 +219,7 @@ namespace MegaloEx {
          QString            english; // for debugging
          //
          using bit_storage_type = decltype(data)::storage_type;
+         //
+         void do_index_fixup();
    };
 }

@@ -230,6 +230,12 @@ namespace cobb {
             inline bool operator!() const noexcept {
                return *this == 0;
             }
+            inline uint128_t operator~() const noexcept {
+               uint128_t result = *this;
+               result.a = ~result.a;
+               result.b = ~result.b;
+               return result;
+            }
             #pragma endregion
             //
             #pragma region Comparisons with uint64_t
