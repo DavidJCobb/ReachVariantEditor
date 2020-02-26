@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <QString>
+#include "../../../helpers/bitwise.h"
 
 struct DetailedEnumValueInfo {
    enum class info_type {
@@ -82,5 +83,23 @@ struct DetailedEnum {
       size_t s = this->size();
       for (size_t i = 0; i < s; ++i)
          this->values[i].index = i;
+   }
+   constexpr inline int count_bits() const noexcept {
+      auto s = this->size();
+      if (!s)
+         return 0;
+      return cobb::bitcount(s);
+   }
+   constexpr inline int index_bits() const noexcept {
+      auto s = this->size();
+      if (!s)
+         return 0;
+      return cobb::bitcount(s - 1);
+   }
+   //
+   const DetailedEnumValue* item(uint32_t i) const noexcept {
+      if (i >= this->size())
+         return nullptr;
+      return &this->values[i];
    }
 };

@@ -1,7 +1,39 @@
 #include "all_basic_enums.h"
 #include "../detailed_enum.h"
+#include "../../../helpers/strings.h"
 
 namespace MegaloEx {
+   namespace type_helpers {
+      bool _load_enum_arg(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
+         data.consume(input_bits, e.index_bits());
+         return true;
+      }
+      bool _enum_arg_functor_to_english(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+         uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+         auto item = e.item(index);
+         if (!item) {
+            cobb::sprintf(out, "invalid value %u", index);
+            return true;
+         }
+         QString name = item->get_friendly_name();
+         if (!name.isEmpty()) {
+            out = name.toStdString();
+            return true;
+         }
+         out = item->name;
+         return true;
+      }
+      bool _enum_arg_functor_decompile(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+         uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+         auto item = e.item(index);
+         if (!item) {
+            cobb::sprintf(out, "%u", index);
+            return true;
+         }
+         out = item->name;
+         return true;
+      }
+   }
    namespace types {
       namespace enums {
          auto add_weapon_type = DetailedEnum({
@@ -40,8 +72,8 @@ namespace MegaloEx {
             DetailedEnumValue("|=", DetailedEnumValueInfo::make_friendly_name("bitwise-OR with")),
             DetailedEnumValue("^=", DetailedEnumValueInfo::make_friendly_name("bitwise-XOR with")),
             DetailedEnumValue("~=", DetailedEnumValueInfo::make_friendly_name("bitwise-NOT with")),
-            DetailedEnumValue("<<=", DetailedEnumValueInfo::make_friendly_name("bitshift left by")),
-            DetailedEnumValue(">>=", DetailedEnumValueInfo::make_friendly_name("bitshift right by")),
+            DetailedEnumValue("<<=",  DetailedEnumValueInfo::make_friendly_name("bitshift left by")),
+            DetailedEnumValue(">>=",  DetailedEnumValueInfo::make_friendly_name("bitshift right by")),
             DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("arith? shift left by")),
          });
          auto pickup_priority = DetailedEnum({
@@ -93,8 +125,25 @@ namespace MegaloEx {
       }
 
       //
-      // TODO: typeinfos using the above enums
+      // TODO: typeinfos using the above enums and helpers
       //
-
+      
+      OpcodeArgTypeinfo add_weapon_type = OpcodeArgTypeinfo(
+         QString("Add-Weapon Type"),
+         QString("Indicates how the weapon should be added to the player."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::_load_enum_arg(enums::add_weapon_type, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::_enum_arg_functor_to_english(enums::add_weapon_type, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::_enum_arg_functor_decompile(enums::add_weapon_type, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
    }
 }
