@@ -14,11 +14,7 @@ namespace MegaloEx {
       //
       // FUNCTOR IMPLEMENTATION NOTES:
       //
-      //  - The (fragment) argument is used as an index into the (relObjs) list.
-      //
-      //  - Output functors read the bit buffer from the start (offset 0). If you need to call these 
-      //    functors from another functor (i.e. if there is some argument type that includes this 
-      //    type inside of it), then you must pass a copy of the bitarray shifted appropriately.
+      //  - This type stores a reference to one relevant-object.
       //
       OpcodeArgTypeinfo forge_label = OpcodeArgTypeinfo(
          QString("Forge Label"),
@@ -30,7 +26,8 @@ namespace MegaloEx {
                relObjs.ranges[fs.obj_index].start = data.size;
                relObjs.ranges[fs.obj_index].count = index_bits;
                data.consume(input_bits, index_bits);
-            }
+            } else
+               relObjs.ranges[fs.obj_index].count = 0;
             return true;
          },
          [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess

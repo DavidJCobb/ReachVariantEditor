@@ -13,11 +13,7 @@ namespace MegaloEx {
       //
       // FUNCTOR IMPLEMENTATION NOTES:
       //
-      //  - The (fragment) argument is used as an index into the (relObjs) list.
-      //
-      //  - Output functors read the bit buffer from the start (offset 0). If you need to call these 
-      //    functors from another functor (i.e. if there is some argument type that includes this 
-      //    type inside of it), then you must pass a copy of the bitarray shifted appropriately.
+      //  - This type stores a reference to one relevant-object.
       //
       OpcodeArgTypeinfo player_traits = OpcodeArgTypeinfo(
          QString("Player Traits"),
