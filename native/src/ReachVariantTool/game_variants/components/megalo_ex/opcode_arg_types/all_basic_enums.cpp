@@ -1,14 +1,13 @@
 #include "all_basic_enums.h"
-#include "../detailed_enum.h"
 #include "../../../helpers/strings.h"
 
 namespace MegaloEx {
    namespace type_helpers {
-      bool _load_enum_arg(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
+      bool enum_arg_functor_load(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
          data.consume(input_bits, e.index_bits());
          return true;
       }
-      bool _enum_arg_functor_to_english(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+      bool enum_arg_functor_to_english(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
          uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
          auto item = e.item(index);
          if (!item) {
@@ -21,9 +20,11 @@ namespace MegaloEx {
             return true;
          }
          out = item->name;
+         if (out.empty()) // enum values should never be nameless but just in case
+            cobb::sprintf(out, "%u", index);
          return true;
       }
-      bool _enum_arg_functor_decompile(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+      bool enum_arg_functor_decompile(const DetailedEnum& e, fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
          uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
          auto item = e.item(index);
          if (!item) {
@@ -31,6 +32,8 @@ namespace MegaloEx {
             return true;
          }
          out = item->name;
+         if (out.empty()) // enum values should never be nameless but just in case
+            cobb::sprintf(out, "%u", index);
          return true;
       }
    }
@@ -58,8 +61,8 @@ namespace MegaloEx {
             DetailedEnumValue("secondary"),
          });
          auto grenade_type = DetailedEnum({
-            DetailedEnumValue("frag_grenades"),
-            DetailedEnumValue("plasma_grenades"),
+            DetailedEnumValue("frag_grenades",   DetailedEnumValueInfo::make_friendly_name("frag grenades")),
+            DetailedEnumValue("plasma_grenades", DetailedEnumValueInfo::make_friendly_name("plasma grenades")),
          });
          auto math_operator = DetailedEnum({
             DetailedEnumValue("+=", DetailedEnumValueInfo::make_friendly_name("add")),
@@ -123,27 +126,196 @@ namespace MegaloEx {
             DetailedEnumValue("default"),
          });
       }
-
       //
-      // TODO: typeinfos using the above enums and helpers
-      //
-      
+      #pragma region Typeinfo: add_weapon_type
       OpcodeArgTypeinfo add_weapon_type = OpcodeArgTypeinfo(
          QString("Add-Weapon Type"),
          QString("Indicates how the weapon should be added to the player."),
          OpcodeArgTypeinfo::flags::none,
          //
          [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::_load_enum_arg(enums::add_weapon_type, fs, data, relObjs, input_bits);
+            return type_helpers::enum_arg_functor_load(enums::add_weapon_type, fs, data, relObjs, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
          [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::_enum_arg_functor_to_english(enums::add_weapon_type, fs, data, relObjs, out);
+            return type_helpers::enum_arg_functor_to_english(enums::add_weapon_type, fs, data, relObjs, out);
          },
          [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::_enum_arg_functor_decompile(enums::add_weapon_type, fs, data, relObjs, out);
+            return type_helpers::enum_arg_functor_decompile(enums::add_weapon_type, fs, data, relObjs, out);
          },
          nullptr // TODO: "compile" functor
       );
+      #pragma endregion
+      #pragma region Typeinfo: c_hud_destination
+      OpcodeArgTypeinfo c_hud_destination = OpcodeArgTypeinfo(
+         QString("C-HUD Destination"),
+         QString("Something to do with the UI."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::c_hud_destination, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::c_hud_destination, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::c_hud_destination, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: compare_operator
+      OpcodeArgTypeinfo compare_operator = OpcodeArgTypeinfo(
+         QString("Comparison Operator"),
+         QString("A comparison operator, such as \"less than\" or \"equal to.\""),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::compare_operator, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::compare_operator, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::compare_operator, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: drop_weapon_type
+      OpcodeArgTypeinfo drop_weapon_type = OpcodeArgTypeinfo(
+         QString("Weapon Slot"),
+         QString("Determines whether an opcode affects a player's primary weapon or secondary weapon."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::drop_weapon_type, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::drop_weapon_type, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::drop_weapon_type, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: grenade_type
+      OpcodeArgTypeinfo grenade_type = OpcodeArgTypeinfo(
+         QString("Grenade Type"),
+         QString("Determines what grenade type an opcode uses."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::grenade_type, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::grenade_type, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::grenade_type, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: math_operator
+      OpcodeArgTypeinfo math_operator = OpcodeArgTypeinfo(
+         QString("Math Operator"),
+         QString("An arithmetic or binary operator, such as \"add,\" \"subtract,\" or \"bitwise AND.\""),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::math_operator, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::math_operator, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::math_operator, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: pickup_priority
+      OpcodeArgTypeinfo pickup_priority = OpcodeArgTypeinfo(
+         QString("Pickup Priority"),
+         QString("Determines how the player picks up an item."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::pickup_priority, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::pickup_priority, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::pickup_priority, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: team_disposition
+      OpcodeArgTypeinfo team_disposition = OpcodeArgTypeinfo(
+         QString("Team Disposition"),
+         QString("Unknown. This may be the alliance status between two teams."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::team_disposition, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::team_disposition, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::team_disposition, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: timer_rate
+      OpcodeArgTypeinfo timer_rate = OpcodeArgTypeinfo(
+         QString("Timer Rate"),
+         QString("Determines how quickly a timer-variable counts, and whether it counts up or down."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::timer_rate, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::timer_rate, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::timer_rate, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: waypoint_priority
+      OpcodeArgTypeinfo waypoint_priority = OpcodeArgTypeinfo(
+         QString("Waypoint Priority"),
+         QString("Determines a waypoint's on-screen priority."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::waypoint_priority, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::waypoint_priority, fs, data, relObjs, out);
+         },
+         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::waypoint_priority, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
    }
 }
