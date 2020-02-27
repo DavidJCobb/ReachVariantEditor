@@ -21,7 +21,7 @@ namespace MegaloEx {
          QString(""),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
             if (data.consume(input_bits, 1) == 0) { // absence bit; 0 means we have a value
                relObjs.ranges[fs.obj_index].start = data.size;
                relObjs.ranges[fs.obj_index].count = index_bits;
@@ -30,7 +30,7 @@ namespace MegaloEx {
                relObjs.ranges[fs.obj_index].count = 0;
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
             /*// Checking for absence this way would prevent us from ever handling this type if it were nested inside of another type.
             bool absence = data.size == fs.bit_offset + 1;
             if (absence)
@@ -50,7 +50,7 @@ namespace MegaloEx {
             relObjs.pointers[fs.obj_index] = &list[index];
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
             if (!relObjs.index_is_set(fs.obj_index)) {
                out = "no Forge label";
                return true;
@@ -68,7 +68,7 @@ namespace MegaloEx {
             cobb::sprintf(out, "missing Forge label %u", index);
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
             if (!relObjs.index_is_set(fs.obj_index)) {
                out = "none";
                return true;

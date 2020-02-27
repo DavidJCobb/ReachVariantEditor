@@ -22,7 +22,7 @@ namespace MegaloEx {
       //
       inline bool index_is_set(uint8_t i) const noexcept { return this->pointers[i] || this->ranges[i].count; }
    };
-   struct fragment_specifier {
+   struct arg_functor_state {
       //
       // State object passed to and between functors, to aid in two cases: argument types that include 
       // other argument types as members (e.g. shape-arguments including number-arguments); and argument 
@@ -54,12 +54,12 @@ namespace MegaloEx {
       // label, etc., and they need to get a refcounted pointer to the target data.
       //
       public:
-         using load_functor_t        = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
-         using decode_functor_t      = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
-         using compile_functor_t     = std::function<arg_consume_result(fragment_specifier, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
-         using postprocess_functor_t = std::function<bool(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
+         using load_functor_t        = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
+         using decode_functor_t      = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
+         using compile_functor_t     = std::function<arg_consume_result(arg_functor_state, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
+         using postprocess_functor_t = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
          //
-         static bool default_postprocess_functor(fragment_specifier, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
+         static bool default_postprocess_functor(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
          //
          struct flags {
             flags() = delete;
@@ -132,21 +132,21 @@ namespace MegaloEx {
       // Broadly speaking, "nested" types such as these will work as follows:
       //
       //  - If a type can refer to indexed-refcountable objects via its (relevant_objects) array, then functors' 
-      //    (fragment_specifier)-type argument is used to indicate the first index in that array that is avail-
-      //    able to the functor. The "outer" type's functor will want to pass a fragment specifier with the app-
+      //    (arg_functor_state)-type argument is used to indicate the first index in that array that is avail-
+      //    able to the functor. The "outer" type's functor will want to pass an arg functor state with the app-
       //    ropriate index to the "inner" type's functor.
       //
       //     = The "outer" type's functor should always receive an obj_index of zero.
       //
       //  - The "decode" functors work by reading the already-loaded data and producing some result, e.g. plain-
       //    English representations of the argument or decompiled script code for the argument. These functors 
-      //    need to know where in the binary data to start reading from; the fragment specifier's (bit_offset) 
+      //    need to know where in the binary data to start reading from; the arg_functor_state's (bit_offset) 
       //    field can be used to indicate this.
       //
       //     = The "outer" type's functor should always receive a bit_offset of zero.
       //
-      //  - The "outer" type's functor is not, as of this writing, required to ferry any other fragment-specifier 
-      //    state to "inner" types' functors.
+      //  - The "outer" type's functor is not, as of this writing, required to ferry any other arg_functor_state 
+      //    data to "inner" types' functors.
       //
       // --------------------------------------------------------------------------------------------------------
       //
@@ -159,7 +159,7 @@ namespace MegaloEx {
       //
       // To effect this, an argument type's "compile" functor will be called multiple times -- specifically, once 
       // to start with, and then once more every time it returns (arg_consume_result::still_hungry). When the 
-      // compile functor is invoked directly by the compiler, the fragment-specifier argument's (which_arg) field 
+      // compile functor is invoked directly by the compiler, the arg_functor_state argument's (which_arg) field 
       // will refer to the number of times that functor has been called for that argument. Looking at our example 
       // above, the shape-type compile functor would be on which_arg 0 when processing the shape type (box), 
       // which_arg 1 when processing the first size (5), which_arg 2 when processing the second size (2), 
@@ -168,7 +168,7 @@ namespace MegaloEx {
       // shape's type enum we would use which_arg 0 again.
       //
       // IMPLEMENTATION DETAILS -- MOVE THIS WHEN THE COMPILER IS IMPLEMENTED: The compiler will maintain a local 
-      // variable serving as a counter; this counter will be passed as the fragment-specifier which_arg to 
+      // variable serving as a counter; this counter will be passed as the arg_functor_state::which_arg to 
       // functors. It is initialized to 0, incremented when a functor returns (arg_consume_result::still_hungry), 
       // and reset to 0 instead whenever a functor returns (arg_consume_result::success).
       //

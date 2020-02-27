@@ -20,13 +20,13 @@ namespace MegaloEx {
          QString("Megalo-defined sets of player traits. In Megalo, you don't \"apply\" and \"remove\" traits; rather, you call the \"apply\" function every frame, and the traits vanish when you stop doing that."),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
             relObjs.ranges[fs.obj_index].start = data.size;
             relObjs.ranges[fs.obj_index].count = index_bits;
             data.consume(input_bits, index_bits);
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
             auto mp = dynamic_cast<GameVariantDataMultiplayer*>(vd);
             if (!mp)
                return false;
@@ -37,7 +37,7 @@ namespace MegaloEx {
             relObjs.pointers[fs.obj_index] = &traits[index];
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
             auto obj = relObjs.pointers[fs.obj_index].pointer_cast<ReachMegaloPlayerTraits>();
             if (obj) {
                if (obj->name) {
@@ -51,7 +51,7 @@ namespace MegaloEx {
             cobb::sprintf(out, "missing traits %u", index);
             return true;
          },
-         [](fragment_specifier fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
             uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
             cobb::sprintf(out, "player_traits[%u]", index);
             return true;
