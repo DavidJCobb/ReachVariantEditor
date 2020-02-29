@@ -14,6 +14,7 @@ namespace MegaloEx {
       extern OpcodeArgTypeinfo compare_operator;
       extern OpcodeArgTypeinfo drop_weapon_type;
       extern OpcodeArgTypeinfo grenade_type;
+      extern OpcodeArgTypeinfo loadout_palette;
       extern OpcodeArgTypeinfo math_operator;
       extern OpcodeArgTypeinfo pickup_priority;
       extern OpcodeArgTypeinfo team_disposition;

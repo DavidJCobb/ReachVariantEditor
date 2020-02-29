@@ -64,6 +64,14 @@ namespace MegaloEx {
             DetailedEnumValue("frag_grenades",   DetailedEnumValueInfo::make_friendly_name("frag grenades")),
             DetailedEnumValue("plasma_grenades", DetailedEnumValueInfo::make_friendly_name("plasma grenades")),
          });
+         auto loadout_palette = DetailedEnum({
+            DetailedEnumValue("spartan_tier_1", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 1")),
+            DetailedEnumValue("elite_tier_1",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 1")),
+            DetailedEnumValue("spartan_tier_2", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 2")),
+            DetailedEnumValue("elite_tier_2",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 2")),
+            DetailedEnumValue("spartan_tier_3", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 3")),
+            DetailedEnumValue("elite_tier_3",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 3")),
+         });
          auto math_operator = DetailedEnum({
             DetailedEnumValue("+=", DetailedEnumValueInfo::make_friendly_name("add")),
             DetailedEnumValue("-=", DetailedEnumValueInfo::make_friendly_name("subtract")),
@@ -218,6 +226,25 @@ namespace MegaloEx {
          },
          [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
             return type_helpers::enum_arg_functor_decompile(enums::grenade_type, fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+      #pragma endregion
+      #pragma region Typeinfo: loadout_palette
+      OpcodeArgTypeinfo loadout_palette = OpcodeArgTypeinfo(
+         QString("Loadout Palette"),
+         QString("Determines what loadout palette is available to a player. Each loadout palette consists of five loadouts."),
+         OpcodeArgTypeinfo::flags::none,
+         //
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::loadout_palette, fs, data, relObjs, input_bits);
+         },
+         OpcodeArgTypeinfo::default_postprocess_functor,
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::loadout_palette, fs, data, relObjs, out);
+         },
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::loadout_palette, fs, data, relObjs, out);
          },
          nullptr // TODO: "compile" functor
       );

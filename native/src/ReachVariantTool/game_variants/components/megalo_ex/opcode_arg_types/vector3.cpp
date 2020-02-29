@@ -14,10 +14,6 @@ namespace MegaloEx {
       //  - This type does not refer to any reference-tracked objects; therefore, (relObjs) will not 
       //    be modified and the (fragment) argument is not used.
       //
-      //  - Output functors read the bit buffer from the start (offset 0). If you need to call these 
-      //    functors from another functor (i.e. if there is some argument type that includes this 
-      //    type inside of it), then you must pass a copy of the bitarray shifted appropriately.
-      //
       OpcodeArgTypeinfo vector3 = OpcodeArgTypeinfo(
          QString("Vector3"),
          QString("A 3D vector. X and Y are the lateral axes; Z, the vertical axis."),

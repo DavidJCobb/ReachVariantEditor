@@ -13,22 +13,17 @@ struct DetailedEnumValueInfo {
       friendly_name, // QString
       description,   // QString
       image,         // bare_string // use for icon enums
-      map_tag_type,  // signature   // use for MP object types
-      map_tag_path,  // bare_string // use for MP object types
+      map_tag,       // signature and string   // use for MP object types, sounds, etc.
+      subtitle,      // QString // for sounds consisting of dialogue
    };
    //
    info_type type = info_type::none;
    uint32_t  signature = 0;
    QString   string;
    //
-   uint32_t get_signature() {
-      if (this->type == info_type::map_tag_type)
-         return this->signature;
-      return 0;
-   }
-   //
    DetailedEnumValueInfo() {}
    DetailedEnumValueInfo(info_type t, uint32_t s) : type(t), signature(s) {}
+   DetailedEnumValueInfo(info_type t, uint32_t s, const char* st) : type(t), signature(s), string(st) {}
    DetailedEnumValueInfo(info_type t, const char* s) : type(t), string(s) {}
    DetailedEnumValueInfo(info_type t, QString s) : type(t), string(s) {}
    //
@@ -38,11 +33,11 @@ struct DetailedEnumValueInfo {
    static DetailedEnumValueInfo make_friendly_name(QString v) {
       return DetailedEnumValueInfo(info_type::friendly_name, v);
    }
-   static DetailedEnumValueInfo make_map_tag_path(const char* path) {
-      return DetailedEnumValueInfo(info_type::map_tag_path, path);
+   static DetailedEnumValueInfo make_map_tag(uint32_t sig, const char* path) {
+      return DetailedEnumValueInfo(info_type::map_tag, sig, path);
    }
-   static DetailedEnumValueInfo make_map_tag_type(uint32_t signature) {
-      return DetailedEnumValueInfo(info_type::map_tag_type, signature);
+   static DetailedEnumValueInfo make_subtitle(QString v) {
+      return DetailedEnumValueInfo(info_type::subtitle, v);
    }
 };
 struct DetailedEnumValue {
