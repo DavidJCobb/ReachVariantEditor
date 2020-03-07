@@ -388,6 +388,7 @@ namespace MegaloEx {
                DetailedEnumValueInfo::make_description("A brief musical cue, suitable for a Covenant-Offense Phase 2 victory.")
             ),
             DetailedEnumValue("unused_87",
+               DetailedEnumValueInfo::make_unused_sentinel(),
                DetailedEnumValueInfo::make_description("An undefined/null sound effect.")
             ),
             DetailedEnumValue("inv_cue_spartan_win_big",

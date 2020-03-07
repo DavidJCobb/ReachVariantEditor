@@ -18,6 +18,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cstdint>
 #include <string>
 #include <intrin.h>
+#include <type_traits>
 
 namespace cobb {
    #ifdef __SIZEOF_INT128__
@@ -308,7 +309,12 @@ namespace cobb {
             void to_hex(std::string& out) const noexcept;
             void to_string(std::string& out) const noexcept;
             //
-            inline explicit operator uint64_t() const noexcept { return this->b; } // must be explicit or operator overloads will break because C++ can implicitly cast EITHER SIDE of an operator
+            template<typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0> inline explicit operator T() const noexcept { // must be explicit or operator overloads will break because C++ can implicitly cast EITHER SIDE of an operator
+               return (T)this->b;
+            }
+            template<typename T, std::enable_if_t<std::is_enum_v<T>, int> = 0> inline explicit operator T() const noexcept {
+               return (T)this->b;
+            }
       };
    #endif
 }

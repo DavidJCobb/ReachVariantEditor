@@ -15,6 +15,16 @@ struct DetailedEnumValueInfo {
       image,         // bare_string // use for icon enums
       map_tag,       // signature and string   // use for MP object types, sounds, etc.
       subtitle,      // QString // for sounds consisting of dialogue
+      sentinel_flags, // uses (signature) as a flags mask
+   };
+   struct flags {
+      flags() = delete;
+      enum type : uint32_t {
+         none = 0,
+         do_not_autosuggest   = 0x00000001, // auto-complete, etc., should not offer this value
+         is_unusual           = 0x00000002, // if this value is used, syntax-highlighting should flag that as cause for concern
+         omit_from_basic_docs = 0x00000004, // auto-generated reference docs for the enum should not show this value except in some "complete" listing somewhere else
+      };
    };
    //
    info_type type = info_type::none;
@@ -38,6 +48,10 @@ struct DetailedEnumValueInfo {
    }
    static DetailedEnumValueInfo make_subtitle(QString v) {
       return DetailedEnumValueInfo(info_type::subtitle, v);
+   }
+   //
+   static DetailedEnumValueInfo make_unused_sentinel() {
+      return DetailedEnumValueInfo(info_type::sentinel_flags, flags::do_not_autosuggest | flags::is_unusual | flags::omit_from_basic_docs);
    }
 };
 struct DetailedEnumValue {
