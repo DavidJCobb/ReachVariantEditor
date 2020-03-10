@@ -21,9 +21,8 @@ struct DetailedEnumValueInfo {
       flags() = delete;
       enum type : uint32_t {
          none = 0,
-         do_not_autosuggest   = 0x00000001, // auto-complete, etc., should not offer this value
-         is_unusual           = 0x00000002, // if this value is used, syntax-highlighting should flag that as cause for concern
-         omit_from_basic_docs = 0x00000004, // auto-generated reference docs for the enum should not show this value except in some "complete" listing somewhere else
+         is_unused  = 0x00000001,
+         is_unknown = 0x00000002,
       };
    };
    //
@@ -51,7 +50,10 @@ struct DetailedEnumValueInfo {
    }
    //
    static DetailedEnumValueInfo make_unused_sentinel() {
-      return DetailedEnumValueInfo(info_type::sentinel_flags, flags::do_not_autosuggest | flags::is_unusual | flags::omit_from_basic_docs);
+      return DetailedEnumValueInfo(info_type::sentinel_flags, flags::is_unused);
+   }
+   static DetailedEnumValueInfo make_unknown_sentinel() {
+      return DetailedEnumValueInfo(info_type::sentinel_flags, flags::is_unknown);
    }
 };
 struct DetailedEnumValue {
