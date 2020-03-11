@@ -115,6 +115,11 @@ namespace MegaloEx {
       // unions," where the value consists of undifferentiated data, but it clearly indicates its type and you 
       // must refer to some other system to then read that data.
       //
+      // One notable benefit of doing things this way is that we can easily sum the bitcount of all loaded 
+      // opcode arguments. As of this writing, I eventually want to be able to display the space usage in a game 
+      // variant file, so being able to rapidly sum opcode bitcounts will make it easier to show how much of the 
+      // file's available space is consumed by script code.
+      //
       // ========================================================================================================
       //
       // NOTES:

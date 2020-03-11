@@ -32,6 +32,71 @@ int main(int argc, char *argv[]) {
 
 //  - DECOMPILER
 //
+//     - New opcode argument system
+//
+//        - MP object types
+//
+//           - Convert to DetailedEnum, and then make a typeinfo for them.
+//
+//        - Incident IDs
+//
+//           - Convert to DetailedEnum, and then make a typeinfo for them.
+//
+//        - Icon indices
+//
+//        - Variable argument values
+//
+//           - Member functions on VariableScopeIndicatorValueList, to load, preprocess, 
+//             do fix-up, etc..
+//
+//           - Instances of VariableScopeIndicatorValueList for each variable type, and 
+//             typeinfos whose functors call the VariableScopeIndicatorValueList member 
+//             functions.
+//
+//           - An "any variable" typeinfo that loads the variable type enum and then 
+//             delegates to the appropriate other typeinfo.
+//
+//        - Other argument values
+//
+//        - The opcodes themselves
+//
+//        = Ensure that error handling has parity with what's in the release build.
+//
+//        = NOTE: POSTPROCESSING: I want to set up a queue on the game variant data 
+//          such that any objects that need postprocessing can just register themselves 
+//          in the queue and then we process (and then empty) that queue after load. 
+//          I've already created IGameVariantDataObjectNeedingPostprocess for this 
+//          purpose. I need to create the queue system itself and the code for it.
+//
+//           - An object can only add itself to the queue if it has access to the queue 
+//             (i.e. through the containing game variant object) during load. Currently 
+//             this access is not available to the new opcode argument system; I need 
+//             to modify all load methods/functors to take a game variant pointer as an 
+//             argument, and modify any typeinfos that can refer to indexed data to 
+//             register themselves for postprocess whenever they DO refer to indexed 
+//             data.
+//
+//        - Swap everything in and see if it works.
+//
+//     - Syntax
+//
+//         - We need to create a "declare" keyword for variable declarations. It should 
+//           take a variable name and, optionally, a value (i.e. "declare foo" or 
+//           "declare foo = bar"). The decompiler then needs to generate these declara-
+//           tions.
+//
+//         - The decompiler should auto-generate aliases for all indexed data items i.e. 
+//           stats, options, and traits, and decompile code for specific typeinfos should 
+//           use these. Currently OpcodeArgTypeinfo::decode_functor_t doesn't take an 
+//           argument that can hold decompile options so for now, let's define a constexpr 
+//           bool somewhere which controls whether aliases are being auto-generated; that 
+//           way, if we ever make this optional, it'll be easier to track down everything 
+//           that needs to respond to the option.
+//
+//
+
+
+//
 //     - Finish implementing OpcodeArgTypeinfo, and have all opcodes refer to instances 
 //       of that instead of factory functions.
 //
@@ -45,21 +110,6 @@ int main(int argc, char *argv[]) {
 //
 //        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
 //          what we'll pass to the opcode functions' argument lists.
-//
-//           = REMAINING: INDICES.
-//
-//              - The more I look at these, the more I think that with the exception of 
-//                trigger and forge label indices, these are all basically just enums. 
-//                The only difference between these and the "generic enums" is that we 
-//                have additional explanatory data for the enum values in some of the 
-//                "indices" (other indices have unknown/unnamed values), and that's not 
-//                a difference that HAS to exist: we could define explanatory data for 
-//                all enums, have it conform to a generic interface, and then treat all 
-//                enums and non-trigger indices the same way.
-//
-//                One potential generic interface would be to have a class for enum 
-//                values that can have up to four "infos" on it; an "info" would have 
-//                a type (e.g. description, map tag, friendly name) and a string.
 //
 //           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
 //             just wouldn't be practical to keep multi-part -- things like shapes, 
@@ -102,19 +152,6 @@ int main(int argc, char *argv[]) {
 //                      they used.
 //
 //                    = ADD THE is_varargs FLAG TO OpcodeArgTypeinfo.
-//
-//           - Enums, flags-masks, and similar are an exception; see next bullet point.
-//
-//     - Merge all enums into a single OpcodeArgValue subclass that needs to be construc-
-//       ted with an OpcodeArgTypeinfo& provided. Have the enum pull its values (and by 
-//       implication its bitfield size) from the typeinfo object. We'll have one typeinfo 
-//       instance per enum -- so basically, the OpcodeArgValue just has all of the common 
-//       code/data for all enums, with the typeinfos actually defining different enums.
-//
-//        - And do the same for flags-masks.
-//
-//        - Get all of the index lists -- incidents, MP object types, and so on -- to 
-//          conform to a common pattern so we can do the same for them.
 //
 //     - Once the above is all done, we can begin working on the decompile functions for 
 //       OpcodeArgValue classes. Enums would be a great place to start, especially since 

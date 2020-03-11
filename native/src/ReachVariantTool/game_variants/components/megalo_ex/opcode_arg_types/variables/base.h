@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "../../../megalo/variables_and_scopes.h"
 #include "../../opcode_arg.h"
 #include "../../../../helpers/strings.h"
@@ -70,17 +71,33 @@ namespace MegaloEx {
       //       object spawn sequence. This should be considered a design flaw; we should use the "which" 
       //       to indicate the object/player/team that the properties belong to.
       //
+      struct _DecodedVariable {
+         //
+         // Something intermediate. Once we've extracted the scope/which/index from a loaded variable's 
+         // data, we can then just index into everything however we need to.
+         //
+         uint8_t scope; // bitcount: VariableScopeIndicatorValueList::scopes.size()
+         uint8_t which = 0;
+         int16_t index = 0;
+      };
+
       class VariableScopeIndicatorValue {
+         private:
+            using _decoded = _DecodedVariable;
+            //
          public:
             struct flags {
                flags() = delete;
                enum type : uint8_t {
                   none = 0,
-                  has_which   = 0x01,
-                  is_readonly = 0x02,
+                  is_readonly = 0x01,
                };
             };
             using flags_t = std::underlying_type_t<flags::type>;
+            //
+            using index_bitcount_get_t  = std::function<int()>;
+            using decode_functor_t      = std::function<bool(_decoded& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
+            using postprocess_functor_t = std::function<bool(_decoded& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
             //
             enum class index_type : uint8_t {
                none, // there is no "index" value
@@ -98,8 +115,12 @@ namespace MegaloEx {
             VariableScope* base       = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams
             const char*    format     = "%w.timer[%i]";
             //
+            index_bitcount_get_t  index_bitcount_get = nullptr;
+            decode_functor_t      index_decode       = nullptr;
+            postprocess_functor_t index_postprocess  = nullptr;
+            //
             inline bool has_index() const noexcept { return this->index_type != index_type::none; }
-            inline bool has_which() const noexcept { return this->flags & flags::has_which; }
+            inline bool has_which() const noexcept { return this->base != nullptr; }
             inline bool is_readonly() const noexcept { return this->flags & flags::is_readonly; }
             //
             int which_bits() const noexcept {
@@ -127,21 +148,21 @@ namespace MegaloEx {
                      assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
                      return this->base->index_bits(Megalo::variable_type::timer);
                   case index_type::indexed_data:
-                     static_assert(false, "Write handlers for this. Indexed data needs functors to allow access.");
+                     assert(this->index_bitcount_get, "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no functor for the bitcount.");
+                     return (this->index_bitcount_get)();
                }
+               #if _DEBUG
+                  assert(false, "Unreachable code!");
+               #else
+                  __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
+               #endif
             }
       };
       class VariableScopeIndicatorValueList {
          private:
-            struct _decoded {
-               //
-               // Something intermediate. Once we've extracted the scope/which/index from a loaded variable's 
-               // data, we can then just index into everything however we need to.
-               //
-               uint8_t scope; // bitcount: VariableScopeIndicatorValueList::scopes.size()
-               uint8_t which = 0;
-               int16_t index = 0;
-            };
+            using _decoded = _DecodedVariable;
+            //
+         private:
             _decoded _decode(arg_functor_state fs, cobb::bitarray128& data) {
                _decoded out;
                auto of = fs.bit_offset;
@@ -166,9 +187,29 @@ namespace MegaloEx {
             //
          public:
             std::vector<VariableScopeIndicatorValue> scopes;
+            inline int scope_bits() const noexcept {
+               return cobb::bitcount(this->scopes.size() - 1);
+            }
             //
             // TODO: helper functions analogous to the various functors used by OpcodeArgValue
             //
+            /*
+            using load_functor_t        = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
+            using decode_functor_t      = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
+            using compile_functor_t     = std::function<arg_consume_result(arg_functor_state, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
+            using postprocess_functor_t = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
+            */
+            bool load(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
+               auto bc = this->scope_bits();
+               uint8_t si = (uint64_t)data.consume(input_bits, bc);
+               if (si >= this->scopes.size())
+                  return false; // TODO: specific messaging
+               auto& scope = this->scopes[si];
+               //
+               // TODO
+               //
+
+            }
       };
    }
 }
