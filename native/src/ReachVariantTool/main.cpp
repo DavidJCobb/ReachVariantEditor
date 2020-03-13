@@ -46,9 +46,6 @@ int main(int argc, char *argv[]) {
 //
 //        - Variable argument values
 //
-//           - Member functions on VariableScopeIndicatorValueList, to load, preprocess, 
-//             do fix-up, etc..
-//
 //           - Instances of VariableScopeIndicatorValueList for each variable type, and 
 //             typeinfos whose functors call the VariableScopeIndicatorValueList member 
 //             functions.

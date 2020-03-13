@@ -71,6 +71,7 @@ namespace MegaloEx {
       //       object spawn sequence. This should be considered a design flaw; we should use the "which" 
       //       to indicate the object/player/team that the properties belong to.
       //
+      class VariableScopeIndicatorValue;
       struct _DecodedVariable {
          //
          // Something intermediate. Once we've extracted the scope/which/index from a loaded variable's 
@@ -79,6 +80,7 @@ namespace MegaloEx {
          uint8_t scope; // bitcount: VariableScopeIndicatorValueList::scopes.size()
          uint8_t which = 0;
          int16_t index = 0;
+         VariableScopeIndicatorValue* scope_instance = nullptr;
       };
 
       class VariableScopeIndicatorValue {
@@ -116,6 +118,7 @@ namespace MegaloEx {
             const char*    format         = "%w.timer[%i]";
             //
             decode_functor_t      index_decode      = nullptr;
+            decode_functor_t      index_to_english  = nullptr;
             postprocess_functor_t index_postprocess = nullptr;
             //
             inline bool has_index() const noexcept { return this->index_type != index_type::none; }
@@ -162,7 +165,7 @@ namespace MegaloEx {
             using _decoded = _DecodedVariable;
             //
          private:
-            _decoded _decode(arg_functor_state fs, cobb::bitarray128& data) {
+            _decoded _decode_to_struct(arg_functor_state fs, cobb::bitarray128& data) {
                _decoded out;
                auto of = fs.bit_offset;
                auto bc = cobb::bitcount(this->scopes.size() - 1);
@@ -171,6 +174,7 @@ namespace MegaloEx {
                   return out;
                of += bc;
                auto& scope = this->scopes[out.scope];
+               out.scope_instance = &scope;
                if (scope.has_which()) {
                   bc = scope.which_bits();
                   out.which = data.excerpt(of, bc);
@@ -199,6 +203,9 @@ namespace MegaloEx {
             using postprocess_functor_t = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
             */
             bool load(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
+               //
+               // Call from OpcodeArgValue::load_functor_t.
+               //
                uint8_t si = (uint64_t)data.consume(input_bits, this->scope_bits());
                if (si >= this->scopes.size())
                   return false; // TODO: specific error messaging
@@ -217,6 +224,9 @@ namespace MegaloEx {
                return true;
             }
             bool postprocess(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) {
+               //
+               // Call from OpcodeArgValue::postprocess_functor_t.
+               //
                uint8_t si = (uint64_t)data.excerpt(fs.bit_offset, this->scope_bits());
                if (si >= this->scopes.size())
                   return false; // TODO: specific error messaging
@@ -229,11 +239,25 @@ namespace MegaloEx {
                assert(scope.index_postprocess, "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
                relObjs.pointers[fs.obj_index] = (scope.index_postprocess)(variant, index);
             }
-            bool decode() {
-               static_assert(false, "WRITE ME");
+            bool decompile(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+               //
+               // Call from OpcodeArgValue::decode_functor_t, for decompiling.
+               //
+               auto decoded = this->_decode_to_struct(fs, data);
+               if (!decoded.scope_instance)
+                  return false;
+               auto& scope = *decoded.scope_instance;
+               return (scope.index_decode)(decoded, relObjs, out);
             }
-            bool to_english() {
-               static_assert(false, "WRITE ME");
+            bool to_english(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+               //
+               // Call from OpcodeArgValue::decode_functor_t, for stringifying to English.
+               //
+               auto decoded = this->_decode_to_struct(fs, data);
+               if (!decoded.scope_instance)
+                  return false;
+               auto& scope = *decoded.scope_instance;
+               return (scope.index_to_english)(decoded, relObjs, out);
             }
       };
    }
