@@ -95,9 +95,8 @@ namespace MegaloEx {
             };
             using flags_t = std::underlying_type_t<flags::type>;
             //
-            using index_bitcount_get_t  = std::function<int()>;
             using decode_functor_t      = std::function<bool(_decoded& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
-            using postprocess_functor_t = std::function<bool(_decoded& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
+            using postprocess_functor_t = std::function<cobb::indexed_refcountable* (GameVariantData* variant, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
             //
             enum class index_type : uint8_t {
                none, // there is no "index" value
@@ -106,18 +105,18 @@ namespace MegaloEx {
                player,
                team,
                timer,
-               indexed_data, // e.g. script options, script stats
+               indexed_data, // e.g. script options, script stats; specify bitcount in (index_bitcount)
             };
             //
-            uint8_t        id         = 0; // the _scopes value
-            flags_t        flags      = flags::none;
-            index_type     index_type = index_type::none;
-            VariableScope* base       = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams
-            const char*    format     = "%w.timer[%i]";
+            uint8_t        id             = 0; // the _scopes value
+            flags_t        flags          = flags::none;
+            index_type     index_type     = index_type::none;
+            uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data
+            VariableScope* base           = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams
+            const char*    format         = "%w.timer[%i]";
             //
-            index_bitcount_get_t  index_bitcount_get = nullptr;
-            decode_functor_t      index_decode       = nullptr;
-            postprocess_functor_t index_postprocess  = nullptr;
+            decode_functor_t      index_decode      = nullptr;
+            postprocess_functor_t index_postprocess = nullptr;
             //
             inline bool has_index() const noexcept { return this->index_type != index_type::none; }
             inline bool has_which() const noexcept { return this->base != nullptr; }
@@ -148,11 +147,11 @@ namespace MegaloEx {
                      assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
                      return this->base->index_bits(Megalo::variable_type::timer);
                   case index_type::indexed_data:
-                     assert(this->index_bitcount_get, "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no functor for the bitcount.");
-                     return (this->index_bitcount_get)();
+                     assert(this->index_bitcount, "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no bitcount.");
+                     return this->index_bitcount;
                }
                #if _DEBUG
-                  assert(false, "Unreachable code!");
+                  assert(false, "We've reached unreachable code!");
                #else
                   __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
                #endif
@@ -200,15 +199,41 @@ namespace MegaloEx {
             using postprocess_functor_t = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
             */
             bool load(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
-               auto bc = this->scope_bits();
-               uint8_t si = (uint64_t)data.consume(input_bits, bc);
+               uint8_t si = (uint64_t)data.consume(input_bits, this->scope_bits());
                if (si >= this->scopes.size())
-                  return false; // TODO: specific messaging
+                  return false; // TODO: specific error messaging
                auto& scope = this->scopes[si];
+               if (scope.has_which())
+                  data.consume(input_bits, scope.which_bits());
+               if (scope.has_index()) {
+                  auto bc = scope.index_bits();
+                  if (scope.index_type == VariableScopeIndicatorValue::index_type::indexed_data) {
+                     auto& range = relObjs.ranges[fs.obj_index];
+                     range.start = data.size;
+                     range.count = bc;
+                  }
+                  data.consume(input_bits, bc);
+               }
+               return true;
+            }
+            bool postprocess(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) {
+               uint8_t si = (uint64_t)data.excerpt(fs.bit_offset, this->scope_bits());
+               if (si >= this->scopes.size())
+                  return false; // TODO: specific error messaging
+               auto& scope = this->scopes[si];
+               if (scope.index_type != VariableScopeIndicatorValue::index_type::indexed_data) // there's nothing to do postprocess for
+                  return true;
+               auto& range = relObjs.ranges[fs.obj_index];
+               int16_t index = (uint64_t)data.excerpt(range.start, range.count);
                //
-               // TODO
-               //
-
+               assert(scope.index_postprocess, "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
+               relObjs.pointers[fs.obj_index] = (scope.index_postprocess)(variant, index);
+            }
+            bool decode() {
+               static_assert(false, "WRITE ME");
+            }
+            bool to_english() {
+               static_assert(false, "WRITE ME");
             }
       };
    }
