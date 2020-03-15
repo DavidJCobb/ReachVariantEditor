@@ -30,6 +30,7 @@
 //    game.betrayal_booting            | betrayal_booting  | <none>           | <none>
 //    global.player[1].team            | player_owner_team | global.player[1] | <none>
 //    global.player[1].object[0].biped | player_biped      | global.player[1] | 0
+//    55                               | constant          | <none>           | 55
 //
 // Each variable type has its own enum of scope-indicators, since the scope-indicator does 
 // double duty and handles game state values and properties along with nested and non-nested 
@@ -136,13 +137,13 @@ namespace MegaloEx {
             team,
             timer,
             indexed_data, // e.g. script options, script stats; specify bitcount in (index_bitcount)
+            generic, // not a variable or an indexed object
          };
          //
-         uint8_t        id             = 0; // the _scopes value
          flags_t        flags          = flags::none;
          index_type     index_type     = index_type::none;
-         uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data
-         VariableScope* base           = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams
+         uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data and index_type::generic
+         const VariableScope* base     = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams
          const char*    format         = "%w.timer[%i]"; // format string for decompiled code; interpreted manually; %w = the "which" as a string; %i = index as a number
          const char*    format_english = "%w's timer[%i]";
          //
@@ -156,6 +157,32 @@ namespace MegaloEx {
          //
          int which_bits() const noexcept;
          int index_bits() const noexcept;
+         //
+         VariableScopeIndicatorValue() {}
+         VariableScopeIndicatorValue(const char* fd, const char* fe, enum index_type it, uint8_t bc) : format(fd), format_english(fe), index_type(it), index_bitcount(bc) {}
+         VariableScopeIndicatorValue(const char* fd, const char* fe, const VariableScope* which, enum index_type it) : format(fd), format_english(fe), base(which), index_type(it) {}
+         static VariableScopeIndicatorValue make_game_value(const char* fd, const char* fe, uint8_t flg = 0) {
+            VariableScopeIndicatorValue result;
+            result.flags          = flg;
+            result.format         = fd;
+            result.format_english = fe;
+            return result;
+         }
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, uint8_t bc, postprocess_functor_t f, flags_t flg = 0) {
+            VariableScopeIndicatorValue result;
+            result.flags             = flg;
+            result.format            = fd;
+            result.format_english    = fe;
+            result.index_type        = index_type::indexed_data;
+            result.index_bitcount    = bc;
+            result.index_postprocess = f;
+            return result;
+         }
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, const VariableScope* which, uint8_t bc, postprocess_functor_t f, flags_t flg = 0) {
+            VariableScopeIndicatorValue result = make_indexed_data_indicator(fd, fe, bc, f, flg);
+            result.base = which;
+            return result;
+         }
    };
    class VariableScopeIndicatorValueList {
       private:

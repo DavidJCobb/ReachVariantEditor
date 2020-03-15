@@ -11,6 +11,8 @@ namespace {
          return megalo_players[which];
       if (which_type == &MegaloVariableScopeTeam)
          return megalo_teams[which];
+      if (which_type == &MegaloVariableScopeGlobal)
+         return "global";
       return nullptr;
    }
    void _default_stringify(const char* format, const _DecodedVariable& decoded, std::string& out) {
