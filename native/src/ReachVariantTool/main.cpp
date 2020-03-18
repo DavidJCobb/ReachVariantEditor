@@ -46,14 +46,19 @@ int main(int argc, char *argv[]) {
 //
 //        - Variable argument values
 //
-//           - Instances of VariableScopeIndicatorValueList for each variable type, and 
-//             typeinfos whose functors call the VariableScopeIndicatorValueList member 
-//             functions.
+//           - Switch the new "timer" variable implementation from old-style switch-cases 
+//             to the generic system.
+//
+//           - The generic variable system does not properly report load errors for 
+//             "biped" property access. It also doesn't have any provisions for "team" 
+//             property access, since apparently we didn't actually have full error-
+//             checking for that in the old system (we didn't validate the "which" in 
+//             that specific case).
 //
 //           - An "any variable" typeinfo that loads the variable type enum and then 
 //             delegates to the appropriate other typeinfo.
 //
-//        - Other argument values
+//        - Other argument value types
 //
 //        - The opcodes themselves
 //
@@ -72,6 +77,12 @@ int main(int argc, char *argv[]) {
 //             argument, and modify any typeinfos that can refer to indexed data to 
 //             register themselves for postprocess whenever they DO refer to indexed 
 //             data.
+//
+//           = Actually, coming back to all of this ages later, it looks like the new 
+//             OpcodeArgTypeinfo has a flag indicating that a type "may need post-
+//             processing." I had probably intended for opcodes to do the registration 
+//             rather than arguments registering themselves, but that still means that 
+//             the game variant needs to be passed at least as far down as the opcode.
 //
 //        - Swap everything in and see if it works.
 //

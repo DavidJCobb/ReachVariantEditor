@@ -1,16 +1,26 @@
 #include "base.h"
+#include "../../../../errors.h"
 
 namespace {
    using namespace Megalo;
    using namespace MegaloEx;
 
-   const char* _which_to_string(VariableScope* which_type, uint8_t which) {
-      if (which_type == &MegaloVariableScopeObject)
+   const char* _which_to_string(const VariableScope* which_type, uint8_t which) {
+      if (which_type == &MegaloVariableScopeObject) {
+         if (which >= megalo_objects.count)
+            return "invalid_object"; // not ideal... we should find a way to print the bad index
          return megalo_objects[which];
-      if (which_type == &MegaloVariableScopePlayer)
+      }
+      if (which_type == &MegaloVariableScopePlayer) {
+         if (which >= megalo_players.count)
+            return "invalid_player"; // not ideal... we should find a way to print the bad index
          return megalo_players[which];
-      if (which_type == &MegaloVariableScopeTeam)
+      }
+      if (which_type == &MegaloVariableScopeTeam) {
+         if (which >= megalo_teams.count)
+            return "invalid_team"; // not ideal... we should find a way to print the bad index
          return megalo_teams[which];
+      }
       if (which_type == &MegaloVariableScopeGlobal)
          return "global";
       return nullptr;
@@ -113,11 +123,20 @@ namespace MegaloEx {
       // Call from OpcodeArgValue::load_functor_t.
       //
       uint8_t si = (uint64_t)data.consume(input_bits, this->scope_bits());
-      if (si >= this->scopes.size())
-         return false; // TODO: specific error messaging
+      if (si >= this->scopes.size()) {
+         auto& error = GameEngineVariantLoadError::get();
+         error.state    = GameEngineVariantLoadError::load_state::failure;
+         error.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+         error.detail   = GameEngineVariantLoadError::load_failure_detail::bad_variable_subtype;
+         error.extra[0] = (int32_t)this->var_type;
+         error.extra[1] = si;
+         return false;
+      }
       auto& scope = this->scopes[si];
+      uint8_t w;
+      int16_t i = 0;
       if (scope.has_which())
-         data.consume(input_bits, scope.which_bits());
+         w = (uint64_t)data.consume(input_bits, scope.which_bits());
       if (scope.has_index()) {
          auto bc = scope.index_bits();
          if (scope.index_type == VariableScopeIndicatorValue::index_type::indexed_data) {
@@ -125,7 +144,22 @@ namespace MegaloEx {
             range.start = data.size;
             range.count = bc;
          }
-         data.consume(input_bits, bc);
+         i = (uint64_t)data.consume(input_bits, bc);
+      }
+      if (scope.has_which() && !scope.base->is_valid_which(w)) {
+         auto& error = GameEngineVariantLoadError::get();
+         error.state = GameEngineVariantLoadError::load_state::failure;
+         error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+         error.detail = GameEngineVariantLoadError::load_failure_detail::bad_variable_scope;
+         error.extra[0] = (int32_t)getScopeConstantForObject(*scope.base);
+         error.extra[1] = w;
+         error.extra[2] = i;
+         error.extra[3] = (int32_t)this->var_type;
+         //
+         // TODO: For errors on var.player.biped, extra[3] should be the player-type and extra[4] should be 1. 
+         // We need to give the object-scopes a way to indicate this behavior.
+         //
+         return false;
       }
       return true;
    }

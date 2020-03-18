@@ -4,7 +4,7 @@
 
 namespace {
    using namespace MegaloEx;
-   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList({
+   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::scalar, {
       VariableScopeIndicatorValue("%i", "%i", VariableScopeIndicatorValue::index_type::generic, 16), // integer constant
       VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::number), // player.number
       VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::number), // object.number
@@ -96,7 +96,25 @@ namespace {
    });
 }
 namespace MegaloEx {
-
-
-
+   namespace types {
+      OpcodeArgTypeinfo number = OpcodeArgTypeinfo(
+         QString("Number"),
+         QString("A numeric variable, 16-bit signed integer constant, or other value."),
+         OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::may_need_postprocessing,
+         //
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+            return scopes.load(fs, data, relObjs, input_bits);
+         },
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) { // postprocess
+            return scopes.postprocess(fs, data, relObjs, variant);
+         },
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+            return scopes.to_english(fs, data, relObjs, out);
+         },
+         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+            return scopes.decompile(fs, data, relObjs, out);
+         },
+         nullptr // TODO: "compile" functor
+      );
+   }
 }

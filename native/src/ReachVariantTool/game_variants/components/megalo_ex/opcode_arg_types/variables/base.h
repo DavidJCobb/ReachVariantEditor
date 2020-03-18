@@ -22,15 +22,18 @@
 //
 // Some examples:
 //
-//                                     | SCOPE             | WHICH            | INDEX
-//    ---------------------------------+-------------------+------------------+--------
-//    global.number[3]                 | global            | <none>           | 3
-//    global.player[1].number[2]       | player            | global.player[1] | 2
-//    current_player.number[2]         | player            | current_player   | 2
-//    game.betrayal_booting            | betrayal_booting  | <none>           | <none>
-//    global.player[1].team            | player_owner_team | global.player[1] | <none>
-//    global.player[1].object[0].biped | player_biped      | global.player[1] | 0
-//    55                               | constant          | <none>           | 55
+//                                     | SCOPE             | WHICH            | INDEX  | NOTES
+//    ---------------------------------+-------------------+------------------+--------+----------------------------------------------------------------------------------------
+//    global.number[3]                 | global            | <none>           | 3      | 
+//    global.timer[3]                  | global            | <none>           | 3      | 
+//    global.object[3]                 | global            | global.object[3] | <none> | If a variable type supports nesting, then its globals use (which) rather than (index). 
+//    global.player[1].number[2]       | player            | global.player[1] | 2      | In practice, that would be object, player, and team variables.
+//    current_player                   | global            | current_player   | <none> | 
+//    current_player.number[2]         | player            | current_player   | 2      | 
+//    game.betrayal_booting            | betrayal_booting  | <none>           | <none> | 
+//    global.player[1].team            | player_owner_team | global.player[1] | <none> | Note that here, "team"  is a property, not a nested variable.
+//    global.player[1].object[0].biped | player_biped      | global.player[1] | 0      | Note that here, "biped" is a property, not a nested variable.
+//    55                               | constant          | <none>           | 55     | 
 //
 // Each variable type has its own enum of scope-indicators, since the scope-indicator does 
 // double duty and handles game state values and properties along with nested and non-nested 
@@ -48,6 +51,12 @@
 // Helper functions on the VariableScopeIndicatorValueList will be available to the various 
 // OpcodeArgTypeinfo functors, such that we will not need variable-type-specific code for 
 // loading, stringifying, or postprocessing variables that appear as opcode arguments.
+//
+// This entire system differs from what we originally shipped with in the following ways:
+//
+//  - The old variable system wasn't consistent about when to use (which) versus (index) for 
+//    some variables. We now always use (which) to refer to the (megalo_WHATEVERs) enums.
+//
 */
 
 namespace MegaloEx {
@@ -193,9 +202,13 @@ namespace MegaloEx {
          //
       public:
          std::vector<VariableScopeIndicatorValue> scopes;
+         Megalo::variable_type var_type = Megalo::variable_type::not_a_variable;
+         //
          inline int scope_bits() const noexcept {
             return cobb::bitcount(this->scopes.size() - 1);
          }
+         //
+         VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue> sl) : var_type(vt), scopes(sl) {}
          //
          // The following functions are made available to call from the various functors on OpcodeArgTypeinfo: respectively: 
          // load_functor_t; postprocess_functor_t; decode_functor_t; and decode_functor_t (yes, twice; decompiling and printing 
