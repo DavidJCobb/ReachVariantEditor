@@ -5,7 +5,7 @@
 namespace {
    using namespace MegaloEx;
    VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::object, {
-      VariableScopeIndicatorValue("%w",            "%w",              &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::object), // global.object, current_object, etc.
+      VariableScopeIndicatorValue("%w",            "%w",              &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none),   // global.object, current_object, etc.
       VariableScopeIndicatorValue("%w.object[%i]", "%w's object[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::object), // player.object
       VariableScopeIndicatorValue("%w.object[%i]", "%w's object[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::object), // object.object
       VariableScopeIndicatorValue("%w.object[%i]", "%w's object[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::object), // team.object
