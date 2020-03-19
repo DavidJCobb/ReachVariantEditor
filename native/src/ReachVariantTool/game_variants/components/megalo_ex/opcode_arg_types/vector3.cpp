@@ -19,23 +19,26 @@ namespace MegaloEx {
          QString("A 3D vector. X and Y are the lateral axes; Z, the vertical axis."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            auto& data = arg.data;
             data.consume(input_bits, coordinate_bits);
             data.consume(input_bits, coordinate_bits);
             data.consume(input_bits, coordinate_bits);
             return true;
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto offset = fs.bit_offset;
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            auto& data   = arg.data;
+            auto  offset = fs.bit_offset;
             coordinate_type x = data.excerpt(offset + coordinate_bits * 0, coordinate_bits);
             coordinate_type y = data.excerpt(offset + coordinate_bits * 1, coordinate_bits);
             coordinate_type z = data.excerpt(offset + coordinate_bits * 2, coordinate_bits);
             cobb::sprintf(out, "(%d, %d, %d)", x, y, z);
             return true;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            auto offset = fs.bit_offset;
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            auto& data   = arg.data;
+            auto  offset = fs.bit_offset;
             coordinate_type x = data.excerpt(offset + coordinate_bits * 0, coordinate_bits);
             coordinate_type y = data.excerpt(offset + coordinate_bits * 1, coordinate_bits);
             coordinate_type z = data.excerpt(offset + coordinate_bits * 2, coordinate_bits);

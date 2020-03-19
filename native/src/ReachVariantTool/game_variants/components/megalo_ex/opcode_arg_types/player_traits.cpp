@@ -20,41 +20,46 @@ namespace MegaloEx {
          QString("Megalo-defined sets of player traits. In Megalo, you don't \"apply\" and \"remove\" traits; rather, you call the \"apply\" function every frame, and the traits vanish when you stop doing that."),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            relObjs.ranges[fs.obj_index].start = data.size;
-            relObjs.ranges[fs.obj_index].count = index_bits;
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
+            ro.ranges[fs.obj_index].start = data.size;
+            ro.ranges[fs.obj_index].count = index_bits;
             data.consume(input_bits, index_bits);
             return true;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
+         [](arg_functor_state fs, OpcodeArgValue& arg, GameVariantData* vd) { // postprocess
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
             auto mp = dynamic_cast<GameVariantDataMultiplayer*>(vd);
             if (!mp)
-               return false;
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+               return OpcodeArgTypeinfo::functor_failed;
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             auto& traits = mp->scriptData.traits;
             if (traits.size() <= index)
-               return false;
-            relObjs.pointers[fs.obj_index] = &traits[index];
-            return true;
+               return OpcodeArgTypeinfo::functor_failed;
+            ro.pointers[fs.obj_index] = &traits[index];
+            return (int32_t)ro.ranges[fs.obj_index].count;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            auto obj = relObjs.pointers[fs.obj_index].pointer_cast<ReachMegaloPlayerTraits>();
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            auto& ro  = arg.relevant_objects;
+            auto  obj = ro.pointers[fs.obj_index].pointer_cast<ReachMegaloPlayerTraits>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
-                  return true;
+                  return ro.ranges[fs.obj_index].count;
                }
                cobb::sprintf(out, "script traits %u", obj->index);
-               return true;
+               return ro.ranges[fs.obj_index].count;
             }
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             cobb::sprintf(out, "missing traits %u", index);
-            return true;
+            return ro.ranges[fs.obj_index].count;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             cobb::sprintf(out, "player_traits[%u]", index);
-            return true;
+            return arg.relevant_objects.ranges[fs.obj_index].count;
          },
          nullptr // TODO: "compile" functor
       );

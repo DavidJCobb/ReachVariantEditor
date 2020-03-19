@@ -20,18 +20,18 @@ namespace MegaloEx {
          QString("A single \"lightswitch\" value capable of representing \"yes or no,\" \"true or false,\" and so on."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            data.consume(input_bits, 1);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            arg.data.consume(input_bits, 1);
             return true;
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            bool v = data.excerpt(fs.bit_offset, 1);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            bool v = arg.data.excerpt(fs.bit_offset, 1);
             out = v ? "true" : "false";
             return true;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            bool v = data.excerpt(fs.bit_offset, 1);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            bool v = arg.data.excerpt(fs.bit_offset, 1);
             out = v ? "true" : "false";
             return true;
          },
@@ -42,18 +42,18 @@ namespace MegaloEx {
          QString("A signed eight-bit integer."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            data.consume(input_bits, 8);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            arg.data.consume(input_bits, 8);
             return true;
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            int8_t v = data.excerpt(fs.bit_offset, 8);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            int8_t v = arg.data.excerpt(fs.bit_offset, 8);
             cobb::sprintf(out, "%d", v);
             return true;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            int8_t v = data.excerpt(fs.bit_offset, 8);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            int8_t v = arg.data.excerpt(fs.bit_offset, 8);
             cobb::sprintf(out, "%d", v);
             return true;
          },

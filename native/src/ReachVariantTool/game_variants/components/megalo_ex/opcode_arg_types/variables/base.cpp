@@ -97,7 +97,8 @@ namespace MegaloEx {
    #pragma region VariableScopeIndicatorValueList
    _DecodedVariable VariableScopeIndicatorValueList::_decode_to_struct(arg_functor_state fs, cobb::bitarray128& data) const {
       _DecodedVariable out;
-      auto of = fs.bit_offset;
+      auto st = fs.bit_offset; // start
+      auto of = fs.bit_offset; // offset
       auto bc = cobb::bitcount(this->scopes.size() - 1);
       out.scope = data.excerpt(of, bc);
       if (out.scope >= this->scopes.size())
@@ -115,14 +116,15 @@ namespace MegaloEx {
          out.index = data.excerpt(of, bc);
          of += bc;
       }
+      out.bits_consumed = of - st;
       return out;
    }
    //
-   bool VariableScopeIndicatorValueList::load(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) const {
+   bool VariableScopeIndicatorValueList::load(arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) const {
       //
       // Call from OpcodeArgValue::load_functor_t.
       //
-      uint8_t si = (uint64_t)data.consume(input_bits, this->scope_bits());
+      uint8_t si = (uint64_t)arg.data.consume(input_bits, this->scope_bits());
       if (si >= this->scopes.size()) {
          auto& error = GameEngineVariantLoadError::get();
          error.state    = GameEngineVariantLoadError::load_state::failure;
@@ -136,15 +138,15 @@ namespace MegaloEx {
       uint8_t w;
       int16_t i = 0;
       if (scope.has_which())
-         w = (uint64_t)data.consume(input_bits, scope.which_bits());
+         w = (uint64_t)arg.data.consume(input_bits, scope.which_bits());
       if (scope.has_index()) {
          auto bc = scope.index_bits();
          if (scope.index_type == VariableScopeIndicatorValue::index_type::indexed_data) {
-            auto& range = relObjs.ranges[fs.obj_index];
-            range.start = data.size;
+            auto& range = arg.relevant_objects.ranges[fs.obj_index];
+            range.start = arg.data.size;
             range.count = bc;
          }
-         i = (uint64_t)data.consume(input_bits, bc);
+         i = (uint64_t)arg.data.consume(input_bits, bc);
       }
       if (scope.has_which() && !scope.base->is_valid_which(w)) {
          auto& error = GameEngineVariantLoadError::get();
@@ -163,47 +165,44 @@ namespace MegaloEx {
       }
       return true;
    }
-   bool VariableScopeIndicatorValueList::postprocess(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) const {
+   int32_t VariableScopeIndicatorValueList::postprocess(arg_functor_state fs, OpcodeArgValue& arg, GameVariantData* variant) const {
       //
       // Call from OpcodeArgValue::postprocess_functor_t.
       //
-      uint8_t si = (uint64_t)data.excerpt(fs.bit_offset, this->scope_bits());
+      uint8_t si = (uint64_t)arg.data.excerpt(fs.bit_offset, this->scope_bits());
       if (si >= this->scopes.size())
-         return false; // TODO: specific error messaging
+         return OpcodeArgTypeinfo::functor_failed; // TODO: specific error messaging
       auto& scope = this->scopes[si];
       if (scope.index_type != VariableScopeIndicatorValue::index_type::indexed_data) // there's nothing to do postprocess for
          return true;
-      auto& range = relObjs.ranges[fs.obj_index];
-      int16_t index = (uint64_t)data.excerpt(range.start, range.count);
+      auto& range = arg.relevant_objects.ranges[fs.obj_index];
+      int16_t index = (uint64_t)arg.data.excerpt(range.start, range.count);
       //
       assert(scope.index_postprocess, "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
-      relObjs.pointers[fs.obj_index] = (scope.index_postprocess)(variant, index);
+      arg.relevant_objects.pointers[fs.obj_index] = (scope.index_postprocess)(variant, index);
+      return (range.start + range.count) - fs.bit_offset;
    }
-   bool VariableScopeIndicatorValueList::decompile(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) const {
+   int32_t VariableScopeIndicatorValueList::decompile(arg_functor_state fs, OpcodeArgValue& arg, std::string& out) const {
       //
       // Call from OpcodeArgValue::decode_functor_t, for decompiling.
       //
-      auto decoded = this->_decode_to_struct(fs, data);
+      auto decoded = this->_decode_to_struct(fs, arg.data);
       if (!decoded.scope_instance)
-         return false;
+         return OpcodeArgTypeinfo::functor_failed;
       auto& scope = *decoded.scope_instance;
-      if (scope.index_decompile)
-         return (scope.index_decompile)(decoded, relObjs, out);
       _default_stringify(scope.format, decoded, out);
-      return true;
+      return decoded.bits_consumed;
    }
-   bool VariableScopeIndicatorValueList::to_english(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) const {
+   int32_t VariableScopeIndicatorValueList::to_english(arg_functor_state fs, OpcodeArgValue& arg, std::string& out) const {
       //
       // Call from OpcodeArgValue::decode_functor_t, for stringifying to English.
       //
-      auto decoded = this->_decode_to_struct(fs, data);
+      auto decoded = this->_decode_to_struct(fs, arg.data);
       if (!decoded.scope_instance)
-         return false;
+         return OpcodeArgTypeinfo::functor_failed;
       auto& scope = *decoded.scope_instance;
-      if (scope.index_to_english)
-         return (scope.index_to_english)(decoded, relObjs, out);
       _default_stringify(scope.format_english, decoded, out);
-      return true;
+      return decoded.bits_consumed;
    }
    #pragma endregion
 

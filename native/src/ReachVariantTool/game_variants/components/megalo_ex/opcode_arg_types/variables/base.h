@@ -118,6 +118,7 @@ namespace MegaloEx {
       uint8_t scope; // bitcount: VariableScopeIndicatorValueList::scopes.size()
       uint8_t which = 0;
       int16_t index = 0;
+      uint8_t bits_consumed = 0;
       const VariableScopeIndicatorValue* scope_instance = nullptr;
    };
 
@@ -135,7 +136,6 @@ namespace MegaloEx {
          };
          using flags_t = std::underlying_type_t<flags::type>;
          //
-         using decode_functor_t      = std::function<bool(_decoded& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
          using postprocess_functor_t = std::function<cobb::indexed_refcountable* (GameVariantData* variant, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
          //
          enum class index_type : uint8_t {
@@ -156,8 +156,6 @@ namespace MegaloEx {
          const char*    format         = "%w.timer[%i]"; // format string for decompiled code; interpreted manually; %w = the "which" as a string; %i = index as a number
          const char*    format_english = "%w's timer[%i]";
          //
-         decode_functor_t      index_decompile   = nullptr; // if present, overrides default handling i.e. format strings above
-         decode_functor_t      index_to_english  = nullptr; // if present, overrides default handling i.e. format strings above
          postprocess_functor_t index_postprocess = nullptr;
          //
          inline bool has_index() const noexcept { return this->index_type != index_type::none; }
@@ -214,9 +212,9 @@ namespace MegaloEx {
          // load_functor_t; postprocess_functor_t; decode_functor_t; and decode_functor_t (yes, twice; decompiling and printing 
          // in English have the same functor type).
          //
-         bool load(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) const;
-         bool postprocess(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) const;
-         bool decompile(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) const;
-         bool to_english(arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) const;
+         bool    load(arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) const;
+         int32_t postprocess(arg_functor_state fs, OpcodeArgValue& arg, GameVariantData* variant) const;
+         int32_t decompile(arg_functor_state fs, OpcodeArgValue& arg, std::string& out) const;
+         int32_t to_english(arg_functor_state fs, OpcodeArgValue& arg, std::string& out) const;
    };
 }

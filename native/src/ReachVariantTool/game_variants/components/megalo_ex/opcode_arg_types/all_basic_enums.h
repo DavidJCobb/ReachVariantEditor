@@ -4,9 +4,9 @@
 
 namespace MegaloEx {
    namespace type_helpers {
-      bool enum_arg_functor_load(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits);
-      bool enum_arg_functor_to_english(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out);
-      bool enum_arg_functor_decompile(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out);
+      bool enum_arg_functor_load(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits);
+      int32_t enum_arg_functor_to_english(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, std::string& out);
+      int32_t enum_arg_functor_decompile(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, std::string& out);
    }
    namespace types {
       extern OpcodeArgTypeinfo add_weapon_type;

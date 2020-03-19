@@ -22,17 +22,17 @@ namespace MegaloEx {
          QString("A variable referring to a physical object in the game world."),
          OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::is_nestable_variable | OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return scopes.load(fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return scopes.load(fs, arg, input_bits);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* variant) { // postprocess
-            return scopes.postprocess(fs, data, relObjs, variant);
+         [](arg_functor_state fs, OpcodeArgValue& arg, GameVariantData* variant) { // postprocess
+            return scopes.postprocess(fs, arg, variant);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return scopes.to_english(fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return scopes.to_english(fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return scopes.decompile(fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return scopes.decompile(fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );

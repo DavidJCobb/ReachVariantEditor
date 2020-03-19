@@ -21,70 +21,81 @@ namespace MegaloEx {
          QString(""),
          OpcodeArgTypeinfo::flags::may_need_postprocessing,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
             if (data.consume(input_bits, 1) == 0) { // absence bit; 0 means we have a value
-               relObjs.ranges[fs.obj_index].start = data.size;
-               relObjs.ranges[fs.obj_index].count = index_bits;
+               ro.ranges[fs.obj_index].start = data.size;
+               ro.ranges[fs.obj_index].count = index_bits;
                data.consume(input_bits, index_bits);
             } else
-               relObjs.ranges[fs.obj_index].count = 0;
+               ro.ranges[fs.obj_index].count = 0;
             return true;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData* vd) { // postprocess
+         [](arg_functor_state fs, OpcodeArgValue& arg, GameVariantData* vd) { // postprocess
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
             /*// Checking for absence this way would prevent us from ever handling this type if it were nested inside of another type.
             bool absence = data.size == fs.bit_offset + 1;
             if (absence)
                return true;
             //*/
-            if (!relObjs.index_is_set(fs.obj_index)) {
-               relObjs.pointers[fs.obj_index] = nullptr;
-               return true;
+            if (!ro.index_is_set(fs.obj_index)) {
+               ro.pointers[fs.obj_index] = nullptr;
+               return 1;
             }
+            int32_t bitcount = 1 + ro.ranges[fs.obj_index].count;
             auto mp = dynamic_cast<GameVariantDataMultiplayer*>(vd);
             if (!mp)
-               return false;
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+               return OpcodeArgTypeinfo::functor_failed;
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             auto& list = mp->scriptContent.forgeLabels;
             if (list.size() <= index)
-               return false;
-            relObjs.pointers[fs.obj_index] = &list[index];
-            return true;
+               return OpcodeArgTypeinfo::functor_failed;
+            ro.pointers[fs.obj_index] = &list[index];
+            return bitcount;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            if (!relObjs.index_is_set(fs.obj_index)) {
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
+            if (!ro.index_is_set(fs.obj_index)) {
                out = "no Forge label";
-               return true;
+               return 1;
             }
-            auto obj = relObjs.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
+            int32_t bitcount = 1 + ro.ranges[fs.obj_index].count;
+            auto    obj      = ro.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   out = obj->name->english();
-                  return true;
+                  return bitcount;
                }
                cobb::sprintf(out, "unnamed Forge label %u", obj->index);
-               return true;
+               return bitcount;
             }
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             cobb::sprintf(out, "missing Forge label %u", index);
-            return true;
+            return bitcount;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            if (!relObjs.index_is_set(fs.obj_index)) {
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            auto& data = arg.data;
+            auto& ro   = arg.relevant_objects;
+            if (!ro.index_is_set(fs.obj_index)) {
                out = "none";
-               return true;
+               return 1;
             }
-            auto obj = relObjs.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
+            int32_t bitcount = 1 + ro.ranges[fs.obj_index].count;
+            auto    obj      = ro.pointers[fs.obj_index].pointer_cast<Megalo::ReachForgeLabel>();
             if (obj) {
                if (obj->name) {
                   cobb::sprintf(out, "\"%s\"", obj->name->english()); // TODO: this will break if the name contains double-quotes
-                  return true;
+                  return bitcount;
                }
                cobb::sprintf(out, "%u", obj->index);
-               return true;
+               return bitcount;
             }
-            uint16_t index = OpcodeArgValue::excerpt_loaded_index(data, relObjs, fs.obj_index);
+            uint16_t index = arg.excerpt_loaded_index(fs.obj_index);
             cobb::sprintf(out, "%u", index);
-            return true;
+            return bitcount;
          },
          nullptr // TODO: "compile" functor
       );

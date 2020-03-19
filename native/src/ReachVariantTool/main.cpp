@@ -52,6 +52,8 @@ int main(int argc, char *argv[]) {
 //
 //        = Ensure that error handling has parity with what's in the release build.
 //
+//           - VariableScopeIndicatorValueList::postprocess needs proper error reporting.
+//
 //        = NOTE: POSTPROCESSING: I want to set up a queue on the game variant data 
 //          such that any objects that need postprocessing can just register themselves 
 //          in the queue and then we process (and then empty) that queue after load. 

@@ -3,14 +3,14 @@
 
 namespace MegaloEx {
    namespace type_helpers {
-      bool flags_arg_functor_load(const DetailedFlags& dfn, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
-         data.consume(input_bits, dfn.bitcount());
+      bool flags_arg_functor_load(const DetailedFlags& dfn, arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) {
+         arg.data.consume(input_bits, dfn.bitcount());
          return true;
       }
-      bool flags_arg_functor_to_english(const DetailedFlags& dfn, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+      int32_t flags_arg_functor_to_english(const DetailedFlags& dfn, arg_functor_state fs, OpcodeArgValue& arg, std::string& out) {
          out.clear();
          uint8_t  count = dfn.bitcount();
-         uint32_t value = data.excerpt(fs.bit_offset, dfn.bitcount());
+         uint32_t value = arg.data.excerpt(fs.bit_offset, count);
          uint8_t  found = 0;
          for (uint8_t i = 0; i < count; i++) {
             if (value & (1 << i)) {
@@ -31,12 +31,12 @@ namespace MegaloEx {
          }
          if (!found)
             out = "none";
-         return true;
+         return count;
       }
-      bool flags_arg_functor_decompile(const DetailedFlags& dfn, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
+      int32_t flags_arg_functor_decompile(const DetailedFlags& dfn, arg_functor_state fs, OpcodeArgValue& arg, std::string& out) {
          out.clear();
          uint8_t  count = dfn.bitcount();
-         uint32_t value = data.excerpt(fs.bit_offset, dfn.bitcount());
+         uint32_t value = arg.data.excerpt(fs.bit_offset, count);
          uint8_t  found = 0;
          for (uint8_t i = 0; i < count; i++) {
             if (value & (1 << i)) {
@@ -59,7 +59,7 @@ namespace MegaloEx {
             out += ')';
          else
             out = "none";
-         return true;
+         return count;
       }
    }
    namespace types {
@@ -90,15 +90,15 @@ namespace MegaloEx {
          QString("Options for creating objects."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::flags_arg_functor_load(flags_definitions::create_object_flags, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::flags_arg_functor_load(flags_definitions::create_object_flags, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::flags_arg_functor_to_english(flags_definitions::create_object_flags, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::flags_arg_functor_to_english(flags_definitions::create_object_flags, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::flags_arg_functor_decompile(flags_definitions::create_object_flags, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::flags_arg_functor_decompile(flags_definitions::create_object_flags, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -109,15 +109,15 @@ namespace MegaloEx {
          QString("The kind of actor that caused a player's death."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::flags_arg_functor_load(flags_definitions::killer_type, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::flags_arg_functor_load(flags_definitions::killer_type, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::flags_arg_functor_to_english(flags_definitions::killer_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::flags_arg_functor_to_english(flags_definitions::killer_type, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::flags_arg_functor_decompile(flags_definitions::killer_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::flags_arg_functor_decompile(flags_definitions::killer_type, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -128,15 +128,15 @@ namespace MegaloEx {
          QString("Unknown."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::flags_arg_functor_load(flags_definitions::player_unused_mode, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::flags_arg_functor_load(flags_definitions::player_unused_mode, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::flags_arg_functor_to_english(flags_definitions::player_unused_mode, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::flags_arg_functor_to_english(flags_definitions::player_unused_mode, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::flags_arg_functor_decompile(flags_definitions::player_unused_mode, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::flags_arg_functor_decompile(flags_definitions::player_unused_mode, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );

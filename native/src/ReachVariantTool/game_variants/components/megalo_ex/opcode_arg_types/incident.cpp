@@ -992,15 +992,15 @@ namespace MegaloEx {
          QString("Used to alert the game to specific events occurring; can award medals, play voiceovers, and similar."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::incident, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::incident, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::incident, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::incident, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::incident, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::incident, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );

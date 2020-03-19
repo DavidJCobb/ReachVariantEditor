@@ -994,69 +994,69 @@ namespace MegaloEx {
          QString("A type of object to spawn or operate on."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
             //
             // Can't use the normal "enum helper" functions both because this enum has a presence bit and because 
             // the maximum allowed index is higher than the number of defined entries.
             //
-            bool absence = (uint64_t)data.consume(input_bits, 1);
+            bool absence = (uint64_t)arg.data.consume(input_bits, 1);
             if (absence)
                return true;
-            data.consume(input_bits, ce_index_bitcount);
+            arg.data.consume(input_bits, ce_index_bitcount);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
             auto e = enums::object_type;
             //
             // Can't use the normal "enum helper" functions both because this enum has a presence bit and because 
             // the maximum allowed index is higher than the number of defined entries.
             //
             auto of = fs.bit_offset;
-            bool absence = (uint64_t)data.excerpt(of, 1);
+            bool absence = (uint64_t)arg.data.excerpt(of, 1);
             if (absence) {
                out = "None";
-               return true;
+               return 1;
             }
             ++of;
-            uint32_t index = data.excerpt(of, ce_index_bitcount);
+            uint32_t index = arg.data.excerpt(of, ce_index_bitcount);
             auto item = e.item(index);
             if (!item) {
                cobb::sprintf(out, "invalid value %u", index);
-               return true;
+               return ce_index_bitcount + 1;
             }
             QString name = item->get_friendly_name();
             if (!name.isEmpty()) {
                out = name.toStdString();
-               return true;
+               return ce_index_bitcount + 1;
             }
             out = item->name;
             if (out.empty()) // enum values should never be nameless but just in case
                cobb::sprintf(out, "%u", index);
-            return true;
+            return ce_index_bitcount + 1;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
             auto e = enums::object_type;
             //
             // Can't use the normal "enum helper" functions both because this enum has a presence bit and because 
             // the maximum allowed index is higher than the number of defined entries.
             //
             auto of = fs.bit_offset;
-            bool absence = (uint64_t)data.excerpt(of, 1);
+            bool absence = (uint64_t)arg.data.excerpt(of, 1);
             if (absence) {
                out = "None";
-               return true;
+               return ce_index_bitcount + 1;
             }
             ++of;
-            uint32_t index = data.excerpt(of, ce_index_bitcount);
+            uint32_t index = arg.data.excerpt(of, ce_index_bitcount);
             auto item = e.item(index);
             if (!item) {
                cobb::sprintf(out, "%u", index);
-               return true;
+               return ce_index_bitcount + 1;
             }
             out = item->name;
             if (out.empty()) // enum values should never be nameless but just in case
                cobb::sprintf(out, "%u", index);
-            return true;
+            return ce_index_bitcount + 1;
          },
          nullptr // TODO: "compile" functor
       );

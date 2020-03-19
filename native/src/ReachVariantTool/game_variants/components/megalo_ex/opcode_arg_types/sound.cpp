@@ -438,60 +438,62 @@ namespace MegaloEx {
          QString("A sound that can be played."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::sound, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::sound, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
             auto e = enums::sound;
+            auto bitcount = e.index_bits();
             //
             // Can't use the normal "enum helper" functions because this enum has an offset, i.e. a value 
             // of -1 is used to indicate "no sound" and to avoid sign bit mishaps, the game adds 1 before 
             // serializing and subtracts 1 when loading.
             //
-            int32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+            int32_t index = arg.data.excerpt(fs.bit_offset, bitcount);
             --index;
             if (index < 0) {
                out = "none";
-               return true;
+               return bitcount;
             }
             auto item = e.item(index);
             if (!item) {
                cobb::sprintf(out, "invalid value %u", index);
-               return true;
+               return bitcount;
             }
             QString name = item->get_friendly_name();
             if (!name.isEmpty()) {
                out = name.toStdString();
-               return true;
+               return bitcount;
             }
             out = item->name;
             if (out.empty()) // enum values should never be nameless but just in case
                cobb::sprintf(out, "%u", index);
-            return true;
+            return bitcount;
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
             auto e = enums::sound;
+            auto bitcount = e.index_bits();
             //
             // Can't use the normal "enum helper" functions because this enum has an offset, i.e. a value 
             // of -1 is used to indicate "no sound" and to avoid sign bit mishaps, the game adds 1 before 
             // serializing and subtracts 1 when loading.
             //
-            int32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+            int32_t index = arg.data.excerpt(fs.bit_offset, bitcount);
             --index;
             if (index < 0) {
                out = "none";
-               return true;
+               return bitcount;
             }
             auto item = e.item(index);
             if (!item) {
                cobb::sprintf(out, "%u", index);
-               return true;
+               return bitcount;
             }
             out = item->name;
             if (out.empty()) // enum values should never be nameless but just in case
                cobb::sprintf(out, "%u", index);
-            return true;
+            return bitcount;
          },
          nullptr // TODO: "compile" functor
       );

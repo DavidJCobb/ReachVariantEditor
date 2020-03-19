@@ -55,12 +55,12 @@ namespace MegaloEx {
       //
       public:
          static constexpr int32_t functor_failed = -1;
-         using load_functor_t        = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
-         using decode_functor_t      = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
-         using compile_functor_t     = std::function<arg_consume_result(arg_functor_state, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;
-         using postprocess_functor_t = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*)>;
+         using load_functor_t        = std::function<bool(arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
+         using decode_functor_t      = std::function<int32_t(arg_functor_state fs, OpcodeArgValue& arg, std::string& out)>; // returns number of bits consumed, or (functor_failed)
+         using compile_functor_t     = std::function<arg_consume_result(arg_functor_state fs, OpcodeArgValue& arg, const std::string&, Compiler&)>;
+         using postprocess_functor_t = std::function<int32_t(arg_functor_state fs, OpcodeArgValue& arg, GameVariantData*)>; // returns number of bits consumed, or (functor_failed)
          //
-         static bool default_postprocess_functor(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, GameVariantData*) { return true; } // for argument types that don't need postprocessing
+         static int32_t default_postprocess_functor(arg_functor_state, OpcodeArgValue& arg, GameVariantData*) { return true; } // for argument types that don't need postprocessing
          //
          struct flags {
             flags() = delete;
@@ -223,7 +223,8 @@ namespace MegaloEx {
       //
       public:
          virtual bool postprocess(GameVariantData* data) override { // IGameVariantDataObjectNeedingPostprocess
-            return (this->type.postprocess)(0, this->data, this->relevant_objects, data);
+            arg_functor_state fs;
+            return (this->type.postprocess)(fs, *this, data) != OpcodeArgTypeinfo::functor_failed;
          }
          cobb::bitarray128  data;
          OpcodeArgTypeinfo& type;
@@ -234,11 +235,11 @@ namespace MegaloEx {
          //
          void do_index_fixup();
          //
-         inline static uint64_t excerpt_loaded_index(cobb::bitarray128& data, arg_rel_obj_list_t& ro, uint8_t which) noexcept {
-            auto& item = ro[which];
+         inline uint64_t excerpt_loaded_index(uint8_t which) noexcept {
+            auto& item = this->relevant_objects.ranges[which];
             if (!item.count)
                return 0;
-            return data.excerpt(item.start, item.count);
+            return this->data.excerpt(item.start, item.count);
          }
    };
 }

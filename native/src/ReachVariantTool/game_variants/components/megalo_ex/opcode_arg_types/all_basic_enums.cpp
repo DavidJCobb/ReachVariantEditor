@@ -3,38 +3,40 @@
 
 namespace MegaloEx {
    namespace type_helpers {
-      bool enum_arg_functor_load(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) {
-         data.consume(input_bits, e.index_bits());
+      bool enum_arg_functor_load(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) {
+         arg.data.consume(input_bits, e.index_bits());
          return true;
       }
-      bool enum_arg_functor_to_english(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
-         uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+      int32_t enum_arg_functor_to_english(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, std::string& out) {
+         auto     bitcount = e.index_bits();
+         uint32_t index    = arg.data.excerpt(fs.bit_offset, bitcount);
          auto item = e.item(index);
          if (!item) {
             cobb::sprintf(out, "invalid value %u", index);
-            return true;
+            return bitcount;
          }
          QString name = item->get_friendly_name();
          if (!name.isEmpty()) {
             out = name.toStdString();
-            return true;
+            return bitcount;
          }
          out = item->name;
          if (out.empty()) // enum values should never be nameless but just in case
             cobb::sprintf(out, "%u", index);
-         return true;
+         return bitcount;
       }
-      bool enum_arg_functor_decompile(const DetailedEnum& e, arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) {
-         uint32_t index = data.excerpt(fs.bit_offset, e.index_bits());
+      int32_t enum_arg_functor_decompile(const DetailedEnum& e, arg_functor_state fs, OpcodeArgValue& arg, std::string& out) {
+         auto     bitcount = e.index_bits();
+         uint32_t index    = arg.data.excerpt(fs.bit_offset, bitcount);
          auto item = e.item(index);
          if (!item) {
             cobb::sprintf(out, "%u", index);
-            return true;
+            return bitcount;
          }
          out = item->name;
          if (out.empty()) // enum values should never be nameless but just in case
             cobb::sprintf(out, "%u", index);
-         return true;
+         return bitcount;
       }
    }
    namespace types {
@@ -141,15 +143,15 @@ namespace MegaloEx {
          QString("Indicates how the weapon should be added to the player."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::add_weapon_type, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::add_weapon_type, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::add_weapon_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::add_weapon_type, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::add_weapon_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::add_weapon_type, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -160,15 +162,15 @@ namespace MegaloEx {
          QString("Something to do with the UI."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::c_hud_destination, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::c_hud_destination, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::c_hud_destination, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::c_hud_destination, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::c_hud_destination, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::c_hud_destination, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -179,15 +181,15 @@ namespace MegaloEx {
          QString("A comparison operator, such as \"less than\" or \"equal to.\""),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::compare_operator, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::compare_operator, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::compare_operator, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::compare_operator, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::compare_operator, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::compare_operator, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -198,15 +200,15 @@ namespace MegaloEx {
          QString("Determines whether an opcode affects a player's primary weapon or secondary weapon."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::drop_weapon_type, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::drop_weapon_type, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::drop_weapon_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::drop_weapon_type, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::drop_weapon_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::drop_weapon_type, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -217,15 +219,15 @@ namespace MegaloEx {
          QString("Determines what grenade type an opcode uses."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::grenade_type, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::grenade_type, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::grenade_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::grenade_type, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::grenade_type, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::grenade_type, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -236,15 +238,15 @@ namespace MegaloEx {
          QString("Determines what loadout palette is available to a player. Each loadout palette consists of five loadouts."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::loadout_palette, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::loadout_palette, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::loadout_palette, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::loadout_palette, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::loadout_palette, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::loadout_palette, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -255,15 +257,15 @@ namespace MegaloEx {
          QString("An arithmetic or binary operator, such as \"add,\" \"subtract,\" or \"bitwise AND.\""),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::math_operator, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::math_operator, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::math_operator, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::math_operator, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::math_operator, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::math_operator, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -274,15 +276,15 @@ namespace MegaloEx {
          QString("Determines how the player picks up an item."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::pickup_priority, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::pickup_priority, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::pickup_priority, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::pickup_priority, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::pickup_priority, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::pickup_priority, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -293,15 +295,15 @@ namespace MegaloEx {
          QString("Unknown. This may be the alliance status between two teams."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::team_disposition, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::team_disposition, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::team_disposition, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::team_disposition, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::team_disposition, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::team_disposition, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -312,15 +314,15 @@ namespace MegaloEx {
          QString("Determines how quickly a timer-variable counts, and whether it counts up or down."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::timer_rate, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::timer_rate, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::timer_rate, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::timer_rate, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::timer_rate, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::timer_rate, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
@@ -331,15 +333,15 @@ namespace MegaloEx {
          QString("Determines a waypoint's on-screen priority."),
          OpcodeArgTypeinfo::flags::none,
          //
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits) { // loader
-            return type_helpers::enum_arg_functor_load(enums::waypoint_priority, fs, data, relObjs, input_bits);
+         [](arg_functor_state fs, OpcodeArgValue& arg, cobb::uint128_t input_bits) { // loader
+            return type_helpers::enum_arg_functor_load(enums::waypoint_priority, fs, arg, input_bits);
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to english
-            return type_helpers::enum_arg_functor_to_english(enums::waypoint_priority, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english
+            return type_helpers::enum_arg_functor_to_english(enums::waypoint_priority, fs, arg, out);
          },
-         [](arg_functor_state fs, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out) { // to script code
-            return type_helpers::enum_arg_functor_decompile(enums::waypoint_priority, fs, data, relObjs, out);
+         [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to script code
+            return type_helpers::enum_arg_functor_decompile(enums::waypoint_priority, fs, arg, out);
          },
          nullptr // TODO: "compile" functor
       );
