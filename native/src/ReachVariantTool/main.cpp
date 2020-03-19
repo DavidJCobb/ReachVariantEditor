@@ -48,6 +48,16 @@ int main(int argc, char *argv[]) {
 //
 //        - Other argument value types
 //
+//           - Format strings (tokens.h in the old system)
+//
+//           - Player sets
+//
+//           - specific_variable.h
+//
+//           - Waypoint icons
+//
+//           - Widget stuff
+//
 //        - The opcodes themselves
 //
 //        = Ensure that error handling has parity with what's in the release build.
