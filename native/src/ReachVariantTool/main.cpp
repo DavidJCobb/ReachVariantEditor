@@ -34,29 +34,15 @@ int main(int argc, char *argv[]) {
 //
 //     - New opcode argument system
 //
-//        - MP object types
-//
-//           - Convert to DetailedEnum, and then make a typeinfo for them.
-//
-//        - Incident IDs
-//
-//           - Convert to DetailedEnum, and then make a typeinfo for them.
-//
 //        - Icon indices
 //
 //        - Variable argument values
-//
-//           - Switch the new "timer" variable implementation from old-style switch-cases 
-//             to the generic system.
 //
 //           - The generic variable system does not properly report load errors for 
 //             "biped" property access. It also doesn't have any provisions for "team" 
 //             property access, since apparently we didn't actually have full error-
 //             checking for that in the old system (we didn't validate the "which" in 
 //             that specific case).
-//
-//           - An "any variable" typeinfo that loads the variable type enum and then 
-//             delegates to the appropriate other typeinfo.
 //
 //        - Other argument value types
 //
