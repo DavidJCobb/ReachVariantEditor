@@ -54,6 +54,7 @@ namespace MegaloEx {
       // label, etc., and they need to get a refcounted pointer to the target data.
       //
       public:
+         static constexpr int32_t functor_failed = -1;
          using load_functor_t        = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, cobb::uint128_t input_bits)>; // loads data from binary stream; returns success/failure
          using decode_functor_t      = std::function<bool(arg_functor_state, cobb::bitarray128& data, arg_rel_obj_list_t& relObjs, std::string& out)>; // returns success/failure
          using compile_functor_t     = std::function<arg_consume_result(arg_functor_state, OpcodeArgValue&, arg_rel_obj_list_t& relObjs, const std::string&, Compiler&)>;

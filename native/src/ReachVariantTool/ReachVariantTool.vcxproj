@@ -132,6 +132,7 @@
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.cpp" />
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\incident.cpp" />
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.cpp" />
+    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\shape.cpp" />
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\any_variable.cpp" />
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\object.cpp" />
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.cpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\incident.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.h" />
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\shape.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\sound.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\any_variable.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\base.h" />

@@ -358,6 +358,9 @@
     <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -886,6 +889,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\shape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

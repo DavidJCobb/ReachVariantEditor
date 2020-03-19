@@ -36,6 +36,8 @@ int main(int argc, char *argv[]) {
 //
 //        - Icon indices
 //
+//        - Requisition palette indices
+//
 //        - Variable argument values
 //
 //           - The generic variable system does not properly report load errors for 
