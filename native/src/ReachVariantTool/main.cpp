@@ -30,6 +30,44 @@ int main(int argc, char *argv[]) {
 //
 
 
+//
+// UPDATED PLANS:
+//
+//  - Backport generic variable handling from the new opcode argument system to the old 
+//    system, and see if it works.
+//
+//     - If so, begin bringing decompile code from the new system back to the old system.
+//
+//  - Remove postprocessing.
+//
+//     - The game-variant-data constructor should fill all indexed lists with dummy elements. 
+//       Dummy elements need to have a flag; when we load the "real" elements, strip the flag 
+//       from existing elements instead of deleting and replacing them.
+//
+//        - After loading the contents of an indexed list, iterate backwards over it and 
+//          delete any dummy elements whose refcounts are zero. Stop deleting at the first 
+//          dummy element with a non-zero refcount, or at the first non-dummy element; if 
+//          any dummy elements have non-zero refcounts, show warnings for all such dummies.
+//
+//     - Pass the game-variant-data down through the load process. Set up indexed-object 
+//       pointers during load.
+//
+//     - And now we don't need postprocessing!
+//
+//  = If we get the above two changes working fully, then consider ditching the new opcode 
+//    system entirely per remarks further below.
+//
+//  - Implement remaining opcode argument types in new system
+//
+//     - Icon indices
+//     - Requisition palette indices
+//     - Format strings
+//     - Player sets
+//     - specific_variable.h
+//     - Waypoint icons
+//     - Widget stuff
+//
+
 //  - DECOMPILER
 //
 //     - New opcode argument system
@@ -70,6 +108,9 @@ int main(int argc, char *argv[]) {
 //          I've already created IGameVariantDataObjectNeedingPostprocess for this 
 //          purpose. I need to create the queue system itself and the code for it.
 //
+//           = ALTERNATIVELY, IMPLEMENT THE "NO POSTPROCESSING" PLANS BELOW EARLIER THAN 
+//             PLANNED, SO WE CAN SKIP THIS WORK ENTIRELY.
+//
 //           - An object can only add itself to the queue if it has access to the queue 
 //             (i.e. through the containing game variant object) during load. Currently 
 //             this access is not available to the new opcode argument system; I need 
@@ -85,6 +126,58 @@ int main(int argc, char *argv[]) {
 //             the game variant needs to be passed at least as far down as the opcode.
 //
 //        - Swap everything in and see if it works.
+//
+//        = TOP-PRIORITY TASKS FOR AFTER WE HAVE A COMPILER: RETAIN A BUILD CAPABLE OF 
+//          COMPILING SO THAT WE CAN TEST STUFF IN-GAME ALONGSIDE WORKING ON THESE TASKS.
+//
+//           - Redesign the GameVariant class so that it no longer lines up exactly with 
+//             the actual structure of the file. I want to group all script content under 
+//             a blanket MegaloScript class and otherwise just make things more orderly.
+//
+//              - We shouldn't do this until we've documented, somewhere, the full struct-
+//                ure of all elements in a script file, including offsets. Right now, the 
+//                only explicit documentation of the file structure that we have on hand 
+//                IS our in-memory struct definitions.
+//
+//           - I can completely remove the need for a "postprocess" step if I just don't 
+//             dynamically instantiate most of the content. For example, a game variant 
+//             can have sixteen options, right? So what if I make it so that the common 
+//             superclass we're using, indexed_refcountable, has an "is_defined" bool on 
+//             it, and then, the moment the game variant is created in memory, create 
+//             sixteen dummy options? Then, I can track their refcounts before they're 
+//             "loaded:" when we find an opcode that refers to the objects, we set up a 
+//             pointer from the opcode to the dummy, and when we finally get around to 
+//             loading the options, we flag those that we load as no longer being dummies.
+//
+//              - As a bonus, this also allows us to display load-time warnings if a 
+//                script refers to an out-of-bounds option. At the end of the load process, 
+//                for each indexed list, we would iterate backwards over the list and 
+//                delete any dummies with a zero refcount; we stop deleting at the first 
+//                entry we find that either isn't a dummy or has a non-zero refcount; and 
+//                if any dummy entries have a non-zero refcount we pop a warning.
+//
+//              - This idea isn't workable for strings in the string table, but we also 
+//                don't need to change anything about how we handle those. Strings are 
+//                loaded before most other script content and we can manually postprocess 
+//                the few things that load earlier.
+//
+//           - I obviously misjudged the work involved in my current approach. With the 
+//             previous system, you need one OpcodeArgValue subclass for every argument 
+//             type, along with a boilerplate-filled "satellite" object: an instance of 
+//             OpcodeArgTypeinfo. Somehow I thought it would be easier to just turn the 
+//             whole thing inside-out -- have just the typeinfo, with non-member functors 
+//             to manipulate the bits -- but all that means is that I have to constantly 
+//             work with bits manually, rather than just on saving and exporting. We don't 
+//             NEED to keep the data in a "friendly" intermediate format but it's so, so 
+//             much easier to.
+//
+//             I don't want to redesign absolutely everything YET AGAIN, as if I keep 
+//             doing that I'll never get anything done, so I've decided to roll back after 
+//             the compiler is done. My reasoning is that I can: a) keep a build with the 
+//             working compiler handy, so I can multitask and test things in-game even 
+//             while the codebase isn't usable; and b) greatly simplify the work involved 
+//             in changing the system just by already having the compiler done -- already 
+//             knowing exactly what a rollback would need to have added to it.
 //
 //     - Syntax
 //
