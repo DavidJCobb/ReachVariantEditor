@@ -14,15 +14,15 @@ namespace Megalo {
       uint8_t type = stream.read_bits<uint8_t>(3);
       switch ((variable_type)type) {
          case variable_type::scalar:
-            return OpcodeArgValueScalar::factory(stream);
+            return OpcodeArgValueScalar::typeinfo.factory(stream);
          case variable_type::timer:
             return OpcodeArgValueTimer::factory(stream);
          case variable_type::team:
             return OpcodeArgValueTeam::factory(stream);
          case variable_type::player:
-            return OpcodeArgValuePlayer::factory(stream);
+            return OpcodeArgValuePlayer::typeinfo.factory(stream);
          case variable_type::object:
-            return OpcodeArgValueObject::factory(stream);
+            return OpcodeArgValueObject::typeinfo.factory(stream);
       }
       auto& error = GameEngineVariantLoadError::get();
       error.state  = GameEngineVariantLoadError::load_state::failure;
@@ -37,7 +37,7 @@ namespace Megalo {
          case 0: // Team
             return OpcodeArgValueTeam::factory(stream);
          case 1: // Player
-            return OpcodeArgValuePlayer::factory(stream);
+            return OpcodeArgValuePlayer::typeinfo.factory(stream);
          case 2: // All Players
             return OpcodeArgValueAllPlayers::factory(stream);
       }

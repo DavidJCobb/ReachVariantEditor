@@ -37,8 +37,8 @@ namespace Megalo {
          "Checks whether one object is inside of another object's Shape.",
          "%1 %v inside of %2's shape.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("shape_contains", "", {0}, 1)
       ),
@@ -47,7 +47,7 @@ namespace Megalo {
          "Checks what killed a player.",
          "%1 %v killed by any of: %2.",
          {
-            OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("victim", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::factory),
          },
          OpcodeFuncToScriptMapping::make_function("killer_type_is", "", {1}, 0),
@@ -79,7 +79,7 @@ namespace Megalo {
          "Checks an object's type.",
          "%1 %v of type %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
          },
          OpcodeFuncToScriptMapping::make_function("is_of_type", "", {1}, 0)
@@ -99,7 +99,7 @@ namespace Megalo {
          "Checks whether an object is out of bounds.",
          "%1 %v out of bounds.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_out_of_bounds", "", {}, 0)
       ),
@@ -108,7 +108,7 @@ namespace Megalo {
          "This condition always returns false.", // TODO: does inverting it change that?
          "Never. (Unused argument: %1)",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("deprecated_09", "", {}, 0)
       ),
@@ -117,8 +117,8 @@ namespace Megalo {
          "Checks whether one player assisted in the slaying of another player. Note that players don't count as \"assisting\" themselves.",
          "%1 %v in the killing of %2.",
          {
-            OpcodeArgBase("attacker", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("victim",   OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("attacker", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("victim",   OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("assisted_kill_of", "", {1}, 0),
          "assisted", "did not assist"
@@ -128,7 +128,7 @@ namespace Megalo {
          "Checks whether an object has a Forge label.",
          "%1 %v label %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
          },
          OpcodeFuncToScriptMapping::make_function("has_forge_label", "", {1}, 0),
@@ -139,7 +139,7 @@ namespace Megalo {
          "Checks whether a player is NOT waiting to respawn.", // TODO: includes loadout cam time?
          "%1 %v waiting to respawn.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_not_respawning", "", {}, 0),
          "is not", "is"
@@ -149,7 +149,7 @@ namespace Megalo {
          "",
          "%1 %v in use.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_in_use", "", {}, 0)
       ),
@@ -158,7 +158,7 @@ namespace Megalo {
          "Checks whether a player is a Spartan.",
          "%1 %v a Spartan.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_spartan", "", {}, 0)
       ),
@@ -167,7 +167,7 @@ namespace Megalo {
          "Checks whether a player is an Elite.",
          "%1 %v an Elite.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_elite", "is_sangheili", {}, 0)
       ),
@@ -176,7 +176,7 @@ namespace Megalo {
          "Checks whether a player is a Monitor.",
          "%1 %v a Monitor.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_monitor", "", {}, 0)
       ),
@@ -225,6 +225,10 @@ namespace Megalo {
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
          auto factory = base[i].factory;
+         #pragma region HACKHACKHACK
+            if (!factory && base[i].typeinfo)
+               factory = base[i].typeinfo->factory;
+         #pragma endregion
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
             if (!this->arguments[i]->read(stream)) {
@@ -281,6 +285,10 @@ namespace Megalo {
          #endif
          auto* arg     = this->arguments[i];
          auto  factory = base[i].factory;
+         #pragma region HACKHACKHACK
+            if (!factory && base[i].typeinfo)
+               factory = base[i].typeinfo->factory;
+         #pragma endregion
          assert(arg && "A condition's argument is nullptr during save!");
          //
          // This is really ugly but I've sort of painted myself into a corner here... Some 

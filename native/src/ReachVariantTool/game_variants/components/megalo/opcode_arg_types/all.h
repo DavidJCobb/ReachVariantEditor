@@ -3,9 +3,9 @@
 #include "all_enums.h"
 #include "all_flags.h"
 #include "all_indices.h"
-#include "scalar.h"
-#include "player.h"
-#include "object.h"
+#include "variables/number.h"
+#include "variables/player.h"
+#include "variables/object.h"
 #include "team.h"
 #include "timer.h"
 //

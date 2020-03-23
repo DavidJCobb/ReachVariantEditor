@@ -70,15 +70,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\scalar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\team.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -292,15 +283,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="helpers\int128.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -310,55 +292,19 @@
     <ClCompile Include="game_variants\components\megalo_ex\detailed_enum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_enums.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_flags.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo_ex\detailed_flags.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_constants.cpp">
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\sound.cpp">
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variant_string_id.cpp">
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\number.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\team.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\any_variable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\variables\player_or_group.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\incident.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg_types\shape.cpp">
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -648,16 +594,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\all_indices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_set.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\scalar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\shape.h">
@@ -822,15 +759,6 @@
     <ClInclude Include="game_variants\components\megalo_ex\opcode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\vector3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\player_traits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\forge_label.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\int128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -843,55 +771,19 @@
     <ClInclude Include="helpers\refcounting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\components\megalo_ex\detailed_flags.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_flags.h">
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\all_basic_constants.h">
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\sound.h">
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\number.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variant_string_id.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\number.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\team.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\any_variable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\variables\player_or_group.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\incident.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\object_type.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg_types\shape.h">
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

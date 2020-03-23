@@ -28,7 +28,7 @@ namespace Megalo {
          {
             OpcodeArgBase("target",   OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory)
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo)
          },
          OpcodeFuncToScriptMapping::make_setter("score", 0, {}, 1)
       ),
@@ -38,8 +38,8 @@ namespace Megalo {
          "Create %1 at offset %6 from %3 with Forge label %4, settings (%5), and name %7. Store a reference to it in %2.",
          {
             OpcodeArgBase("type",        OpcodeArgValueMPObjectTypeIndex::factory),
-            OpcodeArgBase("result",      OpcodeArgValueObject::factory, true),
-            OpcodeArgBase("spawn point", OpcodeArgValueObject::factory),
+            OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
+            OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::factory),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::factory),
@@ -52,7 +52,7 @@ namespace Megalo {
          "Delete an object.",
          "Delete %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("delete", "", {}, 0)
       ),
@@ -61,7 +61,7 @@ namespace Megalo {
          "Control the visibility of a waypoint on an object.",
          "Modify waypoint visibility for %1: make visible to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_visibility", "", {1}, 0)
@@ -71,7 +71,7 @@ namespace Megalo {
          "Control the icon of a waypoint on an object.",
          "Set %1's waypoint icon to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("icon",   OpcodeArgValueWaypointIcon::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_icon", "", {1}, 0)
@@ -81,7 +81,7 @@ namespace Megalo {
          "Control the priority of a waypoint on an object.",
          "Set %1's waypoint priority to %2.",
          {
-            OpcodeArgBase("object",   OpcodeArgValueObject::factory),
+            OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("priority", OpcodeArgValueWaypointPriorityEnum::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_priority", "", {1}, 0)
@@ -91,7 +91,7 @@ namespace Megalo {
          "Set which timer an object displays.",
          "Have %1 display %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_displayed_timer", "", {1}, 0)
@@ -101,9 +101,9 @@ namespace Megalo {
          "",
          "Set %1's distance range to minimum %2, maximum %3.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("min",    OpcodeArgValueScalar::factory), // should be in the range of [-1, 100]
-            OpcodeArgBase("max",    OpcodeArgValueScalar::factory), // should be in the range of [-1, 100]
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("min",    OpcodeArgValueScalar::typeinfo), // should be in the range of [-1, 100]
+            OpcodeArgBase("max",    OpcodeArgValueScalar::typeinfo), // should be in the range of [-1, 100]
          },
          OpcodeFuncToScriptMapping::make_function("set_distance_range", "", {1, 2}, 0)
       ),
@@ -123,7 +123,7 @@ namespace Megalo {
          "Add a Shape to an object, or replace its existing Shape.",
          "Set %1's shape to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("shape",  OpcodeArgValueShape::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_shape", "", {1}, 0)
@@ -133,7 +133,7 @@ namespace Megalo {
          "Apply one of the scripted sets of Player Traits to a player. There is no trigger action to remove a set of player traits; rather, you must reapply traits on every frame, and you \"remove\" traits by not reapplying them.",
          "Apply %2 to %1.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::factory),
          },
          OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
@@ -143,7 +143,7 @@ namespace Megalo {
          "Limit who can interact with an object.",
          "Only allow %2 to interact with %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_interact_permissions", "", {1}, 0)
@@ -153,7 +153,7 @@ namespace Megalo {
          "Limit who can spawn at an object.",
          "Only allow %2 to spawn at %1.",
          {
-            OpcodeArgBase("spawn location", OpcodeArgValueObject::factory),
+            OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who", OpcodeArgValuePlayerSet::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
@@ -163,7 +163,7 @@ namespace Megalo {
          "Limit which fireteam can spawn at an object.",
          "Only allow fireteam #%2 to spawn at %1.",
          {
-            OpcodeArgBase("spawn location", OpcodeArgValueObject::factory),
+            OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::factory), // TODO: -1 == "no fireteam"
          },
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteam", "", {1}, 0)
@@ -173,7 +173,7 @@ namespace Megalo {
          "Set whether an object displays a progress bar.",
          "Have %1 display %3 as a progress bar for %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
          },
@@ -214,8 +214,8 @@ namespace Megalo {
          "Set a player variable to the owner of an object.",
          "Set %2 to the owner of %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_owner", "", {}, 0)
       ),
@@ -240,7 +240,7 @@ namespace Megalo {
          "Limit who can see an object's Shape.",
          "Only allow %2 to see %1's shape.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_shape_visibility", "", {1}, 0)
@@ -250,7 +250,7 @@ namespace Megalo {
          "Instantly destroy the specified object.",
          "Destroy %1 %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("silent", OpcodeArgValueConstBool::factory, "silently", "loudly"),
          },
          OpcodeFuncToScriptMapping::make_function("kill", "", {1}, 0)
@@ -260,8 +260,8 @@ namespace Megalo {
          "Set whether an object is invincible. Invincible objects cannot be destroyed by anything -- even level boundaries.",
          "Modify %1 invincibility: set to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("invincible (treated as a bool)", OpcodeArgValueScalar::factory), // treated as a bool
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("invincible (treated as a bool)", OpcodeArgValueScalar::typeinfo), // treated as a bool
          },
          OpcodeFuncToScriptMapping::make_function("set_invincibility", "", {1}, 0)
       ),
@@ -270,8 +270,8 @@ namespace Megalo {
          "Set a number variable to a random value.",
          "Set %2 to a random number generated using seed %1.",
          {
-            OpcodeArgBase("seed",   OpcodeArgValueScalar::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("seed",   OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("rand", "", {0})
       ),
@@ -287,8 +287,8 @@ namespace Megalo {
          "Retrieve some unknown value from an object, always between 1 and 7 inclusive. This can fail, so you should consider resetting the number variable before calling this.",
          "Set %2 to the Unknown-27 value on %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_27", "", {}, 0)
       ),
@@ -297,8 +297,8 @@ namespace Megalo {
          "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero.",
          "Set integer %2 to the current speed of %1 multiplied by 10.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_speed", "", {}, 0)
       ),
@@ -307,8 +307,8 @@ namespace Megalo {
          "Set a player variable to whoever most recently killed the target player.", // does nothing if player isn't dead? bungie sets the out-variable to no-player before running this
          "Set %2 to the killer of %1.",
          {
-            OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("killer", OpcodeArgValuePlayer::factory, true),
+            OpcodeArgBase("victim", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("killer", OpcodeArgValuePlayer::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_killer", "get_killer", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
@@ -317,8 +317,8 @@ namespace Megalo {
          "Set a number variable to indicate what damage type killed a player.",
          "Set integer %2 to the damage type(s) that killed %1.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_type", "get_death_damage_type", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
@@ -327,8 +327,8 @@ namespace Megalo {
          "Set a number variable to indicate what damage modifier killed a player.", // does nothing if player isn't dead? bungie sets the out-variable to 0 before running this
          "Set integer %2 to the damage modifier(s) that killed %1.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_mod", "get_death_damage_mod", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
          //
@@ -354,8 +354,8 @@ namespace Megalo {
          "Attach one object to another.",
          "Attach %1 to %2 at offset %3. Unknown bool: %4.",
          {
-            OpcodeArgBase("subject", OpcodeArgValueObject::factory),
-            OpcodeArgBase("target",  OpcodeArgValueObject::factory),
+            OpcodeArgBase("subject", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("target",  OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("offset",  OpcodeArgValueVector3::factory),
             OpcodeArgBase("bool",    OpcodeArgValueConstBool::factory),
          },
@@ -366,7 +366,7 @@ namespace Megalo {
          "Detach an object from any other object it is attached to.",
          "Detach %1 from whatever other object it is attached to.",
          {
-            OpcodeArgBase("subject", OpcodeArgValueObject::factory),
+            OpcodeArgBase("subject", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("detach", "", {}, 0)
       ),
@@ -375,8 +375,8 @@ namespace Megalo {
          "Get a player's position on the scoreboard, across all players and teams.",
          "Set %2 to %1's position on the scoreboard.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_scoreboard_pos", "", {}, 0)
       ),
@@ -386,7 +386,7 @@ namespace Megalo {
          "Set %2 to %1's index.",
          {
             OpcodeArgBase("team",   OpcodeArgValueTeam::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_index", "", {}, 0)
       ),
@@ -395,8 +395,8 @@ namespace Megalo {
          "Returns the number of consecutive kills that a player has accomplished without dying.",
          "Set %2 to the number of consecutive kills %1 has achieved without dying.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_spree_count", "", {}, 0)
       ),
@@ -405,8 +405,8 @@ namespace Megalo {
          "",
          "Carry out some unknown action (38) involving %1 and %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("number", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_38", "", {1}, 0)
       ),
@@ -415,7 +415,7 @@ namespace Megalo {
          "",
          "Toggle unused flags %2 for %1.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("flags",  OpcodeArgValuePlayerUnusedModeFlags::factory),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_39", "", {1}, 0)
@@ -425,8 +425,8 @@ namespace Megalo {
          "Sets an object variable to the vehicle that a player is currently using. Does not include boarding.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
          "Set %2 to the vehicle that %1 is currently using.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_vehicle", "get_vehicle", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
@@ -435,8 +435,8 @@ namespace Megalo {
          "Forces the player into a vehicle. The player is instantly teleported in.",
          "Force %1 into any unoccupied seat in %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("vehicle", OpcodeArgValueObject::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("vehicle", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("force_into_vehicle", "", {1}, 0)
       ),
@@ -445,8 +445,8 @@ namespace Megalo {
          "",
          "Set %1's biped to %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_biped", "", {1}, 0)
       ),
@@ -464,7 +464,7 @@ namespace Megalo {
          "Modify whether a weapon is picked up automatically or as a hold action.",
          "Set %1's weapon pickup priority to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("priority", OpcodeArgValuePickupPriorityEnum::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_weapon_pickup_priority", "", {1}, 0)
@@ -474,7 +474,7 @@ namespace Megalo {
          "Launches an object upward by a random amount. This is used for things like skulls popping out of heads in Headhunter.",
          "Apply a semi-random amount of upward force to %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("push_upward", "apply_upward_impulse", {}, 0)
       ),
@@ -524,7 +524,7 @@ namespace Megalo {
          "%3 widget %1 for player %2.",
          {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::factory),
-            OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("visible", OpcodeArgValueConstBool::factory, "Show", "Hide"),
          },
          OpcodeFuncToScriptMapping::make_function("set_visibility", "", {1, 2}, 0)
@@ -545,8 +545,8 @@ namespace Megalo {
          "Resizes an object.",
          "Set %1's scale to %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("scale",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("scale",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_scale", "", {1}, 0)
       ),
@@ -555,7 +555,7 @@ namespace Megalo {
          "",
          "Set %1's display text to message: %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_display_text", "", {1}, 0)
@@ -565,8 +565,8 @@ namespace Megalo {
          "Returns an object's shields as a percentage (i.e. full = 100).",
          "Set %2 to the percentage of shields %1 has remaining.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_getter("shields", 0)
       ),
@@ -575,8 +575,8 @@ namespace Megalo {
          "Returns an object's health as a percentage (i.e. full = 100).",
          "Set %2 to the percentage of health %1 has remaining.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_getter("health", 0)
       ),
@@ -585,7 +585,7 @@ namespace Megalo {
          "Alters the text of the title card shown at the start of a round.",
          "Set the objective title for %1 to %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
@@ -595,7 +595,7 @@ namespace Megalo {
          "Alters the description of the title card shown at the start of a round.",
          "Set the objective description for %1 to %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_text", "", {1}, 0)
@@ -605,7 +605,7 @@ namespace Megalo {
          "Alters the icon of the title card shown at the start of a round.",
          "Set the objective icon for %1 to %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("icon",   OpcodeArgValueIconIndex7Bits::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
@@ -626,7 +626,7 @@ namespace Megalo {
          "Set %1's respawn object: %2.",
          {
             OpcodeArgBase("team",    OpcodeArgValueTeam::factory),
-            OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
+            OpcodeArgBase("respawn", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
       ),
@@ -635,8 +635,8 @@ namespace Megalo {
          "",
          "Set %1's respawn object: %2.",
          {
-            OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("respawn", OpcodeArgValueObject::factory),
+            OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("respawn", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
       ),
@@ -645,8 +645,8 @@ namespace Megalo {
          "Returns a player's fireteam number.",
          "Set %2 to the index of %1's fireteam.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_fireteam", "", {}, 0)
       ),
@@ -655,8 +655,8 @@ namespace Megalo {
          "Sets a player's fireteam number.",
          "Assign %1 to fireteam %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("index",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("index",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_fireteam", "", {1}, 0)
       ),
@@ -665,9 +665,9 @@ namespace Megalo {
          "Modifies an object's shields. Remember that 100 = full.",
          "Modify shields for %1: %2 %3.",
          {
-            OpcodeArgBase("object",   OpcodeArgValueObject::factory),
+            OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("shields", 0, 1)
       ),
@@ -676,9 +676,9 @@ namespace Megalo {
          "Modifies an object's health. Remember that 100 = full.",
          "Modify health for %1: %2 %3.",
          {
-            OpcodeArgBase("object",   OpcodeArgValueObject::factory),
+            OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("health", 0, 1)
       ),
@@ -687,9 +687,9 @@ namespace Megalo {
          "Returns the distance between two objects.",
          "Set %3 to the distance between %1 and %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_distance_to", "", {1}, 0)
       ),
@@ -698,9 +698,9 @@ namespace Megalo {
          "Modifies an object's max shields. Remember that 100 = full.",
          "Modify max shields for %1: %2 %3.",
          {
-            OpcodeArgBase("object",   OpcodeArgValueObject::factory),
+            OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("max_shields", 0, 1)
       ),
@@ -709,9 +709,9 @@ namespace Megalo {
          "Modifies an object's max health. Remember that 100 = full.",
          "Modify max health for %1: %2 %3.",
          {
-            OpcodeArgBase("object",   OpcodeArgValueObject::factory),
+            OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("max_health", 0, 1)
       ),
@@ -720,7 +720,7 @@ namespace Megalo {
          "Switches which Requisition Palette a player has access to. This functionality is not used in Halo: Reach.",
          "Switch %1 to %2.",
          {
-            OpcodeArgBase("player",  OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("palette", OpcodeArgValueRequisitionPalette::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_requisition_palette", "", {1}, 0)
@@ -730,8 +730,8 @@ namespace Megalo {
          "",
          "Set the power for %1 to %2.",
          {
-            OpcodeArgBase("device", OpcodeArgValueObject::factory),
-            OpcodeArgBase("power",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("device", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("power",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_device_power", "", {1}, 0)
       ),
@@ -740,8 +740,8 @@ namespace Megalo {
          "",
          "Set %2 to the power for %1.",
          {
-            OpcodeArgBase("device", OpcodeArgValueObject::factory),
-            OpcodeArgBase("power",  OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("device", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("power",  OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_device_power", "", {}, 0)
       ),
@@ -750,8 +750,8 @@ namespace Megalo {
          "",
          "Set the position for %1 to %2.",
          {
-            OpcodeArgBase("device",   OpcodeArgValueObject::factory),
-            OpcodeArgBase("position", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("device",   OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("position", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_device_position", "", {1}, 0)
       ),
@@ -760,8 +760,8 @@ namespace Megalo {
          "",
          "Set %2 to the position for %1.",
          {
-            OpcodeArgBase("device",   OpcodeArgValueObject::factory),
-            OpcodeArgBase("position", OpcodeArgValueScalar::factory, true),
+            OpcodeArgBase("device",   OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("position", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_device_position", "", {}, 0)
       ),
@@ -770,10 +770,10 @@ namespace Megalo {
          "Modify the amount of grenades the player is carrying.",
          "Modify %2 grenade count for %1: %3 %4.",
          {
-            OpcodeArgBase("player",   OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player",   OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("type",     OpcodeArgValueGrenadeTypeEnum::factory),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
-            OpcodeArgBase("operand",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("", 0, 2, 1)
       ),
@@ -796,7 +796,7 @@ namespace Megalo {
             OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
             OpcodeArgBase("cause?",    OpcodeArgTeamOrPlayerVariableFactory),
             OpcodeArgBase("affected?", OpcodeArgTeamOrPlayerVariableFactory),
-            OpcodeArgBase("value",     OpcodeArgValueScalar::factory),
+            OpcodeArgBase("value",     OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("send_incident", "", {0, 1, 2, 3})
       ),
@@ -815,9 +815,9 @@ namespace Megalo {
          "",
          "Set %1's device track and position to %2 and %3, respectively.",
          {
-            OpcodeArgBase("device",    OpcodeArgValueObject::factory),
+            OpcodeArgBase("device",    OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("animation", OpcodeArgValueNameIndex::factory),
-            OpcodeArgBase("position",  OpcodeArgValueScalar::factory),
+            OpcodeArgBase("position",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_device_animation_position", "", {1, 2}, 0)
       ),
@@ -826,11 +826,11 @@ namespace Megalo {
          "",
          "Animate %1's position using these values: %2, %3, %4, %5.",
          {
-            OpcodeArgBase("device", OpcodeArgValueObject::factory),
-            OpcodeArgBase("unknown number A", OpcodeArgValueScalar::factory),
-            OpcodeArgBase("unknown number B", OpcodeArgValueScalar::factory),
-            OpcodeArgBase("unknown number C", OpcodeArgValueScalar::factory),
-            OpcodeArgBase("unknown number D", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("device", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("unknown number A", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("unknown number B", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("unknown number C", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("unknown number D", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("animate_device_position", "", {1, 2, 3, 4}, 0)
       ),
@@ -839,8 +839,8 @@ namespace Megalo {
          "",
          "Set the actual position for %1 to %2.",
          {
-            OpcodeArgBase("device",   OpcodeArgValueObject::factory),
-            OpcodeArgBase("position", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("device",   OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("position", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_device_actual_position", "", {1}, 0)
       ),
@@ -849,7 +849,7 @@ namespace Megalo {
          "",
          "Carry out an unknown action (81) with number %1 and text: %2.",
          {
-            OpcodeArgBase("number", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_81", "", {0, 1})
@@ -859,8 +859,8 @@ namespace Megalo {
          "",
          "Modify enable state for spawn zone %1: set to %2.",
          {
-            OpcodeArgBase("spawn zone", OpcodeArgValueObject::factory),
-            OpcodeArgBase("enable (treated as bool)", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("spawn zone", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("enable (treated as bool)", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("enable_spawn_zone", "", {1}, 0)
       ),
@@ -869,9 +869,9 @@ namespace Megalo {
          "Returns a player's primary or secondary weapon, as desired.",
          "Set %3 to %1's %2 weapon.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("which", OpcodeArgValueConstBool::factory, "primary", "secondary"),
-            OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_weapon", "get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
@@ -880,8 +880,8 @@ namespace Megalo {
          "Returns a player's armor ability.", // does nothing if no player / no AA? bungie sets the out-variable to no-object before running this
          "Set %2 to %1's Armor Ability.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_armor_ability", "get_armor_ability", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
@@ -890,7 +890,7 @@ namespace Megalo {
          "Set whether an object can be garbage-collected.",
          "%2 garbage collection of %1.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("state",  OpcodeArgValueConstBool::factory, "Enable", "Disable"),
          },
          OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
@@ -900,8 +900,8 @@ namespace Megalo {
          "",
          "Carry out some unknown (86) action with %1 and %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_86", "", {0, 1})
       ),
@@ -910,11 +910,11 @@ namespace Megalo {
          "",
          "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Unknown number: %4.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
-            OpcodeArgBase("number", OpcodeArgValueScalar::factory),
-            OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
+            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {2, 1, 3, 4}, 0)
       ),
@@ -923,7 +923,7 @@ namespace Megalo {
          "",
          "Do nothing. (Unused argument: %1)",
          {
-            OpcodeArgBase("number", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("deprecated_88", "", {0})
       ),
@@ -932,8 +932,8 @@ namespace Megalo {
          "",
          "Carry out some unknown (89) action with %1 and %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_89", "", {0, 1})
       ),
@@ -942,7 +942,7 @@ namespace Megalo {
          "Used in Halo: Reach's standard Race variant?",
          "Carry out some unknown (90) action with %1 and %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("bool",   OpcodeArgValueConstBool::factory),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_90", "", {1}, 0)
@@ -952,8 +952,8 @@ namespace Megalo {
          "",
          "Have %1 copy %2's rotation on the %3 axis.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("axis", OpcodeArgValueConstBool::factory, "axis 1", "axis 0"),
          },
          OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
@@ -963,8 +963,8 @@ namespace Megalo {
          "",
          "Move %1 to point %3 relative to %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("point", OpcodeArgValueVector3::factory),
          },
          OpcodeFuncToScriptMapping::make_function("move_to", "", {1, 2}, 0)
@@ -974,7 +974,7 @@ namespace Megalo {
          "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
          "Add weapon of type %2 to %1 using mode %3.",
          {
-            OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
+            OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("weapon", OpcodeArgValueMPObjectTypeIndex::factory),
             OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::factory),
          },
@@ -985,7 +985,7 @@ namespace Megalo {
          "Take a weapon from any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
          "Remove %1's %2 weapon, %3.",
          {
-            OpcodeArgBase("biped",  OpcodeArgValueObject::factory),
+            OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::factory),
             OpcodeArgBase("delete", OpcodeArgValueConstBool::factory, "and delete it", "but do not delete it"),
          },
@@ -996,8 +996,8 @@ namespace Megalo {
          "",
          "Set scenario interpolator state: %1, %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueScalar::factory),
-            OpcodeArgBase("b", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("a", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_scenario_interpolator_state", "", {0, 1})
       ),
@@ -1006,8 +1006,8 @@ namespace Megalo {
          "Used by Infection to move the active Haven. Will not select the same Haven twice in a row; if the map has only one Haven, then the containing trigger runs on every frame and spams \"Hill Moved\" announcements.",
          "Carry out some unknown (96) action with %1 and %3 and store the result in %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("result", OpcodeArgValueObject::factory, true),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
             OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_96", "", {2, 0})
@@ -1017,8 +1017,8 @@ namespace Megalo {
          "",
          "Carry out some unknown (96) action with %1 and %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("number", OpcodeArgValueScalar::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_97", "", {1}, 0)
       ),
@@ -1067,6 +1067,10 @@ namespace Megalo {
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
          auto factory = base[i].factory;
+         #pragma region HACKHACKHACK
+            if (!factory && base[i].typeinfo)
+               factory = base[i].typeinfo->factory;
+         #pragma endregion
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
             this->arguments[i]->configure_with_base(base[i]);
@@ -1115,6 +1119,10 @@ namespace Megalo {
       for (size_t i = 0; i < argCount; i++) {
          auto arg = this->arguments[i];
          auto factory = base[i].factory;
+         #pragma region HACKHACKHACK
+            if (!factory && base[i].typeinfo)
+               factory = base[i].typeinfo->factory;
+         #pragma endregion
          //
          // This is really ugly but I've sort of painted myself into a corner here... Some 
          // arguments can take multiple variable types, and currently the variable classes 

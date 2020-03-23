@@ -68,7 +68,7 @@ namespace Megalo {
          };
          using flags_t = std::underlying_type_t<flags::type>;
          //
-         using postprocess_functor_t = std::function<cobb::indexed_refcountable* (GameVariantData* variant, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
+         using postprocess_functor_t = std::function<cobb::indexed_refcountable* (GameVariantDataMultiplayer* mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
          //
          enum class index_type : uint8_t {
             none, // there is no "index" value
@@ -165,6 +165,16 @@ namespace Megalo {
          //
          virtual variable_type get_variable_type() const noexcept {
             return this->type.var_type;
+         }
+         //
+         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
+            if (!this->scope)
+               return;
+            auto& scope = *this->scope;
+            if (scope.index_type != VariableScopeIndicatorValue::index_type::indexed_data) // there's nothing to do postprocess for
+               return;
+            assert(scope.index_postprocess && "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
+            this->object = (scope.index_postprocess)(newlyLoaded, index);
          }
    };
 }

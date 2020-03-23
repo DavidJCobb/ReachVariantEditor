@@ -27,7 +27,7 @@ namespace {
    }
    void _default_stringify(const char* format, const Variable& v, std::string& out) {
       #if _DEBUG
-         assert(v.scope, "No scope-instance on a decoded piece of data. This should never happen.");
+         assert(v.scope && "No scope-instance on a decoded piece of data. This should never happen.");
       #endif
       const char* which = _which_to_string(v.scope->base, v.which); // can return nullptr
       size_t size = strlen(format);
@@ -67,27 +67,30 @@ namespace Megalo {
       switch (this->index_type) {
          case index_type::none:
             return 0;
+         case index_type::generic:
+            return this->index_bitcount;
          case index_type::number:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::scalar);
          case index_type::object:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::object);
          case index_type::player:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::player);
          case index_type::team:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::team);
          case index_type::timer:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::timer);
          case index_type::indexed_data:
-            assert(this->index_bitcount, "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no bitcount.");
+            assert(this->index_bitcount && "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no bitcount.");
             return this->index_bitcount;
       }
       #if _DEBUG
-         assert(false, "We've reached unreachable code!");
+         assert(false && "We've reached unreachable code!");
+         return 0;
       #else
          __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
       #endif
@@ -108,13 +111,11 @@ namespace Megalo {
       }
       auto& scope = type.scopes[si];
       this->scope = &scope;
-      uint8_t w;
-      int16_t i = 0;
       if (scope.has_which())
          this->which = stream.read_bits(scope.which_bits());
       if (scope.has_index())
          this->index = stream.read_bits(scope.index_bits());
-      if (scope.has_which() && !scope.base->is_valid_which(w)) {
+      if (scope.has_which() && !scope.base->is_valid_which(this->which)) {
          auto& error = GameEngineVariantLoadError::get();
          error.state = GameEngineVariantLoadError::load_state::failure;
          error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
@@ -132,7 +133,7 @@ namespace Megalo {
       return true;
    }
    void Variable::write(cobb::bitwriter& stream) const noexcept {
-      assert(this->scope, "Cannot save a variable that doesn't have a scope-indicator.");
+      assert(this->scope && "Cannot save a variable that doesn't have a scope-indicator.");
       auto& type = this->type;
       uint8_t si = type.index_of(this->scope);
       stream.write(si, type.scope_bits());
@@ -155,7 +156,7 @@ namespace Megalo {
       std::string code;
       if (!this->scope)
          return; // TODO: add some way to indicate failure
-      _default_stringify(this->scope->format_english, *this, code);
+      _default_stringify(this->scope->format, *this, code);
       out.write(code.c_str());
    }
 }
