@@ -28,7 +28,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueAnyVariable::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueAnyVariable::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::factory)
+            OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::typeinfo)
          },
          OpcodeFuncToScriptMapping::make_intrinsic_comparison({0, 1}, 2)
       ),
@@ -60,7 +60,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueTeam::typeinfo),
-            OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::factory),
+            OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("has_disposition", "", {1, 2}, 0),
          "has", "does not have"

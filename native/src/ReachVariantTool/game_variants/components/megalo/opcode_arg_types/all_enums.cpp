@@ -1,299 +1,209 @@
 #include "all_enums.h"
 #include "../enums.h"
 
-namespace {
-   namespace _MegaloArgValueEnumBase {
-      megalo_define_smart_enum(AddWeapon,
-         "add",
-         "unk_1",
-         "swap"
-      );
-      megalo_define_smart_enum(CHUDDestination,
-         "unk_0",
-         "unk_1"
-      );
-      megalo_define_smart_enum(CompareOperator,
-         "less than",
-         "greater than",
-         "equal to",
-         "less than or equal to",
-         "greater than or equal to",
-         "not equal to",
-      );
-      megalo_define_smart_enum(DropWeapon,
-         "primary",
-         "secondary"
-      );
-      megalo_define_smart_enum(GrenadeType,
-         "frag",
-         "plasma"
-      );
-      megalo_define_smart_enum(MathOperator,
-         "add",
-         "subtract",
-         "multiply",
-         "divide",
-         "set to",
-         "modulo by",
-         "bitwise AND with",
-         "bitwise OR with",
-         "bitwise XOR with",
-         "set to bitwise NOT of",
-         "bitshift left by",
-         "bitshift right by",
-         "arith? shift left by",
-      );
-      megalo_define_smart_enum(PickupPriority,
-         "unk_0",
-         "hold action",
-         "automatic",
-         "unk_3"
-      );
-      megalo_define_smart_enum(TeamDisposition,
-         "unk_0",
-         "unk_1",
-         "unk_2"
-      );
-      megalo_define_smart_enum(TimerRate,
-         "none",
-         "-10",
-         "-25",
-         "-50",
-         "-75",
-         "-100",
-         "-125",
-         "-150",
-         "-175",
-         "-200",
-         "-300",
-         "-400",
-         "-500",
-         "-1000",
-         "+10",
-         "+25",
-         "+50",
-         "+75",
-         "+100",
-         "+125",
-         "+150",
-         "+175",
-         "+200",
-         "+300",
-         "+400",
-         "+500",
-         "+1000",
-      );
-      megalo_define_smart_enum(WaypointPriority,
-         "none",
-         "low",
-         "high",
-         "default",
-      );
-   }
-}
 namespace Megalo {
-   OpcodeArgValueAddWeaponEnum::OpcodeArgValueAddWeaponEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::AddWeapon)
-   {}
-   //
-   OpcodeArgValueCHUDDestinationEnum::OpcodeArgValueCHUDDestinationEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::CHUDDestination)
-   {}
-   //
-   OpcodeArgValueCompareOperatorEnum::OpcodeArgValueCompareOperatorEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::CompareOperator)
-   {}
-   //
-   OpcodeArgValueDropWeaponEnum::OpcodeArgValueDropWeaponEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::DropWeapon)
-   {}
-   //
-   OpcodeArgValueGrenadeTypeEnum::OpcodeArgValueGrenadeTypeEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::GrenadeType)
-   {}
-   //
-   OpcodeArgValueMathOperatorEnum::OpcodeArgValueMathOperatorEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::MathOperator)
-   {}
-   //
-   OpcodeArgValuePickupPriorityEnum::OpcodeArgValuePickupPriorityEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::PickupPriority)
-   {}
-   //
-   OpcodeArgValueTeamDispositionEnum::OpcodeArgValueTeamDispositionEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::TeamDisposition)
-   {}
-   //
-   OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::TimerRate)
-   {}
-   //
-   OpcodeArgValueWaypointPriorityEnum::OpcodeArgValueWaypointPriorityEnum()
-      : OpcodeArgValueBaseEnum(_MegaloArgValueEnumBase::WaypointPriority)
-   {}
-   //
-   bool OpcodeArgValueGenericEnum::read(cobb::ibitreader& stream) noexcept {
-      auto& list = this->typeinfo.elements;
-      this->value = stream.read_bits(cobb::bitcount(list.size() - 1));
+   namespace enums {
+      auto add_weapon_type = DetailedEnum({
+         DetailedEnumValue("add"),
+         DetailedEnumValue("unk_1"),
+         DetailedEnumValue("swap"),
+      });
+      auto c_hud_destination = DetailedEnum({
+         DetailedEnumValue("unk_0"),
+         DetailedEnumValue("unk_1"),
+      });
+      auto compare_operator = DetailedEnum({
+         DetailedEnumValue("<",  DetailedEnumValueInfo::make_friendly_name("less than")),
+         DetailedEnumValue(">",  DetailedEnumValueInfo::make_friendly_name("greater than")),
+         DetailedEnumValue("==", DetailedEnumValueInfo::make_friendly_name("equal to")),
+         DetailedEnumValue("<=", DetailedEnumValueInfo::make_friendly_name("less than or equal to")),
+         DetailedEnumValue(">=", DetailedEnumValueInfo::make_friendly_name("greater than or equal to")),
+         DetailedEnumValue("!=", DetailedEnumValueInfo::make_friendly_name("not equal to")),
+      });
+      auto drop_weapon_type = DetailedEnum({
+         DetailedEnumValue("primary"),
+         DetailedEnumValue("secondary"),
+      });
+      auto grenade_type = DetailedEnum({
+         DetailedEnumValue("frag_grenades",   DetailedEnumValueInfo::make_friendly_name("frag grenades")),
+         DetailedEnumValue("plasma_grenades", DetailedEnumValueInfo::make_friendly_name("plasma grenades")),
+      });
+      auto loadout_palette = DetailedEnum({
+         DetailedEnumValue("spartan_tier_1", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 1")),
+         DetailedEnumValue("elite_tier_1",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 1")),
+         DetailedEnumValue("spartan_tier_2", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 2")),
+         DetailedEnumValue("elite_tier_2",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 2")),
+         DetailedEnumValue("spartan_tier_3", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 3")),
+         DetailedEnumValue("elite_tier_3",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 3")),
+      });
+      auto math_operator = DetailedEnum({
+         DetailedEnumValue("+=", DetailedEnumValueInfo::make_friendly_name("add")),
+         DetailedEnumValue("-=", DetailedEnumValueInfo::make_friendly_name("subtract")),
+         DetailedEnumValue("*=", DetailedEnumValueInfo::make_friendly_name("multiply by")),
+         DetailedEnumValue("/=", DetailedEnumValueInfo::make_friendly_name("divide by")),
+         DetailedEnumValue("=",  DetailedEnumValueInfo::make_friendly_name("set to")),
+         DetailedEnumValue("%=", DetailedEnumValueInfo::make_friendly_name("modulo by")),
+         DetailedEnumValue("&=", DetailedEnumValueInfo::make_friendly_name("bitwise-AND with")),
+         DetailedEnumValue("|=", DetailedEnumValueInfo::make_friendly_name("bitwise-OR with")),
+         DetailedEnumValue("^=", DetailedEnumValueInfo::make_friendly_name("bitwise-XOR with")),
+         DetailedEnumValue("~=", DetailedEnumValueInfo::make_friendly_name("bitwise-NOT with")),
+         DetailedEnumValue("<<=",  DetailedEnumValueInfo::make_friendly_name("bitshift left by")),
+         DetailedEnumValue(">>=",  DetailedEnumValueInfo::make_friendly_name("bitshift right by")),
+         DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("arith? shift left by")),
+      });
+      auto pickup_priority = DetailedEnum({
+         DetailedEnumValue("unk_0"),
+         DetailedEnumValue("hold_action"),
+         DetailedEnumValue("automatic"),
+         DetailedEnumValue("unk_3"),
+      });
+      auto team_disposition = DetailedEnum({
+         DetailedEnumValue("unk_0"),
+         DetailedEnumValue("unk_1"),
+         DetailedEnumValue("unk_2"),
+      });
+      auto timer_rate = DetailedEnum({
+         DetailedEnumValue("0"),
+         DetailedEnumValue("-10"),
+         DetailedEnumValue("-25"),
+         DetailedEnumValue("-50"),
+         DetailedEnumValue("-75"),
+         DetailedEnumValue("-100"),
+         DetailedEnumValue("-125"),
+         DetailedEnumValue("-150"),
+         DetailedEnumValue("-175"),
+         DetailedEnumValue("-200"),
+         DetailedEnumValue("-300"),
+         DetailedEnumValue("-400"),
+         DetailedEnumValue("-500"),
+         DetailedEnumValue("-1000"),
+         DetailedEnumValue("10"),
+         DetailedEnumValue("25"),
+         DetailedEnumValue("50"),
+         DetailedEnumValue("75"),
+         DetailedEnumValue("100"),
+         DetailedEnumValue("125"),
+         DetailedEnumValue("150"),
+         DetailedEnumValue("175"),
+         DetailedEnumValue("200"),
+         DetailedEnumValue("300"),
+         DetailedEnumValue("400"),
+         DetailedEnumValue("500"),
+         DetailedEnumValue("1000"),
+      });
+      auto waypoint_priority = DetailedEnum({
+         DetailedEnumValue("none"),
+         DetailedEnumValue("low"),
+         DetailedEnumValue("high"),
+         DetailedEnumValue("default"),
+      });
+   }
+
+   #pragma region OpcodeArgValueEnumSuperclass member functions
+   bool OpcodeArgValueEnumSuperclass::read(cobb::ibitreader& stream) noexcept {
+      this->value = stream.read_bits(this->base.index_bits());
       return true;
    }
-   void OpcodeArgValueGenericEnum::write(cobb::bitwriter& stream) const noexcept {
-      auto& list = this->typeinfo.elements;
-      stream.write(this->value, cobb::bitcount(list.size() - 1));
+   void OpcodeArgValueEnumSuperclass::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->value, this->base.index_bits());
    }
-   void OpcodeArgValueGenericEnum::to_string(std::string& out) const noexcept {
-      auto& list = this->typeinfo.elements;
-      if (this->value < list.size()) {
-         out = list[this->value];
+   void OpcodeArgValueEnumSuperclass::to_string(std::string& out) const noexcept {
+      auto item = this->base.item(this->value);
+      if (!item) {
+         cobb::sprintf(out, "invalid value %u", this->value);
          return;
       }
-      cobb::sprintf(out, "%u", this->value);
-   }
-   void OpcodeArgValueGenericEnum::decompile(Decompiler& out, uint64_t flags) noexcept {
-      std::string s;
-      this->to_string(s);
-      out.write(s);
-   }
-   //
-   namespace { // factories
-      template<OpcodeArgTypeinfo& ti> OpcodeArgValue* _enumFactory(cobb::ibitreader& stream) {
-         return new OpcodeArgValueGenericEnum(ti);
+      QString name = item->get_friendly_name();
+      if (!name.isEmpty()) {
+         out = name.toStdString();
+         return;
       }
+      out = item->name;
+      if (out.empty()) // enum values should never be nameless but just in case
+         cobb::sprintf(out, "%u", this->value);
    }
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoAddWeapon = OpcodeArgTypeinfo(
+   void OpcodeArgValueEnumSuperclass::decompile(Decompiler& out, uint64_t flags) noexcept {
+      auto item = this->base.item(this->value);
+      std::string temp;
+      if (!item) {
+         cobb::sprintf(temp, "%u", this->value);
+         out.write(temp);
+         return;
+      }
+      temp = item->name;
+      if (temp.empty())
+         cobb::sprintf(temp, "%u", this->value);
+      out.write(temp);
+   }
+   #pragma endregion
+
+   OpcodeArgValueAddWeaponEnum::OpcodeArgValueAddWeaponEnum() : OpcodeArgValueEnumSuperclass(enums::add_weapon_type) {}
+   OpcodeArgTypeinfo OpcodeArgValueAddWeaponEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "add",
-         "unk_1",
-         "swap"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoAddWeapon>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueAddWeaponEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCHUDDestination = OpcodeArgTypeinfo(
+
+   OpcodeArgValueCHUDDestinationEnum::OpcodeArgValueCHUDDestinationEnum() : OpcodeArgValueEnumSuperclass(enums::c_hud_destination) {}
+   OpcodeArgTypeinfo OpcodeArgValueCHUDDestinationEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "unk_0",
-         "unk_1"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoCHUDDestination>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCHUDDestinationEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoCompareOperator = OpcodeArgTypeinfo(
+
+   OpcodeArgValueCompareOperatorEnum::OpcodeArgValueCompareOperatorEnum() : OpcodeArgValueEnumSuperclass(enums::compare_operator) {}
+   OpcodeArgTypeinfo OpcodeArgValueCompareOperatorEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "<",
-         ">",
-         "==",
-         "<=",
-         ">=",
-         "!=",
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoCompareOperator>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCompareOperatorEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoDropWeapon = OpcodeArgTypeinfo(
+
+   OpcodeArgValueDropWeaponEnum::OpcodeArgValueDropWeaponEnum() : OpcodeArgValueEnumSuperclass(enums::drop_weapon_type) {}
+   OpcodeArgTypeinfo OpcodeArgValueDropWeaponEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "primary",
-         "secondary"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoDropWeapon>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueDropWeaponEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoGrenadeType = OpcodeArgTypeinfo(
+
+   OpcodeArgValueGrenadeTypeEnum::OpcodeArgValueGrenadeTypeEnum() : OpcodeArgValueEnumSuperclass(enums::grenade_type) {}
+   OpcodeArgTypeinfo OpcodeArgValueGrenadeTypeEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "frag_grenades",
-         "plasma_grenades"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoGrenadeType>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueGrenadeTypeEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoMathOperator = OpcodeArgTypeinfo(
+
+   OpcodeArgValueMathOperatorEnum::OpcodeArgValueMathOperatorEnum() : OpcodeArgValueEnumSuperclass(enums::math_operator) {}
+   OpcodeArgTypeinfo OpcodeArgValueMathOperatorEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "+=",
-         "-=",
-         "*=",
-         "/=",
-         "=",
-         "%=",
-         "&=",
-         "|=",
-         "^=",
-         "~=",
-         "<<=",
-         ">>=",
-         "<<<=",
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoMathOperator>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueMathOperatorEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoPickupPriority = OpcodeArgTypeinfo(
+
+   OpcodeArgValuePickupPriorityEnum::OpcodeArgValuePickupPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::pickup_priority) {}
+   OpcodeArgTypeinfo OpcodeArgValuePickupPriorityEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "unk_0",
-         "hold_action",
-         "automatic",
-         "unk_3"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoPickupPriority>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePickupPriorityEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTeamDisposition = OpcodeArgTypeinfo(
+
+   OpcodeArgValueTeamDispositionEnum::OpcodeArgValueTeamDispositionEnum() : OpcodeArgValueEnumSuperclass(enums::team_disposition) {}
+   OpcodeArgTypeinfo OpcodeArgValueTeamDispositionEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "unk_0",
-         "unk_1",
-         "unk_2"
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoTeamDisposition>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamDispositionEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoTimerRate = OpcodeArgTypeinfo(
+
+   OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum() : OpcodeArgValueEnumSuperclass(enums::timer_rate) {}
+   OpcodeArgTypeinfo OpcodeArgValueTimerRateEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "none",
-         "-10",
-         "-25",
-         "-50",
-         "-75",
-         "-100",
-         "-125",
-         "-150",
-         "-175",
-         "-200",
-         "-300",
-         "-400",
-         "-500",
-         "-1000",
-         "10",
-         "25",
-         "50",
-         "75",
-         "100",
-         "125",
-         "150",
-         "175",
-         "200",
-         "300",
-         "400",
-         "500",
-         "1000",
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoTimerRate>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTimerRateEnum>
    );
-   OpcodeArgTypeinfo OpcodeArgValueEnumTypeinfoWaypointPriority = OpcodeArgTypeinfo(
+
+   OpcodeArgValueWaypointPriorityEnum::OpcodeArgValueWaypointPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::waypoint_priority) {}
+   OpcodeArgTypeinfo OpcodeArgValueWaypointPriorityEnum::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
-      {
-         "none",
-         "low",
-         "high",
-         "default",
-      },
-      &_enumFactory<OpcodeArgValueEnumTypeinfoWaypointPriority>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointPriorityEnum>
    );
 }

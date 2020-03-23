@@ -27,10 +27,10 @@ namespace Megalo {
          "Modify the score of %1: %2 %3.",
          {
             OpcodeArgBase("target",   OpcodeArgValuePlayerOrGroup::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo)
          },
-         OpcodeFuncToScriptMapping::make_setter("score", 0, {}, 1)
+         OpcodeFuncToScriptMapping::make_setter("score", 0, 1)
       ),
       ActionFunction( // 2
          "Create Object",
@@ -82,7 +82,7 @@ namespace Megalo {
          "Set %1's waypoint priority to %2.",
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("priority", OpcodeArgValueWaypointPriorityEnum::factory),
+            OpcodeArgBase("priority", OpcodeArgValueWaypointPriorityEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_priority", "", {1}, 0)
       ),
@@ -114,7 +114,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueAnyVariable::typeinfo, true),
             OpcodeArgBase("b", OpcodeArgValueAnyVariable::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_intrinsic_assignment(2)
       ),
@@ -196,7 +196,7 @@ namespace Megalo {
          "Have %1 tick at rate %2.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
-            OpcodeArgBase("rate",  OpcodeArgValueTimerRateEnum::factory),
+            OpcodeArgBase("rate",  OpcodeArgValueTimerRateEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_rate", "", {1}, 0)
       ),
@@ -465,7 +465,7 @@ namespace Megalo {
          "Set %1's weapon pickup priority to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("priority", OpcodeArgValuePickupPriorityEnum::factory),
+            OpcodeArgBase("priority", OpcodeArgValuePickupPriorityEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_weapon_pickup_priority", "", {1}, 0)
       ),
@@ -535,7 +535,7 @@ namespace Megalo {
          "For %3, play sound %1. Unknown parameter: %2.",
          {
             OpcodeArgBase("sound",  OpcodeArgValueSound::factory),
-            OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::factory),
+            OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerOrGroup::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("play_sound_for", "", {2, 0, 1}, OpcodeFuncToScriptMapping::game_namespace)
@@ -666,7 +666,7 @@ namespace Megalo {
          "Modify shields for %1: %2 %3.",
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("shields", 0, 1)
@@ -677,7 +677,7 @@ namespace Megalo {
          "Modify health for %1: %2 %3.",
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("health", 0, 1)
@@ -699,7 +699,7 @@ namespace Megalo {
          "Modify max shields for %1: %2 %3.",
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("max_shields", 0, 1)
@@ -710,7 +710,7 @@ namespace Megalo {
          "Modify max health for %1: %2 %3.",
          {
             OpcodeArgBase("object",   OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("max_health", 0, 1)
@@ -771,8 +771,8 @@ namespace Megalo {
          "Modify %2 grenade count for %1: %3 %4.",
          {
             OpcodeArgBase("player",   OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("type",     OpcodeArgValueGrenadeTypeEnum::factory),
-            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
+            OpcodeArgBase("type",     OpcodeArgValueGrenadeTypeEnum::typeinfo),
+            OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::typeinfo),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_setter("", 0, 2, 1)
@@ -976,7 +976,7 @@ namespace Megalo {
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("weapon", OpcodeArgValueMPObjectTypeIndex::factory),
-            OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::factory),
+            OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("add_weapon", "", {1, 2}, 0)
       ),
@@ -986,7 +986,7 @@ namespace Megalo {
          "Remove %1's %2 weapon, %3.",
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::factory),
+            OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::typeinfo),
             OpcodeArgBase("delete", OpcodeArgValueConstBool::factory, "and delete it", "but do not delete it"),
          },
          OpcodeFuncToScriptMapping::make_function("remove_weapon", "", {1, 2}, 0)

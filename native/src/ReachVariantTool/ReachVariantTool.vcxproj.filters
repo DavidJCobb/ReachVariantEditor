@@ -280,15 +280,6 @@
     <ClCompile Include="helpers\int128.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\opcode_arg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\detailed_enum.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo_ex\detailed_flags.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -308,6 +299,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\any_variable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="formats\detailed_enum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="formats\detailed_flags.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -747,15 +747,6 @@
     <ClInclude Include="game_variants\components\megalo\opcode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode_arg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\detailed_enum.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\opcode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\int128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -766,9 +757,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\refcounting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo_ex\detailed_flags.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\base.h">
@@ -790,6 +778,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\any_variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="formats\detailed_flags.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="formats\detailed_enum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

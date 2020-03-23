@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <QString>
-#include "../../../helpers/bitwise.h"
+#include "../helpers/bitwise.h"
 
 struct DetailedFlagsValueInfo{
    enum class info_type {

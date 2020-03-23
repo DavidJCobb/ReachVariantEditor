@@ -91,10 +91,18 @@ namespace Megalo {
             args[mapping.arg_operator]->decompile(out);
             out.write(' ');
             {  // operand
+               //
+               // We don't explicitly specify the operand index; we instead deduce it as the 
+               // argument index that isn't being used for any other role.
+               //
                auto& list = this->arguments;
                size_t count = list.size();
                for (size_t i = 0; i < count; ++i) {
                   if (i != mapping.arg_context && i != mapping.arg_operator) {
+                     if (mapping.primary_name.empty()) {
+                        if (i == mapping.arg_name)
+                           continue;
+                     }
                      args[i]->decompile(out);
                      break;
                   }
