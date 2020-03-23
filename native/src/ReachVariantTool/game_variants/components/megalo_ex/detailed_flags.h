@@ -67,7 +67,7 @@ struct DetailedFlags {
       for (size_t i = 0; i < s; ++i)
          this->values[i].index = i;
    }
-   constexpr inline int bitcount() const noexcept {
+   inline int bitcount() const noexcept {
       auto s = this->size();
       if (!s)
          return 0;

@@ -13,7 +13,7 @@ namespace {
 }
 namespace MegaloEx {
    namespace types {
-      OpcodeArgTypeinfo object = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo player = OpcodeArgTypeinfo(
          QString("Player"),
          QString("A variable referring to a player. Note that the player model is an object distinct from the player itself."),
          OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::is_nestable_variable | OpcodeArgTypeinfo::flags::is_static_variable | OpcodeArgTypeinfo::flags::may_need_postprocessing,

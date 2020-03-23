@@ -27,7 +27,7 @@ namespace {
    }
    void _default_stringify(const char* format, const _DecodedVariable& decoded, std::string& out) {
       #if _DEBUG
-         assert(decoded.scope_instance, "No scope-instance on a decoded piece of data. This should never happen.");
+         assert(decoded.scope_instance && "No scope-instance on a decoded piece of data. This should never happen.");
       #endif
       const char* which = _which_to_string(decoded.scope_instance->base, decoded.which); // can return nullptr
       size_t size = strlen(format);
@@ -68,26 +68,26 @@ namespace MegaloEx {
          case index_type::none:
             return 0;
          case index_type::number:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::scalar);
          case index_type::object:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::object);
          case index_type::player:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::player);
          case index_type::team:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::team);
          case index_type::timer:
-            assert(this->base, "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
+            assert(this->base && "Our scope-indicator definitions are bad. Variables cannot be unscoped.");
             return this->base->index_bits(Megalo::variable_type::timer);
          case index_type::indexed_data:
-            assert(this->index_bitcount, "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no bitcount.");
+            assert(this->index_bitcount && "Our scope-indicator definitions are bad. Definition is set to use indexed data, but offers no bitcount.");
             return this->index_bitcount;
       }
       #if _DEBUG
-         assert(false, "We've reached unreachable code!");
+         assert(false && "We've reached unreachable code!");
       #else
          __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
       #endif

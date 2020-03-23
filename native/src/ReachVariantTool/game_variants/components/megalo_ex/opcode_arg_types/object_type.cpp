@@ -1003,6 +1003,7 @@ namespace MegaloEx {
             if (absence)
                return true;
             arg.data.consume(input_bits, ce_index_bitcount);
+            return true;
          },
          OpcodeArgTypeinfo::default_postprocess_functor,
          [](arg_functor_state fs, OpcodeArgValue& arg, std::string& out) { // to english

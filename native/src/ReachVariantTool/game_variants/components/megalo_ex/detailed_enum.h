@@ -95,13 +95,13 @@ struct DetailedEnum {
       for (size_t i = 0; i < s; ++i)
          this->values[i].index = i;
    }
-   constexpr inline int count_bits() const noexcept {
+   inline int count_bits() const noexcept {
       auto s = this->size();
       if (!s)
          return 0;
       return cobb::bitcount(s);
    }
-   constexpr inline int index_bits() const noexcept {
+   inline int index_bits() const noexcept {
       auto s = this->size();
       if (!s)
          return 0;

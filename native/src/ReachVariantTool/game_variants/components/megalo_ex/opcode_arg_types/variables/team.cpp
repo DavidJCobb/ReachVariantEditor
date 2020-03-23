@@ -15,7 +15,7 @@ namespace {
 }
 namespace MegaloEx {
    namespace types {
-      OpcodeArgTypeinfo object = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo team = OpcodeArgTypeinfo(
          QString("Team"),
          QString("A variable referring to a team."),
          OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::is_nestable_variable | OpcodeArgTypeinfo::flags::is_static_variable | OpcodeArgTypeinfo::flags::may_need_postprocessing,
