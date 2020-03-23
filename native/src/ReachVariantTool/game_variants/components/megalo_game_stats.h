@@ -19,7 +19,6 @@ class ReachMegaloGameStat : public cobb::indexed_refcountable {
          descending,
          obsolete_2,
       };
-      int8_t index = -1;
       MegaloStringRef   name;
       MegaloStringIndex nameIndex;
       Format format      = Format::number;

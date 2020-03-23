@@ -174,7 +174,7 @@ namespace Megalo {
             if (scope.index_type != VariableScopeIndicatorValue::index_type::indexed_data) // there's nothing to do postprocess for
                return;
             assert(scope.index_postprocess && "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
-            this->object = (scope.index_postprocess)(newlyLoaded, index);
+            this->object = (scope.index_postprocess)(newlyLoaded, this->index);
          }
    };
 }

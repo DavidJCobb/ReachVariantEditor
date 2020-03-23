@@ -307,6 +307,9 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -784,6 +787,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

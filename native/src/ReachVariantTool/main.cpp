@@ -33,6 +33,10 @@ int main(int argc, char *argv[]) {
 //
 // UPDATED PLANS:
 //
+//  - Create types for "any variable," "player or group," etc., so that we don't need to hack 
+//    our way around not having classes for those by checking factories in the opcode save 
+//    methods.
+//
 //  - Redesign the enum and flags types to use DetailedEnum and DetailedFlags (which we should 
 //    move out of the megalo_ex folder).
 //
@@ -54,18 +58,31 @@ int main(int argc, char *argv[]) {
 //
 //     - And now we don't need postprocessing!
 //
-//  = If we get the above two changes working fully, then consider ditching the new opcode 
-//    system entirely per remarks further below.
+//  = Ditch the new opcode argument system entirely and revert fully back to the old one.
 //
-//  - Implement remaining opcode argument types in new system
+//     - Remove all factory functions from OpcodeArgValue and its subclasses, and have them 
+//       all use typeinfos. Then, amend OpcodeArgBase to require typeinfos, and remove the 
+//       "band-aid" code from the read/write methods for Condition and Action.
 //
-//     - Icon indices
-//     - Requisition palette indices
-//     - Format strings
-//     - Player sets
-//     - specific_variable.h
-//     - Waypoint icons
-//     - Widget stuff
+//     - If we modify OpcodeArgValue::write to append to a cobb::bitarray128, then we can 
+//       use it both for saving to a file and for counting the total size of all loaded 
+//       opcodes -- needed for my eventual plans to show the space usage for each part of 
+//       the variant file, to help script authors better assess how much room they have to 
+//       work with.
+//
+//     - One thing that the new system did right was to nest the types under a dedicated 
+//       namespace and give them shorter names, i.e. Megalo::types::number and such. We 
+//       should reorganize the old system to use the same convention.
+//
+//  - DO NOT FORGET to have the decompiler generate variable declarations.
+//
+//     - If we can modify references to indexed data to optionally use aliases if the 
+//       Decompiler& so wills, then so much the better; however, this would require 
+//       extending the generic variable handling so that a scope-indicator definition 
+//       can specify a custom decompile functor.
+//
+//  - When decompiling is done, begin porting the compiler work from the JavaScript 
+//    prototype.
 //
 
 //  - DECOMPILER
@@ -170,14 +187,6 @@ int main(int argc, char *argv[]) {
 //             work with bits manually, rather than just on saving and exporting. We don't 
 //             NEED to keep the data in a "friendly" intermediate format but it's so, so 
 //             much easier to.
-//
-//             I don't want to redesign absolutely everything YET AGAIN, as if I keep 
-//             doing that I'll never get anything done, so I've decided to roll back after 
-//             the compiler is done. My reasoning is that I can: a) keep a build with the 
-//             working compiler handy, so I can multitask and test things in-game even 
-//             while the codebase isn't usable; and b) greatly simplify the work involved 
-//             in changing the system just by already having the compiler done -- already 
-//             knowing exactly what a rollback would need to have added to it.
 //
 //     - Syntax
 //

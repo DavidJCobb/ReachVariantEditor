@@ -31,21 +31,4 @@ namespace Megalo {
       error.extra[0] = type;
       return nullptr;
    }
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream) {
-      uint8_t type = stream.read_bits<uint8_t>(2);
-      switch (type) {
-         case 0: // Team
-            return OpcodeArgValueTeam::typeinfo.factory(stream);
-         case 1: // Player
-            return OpcodeArgValuePlayer::typeinfo.factory(stream);
-         case 2: // All Players
-            return OpcodeArgValueAllPlayers::factory(stream);
-      }
-      auto& error = GameEngineVariantLoadError::get();
-      error.state  = GameEngineVariantLoadError::load_state::failure;
-      error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
-      error.detail = GameEngineVariantLoadError::load_failure_detail::bad_opcode_player_or_team_var_type;
-      error.extra[0] = type;
-      return nullptr;
-   }
 }

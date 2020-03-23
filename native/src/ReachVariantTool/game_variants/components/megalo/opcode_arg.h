@@ -47,7 +47,6 @@ namespace Megalo {
 
    using  OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
    extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
 
    class OpcodeArgTypeinfo {
       public:

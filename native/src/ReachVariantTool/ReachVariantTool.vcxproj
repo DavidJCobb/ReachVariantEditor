@@ -117,6 +117,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\number.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\object.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\team.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\timer.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\vector3.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\number.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\object.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\team.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\timer.h" />
     <ClInclude Include="game_variants\components\megalo_ex\detailed_enum.h" />

@@ -300,21 +300,6 @@ namespace Megalo {
                printf("   Opcode base type is <any-variable>. Serializing variable type code...\n");
             #endif
             stream.write((uint8_t)arg->get_variable_type(), 3);
-         } else if (factory == OpcodeArgTeamOrPlayerVariableFactory) {
-            #if _DEBUG
-               printf("   Opcode base type is <team-or-player>. Serializing variable type code...\n");
-            #endif
-            switch (arg->get_variable_type()) {
-               case variable_type::team:
-                  stream.write(0, 2);
-                  break;
-               case variable_type::player:
-                  stream.write(1, 2);
-                  break;
-               case variable_type::not_a_variable:
-                  stream.write(2, 2);
-                  break;
-            }
          }
          //
          // Now we can serialize the argument value.

@@ -26,7 +26,7 @@ namespace Megalo {
          "Modify the score of a player or team.",
          "Modify the score of %1: %2 %3.",
          {
-            OpcodeArgBase("target",   OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("target",   OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
             OpcodeArgBase("operand",  OpcodeArgValueScalar::typeinfo)
          },
@@ -184,7 +184,7 @@ namespace Megalo {
          "",
          "For %1, play sound %2 and display message: %3.",
          {
-            OpcodeArgBase("who",   OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("who",   OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("sound", OpcodeArgValueSound::factory),
             OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
          },
@@ -536,7 +536,7 @@ namespace Megalo {
          {
             OpcodeArgBase("sound",  OpcodeArgValueSound::factory),
             OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::factory),
-            OpcodeArgBase("who",    OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("who",    OpcodeArgValuePlayerOrGroup::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("play_sound_for", "", {2, 0, 1}, OpcodeFuncToScriptMapping::game_namespace)
       ),
@@ -783,8 +783,8 @@ namespace Megalo {
          "Inform the game that incident %1 has occurred, caused by %2 and affecting %3.",
          {
             OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
-            OpcodeArgBase("cause?",    OpcodeArgTeamOrPlayerVariableFactory),
-            OpcodeArgBase("affected?", OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("cause?",    OpcodeArgValuePlayerOrGroup::typeinfo),
+            OpcodeArgBase("affected?", OpcodeArgValuePlayerOrGroup::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("send_incident", "", {0, 1, 2})
       ),
@@ -794,8 +794,8 @@ namespace Megalo {
          "Inform the game that incident %1 has occurred, caused by %2 and affecting %3, with value %4.",
          {
             OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
-            OpcodeArgBase("cause?",    OpcodeArgTeamOrPlayerVariableFactory),
-            OpcodeArgBase("affected?", OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("cause?",    OpcodeArgValuePlayerOrGroup::typeinfo),
+            OpcodeArgBase("affected?", OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("value",     OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("send_incident", "", {0, 1, 2, 3})
@@ -805,7 +805,7 @@ namespace Megalo {
          "Set which loadout palette a player or team has access to.",
          "Switch %1 to %2.",
          {
-            OpcodeArgBase("team or player",  OpcodeArgTeamOrPlayerVariableFactory),
+            OpcodeArgBase("team or player",  OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("loadout palette", OpcodeArgValueLoadoutPalette::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_loadout_palette", "", {1}, 0)
@@ -1130,18 +1130,6 @@ namespace Megalo {
          //
          if (factory == OpcodeArgAnyVariableFactory) {
             stream.write((uint8_t)arg->get_variable_type(), 3);
-         } else if (factory == OpcodeArgTeamOrPlayerVariableFactory) {
-            switch (arg->get_variable_type()) {
-               case variable_type::team:
-                  stream.write(0, 2);
-                  break;
-               case variable_type::player:
-                  stream.write(1, 2);
-                  break;
-               case variable_type::not_a_variable:
-                  stream.write(2, 2);
-                  break;
-            }
          }
          //
          // Now we can serialize the argument value.
