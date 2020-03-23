@@ -6,44 +6,6 @@
 #include "../../../data/mp_object_names.h"
 
 namespace Megalo {
-   class OpcodeArgValueMPObjectTypeIndex : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueMPObjectTypeIndex() : OpcodeArgValueBaseIndex("MP Object Type", 2048, index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueMPObjectTypeIndex();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPObjectTypeList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
-   class OpcodeArgValueNameIndex : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueNameIndex() : OpcodeArgValueBaseIndex("Name", Limits::max_string_ids, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueNameIndex();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPObjectNameList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
    class OpcodeArgValueRequisitionPalette : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
       public:
          OpcodeArgValueRequisitionPalette() : OpcodeArgValueBaseIndex("Requisition Palette", cobb::bitmax(4), index_quirk::presence) {};

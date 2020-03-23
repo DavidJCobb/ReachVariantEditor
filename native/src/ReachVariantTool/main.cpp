@@ -33,7 +33,15 @@ int main(int argc, char *argv[]) {
 //
 // UPDATED PLANS:
 //
-//  - Begin bringing decompile code from the new system back to the old system.
+//  - Begin bringing decompile code from the new system back to the old system. Redo index 
+//    types as needed.
+//
+//     - Forge labels
+//     - formatted strings and their tokens
+//     - player set
+//     - specific-variable
+//     - waypoint stuff
+//     - widget stuff
 //
 //  - Remove postprocessing.
 //

@@ -109,6 +109,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\forge_label.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\incident.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\object_type.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_set.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_traits.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\shape.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player_or_group.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\team.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\timer.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variant_string_id.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\vector3.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\widget_related.cpp" />
@@ -232,6 +234,7 @@
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\incident.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\object_type.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\sound.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\any_variable.h" />
@@ -244,6 +247,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\timer.h" />
     <ClInclude Include="formats\detailed_enum.h" />
     <ClInclude Include="formats\detailed_flags.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variant_string_id.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />

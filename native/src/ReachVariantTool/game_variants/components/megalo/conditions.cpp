@@ -80,7 +80,7 @@ namespace Megalo {
          "%1 %v of type %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
+            OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_of_type", "", {1}, 0)
       ),

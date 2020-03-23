@@ -37,13 +37,13 @@ namespace Megalo {
          "Create an object.",
          "Create %1 at offset %6 from %3 with Forge label %4, settings (%5), and name %7. Store a reference to it in %2.",
          {
-            OpcodeArgBase("type",        OpcodeArgValueMPObjectTypeIndex::factory),
+            OpcodeArgBase("type",        OpcodeArgValueObjectType::typeinfo),
             OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
             OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::typeinfo),
-            OpcodeArgBase("name",        OpcodeArgValueNameIndex::factory),
+            OpcodeArgBase("name",        OpcodeArgValueVariantStringID::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
       ),
@@ -816,7 +816,7 @@ namespace Megalo {
          "Set %1's device track and position to %2 and %3, respectively.",
          {
             OpcodeArgBase("device",    OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("animation", OpcodeArgValueNameIndex::factory),
+            OpcodeArgBase("animation", OpcodeArgValueVariantStringID::typeinfo),
             OpcodeArgBase("position",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_device_animation_position", "", {1, 2}, 0)
@@ -912,7 +912,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
+            OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
@@ -975,7 +975,7 @@ namespace Megalo {
          "Add weapon of type %2 to %1 using mode %3.",
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("weapon", OpcodeArgValueMPObjectTypeIndex::factory),
+            OpcodeArgBase("weapon", OpcodeArgValueObjectType::typeinfo),
             OpcodeArgBase("mode",   OpcodeArgValueAddWeaponEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("add_weapon", "", {1, 2}, 0)
