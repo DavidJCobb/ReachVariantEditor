@@ -1,5 +1,4 @@
 #include "all_enums.h"
-#include "../enums.h"
 
 namespace Megalo {
    namespace enums {

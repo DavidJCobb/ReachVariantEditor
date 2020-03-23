@@ -70,13 +70,6 @@ namespace Megalo {
             return new OpcodeArgValueRequisitionPalette();
          }
    };
-   class OpcodeArgValueSound : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueSound() : OpcodeArgValueBaseIndex("Sound", Limits::max_engine_sounds, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueSound();
-         }
-   };
    class OpcodeArgValueTrigger : public OpcodeArgValueBaseIndex {
       public:
          OpcodeArgValueTrigger() : OpcodeArgValueBaseIndex("Trigger", Limits::max_triggers, index_quirk::reference) {};

@@ -185,7 +185,7 @@ namespace Megalo {
          "For %1, play sound %2 and display message: %3.",
          {
             OpcodeArgBase("who",   OpcodeArgValuePlayerOrGroup::typeinfo),
-            OpcodeArgBase("sound", OpcodeArgValueSound::factory),
+            OpcodeArgBase("sound", OpcodeArgValueSound::typeinfo),
             OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("show_message_to", "", {0, 1, 2}, OpcodeFuncToScriptMapping::game_namespace)
@@ -534,7 +534,7 @@ namespace Megalo {
          "",
          "For %3, play sound %1. Unknown parameter: %2.",
          {
-            OpcodeArgBase("sound",  OpcodeArgValueSound::factory),
+            OpcodeArgBase("sound",  OpcodeArgValueSound::typeinfo),
             OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerOrGroup::typeinfo),
          },
