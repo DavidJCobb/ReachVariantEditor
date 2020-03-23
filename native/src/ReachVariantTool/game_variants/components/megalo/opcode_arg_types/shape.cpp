@@ -5,7 +5,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::can_be_multiple,
       { "none", "sphere", "cylinder", "box" },
-      &OpcodeArgValueShape::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueShape>
    );
    //
    bool OpcodeArgValueShape::read(cobb::ibitreader& stream) noexcept {
@@ -86,6 +86,34 @@ namespace Megalo {
             this->bottom.to_string(temp);
             out += temp;
             return;
+      }
+   }
+   void OpcodeArgValueShape::decompile(Decompiler& out, uint64_t flags) noexcept {
+      switch (this->shapeType) {
+         case ShapeType::sphere:
+            out.write("sphere, ");
+            this->radius.decompile(out, flags);
+            return;
+         case ShapeType::cylinder:
+            out.write("cylinder, ");
+            this->radius.decompile(out, flags);
+            out.write(", ");
+            this->top.decompile(out, flags);
+            out.write(", ");
+            this->bottom.decompile(out, flags);
+            return;
+         case ShapeType::box:
+            out.write("box, ");
+            this->radius.decompile(out, flags);
+            out.write(", ");
+            this->length.decompile(out, flags);
+            out.write(", ");
+            this->top.decompile(out, flags);
+            out.write(", ");
+            this->bottom.decompile(out, flags);
+            return;
+         case ShapeType::none:
+            out.write("none");
       }
    }
 }

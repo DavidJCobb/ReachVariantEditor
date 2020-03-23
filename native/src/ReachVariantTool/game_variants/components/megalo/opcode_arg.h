@@ -152,7 +152,7 @@ namespace Megalo {
          const char* text_false = "false";
          //
          OpcodeArgBase(const char* n, OpcodeArgValueFactory f, bool io = false) : name(n), factory(f), is_out_variable(io) {};
-         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, const char* tt, const char* tf) : name(n), factory(f), text_true(tt), text_false(tf) {}
+         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, const char* tt, const char* tf) : name(n), typeinfo(&f), text_true(tt), text_false(tf) {}
          OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, bool io = false) : name(n), typeinfo(&f), is_out_variable(io) {};
    };
    //

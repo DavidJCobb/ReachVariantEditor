@@ -42,7 +42,7 @@ namespace Megalo {
             OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
-            OpcodeArgBase("offset",      OpcodeArgValueVector3::factory),
+            OpcodeArgBase("offset",      OpcodeArgValueVector3::typeinfo),
             OpcodeArgBase("name",        OpcodeArgValueNameIndex::factory),
          },
          OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
@@ -124,7 +124,7 @@ namespace Megalo {
          "Set %1's shape to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("shape",  OpcodeArgValueShape::factory),
+            OpcodeArgBase("shape",  OpcodeArgValueShape::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_shape", "", {1}, 0)
       ),
@@ -164,7 +164,7 @@ namespace Megalo {
          "Only allow fireteam #%2 to spawn at %1.",
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::factory), // TODO: -1 == "no fireteam"
+            OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::typeinfo), // TODO: -1 == "no fireteam"
          },
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteam", "", {1}, 0)
       ),
@@ -251,7 +251,7 @@ namespace Megalo {
          "Destroy %1 %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("silent", OpcodeArgValueConstBool::factory, "silently", "loudly"),
+            OpcodeArgBase("silent", OpcodeArgValueConstBool::typeinfo, "silently", "loudly"),
          },
          OpcodeFuncToScriptMapping::make_function("kill", "", {1}, 0)
       ),
@@ -345,7 +345,7 @@ namespace Megalo {
          "",
          "Carry out some unknown action (32) using boolean %1.",
          {
-            OpcodeArgBase("bool", OpcodeArgValueConstBool::factory),
+            OpcodeArgBase("bool", OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_32", "", {0})
       ),
@@ -356,8 +356,8 @@ namespace Megalo {
          {
             OpcodeArgBase("subject", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("target",  OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("offset",  OpcodeArgValueVector3::factory),
-            OpcodeArgBase("bool",    OpcodeArgValueConstBool::factory),
+            OpcodeArgBase("offset",  OpcodeArgValueVector3::typeinfo),
+            OpcodeArgBase("bool",    OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("attach_to", "", {1, 2, 3}, 0)
       ),
@@ -525,7 +525,7 @@ namespace Megalo {
          {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::factory),
             OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("visible", OpcodeArgValueConstBool::factory, "Show", "Hide"),
+            OpcodeArgBase("visible", OpcodeArgValueConstBool::typeinfo, "Show", "Hide"),
          },
          OpcodeFuncToScriptMapping::make_function("set_visibility", "", {1, 2}, 0)
       ),
@@ -616,7 +616,7 @@ namespace Megalo {
          "%2 fireteam spawning for %1.",
          {
             OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
-            OpcodeArgBase("bool", OpcodeArgValueConstBool::factory, "Enable", "Disable"),
+            OpcodeArgBase("bool", OpcodeArgValueConstBool::typeinfo, "Enable", "Disable"),
          },
          OpcodeFuncToScriptMapping::make_function("set_fireteam_spawning_enabled", "", {1}, 0)
       ),
@@ -870,7 +870,7 @@ namespace Megalo {
          "Set %3 to %1's %2 weapon.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("which", OpcodeArgValueConstBool::factory, "primary", "secondary"),
+            OpcodeArgBase("which",  OpcodeArgValueConstBool::typeinfo, "primary", "secondary"),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_weapon", "get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
@@ -891,7 +891,7 @@ namespace Megalo {
          "%2 garbage collection of %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("state",  OpcodeArgValueConstBool::factory, "Enable", "Disable"),
+            OpcodeArgBase("state",  OpcodeArgValueConstBool::typeinfo, "Enable", "Disable"),
          },
          OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
       ),
@@ -943,7 +943,7 @@ namespace Megalo {
          "Carry out some unknown (90) action with %1 and %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("bool",   OpcodeArgValueConstBool::factory),
+            OpcodeArgBase("bool",   OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_90", "", {1}, 0)
       ),
@@ -954,7 +954,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("axis", OpcodeArgValueConstBool::factory, "axis 1", "axis 0"),
+            OpcodeArgBase("axis", OpcodeArgValueConstBool::typeinfo, "axis 1", "axis 0"),
          },
          OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
       ),
@@ -965,7 +965,7 @@ namespace Megalo {
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("point", OpcodeArgValueVector3::factory),
+            OpcodeArgBase("point", OpcodeArgValueVector3::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("move_to", "", {1, 2}, 0)
       ),
@@ -987,7 +987,7 @@ namespace Megalo {
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("which",  OpcodeArgValueDropWeaponEnum::typeinfo),
-            OpcodeArgBase("delete", OpcodeArgValueConstBool::factory, "and delete it", "but do not delete it"),
+            OpcodeArgBase("delete", OpcodeArgValueConstBool::typeinfo, "and delete it", "but do not delete it"),
          },
          OpcodeFuncToScriptMapping::make_function("remove_weapon", "", {1, 2}, 0)
       ),
