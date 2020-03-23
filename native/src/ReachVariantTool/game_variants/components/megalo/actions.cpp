@@ -782,7 +782,7 @@ namespace Megalo {
          "",
          "Inform the game that incident %1 has occurred, caused by %2 and affecting %3.",
          {
-            OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
+            OpcodeArgBase("incident",  OpcodeArgValueIncident::typeinfo),
             OpcodeArgBase("cause?",    OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("affected?", OpcodeArgValuePlayerOrGroup::typeinfo),
          },
@@ -793,7 +793,7 @@ namespace Megalo {
          "",
          "Inform the game that incident %1 has occurred, caused by %2 and affecting %3, with value %4.",
          {
-            OpcodeArgBase("incident",  OpcodeArgValueIncidentID::factory),
+            OpcodeArgBase("incident",  OpcodeArgValueIncident::typeinfo),
             OpcodeArgBase("cause?",    OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("affected?", OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("value",     OpcodeArgValueScalar::typeinfo),

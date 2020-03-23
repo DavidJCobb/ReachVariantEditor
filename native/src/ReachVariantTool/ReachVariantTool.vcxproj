@@ -108,6 +108,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\forge_label.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\incident.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_set.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_traits.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\shape.cpp" />
@@ -230,6 +231,7 @@
   <ItemGroup>
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\incident.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\sound.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\any_variable.h" />

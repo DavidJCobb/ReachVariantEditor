@@ -6,25 +6,6 @@
 #include "../../../data/mp_object_names.h"
 
 namespace Megalo {
-   class OpcodeArgValueIncidentID : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
-      public:
-         OpcodeArgValueIncidentID() : OpcodeArgValueBaseIndex("Incident ID", Limits::max_incident_types, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueIncidentID();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPIncidentList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
    class OpcodeArgValueMPObjectTypeIndex : public OpcodeArgValueBaseIndex {
       public:
          OpcodeArgValueMPObjectTypeIndex() : OpcodeArgValueBaseIndex("MP Object Type", 2048, index_quirk::presence) {};
