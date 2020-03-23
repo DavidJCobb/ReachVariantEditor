@@ -61,6 +61,7 @@ struct DetailedFlags {
    //
    inline size_t size() const noexcept { return this->values.size(); }
    inline DetailedFlagsValue& operator[](int i) noexcept { return this->values[i]; }
+   inline const DetailedFlagsValue& operator[](int i) const noexcept { return this->values[i]; }
    //
    DetailedFlags(std::initializer_list<DetailedFlagsValue> values) : values(values) {
       size_t s = this->size();
@@ -68,10 +69,7 @@ struct DetailedFlags {
          this->values[i].index = i;
    }
    inline int bitcount() const noexcept {
-      auto s = this->size();
-      if (!s)
-         return 0;
-      return cobb::bitcount(s);
+      return this->size();
    }
    //
    const DetailedFlagsValue* item(uint32_t i) const noexcept {

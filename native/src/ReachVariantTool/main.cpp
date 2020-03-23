@@ -33,9 +33,6 @@ int main(int argc, char *argv[]) {
 //
 // UPDATED PLANS:
 //
-//  - Redesign the enum and flags types to use DetailedEnum and DetailedFlags (which we should 
-//    move out of the megalo_ex folder).
-//
 //  - Begin bringing decompile code from the new system back to the old system.
 //
 //  - Remove postprocessing.
@@ -65,6 +62,10 @@ int main(int argc, char *argv[]) {
 //       opcodes -- needed for my eventual plans to show the space usage for each part of 
 //       the variant file, to help script authors better assess how much room they have to 
 //       work with.
+//
+//        = Actually, we don't even need to do this. All of the script stuff saves via a 
+//          bitwriter, right? Just make a throwaway bitwriter for the counting and save 
+//          only the script fields to it; then, check its size.
 //
 //     - One thing that the new system did right was to nest the types under a dedicated 
 //       namespace and give them shorter names, i.e. Megalo::types::number and such. We 

@@ -33,4 +33,6 @@ namespace Megalo {
    megalo_opcode_arg_value_enum(OpcodeArgValueTeamDispositionEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueTimerRateEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueWaypointPriorityEnum);
+
+   megalo_opcode_arg_value_enum(OpcodeArgValueLoadoutPalette);
 }

@@ -89,6 +89,7 @@ struct DetailedEnum {
    //
    inline size_t size() const noexcept { return this->values.size(); }
    inline DetailedEnumValue& operator[](int i) noexcept { return this->values[i]; }
+   inline const DetailedEnumValue& operator[](int i) const noexcept { return this->values[i]; }
    //
    DetailedEnum(std::initializer_list<DetailedEnumValue> values) : values(values) {
       size_t s = this->size();

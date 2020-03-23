@@ -206,4 +206,11 @@ namespace Megalo {
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointPriorityEnum>
    );
+
+   OpcodeArgValueLoadoutPalette::OpcodeArgValueLoadoutPalette() : OpcodeArgValueEnumSuperclass(enums::loadout_palette) {}
+   OpcodeArgTypeinfo OpcodeArgValueLoadoutPalette::typeinfo = OpcodeArgTypeinfo(
+      OpcodeArgTypeinfo::typeinfo_type::enumeration,
+      0,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueLoadoutPalette>
+   );
 }

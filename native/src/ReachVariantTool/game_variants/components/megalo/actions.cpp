@@ -41,7 +41,7 @@ namespace Megalo {
             OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
             OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
-            OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::factory),
+            OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::factory),
             OpcodeArgBase("name",        OpcodeArgValueNameIndex::factory),
          },
@@ -416,7 +416,7 @@ namespace Megalo {
          "Toggle unused flags %2 for %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("flags",  OpcodeArgValuePlayerUnusedModeFlags::factory),
+            OpcodeArgBase("flags",  OpcodeArgValuePlayerUnusedModeFlags::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_39", "", {1}, 0)
       ),
@@ -806,7 +806,7 @@ namespace Megalo {
          "Switch %1 to %2.",
          {
             OpcodeArgBase("team or player",  OpcodeArgValuePlayerOrGroup::typeinfo),
-            OpcodeArgBase("loadout palette", OpcodeArgValueLoadoutPalette::factory),
+            OpcodeArgBase("loadout palette", OpcodeArgValueLoadoutPalette::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_loadout_palette", "", {1}, 0)
       ),

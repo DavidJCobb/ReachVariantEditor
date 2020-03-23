@@ -48,7 +48,7 @@ namespace Megalo {
          "%1 %v killed by any of: %2.",
          {
             OpcodeArgBase("victim", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::factory),
+            OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("killer_type_is", "", {1}, 0),
          "was", "was not"
