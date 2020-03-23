@@ -1,6 +1,6 @@
 #pragma once
-#include "player.h"
-#include "scalar.h"
+#include "variables/player.h"
+#include "variables/number.h"
 #include "../../../../helpers/bitnumber.h"
 
 namespace Megalo {

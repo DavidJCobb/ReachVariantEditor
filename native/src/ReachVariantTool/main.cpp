@@ -33,10 +33,10 @@ int main(int argc, char *argv[]) {
 //
 // UPDATED PLANS:
 //
-//  - Backport generic variable handling from the new opcode argument system to the old 
-//    system, and see if it works.
+//  - Redesign the enum and flags types to use DetailedEnum and DetailedFlags (which we should 
+//    move out of the megalo_ex folder).
 //
-//     - If so, begin bringing decompile code from the new system back to the old system.
+//  - Begin bringing decompile code from the new system back to the old system.
 //
 //  - Remove postprocessing.
 //

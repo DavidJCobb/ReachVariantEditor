@@ -195,7 +195,7 @@ namespace Megalo {
          "",
          "Have %1 tick at rate %2.",
          {
-            OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
+            OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
             OpcodeArgBase("rate",  OpcodeArgValueTimerRateEnum::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_rate", "", {1}, 0)
@@ -385,7 +385,7 @@ namespace Megalo {
          "Get the index of a team variable's value.",
          "Set %2 to %1's index.",
          {
-            OpcodeArgBase("team",   OpcodeArgValueTeam::factory),
+            OpcodeArgBase("team",   OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("get_index", "", {}, 0)
@@ -455,7 +455,7 @@ namespace Megalo {
          "Resets a timer.", // to what?
          "Reset %1.",
          {
-            OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
+            OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("reset", "", {}, 0)
       ),
@@ -615,7 +615,7 @@ namespace Megalo {
          "Fireteam Spawning is more commonly known as \"Bro Spawning,\" and is used in Invasion and in Bro Slayer.",
          "%2 fireteam spawning for %1.",
          {
-            OpcodeArgBase("team", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("bool", OpcodeArgValueConstBool::factory, "Enable", "Disable"),
          },
          OpcodeFuncToScriptMapping::make_function("set_fireteam_spawning_enabled", "", {1}, 0)
@@ -625,7 +625,7 @@ namespace Megalo {
          "",
          "Set %1's respawn object: %2.",
          {
-            OpcodeArgBase("team",    OpcodeArgValueTeam::factory),
+            OpcodeArgBase("team",    OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("respawn", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)

@@ -70,12 +70,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\team.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -305,6 +299,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\team.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -603,12 +603,6 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\specific_variable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\team.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\tokens.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -784,6 +778,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\team.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

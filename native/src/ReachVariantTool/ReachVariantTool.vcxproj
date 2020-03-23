@@ -112,13 +112,13 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_traits.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\shape.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\specific_variable.cpp" />
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\team.cpp" />
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\tokens.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\base.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\number.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\object.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\player.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\team.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\variables\timer.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\vector3.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\widget_related.cpp" />
@@ -233,6 +233,8 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\number.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\object.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\player.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\team.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\timer.h" />
     <ClInclude Include="game_variants\components\megalo_ex\detailed_enum.h" />
     <ClInclude Include="game_variants\components\megalo_ex\detailed_flags.h" />
     <ClInclude Include="game_variants\components\megalo_ex\opcode.h" />
@@ -311,8 +313,6 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_set.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\shape.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\specific_variable.h" />
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\team.h" />
-    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\timer.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\tokens.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\vector3.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\waypoint_icon.h" />

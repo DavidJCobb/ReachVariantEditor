@@ -58,8 +58,8 @@ namespace Megalo {
          "",
          "%1 %v disposition %3 with %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueTeam::factory),
-            OpcodeArgBase("b", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("a", OpcodeArgValueTeam::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::factory),
          },
          OpcodeFuncToScriptMapping::make_function("has_disposition", "", {1, 2}, 0),
@@ -70,7 +70,7 @@ namespace Megalo {
          "Checks whether a timer is at zero.",
          "%1 %v at zero.",
          {
-            OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
+            OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_zero", "", {}, 0)
       ),
@@ -89,7 +89,7 @@ namespace Megalo {
          "Checks whether a team has one or more players on it.",
          "%1 %v one or more players on it.",
          {
-            OpcodeArgBase("team", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("has_any_players", "", {}, 0),
          "has", "does not have"

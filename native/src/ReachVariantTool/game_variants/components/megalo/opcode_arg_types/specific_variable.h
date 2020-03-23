@@ -1,7 +1,7 @@
 #pragma once
 #include "../opcode_arg.h"
 #include "../variables_and_scopes.h"
-#include "object.h"
+#include "variables/object.h"
 
 //
 // TODO: "paired_variable.h" would probably be a better name for this file

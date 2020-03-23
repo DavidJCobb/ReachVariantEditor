@@ -1,5 +1,5 @@
 #pragma once
-#include "scalar.h"
+#include "variables/number.h"
 
 namespace Megalo {
    extern const SmartEnum WaypointIcon;

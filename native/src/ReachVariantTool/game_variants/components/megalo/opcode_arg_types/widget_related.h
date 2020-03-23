@@ -1,7 +1,7 @@
 #pragma once
 #include "../opcode_arg.h"
-#include "scalar.h"
-#include "timer.h"
+#include "variables/number.h"
+#include "variables/timer.h"
 #include "../limits.h"
 #include "../widgets.h"
 

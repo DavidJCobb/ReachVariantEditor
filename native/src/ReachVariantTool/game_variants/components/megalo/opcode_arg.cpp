@@ -1,11 +1,11 @@
 #include "opcode_arg.h"
 #include "variables_and_scopes.h"
 
-#include "opcode_arg_types/scalar.h"
-#include "opcode_arg_types/player.h"
-#include "opcode_arg_types/object.h"
-#include "opcode_arg_types/team.h"
-#include "opcode_arg_types/timer.h"
+#include "opcode_arg_types/variables/number.h"
+#include "opcode_arg_types/variables/player.h"
+#include "opcode_arg_types/variables/object.h"
+#include "opcode_arg_types/variables/team.h"
+#include "opcode_arg_types/variables/timer.h"
 
 #include "../../errors.h"
 
@@ -16,9 +16,9 @@ namespace Megalo {
          case variable_type::scalar:
             return OpcodeArgValueScalar::typeinfo.factory(stream);
          case variable_type::timer:
-            return OpcodeArgValueTimer::factory(stream);
+            return OpcodeArgValueTimer::typeinfo.factory(stream);
          case variable_type::team:
-            return OpcodeArgValueTeam::factory(stream);
+            return OpcodeArgValueTeam::typeinfo.factory(stream);
          case variable_type::player:
             return OpcodeArgValuePlayer::typeinfo.factory(stream);
          case variable_type::object:
@@ -35,7 +35,7 @@ namespace Megalo {
       uint8_t type = stream.read_bits<uint8_t>(2);
       switch (type) {
          case 0: // Team
-            return OpcodeArgValueTeam::factory(stream);
+            return OpcodeArgValueTeam::typeinfo.factory(stream);
          case 1: // Player
             return OpcodeArgValuePlayer::typeinfo.factory(stream);
          case 2: // All Players

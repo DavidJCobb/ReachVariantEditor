@@ -6,8 +6,8 @@
 #include "variables/number.h"
 #include "variables/player.h"
 #include "variables/object.h"
-#include "team.h"
-#include "timer.h"
+#include "variables/team.h"
+#include "variables/timer.h"
 //
 #include "forge_label.h"
 #include "player_set.h"

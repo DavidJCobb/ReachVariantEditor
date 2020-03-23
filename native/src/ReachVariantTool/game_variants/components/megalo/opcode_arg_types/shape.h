@@ -1,6 +1,6 @@
 #pragma once
 #include "../opcode_arg.h"
-#include "scalar.h"
+#include "variables/number.h"
 
 namespace Megalo {
    enum class ShapeType {

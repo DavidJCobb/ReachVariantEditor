@@ -2,7 +2,7 @@
 #include "limits.h"
 #include "variables_and_scopes.h"
 #include "opcode_arg_types/all_enums.h"
-#include "opcode_arg_types/scalar.h"
+#include "opcode_arg_types/variables/number.h"
 #include "../../../helpers/bitnumber.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/bitwriter.h"

@@ -1,10 +1,10 @@
 #include "tokens.h"
 #include "../../../types/multiplayer.h"
-#include "object.h"
-#include "player.h"
-#include "scalar.h"
-#include "team.h"
-#include "timer.h"
+#include "variables/object.h"
+#include "variables/player.h"
+#include "variables/number.h"
+#include "variables/team.h"
+#include "variables/timer.h"
 
 namespace Megalo {
    bool OpcodeStringToken::read(cobb::ibitreader& stream) noexcept {
