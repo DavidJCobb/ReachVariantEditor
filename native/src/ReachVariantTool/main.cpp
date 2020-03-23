@@ -33,10 +33,6 @@ int main(int argc, char *argv[]) {
 //
 // UPDATED PLANS:
 //
-//  - Create types for "any variable," "player or group," etc., so that we don't need to hack 
-//    our way around not having classes for those by checking factories in the opcode save 
-//    methods.
-//
 //  - Redesign the enum and flags types to use DetailedEnum and DetailedFlags (which we should 
 //    move out of the megalo_ex folder).
 //

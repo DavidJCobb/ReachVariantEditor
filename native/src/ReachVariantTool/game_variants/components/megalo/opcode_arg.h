@@ -45,8 +45,7 @@ namespace Megalo {
    class OpcodeArgBase;
    class OpcodeArgValue;
 
-   using  OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
+   using OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
 
    class OpcodeArgTypeinfo {
       public:

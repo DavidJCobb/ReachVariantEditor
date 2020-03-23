@@ -112,8 +112,8 @@ namespace Megalo {
          "Modify one variable by another.",
          "Modify variable %1: %3 %2.",
          {
-            OpcodeArgBase("a", OpcodeArgAnyVariableFactory, true),
-            OpcodeArgBase("b", OpcodeArgAnyVariableFactory),
+            OpcodeArgBase("a", OpcodeArgValueAnyVariable::typeinfo, true),
+            OpcodeArgBase("b", OpcodeArgValueAnyVariable::typeinfo),
             OpcodeArgBase("operator", OpcodeArgValueMathOperatorEnum::factory),
          },
          OpcodeFuncToScriptMapping::make_intrinsic_assignment(2)
@@ -1123,17 +1123,6 @@ namespace Megalo {
             if (!factory && base[i].typeinfo)
                factory = base[i].typeinfo->factory;
          #pragma endregion
-         //
-         // This is really ugly but I've sort of painted myself into a corner here... Some 
-         // arguments can take multiple variable types, and currently the variable classes 
-         // have no way of "knowing" that that's how they got here.
-         //
-         if (factory == OpcodeArgAnyVariableFactory) {
-            stream.write((uint8_t)arg->get_variable_type(), 3);
-         }
-         //
-         // Now we can serialize the argument value.
-         //
          arg->write(stream);
       }
    }
