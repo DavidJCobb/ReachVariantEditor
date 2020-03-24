@@ -1,94 +1,106 @@
 #include "waypoint_icon.h"
 
 namespace Megalo {
-   megalo_define_smart_enum(WaypointIcon,
-      "none", // -1
-      "microphone",
-      "death marker",
-      "lightning bolt",
-      "bullseye",
-      "diamond",
-      "bomb",
-      "flag",
-      "skull",
-      "crown",
-      "vip",
-      "territory lock",
-      "territory A",
-      "territory B",
-      "territory C",
-      "territory D",
-      "territory E",
-      "territory F",
-      "territory G",
-      "territory H",
-      "territory I",
-      "supply",
-      "supply (health)",
-      "supply (air drop)",
-      "supply (ammo)",
-      "arrow",
-      "defend",
-      "unknown 26",
-      "unknown 27",
-   );
+   namespace enums {
+      auto waypoint_icon = DetailedEnum({
+         //
+         // "none", // -1
+         //
+         DetailedEnumValue("microphone"),
+         DetailedEnumValue("death_marker"),
+         DetailedEnumValue("lightning_bolt", DetailedEnumValueInfo::make_friendly_name("lightning bolt")),
+         DetailedEnumValue("bullseye"),
+         DetailedEnumValue("diamond"),
+         DetailedEnumValue("bomb"),
+         DetailedEnumValue("flag"),
+         DetailedEnumValue("skull"),
+         DetailedEnumValue("crown"),
+         DetailedEnumValue("vip"),
+         DetailedEnumValue("territory_lock", DetailedEnumValueInfo::make_friendly_name("territory lock")),
+         DetailedEnumValue("territory_a",
+            DetailedEnumValueInfo::make_friendly_name("territory A"),
+            DetailedEnumValueInfo::make_description("Displays the value of a number variable.") // should we rename it, then?
+         ),
+         DetailedEnumValue("territory_b",    DetailedEnumValueInfo::make_friendly_name("territory B")),
+         DetailedEnumValue("territory_c",    DetailedEnumValueInfo::make_friendly_name("territory C")),
+         DetailedEnumValue("territory_d",    DetailedEnumValueInfo::make_friendly_name("territory D")),
+         DetailedEnumValue("territory_e",    DetailedEnumValueInfo::make_friendly_name("territory E")),
+         DetailedEnumValue("territory_f",    DetailedEnumValueInfo::make_friendly_name("territory F")),
+         DetailedEnumValue("territory_g",    DetailedEnumValueInfo::make_friendly_name("territory G")),
+         DetailedEnumValue("territory_h",    DetailedEnumValueInfo::make_friendly_name("territory H")),
+         DetailedEnumValue("territory_i",    DetailedEnumValueInfo::make_friendly_name("territory I")),
+         DetailedEnumValue("supply"),
+         DetailedEnumValue("supply_health",   DetailedEnumValueInfo::make_friendly_name("supply (health)")),
+         DetailedEnumValue("supply_air_drop", DetailedEnumValueInfo::make_friendly_name("supply (air drop)")),
+         DetailedEnumValue("supply_ammo",     DetailedEnumValueInfo::make_friendly_name("supply (ammo)")),
+         DetailedEnumValue("arrow"),
+         DetailedEnumValue("defend"),
+         DetailedEnumValue("unk_26"),
+         DetailedEnumValue("unk_27"),
+      });
+   }
    //
    OpcodeArgTypeinfo OpcodeArgValueWaypointIcon::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::can_be_multiple,
-      {
-         "none", // -1
-         "microphone",
-         "death_marker",
-         "lightning_bolt",
-         "bullseye",
-         "diamond",
-         "bomb",
-         "flag",
-         "skull",
-         "crown",
-         "vip",
-         "territory_lock",
-         "territory_A",
-         "territory_B",
-         "territory_C",
-         "territory_D",
-         "territory_E",
-         "territory_F",
-         "territory_G",
-         "territory_H",
-         "territory_I",
-         "supply",
-         "supply_health",
-         "supply_air_drop",
-         "supply_ammo",
-         "arrow",
-         "defend",
-         "unknown_26",
-         "unknown_27",
-      },
-      &OpcodeArgValueWaypointIcon::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>
    );
    //
    bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream) noexcept {
-      this->icon = stream.read_bits(WaypointIcon.index_bits()); // 5 bits
-      if (this->icon == WaypointIcon.lookup("territory A"))
+      this->icon = stream.read_bits(enums::waypoint_icon.index_bits()) - 1; // 5 bits
+      if (this->icon == enums::waypoint_icon.lookup("territory_a"))
          return OpcodeArgValueScalar::read(stream); // call super
       return true;
    }
    void OpcodeArgValueWaypointIcon::write(cobb::bitwriter& stream) const noexcept {
-      stream.write(this->icon, WaypointIcon.index_bits());
-      if (this->icon == WaypointIcon.lookup("territory A"))
+      stream.write(this->icon + 1, enums::waypoint_icon.index_bits());
+      if (this->icon == enums::waypoint_icon.lookup("territory_a"))
          OpcodeArgValueScalar::write(stream); // call super
    }
    void OpcodeArgValueWaypointIcon::to_string(std::string& out) const noexcept {
-      if (this->icon == WaypointIcon.lookup("territory A")) {
-         OpcodeArgValueScalar::to_string(out);
-         std::string icon;
-         WaypointIcon.to_string(icon, this->icon);
-         cobb::sprintf(out, "%s with number %s", icon.c_str(), out.c_str());
-      } else {
-         WaypointIcon.to_string(out, this->icon);
+      if (this->icon < 0) {
+         out = "none";
+         return;
+      }
+      auto item = enums::waypoint_icon.item(this->icon);
+      if (!item) {
+         cobb::sprintf(out, "invalid value %u", this->icon);
+         return;
+      }
+      QString name = item->get_friendly_name();
+      if (!name.isEmpty()) {
+         out = name.toStdString();
+         return;
+      }
+      out = item->name;
+      if (out.empty()) // enum values should never be nameless but just in case
+         cobb::sprintf(out, "%u", this->icon);
+      //
+      if (this->icon == enums::waypoint_icon.lookup("territory_a")) {
+         std::string temp;
+         OpcodeArgValueScalar::to_string(temp);
+         cobb::sprintf(out, "%s with number %s", out.c_str(), temp.c_str());
+      }
+   }
+   void OpcodeArgValueWaypointIcon::decompile(Decompiler& out, uint64_t flags) noexcept {
+      if (this->icon < 0) {
+         out.write("none");
+         return;
+      }
+      auto item = enums::waypoint_icon.item(this->icon);
+      std::string temp;
+      if (!item) {
+         cobb::sprintf(temp, "%u", this->icon);
+         out.write(temp);
+         return;
+      }
+      temp = item->name;
+      if (temp.empty())
+         cobb::sprintf(temp, "%u", this->icon);
+      out.write(temp);
+      if (this->icon == enums::waypoint_icon.lookup("territory_a")) {
+         out.write(", ");
+         OpcodeArgValueScalar::decompile(out, flags);
       }
    }
 }

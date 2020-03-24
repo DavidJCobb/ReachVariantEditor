@@ -72,7 +72,7 @@ namespace Megalo {
          "Set %1's waypoint icon to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("icon",   OpcodeArgValueWaypointIcon::factory),
+            OpcodeArgBase("icon",   OpcodeArgValueWaypointIcon::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_icon", "", {1}, 0)
       ),
@@ -483,7 +483,7 @@ namespace Megalo {
          "Modifies the text for a HUD widget. You can stitch values together dynamically.",
          "Set text for %1 to: %2.",
          {
-            OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
+            OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_text", "", {1}, 0)
@@ -493,7 +493,7 @@ namespace Megalo {
          "Modifies an unknown text field for a HUD widget. You can stitch values together dynamically.",
          "Set text for %1 to: %2.",
          {
-            OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
+            OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_text_2", "", {1}, 0)
@@ -503,8 +503,8 @@ namespace Megalo {
          "Modify meter options for a HUD widget.",
          "Set meter parameters for %1 to %2.",
          {
-            OpcodeArgBase("widget",     OpcodeArgValueWidget::factory),
-            OpcodeArgBase("parameters", OpcodeArgValueMeterParameters::factory),
+            OpcodeArgBase("widget",     OpcodeArgValueWidget::typeinfo),
+            OpcodeArgBase("parameters", OpcodeArgValueMeterParameters::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_meter_params", "", {1}, 0)
       ),
@@ -513,7 +513,7 @@ namespace Megalo {
          "Modify a HUD widget's icon.",
          "Set %1's icon to %2.",
          {
-            OpcodeArgBase("widget", OpcodeArgValueWidget::factory),
+            OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
             OpcodeArgBase("icon",   OpcodeArgValueIconIndex6Bits::factory),
          },
          OpcodeFuncToScriptMapping::make_function("set_icon", "", {1}, 0)
@@ -523,7 +523,7 @@ namespace Megalo {
          "Modify a HUD widget's icon.",
          "%3 widget %1 for player %2.",
          {
-            OpcodeArgBase("widget",  OpcodeArgValueWidget::factory),
+            OpcodeArgBase("widget",  OpcodeArgValueWidget::typeinfo),
             OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("visible", OpcodeArgValueConstBool::typeinfo, "Show", "Hide"),
          },
@@ -1075,7 +1075,6 @@ namespace Megalo {
          if (this->arguments[i]) {
             this->arguments[i]->configure_with_base(base[i]);
             if (!this->arguments[i]->read(stream)) {
-               printf("Failed to load argument %d for action %s.\n", i, this->function->name);
                auto& error = GameEngineVariantLoadError::get();
                error.state            = GameEngineVariantLoadError::load_state::failure;
                error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_actions;

@@ -251,6 +251,15 @@ namespace Megalo {
             }
             cobb::sprintf(out, "%s #%d", this->name, this->value);
          }
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override {
+            if (this->value == OpcodeArgValueBaseIndex::none || this->value < 0) {
+               out.write(u8"none");
+               return;
+            }
+            std::string temp;
+            cobb::sprintf(temp, "%u", this->value);
+            out.write(temp);
+         }
    };
 
    class OpcodeArgValueAllPlayers : public OpcodeArgValue { // one of the possibilities for team-or-player-vars.

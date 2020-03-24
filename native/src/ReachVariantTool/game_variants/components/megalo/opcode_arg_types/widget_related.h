@@ -11,9 +11,6 @@ namespace Megalo {
    class OpcodeArgValueWidget : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueWidget;
-         }
          //
       public:
          static constexpr int16_t index_of_none = -1;
@@ -27,6 +24,7 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
    };
 
    enum class MeterType {
@@ -37,9 +35,6 @@ namespace Megalo {
    class OpcodeArgValueMeterParameters : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueMeterParameters;
-         }
          //
       public:
          cobb::bitnumber<2, MeterType> type = MeterType::none;
@@ -50,5 +45,6 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
    };
 }
