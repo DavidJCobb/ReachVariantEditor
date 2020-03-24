@@ -92,4 +92,16 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueScalar>
    );
+   //
+   bool OpcodeArgValueScalar::is_const_zero() const noexcept { // bit hacky, but eh
+      if (!this->scope)
+         return false;
+      if (this->scope->index_type != VariableScopeIndicatorValue::index_type::generic)
+         return false;
+      if (this->scope->index_bitcount != 16)
+         return false;
+      if (this->index != 0)
+         return false;
+      return true;
+   }
 }

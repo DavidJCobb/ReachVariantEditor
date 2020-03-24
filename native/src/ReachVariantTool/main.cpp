@@ -18,30 +18,14 @@ int main(int argc, char *argv[]) {
 }
 
 //
-// TODO:
-//
-
-
-//
-//  - We need to decompile script variable declarations.
-//
-//  - We need to compile them, too. For that I think we'll need a special keyword -- perhaps 
-//    "declare".
-//
-
-
-//
-// UPDATED PLANS:
+// CURRENT PLANS:
 //
 //  - Begin bringing decompile code from the new system back to the old system. Redo index 
 //    types as needed.
 //
-//     - Forge labels
 //     - formatted strings and their tokens
 //     - player set
 //     - specific-variable
-//     - waypoint stuff
-//     - widget stuff
 //
 //  - Remove postprocessing.
 //
@@ -79,16 +63,16 @@ int main(int argc, char *argv[]) {
 //       namespace and give them shorter names, i.e. Megalo::types::number and such. We 
 //       should reorganize the old system to use the same convention.
 //
-//  - DO NOT FORGET to have the decompiler generate variable declarations.
-//
-//     - If we can modify references to indexed data to optionally use aliases if the 
-//       Decompiler& so wills, then so much the better; however, this would require 
-//       extending the generic variable handling so that a scope-indicator definition 
-//       can specify a custom decompile functor.
+//  - If we can modify references to indexed data to optionally use aliases if the 
+//    Decompiler& so wills, then so much the better; however, this would require extending 
+//    the generic variable handling so that a scope-indicator definition can specify a 
+//    custom decompile functor.
 //
 //  - When decompiling is done, begin porting the compiler work from the JavaScript 
 //    prototype.
 //
+
+// OLD PLANS BELOW
 
 //  - DECOMPILER
 //

@@ -7,5 +7,7 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValueScalar();
+         //
+         bool is_const_zero() const noexcept;
    };
 }
