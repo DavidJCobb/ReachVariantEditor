@@ -26,7 +26,7 @@ namespace Megalo {
       for_each_player_random, // iterates over all players in a random order; use for things like randomly picking initial zombies in infection
       for_each_team,
       for_each_object, // every MP object?
-      for_each_object_with_label,
+      for_each_object_with_label, // always sorted by ascending spawn sequence
    };
    enum class entry_type : uint8_t {
       normal,

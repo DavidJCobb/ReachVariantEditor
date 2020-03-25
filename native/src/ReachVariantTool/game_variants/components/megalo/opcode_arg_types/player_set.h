@@ -27,5 +27,6 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
    };
 }

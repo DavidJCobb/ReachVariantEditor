@@ -50,4 +50,30 @@ namespace Megalo {
       }
       cobb::sprintf(out, "unknown:%u", (uint32_t)this->set_type);
    }
+   void OpcodeArgValuePlayerSet::decompile(Decompiler& out, uint64_t flags) noexcept {
+      switch (this->set_type) {
+         case PlayerSetType::no_one:
+            out.write("no_one");
+            return;
+         case PlayerSetType::anyone:
+            out.write("anyone");
+            return;
+         case PlayerSetType::allies:
+            out.write("allies");
+            return;
+         case PlayerSetType::enemies:
+            out.write("enemies");
+            return;
+         case PlayerSetType::no_one_2:
+            out.write("no_one_2");
+            return;
+         case PlayerSetType::specific_player:
+            out.write("mod_player, ");
+            this->player.decompile(out, flags);
+            out.write(", ");
+            this->addOrRemove.decompile(out, flags);
+            return;
+      }
+
+   }
 }

@@ -58,7 +58,7 @@ namespace {
       VariableScopeIndicatorValue::make_game_value("game.score_to_win", "Score to Win", VariableScopeIndicatorValue::flags::is_readonly),
       VariableScopeIndicatorValue::make_game_value("game.unkF7A6", "Unknown-F7A6", VariableScopeIndicatorValue::flags::is_readonly),
       VariableScopeIndicatorValue::make_game_value("game.teams_enabled", "Teams Enabled", VariableScopeIndicatorValue::flags::is_readonly),
-      VariableScopeIndicatorValue::make_game_value("game.round_time_limit", "Round Time Limit", VariableScopeIndicatorValue::flags::is_readonly),
+      VariableScopeIndicatorValue::make_game_value("game.round_time_limit", "Round Time Limit", VariableScopeIndicatorValue::flags::is_readonly), // 0 = unlimited
       VariableScopeIndicatorValue::make_game_value("game.round_limit", "Round Limit", VariableScopeIndicatorValue::flags::is_readonly),
       VariableScopeIndicatorValue::make_game_value("game.misc_unk0_bit3", "Misc-Bit-3", VariableScopeIndicatorValue::flags::is_readonly), // TODO: IDENTIFY ME
       VariableScopeIndicatorValue::make_game_value("game.rounds_to_win", "Rounds to Win", VariableScopeIndicatorValue::flags::is_readonly),

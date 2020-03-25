@@ -177,7 +177,7 @@ namespace Megalo {
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
          },
-         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
       ),
       ActionFunction( // 16
          "CHUD Message",

@@ -19,7 +19,7 @@ namespace {
       if (which_type == &MegaloVariableScopeTeam) {
          if (which >= megalo_teams.count)
             return "invalid_team"; // not ideal... we should find a way to print the bad index
-         return megalo_teams[which];
+         return megalo_teams[which - 1]; // the team enum uses -1 for no_team but the other enums don't
       }
       if (which_type == &MegaloVariableScopeGlobal)
          return "global";
