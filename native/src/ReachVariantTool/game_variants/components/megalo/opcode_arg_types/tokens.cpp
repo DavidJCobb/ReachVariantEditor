@@ -45,13 +45,17 @@ namespace Megalo {
       if (this->value)
          this->value->to_string(out);
    }
+   void OpcodeStringToken::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
+      if (this->value)
+         this->value->decompile(out, flags);
+   }
    //
    //
    //
    OpcodeArgTypeinfo OpcodeArgValueStringTokens2::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
-      &OpcodeArgValueStringTokens2::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueStringTokens2>
    );
    //
    bool OpcodeArgValueStringTokens2::read(cobb::ibitreader& stream) noexcept {
@@ -104,5 +108,40 @@ namespace Megalo {
          out += temp;
       }
       cobb::sprintf(out, "format string ID %d and tokens: %s", this->stringIndex, out.c_str());
+   }
+   void OpcodeArgValueStringTokens2::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
+      ReachString* format = this->string;
+      if (format) {
+         std::string english = format->english();
+         //
+         // Escape ", \r, \n, etc.:
+         //
+         size_t size = english.size();
+         for (size_t i = 0; i < size; ++i) {
+            const char* replace = nullptr;
+            char c = english[i];
+            switch (c) {
+               case '\r': replace = "\\r"; break;
+               case '\n': replace = "\\n"; break;
+               case '"': replace = "\\\""; break;
+               case '\\': replace = "\\\\"; break;
+            }
+            if (replace) {
+               english.replace(i, 1, replace);
+               i += strlen(replace) - 1;
+            }
+         }
+         //
+         out.write('"');
+         out.write(english);
+         out.write('"');
+      } else {
+         out.write("none");
+      }
+      //
+      for (uint8_t i = 0; i < this->tokenCount; ++i) {
+         out.write(", ");
+         this->tokens[i].decompile(out, flags);
+      }
    }
 }

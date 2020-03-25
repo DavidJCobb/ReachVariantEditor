@@ -20,11 +20,6 @@ int main(int argc, char *argv[]) {
 //
 // CURRENT PLANS:
 //
-//  - Begin bringing decompile code from the new system back to the old system. Redo index 
-//    types as needed.
-//
-//     - formatted strings and their tokens
-//
 //  - Remove postprocessing.
 //
 //     - The game-variant-data constructor should fill all indexed lists with dummy elements. 
@@ -42,10 +37,6 @@ int main(int argc, char *argv[]) {
 //     - And now we don't need postprocessing!
 //
 //  = Ditch the new opcode argument system entirely and revert fully back to the old one.
-//
-//     - Remove all factory functions from OpcodeArgValue and its subclasses, and have them 
-//       all use typeinfos. Then, amend OpcodeArgBase to require typeinfos, and remove the 
-//       "band-aid" code from the read/write methods for Condition and Action.
 //
 //     - If we modify OpcodeArgValue::write to append to a cobb::bitarray128, then we can 
 //       use it both for saving to a file and for counting the total size of all loaded 

@@ -31,9 +31,10 @@ namespace Megalo {
          bool read(cobb::ibitreader& stream) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          void to_string(std::string& out) const noexcept;
+         void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept;
    };
 
-   class OpcodeArgValueStringTokens2 : OpcodeArgValue {
+   class OpcodeArgValueStringTokens2 : public OpcodeArgValue {
       //
       // An opcode argument which consists of a format string and zero or more tokens to 
       // insert into it. The format string is specified as an index into the string 
@@ -50,15 +51,11 @@ namespace Megalo {
       //
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueStringTokens2;
-         }
+         static constexpr int max_token_count = 2;
          //
       public:
-         static constexpr int max_token_count = 2;
-      public:
          mutable MegaloStringIndexOptional stringIndex = -1; // format string - index in scriptData::strings
-         MegaloStringRef           string;
+         MegaloStringRef string;
          cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[max_token_count];
          //
@@ -66,5 +63,6 @@ namespace Megalo {
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
    };
 }
