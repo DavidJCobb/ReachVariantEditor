@@ -50,7 +50,7 @@ namespace Megalo {
       else
          out = "all players";
    }
-   void OpcodeArgValuePlayerOrGroup::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValuePlayerOrGroup::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->variable)
          this->variable->decompile(out, flags);
       else

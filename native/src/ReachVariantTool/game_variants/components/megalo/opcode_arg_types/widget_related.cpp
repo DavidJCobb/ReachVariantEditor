@@ -55,7 +55,7 @@ namespace Megalo {
          cobb::sprintf(out, "HUD widget %u", f->index);
          return;
       }
-      void OpcodeArgValueWidget::decompile(Decompiler& out, uint64_t flags) noexcept {
+      void OpcodeArgValueWidget::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
          if (!this->value) {
             out.write("no_widget");
             return;
@@ -125,7 +125,7 @@ namespace Megalo {
                return;
          }
       }
-      void OpcodeArgValueMeterParameters::decompile(Decompiler& out, uint64_t flags) noexcept {
+      void OpcodeArgValueMeterParameters::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
          switch (this->type) {
             case MeterType::none:
                out.write("none");

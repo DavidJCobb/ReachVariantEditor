@@ -14,7 +14,7 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual void configure_with_base(const OpcodeArgBase& base) noexcept override;
    };
    class OpcodeArgValueConstSInt8 : public OpcodeArgValue {
@@ -27,7 +27,7 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
    };
 
 }

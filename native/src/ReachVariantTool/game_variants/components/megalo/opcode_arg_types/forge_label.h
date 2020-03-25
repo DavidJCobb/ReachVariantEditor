@@ -21,6 +21,6 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
    };
 }

@@ -121,7 +121,7 @@ namespace Megalo {
       if (out.empty()) // enum values should never be nameless but just in case
          cobb::sprintf(out, "%u", this->value);
    }
-   void OpcodeArgValueEnumSuperclass::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueEnumSuperclass::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       auto item = this->base.item(this->value);
       std::string temp;
       if (!item) {

@@ -24,17 +24,6 @@ int main(int argc, char *argv[]) {
 //    types as needed.
 //
 //     - formatted strings and their tokens
-//     - specific-variable
-//        - OpcodeArgValueObjectTimerVariable is only used in one place: to set which of an 
-//          object's local timer vars is used as its progress bar, and who can see that 
-//          progress bar. I think we should set that up as a new intrinsic akin to assignment 
-//          and comparison, with the syntax: object_var.timer_var.set_visibility(who)
-//
-//        - OpcodeArgValueObjectPlayerVariable is only used in one place: an opcode that is 
-//          incorrectly named: it does not act as a "boundary visibility filter," but instead 
-//          is responsible for showing hill ownership status in KOTH FFA. I've asked friends 
-//          if they can get me details; I also have KOTH decompiled (as much as is possible 
-//          at present) and can find the exact place this appears.
 //
 //  - Remove postprocessing.
 //

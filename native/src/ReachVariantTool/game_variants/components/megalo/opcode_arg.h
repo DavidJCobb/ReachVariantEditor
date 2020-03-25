@@ -144,58 +144,14 @@ namespace Megalo {
    class OpcodeArgBase {
       public:
          const char* name = "";
-         OpcodeArgValueFactory factory = nullptr;
          bool is_out_variable = false;
-         OpcodeArgTypeinfo* typeinfo = nullptr;
+         OpcodeArgTypeinfo& typeinfo;
          //
          const char* text_true  = "true";
          const char* text_false = "false";
          //
-         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, bool io = false) : name(n), factory(f), is_out_variable(io) {};
-         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, const char* tt, const char* tf) : name(n), typeinfo(&f), text_true(tt), text_false(tf) {}
-         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, bool io = false) : name(n), typeinfo(&f), is_out_variable(io) {};
-   };
-   //
-   class OpcodeArgValueBaseEnum : public OpcodeArgValue {
-      public:
-         OpcodeArgValueBaseEnum(const SmartEnum& base, uint32_t offset = 0) : 
-            baseEnum(base),
-            baseOffset(offset)
-         {}
-         //
-         const SmartEnum& baseEnum;
-         uint32_t baseOffset = 0; // not currently applied
-         //
-         uint32_t value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->value = stream.read_bits(this->baseEnum.index_bits_with_offset(this->baseOffset)) - this->baseOffset;
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value + this->baseOffset, this->baseEnum.index_bits_with_offset(this->baseOffset));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            this->baseEnum.to_string(out, this->value + this->baseOffset);
-         }
-   };
-   class OpcodeArgValueBaseFlags : public OpcodeArgValue {
-      public:
-         OpcodeArgValueBaseFlags(const SmartFlags& base) : base(base) {}
-         //
-         const SmartFlags& base;
-         uint32_t value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->value = stream.read_bits(this->base.bits());
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value, this->base.bits());
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            this->base.to_string(out, this->value);
-         }
+         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, const char* tt, const char* tf) : name(n), typeinfo(f), text_true(tt), text_false(tf) {}
+         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, bool io = false) : name(n), typeinfo(f), is_out_variable(io) {};
    };
 
    enum class index_quirk {
@@ -259,27 +215,6 @@ namespace Megalo {
             std::string temp;
             cobb::sprintf(temp, "%u", this->value);
             out.write(temp);
-         }
-   };
-
-   class OpcodeArgValueAllPlayers : public OpcodeArgValue { // one of the possibilities for team-or-player-vars.
-      public:
-         OpcodeArgValueAllPlayers() {};
-         //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueAllPlayers();
-         }
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            return;
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            out = "all players";
-         }
-         virtual variable_type get_variable_type() const noexcept {
-            return variable_type::not_a_variable;
          }
    };
 };

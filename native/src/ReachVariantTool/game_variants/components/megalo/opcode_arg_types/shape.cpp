@@ -88,7 +88,7 @@ namespace Megalo {
             return;
       }
    }
-   void OpcodeArgValueShape::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueShape::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       switch (this->shapeType) {
          case ShapeType::sphere:
             out.write("sphere, ");

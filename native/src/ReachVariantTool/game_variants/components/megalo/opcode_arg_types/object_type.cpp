@@ -1025,7 +1025,7 @@ namespace Megalo {
       if (out.empty()) // enum values should never be nameless but just in case
          cobb::sprintf(out, "%u", this->value);
    }
-   void OpcodeArgValueObjectType::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueObjectType::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->value < 0) {
          out.write("none");
          return;

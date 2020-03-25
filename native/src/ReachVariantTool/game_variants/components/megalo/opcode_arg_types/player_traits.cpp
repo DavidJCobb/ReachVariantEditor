@@ -42,7 +42,7 @@ namespace Megalo {
       }
       out = f->name->english();
    }
-   void OpcodeArgValuePlayerTraits::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValuePlayerTraits::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       std::string temp;
       cobb::sprintf(temp, "script_option[%u]", (this->value) ? this->value->index : this->index);
       out.write(temp);

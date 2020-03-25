@@ -21,7 +21,7 @@ namespace Megalo {
    void OpcodeArgValueVector3::to_string(std::string & out) const noexcept {
       cobb::sprintf(out, "(%d, %d, %d)", this->value.x, this->value.y, this->value.z);
    }
-   void OpcodeArgValueVector3::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueVector3::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       std::string temp;
       cobb::sprintf(temp, "(%d, %d, %d)", this->value.x, this->value.y, this->value.z);
       out.write(temp);

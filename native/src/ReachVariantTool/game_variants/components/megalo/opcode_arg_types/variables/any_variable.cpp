@@ -42,7 +42,7 @@ namespace Megalo {
       if (this->variable)
          this->variable->to_string(out);
    }
-   void OpcodeArgValueAnyVariable::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueAnyVariable::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->variable)
          this->variable->decompile(out, flags);
    }

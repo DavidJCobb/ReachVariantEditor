@@ -4,7 +4,7 @@
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerSet::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::can_be_multiple,
       { "no_one", "anyone", "allies", "enemies", "specific_player", "no_one_2" },
       & OpcodeArgValuePlayerSet::factory
    );
@@ -50,7 +50,7 @@ namespace Megalo {
       }
       cobb::sprintf(out, "unknown:%u", (uint32_t)this->set_type);
    }
-   void OpcodeArgValuePlayerSet::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValuePlayerSet::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       switch (this->set_type) {
          case PlayerSetType::no_one:
             out.write("no_one");

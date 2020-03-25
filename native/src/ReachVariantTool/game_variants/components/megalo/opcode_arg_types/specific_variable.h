@@ -8,9 +8,13 @@
 //
 
 namespace Megalo {
-   class OpcodeArgValueContextualVariableBaseClass : public OpcodeArgValue {
+   class OpcodeArgValueObjectTimerVariable : public OpcodeArgValue {
+      //
+      // The index of a timer variable scoped to any object. Typically, the object in question is 
+      // determined contextually, such as by another argument to the opcode containing this argument.
+      //
       public:
-         OpcodeArgValueContextualVariableBaseClass(variable_scope scope, variable_type type) : baseScope(scope), baseType(type) {}
+         static OpcodeArgTypeinfo typeinfo;
          //
          variable_scope baseScope;
          variable_type  baseType;
@@ -21,19 +25,7 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-   };
-   class OpcodeArgValueObjectTimerVariable : public OpcodeArgValueContextualVariableBaseClass {
-      //
-      // The index of a timer variable scoped to any object. Typically, the object in question is 
-      // determined contextually, such as by another argument to the opcode containing this argument.
-      //
-      public:
-         OpcodeArgValueObjectTimerVariable() : OpcodeArgValueContextualVariableBaseClass(variable_scope::object, variable_type::timer) {}
-         //
-         static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueObjectTimerVariable;
-         }
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
    };
 
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
@@ -42,9 +34,6 @@ namespace Megalo {
       //
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueObjectPlayerVariable();
-         }
          //
       public:
          OpcodeArgValueObject object;
@@ -53,6 +42,6 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
    };
 }

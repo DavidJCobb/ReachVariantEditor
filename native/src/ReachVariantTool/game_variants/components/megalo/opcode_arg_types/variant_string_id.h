@@ -14,7 +14,7 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader& stream) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          //
          static_assert(std::numeric_limits<decltype(value)>::max() >= Limits::max_string_ids, "You need to use a larger type to hold the value.");
    };

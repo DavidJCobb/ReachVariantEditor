@@ -62,7 +62,7 @@ namespace Megalo {
          "Modify waypoint visibility for %1: make visible to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
+            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_waypoint_visibility", "", {1}, 0)
       ),
@@ -88,11 +88,11 @@ namespace Megalo {
       ),
       ActionFunction( // 7
          "Set Object Displayed Timer",
-         "Set which timer an object displays.",
+         "Set which timer an object displays, of the timer variables scoped to that object.",
          "Have %1 display %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
+            OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_displayed_timer", "", {1}, 0)
       ),
@@ -134,7 +134,7 @@ namespace Megalo {
          "Apply %2 to %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::factory),
+            OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
       ),
@@ -144,7 +144,7 @@ namespace Megalo {
          "Only allow %2 to interact with %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
+            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_interact_permissions", "", {1}, 0)
       ),
@@ -154,7 +154,7 @@ namespace Megalo {
          "Only allow %2 to spawn at %1.",
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("who", OpcodeArgValuePlayerSet::factory),
+            OpcodeArgBase("who", OpcodeArgValuePlayerSet::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
       ),
@@ -174,8 +174,8 @@ namespace Megalo {
          "Have %1 display %3 as a progress bar for %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
-            OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::factory),
+            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
+            OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
       ),
@@ -186,7 +186,7 @@ namespace Megalo {
          {
             OpcodeArgBase("who",   OpcodeArgValuePlayerOrGroup::typeinfo),
             OpcodeArgBase("sound", OpcodeArgValueSound::typeinfo),
-            OpcodeArgBase("text",  OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",  OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("show_message_to", "", {0, 1, 2}, OpcodeFuncToScriptMapping::game_namespace)
       ),
@@ -205,7 +205,7 @@ namespace Megalo {
          "This trigger action does nothing.",
          "Do nothing. (Unused message: %1)",
          {
-            OpcodeArgBase("text", OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text", OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("deprecated_18", "", {0})
       ),
@@ -224,7 +224,7 @@ namespace Megalo {
          "Branches execution to another trigger.",
          "Execute trigger %1.",
          {
-            OpcodeArgBase("trigger", OpcodeArgValueTrigger::factory),
+            OpcodeArgBase("trigger", OpcodeArgValueTrigger::typeinfo),
          },
          OpcodeFuncToScriptMapping()
       ),
@@ -241,7 +241,7 @@ namespace Megalo {
          "Only allow %2 to see %1's shape.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::factory),
+            OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_shape_visibility", "", {1}, 0)
       ),
@@ -484,7 +484,7 @@ namespace Megalo {
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_text", "", {1}, 0)
       ),
@@ -494,7 +494,7 @@ namespace Megalo {
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_text_2", "", {1}, 0)
       ),
@@ -514,7 +514,7 @@ namespace Megalo {
          "Set %1's icon to %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("icon",   OpcodeArgValueIconIndex6Bits::factory),
+            OpcodeArgBase("icon",   OpcodeArgValueIconIndex6Bits::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_icon", "", {1}, 0)
       ),
@@ -556,7 +556,7 @@ namespace Megalo {
          "Set %1's display text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_display_text", "", {1}, 0)
       ),
@@ -586,7 +586,7 @@ namespace Megalo {
          "Set the objective title for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
       ),
@@ -596,7 +596,7 @@ namespace Megalo {
          "Set the objective description for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_text", "", {1}, 0)
       ),
@@ -606,7 +606,7 @@ namespace Megalo {
          "Set the objective icon for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("icon",   OpcodeArgValueIconIndex7Bits::factory),
+            OpcodeArgBase("icon",   OpcodeArgValueIconIndex7Bits::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
       ),
@@ -721,7 +721,7 @@ namespace Megalo {
          "Switch %1 to %2.",
          {
             OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("palette", OpcodeArgValueRequisitionPalette::factory),
+            OpcodeArgBase("palette", OpcodeArgValueRequisitionPalette::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_requisition_palette", "", {1}, 0)
       ),
@@ -850,7 +850,7 @@ namespace Megalo {
          "Carry out an unknown action (81) with number %1 and text: %2.",
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::factory),
+            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("unknown_81", "", {0, 1})
       ),
@@ -1027,9 +1027,9 @@ namespace Megalo {
          "Used by KOTH FFA to set a Hill's shape color to the player that controls the Hill. Takes a single argument consisting of a globally-scoped object and a player member on that object.",
          "Make an object's boundary visible to one of its player variables?: %1.",
          {
-            OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::factory),
+            OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_player_member_color_to_object", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
+         OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_color_from_player_member", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
       ),
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];
@@ -1066,11 +1066,7 @@ namespace Megalo {
       size_t argCount = base.size();
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
-         auto factory = base[i].factory;
-         #pragma region HACKHACKHACK
-            if (!factory && base[i].typeinfo)
-               factory = base[i].typeinfo->factory;
-         #pragma endregion
+         auto factory = base[i].typeinfo.factory;
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
             this->arguments[i]->configure_with_base(base[i]);
@@ -1117,11 +1113,6 @@ namespace Megalo {
       size_t argCount = base.size();
       for (size_t i = 0; i < argCount; i++) {
          auto arg = this->arguments[i];
-         auto factory = base[i].factory;
-         #pragma region HACKHACKHACK
-            if (!factory && base[i].typeinfo)
-               factory = base[i].typeinfo->factory;
-         #pragma endregion
          arg->write(stream);
       }
    }

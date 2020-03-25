@@ -56,7 +56,7 @@ namespace Megalo {
       }
       out = f->name->english();
    }
-   void OpcodeArgValueForgeLabel::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueForgeLabel::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachForgeLabel* f = this->value;
       std::string temp;
       if (!f) {

@@ -224,11 +224,7 @@ namespace Megalo {
       size_t argCount = base.size();
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
-         auto factory = base[i].factory;
-         #pragma region HACKHACKHACK
-            if (!factory && base[i].typeinfo)
-               factory = base[i].typeinfo->factory;
-         #pragma endregion
+         auto  factory = base[i].typeinfo.factory;
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
             if (!this->arguments[i]->read(stream)) {
@@ -256,9 +252,6 @@ namespace Megalo {
       return true;
    }
    void Condition::write(cobb::bitwriter& stream) const noexcept {
-      #if _DEBUG
-         printf("Saving condition: %s\n", this->debug_str.c_str());
-      #endif
       {
          size_t index = 0;
          auto&  list   = conditionFunctionList;
@@ -280,16 +273,7 @@ namespace Megalo {
       size_t argCount = base.size();
       assert(this->arguments.size() == argCount && "A condition didn't have enough arguments during save!");
       for (size_t i = 0; i < argCount; i++) {
-         auto* arg     = this->arguments[i];
-         auto  factory = base[i].factory;
-         #pragma region HACKHACKHACK
-            if (!factory && base[i].typeinfo)
-               factory = base[i].typeinfo->factory;
-         #pragma endregion
-         assert(arg && "A condition's argument is nullptr during save!");
-         //
-         // Now we can serialize the argument value.
-         //
+         auto* arg = this->arguments[i];
          arg->write(stream);
       }
    }

@@ -18,7 +18,7 @@ namespace Megalo {
    void OpcodeArgValueConstBool::to_string(std::string& out) const noexcept {
       out = this->value ? this->baseStringTrue : this->baseStringFalse;
    }
-   void OpcodeArgValueConstBool::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueConstBool::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->value)
          out.write("true");
       else
@@ -49,7 +49,7 @@ namespace Megalo {
    void OpcodeArgValueConstSInt8::to_string(std::string& out) const noexcept {
       cobb::sprintf(out, "%d", this->value);
    }
-   void OpcodeArgValueConstSInt8::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueConstSInt8::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       std::string temp;
       cobb::sprintf(temp, "%d", this->value);
       out.write(temp);

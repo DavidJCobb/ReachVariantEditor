@@ -82,7 +82,7 @@ namespace Megalo {
          cobb::sprintf(out, "%s with number %s", out.c_str(), temp.c_str());
       }
    }
-   void OpcodeArgValueWaypointIcon::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void OpcodeArgValueWaypointIcon::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->icon < 0) {
          out.write("none");
          return;

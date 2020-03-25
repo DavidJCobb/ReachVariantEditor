@@ -152,7 +152,7 @@ namespace Megalo {
          return;
       _default_stringify(this->scope->format_english, *this, out);
    }
-   void Variable::decompile(Decompiler& out, uint64_t flags) noexcept {
+   void Variable::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       std::string code;
       if (!this->scope)
          return; // TODO: add some way to indicate failure
