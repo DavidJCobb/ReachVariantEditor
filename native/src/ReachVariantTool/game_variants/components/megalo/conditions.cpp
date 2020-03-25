@@ -129,7 +129,7 @@ namespace Megalo {
          "%1 %v label %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("has_forge_label", "", {1}, 0),
          "has", "does not have"

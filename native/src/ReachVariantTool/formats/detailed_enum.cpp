@@ -16,3 +16,13 @@ QString DetailedEnumValue::get_friendly_name() const noexcept {
    }
    return "";
 }
+
+int DetailedEnum::lookup(const char* name) const noexcept {
+   size_t s = this->size();
+   for (size_t i = 0; i < s; ++i) {
+      const auto& item = this->values[i];
+      if (item.name == name)
+         return i;
+   }
+   return -1;
+}

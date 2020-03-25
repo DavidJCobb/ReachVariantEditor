@@ -10,6 +10,16 @@ namespace Megalo {
          using string_type = QString;
          using char_type   = QChar;
          //
+         struct flags {
+            flags() = delete;
+            enum type : uint64_t {
+               none = 0,
+               //
+               is_call_context = 0x000000000000001,
+            };
+         };
+         using flags_t = std::underlying_type_t<flags::type>;
+         //
       protected:
          string_type  current_indent;
          uint8_t      indent_size = 3;

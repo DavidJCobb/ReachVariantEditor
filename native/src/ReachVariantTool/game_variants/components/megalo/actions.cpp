@@ -40,7 +40,7 @@ namespace Megalo {
             OpcodeArgBase("type",        OpcodeArgValueObjectType::typeinfo),
             OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
             OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("label",       OpcodeArgValueForgeLabel::factory),
+            OpcodeArgBase("label",       OpcodeArgValueForgeLabel::typeinfo),
             OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
             OpcodeArgBase("offset",      OpcodeArgValueVector3::typeinfo),
             OpcodeArgBase("name",        OpcodeArgValueVariantStringID::typeinfo),
@@ -1002,20 +1002,20 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_scenario_interpolator_state", "", {0, 1})
       ),
       ActionFunction( // 96
-         "Unknown-96",
+         "Get Random Object With Label",
          "Used by Infection to move the active Haven. Will not select the same Haven twice in a row; if the map has only one Haven, then the containing trigger runs on every frame and spams \"Hill Moved\" announcements.",
-         "Carry out some unknown (96) action with %1 and %3 and store the result in %2.",
+         "Set %2 to a random object with label %3, excluding %1 as a possible result.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
-            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
+            OpcodeArgBase("exclude", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("result",  OpcodeArgValueObject::typeinfo, true),
+            OpcodeArgBase("label",   OpcodeArgValueForgeLabel::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_96", "", {2, 0})
+         OpcodeFuncToScriptMapping::make_function("get_random_object", "", {2, 0})
       ),
       ActionFunction( // 97
          "Unknown-97",
          "",
-         "Carry out some unknown (96) action with %1 and %2.",
+         "Carry out some unknown (97) action with %1 and %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
@@ -1023,13 +1023,13 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("unknown_97", "", {1}, 0)
       ),
       ActionFunction( // 98
-         "Set Boundary Visibility Filter", // TODO: figure out what this even means; current speculation is based on Halo 4's known actions
-         "",
+         "Set Shape Owner",
+         "Used by KOTH FFA to set a Hill's shape color to the player that controls the Hill. Takes a single argument consisting of a globally-scoped object and a player member on that object.",
          "Make an object's boundary visible to one of its player variables?: %1.",
          {
             OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::factory),
          },
-         OpcodeFuncToScriptMapping::make_function("set_shape_visibility_filter", "", {0}, 0)
+         OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_player_member_color_to_object", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
       ),
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];

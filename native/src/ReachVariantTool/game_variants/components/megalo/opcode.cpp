@@ -39,7 +39,7 @@ namespace Megalo {
                if (ac == OpcodeFuncToScriptMapping::game_namespace) {
                   out.write("game");
                } else {
-                  args[ac]->decompile(out);
+                  args[ac]->decompile(out, Decompiler::flags::is_call_context);
                }
                out.write('.');
             }

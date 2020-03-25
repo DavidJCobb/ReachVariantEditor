@@ -51,6 +51,7 @@ namespace Megalo {
          int8_t       arg_index_mappings[8] = { no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument }; // map native argument order to script argument order
          flags_type   flags = 0;
          OpcodeBase*  owner = nullptr;
+         variable_scope double_context_type = variable_scope::not_a_scope; // use when the opcode is (non_global_scope.var.opcode()) where the types of both the scope and the variable are significant
          //
          OpcodeFuncToScriptMapping() {}
          OpcodeFuncToScriptMapping(mapping_type t, std::initializer_list<int8_t> args) : type(t) {
@@ -65,6 +66,11 @@ namespace Megalo {
             instance.secondary_name = sn;
             instance.arg_context    = ct;
             instance.flags          = flags;
+            return instance;
+         }
+         static OpcodeFuncToScriptMapping make_doubly_contextual_call(const char* pn, const char* sn, std::initializer_list<int8_t> args, variable_scope dc, int8_t ct = no_context, flags_type flags = 0) {
+            auto instance = OpcodeFuncToScriptMapping::make_function(pn, sn, args, ct, flags);
+            instance.double_context_type = dc;
             return instance;
          }
          static OpcodeFuncToScriptMapping make_getter(const char* pn, int8_t ct) {

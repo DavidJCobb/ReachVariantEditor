@@ -8,9 +8,6 @@ namespace Megalo {
    class OpcodeArgValueForgeLabel : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValueForgeLabel;
-         }
          //
       public:
          static constexpr int16_t index_of_none = -1;

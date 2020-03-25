@@ -114,4 +114,5 @@ struct DetailedEnum {
          return nullptr;
       return &this->values[i];
    }
+   int lookup(const char* name) const noexcept;
 };

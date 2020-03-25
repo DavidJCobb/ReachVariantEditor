@@ -82,4 +82,17 @@ namespace Megalo {
       }
       cobb::sprintf(out, "%s.Player[%d]", out.c_str(), this->playerIndex);
    }
+   void OpcodeArgValueObjectPlayerVariable::decompile(Decompiler& out, uint64_t flags) noexcept {
+      if (flags & Decompiler::flags::is_call_context) {
+         this->object.decompile(out);
+         return;
+      }
+      if (this->playerIndex < 0) {
+         out.write("none");
+         return;
+      }
+      std::string temp;
+      cobb::sprintf(temp, "%u", this->playerIndex);
+      out.write(temp);
+   }
 }

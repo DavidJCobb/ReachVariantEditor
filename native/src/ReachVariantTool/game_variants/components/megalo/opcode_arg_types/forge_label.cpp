@@ -4,7 +4,7 @@ namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueForgeLabel::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
-      &OpcodeArgValueForgeLabel::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueForgeLabel>
    );
    //
    bool OpcodeArgValueForgeLabel::read(cobb::ibitreader& stream) noexcept {
