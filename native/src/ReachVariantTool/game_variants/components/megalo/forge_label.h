@@ -3,13 +3,14 @@
 #include "../../../helpers/bitnumber.h"
 #include "../../../helpers/bitwriter.h"
 #include "../../../formats/localized_string_table.h"
+#include "../../../formats/indexed_lists.h"
 #include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
 
 namespace Megalo {
-   class ReachForgeLabel : public cobb::indexed_refcountable {
+   class ReachForgeLabel : public indexed_list_item {
       //
       // NOTES: This Forge Label's (index) field must be updated at the start of the game variant save process so trigger opcode arguments know what index to refer to each label with
       //

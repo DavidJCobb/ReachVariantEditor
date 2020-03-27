@@ -20,7 +20,16 @@ int main(int argc, char *argv[]) {
 //
 // CURRENT PLANS:
 //
-//  - Remove postprocessing.
+//  - Remove postprocessing for trigger content.
+//
+//     - Traits
+//     - Options
+//     - Strings
+//        - Traits and options still need postprocessing for these unless we just create 
+//          string instances on demand and then fill them during load.
+//     - Stats [loads after triggers]
+//     - HUD widgets
+//     - Forge labels
 //
 //     - The game-variant-data constructor should fill all indexed lists with dummy elements. 
 //       Dummy elements need to have a flag; when we load the "real" elements, strip the flag 
@@ -33,6 +42,11 @@ int main(int argc, char *argv[]) {
 //
 //     - Pass the game-variant-data down through the load process. Set up indexed-object 
 //       pointers during load.
+//
+//        - Easiest way to start is to do a find-and-replace on all OpcodeArgValue::read 
+//          and subclass methods just so we can get the game variant in, and then modify 
+//          the opcode load code to pass it. Then, we can update each individual type one 
+//          by one until they're all done.
 //
 //     - And now we don't need postprocessing!
 //
@@ -59,6 +73,9 @@ int main(int argc, char *argv[]) {
 //
 //  - When decompiling is done, begin porting the compiler work from the JavaScript 
 //    prototype.
+//
+//  - Format string arguments: use QStrings so we have UTF-8 support, and modify the 
+//    escaping code in the decompiler to do UTF-8 printable checks.
 //
 
 // OLD PLANS BELOW

@@ -1,15 +1,18 @@
 #pragma once
 #include <QComboBox>
-#include "../../game_variants/data/mp_object_types.h"
+#include "../../game_variants/data/object_types.h"
 
 class MPObjectTypeCombobox : public QComboBox {
    Q_OBJECT
    public:
       MPObjectTypeCombobox(QWidget* parent = nullptr) : QComboBox(parent) {
-         auto& list = MPObjectTypeList::get();
+         auto& list = Megalo::enums::object_type;
          for (uint32_t i = 0; i < list.size(); i++) {
             auto& definition = list[i];
-            this->addItem(QString::fromLatin1(definition.name.c_str()), i);
+            auto  name = definition.get_friendly_name();
+            if (name.isEmpty())
+               name = QString::fromLatin1(definition.name.c_str());
+            this->addItem(name, i);
          }
          auto m = this->model();
          if (m)

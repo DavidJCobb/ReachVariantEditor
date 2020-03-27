@@ -107,6 +107,7 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_constants.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_flags.cpp" />
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_indices.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\forge_label.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\incident.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\object_type.cpp" />
@@ -137,9 +138,7 @@
     <ClCompile Include="game_variants\components\player_traits.cpp" />
     <ClCompile Include="game_variants\components\teams.cpp" />
     <ClCompile Include="game_variants\components\tu1_options.cpp" />
-    <ClCompile Include="game_variants\data\mp_incidents.cpp" />
-    <ClCompile Include="game_variants\data\mp_object_names.cpp" />
-    <ClCompile Include="game_variants\data\mp_object_types.cpp" />
+    <ClCompile Include="game_variants\data\object_types.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
@@ -160,6 +159,7 @@
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
+    <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
     <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
     <ClCompile Include="ui\options_window.cpp" />
@@ -216,6 +216,7 @@
     <QtUic Include="ui\script_editor\page_map_perms.ui" />
     <QtUic Include="ui\script_editor\page_metadata_strings.ui" />
     <QtUic Include="ui\script_editor\page_player_rating_params.ui" />
+    <QtUic Include="ui\script_editor\page_req_obj_types.ui" />
     <QtUic Include="ui\script_editor\page_script_code.ui" />
     <QtUic Include="ui\script_editor\page_script_options.ui" />
     <QtUic Include="ui\script_editor\page_script_stats.ui" />
@@ -231,6 +232,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\incident.h" />
@@ -248,6 +250,7 @@
     <ClInclude Include="formats\detailed_enum.h" />
     <ClInclude Include="formats\detailed_flags.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variant_string_id.h" />
+    <ClInclude Include="game_variants\data\object_types.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
@@ -281,9 +284,6 @@
     <QtMoc Include="ui\main_window\page_multiplayer_settings_scripted.h" />
     <QtMoc Include="ui\main_window\page_loadout_palette.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h" />
-    <ClInclude Include="game_variants\data\mp_incidents.h" />
-    <ClInclude Include="game_variants\data\mp_object_names.h" />
-    <ClInclude Include="game_variants\data\mp_object_types.h" />
     <ClInclude Include="helpers\memory.h" />
     <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\refcounting.h" />
@@ -355,6 +355,7 @@
     <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
+    <QtMoc Include="ui\script_editor\page_req_obj_types.h" />
     <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />

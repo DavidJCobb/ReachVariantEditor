@@ -129,6 +129,14 @@ namespace Megalo {
             if (replace) {
                english.replace(i, 1, replace);
                i += strlen(replace) - 1;
+               continue;
+            }
+            if (c < '!' && c != ' ') { // TODO: UTF-8 printable char check instead of this
+               std::string temp;
+               cobb::sprintf(temp, "\\X%02X", (uint32_t)c);
+               english.replace(i, 1, temp);
+               i += temp.size() - 1;
+               continue;
             }
          }
          //

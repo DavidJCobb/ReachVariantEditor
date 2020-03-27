@@ -16,8 +16,8 @@ namespace {
          [](GameVariantDataMultiplayer* mp, uint32_t index) {
             auto& list = mp->scriptData.options;
             if (index < list.size())
-               return (cobb::indexed_refcountable*) &list[index];
-            return (cobb::indexed_refcountable*) nullptr;
+               return (indexed_list_item*) &list[index];
+            return (indexed_list_item*) nullptr;
          },
          VariableScopeIndicatorValue::flags::is_readonly
       ),
@@ -34,8 +34,8 @@ namespace {
          [](GameVariantDataMultiplayer* mp, uint32_t index) {
             auto& list = mp->scriptContent.stats;
             if (index < list.size())
-               return (cobb::indexed_refcountable*) &list[index];
-            return (cobb::indexed_refcountable*) nullptr;
+               return (indexed_list_item*) &list[index];
+            return (indexed_list_item*) nullptr;
          },
          VariableScopeIndicatorValue::flags::is_readonly
       ),
@@ -47,8 +47,8 @@ namespace {
          [](GameVariantDataMultiplayer* mp, uint32_t index) {
             auto& list = mp->scriptContent.stats;
             if (index < list.size())
-               return (cobb::indexed_refcountable*) &list[index];
-            return (cobb::indexed_refcountable*) nullptr;
+               return (indexed_list_item*) &list[index];
+            return (indexed_list_item*) nullptr;
          },
          VariableScopeIndicatorValue::flags::is_readonly
       ),

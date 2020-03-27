@@ -4,6 +4,7 @@
 #include "../../variables_and_scopes.h"
 #include "../../opcode_arg.h"
 #include "../../../../helpers/bitwise.h"
+#include "../../../../formats/indexed_lists.h"
 
 /*
 // MEGALO VARIABLES
@@ -68,7 +69,7 @@ namespace Megalo {
          };
          using flags_t = std::underlying_type_t<flags::type>;
          //
-         using postprocess_functor_t = std::function<cobb::indexed_refcountable* (GameVariantDataMultiplayer* mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
+         using postprocess_functor_t = std::function<indexed_list_item* (GameVariantDataMultiplayer* mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
          //
          enum class index_type : uint8_t {
             none, // there is no "index" value
@@ -153,7 +154,7 @@ namespace Megalo {
          const VariableScopeIndicatorValue* scope = nullptr;
          uint8_t which = 0;
          int16_t index = 0;
-         cobb::refcount_ptr<cobb::indexed_refcountable> object;
+         cobb::refcount_ptr<indexed_list_item> object;
          //
          Variable(const VariableScopeIndicatorValueList& t) : type(t) {}
          //

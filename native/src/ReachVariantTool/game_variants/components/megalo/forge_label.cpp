@@ -2,6 +2,8 @@
 //
 namespace Megalo {
    void ReachForgeLabel::read(cobb::ibitreader& stream) noexcept {
+      this->is_defined = true;
+      //
       this->nameIndex.read(stream);
       this->requirements.read(stream);
       if (this->requires_object_type())

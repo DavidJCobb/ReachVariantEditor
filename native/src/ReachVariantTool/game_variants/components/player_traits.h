@@ -4,6 +4,7 @@
 #include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
+#include "../../formats/indexed_lists.h"
 #include <QObject>
 
 namespace reach {
@@ -330,7 +331,7 @@ class ReachPlayerTraits {
       #endif
 };
 
-class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::indexed_refcountable {
+class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_item {
    public:
       MegaloStringRef name;
       MegaloStringRef desc;
@@ -338,6 +339,8 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::indexed_r
       MegaloStringIndex descIndex;
       //
       void read(cobb::ibitreader& stream) noexcept {
+         this->is_defined = true;
+         //
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);

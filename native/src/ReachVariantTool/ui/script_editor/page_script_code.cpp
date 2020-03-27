@@ -14,6 +14,14 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
       if (!mp)
          return;
       Megalo::Decompiler decompiler(*variant);
+      {
+         auto& declarations = mp->scriptContent.variables;
+         declarations.global.decompile(decompiler);
+         declarations.player.decompile(decompiler);
+         declarations.object.decompile(decompiler);
+         declarations.team.decompile(decompiler);
+         decompiler.write_line("");
+      }
       auto& triggers = mp->scriptContent.triggers;
       for (auto& trigger : triggers) {
          if (trigger.entryType == Megalo::entry_type::subroutine)

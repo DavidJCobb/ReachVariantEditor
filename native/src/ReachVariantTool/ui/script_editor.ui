@@ -215,7 +215,7 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QListWidget" name="reqObjectTypeList"/>
+        <widget class="ScriptEditorPageReqObjTypes" name="pageContentReqObjTypes" native="true"/>
        </item>
       </layout>
      </widget>
@@ -377,6 +377,12 @@
    <class>ScriptEditorPageScriptCode</class>
    <extends>QWidget</extends>
    <header>script_editor/page_script_code.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScriptEditorPageReqObjTypes</class>
+   <extends>QWidget</extends>
+   <header>script_editor/page_req_obj_types.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

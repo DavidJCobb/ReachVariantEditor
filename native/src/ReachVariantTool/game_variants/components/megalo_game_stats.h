@@ -2,10 +2,11 @@
 #include "../../helpers/bitnumber.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
+#include "../../formats/indexed_lists.h"
 #include "../../helpers/refcounting.h"
 #include "../../helpers/stream.h"
 
-class ReachMegaloGameStat : public cobb::indexed_refcountable {
+class ReachMegaloGameStat : public indexed_list_item {
    public:
       enum class Format : uint8_t {
          number,

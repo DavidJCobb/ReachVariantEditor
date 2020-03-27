@@ -32,6 +32,8 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
 }
 
 void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
+   this->is_defined = true;
+   //
    this->nameIndex.read(stream);
    this->descIndex.read(stream);
    this->isRange.read(stream);

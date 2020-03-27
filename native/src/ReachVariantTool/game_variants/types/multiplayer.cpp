@@ -177,19 +177,6 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          }
          trigger->postprocess_opcodes(conditions, actions);
       }
-      /*//
-      printf("\nFull script content:");
-      for (size_t i = 0; i < triggers.size(); ++i) {
-         auto& trigger = triggers[i];
-         if (trigger.entryType == Megalo::entry_type::subroutine)
-            continue;
-         printf("\nTRIGGER #%d:\n", i);
-         std::string out;
-         trigger.to_string(triggers, out);
-         printf(out.c_str());
-      }
-      printf("\n");
-      //*/
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       this->scriptContent.stats.reserve(count);

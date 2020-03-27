@@ -3,6 +3,7 @@
 #include "../../helpers/bitnumber.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
+#include "../../formats/indexed_lists.h"
 #include "../../helpers/refcounting.h"
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
@@ -36,7 +37,7 @@ class ReachMegaloOptionValueEntry {
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept;
 };
 
-class ReachMegaloOption : public cobb::indexed_refcountable {
+class ReachMegaloOption : public indexed_list_item {
    public:
       MegaloStringRef name;
       MegaloStringRef desc;

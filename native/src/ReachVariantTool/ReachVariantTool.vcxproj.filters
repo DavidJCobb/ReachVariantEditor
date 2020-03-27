@@ -166,15 +166,6 @@
     <ClCompile Include="game_variants\components\tu1_options.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\data\mp_object_types.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\data\mp_object_names.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game_variants\data\mp_incidents.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\widgets\option_toggles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -322,6 +313,15 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\object_type.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_indices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\data\object_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\script_editor\page_req_obj_types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -432,6 +432,9 @@
     <QtMoc Include="ui\widgets\LoadoutForm.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\script_editor\page_req_obj_types.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
@@ -513,6 +516,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\widgets\LoadoutForm.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor\page_req_obj_types.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -711,15 +717,6 @@
     <ClInclude Include="ui\main_window\widget_macros_update_end.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\data\mp_object_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\data\mp_object_names.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\data\mp_incidents.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -811,6 +808,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\object_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="formats\indexed_lists.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\data\object_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
