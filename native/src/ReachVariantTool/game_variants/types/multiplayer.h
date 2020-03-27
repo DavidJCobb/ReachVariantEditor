@@ -28,8 +28,13 @@
 #include "../components/tu1_options.h"
 
 class GameVariantDataMultiplayer : public GameVariantData {
+   protected:
+      void _set_up_indexed_dummies();
+      void _tear_down_indexed_dummies();
+      //
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
+      //
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
       virtual bool read(cobb::reader&) noexcept override;
       virtual void write(cobb::bit_or_byte_writer&) noexcept override;

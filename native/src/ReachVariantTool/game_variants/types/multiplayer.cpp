@@ -10,12 +10,15 @@
 #include "../../helpers/sha1.h"
 
 #include "../errors.h"
+#include "../warnings.h"
 
 bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    auto& error_report = GameEngineVariantLoadError::get();
    error_report.reset();
+   GameEngineVariantLoadWarningLog::get().clear();
    //
    auto& stream = reader.bits;
+   this->_set_up_indexed_dummies();
    //
    stream.read(this->encodingVersion);
    stream.read(this->engineVersion);
@@ -80,16 +83,14 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       int count;
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_traits));
-      t.reserve(count);
       for (int i = 0; i < count; i++) {
-         auto& traits = *t.emplace_back();
+         auto& traits = t[i];
          traits.read(stream);
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_options));
-      o.reserve(count);
       for (int i = 0; i < count; i++) {
-         auto& option = *o.emplace_back();
+         auto& option = o[i];
          option.read(stream);
       }
       //
@@ -179,9 +180,8 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
-      this->scriptContent.stats.reserve(count);
       for (size_t i = 0; i < count; i++) {
-         auto& stat = *this->scriptContent.stats.emplace_back();
+         auto& stat = this->scriptContent.stats[i];
          stat.read(stream);
          stat.postprocess_string_indices(this->scriptData.strings);
       }
@@ -196,10 +196,9 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       {  // HUD widget declarations
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));
          auto& widgets = this->scriptContent.widgets;
-         widgets.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            auto widget = widgets.emplace_back();
-            widget->read(stream);
+            auto& widget = widgets[i];
+            widget.read(stream);
          }
       }
       if (!this->scriptContent.entryPoints.read(stream))
@@ -209,12 +208,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       {  // Forge labels
          auto&  list  = this->scriptContent.forgeLabels;
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
-         list.reserve(count);
          for (size_t i = 0; i < count; i++) {
-            auto label = list.emplace_back();
-            label->index = i;
-            label->read(stream);
-            label->postprocess_string_indices(this->scriptData.strings);
+            auto& label = list[i];
+            label.read(stream);
+            label.postprocess_string_indices(this->scriptData.strings);
          }
       }
    }
@@ -233,6 +230,9 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       return false;
    }
    error_report.state = GameEngineVariantLoadError::load_state::success;
+   //
+   this->_tear_down_indexed_dummies();
+   //
    {  // Postprocess
       for (auto& trigger : this->scriptContent.triggers) {
          trigger.postprocess(this);
@@ -427,4 +427,52 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
          stat.postprocess_string_indices(stringTable);
    }
    return clone;
+}
+//
+namespace {
+   template<typename list_type> void __set_up_indexed_dummies(list_type& list) {
+      size_t max = list.max_count;
+      list.reserve(max);
+      for (size_t i = 0; i < max; i++)
+         list.emplace_back();
+   }
+   template<typename list_type> bool __tear_down_indexed_dummies(QString& warning, list_type& list, QString item_format) {
+      bool   fails = false;
+      size_t max   = list.max_count;
+      for (size_t i = max - 1; i >= 0; --i) {
+         auto& item = list[i];
+         if (item.is_defined)
+            break;
+         if (item.get_refcount()) {
+            fails = true;
+            warning += item_format.arg(i);
+            item.is_defined = true;
+            continue;
+         }
+         list.erase(i);
+      }
+      return fails;
+   }
+}
+void GameVariantDataMultiplayer::_set_up_indexed_dummies() {
+   __set_up_indexed_dummies(this->scriptData.traits);
+   __set_up_indexed_dummies(this->scriptData.options);
+   __set_up_indexed_dummies(this->scriptContent.stats);
+   __set_up_indexed_dummies(this->scriptContent.widgets);
+   __set_up_indexed_dummies(this->scriptContent.forgeLabels);
+}
+void GameVariantDataMultiplayer::_tear_down_indexed_dummies() {
+   QString warning = QObject::tr("The gametype script contained references to the following undefined objects. These objects will be created with blank data.\n", "out-of-bounds index warning on load");
+   bool should_log_warning = false;
+   //
+   should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptData.traits,         QObject::tr("\nScripted player trait set #%1", "out-of-bounds index warning on load"));
+   should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptData.options,        QObject::tr("\nScripted option #%1", "out-of-bounds index warning on load"));
+   should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.stats,       QObject::tr("\nScripted stat #%1", "out-of-bounds index warning on load"));
+   should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.widgets,     QObject::tr("\nScripted HUD widget #%1", "out-of-bounds index warning on load"));
+   should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.forgeLabels, QObject::tr("\nForge label #%1", "out-of-bounds index warning on load"));
+   //
+   // TODO: TELL THE STRING TABLE TO DOUBLE-CHECK THAT NONE OF ITS ELEMENTS ARE STILL DUMMY-FLAGGED
+   //
+   if (should_log_warning)
+      GameEngineVariantLoadWarningLog::get().push_back(warning);
 }

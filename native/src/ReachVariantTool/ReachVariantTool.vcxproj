@@ -251,6 +251,7 @@
     <ClInclude Include="formats\detailed_flags.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variant_string_id.h" />
     <ClInclude Include="game_variants\data\object_types.h" />
+    <ClInclude Include="game_variants\warnings.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />

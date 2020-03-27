@@ -816,6 +816,9 @@
     <ClInclude Include="game_variants\data\object_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\warnings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

@@ -7,6 +7,7 @@
 #include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
+#include "indexed_lists.h"
 
 namespace reach {
    enum class language {
@@ -44,7 +45,7 @@ using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8
 using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
 using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
-class ReachString : public cobb::indexed_refcountable {
+class ReachString : public indexed_list_item {
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 

@@ -31,6 +31,7 @@ namespace reach {
 };
 
 void ReachString::read_offsets(cobb::ibitreader& stream, ReachStringTable& table) noexcept {
+   this->is_defined = true;
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
       if (has)
@@ -211,7 +212,6 @@ void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
 bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    if (count > this->max_count) {
-      printf("WARNING: GOT COUNT %u WHEN MAX IS %d\n", count, this->max_count);
       #if _DEBUG
          __debugbreak();
       #endif

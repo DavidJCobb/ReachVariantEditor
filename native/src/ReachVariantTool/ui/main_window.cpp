@@ -15,6 +15,7 @@
 #include "../editor_state.h"
 #include "../game_variants/base.h"
 #include "../game_variants/errors.h"
+#include "../game_variants/warnings.h"
 #include "../helpers/ini.h"
 #include "../helpers/steam.h"
 #include "../helpers/stream.h"
@@ -446,6 +447,22 @@ void ReachVariantTool::openFile(QString fileName) {
       }
       return;
    }
+   {
+      auto& log   = GameEngineVariantLoadWarningLog::get();
+      auto  count = log.size();
+      if (count) {
+         if (count > 1) {
+            //
+            // TODO: There were %n warnings. View them?
+            //
+            for (size_t i = 0; i < count; i++) {
+               QMessageBox::information(this, tr("Warning"), log.warnings[i]);
+            }
+         } else {
+            QMessageBox::information(this, tr("Warning"), log.warnings[0]);
+         }
+      }
+   }
    editor.takeVariant(variant, s.c_str());
    {
       auto i = this->ui.MainTreeview->currentIndex();
@@ -827,22 +844,6 @@ QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTr
       if (!traits)
          return nullptr;
       index = traits->index;
-      /*
-      auto& editor = ReachEditorState::get();
-      auto  mp     = editor.multiplayerData();
-      if (!mp)
-         return nullptr;
-      auto& list = mp->scriptData.traits;
-      auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         if (list[i] == traits) {
-            index = i;
-            break;
-         }
-      }
-      if (index == -1)
-         return nullptr;
-      //*/
    }
    //
    auto widget = this->ui.MainTreeview;

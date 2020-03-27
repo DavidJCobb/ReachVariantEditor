@@ -22,31 +22,31 @@ int main(int argc, char *argv[]) {
 //
 //  - Remove postprocessing for trigger content.
 //
-//     - Traits
-//     - Options
-//     - Strings
-//        - Traits and options still need postprocessing for these unless we just create 
-//          string instances on demand and then fill them during load.
-//     - Stats [loads after triggers]
-//     - HUD widgets
-//     - Forge labels
-//
-//     - The game-variant-data constructor should fill all indexed lists with dummy elements. 
-//       Dummy elements need to have a flag; when we load the "real" elements, strip the flag 
-//       from existing elements instead of deleting and replacing them.
-//
-//        - After loading the contents of an indexed list, iterate backwards over it and 
-//          delete any dummy elements whose refcounts are zero. Stop deleting at the first 
-//          dummy element with a non-zero refcount, or at the first non-dummy element; if 
-//          any dummy elements have non-zero refcounts, show warnings for all such dummies.
-//
-//     - Pass the game-variant-data down through the load process. Set up indexed-object 
-//       pointers during load.
+//     = NEXT STEP: PASS THE GameVariantDataMultiplayer POINTER DOWN THROUGH THE LOAD PROCESS, 
+//       AND HAVE ALL OPCODE ARGUMENTS (AND SIMILAR OBJECTS) OBTAIN THE THINGS THEY REFER TO 
+//       IMMEDIATELY RATHER THAN THROUGH POSTPROCESS.
 //
 //        - Easiest way to start is to do a find-and-replace on all OpcodeArgValue::read 
 //          and subclass methods just so we can get the game variant in, and then modify 
 //          the opcode load code to pass it. Then, we can update each individual type one 
 //          by one until they're all done.
+//
+//        - For string tables, we will need to do some more work: ReachStringTable needs a 
+//          member function that will, given an index: create dummy elements up to and 
+//          including that index (starting from this->size() and going up); and return a bare 
+//          pointer to the dummy element with the requested index.
+//
+//           - Once that's in place, ReachStringTable also needs a member function that will 
+//             check for any table elements that are still dummies; if any are found, then 
+//             it should compose a QString listing all still-dummy string indices that have 
+//             non-zero refcounts; this entire function should be used to report warnings, by 
+//             GameVariantDataMultiplayer::_tear_down_indexed_dummies().
+//
+//           - List of things that postprocess to obtain strings:
+//
+//              - Options [mandatory; loads earlier]
+//              - Traits  [mandatory; loads earlier]
+//              - ...?
 //
 //     - And now we don't need postprocessing!
 //
