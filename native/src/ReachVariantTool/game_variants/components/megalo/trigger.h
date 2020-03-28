@@ -59,6 +59,7 @@ namespace Megalo {
             condition_count conditionCount =  0;
             action_index    actionStart    = -1;
             action_count    actionCount    =  0;
+            bool            serialized     = false;
          } raw;
          //
          std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor
@@ -69,6 +70,8 @@ namespace Megalo {
          bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
+         //
+         void prep_for_flat_opcode_lists(); // call this on ALL triggers before calling (generate_flat_opcode_lists) on ANY of them
          void generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions);
          //
          void to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions

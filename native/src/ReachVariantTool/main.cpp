@@ -20,25 +20,9 @@ int main(int argc, char *argv[]) {
 //
 // CURRENT PLANS:
 //
-//  = Ditch the new opcode argument system entirely and revert fully back to the old one.
-//
-//     - If we modify OpcodeArgValue::write to append to a cobb::bitarray128, then we can 
-//       use it both for saving to a file and for counting the total size of all loaded 
-//       opcodes -- needed for my eventual plans to show the space usage for each part of 
-//       the variant file, to help script authors better assess how much room they have to 
-//       work with.
-//
-//        = Actually, we don't even need to do this. All of the script stuff saves via a 
-//          bitwriter, right? Just make a throwaway bitwriter for the counting and save 
-//          only the script fields to it; then, check its size.
-//
-//     - One thing that the new system did right was to nest the types under a dedicated 
-//       namespace and give them shorter names, i.e. Megalo::types::number and such. We 
-//       should reorganize the old system to use the same convention.
-//
-//  - Currently we retain the raw condition and action lists (i.e. the flat lists) and 
-//    just write those back into the file. We instead need to dynamically generate new 
-//    flat lists from the triggers, and write those.
+//  = Consider renaming all of the opcode arg types: instead of using classnames prefixed 
+//    with the superclass name e.g. Megalo::OpcodeArgValueObject, consider nesting them 
+//    under a namespace with simplified names e.g. Megalo::types::object.
 //
 //  - If we can modify references to indexed data to optionally use aliases if the 
 //    Decompiler& so wills, then so much the better; however, this would require extending 

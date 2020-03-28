@@ -329,17 +329,26 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    {  // Megalo
       auto& content = this->scriptContent;
       //
-      bits.write(content.raw.conditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
-      for (auto& opcode : content.raw.conditions)
-         opcode.write(bits);
-      //
-      bits.write(content.raw.actions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
-      for (auto& opcode : content.raw.actions)
-         opcode.write(bits);
-      //
-      bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
-      for (auto& trigger : content.triggers)
-         trigger.write(bits);
+      {  // Script code
+         std::vector<Megalo::Condition*> allConditions;
+         std::vector<Megalo::Action*>    allActions;
+         for (auto& trigger : content.triggers)
+            trigger.prep_for_flat_opcode_lists();
+         for (auto& trigger : content.triggers)
+            trigger.generate_flat_opcode_lists(*this, allConditions, allActions);
+         //
+         bits.write(allConditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+         for (auto opcode : allConditions)
+            opcode->write(bits);
+         //
+         bits.write(allActions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+         for (auto opcode : allActions)
+            opcode->write(bits);
+         //
+         bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
+         for (auto& trigger : content.triggers)
+            trigger.write(bits);
+      }
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
       for (auto& stat : content.stats)
@@ -440,8 +449,6 @@ void GameVariantDataMultiplayer::_tear_down_indexed_dummies() {
    should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.stats,       QObject::tr("\nScripted stat #%1", "out-of-bounds index warning on load"));
    should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.widgets,     QObject::tr("\nScripted HUD widget #%1", "out-of-bounds index warning on load"));
    should_log_warning |= __tear_down_indexed_dummies(warning, this->scriptContent.forgeLabels, QObject::tr("\nForge label #%1", "out-of-bounds index warning on load"));
-   //
-   // TODO: TELL THE STRING TABLE TO DOUBLE-CHECK THAT NONE OF ITS ELEMENTS ARE STILL DUMMY-FLAGGED
    //
    if (should_log_warning)
       GameEngineVariantLoadWarningLog::get().push_back(warning);

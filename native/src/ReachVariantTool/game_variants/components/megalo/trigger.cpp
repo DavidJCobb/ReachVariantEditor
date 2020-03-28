@@ -96,6 +96,9 @@ namespace Megalo {
       this->raw.actionCount.write(stream);
    }
    //
+   void Trigger::prep_for_flat_opcode_lists() {
+      this->raw.serialized = false;
+   }
    void Trigger::generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions) {
       //
       // Opcodes are written to the file as flat lists: all conditions in the entire script, consecutively; then 
@@ -166,6 +169,11 @@ namespace Megalo {
       // 6 share a different parent (Trigger 4); therefore, Bungie's code serializes the opcodes for the triggers 
       // in this order: 2, 3, 1, 5, 6, 4; before then writing the opcodes for the root trigger 0.
       //
+      if (this->raw.serialized) { // guard needed since we're doing nested triggers out of flat order
+         return;
+      }
+      this->raw.serialized = true;
+      //
       auto& triggers = mp.scriptContent.triggers;
       size_t size = this->opcodes.size();
       //
@@ -181,11 +189,6 @@ namespace Megalo {
                auto i   = arg->value;
                assert(i >= 0 && i < triggers.size() && "Found a Run Nested Trigger action with an out-of-bounds index.");
                triggers[i].generate_flat_opcode_lists(mp, allConditions, allActions);
-               //
-               // TODO: This will break if a single trigger is referenced from multiple places, unless we either: 
-               // a) add a sentinel bool to triggers; or b) clear the "raw" state and such at the start of this 
-               // function, and then use non-cleared state as a sentinel.
-               //
             }
          }
       }
