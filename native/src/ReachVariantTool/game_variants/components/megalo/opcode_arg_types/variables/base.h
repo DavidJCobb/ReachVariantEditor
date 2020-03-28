@@ -69,7 +69,7 @@ namespace Megalo {
          };
          using flags_t = std::underlying_type_t<flags::type>;
          //
-         using postprocess_functor_t = std::function<indexed_list_item* (GameVariantDataMultiplayer* mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
+         using indexed_access_functor_t = std::function<indexed_list_item* (GameVariantDataMultiplayer& mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
          //
          enum class index_type : uint8_t {
             none, // there is no "index" value
@@ -89,7 +89,7 @@ namespace Megalo {
          const char*    format         = "%w.timer[%i]"; // format string for decompiled code; interpreted manually; %w = the "which" as a string; %i = index as a number
          const char*    format_english = "%w's timer[%i]";
          //
-         postprocess_functor_t index_postprocess = nullptr;
+         indexed_access_functor_t indexed_list_accessor = nullptr;
          //
          inline bool has_index() const noexcept { return this->index_type != index_type::none; }
          inline bool has_which() const noexcept { return this->base != nullptr; }
@@ -108,17 +108,17 @@ namespace Megalo {
             result.format_english = fe;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, uint8_t bc, postprocess_functor_t f, flags_t flg = 0) {
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
             VariableScopeIndicatorValue result;
             result.flags             = flg;
             result.format            = fd;
             result.format_english    = fe;
             result.index_type        = index_type::indexed_data;
             result.index_bitcount    = bc;
-            result.index_postprocess = f;
+            result.indexed_list_accessor = f;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, const VariableScope* which, uint8_t bc, postprocess_functor_t f, flags_t flg = 0) {
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, const VariableScope* which, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
             VariableScopeIndicatorValue result = make_indexed_data_indicator(fd, fe, bc, f, flg);
             result.base = which;
             return result;
@@ -166,16 +166,6 @@ namespace Megalo {
          //
          virtual variable_type get_variable_type() const noexcept {
             return this->type.var_type;
-         }
-         //
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            if (!this->scope)
-               return;
-            auto& scope = *this->scope;
-            if (scope.index_type != VariableScopeIndicatorValue::index_type::indexed_data) // there's nothing to do postprocess for
-               return;
-            assert(scope.index_postprocess && "Our scope-indicator definitions are bad. A scope uses indexed-data but has no postprocess functor.");
-            this->object = (scope.index_postprocess)(newlyLoaded, this->index);
          }
    };
 }

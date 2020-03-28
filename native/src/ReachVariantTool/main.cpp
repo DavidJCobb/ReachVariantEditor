@@ -22,20 +22,8 @@ int main(int argc, char *argv[]) {
 //
 //  - Remove postprocessing for trigger content.
 //
-//     = NEXT STEP: HAVE ALL OPCODE ARGUMENTS (AND SIMILAR OBJECTS) OBTAIN THE THINGS THEY 
-//       REFER TO IMMEDIATELY RATHER THAN THROUGH POSTPROCESS.
-//
-//        - Easiest way to start is to do a find-and-replace on all OpcodeArgValue::read 
-//          and subclass methods just so we can get the game variant in, and then modify 
-//          the opcode load code to pass it. Then, we can update each individual type one 
-//          by one until they're all done.
-//
-//     - And now we don't need postprocessing!
-//
-//     = Notes
-//
-//        - We'd also forgotten to postprocess: the number and timer variables inside of 
-//          OpcodeArgValueMeterParameters; the number variable in OpcodeArgValuePlayerSet.
+//     = Triggers use postprocessing to handle (for each object with label "foo") loops. 
+//       Alter this.
 //
 //  = Ditch the new opcode argument system entirely and revert fully back to the old one.
 //

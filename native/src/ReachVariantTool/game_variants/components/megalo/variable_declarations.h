@@ -33,9 +33,6 @@ namespace Megalo {
             this->initial->write(stream);
             this->networking.write(stream);
          }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            this->initial->postprocess(newlyLoaded);
-         }
    };
    class PlayerVariableDeclaration {
       public:
@@ -50,7 +47,6 @@ namespace Megalo {
          void write(cobb::bitwriter& stream) const noexcept {
             this->networking.write(stream);
          }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {}
    };
    class ObjectVariableDeclaration {
       public:
@@ -65,7 +61,6 @@ namespace Megalo {
          void write(cobb::bitwriter& stream) const noexcept {
             this->networking.write(stream);
          }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {}
    };
    class TeamVariableDeclaration {
       public:
@@ -84,7 +79,6 @@ namespace Megalo {
             this->initial.write(stream);
             this->networking.write(stream);
          }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {}
    };
    class TimerVariableDeclaration {
       public:
@@ -95,9 +89,6 @@ namespace Megalo {
          }
          void write(cobb::bitwriter& stream) const noexcept {
             this->initial->write(stream);
-         }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            this->initial->postprocess(newlyLoaded);
          }
    };
 
@@ -139,18 +130,6 @@ namespace Megalo {
             megalo_variable_declaration_set_write_type(player);
             megalo_variable_declaration_set_write_type(object);
             #undef megalo_variable_declaration_set_write_type
-         }
-         void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            for (auto& var : this->scalars)
-               var.postprocess(newlyLoaded);
-            for (auto& var : this->players)
-               var.postprocess(newlyLoaded);
-            for (auto& var : this->objects)
-               var.postprocess(newlyLoaded);
-            for (auto& var : this->teams)
-               var.postprocess(newlyLoaded);
-            for (auto& var : this->timers)
-               var.postprocess(newlyLoaded);
          }
          void decompile(Decompiler& out, uint32_t flags = 0) noexcept {
             std::string temp;

@@ -231,8 +231,6 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    {  // Postprocess
       for (auto& trigger : this->scriptContent.triggers) {
          trigger.postprocess(this);
-         for (auto* opcode : trigger.opcodes)
-            opcode->postprocess(this);
       }
       //
       // TODO: We only need to update these for now. Eventually we need to switch to serializing 
@@ -240,18 +238,6 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       // made that switch, we should actually delete the next two lists (i.e. they should be 
       // emptied after a successful load and retained only if the load fails).
       //
-      for (auto& opcode : this->scriptContent.raw.actions)
-         opcode.postprocess(this);
-      for (auto& opcode : this->scriptContent.raw.conditions)
-         opcode.postprocess(this);
-      //
-      {  // Script variable declarations (these can be default-initialized to script options, etc.)
-         auto& v = this->scriptContent.variables;
-         v.global.postprocess(this);
-         v.player.postprocess(this);
-         v.object.postprocess(this);
-         v.team.postprocess(this);
-      }
    }
    return true;
 }

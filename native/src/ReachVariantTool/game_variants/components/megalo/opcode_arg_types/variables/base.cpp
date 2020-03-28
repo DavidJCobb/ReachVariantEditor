@@ -113,8 +113,13 @@ namespace Megalo {
       this->scope = &scope;
       if (scope.has_which())
          this->which = stream.read_bits(scope.which_bits());
-      if (scope.has_index())
+      if (scope.has_index()) {
          this->index = stream.read_bits(scope.index_bits());
+         if (scope.index_type == VariableScopeIndicatorValue::index_type::indexed_data) {
+            assert(scope.indexed_list_accessor && "Our scope-indicator definitions are bad. A scope uses indexed-data but has no access functor.");
+            this->object = (scope.indexed_list_accessor)(mp, this->index);
+         }
+      }
       if (scope.has_which() && !scope.base->is_valid_which(this->which)) {
          auto& error = GameEngineVariantLoadError::get();
          error.state = GameEngineVariantLoadError::load_state::failure;

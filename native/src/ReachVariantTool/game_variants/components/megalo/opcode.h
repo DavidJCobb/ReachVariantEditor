@@ -131,9 +131,6 @@ namespace Megalo {
          virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept = 0;
-         virtual void decompile(Decompiler& out) noexcept { // override me!
-            out.write(u8"OPCODE");
-         };
+         virtual void decompile(Decompiler& out) noexcept = 0;
    };
 }

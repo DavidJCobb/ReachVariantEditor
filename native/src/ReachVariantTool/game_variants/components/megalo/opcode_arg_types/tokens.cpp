@@ -59,7 +59,10 @@ namespace Megalo {
    );
    //
    bool OpcodeArgValueStringTokens2::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-      this->stringIndex.read(stream); // string table index pointer; -1 == none
+      MegaloStringIndexOptional index;
+      index.read(stream);
+      this->string = mp.scriptData.strings.get_entry(index);
+      //
       this->tokenCount.read(stream);
       if (this->tokenCount > max_token_count) {
          printf("Tokens value claimed to have %d tokens; max is %d.\n", this->tokenCount.to_int(), max_token_count);
@@ -69,31 +72,23 @@ namespace Megalo {
          this->tokens[i].read(stream, mp);
       return true;
    }
-   void OpcodeArgValueStringTokens2::postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-      if (this->stringIndex >= 0) {
-         auto& list = newlyLoaded->scriptData.strings;
-         if (this->stringIndex < list.size())
-            this->string = list.get_entry(this->stringIndex);
-      }
-      for (uint8_t i = 0; i < this->tokenCount; i++)
-         this->tokens[i].value->postprocess(newlyLoaded);
-   }
    void OpcodeArgValueStringTokens2::write(cobb::bitwriter& stream) const noexcept {
-      if (this->string) {
-         this->stringIndex = this->string->index;
-      }
-      this->stringIndex.write(stream);
+      MegaloStringIndexOptional index = -1;
+      if (this->string)
+         index = this->string->index;
+      index.write(stream);
+      //
       this->tokenCount.write(stream);
       for (uint8_t i = 0; i < this->tokenCount; i++)
          this->tokens[i].write(stream);
    }
    void OpcodeArgValueStringTokens2::to_string(std::string& out) const noexcept {
       if (this->tokenCount == 0) {
-         if (this->stringIndex == -1) {
+         if (!this->string) {
             out = "no string";
             return;
          }
-         cobb::sprintf(out, "localized string ID %d", this->stringIndex);
+         cobb::sprintf(out, "localized string ID %d", this->string->index);
          return;
       }
       out.clear();
@@ -107,7 +102,7 @@ namespace Megalo {
             out += ", ";
          out += temp;
       }
-      cobb::sprintf(out, "format string ID %d and tokens: %s", this->stringIndex, out.c_str());
+      cobb::sprintf(out, "format string ID %d and tokens: %s", this->string->index, out.c_str());
    }
    void OpcodeArgValueStringTokens2::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachString* format = this->string;

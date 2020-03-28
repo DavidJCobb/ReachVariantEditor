@@ -118,22 +118,10 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept { // override me!
-            out.write(u8"ARG");
-         };
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
-         }
-         //
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            //
-            // OpcodeArgValue subclasses should override this as necessary in order to 
-            // access data that is only reliably available after the full variant has 
-            // loaded. For example, the OpcodeArgValue subclass for a Forge label may 
-            // use this to exchange its numeric label index for a pointer to the Forge 
-            // label data.
-            //
          }
    };
    //

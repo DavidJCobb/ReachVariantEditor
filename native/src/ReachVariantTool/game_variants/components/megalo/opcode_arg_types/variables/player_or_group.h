@@ -15,10 +15,5 @@ namespace Megalo {
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          //
          virtual variable_type get_variable_type() const noexcept;
-         //
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            if (this->variable)
-               this->variable->postprocess(newlyLoaded);
-         }
    };
 }
