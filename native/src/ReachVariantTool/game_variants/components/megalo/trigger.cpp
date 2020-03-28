@@ -38,6 +38,12 @@ namespace Megalo {
       return true;
    }
    void Trigger::postprocess_opcodes(const std::vector<Condition>& conditions, const std::vector<Action>& actions) noexcept {
+      //
+      // Opcodes are written to the file as flat lists: all conditions in the entire script, consecutively; then 
+      // all actions in the entire script, consecutively; and then all triggers. Indices and counts in the triggers 
+      // and conditions make it possible to reconstruct the triggers (and properly interleave conditions and actions) 
+      // once all data is loaded.
+      //
       auto& raw = this->raw;
       std::vector<Action*> temp;
       //
@@ -89,6 +95,127 @@ namespace Megalo {
       this->raw.actionStart.write(stream);
       this->raw.actionCount.write(stream);
    }
+   //
+   void Trigger::generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions) {
+      //
+      // Opcodes are written to the file as flat lists: all conditions in the entire script, consecutively; then 
+      // all actions in the entire script, consecutively; and then all triggers. Indices and counts in the triggers 
+      // and conditions make it possible to reconstruct the triggers (and properly interleave conditions and actions) 
+      // once all data is loaded.
+      //
+      // But... how is the data written?
+      //
+      // I examined some of Bungie's scripts by hand. It looks like for any given trigger:
+      //
+      //  - The opcodes of all nested triggers are written first.
+      //  - Then, the trigger's own opcodes are written.
+      //  - If a trigger doesn't contain any of a given kind of opcode, it'll still have a non-zero start index.
+      //
+      // As an example:
+      //
+      //    do              | Trigger 0 |           | Trigger indices are in order from outermost to innermost...
+      //       condition    |           | Cond.n  2 | ...but opcodes are ordered from innermost to outermost.
+      //       action       |           | Action  3 | 
+      //       action       |           | Action  4 | 
+      //       condition    |           | Cond.n  5 | 
+      //       do           | Trigger 1 |           | 
+      //          action    | Action  0 |           | 
+      //          condition | Cond.n  0 |           | 
+      //          action    | Action  1 |           | All content is sequential otherwise.
+      //       end          |           |           | 
+      //       do           | Trigger 2 |           | 
+      //          action    | Action  2 |           | 
+      //       end          |           |           | 
+      //       action       |           | Action  5 | 
+      //    end
+      //
+      // Below is Trigger 2 from Alpha Zombies, but we'll start our numbering off from 0 for simplicity. This time, 
+      // we'll also note that nested triggers are "execute" actions.
+      /*
+            CODE               | TRIGGERS  | OPS    | BY SEQUENCE            |
+            -------------------+-----------+--------+------------------------+
+            do                 | Trigger 0 |        |    :    :    :    :    |
+               do              | Trigger 1 | A |  9 |    |    |    |    |  9 |
+                  condition    |           | C |  2 |    |  2 |    |    |    |
+                  do           | Trigger 2 | A |  2 |    |  2 |    |    |    |
+                     condition |           | C |  0 |  0 |    |    |    |    |
+                     action    |           | A |  0 |  0 |    |    |    |    |
+                  end          |           |        |    :    :    :    :    |
+                  do           | Trigger 3 | A |  3 |    |  3 |    |    |    |
+                     condition |           | C |  1 |  1 |    |    |    |    |
+                     action    |           | A |  1 |  1 |    |    |    |    |
+                  end          |           |        |    :    :    :    :    |
+               end             |           |        |    :    :    :    :    |
+               do              | Trigger 4 | A | 10 |    |    |    |    | 10 |
+                  condition    |           | C |  5 |    |    |    |  5 |    |
+                  action       |           | A |  6 |    |    |    |  6 |    |
+                  do           | Trigger 5 | A |  7 |    |    |    |  7 |    |
+                     condition |           | C |  3 |    |    |  3 |    |    |
+                     action    |           | A |  4 |    |    |  4 |    |    |
+                  end          |           |        |    :    :    :    :    |
+                  do           | Trigger 6 | A |  8 |    |    |    |  8 |    |
+                     condition |           | C |  4 |    |    |  4 |    |    |
+                     action    |           | A |  5 |    |    |  5 |    |    |
+                  end          |           |        |    :    :    :    :    |
+               end             |           |        |    :    :    :    :    |
+            end                |           |        |    :    :    :    :    |
+      */
+      // As you can see, triggers are numbered in sequence with the outermost first, while opcodes are numbered 
+      // in sequence with the innermost first. However, this doesn't "cross boundaries." Triggers 2, 3, 5, and 6 
+      // are all nested to the same depth, but Triggers 2 and 3 share a parent (Trigger 1) while Triggers 5 and 
+      // 6 share a different parent (Trigger 4); therefore, Bungie's code serializes the opcodes for the triggers 
+      // in this order: 2, 3, 1, 5, 6, 4; before then writing the opcodes for the root trigger 0.
+      //
+      auto& triggers = mp.scriptContent.triggers;
+      size_t size = this->opcodes.size();
+      //
+      // Recurse over nested triggers first, so that opcodes are serialized inner-first.
+      //
+      for (size_t i = 0; i < size; i++) {
+         auto* opcode = this->opcodes[i];
+         auto  action = dynamic_cast<const Action*>(opcode);
+         if (action) {
+            if (action->function == &actionFunction_runNestedTrigger) {
+               auto arg = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
+               assert(arg && "Found a Run Nested Trigger action with no argument specifying the trigger?!");
+               auto i   = arg->value;
+               assert(i >= 0 && i < triggers.size() && "Found a Run Nested Trigger action with an out-of-bounds index.");
+               triggers[i].generate_flat_opcode_lists(mp, allConditions, allActions);
+               //
+               // TODO: This will break if a single trigger is referenced from multiple places, unless we either: 
+               // a) add a sentinel bool to triggers; or b) clear the "raw" state and such at the start of this 
+               // function, and then use non-cleared state as a sentinel.
+               //
+            }
+         }
+      }
+      //
+      // Now run over our own opcodes.
+      //
+      this->raw.conditionStart = allConditions.size();
+      this->raw.conditionCount = 0;
+      this->raw.actionStart    = allActions.size();
+      this->raw.actionCount    = 0;
+      for (size_t i = 0; i < size; ++i) {
+         auto* opcode    = this->opcodes[i];
+         auto  condition = dynamic_cast<Condition*>(opcode);
+         if (condition) {
+            this->raw.conditionCount += 1;
+            allConditions.push_back(condition);
+            //
+            condition->action = this->raw.actionCount;
+            //
+            continue;
+         }
+         auto action = dynamic_cast<Action*>(opcode);
+         if (action) {
+            this->raw.actionCount += 1;
+            allActions.push_back(action);
+            continue;
+         }
+      }
+   }
+   //
    void Trigger::to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
       //

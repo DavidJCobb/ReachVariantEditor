@@ -33,6 +33,10 @@ namespace Megalo {
          inline uint8_t get_indent_size() const noexcept { return this->indent_size; }
          inline void set_indent_size(uint8_t spaces) noexcept { this->indent_size = spaces; } // TOOD: fail if decompiling is in progress
          //
+         void decompile();
+         //
+         // Code below is provided to the objects being decompiled:
+         //
          void modify_indent_count(int16_t nesting) noexcept;
          //
          void write(string_type& content);

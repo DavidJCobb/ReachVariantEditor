@@ -69,6 +69,7 @@ namespace Megalo {
          bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
+         void generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions);
          //
          void to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
          inline void to_string(const std::vector<Trigger*>& allTriggers, std::string& out) const noexcept {
