@@ -1,10 +1,14 @@
 #include "forge_label.h"
+#include "../../types/multiplayer.h"
 //
 namespace Megalo {
-   void ReachForgeLabel::read(cobb::ibitreader& stream) noexcept {
+   void ReachForgeLabel::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->is_defined = true;
+   //
+      MegaloStringIndexOptional index;
+      index.read(stream);
+      this->name = mp.scriptData.strings.get_entry(index);
       //
-      this->nameIndex.read(stream);
       this->requirements.read(stream);
       if (this->requires_object_type())
          this->requiredObjectType.read(stream);
@@ -14,15 +18,12 @@ namespace Megalo {
          this->requiredNumber.read(stream);
       this->mapMustHaveAtLeast.read(stream);
    }
-   void ReachForgeLabel::postprocess_string_indices(ReachStringTable& table) noexcept {
-      this->name = table.get_entry(this->nameIndex);
-   }
    void ReachForgeLabel::write(cobb::bitwriter& stream) noexcept {
-      if (this->name) {
-         this->nameIndex = this->name->index;
-      } else
-         this->nameIndex = -1;
-      this->nameIndex.write(stream);
+      MegaloStringIndexOptional index = -1;
+      if (this->name)
+         index = this->name->index;
+      index.write(stream);
+      //
       this->requirements.write(stream);
       if (this->requires_object_type())
          this->requiredObjectType.write(stream);

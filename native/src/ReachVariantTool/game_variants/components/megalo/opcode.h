@@ -128,7 +128,7 @@ namespace Megalo {
 
    class Opcode { // base class for Condition and Action
       public:
-         virtual bool read(cobb::ibitreader&) noexcept = 0;
+         virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept = 0;

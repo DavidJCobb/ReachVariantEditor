@@ -132,7 +132,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
       conditions.resize(count);
       for (size_t i = 0; i < count; i++) {
-         if (!conditions[i].read(stream)) {
+         if (!conditions[i].read(stream, *this)) {
             error_report.failure_index = i;
             return false;
          }
@@ -148,7 +148,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
       actions.resize(count);
       for (size_t i = 0; i < count; i++) {
-         if (!actions[i].read(stream)) {
+         if (!actions[i].read(stream, *this)) {
             error_report.failure_index = i;
             return false;
          }
@@ -181,9 +181,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
       for (size_t i = 0; i < count; i++) {
-         auto& stat = this->scriptContent.stats[i];
-         stat.read(stream);
-         stat.postprocess_string_indices(this->scriptData.strings);
+         this->scriptContent.stats[i].read(stream, *this);
       }
       //
       {  // Script variable declarations
@@ -197,8 +195,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));
          auto& widgets = this->scriptContent.widgets;
          for (size_t i = 0; i < count; i++) {
-            auto& widget = widgets[i];
-            widget.read(stream);
+            widgets[i].read(stream);
          }
       }
       if (!this->scriptContent.entryPoints.read(stream))
@@ -209,9 +206,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          auto&  list  = this->scriptContent.forgeLabels;
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
          for (size_t i = 0; i < count; i++) {
-            auto& label = list[i];
-            label.read(stream);
-            label.postprocess_string_indices(this->scriptData.strings);
+            list[i].read(stream, *this);
          }
       }
    }
@@ -423,8 +418,8 @@ GameVariantData* GameVariantDataMultiplayer::clone() const noexcept {
          option.postprocess_string_indices(stringTable);
       for (auto& traits : cd.traits)
          traits.postprocess_string_indices(stringTable);
-      for (auto& stat : cc.stats)
-         stat.postprocess_string_indices(stringTable);
+      //for (auto& stat : cc.stats)
+      //   stat.postprocess_string_indices(stringTable);
    }
    return clone;
 }

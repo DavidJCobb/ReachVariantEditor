@@ -34,7 +34,9 @@ int main(int argc, char *argv[]) {
 //        - For string tables, we will need to do some more work: ReachStringTable needs a 
 //          member function that will, given an index: create dummy elements up to and 
 //          including that index (starting from this->size() and going up); and return a bare 
-//          pointer to the dummy element with the requested index.
+//          pointer to the dummy element with the requested index. This is going to be a 
+//          substitute for pre-filling the string table with dummies (because that'd be a 
+//          waste).
 //
 //           - Once that's in place, ReachStringTable also needs a member function that will 
 //             check for any table elements that are still dummies; if any are found, then 

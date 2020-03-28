@@ -189,7 +189,7 @@ namespace Megalo {
       ),
    }};
 
-   bool Condition::read(cobb::ibitreader& stream) noexcept {
+   bool Condition::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
          this->bit_offset = stream.get_bitpos();
       #endif

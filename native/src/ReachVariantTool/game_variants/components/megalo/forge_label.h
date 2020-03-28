@@ -9,6 +9,8 @@
 #include "limits.h"
 #include "limits_bitnumbers.h"
 
+class GameVariantDataMultiplayer;
+
 namespace Megalo {
    class ReachForgeLabel : public indexed_list_item {
       //
@@ -33,8 +35,7 @@ namespace Megalo {
          cobb::bytenumber<int16_t>   requiredNumber     = 0;
          cobb::bitnumber<7, uint8_t> mapMustHaveAtLeast = 0;
          //
-         void read(cobb::ibitreader&) noexcept;
-         void postprocess_string_indices(ReachStringTable& table) noexcept;
+         void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
          void write(cobb::bitwriter& stream) noexcept;
          //
          inline bool requires_object_type()   const noexcept { return this->requirements & (requirement_int)requirement_flags::objects_of_type; }

@@ -1034,7 +1034,7 @@ namespace Megalo {
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];
 
-   bool Action::read(cobb::ibitreader& stream) noexcept {
+   bool Action::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
          this->bit_offset = stream.get_bitpos();
       #endif

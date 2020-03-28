@@ -6,6 +6,8 @@
 #include "../../helpers/refcounting.h"
 #include "../../helpers/stream.h"
 
+class GameVariantDataMultiplayer;
+
 class ReachMegaloGameStat : public indexed_list_item {
    public:
       enum class Format : uint8_t {
@@ -20,13 +22,11 @@ class ReachMegaloGameStat : public indexed_list_item {
          descending,
          obsolete_2,
       };
-      MegaloStringRef   name;
-      MegaloStringIndex nameIndex;
+      MegaloStringRef name;
       Format format      = Format::number;
       Sort   sortOrder   = Sort::ascending;
       bool   groupByTeam = false;
       //
-      void read(cobb::ibitreader&) noexcept;
-      void postprocess_string_indices(ReachStringTable& table) noexcept;
+      void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
       void write(cobb::bitwriter& stream) noexcept;
 };
