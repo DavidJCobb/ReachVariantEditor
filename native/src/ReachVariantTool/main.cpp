@@ -20,11 +20,6 @@ int main(int argc, char *argv[]) {
 //
 // CURRENT PLANS:
 //
-//  - Remove postprocessing for trigger content.
-//
-//     = Triggers use postprocessing to handle (for each object with label "foo") loops. 
-//       Alter this.
-//
 //  = Ditch the new opcode argument system entirely and revert fully back to the old one.
 //
 //     - If we modify OpcodeArgValue::write to append to a cobb::bitarray128, then we can 

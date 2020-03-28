@@ -41,14 +41,11 @@ namespace Megalo {
    };
 
    class Trigger {
-      private:
-         using _fli = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t>;
       public:
          ~Trigger();
          //
          cobb::bitnumber<3, block_type> blockType = block_type::normal;
          cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
-         mutable _fli forgeLabelIndex = -1; // Forge label index for block_type::for_each_object_with_label
          cobb::refcount_ptr<ReachForgeLabel> forgeLabel;
          struct {
             //
@@ -69,9 +66,8 @@ namespace Megalo {
             uint32_t bit_offset = 0;
          #endif
          //
-         bool read(cobb::ibitreader& stream) noexcept;
+         bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
-         void postprocess(GameVariantDataMultiplayer*) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          //
          void to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions

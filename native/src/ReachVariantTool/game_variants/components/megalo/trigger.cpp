@@ -3,6 +3,13 @@
 #include "opcode_arg_types/all_indices.h"
 #include "../../types/multiplayer.h"
 
+namespace {
+   constexpr int ce_max_index      = Megalo::Limits::max_script_labels;
+   constexpr int ce_index_bitcount = cobb::bitcount(ce_max_index); // DON'T subtract 1; you can do "for each with no label" and that encodes as -1, i.e. we need an extra bit for the sign
+   //
+   using _index_t = int8_t;
+   static_assert(std::numeric_limits<_index_t>::max() >= ce_max_index, "Use a larger type.");
+}
 namespace Megalo {
    Trigger::~Trigger() {
       for (auto opcode : this->opcodes)
@@ -10,14 +17,20 @@ namespace Megalo {
       this->opcodes.clear();
    }
    //
-   bool Trigger::read(cobb::ibitreader& stream) noexcept {
+   bool Trigger::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
          this->bit_offset = stream.get_bitpos();
       #endif
       this->blockType.read(stream);
       this->entryType.read(stream);
-      if (this->blockType == block_type::for_each_object_with_label)
-         this->forgeLabelIndex.read(stream);
+      if (this->blockType == block_type::for_each_object_with_label) {
+         _index_t index = stream.read_bits(ce_index_bitcount);
+         if (index != -1) {
+            auto& list = mp.scriptContent.forgeLabels;
+            if (index < list.size())
+               this->forgeLabel = &list[index];
+         }
+      }
       this->raw.conditionStart.read(stream);
       this->raw.conditionCount.read(stream);
       this->raw.actionStart.read(stream);
@@ -62,24 +75,14 @@ namespace Megalo {
          }
       }
    }
-   void Trigger::postprocess(GameVariantDataMultiplayer* mp) noexcept {
-      if (this->blockType == block_type::for_each_object_with_label) {
-         if (this->forgeLabelIndex != -1) {
-            auto& list = mp->scriptContent.forgeLabels;
-            if (this->forgeLabelIndex < list.size())
-               this->forgeLabel = &list[this->forgeLabelIndex];
-         }
-      }
-   }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
       this->blockType.write(stream);
       this->entryType.write(stream);
       if (this->blockType == block_type::for_each_object_with_label) {
-         if (!this->forgeLabel)
-            this->forgeLabelIndex = -1;
-         else
-            this->forgeLabelIndex = this->forgeLabel->index;
-         this->forgeLabelIndex.write(stream);
+         _index_t index = -1;
+         if (this->forgeLabel)
+            index = this->forgeLabel->index;
+         stream.write(index, ce_index_bitcount);
       }
       this->raw.conditionStart.write(stream);
       this->raw.conditionCount.write(stream);
@@ -100,15 +103,11 @@ namespace Megalo {
             break;
          case block_type::for_each_object_with_label:
             if (!this->forgeLabel) {
-               if (this->forgeLabelIndex == -1) {
-                  line = "for each object with no label";
-               } else {
-                  cobb::sprintf(line, "for each object with label #%d", this->forgeLabelIndex);
-               }
+               line = "for each object with label none";
             } else {
                ReachForgeLabel* f = this->forgeLabel;
                if (!f->name) {
-                  cobb::sprintf(line, "label index %u", this->forgeLabelIndex);
+                  cobb::sprintf(line, "label index %u", f->index);
                   break;
                }
                cobb::sprintf(line, "for each object with label %s", f->name->english().c_str());
@@ -283,14 +282,11 @@ namespace Megalo {
             {
                std::string line;
                if (!this->forgeLabel) {
-                  if (this->forgeLabelIndex == -1)
-                     line = "no label";
-                  else
-                     cobb::sprintf(line, "label %d", this->forgeLabelIndex);
+                  line = "label none";
                } else {
                   ReachForgeLabel* f = this->forgeLabel;
                   if (!f->name)
-                     cobb::sprintf(line, "label %u", this->forgeLabelIndex);
+                     cobb::sprintf(line, "label %u", f->index);
                   else
                      cobb::sprintf(line, "label \"%s\"", f->name->english().c_str()); // TODO: this will break if a label actually contains a double-quote
                }

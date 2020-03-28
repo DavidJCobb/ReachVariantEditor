@@ -165,7 +165,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       triggers.reserve(count);
       for (size_t i = 0; i < count; i++) {
          auto trigger = triggers.emplace_back();
-         if (!trigger->read(stream)) {
+         if (!trigger->read(stream, *this)) {
             error_report.failure_index = i;
             return false;
          }
@@ -228,17 +228,6 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    //
    this->_tear_down_indexed_dummies();
    //
-   {  // Postprocess
-      for (auto& trigger : this->scriptContent.triggers) {
-         trigger.postprocess(this);
-      }
-      //
-      // TODO: We only need to update these for now. Eventually we need to switch to serializing 
-      // from the trigger list instead of serializing the original, raw loaded data; once we've 
-      // made that switch, we should actually delete the next two lists (i.e. they should be 
-      // emptied after a successful load and retained only if the load fails).
-      //
-   }
    return true;
 }
 void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcept {
