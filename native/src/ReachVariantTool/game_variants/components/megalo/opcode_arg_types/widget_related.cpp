@@ -1,6 +1,14 @@
 #include "widget_related.h"
+#include "../../../errors.h"
 #include "../../../types/multiplayer.h"
 
+namespace {
+   constexpr int ce_max_index      = Megalo::Limits::max_script_widgets;
+   constexpr int ce_index_bitcount = cobb::bitcount(ce_max_index - 1);
+   //
+   using _index_t = uint8_t;
+   static_assert(std::numeric_limits<_index_t>::max() >= ce_max_index, "Use a larger type.");
+}
 namespace Megalo {
    #pragma region OpcodeArgValueWidget
       OpcodeArgTypeinfo OpcodeArgValueWidget::typeinfo = OpcodeArgTypeinfo(
@@ -11,10 +19,20 @@ namespace Megalo {
       //
       bool OpcodeArgValueWidget::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
          if (stream.read_bits(1) != 0) { // absence bit
-            this->index = index_of_none;
             return true;
          }
-         this->index = stream.read_bits(cobb::bitcount(max_index - 1));
+         _index_t index = stream.read_bits(ce_index_bitcount);
+         auto& list = mp.scriptContent.widgets;
+         if (index >= list.size()) {
+            auto& e = GameEngineVariantLoadError::get();
+            e.state    = GameEngineVariantLoadError::load_state::failure;
+            e.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+            e.detail   = GameEngineVariantLoadError::load_failure_detail::bad_opcode_impossible_index;
+            e.extra[0] = index;
+            e.extra[1] = ce_max_index - 1;
+            return false;
+         }
+         this->value = &list[index];
          return true;
       }
       void OpcodeArgValueWidget::write(cobb::bitwriter& stream) const noexcept {
@@ -23,32 +41,11 @@ namespace Megalo {
             return;
          }
          stream.write(0, 1); // absence bit
-         stream.write(this->value->index, cobb::bitcount(max_index - 1));
-      }
-      void OpcodeArgValueWidget::postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-         this->postprocessed = true;
-         if (this->index == index_of_none)
-            return;
-         auto& list = newlyLoaded->scriptContent.widgets;
-         if (this->index >= list.size())
-            return;
-         this->value = &list[this->index];
+         stream.write(this->value->index, ce_index_bitcount);
       }
       void OpcodeArgValueWidget::to_string(std::string& out) const noexcept {
-         if (!this->postprocessed) {
-            if (this->index == index_of_none) {
-               out = "no HUD widget";
-               return;
-            }
-            cobb::sprintf(out, "HUD widget %u", this->index);
-            return;
-         }
          if (!this->value) {
-            if (this->index == index_of_none) {
-               out = "no HUD widget";
-               return;
-            }
-            cobb::sprintf(out, "invalid HUD widget %u", this->index);
+            out = "no HUD widget";
             return;
          }
          HUDWidgetDeclaration* f = this->value;
@@ -88,6 +85,11 @@ namespace Megalo {
                break;
             default:
                printf("Widget Meter Parameters had bad type %u.\n", (int)this->type);
+               auto& e = GameEngineVariantLoadError::get();
+               e.state    = GameEngineVariantLoadError::load_state::failure;
+               e.reason   = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;
+               e.detail   = GameEngineVariantLoadError::load_failure_detail::bad_widget_meter_parameters_type;
+               e.extra[0] = (int32_t)this->type;
                return false;
          }
          return true;

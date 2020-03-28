@@ -22,9 +22,8 @@ int main(int argc, char *argv[]) {
 //
 //  - Remove postprocessing for trigger content.
 //
-//     = NEXT STEP: PASS THE GameVariantDataMultiplayer POINTER DOWN THROUGH THE LOAD PROCESS, 
-//       AND HAVE ALL OPCODE ARGUMENTS (AND SIMILAR OBJECTS) OBTAIN THE THINGS THEY REFER TO 
-//       IMMEDIATELY RATHER THAN THROUGH POSTPROCESS.
+//     = NEXT STEP: HAVE ALL OPCODE ARGUMENTS (AND SIMILAR OBJECTS) OBTAIN THE THINGS THEY 
+//       REFER TO IMMEDIATELY RATHER THAN THROUGH POSTPROCESS.
 //
 //        - Easiest way to start is to do a find-and-replace on all OpcodeArgValue::read 
 //          and subclass methods just so we can get the game variant in, and then modify 
@@ -32,6 +31,11 @@ int main(int argc, char *argv[]) {
 //          by one until they're all done.
 //
 //     - And now we don't need postprocessing!
+//
+//     = Notes
+//
+//        - We'd also forgotten to postprocess: the number and timer variables inside of 
+//          OpcodeArgValueMeterParameters; the number variable in OpcodeArgValuePlayerSet.
 //
 //  = Ditch the new opcode argument system entirely and revert fully back to the old one.
 //

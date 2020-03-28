@@ -6,7 +6,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::can_be_multiple,
       { "no_one", "anyone", "allies", "enemies", "specific_player", "no_one_2" },
-      & OpcodeArgValuePlayerSet::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerSet>
    );
    //
    bool OpcodeArgValuePlayerSet::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

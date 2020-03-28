@@ -73,6 +73,9 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
                }
             }
             break;
+         case load_failure_detail::bad_opcode_impossible_index:
+            result += QObject::tr("The argument contained an out-of-bounds reference to an indexed collection -- specifically, index %1 of a maximum allowed %2.", tr_disambiguator).arg(this->extra[0]).arg(this->extra[1]);
+            break;
          case load_failure_detail::failed_to_construct_script_opcode_arg:
             result += QObject::tr("For some reason, we were unable to construct an in-memory data structure to hold this argument's value.", tr_disambiguator);
             break;

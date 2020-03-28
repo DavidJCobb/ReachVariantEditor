@@ -42,6 +42,8 @@ struct GameEngineVariantLoadError {
       bad_opcode_player_or_team_var_type, // extra[0] is the type value
       bad_variable_subtype, // extra[0] is the type; extra[1] is the subtype
       bad_variable_scope, // extra[0] is a (variable_scope) constant; extra[1] is which scope of that type; extra[2] is the variable index; extra[3] is the variable type; extra[4] is 1 if it's a biped variable
+      bad_opcode_impossible_index, // extra[0] is the index; extra[1] is the max allowed index
+      bad_widget_meter_parameters_type, // extra[0] is the type
    };
 
    load_state          state            = load_state::incomplete;

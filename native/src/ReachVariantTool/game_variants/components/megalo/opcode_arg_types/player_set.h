@@ -15,9 +15,6 @@ namespace Megalo {
    class OpcodeArgValuePlayerSet : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValuePlayerSet;
-         }
          //
       public:
          cobb::bitnumber<3, PlayerSetType> set_type = PlayerSetType::no_one;
