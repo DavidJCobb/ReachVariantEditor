@@ -24,8 +24,8 @@ namespace Megalo {
          network_type networking = network_enum::default;
          OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
          //
-         void read(cobb::ibitreader& stream) noexcept {
-            if (!this->initial->read(stream))
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+            if (!this->initial->read(stream, mp))
                return;
             this->networking.read(stream);
          }
@@ -44,7 +44,7 @@ namespace Megalo {
          //
          network_type networking = network_enum::default;
          //
-         void read(cobb::ibitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
@@ -59,7 +59,7 @@ namespace Megalo {
          //
          network_type networking = network_enum::default;
          //
-         void read(cobb::ibitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             this->networking.read(stream);
          }
          void write(cobb::bitwriter& stream) const noexcept {
@@ -76,7 +76,7 @@ namespace Megalo {
          network_type   networking = network_enum::default;
          team_bitnumber initial    = const_team::none;
          //
-         void read(cobb::ibitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             this->initial.read(stream);
             this->networking.read(stream);
          }
@@ -90,8 +90,8 @@ namespace Megalo {
       public:
          OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
          //
-         void read(cobb::ibitreader& stream) noexcept {
-            this->initial->read(stream);
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+            this->initial->read(stream, mp);
          }
          void write(cobb::bitwriter& stream) const noexcept {
             this->initial->write(stream);
@@ -112,13 +112,13 @@ namespace Megalo {
          //
          VariableDeclarationSet(variable_scope t) : type(t) {}
          //
-         void read(cobb::ibitreader& stream) noexcept {
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
             //
             #define megalo_variable_declaration_set_read_type(name) \
                this->##name##s.resize(stream.read_bits(scope.count_bits(variable_type::##name##))); \
                for (auto& var : this->##name##s) \
-                  var.read(stream);
+                  var.read(stream, mp);
             megalo_variable_declaration_set_read_type(scalar);
             megalo_variable_declaration_set_read_type(timer);
             megalo_variable_declaration_set_read_type(team);

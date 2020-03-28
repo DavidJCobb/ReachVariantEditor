@@ -18,7 +18,7 @@ namespace Megalo {
          this->requiredNumber.read(stream);
       this->mapMustHaveAtLeast.read(stream);
    }
-   void ReachForgeLabel::write(cobb::bitwriter& stream) noexcept {
+   void ReachForgeLabel::write(cobb::bitwriter& stream) const noexcept {
       MegaloStringIndexOptional index = -1;
       if (this->name)
          index = this->name->index;

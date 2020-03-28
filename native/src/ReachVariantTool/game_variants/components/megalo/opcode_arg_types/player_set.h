@@ -24,7 +24,7 @@ namespace Megalo {
          OpcodeArgValuePlayer player;
          OpcodeArgValueScalar addOrRemove;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;

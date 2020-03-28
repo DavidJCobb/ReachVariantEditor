@@ -8,9 +8,6 @@ namespace Megalo {
    class OpcodeArgValuePlayerTraits : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValuePlayerTraits;
-         }
          //
       public:
          static constexpr int16_t max_index = Limits::max_script_traits;
@@ -19,7 +16,7 @@ namespace Megalo {
          cobb::refcount_ptr<ReachMegaloPlayerTraits> value;
          bool postprocessed = false;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;

@@ -8,7 +8,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstBool>
    );
    //
-   bool OpcodeArgValueConstBool::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueConstBool::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       stream.read(this->value);
       return true;
    }
@@ -39,7 +39,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstSInt8>
    );
    //
-   bool OpcodeArgValueConstSInt8::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueConstSInt8::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       stream.read(this->value);
       return true;
    }

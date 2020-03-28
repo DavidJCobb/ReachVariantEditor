@@ -7,7 +7,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueForgeLabel>
    );
    //
-   bool OpcodeArgValueForgeLabel::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueForgeLabel::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       if (stream.read_bits(1) != 0) { // absence bit
          this->index = index_of_none;
          return true;

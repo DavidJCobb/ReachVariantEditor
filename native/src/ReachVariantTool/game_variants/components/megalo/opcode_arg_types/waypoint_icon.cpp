@@ -46,10 +46,10 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>
    );
    //
-   bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->icon = stream.read_bits(enums::waypoint_icon.index_bits()) - 1; // 5 bits
       if (this->icon == enums::waypoint_icon.lookup("territory_a"))
-         return OpcodeArgValueScalar::read(stream); // call super
+         return OpcodeArgValueScalar::read(stream, mp); // call super
       return true;
    }
    void OpcodeArgValueWaypointIcon::write(cobb::bitwriter& stream) const noexcept {

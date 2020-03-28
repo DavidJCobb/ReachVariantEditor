@@ -186,10 +186,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       //
       {  // Script variable declarations
          auto& v = this->scriptContent.variables;
-         v.global.read(stream);
-         v.player.read(stream);
-         v.object.read(stream);
-         v.team.read(stream);
+         v.global.read(stream, *this);
+         v.player.read(stream, *this);
+         v.object.read(stream, *this);
+         v.team.read(stream, *this);
       }
       {  // HUD widget declarations
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));
@@ -434,7 +434,7 @@ namespace {
    template<typename list_type> bool __tear_down_indexed_dummies(QString& warning, list_type& list, QString item_format) {
       bool   fails = false;
       size_t max   = list.max_count;
-      for (size_t i = max - 1; i >= 0; --i) {
+      for (int16_t i = max - 1; i >= 0; --i) { // need a signed loop var or --i will never be less than 0
          auto& item = list[i];
          if (item.is_defined)
             break;

@@ -31,25 +31,6 @@ int main(int argc, char *argv[]) {
 //          the opcode load code to pass it. Then, we can update each individual type one 
 //          by one until they're all done.
 //
-//        - For string tables, we will need to do some more work: ReachStringTable needs a 
-//          member function that will, given an index: create dummy elements up to and 
-//          including that index (starting from this->size() and going up); and return a bare 
-//          pointer to the dummy element with the requested index. This is going to be a 
-//          substitute for pre-filling the string table with dummies (because that'd be a 
-//          waste).
-//
-//           - Once that's in place, ReachStringTable also needs a member function that will 
-//             check for any table elements that are still dummies; if any are found, then 
-//             it should compose a QString listing all still-dummy string indices that have 
-//             non-zero refcounts; this entire function should be used to report warnings, by 
-//             GameVariantDataMultiplayer::_tear_down_indexed_dummies().
-//
-//           - List of things that postprocess to obtain strings:
-//
-//              - Options [mandatory; loads earlier]
-//              - Traits  [mandatory; loads earlier]
-//              - ...?
-//
 //     - And now we don't need postprocessing!
 //
 //  = Ditch the new opcode argument system entirely and revert fully back to the old one.
@@ -67,6 +48,10 @@ int main(int argc, char *argv[]) {
 //     - One thing that the new system did right was to nest the types under a dedicated 
 //       namespace and give them shorter names, i.e. Megalo::types::number and such. We 
 //       should reorganize the old system to use the same convention.
+//
+//  - Currently we retain the raw condition and action lists (i.e. the flat lists) and 
+//    just write those back into the file. We instead need to dynamically generate new 
+//    flat lists from the triggers, and write those.
 //
 //  - If we can modify references to indexed data to optionally use aliases if the 
 //    Decompiler& so wills, then so much the better; however, this would require extending 

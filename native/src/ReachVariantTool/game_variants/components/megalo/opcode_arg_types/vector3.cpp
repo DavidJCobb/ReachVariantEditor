@@ -7,7 +7,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVector3>
    );
    //
-   bool OpcodeArgValueVector3::read(cobb::ibitreader & stream) noexcept {
+   bool OpcodeArgValueVector3::read(cobb::ibitreader & stream, GameVariantDataMultiplayer& mp) noexcept {
       stream.read(this->value.x);
       stream.read(this->value.y);
       stream.read(this->value.z);

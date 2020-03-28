@@ -9,10 +9,10 @@ namespace Megalo {
       & OpcodeArgValuePlayerSet::factory
    );
    //
-   bool OpcodeArgValuePlayerSet::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValuePlayerSet::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->set_type.read(stream);
       if (this->set_type == PlayerSetType::specific_player) {
-         return this->player.read(stream) && this->addOrRemove.read(stream);
+         return this->player.read(stream, mp) && this->addOrRemove.read(stream, mp);
       }
       return true;
    }

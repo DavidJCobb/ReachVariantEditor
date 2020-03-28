@@ -28,7 +28,7 @@ namespace Megalo {
             }
          }
          //
-         bool read(cobb::ibitreader& stream) noexcept;
+         bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          void to_string(std::string& out) const noexcept;
          void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept;
@@ -59,7 +59,7 @@ namespace Megalo {
          cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[max_token_count];
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;

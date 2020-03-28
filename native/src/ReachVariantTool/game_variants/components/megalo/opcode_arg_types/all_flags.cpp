@@ -61,7 +61,7 @@ namespace Megalo {
    }
 
    #pragma region OpcodeArgValueFlagsSuperclass member functions
-   bool OpcodeArgValueFlagsSuperclass::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueFlagsSuperclass::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(this->base.bitcount());
       return true;
    }

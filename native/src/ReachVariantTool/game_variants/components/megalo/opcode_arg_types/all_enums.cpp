@@ -99,7 +99,7 @@ namespace Megalo {
    }
 
    #pragma region OpcodeArgValueEnumSuperclass member functions
-   bool OpcodeArgValueEnumSuperclass::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueEnumSuperclass::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(this->base.index_bits());
       return true;
    }

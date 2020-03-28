@@ -8,23 +8,23 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueShape>
    );
    //
-   bool OpcodeArgValueShape::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueShape::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->shapeType.read(stream);
       switch (this->shapeType) {
          case ShapeType::sphere:
-            return this->radius.read(stream);
+            return this->radius.read(stream, mp);
          case ShapeType::cylinder:
             return (
-               this->radius.read(stream)
-            && this->top.read(stream)
-            && this->bottom.read(stream)
+               this->radius.read(stream, mp)
+            && this->top.read(stream, mp)
+            && this->bottom.read(stream, mp)
             );
          case ShapeType::box:
             return (
-               this->radius.read(stream)
-            && this->length.read(stream)
-            && this->top.read(stream)
-            && this->bottom.read(stream)
+               this->radius.read(stream, mp)
+            && this->length.read(stream, mp)
+            && this->top.read(stream, mp)
+            && this->bottom.read(stream, mp)
             );
          case ShapeType::none:
             return true;

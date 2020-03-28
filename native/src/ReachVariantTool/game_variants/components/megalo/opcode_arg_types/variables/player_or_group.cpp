@@ -10,7 +10,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerOrGroup>
    );
    //
-   bool OpcodeArgValuePlayerOrGroup::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValuePlayerOrGroup::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       uint8_t type = stream.read_bits(2);
       switch (type) {
          case 0: this->variable = new OpcodeArgValueTeam;   break; // team
@@ -19,7 +19,7 @@ namespace Megalo {
             return true;
       }
       if (this->variable)
-         return this->variable->read(stream);
+         return this->variable->read(stream, mp);
       auto& error = GameEngineVariantLoadError::get();
       error.state  = GameEngineVariantLoadError::load_state::failure;
       error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;

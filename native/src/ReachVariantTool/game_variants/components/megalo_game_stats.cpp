@@ -12,7 +12,7 @@ void ReachMegaloGameStat::read(cobb::ibitreader& stream, GameVariantDataMultipla
    this->sortOrder = (Sort)stream.read_bits(2);
    stream.read(this->groupByTeam);
 }
-void ReachMegaloGameStat::write(cobb::bitwriter& stream) noexcept {
+void ReachMegaloGameStat::write(cobb::bitwriter& stream) const noexcept {
    MegaloStringIndex index = 0;
    if (this->name)
       index = this->name->index;

@@ -17,7 +17,7 @@ namespace Megalo {
          cobb::refcount_ptr<ReachForgeLabel> value;
          bool postprocessed = false;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;

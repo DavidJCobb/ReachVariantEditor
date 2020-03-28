@@ -1,7 +1,7 @@
 #include "specific_variable.h"
 
 namespace Megalo {
-   bool OpcodeArgValueObjectTimerVariable::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueObjectTimerVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       bool absence = stream.read_bits(1) != 0;
       if (absence)
          return true;
@@ -53,8 +53,8 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectPlayerVariable>
    );
    //
-   bool OpcodeArgValueObjectPlayerVariable::read(cobb::ibitreader& stream) noexcept {
-      if (!this->object.read(stream))
+   bool OpcodeArgValueObjectPlayerVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+      if (!this->object.read(stream, mp))
          return false;
       bool absence = stream.read_bits(1) != 0;
       if (absence)

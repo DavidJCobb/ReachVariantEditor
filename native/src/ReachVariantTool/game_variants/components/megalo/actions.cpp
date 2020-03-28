@@ -1070,7 +1070,7 @@ namespace Megalo {
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
             this->arguments[i]->configure_with_base(base[i]);
-            if (!this->arguments[i]->read(stream)) {
+            if (!this->arguments[i]->read(stream, mp)) {
                auto& error = GameEngineVariantLoadError::get();
                error.state            = GameEngineVariantLoadError::load_state::failure;
                error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_actions;

@@ -446,7 +446,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>
    );
 
-   bool OpcodeArgValueSound::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueSound::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(ce_bitcount) - 1;
       return true;
    }

@@ -97,7 +97,7 @@ namespace Megalo {
    }
    #pragma endregion
 
-   bool Variable::read(cobb::ibitreader& stream) noexcept {
+   bool Variable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       auto& type = this->type;
       uint8_t si = stream.read_bits(type.scope_bits());
       if (si >= type.scopes.size()) {

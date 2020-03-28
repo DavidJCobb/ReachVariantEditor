@@ -4,10 +4,10 @@ namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerTraits::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
-      &OpcodeArgValuePlayerTraits::factory
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerTraits>
    );
    //
-   bool OpcodeArgValuePlayerTraits::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValuePlayerTraits::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->index = stream.read_bits(cobb::bitcount(max_index - 1));
       return true;
    }

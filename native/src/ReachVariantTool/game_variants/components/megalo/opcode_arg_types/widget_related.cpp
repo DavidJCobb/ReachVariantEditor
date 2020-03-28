@@ -9,7 +9,7 @@ namespace Megalo {
          OpcodeArgTypeinfo::default_factory<OpcodeArgValueWidget>
       );
       //
-      bool OpcodeArgValueWidget::read(cobb::ibitreader& stream) noexcept {
+      bool OpcodeArgValueWidget::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
          if (stream.read_bits(1) != 0) { // absence bit
             this->index = index_of_none;
             return true;
@@ -74,17 +74,17 @@ namespace Megalo {
          OpcodeArgTypeinfo::default_factory<OpcodeArgValueMeterParameters>
       );
       //
-      bool OpcodeArgValueMeterParameters::read(cobb::ibitreader& stream) noexcept {
+      bool OpcodeArgValueMeterParameters::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
          this->type.read(stream);
          switch (this->type) {
             case MeterType::none:
                break;
             case MeterType::timer:
-               this->timer.read(stream);
+               this->timer.read(stream, mp);
                break;
             case MeterType::number:
-               this->numerator.read(stream);
-               this->denominator.read(stream);
+               this->numerator.read(stream, mp);
+               this->denominator.read(stream, mp);
                break;
             default:
                printf("Widget Meter Parameters had bad type %u.\n", (int)this->type);

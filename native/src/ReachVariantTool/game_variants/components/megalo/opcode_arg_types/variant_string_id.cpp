@@ -53,7 +53,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVariantStringID>
    );
 
-   bool OpcodeArgValueVariantStringID::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueVariantStringID::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(ce_bitcount) - 1;
       return true;
    }

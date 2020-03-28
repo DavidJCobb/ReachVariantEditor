@@ -11,7 +11,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectType>
    );
 
-   bool OpcodeArgValueObjectType::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueObjectType::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       bool absence = stream.read_bits(1);
       if (!absence)
          this->value = stream.read_bits(ce_bitcount);

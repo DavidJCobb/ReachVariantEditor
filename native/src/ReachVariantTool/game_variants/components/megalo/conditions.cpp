@@ -227,7 +227,7 @@ namespace Megalo {
          auto  factory = base[i].typeinfo.factory;
          this->arguments[i] = factory(stream);
          if (this->arguments[i]) {
-            if (!this->arguments[i]->read(stream)) {
+            if (!this->arguments[i]->read(stream, mp)) {
                auto& error = GameEngineVariantLoadError::get();
                error.state            = GameEngineVariantLoadError::load_state::failure;
                error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_conditions;

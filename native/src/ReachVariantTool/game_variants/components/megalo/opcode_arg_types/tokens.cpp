@@ -7,7 +7,7 @@
 #include "variables/timer.h"
 
 namespace Megalo {
-   bool OpcodeStringToken::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeStringToken::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->type.read(stream);
       switch (this->type) {
          case OpcodeStringTokenType::none:
@@ -32,7 +32,7 @@ namespace Megalo {
             return false;
       }
       if (this->value) {
-         this->value->read(stream);
+         this->value->read(stream, mp);
       }
       return true;
    }
@@ -58,7 +58,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueStringTokens2>
    );
    //
-   bool OpcodeArgValueStringTokens2::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueStringTokens2::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->stringIndex.read(stream); // string table index pointer; -1 == none
       this->tokenCount.read(stream);
       if (this->tokenCount > max_token_count) {
@@ -66,7 +66,7 @@ namespace Megalo {
          return false;
       }
       for (uint8_t i = 0; i < this->tokenCount; i++)
-         this->tokens[i].read(stream);
+         this->tokens[i].read(stream, mp);
       return true;
    }
    void OpcodeArgValueStringTokens2::postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {

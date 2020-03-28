@@ -114,7 +114,7 @@ namespace Megalo {
    
    class OpcodeArgValue {
       public:
-         virtual bool read(cobb::ibitreader&) noexcept = 0;
+         virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer& mp) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
@@ -122,10 +122,6 @@ namespace Megalo {
             out.write(u8"ARG");
          };
          //
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");
-            return nullptr;
-         }
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
          }
@@ -174,7 +170,7 @@ namespace Megalo {
          index_quirk quirk;
          int32_t     value = 0; // loaded value
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override {
             if (this->quirk == index_quirk::presence) {
                bool absence = stream.read_bits(1) != 0;
                if (absence) {

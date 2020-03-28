@@ -13,7 +13,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueAnyVariable>
    );
    //
-   bool OpcodeArgValueAnyVariable::read(cobb::ibitreader& stream) noexcept {
+   bool OpcodeArgValueAnyVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       uint8_t type = stream.read_bits(3);
       switch ((variable_type)type) {
          case variable_type::scalar: this->variable = new OpcodeArgValueScalar; break;
@@ -23,7 +23,7 @@ namespace Megalo {
          case variable_type::object: this->variable = new OpcodeArgValueObject; break;
       }
       if (this->variable)
-         return this->variable->read(stream);
+         return this->variable->read(stream, mp);
       auto& error = GameEngineVariantLoadError::get();
       error.state  = GameEngineVariantLoadError::load_state::failure;
       error.reason = GameEngineVariantLoadError::load_failure_reason::bad_script_opcode_argument;

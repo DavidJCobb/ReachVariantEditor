@@ -28,5 +28,5 @@ class ReachMegaloGameStat : public indexed_list_item {
       bool   groupByTeam = false;
       //
       void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
-      void write(cobb::bitwriter& stream) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
 };

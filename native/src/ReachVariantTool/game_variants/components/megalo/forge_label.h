@@ -27,8 +27,7 @@ namespace Megalo {
          };
          using requirement_int   = std::underlying_type_t<requirement_flags::type>;
          //
-         MegaloStringRef           name;
-         MegaloStringIndexOptional nameIndex;
+         MegaloStringRef name;
          cobb::bitnumber<3, requirement_int> requirements = 0; // testing indicates that these actually aren't requirements but I don't know what they are yet
          object_type_index_optional  requiredObjectType = -1;
          const_team_index            requiredTeam       = Megalo::const_team::none;
@@ -36,7 +35,7 @@ namespace Megalo {
          cobb::bitnumber<7, uint8_t> mapMustHaveAtLeast = 0;
          //
          void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
-         void write(cobb::bitwriter& stream) noexcept;
+         void write(cobb::bitwriter& stream) const noexcept;
          //
          inline bool requires_object_type()   const noexcept { return this->requirements & (requirement_int)requirement_flags::objects_of_type; }
          inline bool requires_assigned_team() const noexcept { return this->requirements & (requirement_int)requirement_flags::assigned_team; }
