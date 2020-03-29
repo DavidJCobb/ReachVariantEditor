@@ -35,6 +35,24 @@ int main(int argc, char *argv[]) {
 //
 //     - Begin creating a Compiler singleton with parser logic.
 //
+//        - Start by just straight-up porting the JavaScript: blocks and statements first, 
+//          just storing variable references as strings, and not resolving to opcodes; 
+//          then, variable references; then, opcodes (which can only be done after we can 
+//          decode variable references); and then everything else.
+//
+//          It turns out we basically have to do everything the same way as in the JS build 
+//          (except opcodes, which actually can be resolved at parse time) due to how we 
+//          need to handle "if"s.
+//
+//        - We're gonna have to take some time to work out how to negate if-statements that 
+//          mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
+//          to know that when it comes time to actually compile the blocks... assuming we 
+//          don't decide to just drop support for else(if)s at that point. (Think about it: 
+//          first of all, they abstract away conditions, so you can't see the full "cost" 
+//          of your code; and second, there's no code to detect equivalent ifs and decompile 
+//          them to else(if)s yet. We should support else(if)s if we can but they aren't by 
+//          any means essential; we've already decided that conciseness is not required.)
+//
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..
 //

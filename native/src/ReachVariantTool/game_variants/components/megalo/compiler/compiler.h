@@ -6,6 +6,8 @@
 #include "../trigger.h"
 
 namespace Megalo {
+   class Compiler;
+   //
    namespace Script {
       struct ParserPosition {
          int32_t pos  = -1; // position in the script
@@ -13,8 +15,12 @@ namespace Megalo {
          int32_t last_newline = -1; // index of last newline in the script
       };
       //
+      class VariableReference;
+      //
       class ParsedItem {
          public:
+            virtual ~ParsedItem() {} // need virtual methods to allow dynamic_cast
+            //
             ParsedItem* parent = nullptr;
             ParsedItem* owner  = nullptr; // for conditions
             int32_t line = -1;
@@ -34,9 +40,9 @@ namespace Megalo {
       class Alias : public ParsedItem {
          public:
             QString name;
-            void* target = nullptr;
+            VariableReference* target = nullptr;
             //
-            Alias(QString name, QString target);
+            Alias(Compiler&, QString name, QString target);
       };
       class Block : public ParsedItem {
          public:
@@ -66,10 +72,15 @@ namespace Megalo {
          public:
             Trigger* trigger  = nullptr;
             QString  name; // only for functions
+            QString  label_name;
+            int32_t  label_index = -1;
             Type     type;
             Event    event;
             std::vector<ParsedItem*> items;
             std::vector<ParsedItem*> conditions; // only for if/elseif blocks
+            //
+            void insert_item(ParsedItem*);
+            ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
       };
       class StringLiteral : public ParsedItem {
          public:
@@ -77,8 +88,12 @@ namespace Megalo {
       };
       class VariableReference : public ParsedItem {
          public:
-            class Part {
-            };
+            QString content;
+            #if !_DEBUG
+               static_assert(false, "replace (content) with logic to actuall parse parts");
+            #endif
+            //
+            class Part {};
             //
             std::vector<Part> parts;
             int16_t constant = 0;
@@ -87,6 +102,9 @@ namespace Megalo {
             int8_t  which = -1;
             int8_t  index = -1;
             bool    is_read_only = false;
+            //
+            VariableReference(QString);
+            VariableReference(int32_t);
       };
       class FunctionCall : public ParsedItem {
          public:
@@ -166,6 +184,8 @@ namespace Megalo {
          bool extractStringLiteral(QString& out); // advances the stream past the end-quote if a string literal is found
          QString extractWord(); // advances the stream to the end of the found word, or to the next non-word and non-whitespace character
          bool    extractWord(QString desired); // advances the stream to the end of the desired word only if it is found; no advancement otherwise
+         //
+         bool _closeCurrentBlock();
          //
          void _handleKeyword_Alias();
          void _handleKeyword_Do();

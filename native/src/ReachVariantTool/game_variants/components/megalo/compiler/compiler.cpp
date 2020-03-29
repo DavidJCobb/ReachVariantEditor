@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include <QRegExp>
 
 namespace {
    bool _is_operator_char(QChar c) {
@@ -54,6 +55,49 @@ namespace Megalo {
       }
       void ParsedItem::set_end(ParserPosition& pos) {
          this->range.end = pos.pos;
+      }
+      //
+      Alias::Alias(Compiler& compiler, QString name, QString target) {
+         this->name = name;
+         {  // Validate name.
+            if (_is_keyword(name)) {
+               std::string text;
+               cobb::sprintf(text, "Keyword \"%s\" cannot be used as the name of an alias.", this->name.toStdString().c_str());
+               compiler.throw_error(text);
+            }
+            if (name.contains(QRegExp("[\\[\\]\\.]"))) {
+               std::string text;
+               cobb::sprintf(text, "Invalid alias name \"%s\". Alias names cannot contain square brackets or periods.", this->name.toStdString().c_str());
+               compiler.throw_error(text);
+            }
+            if (!name.contains(QRegExp("[^0-9]"))) {
+               std::string text;
+               cobb::sprintf(text, "Invalid alias name \"%s\". You cannot alias an integer constant.", this->name.toStdString().c_str());
+               compiler.throw_error(text);
+            }
+            //
+            // TODO: Disallow aliasing namespace names, typenames, and the names of members of the unnamed namespace.
+            //
+         }
+         //
+         // TODO: If (target) is a numeric string, pass an integer to the VariableReference constructor instead.
+         //
+         this->target = new VariableReference(target);
+         this->target->owner = this;
+      }
+      //
+      void Block::insert_item(ParsedItem* item) {
+         this->items.push_back(item);
+         item->parent = this;
+      }
+      ParsedItem* Block::item(int32_t i) {
+         if (i < 0) {
+            i = this->items.size() + i;
+            if (i < 0)
+               return nullptr;
+         } else if (i >= this->items.size())
+            return nullptr;
+         return this->items[i];
       }
    }
    //
@@ -307,6 +351,14 @@ namespace Megalo {
       return true;
    }
    //
+   bool Compiler::_closeCurrentBlock() {
+      this->block->set_end(this->state);
+      auto parent = dynamic_cast<Script::Block*>(this->block->parent);
+      if (!parent)
+         return false;
+      this->block = parent;
+   }
+   //
    void Compiler::_handleKeyword_Alias() {
       auto start = this->token.pos;
       //
@@ -319,10 +371,221 @@ namespace Megalo {
       if (target.isEmpty())
          this->throw_error("An alias declaration must supply a target.");
       //
-      auto item = new Script::Alias(name, target);
+      auto item = new Script::Alias(*this, name, target);
       item->set_start(start);
       item->set_end(this->state);
       this->block->insert_item(item);
    }
-
+   void Compiler::_handleKeyword_Do() {
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::basic;
+      item->set_start(this->token.pos);
+      item->event = this->next_event;
+      this->next_event = Script::Block::Event::none;
+      this->block->insert_item(item);
+      this->block = item;
+   }
+   void Compiler::_handleKeyword_Else() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
+               this->throw_error("Unexpected \"else\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->throw_error("Unexpected \"else\".");
+      }
+      if (!this->_closeCurrentBlock())
+         this->throw_error("Unexpected \"else\".");
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::else_block;
+      item->set_start(this->token.pos);
+      this->block->insert_item(item);
+      this->block = item;
+   }
+   void Compiler::_handleKeyword_ElseIf() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
+               this->throw_error("Unexpected \"elseif\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->throw_error("Unexpected \"elseif\".");
+      }
+      if (!this->_closeCurrentBlock())
+         this->throw_error("Unexpected \"elseif\".");
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::elseif_block;
+      item->set_start(this->token.pos);
+      this->block->insert_item(item);
+      this->block = item;
+      this->_parseBlockConditions();
+      this->reset_token();
+   }
+   void Compiler::_handleKeyword_End() {
+      if (!this->_closeCurrentBlock())
+         this->throw_error("Unexpected \"end\".");
+   }
+   void Compiler::_handleKeyword_If() {
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::if_block;
+      item->set_start(this->token.pos);
+      item->event = this->next_event;
+      this->next_event = Script::Block::Event::none;
+      this->block->insert_item(item);
+      this->block = item;
+      this->_parseBlockConditions();
+      this->reset_token();
+   }
+   void Compiler::_handleKeyword_For() {
+      auto start = this->token.pos;
+      //
+      if (!this->extractWord("each"))
+         this->throw_error("The \"for\" keyword must be followed by \"each\".");
+      auto word = this->extractWord();
+      if (word.isEmpty())
+         this->throw_error("Invalid for-loop.");
+      auto    type = Script::Block::Type::basic;
+      QString label;
+      int32_t label_index = -1;
+      bool    label_is_index = false;
+      if (word == "team") {
+         type = Script::Block::Type::for_each_team;
+         if (!this->extractWord("do"))
+            this->throw_error("Invalid for-each-team loop: expected the word \"do\".");
+      } else if (word == "player") {
+         type = Script::Block::Type::for_each_player;
+         word = this->extractWord();
+         if (word == "randomly") {
+            type = Script::Block::Type::for_each_player_randomly;
+            word = this->extractWord();
+         }
+         if (word != "do") {
+            if (type == Script::Block::Type::for_each_player_randomly)
+               this->throw_error("Invalid for-each-player-randomly loop: expected the word \"do\".");
+            this->throw_error("Invalid for-each-player loop: expected the word \"randomly\" or the word \"do\".");
+         }
+      } else if (word == "object") {
+         type = Script::Block::Type::for_each_object;
+         word = this->extractWord();
+         if (word != "do") {
+            if (word != "with")
+               this->throw_error("Invalid for-each-object loop: expected the word \"with\" or the word \"do\".");
+            type = Script::Block::Type::for_each_object_with_label;
+            word = this->extractWord();
+            if (word == "no") {
+               if (!this->extractWord("label"))
+                  this->throw_error("Invalid for-each-object-with-label loop: must use the phrase \"no label\" or specify a label.");
+            } else {
+               if (word != "label")
+                  this->throw_error("Invalid for-each-object-with-label loop: expected the word \"label\".");
+               if (!this->extractStringLiteral(label)) {
+                  if (!this->extractIntegerLiteral(label_index))
+                     this->throw_error("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                  label_is_index = true;
+               }
+            }
+            if (!this->extractWord("do"))
+               this->throw_error("Invalid for-each-object-with-label loop: expected the word \"do\".");
+         }
+      } else {
+         this->throw_error("Invalid for-loop.");
+      }
+      //
+      auto item = new Script::Block;
+      item->type        = type;
+      item->label_name  = label;
+      item->label_index = label_index;
+      item->set_start(start);
+      item->event       = this->next_event;
+      this->next_event  = Script::Block::Event::none;
+      this->block->insert_item(item);
+      this->block = item;
+   }
+   void Compiler::_handleKeyword_Function() {
+      auto start = this->token.pos;
+      //
+      auto name = this->extractWord();
+      if (name.isEmpty())
+         this->throw_error("A function must have a name.");
+      for (QChar c : name) {
+         if (QString("[].").contains(c)) {
+            std::string temp;
+            cobb::sprintf(temp, "Unexpected %s inside of a function name.", QString(c).toStdString().c_str());
+            this->throw_error(temp);
+         }
+      }
+      if (_is_keyword(name)) {
+         std::string temp;
+         cobb::sprintf(temp, "Keyword \"%s\" cannot be used as the name of a function.", name.toStdString().c_str());
+         this->throw_error(temp);
+      }
+      if (!this->extractSpecificChar('('))
+         this->throw_error("Expected \"(\".");
+      if (!this->extractSpecificChar(')'))
+         this->throw_error("Expected \")\". User-defined functions cannot have arguments.");
+      //
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::function;
+      item->name = name;
+      item->set_start(start);
+      item->event = this->next_event;
+      this->next_event = Script::Block::Event::none;
+      this->block->insert_item(item);
+      this->block = item;
+   }
+   void Compiler::_handleKeyword_On() {
+      if (this->block != this->root)
+         this->throw_error("Only top-level (non-nested) blocks can be event handlers.");
+      QString words;
+      auto    prior = this->backup_stream_state();
+      while (!this->extractSpecificChar(':')) {
+         auto w = this->extractWord();
+         if (w.isEmpty()) {
+            this->restore_stream_state(prior);
+            this->throw_error("No valid event name specified.");
+         }
+         if (!words.isEmpty())
+            words += ' ';
+         words += w;
+      }
+      if (words.isEmpty()) {
+         this->restore_stream_state(prior);
+         this->throw_error("No valid event name specified.");
+      }
+      auto event = Script::Block::Event::none;
+      if (words == "init") {
+         this->next_event = Script::Block::Event::init;
+         return;
+      }
+      if (words == "local init") {
+         this->next_event = Script::Block::Event::local_init;
+         return;
+      }
+      if (words == "host migration") {
+         this->next_event = Script::Block::Event::host_migration;
+         return;
+      }
+      if (words == "double host migration") {
+         this->next_event = Script::Block::Event::double_host_migration;
+         return;
+      }
+      if (words == "object death") {
+         this->next_event = Script::Block::Event::object_death;
+         return;
+      }
+      if (words == "local") {
+         this->next_event = Script::Block::Event::local;
+         return;
+      }
+      if (words == "pregame") {
+         this->next_event = Script::Block::Event::pregame;
+         return;
+      }
+      this->restore_stream_state(prior);
+      std::string temp;
+      cobb::sprintf(temp, "Invalid event name: \"%s\".", words);
+      this->throw_error(temp);
+   }
 }
