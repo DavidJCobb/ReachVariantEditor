@@ -15,7 +15,7 @@ namespace Megalo {
    OpcodeArgValueTeam::OpcodeArgValueTeam() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValueTeam::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
+      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeam>
    );
 }

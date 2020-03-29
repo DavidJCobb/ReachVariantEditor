@@ -20,17 +20,34 @@ int main(int argc, char *argv[]) {
 //
 // CURRENT PLANS:
 //
-//  = Consider renaming all of the opcode arg types: instead of using classnames prefixed 
-//    with the superclass name e.g. Megalo::OpcodeArgValueObject, consider nesting them 
-//    under a namespace with simplified names e.g. Megalo::types::object.
+//  = [OPTIONAL] Consider renaming all of the opcode arg types: instead of using classnames 
+//    prefixed with the superclass name e.g. Megalo::OpcodeArgValueObject, consider nesting 
+//    them under a namespace with simplified names e.g. Megalo::types::object.
 //
-//  - If we can modify references to indexed data to optionally use aliases if the 
-//    Decompiler& so wills, then so much the better; however, this would require extending 
-//    the generic variable handling so that a scope-indicator definition can specify a 
+//  - [OPTIONAL] If we can modify references to indexed data to optionally use aliases if 
+//    the Decompiler& so wills, then so much the better; however, this would require extend-
+//    ing the generic variable handling so that a scope-indicator definition can specify a 
 //    custom decompile functor.
 //
-//  - When decompiling is done, begin porting the compiler work from the JavaScript 
-//    prototype.
+//  - Start work on the compiler.
+//
+//     - Port namespace, etc., definitions from JavaScript.
+//
+//     - Begin creating a Compiler singleton with parser logic.
+//
+//  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
+//    numbers, syntax highlighting, code folding, etc..
+//
+//  - Script editor window: work on a display on the bottom: a bar that should show how 
+//    much space in the file has been used, with usage divided into colored regions based 
+//    on the different parts of the file (showing details onmouseover). Think of it like 
+//    the disk usage bar from the old pre-Vista Windows Disk Defragmenter.
+//
+//  - Modify the Vector3 type so that it's just treated as three script arguments. That odd 
+//    "multi-part argument" syntax I came up with the parens should probably only be used 
+//    for flags, and maybe not even for that.
+//
+//     = HOLD OFF ON THIS UNTIL THE PARSER'S IN GOOD SHAPE.
 //
 //  - Format string arguments: use QStrings so we have UTF-8 support, and modify the 
 //    escaping code in the decompiler to do UTF-8 printable checks.

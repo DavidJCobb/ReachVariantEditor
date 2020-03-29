@@ -13,7 +13,7 @@ namespace Megalo {
    OpcodeArgValuePlayer::OpcodeArgValuePlayer() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayer::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
+      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static ,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayer>
    );
 }

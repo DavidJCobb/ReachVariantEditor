@@ -61,6 +61,7 @@ namespace Megalo {
                can_hold_variables = 0x00000002, // object, player, team
                always_read_only   = 0x00000004, // only relevant for (is_variable); only variables and properties can appear in assign statements, and properties have their own "is read only" attribute
                can_be_multiple    = 0x00000008, // this type represents one argument internally but multiple arguments in script code
+               can_be_static      = 0x00000010, // this type can be indexed directly, e.g. player[1] and team[3]
             };
          };
          using flags_type = std::underlying_type_t<flags::type>;
@@ -73,7 +74,6 @@ namespace Megalo {
          flags_type               flags   = 0;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          OpcodeArgValueFactory    factory = nullptr;
-         // TODO: other fields from the JavaScript parser implementation's MScriptTypename
          //
          OpcodeArgTypeinfo() {}
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
