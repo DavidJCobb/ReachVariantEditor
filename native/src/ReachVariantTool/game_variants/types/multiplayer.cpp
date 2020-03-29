@@ -101,7 +101,11 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       for (auto& option : o)
          option.postprocess_string_indices(sd.strings);
    }
-   this->stringTableIndexPointer.read(stream);
+   {
+      MegaloStringIndexOptional index;
+      index.read(stream);
+      this->genericName = this->scriptData.strings.get_entry(index);
+   }
    this->localizedName.read(stream);
    this->localizedDesc.read(stream);
    this->localizedCategory.read(stream);
@@ -304,7 +308,10 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          option.write(bits);
       sd.strings.write(bits);
    }
-   this->stringTableIndexPointer.write(bits);
+   {
+      MegaloStringIndexOptional index = this->genericName->index;
+      index.write(bits);
+   }
    this->localizedName.write(bits);
    this->localizedDesc.write(bits);
    this->localizedCategory.write(bits);

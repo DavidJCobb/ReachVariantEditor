@@ -103,7 +103,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          cobb::indexed_list<ReachMegaloOption,       Megalo::Limits::max_script_options> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
-      MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)
+      MegaloStringRef  genericName; // more specific than the category name but less specific than the name; could possibly also be a "fallback name"
       ReachStringTable localizedName = ReachStringTable(1, 0x180);
       ReachStringTable localizedDesc = ReachStringTable(1, 0xC00);
       ReachStringTable localizedCategory = ReachStringTable(1, 0x180);

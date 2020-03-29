@@ -40,63 +40,6 @@ int main(int argc, char *argv[]) {
 
 //  - DECOMPILER
 //
-//     - New opcode argument system
-//
-//        - Icon indices
-//
-//        - Requisition palette indices
-//
-//        - Variable argument values
-//
-//           - The generic variable system does not properly report load errors for 
-//             "biped" property access. It also doesn't have any provisions for "team" 
-//             property access, since apparently we didn't actually have full error-
-//             checking for that in the old system (we didn't validate the "which" in 
-//             that specific case).
-//
-//        - Other argument value types
-//
-//           - Format strings (tokens.h in the old system)
-//
-//           - Player sets
-//
-//           - specific_variable.h
-//
-//           - Waypoint icons
-//
-//           - Widget stuff
-//
-//        - The opcodes themselves
-//
-//        = Ensure that error handling has parity with what's in the release build.
-//
-//           - VariableScopeIndicatorValueList::postprocess needs proper error reporting.
-//
-//        = NOTE: POSTPROCESSING: I want to set up a queue on the game variant data 
-//          such that any objects that need postprocessing can just register themselves 
-//          in the queue and then we process (and then empty) that queue after load. 
-//          I've already created IGameVariantDataObjectNeedingPostprocess for this 
-//          purpose. I need to create the queue system itself and the code for it.
-//
-//           = ALTERNATIVELY, IMPLEMENT THE "NO POSTPROCESSING" PLANS BELOW EARLIER THAN 
-//             PLANNED, SO WE CAN SKIP THIS WORK ENTIRELY.
-//
-//           - An object can only add itself to the queue if it has access to the queue 
-//             (i.e. through the containing game variant object) during load. Currently 
-//             this access is not available to the new opcode argument system; I need 
-//             to modify all load methods/functors to take a game variant pointer as an 
-//             argument, and modify any typeinfos that can refer to indexed data to 
-//             register themselves for postprocess whenever they DO refer to indexed 
-//             data.
-//
-//           = Actually, coming back to all of this ages later, it looks like the new 
-//             OpcodeArgTypeinfo has a flag indicating that a type "may need post-
-//             processing." I had probably intended for opcodes to do the registration 
-//             rather than arguments registering themselves, but that still means that 
-//             the game variant needs to be passed at least as far down as the opcode.
-//
-//        - Swap everything in and see if it works.
-//
 //        = TOP-PRIORITY TASKS FOR AFTER WE HAVE A COMPILER: RETAIN A BUILD CAPABLE OF 
 //          COMPILING SO THAT WE CAN TEST STUFF IN-GAME ALONGSIDE WORKING ON THESE TASKS.
 //
@@ -109,132 +52,8 @@ int main(int argc, char *argv[]) {
 //                only explicit documentation of the file structure that we have on hand 
 //                IS our in-memory struct definitions.
 //
-//           - I can completely remove the need for a "postprocess" step if I just don't 
-//             dynamically instantiate most of the content. For example, a game variant 
-//             can have sixteen options, right? So what if I make it so that the common 
-//             superclass we're using, indexed_refcountable, has an "is_defined" bool on 
-//             it, and then, the moment the game variant is created in memory, create 
-//             sixteen dummy options? Then, I can track their refcounts before they're 
-//             "loaded:" when we find an opcode that refers to the objects, we set up a 
-//             pointer from the opcode to the dummy, and when we finally get around to 
-//             loading the options, we flag those that we load as no longer being dummies.
-//
-//              - As a bonus, this also allows us to display load-time warnings if a 
-//                script refers to an out-of-bounds option. At the end of the load process, 
-//                for each indexed list, we would iterate backwards over the list and 
-//                delete any dummies with a zero refcount; we stop deleting at the first 
-//                entry we find that either isn't a dummy or has a non-zero refcount; and 
-//                if any dummy entries have a non-zero refcount we pop a warning.
-//
-//              - This idea isn't workable for strings in the string table, but we also 
-//                don't need to change anything about how we handle those. Strings are 
-//                loaded before most other script content and we can manually postprocess 
-//                the few things that load earlier.
-//
-//           - I obviously misjudged the work involved in my current approach. With the 
-//             previous system, you need one OpcodeArgValue subclass for every argument 
-//             type, along with a boilerplate-filled "satellite" object: an instance of 
-//             OpcodeArgTypeinfo. Somehow I thought it would be easier to just turn the 
-//             whole thing inside-out -- have just the typeinfo, with non-member functors 
-//             to manipulate the bits -- but all that means is that I have to constantly 
-//             work with bits manually, rather than just on saving and exporting. We don't 
-//             NEED to keep the data in a "friendly" intermediate format but it's so, so 
-//             much easier to.
-//
-//     - Syntax
-//
-//         - We need to create a "declare" keyword for variable declarations. It should 
-//           take a variable name and, optionally, a value (i.e. "declare foo" or 
-//           "declare foo = bar"). The decompiler then needs to generate these declara-
-//           tions.
-//
-//         - The decompiler should auto-generate aliases for all indexed data items i.e. 
-//           stats, options, and traits, and decompile code for specific typeinfos should 
-//           use these. Currently OpcodeArgTypeinfo::decode_functor_t doesn't take an 
-//           argument that can hold decompile options so for now, let's define a constexpr 
-//           bool somewhere which controls whether aliases are being auto-generated; that 
-//           way, if we ever make this optional, it'll be easier to track down everything 
-//           that needs to respond to the option.
-//
 //
 
-
-//
-//     - Finish implementing OpcodeArgTypeinfo, and have all opcodes refer to instances 
-//       of that instead of factory functions.
-//
-//        - OpcodeArgTypeinfo instances need to be able to hold a factory function; they 
-//          should accept a lambda as a constructor argument and store it locally. The 
-//          factory function should NOT be a method; it should be a function pointer 
-//          member, because we want to create OpcodeArgTypeinfo instances, not subclasses.
-//
-//           = They should also overlap with what the JavaScript parser implementation 
-//             defines as the "MScriptTypename" class.
-//
-//        - Every OpcodeArgValue should have a static OpcodeArgTypeinfo member; THAT is 
-//          what we'll pass to the opcode functions' argument lists.
-//
-//           = IN PROGRESS, BUT WE'VE HIT A TINY SNAG. There are several arguments that 
-//             just wouldn't be practical to keep multi-part -- things like shapes, 
-//             widget meter parameters, and waypoint icons. We may want to consider 
-//             cheating a bit -- splitting these single arguments into multiple arguments. 
-//             The binary representation *should* be equivalent.
-//
-//              - The problem is that if we split these apart, then some opcodes become 
-//                varargs. Splitting them apart *internally* is going to be especially 
-//                nasty, but what would be easier is to just split them apart in the 
-//                script dialect -- so we'd still have a single OpcodeArgValueShape class 
-//                internally, but in the script, you'd write that one argument out as 
-//                multiple arguments.
-//
-//                In that case, opcodes are still varags within the script, so we'll have 
-//                to handle that within the code for compiling function call arguments. 
-//                That code will have to have access to the full list of arguments in the 
-//                current call, it will have to be able to "consume" zero or more arg-
-//                uments, and it will have to return the number consumed. That also means 
-//                that we won't be able to just do a single count check on function call 
-//                arguments; instead, we'll have to consume arguments until done and then 
-//                check if there are extra arguments remaining (if there aren't enough 
-//                arguments, then the consume function should return a negative result -- 
-//                perhaps the number of arguments it did manage to consume, negated).
-//
-//                 = At the same time, we need to make sure that this doesn't cause 
-//                   issues in cases where two opcodes have the same name but different 
-//                   signatures: the two "send_incident" opcodes would be the sole case 
-//                   of this. We should add to OpcodeArgTypeinfo an "is_varargs" bool 
-//                   that would be set on any argument class that represents more than 
-//                   one argument in script, like OpcodeArgValueShape:
-//
-//                    - When matching function names (from scripts) to opcodes, we prefer 
-//                      the opcode with the same name, the same argument count, and no 
-//                      is_varargs arguments. If no such opcode exists, we prefer the 
-//                      opcode with the same name and any is_varargs arguments, and we 
-//                      try to compile for that opcode. If no such opcode exists, then 
-//                      there is an error: the user specified a non-existent opcode or 
-//                      an argument count that matches no overload for the opcode name 
-//                      they used.
-//
-//                    = ADD THE is_varargs FLAG TO OpcodeArgTypeinfo.
-//
-//     - Once the above is all done, we can begin working on the decompile functions for 
-//       OpcodeArgValue classes. Enums would be a great place to start, especially since 
-//       they include assignment and comparison operators.
-//
-//        - There's a single type that acts as an "object and player variable;" it's 
-//          used by the very last action in the actions list, and appears to serve as 
-//          both that opcode's context and its parameter. We should look at the class 
-//          and see if we can't split this argument in two -- sure, the game engine may 
-//          treat it as "one argument," but if we can "lie" and still have the same 
-//          binary output, then that makes things easier for us.
-//
-//          If that's not possible, we have a fallback: OpcodeArgValue::decompile takes 
-//          a flags parameter that is currently unused. We can define a flag to indicate 
-//          whether the argument is being decompiled as a context (i.e. "this") or as an 
-//          argument; then, we can make the "opcode and player variable" argument both 
-//          the context AND the argument (i.e. same_arg.function(same_arg)).
-//
-//     - Once it's done, test all official gametypes (including Freeze Tag!) against 
-//       the current parser work in JS.
 //
 //  - PARSER
 //
@@ -248,16 +67,10 @@ int main(int argc, char *argv[]) {
 //
 //     - Generate triggers and opcodes.
 //
-//        - We'll need to update the saving code; see multiplayer.cpp line 255.
-//
 //  - IN-GAME TESTS
 //
 //     - Some game-namespace numbers that refer to social options are unknown; identify 
 //       them.
-//
-//     - The opcodes to select a new Hill are listed as unknown; I think one selects by 
-//       Spawn Sequence and the other selects at random. KOTH would be a good way to 
-//       check that.
 //
 //  - POTENTIAL COMPILER IMPROVEMENTS
 //
@@ -279,30 +92,6 @@ int main(int argc, char *argv[]) {
 //       from the moment we see it to the moment we're done compiling. It may also be 
 //       simpler, conceptually.
 //
-//     - We could greatly simplify our handling of opcode arguments by removing all of 
-//       the OpcodeArgValue subclasses, and just having OpcodeArgValue store a uint64_t 
-//       of binary data and a OpcodeArgTypeinfo reference; we would then make the 
-//       OpcodeArgTypeinfo responsible for decoding that binary data.
-//
-//       Currently, we have OpcodeArgValue subclasses which are used to decode that 
-//       data on load and retain it indefinitely, but we only really *need* to decode 
-//       the data to accomplish the following:
-//
-//        - Correctness checks during load.
-//
-//        - Serializing to plain English.
-//
-//        - Serializing to script code.
-//
-//        - Inspecting and tampering with data during debugging.
-//
-//       None of those needs require us to actually retain the decoded data. None of 
-//       those needs require us to ever decode the data into an orderly struct (though 
-//       doing so makes debugging a lot easier). If we just load the raw bits and have 
-//       the typeinfo decode them on demand for decompiling, then we remove the need to 
-//       have both OpcodeArgValue subclasses and OpcodeArgTypeinfo instances for every 
-//       argument type.
-//
 //  - POTENTIAL EDITOR IMPROVEMENTS:
 //
 //     - String table: warn when loaded count exceeds max count
@@ -314,17 +103,8 @@ int main(int argc, char *argv[]) {
 //  - Consider adding an in-app help manual explaining the various settings and 
 //    traits.
 //
-//  - GameVariantDataMultiplayer::stringTableIndexPointer is going to break if strings 
-//    are reordered, or if enough strings are removed for the index to be invalid. We 
-//    need to wrap that in a cobb::reference_tracked_object as we have string references 
-//    elsewhere.
-//
-//     = URGENT; NEEDS FIXING
-//
-//  - In Alpha Zombies, where are the following strings used? None of our current stuff 
-//    for reference_tracked_object is catching them (the user still has the option to 
-//    delete them). "Humans" "Zombies" "Infection" They're the first three strings in 
-//    the variant.
+//  - In Alpha Zombies, where are the "Humans" and "Zombies" strings near the top of the 
+//    variant used? *Are* they used?
 //
 //  - When editing single-string tables, can we use the table's max length to enforce a 
 //    max length on the UI form fields?
