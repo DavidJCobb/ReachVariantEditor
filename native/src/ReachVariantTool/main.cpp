@@ -35,14 +35,44 @@ int main(int argc, char *argv[]) {
 //
 //     - Begin creating a Compiler singleton with parser logic.
 //
-//        - Start by just straight-up porting the JavaScript: blocks and statements first, 
-//          just storing variable references as strings, and not resolving to opcodes; 
-//          then, variable references; then, opcodes (which can only be done after we can 
-//          decode variable references); and then everything else.
+//        - Code to parse blocks, assignments, and comparisons
 //
-//          It turns out we basically have to do everything the same way as in the JS build 
-//          (except opcodes, which actually can be resolved at parse time) due to how we 
-//          need to handle "if"s.
+//           = Mostly done, though some things are obviously missing since we can't handle 
+//             variable references, etc..
+//
+//        - Code to parse function calls (for now, don't bother with args)
+//
+//        - Code to interpret variable references
+//
+//           - Basic references
+//
+//           - Aliases
+//
+//        - Code to generate Opcode*s from assignments, comparisons, and function calls
+//
+//           - Once we've parsed a function's name (and context, for thiscalls), we can 
+//             identify the opcode function being invoked. We can then create an Opcode 
+//             instance and its args, and ask the args to handle their own parsing: have 
+//             a function like OpcodeArgValue::compile(Compiler&, uint8_t part), with it 
+//             having access to the "extract" functions for argument parsing. That function 
+//             should be able to return one of four status codes: success; failure; need 
+//             another argument; can receive another argument. The latter two are for 
+//             varargs types e.g. Shape (which always knows how many more arguments it 
+//             needs) and Formatted String (which receives a format string and between 0 
+//             and 2 additional tokens, inclusive).
+//
+//        - Code to compile a Block and its contained Blocks.
+//
+//           - We can run this whenever we close a top-level Block. We can't run it the 
+//             instant we close a nested Block because we want a consistent Trigger order 
+//             with Bungie, and compiling nested Blocks on closure will result in inner 
+//             Triggers being numbered before outer Triggers.
+//
+//        - Code to allow the aliasing of enum and flag values
+//
+//           - OpcodeArgTypeinfo has a system to declare names, but it requires a list of 
+//             const char*s whereas basically everything we have now is based on DetailedEnum 
+//             or DetailedFlags. We should upgrade it.
 //
 //        - We're gonna have to take some time to work out how to negate if-statements that 
 //          mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
