@@ -123,6 +123,7 @@ namespace Megalo {
             VariableReference* lhs = nullptr;
             VariableReference* rhs = nullptr;
             QString op;
+            bool negated = false;
       };
    }
    //
@@ -157,6 +158,7 @@ namespace Megalo {
          Script::FunctionCall*  call       = nullptr; // current call being parsed, if any
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
+         bool negate_next_condition = false;
          //
          void throw_error(const QString& text); // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
          Script::ParserPosition backup_stream_state();
@@ -174,7 +176,7 @@ namespace Megalo {
          void _parseAssignment(QChar);
          //
          void _parseBlockConditions();
-         void _parseConditionStart(QChar);
+         bool _parseConditionStart(QChar); // returns "true" at the end of the condition list, i.e. upon reaching the keywrod "then"
          void _parseComparison(QChar);
          //
          void _parseFunctionCallArg();
@@ -189,6 +191,7 @@ namespace Megalo {
          bool _closeCurrentBlock();
          //
          void _handleKeyword_Alias();
+         void _handleKeyword_Declare();
          void _handleKeyword_Do();
          void _handleKeyword_Else();
          void _handleKeyword_ElseIf();

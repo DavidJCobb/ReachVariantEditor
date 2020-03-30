@@ -45,6 +45,42 @@ namespace {
          return true;
       return false;
    }
+   //
+   bool _is_assignment_operator(QString s) {
+      constexpr char* operators[] = {
+         "=",
+         "+=",
+         "-=",
+         "*=",
+         "/=",
+         "%=",
+         ">>=",
+         "<<=",
+         ">>>=",
+         "~=",
+         "^=",
+         "&=",
+         "|="
+      };
+      for (size_t i = 0; i < std::extent<decltype(operators)>::value; i++)
+         if (s == operators[i])
+            return true;
+      return false;
+   }
+   bool _is_comparison_operator(QString s) {
+      constexpr char* operators[] = {
+         "==",
+         "!=",
+         ">=",
+         "<=",
+         ">",
+         "<"
+      };
+      for (size_t i = 0; i < std::extent<decltype(operators)>::value; i++)
+         if (s == operators[i])
+            return true;
+      return false;
+   }
 }
 namespace Megalo {
    namespace Script {
@@ -187,7 +223,7 @@ namespace Megalo {
    }
    void Compiler::_parseActionStart(QChar c) {
       if (this->token.text.isEmpty()) {
-         if (c != '-' && _is_operator_char(c))
+         if (c != '-' && _is_operator_char(c)) // minus-as-numeric-sign must be special-cased
             this->throw_error(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
          if (_is_syntax_char(c))
             this->throw_error(QString("Unexpected %1.").arg(c));
@@ -219,10 +255,12 @@ namespace Megalo {
          _handler_t handler = nullptr;
          //
          auto& word = this->token.text;
-         if (word == "and" || word == "or" || word == "then")
+         if (word == "and" || word == "or" || word == "not" || word == "then")
             this->throw_error(QString("The \"%1\" keyword cannot appear here.").arg(word));
          if (word == "alias")
             handler = &this->_handleKeyword_Alias;
+         else if (word == "declare")
+            handler = &this->_handleKeyword_Declare;
          else if (word == "do")
             handler = &this->_handleKeyword_Do;
          else if (word == "else")
@@ -307,8 +345,8 @@ namespace Megalo {
             return;
          }
          auto a = this->assignment;
-         a->op += c;
-         if (a->op != "=")
+         a->op = this->token.text;
+         if (!_is_assignment_operator(this->token.text))
             this->throw_error(QString("Operator %1 is not a valid assignment operator.").arg(this->token.text));
          this->reset_token();
          //
@@ -362,6 +400,173 @@ namespace Megalo {
       this->assignment->source->owner = this->assignment;
       this->block->insert_item(this->assignment);
       this->assignment = nullptr;
+      this->reset_token();
+   }
+   void Compiler::_parseBlockConditions() {
+      this->comparison = nullptr;
+      this->call       = nullptr;
+      this->reset_token();
+      this->scan([this](QChar c) {
+         if (!this->comparison) {
+            if (this->_parseConditionStart(c))
+               return true; // stop the loop; we found the "then" keyword
+            return false;
+         }
+         //
+         // If, on the other hand, we're in a statement, then we need to finish that up.
+         //
+         this->_parseComparison(c);
+         return false;
+      });
+   }
+   bool Compiler::_parseConditionStart(QChar c) {
+      if (this->token.text.isEmpty()) {
+         if (c != '-' && _is_operator_char(c)) // minus-as-numeric-sign must be special-cased
+            this->throw_error(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
+         if (_is_syntax_char(c))
+            this->throw_error(QString("Unexpected %1.").arg(c));
+         if (_is_quote_char(c))
+            this->throw_error(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
+         if (_is_whitespace_char(c))
+            return false;
+         this->token.text += c;
+         this->token.pos = this->backup_stream_state();
+         return false;
+      }
+      if (c == '[') {
+         this->token.brace = true;
+         this->token.text += c;
+         return false;
+      }
+      if (this->token.brace) {
+         if (c == ']')
+            this->token.brace = false;
+         this->token.text += c;
+         return;
+      }
+      if (_is_whitespace_char(c)) {
+         this->token.ended = true;
+         //
+         // Handle keywords here, if appropriate.
+         //
+         auto& word = this->token.text;
+         if (word == "then") {
+            if (this->negate_next_condition)
+               this->throw_error("Expected a condition after \"not\".");
+            return true;
+         }
+         if (word == "alias")
+            this->throw_error(QString("You cannot place %1 declarations inside of conditions.").arg(word));
+         else if (word == "do")
+            this->throw_error("You cannot open or close blocks inside of conditions. (If the \"do\" was meant to mark the end of conditions, use \"then\" instead.)");
+         else if (word == "else" || word == "elseif")
+            this->throw_error(QString("Unexpected \"%1\". A list of conditions must end with \"then\".").arg(word));
+         else if (word == "for" || word == "function" || word == "if")
+            this->throw_error("You cannot open or close blocks inside of conditions. End the list of conditions using the \"then\" keyword.");
+         else if (word == "on")
+            this->throw_error("You cannot mark event handlers inside of conditions.");
+         else if (word == "and" || word == "or") {
+            //
+            // TODO
+            //
+            this->reset_token();
+         } else if (word == "not") {
+            if (this->negate_next_condition)
+               this->throw_error("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
+            this->negate_next_condition = true;
+            this->reset_token();
+         }
+         return;
+      }
+      if (_is_quote_char(c))
+         this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+      if (c == '(') {
+         this->call = new Script::FunctionCall;
+         this->call->set_start(this->token.pos);
+         if (!this->call->extract_stem(this->token.text))
+            this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
+         this->reset_token();
+         ++this->state.pos; // advance past the open-paren
+         this->_parseFunctionCall(true);
+         --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+         return;
+      }
+      if (c == ')' || c == ',')
+         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (_is_operator_char(c)) {
+         this->comparison = new Script::Comparison;
+         this->comparison->set_start(this->token.pos);
+         this->comparison->lhs = new Script::VariableReference(this->token.text); // TODO: we need to catch errors here if it's not a valid variable reference, or if it's an integer
+         this->comparison->lhs->owner = this->assignment;
+         this->reset_token();
+         this->token.text = c;
+         this->token.pos = this->backup_stream_state();
+         this->comparison->negated = this->negate_next_condition;
+         this->negate_next_condition = false;
+         return;
+      }
+      if (this->token.ended)
+         this->throw_error("Statements of the form {word word} are not valid.");
+      this->token.text += c;
+      if (this->token.text[0] == '-' && !c.isNumber())
+         //
+         // We allowed the word to start with "-" in case it was a number, but it 
+         // has turned out not to be a number. That means that the "-" was an 
+         // operator, not a numeric sign. Wait, that's illegal.
+         //
+         this->throw_error("Unexpected -. Statements cannot begin with an operator.");
+   }
+   void Compiler::_parseComparison(QChar c) {
+      assert(this->comparison && "This should not have been called!");
+      if (this->comparison->op.isEmpty()) {
+         //
+         // If the statement doesn't have an operator stored, then the operator is currently 
+         // being parsed and exists in (token).
+         //
+         if (_is_operator_char(c)) {
+            this->token.text += c;
+            return;
+         }
+         auto c = this->comparison;
+         c->op = this->token.text;
+         if (!_is_comparison_operator(this->token.text))
+            this->throw_error(QString("Operator %1 is not a valid comparison operator.").arg(this->token.text));
+         this->reset_token();
+         //
+         // Fall through to righthand-side handling so we don't miss the first character 
+         // after the operator in cases like {a==b} where there's no whitespace.
+         //
+      }
+      //
+      // Handle the righthand side.
+      //
+      if ((!this->token.text.isEmpty() || c != '-') && _is_operator_char(c))
+         this->throw_error(QString("Unexpected %1 on the righthand side of a comparison statement.").arg(c));
+      if (_is_quote_char(c))
+         this->throw_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
+      if (this->token.text.isEmpty() && _is_whitespace_char(c))
+         return;
+      if (c == "(") {
+         if (!this->token.text.isEmpty())
+            this->throw_error(QString("Unexpected %1. You cannot compare variables to the result of a function call.").arg(c));
+         this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+      }
+      if (c == ')' || c == ',')
+         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (!_is_whitespace_char(c)) {
+         if (this->token.text.isEmpty())
+            this->token.pos = this->backup_stream_state();
+         this->token.text += c;
+         return;
+      }
+      //
+      // If we get here, then we've encountered the end of the statement's righthand side.
+      //
+      this->comparison->set_end(this->state);
+      this->comparison->rhs = new Script::VariableReference(this->token.text);
+      this->comparison->rhs->owner = this->comparison;
+      this->block->insert_condition(this->comparison);
+      this->comparison = nullptr;
       this->reset_token();
    }
    //
