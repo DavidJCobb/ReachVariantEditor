@@ -128,13 +128,14 @@ namespace Megalo {
    //
    class compile_exception : public std::exception {
       private:
-         std::string reason;
+         QString reason;
       public:
-         compile_exception(const std::string& reason) : std::exception(""), reason(reason) {}
+         compile_exception(const QString& reason) : std::exception(""), reason(reason) {} // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
          //
          [[nodiscard]] virtual char const* what() const {
-            return this->reason.c_str();
+            return "this is a QString";
          }
+         const QChar* why() const noexcept { return reason.constData(); }
    };
    class Compiler {
       public:
@@ -157,7 +158,7 @@ namespace Megalo {
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
          //
-         void throw_error(const std::string& text);
+         void throw_error(const QString& text); // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
          Script::ParserPosition backup_stream_state();
          void restore_stream_state(Script::ParserPosition&);
          void reset_token();

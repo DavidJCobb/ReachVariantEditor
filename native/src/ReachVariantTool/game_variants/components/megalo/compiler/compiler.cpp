@@ -60,21 +60,12 @@ namespace Megalo {
       Alias::Alias(Compiler& compiler, QString name, QString target) {
          this->name = name;
          {  // Validate name.
-            if (_is_keyword(name)) {
-               std::string text;
-               cobb::sprintf(text, "Keyword \"%s\" cannot be used as the name of an alias.", this->name.toStdString().c_str());
-               compiler.throw_error(text);
-            }
-            if (name.contains(QRegExp("[\\[\\]\\.]"))) {
-               std::string text;
-               cobb::sprintf(text, "Invalid alias name \"%s\". Alias names cannot contain square brackets or periods.", this->name.toStdString().c_str());
-               compiler.throw_error(text);
-            }
-            if (!name.contains(QRegExp("[^0-9]"))) {
-               std::string text;
-               cobb::sprintf(text, "Invalid alias name \"%s\". You cannot alias an integer constant.", this->name.toStdString().c_str());
-               compiler.throw_error(text);
-            }
+            if (_is_keyword(name))
+               compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
+            if (name.contains(QRegExp("[\\[\\]\\.]")))
+               compiler.throw_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
+            if (!name.contains(QRegExp("[^0-9]")))
+               compiler.throw_error(QString("Invalid alias name \"%1\". You cannot alias an integer constant.").arg(this->name));
             //
             // TODO: Disallow aliasing namespace names, typenames, and the names of members of the unnamed namespace.
             //
@@ -101,10 +92,8 @@ namespace Megalo {
       }
    }
    //
-   void Compiler::throw_error(const std::string& text) {
-      std::string e;
-      cobb::sprintf(e, "Error on or near line %u col %u: %s", (this->state.line + 1), (this->state.pos - this->state.last_newline + 1), text.c_str());
-      throw compile_exception(e);
+   void Compiler::throw_error(const QString& text) {
+      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(this->state.line + 1).arg(this->state.pos - this->state.last_newline + 1).arg(text));
    }
    Script::ParserPosition Compiler::backup_stream_state() {
       return this->state;
@@ -196,10 +185,190 @@ namespace Megalo {
       this->root->set_end(this->state);
       return;
    }
+   void Compiler::_parseActionStart(QChar c) {
+      if (this->token.text.isEmpty()) {
+         if (c != '-' && _is_operator_char(c))
+            this->throw_error(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
+         if (_is_syntax_char(c))
+            this->throw_error(QString("Unexpected %1.").arg(c));
+         if (_is_quote_char(c))
+            this->throw_error(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
+         if (_is_whitespace_char(c))
+            return;
+         this->token.text += c;
+         this->token.pos = this->backup_stream_state();
+         return;
+      }
+      if (c == '[') {
+         this->token.brace = true;
+         this->token.text += c;
+         return;
+      }
+      if (this->token.brace) {
+         if (c == ']')
+            this->token.brace = false;
+         this->token.text += c;
+         return;
+      }
+      if (_is_whitespace_char(c)) {
+         this->token.ended = true;
+         //
+         // Handle keywords here, if appropriate.
+         //
+         using _handler_t = decltype(Compiler::_handleKeyword_Alias);
+         _handler_t handler = nullptr;
+         //
+         auto& word = this->token.text;
+         if (word == "and" || word == "or" || word == "then")
+            this->throw_error(QString("The \"%1\" keyword cannot appear here.").arg(word));
+         if (word == "alias")
+            handler = &this->_handleKeyword_Alias;
+         else if (word == "do")
+            handler = &this->_handleKeyword_Do;
+         else if (word == "else")
+            handler = &this->_handleKeyword_Else;
+         else if (word == "elseif")
+            handler = &this->_handleKeyword_ElseIf;
+         else if (word == "end")
+            handler = &this->_handleKeyword_End;
+         else if (word == "for")
+            handler = &this->_handleKeyword_For;
+         else if (word == "function")
+            handler = &this->_handleKeyword_Function;
+         else if (word == "if")
+            handler = &this->_handleKeyword_If;
+         else if (word == "on")
+            handler = &this->_handleKeyword_On;
+         //
+         if (handler) {
+            auto prior = this->state;
+            ((*this).*(handler))();
+            this->reset_token();
+            if (prior.pos < this->state.pos) {
+               //
+               // The handler code advanced the position to the end of the keyword's relevant 
+               // content (e.g. the end of a block declaration). However, our containing loop 
+               // will increment the position one more time, so we need to rewind by one.
+               //
+               --this->state.pos;
+            }
+         }
+         //
+         // If (handler) is null, then the word wasn't a keyword. Move to the next iteration 
+         // of the parsing loop; we'll eventually feed the word to a new statement.
+         //
+         return;
+      }
+      if (_is_quote_char(c))
+         this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+      if (c == '(') {
+         this->call = new Script::FunctionCall;
+         this->call->set_start(this->token.pos);
+         if (!this->call->extract_stem(this->token.text))
+            this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
+         this->reset_token();
+         ++this->state.pos; // advance past the open-paren
+         this->_parseFunctionCall(false);
+         --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+         return;
+      }
+      if (c == ')' || c == ',')
+         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (_is_operator_char(c)) {
+         this->assignment = new Script::Assignment;
+         this->assignment->set_start(this->token.pos);
+         this->assignment->target = new Script::VariableReference(this->token.text); // TODO: we need to catch errors here if it's not a valid variable reference, or if it's an integer
+         this->assignment->target->owner = this->assignment;
+         this->reset_token();
+         this->token.text = c;
+         this->token.pos  = this->backup_stream_state();
+         return;
+      }
+      if (this->token.ended)
+         this->throw_error("Statements of the form {word word} are not valid.");
+      this->token.text += c;
+      if (this->token.text[0] == '-' && !c.isNumber())
+         //
+         // We allowed the word to start with "-" in case it was a number, but it 
+         // has turned out not to be a number. That means that the "-" was an 
+         // operator, not a numeric sign. Wait, that's illegal.
+         //
+         this->throw_error("Unexpected -. Statements cannot begin with an operator.");
+   }
+   void Compiler::_parseAssignment(QChar c) {
+      assert(this->assignment && "This should not have been called!");
+      if (this->assignment->op.isEmpty()) {
+         //
+         // If the statement doesn't have an operator stored, then the operator is currently 
+         // being parsed and exists in (token).
+         //
+         if (_is_operator_char(c)) {
+            this->token.text += c;
+            return;
+         }
+         auto a = this->assignment;
+         a->op += c;
+         if (a->op != "=")
+            this->throw_error(QString("Operator %1 is not a valid assignment operator.").arg(this->token.text));
+         this->reset_token();
+         //
+         // Fall through to righthand-side handling so we don't miss the first character 
+         // after the operator in cases like {a=b} where there's no whitespace.
+         //
+      }
+      if ((!this->token.text.isEmpty() || c != '-') && _is_operator_char(c))
+         this->throw_error(QString("Unexpected %1 on the righthand side of an assignment statement.").arg(c));
+      if (_is_quote_char(c))
+         this->throw_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+      if (this->token.text.isEmpty()) {
+         if (_is_whitespace_char(c))
+            return;
+         if (c == '(')
+            this->throw_error("Unexpected (. Parentheses are only allowed as delimiters for function arguments.");
+      } else {
+         if (c == '(') {
+            this->call = new Script::FunctionCall;
+            this->call->set_start(this->token.pos);
+            if (!this->call->extract_stem(this->token.text))
+               this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
+            this->assignment->source = this->call;
+            this->call->owner = this->assignment;
+            this->reset_token();
+            ++this->state.pos; // advance past the open-paren
+            this->_parseFunctionCall(false);
+            --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+            return;
+            //
+            // From here on out, the code for parsing function calls will handle what 
+            // remains. The end of the function call is also the end of this statement, 
+            // so the code for parsing function calls will "close" this statement just 
+            // fine.
+            //
+         }
+      }
+      if (c == ')' || c == ',')
+         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (!_is_whitespace_char(c)) {
+         if (this->token.text.isEmpty())
+            this->token.pos = this->backup_stream_state();
+         this->token.text += c;
+         return;
+      }
+      //
+      // If we get here, then we've encountered the end of the statement's righthand side.
+      //
+      this->assignment->set_end(this->state);
+      this->assignment->source = new Script::VariableReference(this->token.text);
+      this->assignment->source->owner = this->assignment;
+      this->block->insert_item(this->assignment);
+      this->assignment = nullptr;
+      this->reset_token();
+   }
    //
    bool Compiler::is_in_statement() const {
       return this->assignment || this->comparison || this->call;
    }
+   //
    bool Compiler::extractIntegerLiteral(int32_t& out) {
       auto    prior = this->backup_stream_state();
       QChar   sign  = '\0';
@@ -510,17 +679,11 @@ namespace Megalo {
       if (name.isEmpty())
          this->throw_error("A function must have a name.");
       for (QChar c : name) {
-         if (QString("[].").contains(c)) {
-            std::string temp;
-            cobb::sprintf(temp, "Unexpected %s inside of a function name.", QString(c).toStdString().c_str());
-            this->throw_error(temp);
-         }
+         if (QString("[].").contains(c))
+            this->throw_error(QString("Unexpected %1 inside of a function name.").arg(c));
       }
-      if (_is_keyword(name)) {
-         std::string temp;
-         cobb::sprintf(temp, "Keyword \"%s\" cannot be used as the name of a function.", name.toStdString().c_str());
-         this->throw_error(temp);
-      }
+      if (_is_keyword(name))
+         this->throw_error(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
       if (!this->extractSpecificChar('('))
          this->throw_error("Expected \"(\".");
       if (!this->extractSpecificChar(')'))
@@ -584,8 +747,6 @@ namespace Megalo {
          return;
       }
       this->restore_stream_state(prior);
-      std::string temp;
-      cobb::sprintf(temp, "Invalid event name: \"%s\".", words);
-      this->throw_error(temp);
+      this->throw_error(QString("Invalid event name: \"%s\".").arg(words));
    }
 }
