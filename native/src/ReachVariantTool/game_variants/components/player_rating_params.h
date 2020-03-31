@@ -32,4 +32,8 @@ class ReachPlayerRatingParams {
       bool operator==(const ReachPlayerRatingParams&) const noexcept = default;
       bool operator!=(const ReachPlayerRatingParams&) const noexcept = default;
       #endif
+      //
+      inline static constexpr uint32_t bitcount() noexcept { // constexpr implies inline but let's be explicit
+         return (sizeof(float) * 8 * 15) + decltype(flag)::bitcount;
+      }
 };

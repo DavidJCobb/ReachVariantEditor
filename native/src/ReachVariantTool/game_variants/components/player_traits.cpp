@@ -1,5 +1,17 @@
 #include "player_traits.h"
 
+uint32_t ReachPlayerTraits::bitcount() const noexcept {
+   uint32_t bitcount = ReachPlayerTraits::_fixed_bitcount();
+   //
+   if (this->movement.jumpHeight < 0) {
+      bitcount += 1; // include the presence bit
+   } else {
+      bitcount += decltype(this->movement.jumpHeight)::bitcount + 1; // include the presence bit
+   }
+   //
+   return bitcount;
+}
+
 #if __cplusplus <= 201703L
 #include <tuple>
 bool ReachPlayerTraits::operator==(const ReachPlayerTraits& o) const noexcept {

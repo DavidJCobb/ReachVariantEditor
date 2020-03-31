@@ -80,6 +80,7 @@ namespace Megalo {
             std::vector<ParsedItem*> items;
             std::vector<ParsedItem*> conditions; // only for if/elseif blocks
             //
+            void insert_condition(ParsedItem*);
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
       };
@@ -91,7 +92,7 @@ namespace Megalo {
          public:
             QString content;
             #if !_DEBUG
-               static_assert(false, "replace (content) with logic to actuall parse parts");
+               static_assert(false, "replace (content) with logic to actually parse parts");
             #endif
             //
             class Part {};
@@ -112,6 +113,8 @@ namespace Megalo {
             VariableReference* context = nullptr;
             QString name;
             std::vector<std::string> args;
+            //
+            bool extract_stem(QString);
       };
       class Assignment : public ParsedItem {
          public:
@@ -174,23 +177,19 @@ namespace Megalo {
          bool _parseConditionStart(QChar); // returns "true" at the end of the condition list, i.e. upon reaching the keywrod "then"
          void _parseComparison(QChar);
          //
-         void _parseFunctionCallArg();
          void _parseFunctionCall(bool is_condition);
          //
          bool _closeCurrentBlock();
          //
-         extract_result extract_integer_literal(int32_t& out) = delete;
-         bool extract_integer(int32_t& out) { // cAnNoT oVeRlOaD fUnCtIoNs DiStInGuIsHeD bY rEtUrN tYpE aLoNe
+         extract_result_t extract_integer_literal(int32_t& out) {
             auto result = string_scanner::extract_integer_literal(out);
-            if (result == string_scanner::extract_result::success)
-               return true;
             if (result == string_scanner::extract_result::floating_point)
                this->throw_error("Unexpected decimal point. Floating-point numbers are not supported.");
-            return false;
+            return result;
          }
          //
          void _handleKeyword_Alias();
-         void _handleKeyword_Declare();
+         void _handleKeyword_Declare(); // INCOMPLETE
          void _handleKeyword_Do();
          void _handleKeyword_Else();
          void _handleKeyword_ElseIf();

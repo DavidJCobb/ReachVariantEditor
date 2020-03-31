@@ -29,4 +29,8 @@ class ReachMegaloGameStat : public indexed_list_item {
       //
       void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
+      //
+      inline static constexpr uint32_t bitcount() noexcept { // constexpr implies inline but let's be explicit
+         return MegaloStringIndex::bitcount + 2 + 2 + 1;
+      }
 };

@@ -5,8 +5,6 @@
 MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
    //
-   auto& editor = ReachEditorState::get();
-   //
    QObject::connect(this->ui.navigation, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* current, QListWidgetItem* previous) {
       auto stack = this->ui.stack;
       if (current->text() == "Metadata Strings") {
@@ -54,16 +52,4 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          return;
       }
    });
-   //
-   this->updateFromVariant(nullptr);
-}
-void MegaloScriptEditorWindow::updateFromVariant(GameVariant* variant) {
-   if (!variant) {
-      variant = ReachEditorState::get().variant();
-      if (!variant)
-         return;
-   }
-   auto mp = variant->get_multiplayer_data();
-   if (!mp)
-      return;
 }

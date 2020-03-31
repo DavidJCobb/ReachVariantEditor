@@ -22,6 +22,7 @@ namespace Megalo {
             bool can_have_variables = false; // only true for global namespace
             std::vector<NamespaceMember> members;
             //
+            Namespace() {}
             Namespace(const char* n, bool s, bool v) : name(n), can_have_statics(s), can_have_variables(v) {}
             Namespace(const char* n, bool s, bool v, std::initializer_list<NamespaceMember> m) : name(n), can_have_statics(s), can_have_variables(v), members(m) {}
       };

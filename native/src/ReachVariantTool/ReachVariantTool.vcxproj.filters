@@ -334,6 +334,12 @@
     <ClCompile Include="helpers\qt\string.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\generic\AllocationMeter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\script_editor\bottom_bar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -447,6 +453,12 @@
     <QtMoc Include="ui\script_editor\page_req_obj_types.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\generic\AllocationMeter.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\script_editor\bottom_bar.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
@@ -531,6 +543,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\script_editor\page_req_obj_types.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\script_editor\bottom_bar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

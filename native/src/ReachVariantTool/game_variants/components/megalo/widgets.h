@@ -19,5 +19,9 @@ namespace Megalo {
          void write(cobb::bitwriter& stream) const noexcept {
             this->position.write(stream);
          }
+         //
+         inline static constexpr uint32_t bitcount() noexcept {
+            return decltype(position)::bitcount;
+         }
    };
 }

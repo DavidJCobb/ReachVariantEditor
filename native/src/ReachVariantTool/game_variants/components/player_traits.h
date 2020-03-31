@@ -322,13 +322,60 @@ class ReachPlayerTraits {
       void read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
+      uint32_t bitcount() const noexcept;
+      //
       #if __cplusplus <= 201703L
-      bool operator==(const ReachPlayerTraits&) const noexcept;
-      bool operator!=(const ReachPlayerTraits& other) const noexcept { return !(*this == other); }
+         bool operator==(const ReachPlayerTraits&) const noexcept;
+         bool operator!=(const ReachPlayerTraits& other) const noexcept { return !(*this == other); }
       #else
-      bool operator==(const ReachPlayerTraits&) const noexcept = default;
-      bool operator!=(const ReachPlayerTraits&) const noexcept = default;
+         bool operator==(const ReachPlayerTraits&) const noexcept = default;
+         bool operator!=(const ReachPlayerTraits&) const noexcept = default;
       #endif
+      //
+   private:
+      inline static constexpr uint32_t _fixed_bitcount() noexcept { // constexpr implies inline but let's be explicit
+         uint32_t bitcount = 0;
+         bitcount += decltype(defense.damageResist)::bitcount;
+         bitcount += decltype(defense.healthMult)::bitcount;
+         bitcount += decltype(defense.healthRate)::bitcount;
+         bitcount += decltype(defense.shieldMult)::bitcount;
+         bitcount += decltype(defense.shieldRate)::bitcount;
+         bitcount += decltype(defense.shieldDelay)::bitcount;
+         bitcount += decltype(defense.headshotImmune)::bitcount;
+         bitcount += decltype(defense.vampirism)::bitcount;
+         bitcount += decltype(defense.assassinImmune)::bitcount;
+         bitcount += decltype(defense.cannotDieFromDamage)::bitcount;
+         //
+         bitcount += decltype(offense.damageMult)::bitcount;
+         bitcount += decltype(offense.meleeMult)::bitcount;
+         bitcount += decltype(offense.weaponPrimary)::bitcount;
+         bitcount += decltype(offense.weaponSecondary)::bitcount;
+         bitcount += decltype(offense.grenadeCount)::bitcount;
+         bitcount += decltype(offense.infiniteAmmo)::bitcount;
+         bitcount += decltype(offense.grenadeRegen)::bitcount;
+         bitcount += decltype(offense.weaponPickup)::bitcount;
+         bitcount += decltype(offense.abilityUsage)::bitcount;
+         bitcount += decltype(offense.abilitiesDropOnDeath)::bitcount;
+         bitcount += decltype(offense.infiniteAbility)::bitcount;
+         bitcount += decltype(offense.ability)::bitcount;
+         //
+         bitcount += decltype(movement.speed)::bitcount;
+         bitcount += decltype(movement.gravity)::bitcount;
+         bitcount += decltype(movement.vehicleUsage)::bitcount;
+         bitcount += decltype(movement.unknown)::bitcount;
+         //bitcount += decltype(movement.jumpHeight)::bitcount; // can only be computed on instances, since it uses a presence bit
+         //
+         bitcount += decltype(appearance.activeCamo)::bitcount;
+         bitcount += decltype(appearance.waypoint)::bitcount;
+         bitcount += decltype(appearance.visibleName)::bitcount;
+         bitcount += decltype(appearance.aura)::bitcount;
+         bitcount += decltype(appearance.forcedColor)::bitcount;
+         //
+         bitcount += decltype(sensors.radarState)::bitcount;
+         bitcount += decltype(sensors.radarRange)::bitcount;
+         bitcount += decltype(sensors.directionalDamageIndicator)::bitcount;
+         return bitcount;
+      }
 };
 
 class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_item {
@@ -364,5 +411,11 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_it
       void postprocess_string_indices(ReachStringTable& table) noexcept {
          this->name = table.get_entry(this->nameIndex);
          this->desc = table.get_entry(this->descIndex);
+      }
+      //
+      inline uint32_t bitcount() noexcept {
+         uint32_t bitcount = ReachPlayerTraits::bitcount();
+         bitcount += MegaloStringIndex::bitcount * 2;
+         return bitcount;
       }
 };

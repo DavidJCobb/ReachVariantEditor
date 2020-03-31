@@ -15,11 +15,15 @@ namespace Megalo {
             };
             using scan_functor_t = std::function<bool(QChar)>;
             //
-            enum class extract_result {
-               failure,
-               success,
-               floating_point, // extracted an integer literal, but it ended with a decimal point
+            struct extract_result {
+               extract_result() = delete;
+               enum type : int {
+                  failure,
+                  success,
+                  floating_point,  // extracted an integer literal, but it ended with a decimal point
+               };
             };
+            using extract_result_t = extract_result::type;
             //
          protected:
             QString text;
@@ -36,8 +40,12 @@ namespace Megalo {
             void scan(scan_functor_t);
             pos  backup_stream_state();
             void restore_stream_state(pos);
+            void skip_to_end();
+            inline bool is_at_end() {
+               return this->state.offset <= this->text.size();
+            }
             //
-            extract_result extract_integer_literal(int32_t& out);
+            extract_result_t extract_integer_literal(int32_t& out);
             bool extract_specific_char(QChar which); // advances the stream past the char if the char is found. NOTE: cannot be used to search for whitespace
             bool extract_string_literal(QString& out); // advances the stream past the end-quote if a string literal is found
             QString extract_word(); // advances the stream to the end of the found word, or to the next non-word and non-whitespace character

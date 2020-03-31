@@ -40,13 +40,13 @@ int main(int argc, char *argv[]) {
 //           = Mostly done, though some things are obviously missing since we can't handle 
 //             variable references, etc..
 //
-//           = Assignments should allow (var = func()) but NOT (var += func()).
-//
 //           = Assignments should fail when assigning to a constant integer, or to an alias 
 //             of a constant integer. (We'll probably have to do this when compiling, not 
 //             sooner.)
 //
 //        - Code to parse function calls (for now, don't bother with args)
+//
+//           = Mostly done, but a lot will need rewriting once we're compiling Opcodes.
 //
 //        - Code to interpret variable references
 //
@@ -60,6 +60,13 @@ int main(int argc, char *argv[]) {
 //          even have initial values in the first place.
 //
 //        - Code to generate Opcode*s from assignments, comparisons, and function calls
+//
+//           - For non-condition statements, we can identify the opcode function being 
+//             invoked once we detect the presence or absence of an opening parentheses, 
+//             i.e. all statements are either {func()}, {var = var}, or {var = func()}, 
+//             and once we hit that opening parentheses (or detect that there isn't one), 
+//             we've seen enough (the lefthand side, operator, and righthand side) to 
+//             begin trying to ID the opcode function.
 //
 //           - By the time we hit this point, we'll need the Compiler to have a reference 
 //             to the game variant MP data just like Decompiler does, since we'll need to 

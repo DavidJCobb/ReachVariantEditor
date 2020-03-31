@@ -6,6 +6,7 @@ namespace Megalo {
          this->offset += other.offset;
          this->line   += other.line;
          this->last_newline = (other.offset - other.last_newline) + this->offset; // TODO: verify
+         return *this;
       }
       //
       /*static*/ bool string_scanner::is_operator_char(QChar c) {
@@ -71,8 +72,11 @@ namespace Megalo {
       void string_scanner::restore_stream_state(pos s) {
          this->state = s;
       }
+      void string_scanner::skip_to_end() {
+         this->scan([](QChar c) { return false; });
+      }
       //
-      string_scanner::extract_result string_scanner::extract_integer_literal(int32_t& out) {
+      string_scanner::extract_result_t string_scanner::extract_integer_literal(int32_t& out) {
          auto    prior   = this->backup_stream_state();
          QChar   sign    = '\0';
          QString found   = "";
@@ -128,13 +132,11 @@ namespace Megalo {
          return true;
       }
       bool string_scanner::extract_string_literal(QString& out) {
-         constexpr QChar ce_none = '\0';
-         //
          auto  prior = this->backup_stream_state();
-         QChar inside = ce_none;
+         QChar inside = '\0';
          out = "";
          this->scan([this, &out, &inside](QChar c) {
-            if (inside != ce_none) {
+            if (inside != '\0') { // can't use a constexpr for the "none" value because lambdas don't like that, and can't use !delim because a null QChar doesn't test as false, UGH
                if (c == inside) {
                   if (this->state.offset > 0 && this->text[this->state.offset - 1] == "\\") { // allow backslash-escaping
                      out += c;
@@ -153,7 +155,7 @@ namespace Megalo {
                return true; // stop
             return false;
          });
-         if (inside == ce_none) {
+         if (inside == '\0') {
             this->restore_stream_state(prior);
             return false;
          }
