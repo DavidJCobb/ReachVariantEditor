@@ -2,21 +2,6 @@
 #include <QRegExp>
 
 namespace {
-   bool _is_operator_char(QChar c) {
-      static auto charset = QString("=<>!+-*/%&|~^");
-      return charset.indexOf(c) >= 0;
-   }
-   bool _is_quote_char(QChar c) {
-      static auto charset = QString("`'\"");
-      return charset.indexOf(c) >= 0;
-   }
-   bool _is_syntax_char(QChar c) {
-      static auto charset = QString("(),:");
-      return charset.indexOf(c) >= 0;
-   }
-   inline bool _is_whitespace_char(QChar c) {
-      return c.isSpace();
-   }
    bool _is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias")
@@ -46,6 +31,7 @@ namespace {
       return false;
    }
    //
+   constexpr char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
       constexpr char* operators[] = {
          "=",
@@ -84,13 +70,13 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
-      void ParsedItem::set_start(ParserPosition& pos) {
+      void ParsedItem::set_start(string_scanner::pos& pos) {
          this->line = pos.line;
-         this->col  = pos.pos - pos.last_newline;
-         this->range.start = pos.pos;
+         this->col  = pos.offset - pos.last_newline;
+         this->range.start = pos.offset;
       }
-      void ParsedItem::set_end(ParserPosition& pos) {
-         this->range.end = pos.pos;
+      void ParsedItem::set_end(string_scanner::pos& pos) {
+         this->range.end = pos.offset;
       }
       //
       Alias::Alias(Compiler& compiler, QString name, QString target) {
@@ -129,58 +115,10 @@ namespace Megalo {
    }
    //
    void Compiler::throw_error(const QString& text) {
-      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(this->state.line + 1).arg(this->state.pos - this->state.last_newline + 1).arg(text));
-   }
-   Script::ParserPosition Compiler::backup_stream_state() {
-      return this->state;
-   }
-   void Compiler::restore_stream_state(Script::ParserPosition& s) {
-      this->state = s;
+      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(this->state.line + 1).arg(this->state.offset - this->state.last_newline + 1).arg(text));
    }
    void Compiler::reset_token() {
       this->token = Token();
-   }
-   //
-   void Compiler::scan(scan_functor_t functor) {
-      auto&  text    = this->text;
-      size_t length  = this->text.size();
-      auto&  pos     = this->state.pos;
-      bool   comment = false; // are we inside of a line comment?
-      for (; pos < length; ++pos) {
-         QChar c = text[pos];
-         if (c == '\n') {
-            if (pos != this->state.last_newline) {
-               //
-               // Before we increment the line counter, we want to double-check that we haven't seen this 
-               // specific line break before. This is because if a functor chooses to stop scanning on a 
-               // newline, the next call to (scan) will see that same newline again.
-               //
-               ++this->state.line;
-               this->state.last_newline = pos;
-            }
-            if (comment) {
-               comment = false;
-               continue;
-            }
-         }
-         if (comment)
-            continue;
-         if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle line comments
-            comment = true;
-            continue;
-         }
-         if (functor(c))
-            return;
-      }
-      //
-      // A lot of our parser logic relies on reacting to the character after something, e.g. processing a 
-      // keyword when we encounter the non-word character after it. However, this means that if a token 
-      // ends at EOF (such that there's no character after the token), then parsing code can't react to 
-      // it. We solve this problem by pretending that the input stream is one character longer than it 
-      // really is: we supply a trailing space character in order to be sure that any given token's end 
-      // is processed.
-      //
-      functor(' ');
    }
    //
    void Compiler::parse(QString text) {
@@ -223,13 +161,13 @@ namespace Megalo {
    }
    void Compiler::_parseActionStart(QChar c) {
       if (this->token.text.isEmpty()) {
-         if (c != '-' && _is_operator_char(c)) // minus-as-numeric-sign must be special-cased
+         if (c != '-' && string_scanner::is_operator_char(c)) // minus-as-numeric-sign must be special-cased
             this->throw_error(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
-         if (_is_syntax_char(c))
+         if (string_scanner::is_syntax_char(c))
             this->throw_error(QString("Unexpected %1.").arg(c));
-         if (_is_quote_char(c))
+         if (string_scanner::is_quote_char(c))
             this->throw_error(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
-         if (_is_whitespace_char(c))
+         if (string_scanner::is_whitespace_char(c))
             return;
          this->token.text += c;
          this->token.pos = this->backup_stream_state();
@@ -246,7 +184,7 @@ namespace Megalo {
          this->token.text += c;
          return;
       }
-      if (_is_whitespace_char(c)) {
+      if (string_scanner::is_whitespace_char(c)) {
          this->token.ended = true;
          //
          // Handle keywords here, if appropriate.
@@ -282,13 +220,13 @@ namespace Megalo {
             auto prior = this->state;
             ((*this).*(handler))();
             this->reset_token();
-            if (prior.pos < this->state.pos) {
+            if (prior.offset < this->state.offset) {
                //
                // The handler code advanced the position to the end of the keyword's relevant 
                // content (e.g. the end of a block declaration). However, our containing loop 
                // will increment the position one more time, so we need to rewind by one.
                //
-               --this->state.pos;
+               --this->state.offset;
             }
          }
          //
@@ -297,7 +235,7 @@ namespace Megalo {
          //
          return;
       }
-      if (_is_quote_char(c))
+      if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
       if (c == '(') {
          this->call = new Script::FunctionCall;
@@ -305,14 +243,14 @@ namespace Megalo {
          if (!this->call->extract_stem(this->token.text))
             this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
          this->reset_token();
-         ++this->state.pos; // advance past the open-paren
+         ++this->state.offset; // advance past the open-paren
          this->_parseFunctionCall(false);
-         --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+         --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
       }
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
-      if (_is_operator_char(c)) {
+      if (string_scanner::is_operator_char(c)) {
          this->assignment = new Script::Assignment;
          this->assignment->set_start(this->token.pos);
          this->assignment->target = new Script::VariableReference(this->token.text); // TODO: we need to catch errors here if it's not a valid variable reference, or if it's an integer
@@ -340,7 +278,7 @@ namespace Megalo {
          // If the statement doesn't have an operator stored, then the operator is currently 
          // being parsed and exists in (token).
          //
-         if (_is_operator_char(c)) {
+         if (string_scanner::is_operator_char(c)) {
             this->token.text += c;
             return;
          }
@@ -354,17 +292,20 @@ namespace Megalo {
          // after the operator in cases like {a=b} where there's no whitespace.
          //
       }
-      if ((!this->token.text.isEmpty() || c != '-') && _is_operator_char(c))
+      if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c))
          this->throw_error(QString("Unexpected %1 on the righthand side of an assignment statement.").arg(c));
-      if (_is_quote_char(c))
+      if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
       if (this->token.text.isEmpty()) {
-         if (_is_whitespace_char(c))
+         if (string_scanner::is_whitespace_char(c))
             return;
          if (c == '(')
             this->throw_error("Unexpected (. Parentheses are only allowed as delimiters for function arguments.");
       } else {
          if (c == '(') {
+            if (this->assignment->op != ce_assignment_operator) {
+               this->throw_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator =.").arg(this->assignment->op));
+            }
             this->call = new Script::FunctionCall;
             this->call->set_start(this->token.pos);
             if (!this->call->extract_stem(this->token.text))
@@ -372,9 +313,9 @@ namespace Megalo {
             this->assignment->source = this->call;
             this->call->owner = this->assignment;
             this->reset_token();
-            ++this->state.pos; // advance past the open-paren
+            ++this->state.offset; // advance past the open-paren
             this->_parseFunctionCall(false);
-            --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+            --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
             return;
             //
             // From here on out, the code for parsing function calls will handle what 
@@ -386,7 +327,7 @@ namespace Megalo {
       }
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
-      if (!_is_whitespace_char(c)) {
+      if (!string_scanner::is_whitespace_char(c)) {
          if (this->token.text.isEmpty())
             this->token.pos = this->backup_stream_state();
          this->token.text += c;
@@ -421,13 +362,13 @@ namespace Megalo {
    }
    bool Compiler::_parseConditionStart(QChar c) {
       if (this->token.text.isEmpty()) {
-         if (c != '-' && _is_operator_char(c)) // minus-as-numeric-sign must be special-cased
+         if (c != '-' && string_scanner::is_operator_char(c)) // minus-as-numeric-sign must be special-cased
             this->throw_error(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
-         if (_is_syntax_char(c))
+         if (string_scanner::is_syntax_char(c))
             this->throw_error(QString("Unexpected %1.").arg(c));
-         if (_is_quote_char(c))
+         if (string_scanner::is_quote_char(c))
             this->throw_error(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
-         if (_is_whitespace_char(c))
+         if (string_scanner::is_whitespace_char(c))
             return false;
          this->token.text += c;
          this->token.pos = this->backup_stream_state();
@@ -444,7 +385,7 @@ namespace Megalo {
          this->token.text += c;
          return;
       }
-      if (_is_whitespace_char(c)) {
+      if (string_scanner::is_whitespace_char(c)) {
          this->token.ended = true;
          //
          // Handle keywords here, if appropriate.
@@ -478,7 +419,7 @@ namespace Megalo {
          }
          return;
       }
-      if (_is_quote_char(c))
+      if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
       if (c == '(') {
          this->call = new Script::FunctionCall;
@@ -486,14 +427,14 @@ namespace Megalo {
          if (!this->call->extract_stem(this->token.text))
             this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
          this->reset_token();
-         ++this->state.pos; // advance past the open-paren
+         ++this->state.offset; // advance past the open-paren
          this->_parseFunctionCall(true);
-         --this->state.pos; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
+         --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
       }
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
-      if (_is_operator_char(c)) {
+      if (string_scanner::is_operator_char(c)) {
          this->comparison = new Script::Comparison;
          this->comparison->set_start(this->token.pos);
          this->comparison->lhs = new Script::VariableReference(this->token.text); // TODO: we need to catch errors here if it's not a valid variable reference, or if it's an integer
@@ -523,7 +464,7 @@ namespace Megalo {
          // If the statement doesn't have an operator stored, then the operator is currently 
          // being parsed and exists in (token).
          //
-         if (_is_operator_char(c)) {
+         if (string_scanner::is_operator_char(c)) {
             this->token.text += c;
             return;
          }
@@ -540,11 +481,11 @@ namespace Megalo {
       //
       // Handle the righthand side.
       //
-      if ((!this->token.text.isEmpty() || c != '-') && _is_operator_char(c))
+      if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c))
          this->throw_error(QString("Unexpected %1 on the righthand side of a comparison statement.").arg(c));
-      if (_is_quote_char(c))
+      if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
-      if (this->token.text.isEmpty() && _is_whitespace_char(c))
+      if (this->token.text.isEmpty() && string_scanner::is_whitespace_char(c))
          return;
       if (c == "(") {
          if (!this->token.text.isEmpty())
@@ -553,7 +494,7 @@ namespace Megalo {
       }
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
-      if (!_is_whitespace_char(c)) {
+      if (!string_scanner::is_whitespace_char(c)) {
          if (this->token.text.isEmpty())
             this->token.pos = this->backup_stream_state();
          this->token.text += c;
@@ -574,157 +515,6 @@ namespace Megalo {
       return this->assignment || this->comparison || this->call;
    }
    //
-   bool Compiler::extractIntegerLiteral(int32_t& out) {
-      auto    prior = this->backup_stream_state();
-      QChar   sign  = '\0';
-      QString found = "";
-      out = 0;
-      this->scan([this, &sign, &found](QChar c) {
-         if (c == '-') { // handle numeric sign
-            if (sign != '\0' || found.size())
-               return true; // stop
-            sign = c;
-            return false;
-         }
-         if (c.isNumber()) {
-            found += c;
-            return false;
-         }
-         if (_is_whitespace_char(c))
-            return found.size() > 0; // stop if we have any digits
-         if (c == '.' && found.size())
-            this->throw_error("Floating-point numbers are not supported. Numbers cannot have a decimal point.");
-         return true; // stop
-      });
-      if (!found.size()) {
-         this->restore_stream_state(prior);
-         return false;
-      }
-      if (sign != '\0')
-         found = sign + found;
-      out = found.toInt();
-      return true;
-   }
-   bool Compiler::extractSpecificChar(QChar which) {
-      auto prior = this->backup_stream_state();
-      bool found = false;
-      this->scan([this, which, &found](QChar c) {
-         if (_is_whitespace_char(c))
-            return false;
-         if (c == which)
-            found = true;
-         return true;
-      });
-      if (!found) {
-         this->restore_stream_state(prior);
-         return false;
-      }
-      ++this->state.pos; // move position to after the char
-      return true;
-   }
-   bool Compiler::extractStringLiteral(QString& out) {
-      constexpr QChar ce_none = '\0';
-      //
-      auto  prior = this->backup_stream_state();
-      QChar inside = ce_none;
-      out = "";
-      this->scan([this, &out, &inside](QChar c) {
-         if (inside != ce_none) {
-            if (c == inside) {
-               if (this->state.pos > 0 && this->text[this->state.pos - 1] == "\\") { // allow backslash-escaping
-                  out += c;
-                  return false;
-               }
-               return true; // stop
-            }
-            out += c;
-            return false;
-         }
-         if (_is_quote_char(c)) {
-            inside = c;
-            return false;
-         }
-         if (!_is_whitespace_char(c))
-            return true; // stop
-         return false;
-      });
-      if (inside == ce_none) {
-         this->restore_stream_state(prior);
-         return false;
-      }
-      ++this->state.pos; // move position to after the closing quote
-      return true;
-   }
-   QString Compiler::extractWord() {
-      //
-      // For the purposes of the parser, a "word" is any sequence of characters that are 
-      // not whitespace, string delimiters, function syntax characters (i.e. parentheses 
-      // and commas), or operator characters. This includes keywords, variables with 
-      // square brackets and periods, and integer literals.
-      //
-      // If searching for any word, advances the stream to the end of the found word or 
-      // to the first non-word character.
-      //
-      QString word;
-      bool    brace = false; // are we in square brackets?
-      this->scan([this, &word, &brace](QChar c) {
-         if (brace) {
-            if (c == ']')
-               brace = false;
-            word += c;
-            return false;
-         }
-         if (_is_whitespace_char(c))
-            return word.size() > 0;
-         if (QString(".[]").indexOf(c) >= 0 && !word.size()) { // these chars are allowed in a word, but not at the start
-            if (c == '[')
-               brace = true;
-            return true;
-         }
-         if (_is_syntax_char(c))
-            return true;
-         if (_is_quote_char(c))
-            return true;
-         if (_is_operator_char(c))
-            return true;
-         word += c;
-         return false;
-      });
-      return word;
-   }
-   bool Compiler::extractWord(QString desired) {
-      //
-      // For the purposes of the parser, a "word" is any sequence of characters that are 
-      // not whitespace, string delimiters, function syntax characters (i.e. parentheses 
-      // and commas), or operator characters. This includes keywords, variables with 
-      // square brackets and periods, and integer literals.
-      //
-      // If searching for a specific word, advances the stream to the end of that word 
-      // if it is found. NOTE: square brackets aren't supported in this branch, because 
-      // we should never end up wanting to find a specific parser-mandated variable name 
-      // anywhere.
-      //
-      auto   prior = this->backup_stream_state();
-      size_t index = 0;
-      bool   valid = true;
-      this->scan([this, &desired, &valid, &index](QChar c) {
-         if (_is_whitespace_char(c))
-            return index > 0; // abort... unless we haven't started yet
-         c = c.toLower();
-         if (desired[(uint)index] != c) {
-            valid = false;
-            return true; // abort
-         }
-         ++index;
-         return false;
-      });
-      if (!valid) {
-         this->restore_stream_state(prior);
-         return false;
-      }
-      return true;
-   }
-   //
    bool Compiler::_closeCurrentBlock() {
       this->block->set_end(this->state);
       auto parent = dynamic_cast<Script::Block*>(this->block->parent);
@@ -736,12 +526,12 @@ namespace Megalo {
    void Compiler::_handleKeyword_Alias() {
       auto start = this->token.pos;
       //
-      auto name = this->extractWord();
+      auto name = this->extract_word();
       if (name.isEmpty())
          this->throw_error("An alias declaration must supply a name.");
-      if (!this->extractSpecificChar('='))
+      if (!this->extract_specific_char('='))
          this->throw_error("Expected \"=\".");
-      auto target = this->extractWord();
+      auto target = this->extract_word();
       if (target.isEmpty())
          this->throw_error("An alias declaration must supply a target.");
       //
@@ -815,9 +605,9 @@ namespace Megalo {
    void Compiler::_handleKeyword_For() {
       auto start = this->token.pos;
       //
-      if (!this->extractWord("each"))
+      if (!this->extract_word("each"))
          this->throw_error("The \"for\" keyword must be followed by \"each\".");
-      auto word = this->extractWord();
+      auto word = this->extract_word();
       if (word.isEmpty())
          this->throw_error("Invalid for-loop.");
       auto    type = Script::Block::Type::basic;
@@ -826,14 +616,14 @@ namespace Megalo {
       bool    label_is_index = false;
       if (word == "team") {
          type = Script::Block::Type::for_each_team;
-         if (!this->extractWord("do"))
+         if (!this->extract_word("do"))
             this->throw_error("Invalid for-each-team loop: expected the word \"do\".");
       } else if (word == "player") {
          type = Script::Block::Type::for_each_player;
-         word = this->extractWord();
+         word = this->extract_word();
          if (word == "randomly") {
             type = Script::Block::Type::for_each_player_randomly;
-            word = this->extractWord();
+            word = this->extract_word();
          }
          if (word != "do") {
             if (type == Script::Block::Type::for_each_player_randomly)
@@ -842,25 +632,25 @@ namespace Megalo {
          }
       } else if (word == "object") {
          type = Script::Block::Type::for_each_object;
-         word = this->extractWord();
+         word = this->extract_word();
          if (word != "do") {
             if (word != "with")
                this->throw_error("Invalid for-each-object loop: expected the word \"with\" or the word \"do\".");
             type = Script::Block::Type::for_each_object_with_label;
-            word = this->extractWord();
+            word = this->extract_word();
             if (word == "no") {
-               if (!this->extractWord("label"))
+               if (!this->extract_word("label"))
                   this->throw_error("Invalid for-each-object-with-label loop: must use the phrase \"no label\" or specify a label.");
             } else {
                if (word != "label")
                   this->throw_error("Invalid for-each-object-with-label loop: expected the word \"label\".");
-               if (!this->extractStringLiteral(label)) {
-                  if (!this->extractIntegerLiteral(label_index))
+               if (!this->extract_string_literal(label)) {
+                  if (!this->extract_integer(label_index))
                      this->throw_error("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
                   label_is_index = true;
                }
             }
-            if (!this->extractWord("do"))
+            if (!this->extract_word("do"))
                this->throw_error("Invalid for-each-object-with-label loop: expected the word \"do\".");
          }
       } else {
@@ -880,7 +670,7 @@ namespace Megalo {
    void Compiler::_handleKeyword_Function() {
       auto start = this->token.pos;
       //
-      auto name = this->extractWord();
+      auto name = this->extract_word();
       if (name.isEmpty())
          this->throw_error("A function must have a name.");
       for (QChar c : name) {
@@ -889,9 +679,9 @@ namespace Megalo {
       }
       if (_is_keyword(name))
          this->throw_error(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
-      if (!this->extractSpecificChar('('))
+      if (!this->extract_specific_char('('))
          this->throw_error("Expected \"(\".");
-      if (!this->extractSpecificChar(')'))
+      if (!this->extract_specific_char(')'))
          this->throw_error("Expected \")\". User-defined functions cannot have arguments.");
       //
       auto item = new Script::Block;
@@ -908,8 +698,8 @@ namespace Megalo {
          this->throw_error("Only top-level (non-nested) blocks can be event handlers.");
       QString words;
       auto    prior = this->backup_stream_state();
-      while (!this->extractSpecificChar(':')) {
-         auto w = this->extractWord();
+      while (!this->extract_specific_char(':')) {
+         auto w = this->extract_word();
          if (w.isEmpty()) {
             this->restore_stream_state(prior);
             this->throw_error("No valid event name specified.");

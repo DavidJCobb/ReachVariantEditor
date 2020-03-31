@@ -69,7 +69,8 @@ namespace cobb {
          template<typename T> static constexpr bool _type_has_index_member_v = _type_has_index_member<T>::value;
          //
       public:
-         static constexpr bool type_has_index_member = _type_has_index_member_v<T>;
+         static constexpr bool   type_has_index_member = _type_has_index_member_v<T>;
+         static constexpr size_t max_count = max_count;
          using value_type = T;
          using entry_type = T*;
          using size_type  = size_t;
@@ -168,8 +169,10 @@ namespace cobb {
          void* take(size_type i) noexcept {
             auto item = this->data()[i];
             std::intptr_t size = (this->_size - i - 1) * sizeof(void*);
-            memcpy(this->_list + i, this->_list + i + 1, size);
-            this->data()[this->_size - 1] = nullptr;
+            if (size) {
+               memcpy(this->_list + i, this->_list + i + 1, size);
+               this->data()[this->_size - 1] = nullptr;
+            }
             --this->_size;
             return item;
          }

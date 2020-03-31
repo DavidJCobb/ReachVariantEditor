@@ -328,6 +328,12 @@
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\qt\string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -832,6 +838,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

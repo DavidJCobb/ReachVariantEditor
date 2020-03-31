@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 #include <QString>
+#include "string_scanner.h"
 #include "../trigger.h"
 
 namespace Megalo {
@@ -30,8 +31,8 @@ namespace Megalo {
                int32_t end   = -1;
             } range;
             //
-            void set_start(ParserPosition&);
-            void set_end(ParserPosition&);
+            void set_start(string_scanner::pos&);
+            void set_end(string_scanner::pos&);
       };
       class ParsedOpcode { // used for once we've fully parsed an opcode, so we can retain it in a Block
          public:
@@ -138,19 +139,17 @@ namespace Megalo {
          }
          const QChar* why() const noexcept { return reason.constData(); }
    };
-   class Compiler {
+   class Compiler : public Script::string_scanner {
       public:
          struct Token {
             QString text;
-            Script::ParserPosition pos;
+            Script::string_scanner::pos pos;
             bool ended = false; // whether we hit whitspace, meaning that the current word is "over"
             bool brace = false; // whether we're in square brackets; needed to properly handle constructs like "abc[ d]" or "abc[-1]" at the starts of statements
          };
          using scan_functor_t = std::function<bool(QChar)>;
          //
       public:
-         QString text;
-         Script::ParserPosition state;
          Script::Block*         root       = nullptr;
          Script::Block*         block      = nullptr; // current block being parsed
          Script::Assignment*    assignment = nullptr; // current assignment being parsed, if any
@@ -161,11 +160,7 @@ namespace Megalo {
          bool negate_next_condition = false;
          //
          void throw_error(const QString& text); // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
-         Script::ParserPosition backup_stream_state();
-         void restore_stream_state(Script::ParserPosition&);
          void reset_token();
-         //
-         void scan(scan_functor_t);
          //
          void parse(QString text); // can throw compile_exception
          //
@@ -182,13 +177,17 @@ namespace Megalo {
          void _parseFunctionCallArg();
          void _parseFunctionCall(bool is_condition);
          //
-         bool extractIntegerLiteral(int32_t& out);
-         bool extractSpecificChar(QChar which); // advances the stream past the char if the char is found. NOTE: cannot be used to search for whitespace
-         bool extractStringLiteral(QString& out); // advances the stream past the end-quote if a string literal is found
-         QString extractWord(); // advances the stream to the end of the found word, or to the next non-word and non-whitespace character
-         bool    extractWord(QString desired); // advances the stream to the end of the desired word only if it is found; no advancement otherwise
-         //
          bool _closeCurrentBlock();
+         //
+         extract_result extract_integer_literal(int32_t& out) = delete;
+         bool extract_integer(int32_t& out) { // cAnNoT oVeRlOaD fUnCtIoNs DiStInGuIsHeD bY rEtUrN tYpE aLoNe
+            auto result = string_scanner::extract_integer_literal(out);
+            if (result == string_scanner::extract_result::success)
+               return true;
+            if (result == string_scanner::extract_result::floating_point)
+               this->throw_error("Unexpected decimal point. Floating-point numbers are not supported.");
+            return false;
+         }
          //
          void _handleKeyword_Alias();
          void _handleKeyword_Declare();

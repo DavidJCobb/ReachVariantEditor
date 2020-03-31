@@ -100,6 +100,7 @@
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\namespaces.cpp" />
+    <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp" />
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\enums.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="helpers\int128.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
+    <ClCompile Include="helpers\qt\string.cpp" />
     <ClCompile Include="helpers\qt\tree_widget.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
     <ClCompile Include="helpers\steam.cpp" />
@@ -237,6 +239,7 @@
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\namespaces.h" />
+    <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\types.h" />
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
@@ -291,6 +294,7 @@
     <QtMoc Include="ui\main_window\page_loadout_palette.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h" />
     <ClInclude Include="helpers\memory.h" />
+    <ClInclude Include="helpers\qt\string.h" />
     <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\refcounting.h" />
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
