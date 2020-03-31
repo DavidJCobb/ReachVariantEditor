@@ -106,7 +106,7 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
       tr("Option toggles"),
       tr("Bits used to encode option visibility and availability toggles."),
       QColor(130, 30, 60),
-      (ReachGameVariantEngineOptionToggles::flag_count + ReachGameVariantMegaloOptionToggles::flag_count) * 2 // bits
+      (ReachGameVariantEngineOptionToggles::dword_count + ReachGameVariantMegaloOptionToggles::dword_count) * 32 * 2 // bits
    );
    //
    indices.script_content = this->ui.meter->segmentCount();
@@ -182,7 +182,6 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += decltype(options.misc.suddenDeathTime)::bitcount;
       bitcount += decltype(options.misc.gracePeriod)::bitcount;
       //
-      bitcount += options.respawn.traits.bitcount();
       bitcount += decltype(options.respawn.flags)::bitcount;
       bitcount += decltype(options.respawn.livesPerRound)::bitcount;
       bitcount += decltype(options.respawn.teamLivesPerRound)::bitcount;
@@ -192,15 +191,16 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += decltype(options.respawn.respawnGrowth)::bitcount;
       bitcount += decltype(options.respawn.loadoutCamTime)::bitcount;
       bitcount += decltype(options.respawn.traitsDuration)::bitcount;
+      bitcount += options.respawn.traits.bitcount();
       //
       bitcount += decltype(options.social.observers)::bitcount;
       bitcount += decltype(options.social.teamChanges)::bitcount;
       bitcount += decltype(options.social.flags)::bitcount;
       //
       bitcount += decltype(options.map.flags)::bitcount;
+      bitcount += options.map.baseTraits.bitcount();
       bitcount += decltype(options.map.weaponSet)::bitcount;
       bitcount += decltype(options.map.vehicleSet)::bitcount;
-      bitcount += options.map.baseTraits.bitcount();
       bitcount += options.map.powerups.red.traits.bitcount();
       bitcount += options.map.powerups.blue.traits.bitcount();
       bitcount += options.map.powerups.yellow.traits.bitcount();
