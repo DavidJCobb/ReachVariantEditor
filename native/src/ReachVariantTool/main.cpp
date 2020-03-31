@@ -40,6 +40,12 @@ int main(int argc, char *argv[]) {
 //           = Mostly done, though some things are obviously missing since we can't handle 
 //             variable references, etc..
 //
+//           = Assignments should allow (var = func()) but NOT (var += func()).
+//
+//           = Assignments should fail when assigning to a constant integer, or to an alias 
+//             of a constant integer. (We'll probably have to do this when compiling, not 
+//             sooner.)
+//
 //        - Code to parse function calls (for now, don't bother with args)
 //
 //        - Code to interpret variable references
@@ -48,7 +54,21 @@ int main(int argc, char *argv[]) {
 //
 //           - Aliases
 //
+//        - Code to parse variable declarations. Remember that you can declare variables 
+//          in any scope (i.e. "player.number[0]" without a specific player specified), 
+//          that specifying an initial value is optional, and that only some types can 
+//          even have initial values in the first place.
+//
 //        - Code to generate Opcode*s from assignments, comparisons, and function calls
+//
+//           - By the time we hit this point, we'll need the Compiler to have a reference 
+//             to the game variant MP data just like Decompiler does, since we'll need to 
+//             set up references to indexed list items and whatnot.
+//
+//              - We're also gonna wanna write teardown code and make sure that anything 
+//                we're doing can survive an exception being thrown, i.e. make sure we 
+//                don't leak things allocated with (new) when we throw exceptions. That 
+//                will require careful coding at every site that can raise an exception.
 //
 //           - Once we've parsed a function's name (and context, for thiscalls), we can 
 //             identify the opcode function being invoked. We can then create an Opcode 
@@ -60,6 +80,55 @@ int main(int argc, char *argv[]) {
 //             varargs types e.g. Shape (which always knows how many more arguments it 
 //             needs) and Formatted String (which receives a format string and between 0 
 //             and 2 additional tokens, inclusive).
+//
+//              = NO. THIS WON'T WORK FOR THINGS THAT USE AN ALTERNATE SYNTAX, E.G. 
+//                COMPARISONS, ASSIGNMENTS, AND THE "Modify Grenades" OPCODE WHEREIN THE 
+//                PROPERTY NAME IS ITSELF AN OPCODE ARGUMENT.
+//
+//                How about this instead:
+//
+//                 - Move the string stuff -- scan, extract, etc. -- from Compiler to a 
+//                   new base class. Perhaps "StringScanner."
+//
+//                 - Define Script::ParserPosition::operator+ and such.
+//
+//                 - To compile a function call argument, extract everything up to the 
+//                   next ',' or ')' and stuff that content into a new StringScanner. 
+//                   Then, have OpcodeArgValue::compile take both a reference to the 
+//                   Compiler, a part index, and the StringScanner, and have it use the 
+//                   StringScanner to extract the argument. (Compiler should also provide 
+//                   a function that takes a QString and produces a variable reference.) 
+//                   If we return a failure code, then the compiler can add the string-
+//                   scanner's position to its own position and then raise the error.
+//
+//                    - If a non-failure code is returned, add the StringScanner's state 
+//                      to the Compiler's state in order to advance to the end of the 
+//                      parsed argument. Then, look for a ',' or ')'; if we find any-
+//                      thing else instead (or hit EOF), raise an error; otherwise, 
+//                      repeat for the next argument.
+//
+//                 - Once that's done? We can handle "Modify Grenades" via special-case 
+//                   behavior for when the OpcodeFuncToScriptMapping has a blank primary 
+//                   name and a defined (arg_name): we just pass the property name to 
+//                   OpcodeArgValue::compile.
+//
+//           - Once we've parsed a function's name (and context, for thiscalls), we can 
+//             identify the opcode function being invoked... but some Opcodes share the 
+//             same name. Specifically, there are two (send_incident) opcodes, one of 
+//             which accepts an additional integer argument. So how do we allow that? By 
+//             simple trial-and-error. When we know the function's name and context, we 
+//             grab a vector of ALL opcodes that have a matching name and context, and 
+//             then we try each one until one of them returns a success code. If all of 
+//             them return failure codes, then we raise an error. (If there was only one 
+//             matching opcode, then we should raise whatever error text it gave us; 
+//             otherwise: "The arguments did not match any of the signatures for the X 
+//             function.")
+//
+//              - So: get a list of all matching functions; create an Opcode; back up the 
+//                stream state. Then, for each function: clear the Opcode's arguments; 
+//                create arguments based on the function signature; try parsing them; if 
+//                we fail, restore stream state from the backup (i.e. rewind) and try the 
+//                next function.
 //
 //        - Code to compile a Block and its contained Blocks.
 //
