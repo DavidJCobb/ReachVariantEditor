@@ -143,17 +143,85 @@ namespace Megalo {
          return true;
       }
       //
-      VariableReference::VariableReference(QString text) {
-         this->content = text;
-         #if !_DEBUG
-            static_assert(false, "THIS IS PLACEHOLDER CODE");
+      VariableReference::VariableReference(int32_t i) {
+         this->constant = i;
+         #if _DEBUG
+            this->content = QString("%1").arg(i);
          #endif
       }
-      VariableReference::VariableReference(int32_t i) {
-         this->content = QString("%1").arg(i);
-         #if !_DEBUG
-            static_assert(false, "THIS IS PLACEHOLDER CODE");
+      VariableReference::VariableReference(QString text) {
+         #if _DEBUG
+            this->content = text;
          #endif
+         {
+            bool ok = false;
+            this->constant = text.toInt(&ok);
+            if (ok)
+               return;
+         }
+         auto    size  = text.size();
+         QString name;
+         QString index;
+         bool    is_index = false;
+         //
+         static const QString BAD_CHARS = QString("[.=!<>+-*/%&|~^");
+         //
+         for (int i = 0; i < size; i++) {
+            auto c = text[i];
+            if (is_index) {
+               if (BAD_CHARS.indexOf(c) >= 0) {
+                  if (index.isEmpty() && c == '-') { // negative indices are invalid but should not be a fatal parse error
+                     index += c;
+                     continue;
+                  }
+                  throw compile_exception(QString("Character %1 is not valid inside of an index.").arg(c));
+               }
+               if (c == ']') {
+                  is_index = false;
+                  if (index.isEmpty()) // "name[]" is a syntax error
+                     throw compile_exception("Variables of the form \"name[]\" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.");
+                  continue;
+               }
+               if (index.isEmpty() && string_scanner::is_whitespace_char(c))
+                  continue;
+               index += c;
+            } else {
+               if (c == '[') {
+                  //
+                  // TODO: Write code to detect "name[1][2]", "name[2][]", etc., and treat that as a syntax error.
+                  //
+                  is_index = true;
+                  continue;
+               }
+               if (c == '.') {
+                  auto part = Part(name, index);
+                  this->parts.push_back(part);
+                  name  = "";
+                  index = "";
+                  continue;
+               }
+               name += c;
+            }
+         }
+         if (name.isEmpty()) // text ended in '.' or was empty string
+            throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
+         auto part = Part(name, index);
+         this->parts.push_back(part);
+         //
+         for (auto& part : this->parts) {
+            if (part.name.isEmpty())
+               throw compile_exception("Invalid variable name. Did you accidentally type two periods instead of one?");
+            if (_is_keyword(part.name))
+               throw compile_exception(QString("Keywords, including \"%1\", cannot be used as variable names.").arg(part.name));
+            if (_is_keyword(part.index_str))
+               throw compile_exception(QString("Keywords, including \"%1\", cannot be used as indices in a collection.").arg(part.index_str));
+            //
+            bool ok = false;
+            part.index = part.index_str.toInt(&ok);
+            part.index_is_numeric = ok;
+            if (ok)
+               part.index_str = "";
+         }
       }
    }
    //
@@ -296,8 +364,13 @@ namespace Megalo {
       if (string_scanner::is_operator_char(c)) {
          this->assignment = new Script::Assignment;
          this->assignment->set_start(this->token.pos);
-         this->assignment->target = new Script::VariableReference(this->token.text); // TODO: we need to catch errors here if it's not a valid variable reference, or if it's an integer
-         this->assignment->target->owner = this->assignment;
+         {
+            this->assignment->target = new Script::VariableReference(this->token.text);
+            auto ref = this->assignment->target;
+            ref->owner = this->assignment;
+            if (ref->is_constant_integer())
+               this->throw_error("Cannot assign to a constant integer.");
+         }
          this->reset_token();
          this->token.text = c;
          this->token.pos  = this->backup_stream_state();

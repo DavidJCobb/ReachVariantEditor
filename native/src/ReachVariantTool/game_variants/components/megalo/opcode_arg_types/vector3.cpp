@@ -3,7 +3,7 @@
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueVector3::typeinfo = OpcodeArgTypeinfo(
       OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::can_be_multiple,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVector3>
    );
    //
@@ -23,7 +23,7 @@ namespace Megalo {
    }
    void OpcodeArgValueVector3::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       std::string temp;
-      cobb::sprintf(temp, "(%d, %d, %d)", this->value.x, this->value.y, this->value.z);
+      cobb::sprintf(temp, "%d, %d, %d", this->value.x, this->value.y, this->value.z);
       out.write(temp);
    }
 }

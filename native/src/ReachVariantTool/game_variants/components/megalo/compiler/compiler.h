@@ -8,6 +8,17 @@
 
 namespace Megalo {
    class Compiler;
+   class compile_exception : public std::exception {
+      private:
+         QString reason;
+      public:
+         compile_exception(const QString& reason) : std::exception(""), reason(reason) {} // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
+         //
+         [[nodiscard]] virtual char const* what() const {
+            return "this is a QString";
+         }
+         const QChar* why() const noexcept { return reason.constData(); }
+   };
    //
    namespace Script {
       struct ParserPosition {
@@ -95,10 +106,19 @@ namespace Megalo {
                static_assert(false, "replace (content) with logic to actually parse parts");
             #endif
             //
-            class Part {};
+            struct Part {
+               QString name;
+               QString index_str;
+               int32_t index = -1;
+               bool    index_is_numeric = false;
+               //
+               Part() {} // needed for std::vector::push_back
+               Part(QString n, QString i) : name(n), index_str(i) {}
+               Part(QString n, int32_t i) : name(n), index(i) {};
+            };
             //
             std::vector<Part> parts;
-            int16_t constant = 0;
+            int32_t constant = 0;
             int8_t  type  = -1; // TODO
             int8_t  scope = -1;
             int8_t  which = -1;
@@ -107,6 +127,8 @@ namespace Megalo {
             //
             VariableReference(QString);
             VariableReference(int32_t);
+            //
+            inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
       };
       class FunctionCall : public ParsedItem {
          public:
@@ -131,17 +153,6 @@ namespace Megalo {
       };
    }
    //
-   class compile_exception : public std::exception {
-      private:
-         QString reason;
-      public:
-         compile_exception(const QString& reason) : std::exception(""), reason(reason) {} // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
-         //
-         [[nodiscard]] virtual char const* what() const {
-            return "this is a QString";
-         }
-         const QChar* why() const noexcept { return reason.constData(); }
-   };
    class Compiler : public Script::string_scanner {
       public:
          struct Token {
