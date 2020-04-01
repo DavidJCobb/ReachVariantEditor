@@ -97,6 +97,16 @@ namespace Megalo {
    }
    #pragma endregion
 
+   const VariableScopeIndicatorValue& VariableScopeIndicatorValueList::by_id(const char* id) const noexcept {
+      for (auto& indic : this->scopes)
+         if (stricmp(indic.uniqueID, id) == 0)
+            return indic;
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      assert(false && "Something referred to a non-existent VariableScopeIndicatorValue ID.");
+   }
+
    bool Variable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       auto& type = this->type;
       uint8_t si = stream.read_bits(type.scope_bits());

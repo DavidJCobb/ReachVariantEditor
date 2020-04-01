@@ -52,11 +52,7 @@ int main(int argc, char *argv[]) {
 //
 //           - Basic references
 //
-//              - Split the word into parts, with each part having a name and optionally 
-//                an index, i.e. "foo[1].bar[2].baz" -> foo[1], bar[2], baz, just like we 
-//                did in JavaScript.
-//
-//                 = START HERE
+//              - We need to make "name[1][2]" a syntax error.
 //
 //              - Identify the parts. The only possible patterns are:
 //
@@ -71,6 +67,11 @@ int main(int argc, char *argv[]) {
 //
 //                 = REQUIRES SETTING UP NAMESPACE DEFINITIONS, THEN NAMESPACE MEMBER 
 //                   DEFINITIONS, THEN PROPERTY LISTS ON THE TYPEINFOS.
+//
+//                    - STRONGLY consider making VariableScopeIndicatorValue::uniqueID 
+//                      a uint8_t, and defining non-strictly-typed enums instead of 
+//                      using string literals; this would allow us to detect mistyped 
+//                      entries when building the program.
 //
 //                 - When resolving properties: if the name doesn't match any properties 
 //                   defined in the typenames, then search the opcode-function list for 
@@ -204,7 +205,7 @@ int main(int argc, char *argv[]) {
 //
 //       So, what we need to do is: make ReachPlayerTraits::bitcount a static member 
 //       again, and always add the bitcount for Jump Height plus one (for the presence 
-//       bit).
+//       bit). The space that Jump Height *can* use should always *display* as in use.
 //
 //     = THE METER NEEDS TO UPDATE WHENEVER INDEXED LISTS OR THEIR CONTAINED OBJECTS ARE 
 //       ALTERED IN ANY WAY.

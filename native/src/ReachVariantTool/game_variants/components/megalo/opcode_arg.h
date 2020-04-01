@@ -9,6 +9,7 @@
 #include "enums.h"
 #include "variables_and_scopes.h"
 #include "decompiler/decompiler.h"
+#include "compiler/types.h"
 
 //
 // Here, an "opcode" is an instruction that can appear in a Megalo trigger, i.e. a 
@@ -74,10 +75,12 @@ namespace Megalo {
          flags_type               flags   = 0;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          OpcodeArgValueFactory    factory = nullptr;
+         std::vector<Script::Property> properties; // for compiler
          //
          OpcodeArgTypeinfo() {}
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr) : type(t), flags(f), factory(fac), properties(pr) {}
    };
    
    class OpcodeArgValue {

@@ -106,6 +106,11 @@ namespace Megalo {
                static_assert(false, "replace (content) with logic to actually parse parts");
             #endif
             //
+            struct Which {
+               uint8_t part_count = 0;
+               void*   type = nullptr; // TODO
+               uint8_t which = 0;
+            };
             struct Part {
                QString name;
                QString index_str;
