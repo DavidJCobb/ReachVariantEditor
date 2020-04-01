@@ -3,13 +3,14 @@
 
 namespace {
    using namespace Megalo;
+   using id = OpcodeArgValueTeam::scope_indicator_id;
    VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::team, {
-      VariableScopeIndicatorValue("g-t",          "%w",          "%w",            &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::none), // global.team[i], current_team, etc.
-      VariableScopeIndicatorValue("p-t",          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::team), // player.team[i]
-      VariableScopeIndicatorValue("o-t",          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::team), // object.team[i]
-      VariableScopeIndicatorValue("t-t",          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::team), // team.team[i]
-      VariableScopeIndicatorValue("p-owner-team", "%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none), // player.team
-      VariableScopeIndicatorValue("o-owner-team", "%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none), // object.team
+      VariableScopeIndicatorValue(id::g_t,          "%w",          "%w",            &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::none), // global.team[i], current_team, etc.
+      VariableScopeIndicatorValue(id::p_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::team), // player.team[i]
+      VariableScopeIndicatorValue(id::o_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::team), // object.team[i]
+      VariableScopeIndicatorValue(id::t_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::team), // team.team[i]
+      VariableScopeIndicatorValue(id::p_owner_team, "%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none), // player.team
+      VariableScopeIndicatorValue(id::o_owner_team, "%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none), // object.team
    });
 }
 namespace Megalo {
@@ -19,8 +20,9 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeam>,
       {
-         Script::Property("score",       OpcodeArgValueScalar::typeinfo, "t-score"),
-         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, "t-stat"),
-      }
+         Script::Property("score",       OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_score),
+         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_stat),
+      },
+      8 // static count
    );
 }

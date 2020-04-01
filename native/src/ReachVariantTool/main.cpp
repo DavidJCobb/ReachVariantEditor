@@ -68,10 +68,14 @@ int main(int argc, char *argv[]) {
 //                 = REQUIRES SETTING UP NAMESPACE DEFINITIONS, THEN NAMESPACE MEMBER 
 //                   DEFINITIONS, THEN PROPERTY LISTS ON THE TYPEINFOS.
 //
-//                    - STRONGLY consider making VariableScopeIndicatorValue::uniqueID 
-//                      a uint8_t, and defining non-strictly-typed enums instead of 
-//                      using string literals; this would allow us to detect mistyped 
-//                      entries when building the program.
+//                    - Need to revamp VariableScopeIndicatorValue so we can more easily 
+//                      control the is_readonly flag on entries.
+//
+//                    - We're not porting the "readonly" or "hard max index" values from 
+//                      the JS Property class; we can get the former from scope indicator 
+//                      values (or assume it's read-only if one is not specified), and we 
+//                      can get the latter if we modify scope indicator values to list 
+//                      indexed lists' max indices in addition to their index bitcounts.
 //
 //                 - When resolving properties: if the name doesn't match any properties 
 //                   defined in the typenames, then search the opcode-function list for 

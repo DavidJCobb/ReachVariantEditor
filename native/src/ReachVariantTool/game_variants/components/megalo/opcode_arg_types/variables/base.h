@@ -82,7 +82,7 @@ namespace Megalo {
             generic, // not a variable or an indexed object
          };
          //
-         const char*    uniqueID       = ""; // exists so that outside actors can refer to a scope indicator by ID rather than by index; only needs to be unique within the containing scope indicator list
+         uint8_t        uniqueID       = -1; // exists so that outside actors can refer to a scope indicator by a reliable ID rather than by index
          flags_t        flags          = flags::none;
          index_type     index_type     = index_type::none;
          uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data and index_type::generic
@@ -100,9 +100,9 @@ namespace Megalo {
          int index_bits() const noexcept;
          //
          VariableScopeIndicatorValue() {}
-         VariableScopeIndicatorValue(const char* uid, const char* fd, const char* fe, enum index_type it, uint8_t bc) : uniqueID(uid), format(fd), format_english(fe), index_type(it), index_bitcount(bc) {}
-         VariableScopeIndicatorValue(const char* uid, const char* fd, const char* fe, const VariableScope* which, enum index_type it) : uniqueID(uid), format(fd), format_english(fe), base(which), index_type(it) {}
-         static VariableScopeIndicatorValue make_game_value(const char* uid, const char* fd, const char* fe, uint8_t flg = 0) {
+         VariableScopeIndicatorValue(uint8_t uid, const char* fd, const char* fe, enum index_type it, uint8_t bc) : uniqueID(uid), format(fd), format_english(fe), index_type(it), index_bitcount(bc) {}
+         VariableScopeIndicatorValue(uint8_t uid, const char* fd, const char* fe, const VariableScope* which, enum index_type it) : uniqueID(uid), format(fd), format_english(fe), base(which), index_type(it) {}
+         static VariableScopeIndicatorValue make_game_value(uint8_t uid, const char* fd, const char* fe, uint8_t flg = 0) {
             VariableScopeIndicatorValue result;
             result.uniqueID       = uid;
             result.flags          = flg;
@@ -110,7 +110,7 @@ namespace Megalo {
             result.format_english = fe;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* uid, const char* fd, const char* fe, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
+         static VariableScopeIndicatorValue make_indexed_data_indicator(uint8_t uid, const char* fd, const char* fe, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
             VariableScopeIndicatorValue result;
             result.uniqueID          = uid;
             result.flags             = flg;
@@ -121,7 +121,7 @@ namespace Megalo {
             result.indexed_list_accessor = f;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* uid, const char* fd, const char* fe, const VariableScope* which, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
+         static VariableScopeIndicatorValue make_indexed_data_indicator(uint8_t uid, const char* fd, const char* fe, const VariableScope* which, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
             VariableScopeIndicatorValue result = make_indexed_data_indicator(uid, fd, fe, bc, f, flg);
             result.base = which;
             return result;
@@ -143,7 +143,7 @@ namespace Megalo {
             return -1;
          }
          //
-         const VariableScopeIndicatorValue& by_id(const char* id) const noexcept; // FOR INTERNAL USE ONLY; fails an assert if the ID is not found; this is intentional -- if it searches for a bad ID then that's a programmer mistake
+         const VariableScopeIndicatorValue& by_id(uint8_t id) const noexcept; // provided for use by the compiler; fails an assert if the ID is not found; this is intentional -- if it searches for a bad ID then that's a programmer mistake
          //
          VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue> sl) : var_type(vt), scopes(sl) {}
    };

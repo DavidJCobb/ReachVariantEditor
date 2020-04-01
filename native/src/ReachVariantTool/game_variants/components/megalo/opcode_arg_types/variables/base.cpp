@@ -97,9 +97,9 @@ namespace Megalo {
    }
    #pragma endregion
 
-   const VariableScopeIndicatorValue& VariableScopeIndicatorValueList::by_id(const char* id) const noexcept {
+   const VariableScopeIndicatorValue& VariableScopeIndicatorValueList::by_id(uint8_t id) const noexcept {
       for (auto& indic : this->scopes)
-         if (stricmp(indic.uniqueID, id) == 0)
+         if (indic.uniqueID == id)
             return indic;
       #if _DEBUG
          __debugbreak();

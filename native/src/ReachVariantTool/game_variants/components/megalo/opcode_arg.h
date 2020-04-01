@@ -76,11 +76,12 @@ namespace Megalo {
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          OpcodeArgValueFactory    factory = nullptr;
          std::vector<Script::Property> properties; // for compiler
+         uint8_t static_count = 0; // e.g. 8 for player[7]
          //
          OpcodeArgTypeinfo() {}
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
          OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr) : type(t), flags(f), factory(fac), properties(pr) {}
+         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr, uint8_t sc) : type(t), flags(f), factory(fac), properties(pr), static_count(sc) {}
    };
    
    class OpcodeArgValue {
