@@ -52,6 +52,33 @@ int main(int argc, char *argv[]) {
 //
 //           - Basic references
 //
+//              - Split the word into parts, with each part having a name and optionally 
+//                an index, i.e. "foo[1].bar[2].baz" -> foo[1], bar[2], baz, just like we 
+//                did in JavaScript.
+//
+//                 = START HERE
+//
+//              - Identify the parts. The only possible patterns are:
+//
+//                member // global.object[n]; current_object; global.number[1]; etc.
+//                member.property
+//                member.var
+//                member.var.property (only for biped, I think)
+//                static
+//                static.property
+//                static.var
+//                static.var.property (only for biped, I think)
+//
+//                 = REQUIRES SETTING UP NAMESPACE DEFINITIONS, THEN NAMESPACE MEMBER 
+//                   DEFINITIONS, THEN PROPERTY LISTS ON THE TYPEINFOS.
+//
+//                 - When resolving properties: if the name doesn't match any properties 
+//                   defined in the typenames, then search the opcode-function list for 
+//                   any functions with a (property_set) mapping and a blank primary 
+//                   name (i.e. where the property name is an argument). If any are 
+//                   found, build an Opcode and arguments and try passing the current 
+//                   property name to OpcodeArgValue::compile to see if it matches.
+//
 //           - Aliases
 //
 //        - Code to parse variable declarations. Remember that you can declare variables 
@@ -162,10 +189,31 @@ int main(int argc, char *argv[]) {
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..
 //
-//  - Script editor window: work on a display on the bottom: a bar that should show how 
-//    much space in the file has been used, with usage divided into colored regions based 
-//    on the different parts of the file (showing details onmouseover). Think of it like 
-//    the disk usage bar from the old pre-Vista Windows Disk Defragmenter.
+//  - Script editor window: MPVR space usage meter: we should also show absolute counts 
+//    out of maximums for triggers, conditions, actions, number of strings, and perhaps 
+//    other data items if we use two or three columns as well. We could even correlate 
+//    these to blocks on the bar if we give them distinct colors (e.g. a colored box 
+//    before each limit like "[ ] Conditions: 317 / 512").
+//
+//     - WE MESSED UP WITH PLAYER TRAITS. We need the maximum possible bitcount for a 
+//       set of player traits, not the current bitcount, because traits are alterable 
+//       in-game. Like -- Jump Height is 10 bits if it's set and 1 bit if it's not, 
+//       right? So consider what happens if you make a gametype that's just 5 bits shy 
+//       of the filesize limit, with a set of player traits that has no Jump Height: if 
+//       the user changes that trait in-game, then they break the file.
+//
+//       So, what we need to do is: make ReachPlayerTraits::bitcount a static member 
+//       again, and always add the bitcount for Jump Height plus one (for the presence 
+//       bit).
+//
+//     = THE METER NEEDS TO UPDATE WHENEVER INDEXED LISTS OR THEIR CONTAINED OBJECTS ARE 
+//       ALTERED IN ANY WAY.
+//
+//     - Continue improving the code for the meter: add bitcount getters to more objects 
+//       so we aren't just reaching into them from outside and counting stuff ourselves. 
+//       Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
+//       standard_options_bitcount, etc., or perhaps a single getter that switch-cases on 
+//       an enum indicating what we want counted.
 //
 //  - Modify the Vector3 type so that it's just treated as three script arguments. That odd 
 //    "multi-part argument" syntax I came up with the parens should probably only be used 
