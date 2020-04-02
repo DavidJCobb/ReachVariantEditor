@@ -8,6 +8,10 @@
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueAnyVariable::typeinfo = OpcodeArgTypeinfo(
+      "_any_variable",
+      "Any Variable",
+      "A number, object, player, team, or timer can appear here.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueAnyVariable>

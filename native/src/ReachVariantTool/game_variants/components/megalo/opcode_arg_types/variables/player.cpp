@@ -16,6 +16,10 @@ namespace {
 namespace Megalo {
    OpcodeArgValuePlayer::OpcodeArgValuePlayer() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayer::typeinfo = OpcodeArgTypeinfo(
+      "player",
+      "Player",
+      "A player participating in the match. Note that players are a distinct concept from \"bipeds,\" the character objects that players control.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayer>,

@@ -11,9 +11,15 @@ namespace {
 }
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerTraits::typeinfo = OpcodeArgTypeinfo(
+      "player_traits",
+      "Player Traits",
+      "A set of player traits. These are not applied and removed; rather, a script must apply them for every tick that the script wishes them to be active.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerTraits>
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerTraits>,
+      {},
+      Limits::max_script_traits
    );
    //
    bool OpcodeArgValuePlayerTraits::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

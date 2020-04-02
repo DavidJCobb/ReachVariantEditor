@@ -250,6 +250,7 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\object_type.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\player_traits.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\sound.h" />
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\all_core.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\any_variable.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\base.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\number.h" />
@@ -388,6 +389,7 @@
     <Image Include="ReachVariantTool.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="README.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

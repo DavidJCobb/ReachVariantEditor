@@ -120,20 +120,40 @@ namespace Megalo {
                Part() {} // needed for std::vector::push_back
                Part(QString n, QString i) : name(n), index_str(i) {}
                Part(QString n, int32_t i) : name(n), index(i) {};
+               //
+               inline bool has_index() const noexcept {
+                  return this->index_is_numeric || !this->index_str.isEmpty();
+               }
             };
             //
             std::vector<Part> parts;
-            int32_t constant = 0;
-            int8_t  type  = -1; // TODO
-            int8_t  scope = -1;
-            int8_t  which = -1;
-            int8_t  index = -1;
-            bool    is_read_only = false;
+            struct {
+               bool done = false;
+               //
+               const OpcodeArgTypeinfo* which_type = nullptr; // also used for namespace scope-members
+               int16_t  which      = -1; // used for namespace which-members
+               uint32_t scope      =  0; // used for namespace scope-members
+               const OpcodeArgTypeinfo* var_type   = nullptr;
+               int32_t  var_index  =  0;
+               QString  property;
+               int32_t  constant   =  0;
+            } resolved;
             //
             VariableReference(QString);
             VariableReference(int32_t);
             //
+            void resolve();
+            //
             inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
+            //
+         protected:
+            inline Part* _part(int i) {
+               if (i < 0)
+                  i += this->parts.size();
+               else if (i >= this->parts.size())
+                  return nullptr;
+               return &this->parts[i];
+            }
       };
       class FunctionCall : public ParsedItem {
          public:

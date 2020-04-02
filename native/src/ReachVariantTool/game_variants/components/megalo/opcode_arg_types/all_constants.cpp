@@ -3,6 +3,10 @@
 namespace Megalo {
    #pragma region bool
    OpcodeArgTypeinfo OpcodeArgValueConstBool::typeinfo = OpcodeArgTypeinfo(
+      "_const_bool",
+      "Boolean",
+      "A single \"true\" or \"false\" constant value.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstBool>
@@ -34,6 +38,10 @@ namespace Megalo {
    //
    #pragma region int8
    OpcodeArgTypeinfo OpcodeArgValueConstSInt8::typeinfo = OpcodeArgTypeinfo(
+      "_int8_t",
+      "Integer, 8-Bit",
+      "A numeric constant ranging from -128 to +127.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstSInt8>

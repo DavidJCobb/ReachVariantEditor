@@ -1,7 +1,17 @@
 #include "compiler.h"
+#include "namespaces.h"
+#include "../opcode_arg_types/variables/all_core.h"
 #include "../../../helpers/qt/string.h"
 
 namespace {
+   std::array<const Megalo::OpcodeArgTypeinfo&, 5> variable_typeinfos = {
+      Megalo::OpcodeArgValueScalar::typeinfo,
+      Megalo::OpcodeArgValueObject::typeinfo,
+      Megalo::OpcodeArgValuePlayer::typeinfo,
+      Megalo::OpcodeArgValueTeam::typeinfo,
+      Megalo::OpcodeArgValueTimer::typeinfo
+   };
+   //
    bool _is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias")
@@ -144,7 +154,8 @@ namespace Megalo {
       }
       //
       VariableReference::VariableReference(int32_t i) {
-         this->constant = i;
+         this->resolved.constant = i;
+         this->resolved.done = true;
          #if _DEBUG
             this->content = QString("%1").arg(i);
          #endif
@@ -155,9 +166,11 @@ namespace Megalo {
          #endif
          {
             bool ok = false;
-            this->constant = text.toInt(&ok);
-            if (ok)
+            this->resolved.constant = text.toInt(&ok);
+            if (ok) {
+               this->resolved.done = true;
                return;
+            }
          }
          auto    size  = text.size();
          QString name;
@@ -256,6 +269,69 @@ namespace Megalo {
             if (ok)
                part.index_str = "";
          }
+      }
+      void VariableReference::resolve() {
+         if (this->resolved.done)
+            return;
+         size_t i = 0;
+         {  // Identify the "which."
+            auto part = this->_part(i);
+            //
+            Namespace* ns = namespaces::get_by_name(part->name);
+            if (!ns) {
+               //
+               // Try matching this to a statically-indexable type, e.g. player[0] or script_widget[1]; if that 
+               // fails, then fall back to the unnamed namespace.
+               //
+               auto type = OpcodeArgTypeRegistry::get().get_by_internal_name(part->name);
+               if (type && type->can_be_static()) {
+                  if (!part->has_index())
+                     throw compile_exception(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
+                  //
+                  // TODO: Bounds-check the index using (type->static_count).
+                  //
+                  this->resolved.which_type = type;
+                  //
+                  // TODO: Identify the (which) value. (Likely requires a functor on the typeinfo, which would 
+                  // take the index and return an entry in megalo_players, megalo_objects, or megalo_teams.)
+                  //
+               } else
+                  ns = &namespaces::unnamed;
+            }
+            if (ns) {
+               part = this->_part(++i);
+               if (!part)
+                  throw compile_exception(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
+               auto type = OpcodeArgTypeRegistry::get().get_by_internal_name(part->name);
+               if (ns->can_have_variables && type && type->is_variable()) {
+                  if (!part->has_index())
+                     throw compile_exception(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
+                  //
+                  // TODO: Use (MegaloVariableScopeGlobal) to bounds-check the index.
+                  //
+                  this->resolved.which_type = type;
+                  //
+                  // TODO: Identify the (which) value. (Requires that the typeinfo specify the signature of 
+                  // the first global-variable entry, e.g. the signature of "global.number[0]" for numbers; 
+                  // we can assume that those are contiguous and just add to the enum value index.)
+                  //
+               } else {
+                  auto member = ns->get_member(part->name);
+                  if (!member)
+                     //
+                     // TODO: resolve aliases
+                     //
+                     throw compile_exception(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
+                  this->resolved.which_type = &member->type;
+                  this->resolved.which = member->which;
+                  this->resolved.scope = member->scope_indicator_id;
+               }
+            }
+         }
+         //
+         // TODO: EVERYTHING AFTER THE (which) VALUE
+         //
+         this->resolved.done = true;
       }
    }
    //

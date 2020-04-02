@@ -861,11 +861,15 @@
     <ClInclude Include="helpers\qt\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variables\all_core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.txt" />
+    <Text Include="game_variants\components\megalo\compiler\notes.txt" />
   </ItemGroup>
 </Project>

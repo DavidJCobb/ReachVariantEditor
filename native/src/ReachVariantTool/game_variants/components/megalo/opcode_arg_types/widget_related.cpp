@@ -12,9 +12,15 @@ namespace {
 namespace Megalo {
    #pragma region OpcodeArgValueWidget
       OpcodeArgTypeinfo OpcodeArgValueWidget::typeinfo = OpcodeArgTypeinfo(
+         "script_widget",
+         "HUD Widget",
+         "A HUD widget controllable by script.",
+         //
          OpcodeArgTypeinfo::typeinfo_type::default,
          0,
-         OpcodeArgTypeinfo::default_factory<OpcodeArgValueWidget>
+         OpcodeArgTypeinfo::default_factory<OpcodeArgValueWidget>,
+         {},
+         Limits::max_script_widgets
       );
       //
       bool OpcodeArgValueWidget::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
@@ -65,6 +71,10 @@ namespace Megalo {
    //
    #pragma region OpcodeArgValueMeterParameters
       OpcodeArgTypeinfo OpcodeArgValueMeterParameters::typeinfo = OpcodeArgTypeinfo(
+         "_meter_parameters",
+         "HUD Widget Meter Parameters",
+         "Options for displaying a meter on the HUD.",
+         //
          OpcodeArgTypeinfo::typeinfo_type::default,
          OpcodeArgTypeinfo::flags::can_be_multiple,
          { "none", "timer", "number" },

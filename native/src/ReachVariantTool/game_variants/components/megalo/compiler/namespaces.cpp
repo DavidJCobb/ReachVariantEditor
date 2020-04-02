@@ -4,10 +4,26 @@
 #include "../opcode_arg_types/variables/player.h"
 #include "../opcode_arg_types/variables/team.h"
 #include "../opcode_arg_types/variables/timer.h"
+#include "../../../helpers/qt/string.h"
 
 namespace Megalo {
    namespace Script {
+      const NamespaceMember* Namespace::get_member(const QString& name) const noexcept {
+         for (auto& member : this->members)
+            if (cobb::qt::stricmp(name, member.name) == 0)
+               return &member;
+         return nullptr;
+      }
+
       namespace namespaces {
+         std::array<Namespace&, 3> list = { unnamed, global, game };
+         Namespace* get_by_name(const QString& name) {
+            for (auto& ns : namespaces::list)
+               if (cobb::qt::stricmp(name, ns.name) == 0)
+                  return &ns;
+            return nullptr;
+         }
+         //
          Namespace unnamed = Namespace("game", true, false, {
             NamespaceMember::make_which_member("no_object",         OpcodeArgValueObject::typeinfo, 'none', NamespaceMember::flag::is_none),
             NamespaceMember::make_which_member("no_player",         OpcodeArgValuePlayer::typeinfo, 'none', NamespaceMember::flag::is_none),

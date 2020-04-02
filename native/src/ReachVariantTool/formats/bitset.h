@@ -19,7 +19,8 @@
 
 template<int count> class ReachDwordBasedBitset {
    public:
-      static constexpr int flag_count = count;
+      static constexpr int flag_count  = count;
+      static constexpr int dword_count = (count + 31) / 32;
       //
       cobb::bitset<count> bits;
       //

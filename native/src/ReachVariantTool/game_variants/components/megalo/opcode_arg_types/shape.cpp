@@ -2,6 +2,10 @@
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueShape::typeinfo = OpcodeArgTypeinfo(
+      "_shape",
+      "Shape",
+      "A boundary volume that an object can have.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::can_be_multiple,
       { "none", "sphere", "cylinder", "box" },

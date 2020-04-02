@@ -3,6 +3,10 @@
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerSet::typeinfo = OpcodeArgTypeinfo(
+      "_player_set",
+      "Player Set",
+      "A group of players.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::can_be_multiple,
       { "no_one", "anyone", "allies", "enemies", "specific_player", "no_one_2" },

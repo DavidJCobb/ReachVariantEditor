@@ -6,6 +6,10 @@ namespace {
 }
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueObjectType::typeinfo = OpcodeArgTypeinfo(
+      "_object_type",
+      "Object Type",
+      "A type of object to spawn in the game world.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectType>

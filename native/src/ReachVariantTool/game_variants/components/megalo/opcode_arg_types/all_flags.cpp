@@ -113,6 +113,10 @@ namespace Megalo {
 
    OpcodeArgValueCreateObjectFlags::OpcodeArgValueCreateObjectFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::create_object) {}
    OpcodeArgTypeinfo OpcodeArgValueCreateObjectFlags::typeinfo = OpcodeArgTypeinfo(
+      "_create_object_flags",
+      "Create Object Flags",
+      "Options for creating objects.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueCreateObjectFlags>
@@ -120,6 +124,10 @@ namespace Megalo {
    //
    OpcodeArgValueKillerTypeFlags::OpcodeArgValueKillerTypeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::killer_type) {}
    OpcodeArgTypeinfo OpcodeArgValueKillerTypeFlags::typeinfo = OpcodeArgTypeinfo(
+      "_killer_type_flags",
+      "Killer Type Flags",
+      "Overall causes of death for players.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueKillerTypeFlags>
@@ -127,6 +135,10 @@ namespace Megalo {
    //
    OpcodeArgValuePlayerUnusedModeFlags::OpcodeArgValuePlayerUnusedModeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayerUnusedModeFlags::typeinfo = OpcodeArgTypeinfo(
+      "_player_unused_mode",
+      "Player Unused Mode",
+      "Unknown.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerUnusedModeFlags>

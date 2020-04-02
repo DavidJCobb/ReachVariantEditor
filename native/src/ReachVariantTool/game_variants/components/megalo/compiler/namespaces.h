@@ -3,6 +3,7 @@
 #include <vector>
 #include "types.h"
 #include "../variables_and_scopes.h"
+#include <QString>
 
 namespace Megalo {
    namespace Script {
@@ -52,11 +53,16 @@ namespace Megalo {
                for (auto& member : this->members)
                   member.owner = this;
             }
+            //
+            const NamespaceMember* get_member(const QString& name) const noexcept;
       };
       namespace namespaces {
          extern Namespace unnamed;
          extern Namespace global;
          extern Namespace game;
+         //
+         extern std::array<Namespace&, 3> list;
+         extern Namespace* get_by_name(const QString&);
       }
    }
 }

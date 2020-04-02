@@ -92,6 +92,10 @@ namespace {
 namespace Megalo {
    OpcodeArgValueScalar::OpcodeArgValueScalar() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValueScalar::typeinfo = OpcodeArgTypeinfo(
+      "number",
+      "Number",
+      "A constant integer, numeric variable, or numeric game state value.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueScalar>

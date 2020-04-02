@@ -441,6 +441,10 @@ namespace Megalo {
    }
    
    OpcodeArgTypeinfo OpcodeArgValueSound::typeinfo = OpcodeArgTypeinfo(
+      "_sound",
+      "Sound",
+      "One of a limited set of sounds available to scripts to play.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>

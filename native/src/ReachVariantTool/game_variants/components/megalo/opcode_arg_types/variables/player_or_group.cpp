@@ -5,6 +5,10 @@
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerOrGroup::typeinfo = OpcodeArgTypeinfo(
+      "_player_or_group",
+      "Player-or-Group",
+      "A reference to either a team, a player, or all players.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::default,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerOrGroup>

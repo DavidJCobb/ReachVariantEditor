@@ -48,6 +48,10 @@ namespace Megalo {
    }
    
    OpcodeArgTypeinfo OpcodeArgValueVariantStringID::typeinfo = OpcodeArgTypeinfo(
+      "_variant_string",
+      "Variant String",
+      "A small name indicating a variation of an object type, such as an armor permutation for a biped.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVariantStringID>

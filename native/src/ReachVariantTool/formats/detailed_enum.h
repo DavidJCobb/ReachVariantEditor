@@ -16,6 +16,7 @@ struct DetailedEnumValueInfo {
       map_tag,       // signature and string   // use for MP object types, sounds, etc.
       subtitle,      // QString // for sounds consisting of dialogue
       sentinel_flags, // uses (signature) as a flags mask
+      signature,     // integer
    };
    struct flags {
       flags() = delete;
@@ -47,6 +48,9 @@ struct DetailedEnumValueInfo {
    }
    static DetailedEnumValueInfo make_subtitle(QString v) {
       return DetailedEnumValueInfo(info_type::subtitle, v);
+   }
+   static DetailedEnumValueInfo make_signature(uint32_t v) {
+      return DetailedEnumValueInfo(info_type::signature, v);
    }
    //
    static DetailedEnumValueInfo make_unused_sentinel() {
@@ -115,4 +119,11 @@ struct DetailedEnum {
       return &this->values[i];
    }
    int lookup(const char* name) const noexcept;
+   int lookup_by_signature(uint32_t s) const noexcept;
+   //
+   inline bool is_in_bounds(int v) const noexcept {
+      if (v < 0)
+         return false;
+      return v < this->size();
+   }
 };

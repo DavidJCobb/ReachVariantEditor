@@ -327,10 +327,10 @@ Once we've split the variable reference into parts, we can process it as follows
 
 In other words, the possible patterns are:
 
-   member
-   member.var          -- only if the member is a variable AND its type allows nested variables
-   member.property     -- only if the member is a variable
-   member.var.property -- biped only
+   which
+   which.var          -- only if the member is a variable AND its type allows nested variables
+   which.property     -- only if the member is a variable
+   which.var.property -- biped only
 
 And so all variable references, once resolved, can be conceived of as three units, the latter 
 two of which are optional: the member (or typeinfo and index, to be converted to a "which" 
@@ -338,12 +338,16 @@ value); the nested variable; and the property. (Additionally, we treat constant 
 variable references, so I guess that is a fourth unit, and also an optional one.) We can 
 represent this with a struct containing the following fields:
 
-   Script::NamespaceMember* member
-   OpcodeArgTypeinfo*       static_type
-   int32_t                  static_index
-   OpcodeArgTypeinfo*       variable_type
-   int32_t                  variable_index
-   Script::Property*        property
+   which:
+      OpcodeArgTypeinfo*       type
+      int32_t                  value
+   var:
+      OpcodeArgTypeinfo*       type
+      int32_t                  index
+   property:
+      QString                  property // can't use a pointer because it may be an opcode
+   constant:
+      int32_t                  value
 
 (Note that resolving property names will be somewhat tricky: if the property name doesn't 
 match any of the properties defined on the type, then we must search the action function list 

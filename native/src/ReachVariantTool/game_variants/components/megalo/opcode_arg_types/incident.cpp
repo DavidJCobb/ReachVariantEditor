@@ -989,6 +989,10 @@ namespace Megalo {
    }
    
    OpcodeArgTypeinfo OpcodeArgValueIncident::typeinfo = OpcodeArgTypeinfo(
+      "_incident",
+      "Incident",
+      "A notification that can be sent to the game engine to award medals, trigger announcer voiceovers, and so on.",
+      //
       OpcodeArgTypeinfo::typeinfo_type::enumeration,
       0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueIncident>

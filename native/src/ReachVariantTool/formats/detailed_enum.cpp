@@ -26,3 +26,14 @@ int DetailedEnum::lookup(const char* name) const noexcept {
    }
    return -1;
 }
+int DetailedEnum::lookup_by_signature(uint32_t s) const noexcept {
+   size_t s = this->size();
+   for (size_t i = 0; i < s; ++i) {
+      const auto& item  = this->values[i];
+      const auto& infos = item.infos;
+      for (auto& info : infos)
+         if (info.type == DetailedEnumValueInfo::info_type::signature && info.signature == s)
+            return i;
+   }
+   return -1;
+}

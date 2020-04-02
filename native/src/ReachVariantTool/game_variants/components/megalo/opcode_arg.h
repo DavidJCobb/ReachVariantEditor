@@ -10,6 +10,7 @@
 #include "variables_and_scopes.h"
 #include "decompiler/decompiler.h"
 #include "compiler/types.h"
+#include <QString>
 
 //
 // Here, an "opcode" is an instruction that can appear in a Megalo trigger, i.e. a 
@@ -45,8 +46,22 @@ class GameVariantDataMultiplayer;
 namespace Megalo {
    class OpcodeArgBase;
    class OpcodeArgValue;
+   class OpcodeArgTypeinfo;
 
    using OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
+
+   class OpcodeArgTypeRegistry {
+      public:
+         static OpcodeArgTypeRegistry& get() {
+            static OpcodeArgTypeRegistry instance;
+            return instance;
+         }
+         //
+         std::vector<const OpcodeArgTypeinfo&> types;
+         //
+         void register_type(const OpcodeArgTypeinfo& type);
+         const OpcodeArgTypeinfo* get_by_internal_name(const QString& name) const;
+   };
 
    class OpcodeArgTypeinfo {
       public:
@@ -71,6 +86,9 @@ namespace Megalo {
          template<typename T> static OpcodeArgValue* default_factory(cobb::ibitreader&) { return new T; }
          //
       public:
+         std::string internal_name;
+         QString     friendly_name;
+         QString     description;
          typeinfo_type            type    = typeinfo_type::default;
          flags_type               flags   = 0;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
@@ -78,10 +96,25 @@ namespace Megalo {
          std::vector<Script::Property> properties; // for compiler
          uint8_t static_count = 0; // e.g. 8 for player[7]
          //
-         OpcodeArgTypeinfo() {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr, uint8_t sc) : type(t), flags(f), factory(fac), properties(pr), static_count(sc) {}
+         OpcodeArgTypeinfo() {
+            OpcodeArgTypeRegistry::get().register_type(*this);
+         }
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac) {
+            OpcodeArgTypeRegistry::get().register_type(*this);
+         }
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), elements(e), factory(fac) {
+            OpcodeArgTypeRegistry::get().register_type(*this);
+         }
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr, uint8_t sc = 0) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac), properties(pr), static_count(sc) {
+            OpcodeArgTypeRegistry::get().register_type(*this);
+         }
+         //
+         inline bool can_be_static() const noexcept {
+            return this->static_count > 0;
+         }
+         inline bool is_variable() const noexcept {
+            return (this->flags) & flags::is_variable;
+         }
    };
    
    class OpcodeArgValue {
