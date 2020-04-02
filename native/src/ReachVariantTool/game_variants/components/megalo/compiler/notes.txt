@@ -12,6 +12,12 @@ A PROPERTY is a member of a variable. Properties are "dead ends:" you cannot acc
 variables or other properties through them (e.g. no global.player[0].biped.biped), though 
 you can call member functions on them (e.g. global.player[0].biped.set_shape(...)).
 
+An "abstract property" is a property whose getter or setter access is handled by opcodes 
+under the hood. Abstract properties can only appear in assignment statements, and some 
+abstract properties may only have a getter or only have a setter. (We basically only use 
+abstract properties when there is an opcode to modify some value using an assignment 
+operator, e.g. to facilitate syntax like "object.shields += 3").
+
 An OPCODE is any condition or action that can exist in a script. This includes ordinary 
 assignments to variables and comparisons of variables, as well as every function call that 
 one can write in a script. Some opcodes are getters and setters for specific data fields on 
@@ -64,6 +70,10 @@ to a type is a "relative alias:"
    alias max_phases   = 3                -- absolute
    alias is_zombie    = player.number[0] -- relative
 
+Absolute aliases will not conflict with, shadow, or be shadowed by relative aliases with 
+the same name. Additionally, two relative aliases with the same name will not conflict with 
+or shadow each other if they are relative to different types.
+
 
 
 == What information do typeinfos provide? ==
@@ -92,10 +102,10 @@ accessed as static collections (e.g. player[0] to refer to the first player in t
 and if so, what the maximum index is.
 
 (Script traits use the same index as variables and script widgets, but they only appear as 
-arguments. We can't rely solely on argument parsing to deal with them, because we want it 
-to be possible to alias them. Argument parsing will have a few other hiccups; for example, 
-Vector3s need to parse carefully so that you can use aliases of constant integers as coord-
-inate values.)
+arguments; we can't rely solely on argument parsing to deal with them, because we want it 
+to be possible to alias them, so we should handle them the same way as widgets (see below). 
+Argument parsing will have a few other hiccups; for example, Vector3s need to parse care-
+fully so that you can use aliases of constant integers as coordinate values.)
 
 Most other types only need to define basic information on their typeinfos:
 
@@ -113,7 +123,8 @@ Most other types only need to define basic information on their typeinfos:
 So what information needs to exist for detailed typeinfos?
 
  - Is the type statically accessible by its typename? (Yes for players and teams; yes for 
-   script widgets; no for everything else.) If so, what is the maximum allowed index?
+   script widgets and script traits; no for everything else.) If so, what is the maximum          <-------- LOOK HERE FOR HOW TO IMPLEMENT SCRIPT WIDGETS AND TRAITS FOR THE COMPILER
+   allowed index?
 
  - Is the type a variable? If so, can it contain nested variables?
 
@@ -127,7 +138,7 @@ So what information needs to exist for detailed typeinfos?
       function list.
 
     - Each property has a name and a type. Some properties specify a scope indicator ID 
-      for their parent variable, which is enough information to fully resolve a reference 
+      for their parent variable, which is enough information to fully resolve a reference         <------- IN ADDITION TO THINGS LIKE object.spawn_sequence, THIS IS ALSO HOW WE'LL IMPLEMENT SCRIPT STATS
       (the scope indicator will specify whether the property is read-only, and whether it 
       can be indexed). The "biped" property on players is a notable exception: there are 
       four possible scope indicators that it can use, so that property must instead rely 
@@ -159,7 +170,7 @@ Each namespace member can have:
    value is mutually exclusive with the scope ID.
 
  - A scope indicator ID, for things like (script_option[0]) in the unnamed namespace or 
-   (game.round_timer) in the "game" namespace. This ID should match those used for the 
+   (game.round_timer) in the "game" namespace. This ID should match those used for the            <------- THIS IS HOW WE'LL IMPLEMENT SCRIPT OPTIONS, IN CONTRAST TO TRAITS AND WIDGETS
    appropriate variable type's VariableScopeIndicatorValues. This value is mutually 
    exclusive with the "which" value.
 
@@ -178,7 +189,7 @@ Each namespace member can have:
 
 
 
-== How do we parse a statement? ==
+== How do we parse a statement (not including conditions)? ==
 
 We parse a word and verify that it's not a keyword (if it's a keyword, we handle it). Then, 
 we look for either an operator or an opening parentheses. If an opening parentheses is 
@@ -188,7 +199,8 @@ then we must be inside of an assignment statement, and the previously found word
 variable reference. We ensure that it's valid, and that it isn't a read-only value, and then 
 we get the next word after the operator. We then look for an opening parentheses; if none is 
 found, then we take the newly-found word and interpret it as a variable reference, and at that 
-point, we're done.
+point, we're done: we can compile an ordinary assignment operator or a property setter opcode 
+as appropriate.
 
 If an opening parentheses is found, then we double-check that the operator found was "=", a 
 vanilla assignment, because modify-and-assign operators like "+=" cannot be used on functions. 
@@ -288,6 +300,18 @@ This procedure allows us to weed out the following syntax errors:
 
     = TODO: THIS
 
+ - Any name that is an integer, e.g. "123[4]" or "name[1].123[4]". Normal integer constants 
+   e.g. "123" are checked for and handled before we begin splitting the reference into parts.
+ 
+    = TODO: THIS. ERROR MESSAGES SHOULD BE:
+       - "An integer literal cannot be indexed." (if it's the first part and has an index)
+       - "An integer literal cannot have properties or nested variables." (if it's the first part and has no index)
+       - "An integer literal cannot be a property or nested variable." (if it's not the first part)
+
+  - A mismatched closing bracket e.g. "name]"
+
+     = TODO: THIS
+
 Once we've split the variable reference into parts, we can process it as follows:
 
  - For any part: if the index consists of non-numeric text, then we need to check whether 
@@ -310,7 +334,9 @@ Once we've split the variable reference into parts, we can process it as follows
       pretty much handle these the same as members.
 
  - If the member's type is a variable type (i.e. number, object, player, team, or timer), 
-   then the next part, if present, must be either another variable or a property.
+   then the next part, if present, must be either another variable or a property (either one 
+   defined on that type, or one implied by a getter or setter opcode that uses that type as 
+   a context argument).
 
 In other words, the possible patterns are:
 
@@ -320,11 +346,30 @@ In other words, the possible patterns are:
    member.var.property -- biped only
 
 And so all variable references, once resolved, can be conceived of as three units, the latter 
-two of which are optional: the member, the nested variable, and the property. (Additionally, we 
-treat constant integers as variable references, so I guess that is a fourth unit.)
+two of which are optional: the member (or typeinfo and index, to be converted to a "which" 
+value); the nested variable; and the property. (Additionally, we treat constant integers as 
+variable references, so I guess that is a fourth unit, and also an optional one.) We can 
+represent this with a struct containing the following fields:
 
-If at any point we fail to identify a part (i.e. its name is unrecognized), then we need to 
-check for an appropriate alias:
+   Script::NamespaceMember* member
+   OpcodeArgTypeinfo*       static_type
+   int32_t                  static_index
+   OpcodeArgTypeinfo*       variable_type
+   int32_t                  variable_index
+   Script::Property*        property
+
+(Note that resolving property names will be somewhat tricky: if the property name doesn't 
+match any of the properties defined on the type, then we must search the action function list 
+for property getters/setters and see if the name matches what is listed there. What makes this 
+tricky is that there is one opcode, Modify Grenade Count, that doesn't have a constant 
+property name; instead, the property name is one of the opcode arguments. The solution is 
+to simply look through the OpcodeToScriptMapping to identify *which* argument that is; then, 
+instantiate just that argument, standalone, and call OpcodeArgValue::compile with the property 
+name as the "argument." If it returns a success code, then we've identified our property as 
+that specific getter or setter.)
+
+If at any point we fail to identify a part as part of the process above (i.e. its name is 
+unrecognized), then we need to check for an appropriate alias:
 
  - Non-relative aliases can only be used as the first part. (alias_name[any_index]) is a syntax 
    error.
@@ -345,3 +390,21 @@ check for an appropriate alias:
     - If the first part fails to match any absolute aliases, then the error message we display 
       should vary depending on whether it matches any relative aliases (i.e. "you need to 
       supply a type" if so, or "unrecognized variable part" otherwise).
+
+If an appropriate alias is found, then we should include its content i.e. the variable it 
+refers to, and then continue the above process for resolving the variable reference.
+
+
+
+== How do we resolve an alias definition? ==
+
+We first try to resolve the alias's target as a variable reference. If this succeeds, then the 
+alias is an absolute alias, and we retain the resolved variable data. Otherwise, we try to 
+resolve the alias as one of the following:
+
+   typename.property        -- aliased property
+   typename.typename[index] -- aliased nested variable
+
+We apply the appropriate constraints: the first typename must be a variable type; a property 
+name must exist on the typename (or as a getter or setter); a second typename must be a 
+variable type and the preceding typename must allow nested variables.
