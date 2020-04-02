@@ -19,19 +19,25 @@ namespace Megalo {
             };
             using flags_t = std::underlying_type_t<flag::type>;
             //
-            static constexpr int8_t  no_which = -1;
+            static constexpr int8_t  no_which = 0;
             static constexpr int16_t no_scope = -1;
             //
          public:
             std::string name;
             const OpcodeArgTypeinfo& type;
             flags_t     flags = flag::none;
-            int8_t      which = no_which;
+            uint32_t    which = no_which; // signature
             int16_t     scope_indicator_id = no_scope;
             //
             Namespace* owner = nullptr;
             //
             NamespaceMember(const char* n, const OpcodeArgTypeinfo& t, int8_t w, int16_t s, flags_t fl = flag::none) : name(n), type(t), which(w), scope_indicator_id(s), flags(fl) {}
+            static NamespaceMember make_which_member(const char* n, const OpcodeArgTypeinfo& t, int8_t w, flags_t fl = flag::none) {
+               return NamespaceMember(n, t, w, no_scope, fl);
+            }
+            static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, int16_t s) {
+               return NamespaceMember(n, t, no_which, s);
+            }
       };
       class Namespace {
          public:

@@ -2,6 +2,7 @@
 #include <cassert>
 #include <vector>
 #include "enums.h"
+#include "../../../formats/detailed_enum.h"
 
 namespace Megalo {
    enum class variable_scope {
@@ -22,14 +23,14 @@ namespace Megalo {
       not_a_variable = -1, // needed for "All Players" values in team-or-player vars
    };
 
-   extern const SmartEnum megalo_scope_does_not_have_specifier; // there is only one Global scope; you don't need to specify "which Global scope" a variable is in
-   extern const SmartEnum megalo_objects;
-   extern const SmartEnum megalo_players;
-   extern const SmartEnum megalo_teams;
+   extern const DetailedEnum megalo_scope_does_not_have_specifier; // there is only one Global scope; you don't need to specify "which Global scope" a variable is in
+   extern const DetailedEnum megalo_objects;
+   extern const DetailedEnum megalo_players;
+   extern const DetailedEnum megalo_teams;
 
    class VariableScope {
       public:
-         constexpr VariableScope(const SmartEnum& list, uint8_t n, uint8_t i, uint8_t e, uint8_t p, uint8_t o) : 
+         constexpr VariableScope(const DetailedEnum& list, uint8_t n, uint8_t i, uint8_t e, uint8_t p, uint8_t o) :
             list(list),
             max_scalars(n),
             max_timers(i),
@@ -38,7 +39,7 @@ namespace Megalo {
             max_objects(o)
          {}
          //
-         const SmartEnum& list;
+         const DetailedEnum& list;
          uint8_t max_scalars;
          uint8_t max_timers;
          uint8_t max_teams;
@@ -70,7 +71,7 @@ namespace Megalo {
          }
          //
          bool is_valid_which(int which) const noexcept {
-            if (this->list.count == 0)
+            if (this->list.size() == 0)
                return which == 0;
             return this->list.is_in_bounds(which);
          }
