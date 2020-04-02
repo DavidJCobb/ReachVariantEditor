@@ -288,29 +288,16 @@ This procedure allows us to weed out the following syntax errors:
 
  - Unterminated square brackets on the last part e.g. "name[0"
 
-    = TODO: THIS
-
  - An empty set of brackets, e.g. "name[]"
 
  - Any glyph other than "." after the square brackets, e.g. "name[]name"
 
-    = TODO: THIS
-
  - Multiple sets of square brackets, e.g. "name[1][2]"
-
-    = TODO: THIS
 
  - Any name that is an integer, e.g. "123[4]" or "name[1].123[4]". Normal integer constants 
    e.g. "123" are checked for and handled before we begin splitting the reference into parts.
- 
-    = TODO: THIS. ERROR MESSAGES SHOULD BE:
-       - "An integer literal cannot be indexed." (if it's the first part and has an index)
-       - "An integer literal cannot have properties or nested variables." (if it's the first part and has no index)
-       - "An integer literal cannot be a property or nested variable." (if it's not the first part)
 
   - A mismatched closing bracket e.g. "name]"
-
-     = TODO: THIS
 
 Once we've split the variable reference into parts, we can process it as follows:
 

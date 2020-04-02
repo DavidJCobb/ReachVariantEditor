@@ -1,5 +1,5 @@
 #include "compiler.h"
-#include <QRegExp>
+#include "../../../helpers/qt/string.h"
 
 namespace {
    bool _is_keyword(QString s) {
@@ -84,9 +84,9 @@ namespace Megalo {
          {  // Validate name.
             if (_is_keyword(name))
                compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
-            if (name.contains(QRegExp("[\\[\\]\\.]")))
+            if (cobb::qt::string_has_any_of(name, "[]."))
                compiler.throw_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
-            if (!name.contains(QRegExp("[^0-9]")))
+            if (cobb::qt::string_is_integer(name))
                compiler.throw_error(QString("Invalid alias name \"%1\". You cannot alias an integer constant.").arg(this->name));
             //
             // TODO: Disallow aliasing namespace names, typenames, and the names of members of the unnamed namespace.
@@ -186,27 +186,61 @@ namespace Megalo {
                   continue;
                index += c;
             } else {
+               if (c == ']')
+                  throw compile_exception("Unexpected \"]\".");
                if (c == '[') {
-                  //
-                  // TODO: Write code to detect "name[1][2]", "name[2][]", etc., and treat that as a syntax error.
-                  //
+                  if (cobb::qt::string_is_integer(name)) { // "123[4]" is a syntax error
+                     if (this->parts.empty())
+                        throw compile_exception("An integer literal cannot be indexed.");
+                     throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.123" is also a syntax error and should take priority
+                  }
+                  if (!index.isEmpty())
+                     throw compile_exception("Variables of the form \"name[1][2]\" are not valid. Only specify one index.");
                   is_index = true;
                   continue;
                }
                if (c == '.') {
+                  if (cobb::qt::string_is_integer(name)) { // "1234.name" and "name.1234.name" are syntax errors
+                     if (this->parts.empty())
+                        throw compile_exception("An integer literal cannot have properties or nested variables."); // 1234.name"
+                     throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.1234.name"
+                  }
                   auto part = Part(name, index);
                   this->parts.push_back(part);
                   name  = "";
                   index = "";
                   continue;
                }
+               if (!index.isEmpty()) // "name[1]name" is a syntax error
+                  throw compile_exception("Expected a period. Variables of the form \"name[1]name\" are not valid.");
                name += c;
             }
          }
-         if (name.isEmpty()) // text ended in '.' or was empty string
-            throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
-         auto part = Part(name, index);
-         this->parts.push_back(part);
+         //
+         // We've reached the end of the string. We were only saving parts when we encountered a '.', so the 
+         // last part in the string still needs to be validated and added.
+         //
+         {
+            if (name.isEmpty()) // text ended in '.' or was empty string
+               throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
+            if (cobb::qt::string_is_integer(name)) {
+               if (this->parts.empty())
+                  //
+                  // If there are no earlier parts, then this must have been something like "123[4]". If there 
+                  // weren't an index, then the entire string would just be the integer and we would've treated 
+                  // it accordingly at the very start of this function.
+                  //
+                  throw compile_exception("An integer literal cannot be indexed.");
+               throw compile_exception("An integer literal cannot be a property or nested variable.");
+            }
+            if (is_index)
+               throw compile_exception("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
+            auto part = Part(name, index);
+            this->parts.push_back(part);
+         }
+         //
+         // Next, let's do some final basic validation -- specifically, disallow the use of keywords as part 
+         // names and indices, disallow empty part names, and store integer indices as integers.
          //
          for (auto& part : this->parts) {
             if (part.name.isEmpty())
