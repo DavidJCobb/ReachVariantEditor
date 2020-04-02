@@ -57,7 +57,7 @@ namespace Megalo {
             return instance;
          }
          //
-         std::vector<const OpcodeArgTypeinfo&> types;
+         std::vector<const OpcodeArgTypeinfo*> types;
          //
          void register_type(const OpcodeArgTypeinfo& type);
          const OpcodeArgTypeinfo* get_by_internal_name(const QString& name) const;

@@ -16,11 +16,11 @@ namespace Megalo {
       }
 
       namespace namespaces {
-         std::array<Namespace&, 3> list = { unnamed, global, game };
+         std::array<Namespace*, 3> list = { &unnamed, &global, &game };
          Namespace* get_by_name(const QString& name) {
             for (auto& ns : namespaces::list)
-               if (cobb::qt::stricmp(name, ns.name) == 0)
-                  return &ns;
+               if (cobb::qt::stricmp(name, ns->name) == 0)
+                  return ns;
             return nullptr;
          }
          //

@@ -4,14 +4,6 @@
 #include "../../../helpers/qt/string.h"
 
 namespace {
-   std::array<const Megalo::OpcodeArgTypeinfo&, 5> variable_typeinfos = {
-      Megalo::OpcodeArgValueScalar::typeinfo,
-      Megalo::OpcodeArgValueObject::typeinfo,
-      Megalo::OpcodeArgValuePlayer::typeinfo,
-      Megalo::OpcodeArgValueTeam::typeinfo,
-      Megalo::OpcodeArgValueTimer::typeinfo
-   };
-   //
    bool _is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias")
@@ -292,8 +284,9 @@ namespace Megalo {
                   //
                   this->resolved.which_type = type;
                   //
-                  // TODO: Identify the (which) value. (Likely requires a functor on the typeinfo, which would 
-                  // take the index and return an entry in megalo_players, megalo_objects, or megalo_teams.)
+                  // TODO: Identify the (which) value. (Likely requires that the typeinfo specify the 
+                  // signature of the first static-entry, e.g. the signature of "player[0]" for players; 
+                  // we can assume that those are contiguous and just add to the enum value index.)
                   //
                } else
                   ns = &namespaces::unnamed;

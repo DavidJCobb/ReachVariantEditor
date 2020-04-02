@@ -61,7 +61,7 @@ namespace Megalo {
          extern Namespace global;
          extern Namespace game;
          //
-         extern std::array<Namespace&, 3> list;
+         extern std::array<Namespace*, 3> list;
          extern Namespace* get_by_name(const QString&);
       }
    }

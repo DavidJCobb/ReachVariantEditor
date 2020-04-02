@@ -57,7 +57,7 @@ namespace Megalo {
       DetailedEnumValue("hud_target_player", DetailedEnumValueInfo::make_signature('hudt')),
       DetailedEnumValue("killer_player",     DetailedEnumValueInfo::make_signature('kilr')),
    });
-   const DetailedEnum megalo_teams = DetailedEnum({ // TODO: internally, this is offset by 1 i.e. (no_team) uses index -1, but we're not doing that here
+   const DetailedEnum megalo_teams = DetailedEnum({ // Apparently, in Reach's memory, this type's "none" value is -1... but it's still serialized as 0. We could honor that but why? Just handle it as 0 lol
       DetailedEnumValue("no_team",           DetailedEnumValueInfo::make_signature('none')),
       DetailedEnumValue("team[0]",           DetailedEnumValueInfo::make_signature('s_00')),
       DetailedEnumValue("team[1]",           DetailedEnumValueInfo::make_signature('s_01')),
