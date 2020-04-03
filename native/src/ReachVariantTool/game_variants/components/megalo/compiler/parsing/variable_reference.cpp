@@ -201,6 +201,8 @@ namespace Megalo::Script {
       if (!ns) {
          ns = &namespaces::unnamed;
          //
+         // Let's real quick check to handle "static indexable" references, e.g. "player[0]" or "script_widget[2]".
+         //
          auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(part->name);
          if (type) {
             if (!part->has_index())
@@ -225,6 +227,10 @@ namespace Megalo::Script {
                }
             }
             this->interpreted.push_back(interpreted);
+            //
+            // We return the number of parts consumed, so that code to read the rest of the VariableReference 
+            // knows where to continue from.
+            //
             return ++i;
          }
          //
@@ -235,6 +241,9 @@ namespace Megalo::Script {
       if (!part)
          throw compile_exception(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
       if (ns->can_have_variables) {
+         //
+         // Let's check to see if we're looking at a global variable.
+         //
          #if _DEBUG
             assert(ns == &namespaces::global && "Only the global namespace can have variables, and some of the code here is written on the assumption that that will not change in the future.");
          #endif
@@ -273,9 +282,16 @@ namespace Megalo::Script {
             return ++i;
          }
       }
+      //
+      // The first part(s) of the VariableReference were not a statically-indexable type e.g. player[0], nor were 
+      // they a global variable e.g. global.player[0], so they must instead be a namespace member.
+      //
       auto member = ns->get_member(part->name);
-      if (!member)
+      if (!member) {
+         if (ns == &namespaces::unnamed)
+            throw compile_exception(QString("There are no unscoped values named \"%1\".").arg(part->name));
          throw compile_exception(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
+      }
       InterpretedPart interpreted;
       interpreted.type = &member->type;
       if (member->is_which_member()) {
@@ -298,6 +314,14 @@ namespace Megalo::Script {
          auto* part = &this->parts[i];
          auto& prev = this->interpreted.back();
          {
+            //
+            // There are two approaches for resolving aliases. If we check for aliases after checking for everything else, 
+            // then we'll have to repeat the checks for everything else in the event that an alias is used. If we check 
+            // for aliases before checking for everything else, then there's no need for repetition, but if we make any 
+            // mistakes in our code for reading alias definitions, then aliases can shadow built-ins, which we don't want. 
+            // Basically, all of the things we check for here? We have to explicitly disallow shadowing them when we're 
+            // reading an alias definition.
+            //
             auto alias = compiler.lookup_relative_alias(part->name, prev.type);
             if (alias) {
                if (part->has_index())
@@ -306,6 +330,10 @@ namespace Megalo::Script {
                part = &this->parts[i];
             }
          }
+         //
+         // If a relative alias was used, it has now been resolved, which means that now, either we're looking at a 
+         // built-in, or we're looking at something invalid.
+         //
          if (prev.type->can_have_variables()) {
             //
             // Handle nested variables, e.g. global.player[0].number[1]

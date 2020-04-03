@@ -13,6 +13,7 @@ namespace Megalo {
                which,
                index,
                constant_integer,
+               alias_relative_to, // only use in alias definitions, e.g. for the "player" in "alias is_zombie = player.number[0]"
             };
             //
          public:
@@ -49,13 +50,13 @@ namespace Megalo {
             std::vector<InterpretedPart> interpreted;
             bool resolved = false;
             //
-            VariableReference(QString);
+            VariableReference(QString); // can throw compile_exception
             VariableReference(int32_t);
             //
             void set_to_constant_integer(int32_t);
             inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
             //
-            void resolve(Compiler&);
+            void resolve(Compiler&); // can throw compile_exception
             //
          protected:
             inline Part* _part(int i) {
@@ -65,7 +66,7 @@ namespace Megalo {
                   return nullptr;
                return &this->parts[i];
             }
-            void _transclude(uint32_t index, Alias&);
+            void _transclude(uint32_t index, Alias&); // replaces (this->parts[index]) with the contents of the alias. if the alias is a relative alias, does not include the alias typename
             size_t _resolve_first_parts(Compiler&);
       };
    }
