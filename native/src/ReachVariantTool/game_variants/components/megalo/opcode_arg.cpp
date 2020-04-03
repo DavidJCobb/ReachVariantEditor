@@ -14,4 +14,24 @@ namespace Megalo {
             return type;
       return nullptr;
    }
+   const OpcodeArgTypeinfo* OpcodeArgTypeRegistry::get_static_indexable_type(const QString& name) const {
+      for (auto type : this->types)
+         if (type->can_be_static() && cobb::qt::stricmp(name, type->internal_name) == 0)
+            return type;
+      return nullptr;
+   }
+   const OpcodeArgTypeinfo* OpcodeArgTypeRegistry::get_variable_type(const QString& name) const {
+      for (auto type : this->types)
+         if (type->is_variable() && cobb::qt::stricmp(name, type->internal_name) == 0)
+            return type;
+      return nullptr;
+   }
+
+   const Script::Property* OpcodeArgTypeinfo::get_property_by_name(QString name) const {
+      name = name.toLower();
+      for (auto& prop : this->properties)
+         if (cobb::qt::stricmp(name, prop.name) == 0)
+            return &prop;
+      return nullptr;
+   }
 }

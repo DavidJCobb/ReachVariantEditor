@@ -46,28 +46,22 @@ namespace Megalo {
          uint8_t max_players;
          uint8_t max_objects;
          //
-         const int which_bits() const noexcept { return this->list.index_bits(); }
-         const int count_bits(const variable_type vt) const noexcept {
+         const int max_variables_of_type(const variable_type vt) const noexcept {
             switch (vt) {
-               case variable_type::scalar: return cobb::bitcount(this->max_scalars);
-               case variable_type::timer:  return cobb::bitcount(this->max_timers);
-               case variable_type::team:   return cobb::bitcount(this->max_teams);
-               case variable_type::player: return cobb::bitcount(this->max_players);
-               case variable_type::object: return cobb::bitcount(this->max_objects);
+               case variable_type::scalar: return this->max_scalars;
+               case variable_type::timer:  return this->max_timers;
+               case variable_type::team:   return this->max_teams;
+               case variable_type::player: return this->max_players;
+               case variable_type::object: return this->max_objects;
             }
-            assert(false && "Unrecognized variable type.");
             return 0;
          }
+         const int which_bits() const noexcept { return this->list.index_bits(); }
+         const int count_bits(const variable_type vt) const noexcept {
+            return cobb::bitcount(this->max_variables_of_type(vt));
+         }
          const int index_bits(const variable_type vt) const noexcept {
-            switch (vt) {
-               case variable_type::scalar: return cobb::bitcount(this->max_scalars - 1);
-               case variable_type::timer:  return cobb::bitcount(this->max_timers  - 1);
-               case variable_type::team:   return cobb::bitcount(this->max_teams   - 1);
-               case variable_type::player: return cobb::bitcount(this->max_players - 1);
-               case variable_type::object: return cobb::bitcount(this->max_objects - 1);
-            }
-            assert(false && "Unrecognized variable type.");
-            return 0;
+            return cobb::bitcount(this->max_variables_of_type(vt) - 1);
          }
          //
          bool is_valid_which(int which) const noexcept {

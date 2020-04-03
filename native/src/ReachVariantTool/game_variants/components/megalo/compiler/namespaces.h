@@ -39,6 +39,9 @@ namespace Megalo {
             static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, int16_t s) {
                return NamespaceMember(n, t, no_which, s);
             }
+            //
+            inline bool is_which_member() const noexcept { return this->which != no_which; }
+            inline bool is_scope_member() const noexcept { return this->scope_indicator_id != no_scope; }
       };
       class Namespace {
          public:

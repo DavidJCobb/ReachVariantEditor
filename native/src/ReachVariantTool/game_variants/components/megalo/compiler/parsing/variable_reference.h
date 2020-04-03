@@ -5,7 +5,16 @@
 
 namespace Megalo {
    namespace Script {
+      class Alias;
       class VariableReference : public ParsedItem {
+         public:
+            enum class disambig_type : uint8_t {
+               scope,
+               which,
+               index,
+               constant_integer,
+            };
+            //
          public:
             QString content;
             #if !_DEBUG
@@ -22,36 +31,31 @@ namespace Megalo {
                Part(QString n, QString i) : name(n), index_str(i) {}
                Part(QString n, int32_t i) : name(n), index(i) {};
                //
+               Part& operator=(const Part& other) noexcept;
+               //
                inline bool has_index() const noexcept {
                   return this->index_is_numeric || !this->index_str.isEmpty();
                }
+               void resolve_index(Compiler&);
             };
             struct InterpretedPart {
                const OpcodeArgTypeinfo* type = nullptr;
-               int8_t  scope_id      = -1;
-               int32_t disambiguator =  0; // which/index value; if type is nullptr and this is the first part, then the disambiguator is an integer constant value
+               int32_t       disambiguator = 0;
+               disambig_type disambig_type = disambig_type::scope;
+               QString       property;
             };
             //
             std::vector<Part> parts;
             std::vector<InterpretedPart> interpreted;
-            struct {
-               bool done = false;
-               //
-               const OpcodeArgTypeinfo* which_type = nullptr; // also used for namespace scope-members
-               int16_t  which      = -1; // used for namespace which-members
-               uint32_t scope      =  0; // used for namespace scope-members
-               const OpcodeArgTypeinfo* var_type   = nullptr;
-               int32_t  var_index  =  0;
-               QString  property;        // must use a string and not a pointer to a definition, because Opcodes can serve as implicit property definitions
-               int32_t  constant   =  0;
-            } resolved;
+            bool resolved = false;
             //
             VariableReference(QString);
             VariableReference(int32_t);
             //
-            void resolve();
-            //
+            void set_to_constant_integer(int32_t);
             inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
+            //
+            void resolve(Compiler&);
             //
          protected:
             inline Part* _part(int i) {
@@ -61,6 +65,8 @@ namespace Megalo {
                   return nullptr;
                return &this->parts[i];
             }
+            void _transclude(uint32_t index, Alias&);
+            size_t _resolve_first_parts(Compiler&);
       };
    }
 }

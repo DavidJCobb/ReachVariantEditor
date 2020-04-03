@@ -61,6 +61,8 @@ namespace Megalo {
          //
          void register_type(const OpcodeArgTypeinfo& type);
          const OpcodeArgTypeinfo* get_by_internal_name(const QString& name) const;
+         const OpcodeArgTypeinfo* get_static_indexable_type(const QString& name) const;
+         const OpcodeArgTypeinfo* get_variable_type(const QString& name) const;
    };
 
    class OpcodeArgTypeinfo {
@@ -142,6 +144,7 @@ namespace Megalo {
          inline bool can_have_variables() const noexcept {
             return this->flags & flags::can_hold_variables;
          }
+         const Script::Property* get_property_by_name(QString) const;
    };
    
    class OpcodeArgValue {

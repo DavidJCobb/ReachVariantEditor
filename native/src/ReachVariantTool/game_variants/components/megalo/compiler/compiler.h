@@ -21,6 +21,9 @@ namespace Megalo {
             VariableReference* target = nullptr;
             //
             Alias(Compiler&, QString name, QString target);
+            //
+            bool    is_integer_constant()  const noexcept;
+            int32_t get_integer_constant() const noexcept;
       };
       class Block : public ParsedItem {
          public:
@@ -114,6 +117,9 @@ namespace Megalo {
          void parse(QString text); // can throw compile_exception
          //
          static bool is_keyword(QString word);
+         //
+         Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
+         Script::Alias* lookup_absolute_alias(QString name);
          //
       protected:
          bool is_in_statement() const;
