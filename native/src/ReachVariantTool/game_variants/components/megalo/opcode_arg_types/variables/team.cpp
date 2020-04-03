@@ -27,6 +27,8 @@ namespace Megalo {
          Script::Property("score",       OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_score),
          Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_stat),
       },
+      'g_00', // "global.team[0]"
+      's_00', // "team[0]"
       8 // static count
    );
 }

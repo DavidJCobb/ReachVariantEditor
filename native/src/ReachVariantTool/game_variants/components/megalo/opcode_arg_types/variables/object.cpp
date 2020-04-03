@@ -29,6 +29,7 @@ namespace Megalo {
       {
          Script::Property("spawn_sequence", OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::spawn_sequence),
          Script::Property("team",           OpcodeArgValueTeam::typeinfo,   OpcodeArgValueTeam::scope_indicator_id::o_owner_team),
-      }
+      },
+      'g_00' // global.object[0]
    );
 }

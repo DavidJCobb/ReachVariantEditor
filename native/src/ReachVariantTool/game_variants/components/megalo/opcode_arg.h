@@ -94,7 +94,9 @@ namespace Megalo {
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          OpcodeArgValueFactory    factory = nullptr;
          std::vector<Script::Property> properties; // for compiler
-         uint8_t static_count = 0; // e.g. 8 for player[7]
+         uint8_t static_count      = 0; // e.g. 8 for player[7]
+         uint32_t which_sig_static = 0; // e.g. for the (player) type, this would be the signature corresponding to "player[0]" in megalo_players
+         uint32_t which_sig_global = 0; // e.g. for the (player) type, this would be the signature corresponding to "global.player[0]" in megalo_players
          //
          OpcodeArgTypeinfo() {
             OpcodeArgTypeRegistry::get().register_type(*this);
@@ -105,7 +107,29 @@ namespace Megalo {
          OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), elements(e), factory(fac) {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, OpcodeArgValueFactory fac, std::initializer_list<Script::Property> pr, uint8_t sc = 0) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac), properties(pr), static_count(sc) {
+         OpcodeArgTypeinfo(
+            const char* in,
+            QString fn,
+            QString desc,
+            typeinfo_type t,
+            flags_type f,
+            OpcodeArgValueFactory fac,
+            std::initializer_list<Script::Property> pr,
+            uint32_t wsg = 0,
+            uint32_t wss = 0,
+            uint8_t sc = 0
+         ) :
+            internal_name(in),
+            friendly_name(fn),
+            description(desc),
+            type(t),
+            flags(f),
+            factory(fac),
+            properties(pr),
+            static_count(sc),
+            which_sig_static(wss),
+            which_sig_global(wsg)
+         {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
          //
@@ -114,6 +138,9 @@ namespace Megalo {
          }
          inline bool is_variable() const noexcept {
             return (this->flags) & flags::is_variable;
+         }
+         inline bool can_have_variables() const noexcept {
+            return this->flags & flags::can_hold_variables;
          }
    };
    

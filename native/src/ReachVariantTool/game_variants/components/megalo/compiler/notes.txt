@@ -76,6 +76,54 @@ or shadow each other if they are relative to different types.
 
 
 
+== How do variables work in Megalo? ==
+
+There are five variable types: number, object, player, team, and timer. Numbers and timers 
+are simple values; they can't have members. Objects, players, and teams, however, are more 
+complex: they have a full complement of variables as members, and they can also have 
+properties.
+
+A loaded variable value consists of four parts:
+
+   SCOPE
+      An enum indicating the scope of the variable. For example, given a reference to the 
+      variable (global.player[0].number[1]), the "scope" would indicate that the number 
+      variable exists on a player variable.
+
+      Some variable types can refer to game state values, such as the current round time. 
+      These are encoded in the scope enum as well. Some variable types can also refer to 
+      the contents of an indexed list, such as script options, and the scope enumeration 
+      covers this as well.
+
+   WHICH
+      If the scope-indicator specifies that the scope is an object, player, or team, then 
+      the "which" value indicates which object, player, or team it is. This is also an 
+      enumeration.
+
+   INDEX
+      In most cases, this indicates which variable of the current type is being referred 
+      to. For example, given (global.player[0].number[1]), this would be 1. There is one 
+      special case: for integer constants, we use a number variable whose scope indicator 
+      specifies that it is an integer constant, and the signed 16-bit value of the number 
+      is stored in the index.
+
+A few examples:
+
+                                 | SCOPE             | WHICH            | INDEX  | NOTES
+---------------------------------+-------------------+------------------+--------+----------------------------------------------------------------------------------------
+global.number[3]                 | global            | <none>           | 3      | 
+global.timer[3]                  | global            | <none>           | 3      | 
+global.object[3]                 | global            | global.object[3] | <none> | If a variable type supports nesting, then its globals use (which) rather than (index). 
+global.player[1].number[2]       | player            | global.player[1] | 2      | In practice, that would be object, player, and team variables.
+current_player                   | global            | current_player   | <none> | 
+current_player.number[2]         | player            | current_player   | 2      | 
+game.betrayal_booting            | betrayal_booting  | <none>           | <none> | 
+global.player[1].team            | player_owner_team | global.player[1] | <none> | Note that here, "team"  is a property, not a nested variable.
+global.player[1].object[0].biped | player_biped      | global.player[1] | 0      | Note that here, "biped" is a property, not a nested variable.
+55                               | constant          | <none>           | 55     | 
+
+
+
 == What information do typeinfos provide? ==
 
 The compiler only needs a very detailed understanding of the following types:

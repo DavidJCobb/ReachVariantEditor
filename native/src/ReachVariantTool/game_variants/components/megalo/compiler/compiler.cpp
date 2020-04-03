@@ -1,38 +1,8 @@
 #include "compiler.h"
 #include "namespaces.h"
-#include "../opcode_arg_types/variables/all_core.h"
 #include "../../../helpers/qt/string.h"
 
 namespace {
-   bool _is_keyword(QString s) {
-      s = s.toLower();
-      if (s == "alias")
-         return true;
-      if (s == "and")
-         return true;
-      if (s == "do")
-         return true;
-      if (s == "else")
-         return true;
-      if (s == "elseif")
-         return true;
-      if (s == "end")
-         return true;
-      if (s == "for")
-         return true;
-      if (s == "function")
-         return true;
-      if (s == "if")
-         return true;
-      if (s == "on")
-         return true;
-      if (s == "or")
-         return true;
-      if (s == "then")
-         return true;
-      return false;
-   }
-   //
    constexpr char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
       constexpr char* operators[] = {
@@ -72,33 +42,28 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
-      void ParsedItem::set_start(string_scanner::pos& pos) {
-         this->line = pos.line;
-         this->col  = pos.offset - pos.last_newline;
-         this->range.start = pos.offset;
-      }
-      void ParsedItem::set_end(string_scanner::pos& pos) {
-         this->range.end = pos.offset;
-      }
-      //
       Alias::Alias(Compiler& compiler, QString name, QString target) {
          this->name = name;
          {  // Validate name.
-            if (_is_keyword(name))
+            if (Compiler::is_keyword(name))
                compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
             if (cobb::qt::string_has_any_of(name, "[]."))
                compiler.throw_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
             if (cobb::qt::string_is_integer(name))
                compiler.throw_error(QString("Invalid alias name \"%1\". You cannot alias an integer constant.").arg(this->name));
+            if (namespaces::get_by_name(name))
+               compiler.throw_error(QString("Namespace \"%1\" cannot be used as the name of an alias.").arg(this->name));
             //
-            // TODO: Disallow aliasing namespace names, typenames, and the names of members of the unnamed namespace.
+            // TODO: Disallow aliasing typenames and the names of members of the unnamed namespace.
+            //
+            // TODO: For absolute aloases, do not allow the shadowing of a non-member opcode name.
             //
          }
-         //
-         // TODO: If (target) is a numeric string, pass an integer to the VariableReference constructor instead.
-         //
          this->target = new VariableReference(target);
          this->target->owner = this;
+         //
+         // TODO: For relative aliases, do not allow the shadowing of a property name, thiscall-opcode name, or variable typename.
+         //
       }
       //
       void Block::insert_condition(ParsedItem* item) {
@@ -144,188 +109,35 @@ namespace Megalo {
          }
          return true;
       }
-      //
-      VariableReference::VariableReference(int32_t i) {
-         this->resolved.constant = i;
-         this->resolved.done = true;
-         #if _DEBUG
-            this->content = QString("%1").arg(i);
-         #endif
-      }
-      VariableReference::VariableReference(QString text) {
-         #if _DEBUG
-            this->content = text;
-         #endif
-         {
-            bool ok = false;
-            this->resolved.constant = text.toInt(&ok);
-            if (ok) {
-               this->resolved.done = true;
-               return;
-            }
-         }
-         auto    size  = text.size();
-         QString name;
-         QString index;
-         bool    is_index = false;
-         //
-         static const QString BAD_CHARS = QString("[.=!<>+-*/%&|~^");
-         //
-         for (int i = 0; i < size; i++) {
-            auto c = text[i];
-            if (is_index) {
-               if (BAD_CHARS.indexOf(c) >= 0) {
-                  if (index.isEmpty() && c == '-') { // negative indices are invalid but should not be a fatal parse error
-                     index += c;
-                     continue;
-                  }
-                  throw compile_exception(QString("Character %1 is not valid inside of an index.").arg(c));
-               }
-               if (c == ']') {
-                  is_index = false;
-                  if (index.isEmpty()) // "name[]" is a syntax error
-                     throw compile_exception("Variables of the form \"name[]\" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.");
-                  continue;
-               }
-               if (index.isEmpty() && string_scanner::is_whitespace_char(c))
-                  continue;
-               index += c;
-            } else {
-               if (c == ']')
-                  throw compile_exception("Unexpected \"]\".");
-               if (c == '[') {
-                  if (cobb::qt::string_is_integer(name)) { // "123[4]" is a syntax error
-                     if (this->parts.empty())
-                        throw compile_exception("An integer literal cannot be indexed.");
-                     throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.123" is also a syntax error and should take priority
-                  }
-                  if (!index.isEmpty())
-                     throw compile_exception("Variables of the form \"name[1][2]\" are not valid. Only specify one index.");
-                  is_index = true;
-                  continue;
-               }
-               if (c == '.') {
-                  if (cobb::qt::string_is_integer(name)) { // "1234.name" and "name.1234.name" are syntax errors
-                     if (this->parts.empty())
-                        throw compile_exception("An integer literal cannot have properties or nested variables."); // 1234.name"
-                     throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.1234.name"
-                  }
-                  auto part = Part(name, index);
-                  this->parts.push_back(part);
-                  name  = "";
-                  index = "";
-                  continue;
-               }
-               if (!index.isEmpty()) // "name[1]name" is a syntax error
-                  throw compile_exception("Expected a period. Variables of the form \"name[1]name\" are not valid.");
-               name += c;
-            }
-         }
-         //
-         // We've reached the end of the string. We were only saving parts when we encountered a '.', so the 
-         // last part in the string still needs to be validated and added.
-         //
-         {
-            if (name.isEmpty()) // text ended in '.' or was empty string
-               throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
-            if (cobb::qt::string_is_integer(name)) {
-               if (this->parts.empty())
-                  //
-                  // If there are no earlier parts, then this must have been something like "123[4]". If there 
-                  // weren't an index, then the entire string would just be the integer and we would've treated 
-                  // it accordingly at the very start of this function.
-                  //
-                  throw compile_exception("An integer literal cannot be indexed.");
-               throw compile_exception("An integer literal cannot be a property or nested variable.");
-            }
-            if (is_index)
-               throw compile_exception("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
-            auto part = Part(name, index);
-            this->parts.push_back(part);
-         }
-         //
-         // Next, let's do some final basic validation -- specifically, disallow the use of keywords as part 
-         // names and indices, disallow empty part names, and store integer indices as integers.
-         //
-         for (auto& part : this->parts) {
-            if (part.name.isEmpty())
-               throw compile_exception("Invalid variable name. Did you accidentally type two periods instead of one?");
-            if (_is_keyword(part.name))
-               throw compile_exception(QString("Keywords, including \"%1\", cannot be used as variable names.").arg(part.name));
-            if (_is_keyword(part.index_str))
-               throw compile_exception(QString("Keywords, including \"%1\", cannot be used as indices in a collection.").arg(part.index_str));
-            //
-            bool ok = false;
-            part.index = part.index_str.toInt(&ok);
-            part.index_is_numeric = ok;
-            if (ok)
-               part.index_str = "";
-         }
-      }
-      void VariableReference::resolve() {
-         if (this->resolved.done)
-            return;
-         size_t i = 0;
-         {  // Identify the "which."
-            auto part = this->_part(i);
-            //
-            Namespace* ns = namespaces::get_by_name(part->name);
-            if (!ns) {
-               //
-               // Try matching this to a statically-indexable type, e.g. player[0] or script_widget[1]; if that 
-               // fails, then fall back to the unnamed namespace.
-               //
-               auto type = OpcodeArgTypeRegistry::get().get_by_internal_name(part->name);
-               if (type && type->can_be_static()) {
-                  if (!part->has_index())
-                     throw compile_exception(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
-                  //
-                  // TODO: Bounds-check the index using (type->static_count).
-                  //
-                  this->resolved.which_type = type;
-                  //
-                  // TODO: Identify the (which) value. (Likely requires that the typeinfo specify the 
-                  // signature of the first static-entry, e.g. the signature of "player[0]" for players; 
-                  // we can assume that those are contiguous and just add to the enum value index.)
-                  //
-               } else
-                  ns = &namespaces::unnamed;
-            }
-            if (ns) {
-               part = this->_part(++i);
-               if (!part)
-                  throw compile_exception(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
-               auto type = OpcodeArgTypeRegistry::get().get_by_internal_name(part->name);
-               if (ns->can_have_variables && type && type->is_variable()) {
-                  if (!part->has_index())
-                     throw compile_exception(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
-                  //
-                  // TODO: Use (MegaloVariableScopeGlobal) to bounds-check the index.
-                  //
-                  this->resolved.which_type = type;
-                  //
-                  // TODO: Identify the (which) value. (Requires that the typeinfo specify the signature of 
-                  // the first global-variable entry, e.g. the signature of "global.number[0]" for numbers; 
-                  // we can assume that those are contiguous and just add to the enum value index.)
-                  //
-               } else {
-                  auto member = ns->get_member(part->name);
-                  if (!member)
-                     //
-                     // TODO: resolve aliases
-                     //
-                     throw compile_exception(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
-                  this->resolved.which_type = &member->type;
-                  this->resolved.which = member->which;
-                  this->resolved.scope = member->scope_indicator_id;
-               }
-            }
-         }
-         //
-         // TODO: EVERYTHING AFTER THE (which) VALUE
-         //
-         this->resolved.done = true;
-      }
+   }
+   //
+   /*static*/ bool Compiler::is_keyword(QString s) {
+      s = s.toLower();
+      if (s == "alias")
+         return true;
+      if (s == "and")
+         return true;
+      if (s == "do")
+         return true;
+      if (s == "else")
+         return true;
+      if (s == "elseif")
+         return true;
+      if (s == "end")
+         return true;
+      if (s == "for")
+         return true;
+      if (s == "function")
+         return true;
+      if (s == "if")
+         return true;
+      if (s == "on")
+         return true;
+      if (s == "or")
+         return true;
+      if (s == "then")
+         return true;
+      return false;
    }
    //
    void Compiler::throw_error(const QString& text) {
@@ -1006,7 +818,7 @@ namespace Megalo {
          if (QString("[].").contains(c))
             this->throw_error(QString("Unexpected %1 inside of a function name.").arg(c));
       }
-      if (_is_keyword(name))
+      if (Compiler::is_keyword(name))
          this->throw_error(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
       if (!this->extract_specific_char('('))
          this->throw_error("Expected \"(\".");

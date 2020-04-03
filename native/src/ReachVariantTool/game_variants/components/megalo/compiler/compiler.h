@@ -1,50 +1,16 @@
 #pragma once
 #include <functional>
-#include <stdexcept>
 #include <vector>
 #include <QString>
 #include "string_scanner.h"
 #include "../trigger.h"
+#include "parsing/base.h"
+#include "parsing/variable_reference.h"
 
 namespace Megalo {
    class Compiler;
-   class compile_exception : public std::exception {
-      private:
-         QString reason;
-      public:
-         compile_exception(const QString& reason) : std::exception(""), reason(reason) {} // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
-         //
-         [[nodiscard]] virtual char const* what() const {
-            return "this is a QString";
-         }
-         const QChar* why() const noexcept { return reason.constData(); }
-   };
    //
    namespace Script {
-      struct ParserPosition {
-         int32_t pos  = -1; // position in the script
-         int32_t line = -1; // current line number
-         int32_t last_newline = -1; // index of last newline in the script
-      };
-      //
-      class VariableReference;
-      //
-      class ParsedItem {
-         public:
-            virtual ~ParsedItem() {} // need virtual methods to allow dynamic_cast
-            //
-            ParsedItem* parent = nullptr;
-            ParsedItem* owner  = nullptr; // for conditions
-            int32_t line = -1;
-            int32_t col  = -1;
-            struct {
-               int32_t start = -1;
-               int32_t end   = -1;
-            } range;
-            //
-            void set_start(string_scanner::pos&);
-            void set_end(string_scanner::pos&);
-      };
       class ParsedOpcode { // used for once we've fully parsed an opcode, so we can retain it in a Block
          public:
             Opcode* data = nullptr;
@@ -99,62 +65,6 @@ namespace Megalo {
          public:
             QString value;
       };
-      class VariableReference : public ParsedItem {
-         public:
-            QString content;
-            #if !_DEBUG
-               static_assert(false, "replace (content) with logic to actually parse parts");
-            #endif
-            //
-            struct Which {
-               uint8_t part_count = 0;
-               void*   type = nullptr; // TODO
-               uint8_t which = 0;
-            };
-            struct Part {
-               QString name;
-               QString index_str;
-               int32_t index = -1;
-               bool    index_is_numeric = false;
-               //
-               Part() {} // needed for std::vector::push_back
-               Part(QString n, QString i) : name(n), index_str(i) {}
-               Part(QString n, int32_t i) : name(n), index(i) {};
-               //
-               inline bool has_index() const noexcept {
-                  return this->index_is_numeric || !this->index_str.isEmpty();
-               }
-            };
-            //
-            std::vector<Part> parts;
-            struct {
-               bool done = false;
-               //
-               const OpcodeArgTypeinfo* which_type = nullptr; // also used for namespace scope-members
-               int16_t  which      = -1; // used for namespace which-members
-               uint32_t scope      =  0; // used for namespace scope-members
-               const OpcodeArgTypeinfo* var_type   = nullptr;
-               int32_t  var_index  =  0;
-               QString  property;
-               int32_t  constant   =  0;
-            } resolved;
-            //
-            VariableReference(QString);
-            VariableReference(int32_t);
-            //
-            void resolve();
-            //
-            inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
-            //
-         protected:
-            inline Part* _part(int i) {
-               if (i < 0)
-                  i += this->parts.size();
-               else if (i >= this->parts.size())
-                  return nullptr;
-               return &this->parts[i];
-            }
-      };
       class FunctionCall : public ParsedItem {
          public:
             VariableReference* context = nullptr;
@@ -202,6 +112,8 @@ namespace Megalo {
          void reset_token();
          //
          void parse(QString text); // can throw compile_exception
+         //
+         static bool is_keyword(QString word);
          //
       protected:
          bool is_in_statement() const;

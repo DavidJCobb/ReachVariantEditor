@@ -31,6 +31,8 @@ namespace Megalo {
          Script::Property("team",        OpcodeArgValueTeam::typeinfo,   OpcodeArgValueTeam::scope_indicator_id::p_owner_team),
          Script::Property("unknown_09",  OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::p_unk09),
       },
+      'g_00', // "global.player[0]"
+      's_00', // "player[0]"
       16 // static count
    );
 }
