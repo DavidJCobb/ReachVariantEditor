@@ -1,6 +1,7 @@
 #include "variable_reference.h"
 #include "../compiler.h"
 #include "../namespaces.h"
+#include "../../actions.h"
 #include "../../variables_and_scopes.h"
 #include "../../opcode_arg_types/variables/all_core.h"
 #include "../../../../helpers/qt/string.h"
@@ -185,9 +186,19 @@ namespace Megalo::Script {
       this->resolved = true;
    }
 
-   size_t VariableReference::_resolve_first_parts(Compiler& compiler) {
+   size_t VariableReference::_resolve_first_parts(Compiler& compiler, bool is_alias_definition) {
       size_t i    = 0;
       auto   part = this->_part(i);
+      if (is_alias_definition && !part->has_index()) {
+         auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
+         if (type && type->can_have_variables()) {
+            InterpretedPart interpreted;
+            interpreted.type = type;
+            interpreted.disambig_type = disambig_type::alias_relative_to;
+            this->interpreted.push_back(interpreted);
+            return ++i;
+         }
+      }
       {
          auto abs = compiler.lookup_absolute_alias(part->name);
          if (abs) {
@@ -305,10 +316,10 @@ namespace Megalo::Script {
       return ++i;
    }
    //
-   void VariableReference::resolve(Compiler& compiler) {
+   void VariableReference::resolve(Compiler& compiler, bool is_alias_definition) {
       if (this->resolved)
          return;
-      size_t i = this->_resolve_first_parts(compiler);
+      size_t i = this->_resolve_first_parts(compiler, is_alias_definition);
       assert(this->interpreted.size() > 0 && "We failed to interpret the first parts of a VariableReference, but also failed to log an error. How did this happen?");
       while (i < this->parts.size()) {
          auto* part = &this->parts[i];
@@ -367,18 +378,78 @@ namespace Megalo::Script {
          if (prop) {
             if (part->has_index())
                throw compile_exception(QString("Properties, such as \"%1\" on the %2 type, cannot be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
-            InterpretedPart interpreted;
-            interpreted.type     = &prop->type;
-            interpreted.property = prop->name.c_str();
-            this->interpreted.push_back(interpreted);
-            continue;
+            this->property.definition = prop;
+            break;
          }
          //
-         // TODO: PROPERTIES DEFINED BY WAY OF OPCODES
+         // The name didn't match any properties that are explicitly defined on the previous type. However, some 
+         // properties exist not as "real" definitions but as getter/setter opcodes which use property syntax, so 
+         // we need to loop over those and see if any match:
          //
-
-         // else, if no match:
+         for (auto& action : actionFunctionList) {
+            //
+            // TODO: ADD AN ARGUMENT TO SKIP THIS IF THE REFERENCE THAT WE'RE COMPILING IS INSIDE OF A FUNCTION 
+            // CALL ARGUMENT LIST OR A COMPARISON; BETTER YET: DON'T SKIP, BUT DISPLAY A UNIQUE ERROR MESSAGE IF 
+            // IT MATCHES.
+            //
+            using mapping_type = OpcodeFuncToScriptMapping::mapping_type;
+            //
+            auto& mapping = action.mapping;
+            if (mapping.type != mapping_type::property_get && mapping.type != mapping_type::property_set)
+               continue;
+            if (mapping.primary_name.empty()) {
+               //
+               // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
+               // is the name. The easiest way to test against such getters/setters is to simply instantiate that 
+               // argument, pass the current property name to its compile method, and see if that succeeds.
+               //
+               int ai = mapping.arg_name;
+               assert(ai >= 0 && "If a property-getter or property-setter has no defined primary name, then one of the opcode arguments should be the name. Specify which one!");
+               auto& base = action.arguments[ai];
+               auto& type = base.typeinfo;
+               #if _DEBUG
+                  assert(type.factory && "The typeinfo has no factory.");
+               #endif
+               std::unique_ptr<OpcodeArgValue> arg;
+               arg.reset((type.factory)());
+               #if _DEBUG
+                  assert(arg && "The typeinfo factory failed to create an argument. How?");
+               #endif
+               if (arg->compile(compiler, string_scanner(part->name)) == arg_compile_result::success)
+                  this->property.name = part->name;
+               break;
+            } else {
+               if (cobb::qt::stricmp(part->name, mapping.primary_name)) {
+                  this->property.name = part->name;
+                  break;
+               }
+            }
+         }
+         if (this->is_property()) // we matched a property
+            break;
          throw compile_exception(QString("Member name \"%1\" is not defined for type %2.").arg(part->name).arg(prev.type->internal_name.c_str()));
+      }
+      if (i < this->parts.size()) { // we didn't process everything for some reason
+         //
+         // For some reason, we stopped early. That should only happen if a problem has occurred. For 
+         // example, properties cannot have members, so we stop immediately after reading a property; 
+         // if "immediately after reading a property" is before the end of the part list, then the 
+         // user is trying to access a member on a property.
+         //
+         if (this->is_property()) {
+            assert(this->interpreted.size() && "How did we resolve property access when we didn't resolve what the property was *on*?");
+            auto& interpreted = this->interpreted.back();
+            QString name = this->property.name;
+            if (this->property.definition)
+               name = QString::fromLatin1(this->property.definition->name.c_str());
+            throw compile_exception(QString("You cannot access the members of a property like \"%1.%2\". Copy the property value into an intermediate variable and access through that.").arg(interpreted.type->internal_name.c_str()).arg(name));
+         }
+         throw compile_exception(QString("Unknown error."));
+      }
+      if (is_alias_definition && this->interpreted.size() == 1) {
+         auto& first = this->interpreted[0];
+         if (first.disambig_type == disambig_type::alias_relative_to)
+            throw compile_exception(QString("You cannot alias a typename such as \"%1\".").arg(first.type->internal_name.c_str()));
       }
       this->resolved = true;
    }

@@ -225,7 +225,7 @@ namespace Megalo {
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
          auto  factory = base[i].typeinfo.factory;
-         this->arguments[i] = factory(stream);
+         this->arguments[i] = factory();
          if (this->arguments[i]) {
             if (!this->arguments[i]->read(stream, mp)) {
                auto& error = GameEngineVariantLoadError::get();

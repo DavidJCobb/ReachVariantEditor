@@ -8,6 +8,7 @@
 #include "../../../helpers/strings.h"
 #include "enums.h"
 #include "variables_and_scopes.h"
+#include "compiler/string_scanner.h"
 #include "decompiler/decompiler.h"
 #include "compiler/types.h"
 #include <QString>
@@ -48,8 +49,6 @@ namespace Megalo {
    class OpcodeArgValue;
    class OpcodeArgTypeinfo;
 
-   using OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
-
    class OpcodeArgTypeRegistry {
       public:
          static OpcodeArgTypeRegistry& get() {
@@ -83,9 +82,9 @@ namespace Megalo {
             };
          };
          using flags_type = std::underlying_type_t<flags::type>;
-         using factory_t = std::function<OpcodeArgValueFactory>;
+         using factory_t  = OpcodeArgValue*(*)();
          //
-         template<typename T> static OpcodeArgValue* default_factory(cobb::ibitreader&) { return new T; }
+         template<typename T> static OpcodeArgValue* default_factory() { return new T; }
          //
       public:
          std::string internal_name;
@@ -94,8 +93,8 @@ namespace Megalo {
          typeinfo_type            type    = typeinfo_type::default;
          flags_type               flags   = 0;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
-         OpcodeArgValueFactory    factory = nullptr;
-         std::vector<Script::Property> properties; // for compiler
+         factory_t                factory = nullptr;
+         std::vector<Script::Property> properties; // for the compiler; do not list abstract properties here
          uint8_t static_count      = 0; // e.g. 8 for player[7]
          uint32_t which_sig_static = 0; // e.g. for the (player) type, this would be the signature corresponding to "player[0]" in megalo_players
          uint32_t which_sig_global = 0; // e.g. for the (player) type, this would be the signature corresponding to "global.player[0]" in megalo_players
@@ -103,10 +102,10 @@ namespace Megalo {
          OpcodeArgTypeinfo() {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac) {
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac) {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), elements(e), factory(fac) {
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, std::initializer_list<const char*> e, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), elements(e), factory(fac) {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
          OpcodeArgTypeinfo(
@@ -115,7 +114,7 @@ namespace Megalo {
             QString desc,
             typeinfo_type t,
             flags_type f,
-            OpcodeArgValueFactory fac,
+            factory_t fac,
             std::initializer_list<Script::Property> pr,
             uint32_t wsg = 0,
             uint32_t wss = 0,
@@ -146,6 +145,13 @@ namespace Megalo {
          }
          const Script::Property* get_property_by_name(QString) const;
    };
+
+   enum class arg_compile_result {
+      failure,
+      success,
+      needs_another,
+      can_take_another,
+   };
    
    class OpcodeArgValue {
       public:
@@ -154,6 +160,7 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&) noexcept;
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;

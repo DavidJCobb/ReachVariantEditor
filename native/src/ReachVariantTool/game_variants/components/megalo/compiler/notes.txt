@@ -8,15 +8,25 @@ A VARIABLE is any number, object, player, team, or timer value in the script. Th
    current_object
    current_object.number[0]
 
-A PROPERTY is a member of a variable. Properties are "dead ends:" you cannot access nested 
-variables or other properties through them (e.g. no global.player[0].biped.biped), though 
-you can call member functions on them (e.g. global.player[0].biped.set_shape(...)).
+Variables can be referred to by no more than two levels of depth:
 
-An "abstract property" is a property whose getter or setter access is handled by opcodes 
+   global.player[0]                     -- valid
+   global.player[0].player[1]           -- valid
+   global.player[0].player[1].player[2] -- invalid
+
+A PROPERTY is a member of a variable. Properties are "dead ends:" you cannot access 
+nested variables or other properties through them (e.g. player[0].biped.team).
+
+An ABSTRACT PROPERTY is a property whose getter or setter access is handled by opcodes 
 under the hood. Abstract properties can only appear in assignment statements, and some 
 abstract properties may only have a getter or only have a setter. (We basically only use 
 abstract properties when there is an opcode to modify some value using an assignment 
-operator, e.g. to facilitate syntax like "object.shields += 3").
+operator, e.g. to facilitate syntax like "object.shields += 3"). The following limitations 
+apply to abstract properties:
+
+ - They cannot be passed as an argument in a function call.
+
+ - They cannot be used in a comparison.
 
 An OPCODE is any condition or action that can exist in a script. This includes ordinary 
 assignments to variables and comparisons of variables, as well as every function call that 
@@ -88,12 +98,14 @@ A loaded variable value consists of four parts:
    SCOPE
       An enum indicating the scope of the variable. For example, given a reference to the 
       variable (global.player[0].number[1]), the "scope" would indicate that the number 
-      variable exists on a player variable.
+      variable exists on a player variable. Each variable type has its own scope enum 
+      because...
 
       Some variable types can refer to game state values, such as the current round time. 
       These are encoded in the scope enum as well. Some variable types can also refer to 
       the contents of an indexed list, such as script options, and the scope enumeration 
-      covers this as well.
+      covers this as well. Different variable types can refer to different "environment" 
+      data.
 
    WHICH
       If the scope-indicator specifies that the scope is an object, player, or team, then 
@@ -121,6 +133,13 @@ game.betrayal_booting            | betrayal_booting  | <none>           | <none>
 global.player[1].team            | player_owner_team | global.player[1] | <none> | Note that here, "team"  is a property, not a nested variable.
 global.player[1].object[0].biped | player_biped      | global.player[1] | 0      | Note that here, "biped" is a property, not a nested variable.
 55                               | constant          | <none>           | 55     | 
+
+The interactions between this system and properties are worth knowing about:
+
+ - All properties are implemented as scopes.
+
+ - Because of the above, you cannot access one property through another. A variable 
+   reference can only have one scope indicator.
 
 
 
@@ -181,9 +200,7 @@ So what information needs to exist for detailed typeinfos?
 
     - Only variables can have properties.
 
-    - Typeinfos don't need to specify properties whose existence is implied (and whose 
-      behavior is entirely handled) by property getter and setter opcodes in the action 
-      function list.
+    - Typeinfos should not specify abstract properties here.
 
     - Each property has a name and a type. Some properties specify a scope indicator ID 
       for their parent variable, which is enough information to fully resolve a reference         <------- IN ADDITION TO THINGS LIKE object.spawn_sequence, THIS IS ALSO HOW WE'LL IMPLEMENT SCRIPT STATS

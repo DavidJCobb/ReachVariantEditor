@@ -5,6 +5,8 @@
 
 namespace Megalo {
    namespace Script {
+      class Property;
+
       class Alias;
       class VariableReference : public ParsedItem {
          public:
@@ -48,6 +50,10 @@ namespace Megalo {
             //
             std::vector<Part> parts;
             std::vector<InterpretedPart> interpreted;
+            struct {
+               QString name;
+               const Property* definition = nullptr;
+            } property;
             bool resolved = false;
             //
             VariableReference(QString); // can throw compile_exception
@@ -55,8 +61,14 @@ namespace Megalo {
             //
             void set_to_constant_integer(int32_t);
             inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
+            inline bool is_property() const noexcept {
+               return this->property.definition || !this->property.name.isEmpty();
+            }
+            inline bool is_abstract_property() const noexcept {
+               return !this->property.name.isEmpty() && !this->property.definition;
+            }
             //
-            void resolve(Compiler&); // can throw compile_exception
+            void resolve(Compiler&, bool is_alias_definition = false); // can throw compile_exception
             //
          protected:
             inline Part* _part(int i) {
@@ -67,7 +79,7 @@ namespace Megalo {
                return &this->parts[i];
             }
             void _transclude(uint32_t index, Alias&); // replaces (this->parts[index]) with the contents of the alias. if the alias is a relative alias, does not include the alias typename
-            size_t _resolve_first_parts(Compiler&);
+            size_t _resolve_first_parts(Compiler&, bool is_alias_definition = false);
       };
    }
 }

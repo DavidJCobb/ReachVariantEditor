@@ -13,6 +13,8 @@ namespace Megalo {
          // but it's not super required; their main role is just so that the compiler can identify 
          // references to the properties during parsing.
          //
+         // Do not use this for abstract properties.
+         //
          public:
             std::string name;
             const OpcodeArgTypeinfo& type;
@@ -20,11 +22,6 @@ namespace Megalo {
             int16_t scope_indicator_id = -1;    // use -1 if the scope is to be determined dynamically
             //
             Property(const char* n, const OpcodeArgTypeinfo& t, int16_t scope = -1, bool afn = false) : name(n), type(t), scope_indicator_id(scope), allow_from_nested(afn) {}
-      };
-      class TypeinfoToScriptMapping {
-         public:
-            OpcodeArgTypeinfo* underlying_type = nullptr;
-            uint32_t static_limit = 0; // if > 0, then the limit is constant
       };
    }
 }
