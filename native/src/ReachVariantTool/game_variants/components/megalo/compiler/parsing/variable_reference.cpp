@@ -185,6 +185,34 @@ namespace Megalo::Script {
       this->interpreted.push_back(part);
       this->resolved = true;
    }
+   bool VariableReference::is_statically_indexable_value() const noexcept {
+      if (!this->interpreted.size())
+         return false;
+      return this->interpreted.front().disambig_type == disambig_type::static_var;
+   }
+   const OpcodeArgTypeinfo* VariableReference::get_type() const noexcept {
+      if (!this->interpreted.size())
+         return nullptr;
+      return this->interpreted.back().type;
+   }
+   QString VariableReference::to_string() const noexcept {
+      QString result;
+      for (size_t i = 0; i < this->parts.size(); ++i) { // I wanted to use (this->interpreted) but it doesn't retain enough information
+         if (i)
+            result += '.';
+         auto& part = this->parts[i];
+         result += part.name;
+         if (part.has_index()) {
+            result += '[';
+            if (part.index_is_numeric)
+               result += part.index;
+            else
+               result += part.index_str;
+            result += ']';
+         }
+      }
+      return result;
+   }
 
    size_t VariableReference::_resolve_first_parts(Compiler& compiler, bool is_alias_definition) {
       size_t i    = 0;
@@ -227,16 +255,7 @@ namespace Megalo::Script {
             InterpretedPart interpreted;
             interpreted.type          = type;
             interpreted.disambiguator = part->index;
-            interpreted.disambig_type = disambig_type::index;
-            if (type->is_variable()) {
-               auto var_scope = _var_scope_for_type(*type);
-               if (var_scope) {
-                  auto which = var_scope->list.lookup_by_signature(type->which_sig_static);
-                  assert(which >= 0 && "Bad OpcodeArgTypeinfo::which_sig_global for the type being matched here.");
-                  interpreted.disambiguator += which;
-                  interpreted.disambig_type = disambig_type::which;
-               }
-            }
+            interpreted.disambig_type = disambig_type::static_var;
             this->interpreted.push_back(interpreted);
             //
             // We return the number of parts consumed, so that code to read the rest of the VariableReference 
@@ -276,7 +295,7 @@ namespace Megalo::Script {
             interpreted.type          = type;
             interpreted.disambiguator = part->index;
             interpreted.disambig_type = disambig_type::index;
-            {
+            {  // TODO: move this to the generic Variable class
                auto var_scope = _var_scope_for_type(*type);
                if (var_scope) {
                   //
@@ -401,7 +420,9 @@ namespace Megalo::Script {
                //
                // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
                // is the name. The easiest way to test against such getters/setters is to simply instantiate that 
-               // argument, pass the current property name to its compile method, and see if that succeeds.
+               // argument, pass the current property name to its compile method, and see if that succeeds. I know that 
+               // that's kinda ugly. Maybe we can alter the code to retain a successfully-compiled argument for use in 
+               // the Opcode we'll eventually create. [TODO]
                //
                int ai = mapping.arg_name;
                assert(ai >= 0 && "If a property-getter or property-setter has no defined primary name, then one of the opcode arguments should be the name. Specify which one!");

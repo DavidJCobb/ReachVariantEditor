@@ -14,6 +14,7 @@ namespace Megalo {
                scope,
                which,
                index,
+               static_var, // typename[3] e.g. "player[0]"; only valid for the first interpreted part
                constant_integer,
                alias_relative_to, // only use in alias definitions, e.g. for the "player" in "alias is_zombie = player.number[0]"
             };
@@ -45,7 +46,6 @@ namespace Megalo {
                const OpcodeArgTypeinfo* type = nullptr;
                int32_t       disambiguator = 0;
                disambig_type disambig_type = disambig_type::scope;
-               QString       property;
             };
             //
             std::vector<Part> parts;
@@ -67,8 +67,13 @@ namespace Megalo {
             inline bool is_abstract_property() const noexcept {
                return !this->property.name.isEmpty() && !this->property.definition;
             }
+            bool is_read_only() const noexcept;
+            bool is_statically_indexable_value() const noexcept;
+            const OpcodeArgTypeinfo* get_type() const noexcept;
             //
             void resolve(Compiler&, bool is_alias_definition = false); // can throw compile_exception
+            //
+            QString to_string() const noexcept;
             //
          protected:
             inline Part* _part(int i) {

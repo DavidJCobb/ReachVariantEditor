@@ -21,7 +21,7 @@ namespace Megalo {
       "A player participating in the match. Note that players are a distinct concept from \"bipeds,\" the character objects that players control.",
       //
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static,
+      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayer>,
       {
          Script::Property("biped",       OpcodeArgValueObject::typeinfo, -1, true),

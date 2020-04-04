@@ -53,6 +53,13 @@ namespace Megalo {
          OpcodeBase*  owner = nullptr;
          variable_scope double_context_type = variable_scope::not_a_scope; // use when the opcode is (non_global_scope.var.opcode()) where the types of both the scope and the variable are significant
          //
+         uint8_t mapped_arg_count() const noexcept {
+            for (uint8_t i = 0; i < std::extent<decltype(arg_index_mappings)>::value; ++i)
+               if (this->arg_index_mappings[i] == no_argument)
+                  return i;
+            return std::extent<decltype(arg_index_mappings)>::value;
+         }
+         //
          OpcodeFuncToScriptMapping() {}
          OpcodeFuncToScriptMapping(mapping_type t, std::initializer_list<int8_t> args) : type(t) {
             size_t i = 0;
@@ -128,9 +135,11 @@ namespace Megalo {
 
    class Opcode { // base class for Condition and Action
       public:
+         virtual ~Opcode() {}
          virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void decompile(Decompiler& out) noexcept = 0;
+         virtual void reset() noexcept = 0;
    };
 }

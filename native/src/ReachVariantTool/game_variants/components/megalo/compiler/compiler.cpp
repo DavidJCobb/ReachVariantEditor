@@ -50,7 +50,7 @@ namespace Megalo {
             if (cobb::qt::string_has_any_of(name, "[]."))
                compiler.throw_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
             if (cobb::qt::string_is_integer(name))
-               compiler.throw_error(QString("Invalid alias name \"%1\". You cannot alias an integer constant.").arg(this->name));
+               compiler.throw_error(QString("Invalid alias name \"%1\". An integer literal cannot be used as the name of an alias.").arg(this->name));
             if (namespaces::get_by_name(name))
                compiler.throw_error(QString("Namespace \"%1\" cannot be used as the name of an alias.").arg(this->name));
             //
@@ -61,9 +61,30 @@ namespace Megalo {
          }
          this->target = new VariableReference(target);
          this->target->owner = this;
-         //
-         // TODO: For relative aliases, do not allow the shadowing of a property name, thiscall-opcode name, or variable typename.
-         //
+         try {
+            this->target->resolve(compiler, true);
+         } catch (compile_exception& e) {
+            //
+            // TODO: (resolve) will throw if we attempt to alias enum values or anything else that isn't 
+            // recognized as a variable name. We should find a way to handle that, because we do want to 
+            // allow those things to be referred to by an alias.
+            //
+         }
+         if (this->is_relative_alias()) {
+            //
+            // TODO: For relative aliases, do not allow the shadowing of a property name, thiscall-opcode name, or variable typename 
+            // accessible through the type that (this->target) has. For example, (alias spawn_sequence = object.number[0]) should be 
+            // rejected but (alias spawn_sequence = player.number[0]) should be permitted.
+            //
+
+         } else {
+            if (auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(name))
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(type->internal_name.c_str()));
+            //
+            // TODO: for absolute aliases, do not allow the shadowing of a non-member opcode name, a statically-indexable typename, 
+            // or a term defined by any opcode (enum values, etc..)
+            //
+         }
       }
       //
       void Block::insert_condition(ParsedItem* item) {
@@ -113,29 +134,33 @@ namespace Megalo {
    //
    /*static*/ bool Compiler::is_keyword(QString s) {
       s = s.toLower();
-      if (s == "alias")
+      if (s == "alias") // declare an alias
          return true;
-      if (s == "and")
+      if (s == "and") // bridge conditions
          return true;
-      if (s == "do")
+      if (s == "declare") // declare a variable
          return true;
-      if (s == "else")
+      if (s == "do") // open a generic block
          return true;
-      if (s == "elseif")
+      if (s == "else") // close an if- or elseif-block and open a new block
          return true;
-      if (s == "end")
+      if (s == "elseif") // close an if- or elseif-block and open a new block with conditions
          return true;
-      if (s == "for")
+      if (s == "end") // close a block
          return true;
-      if (s == "function")
+      if (s == "for") // open a for loop block
          return true;
-      if (s == "if")
+      if (s == "function") // open a function block
          return true;
-      if (s == "on")
+      if (s == "if") // open a new block with conditions
          return true;
-      if (s == "or")
+      if (s == "not") // indicate that the next condition should be negated
          return true;
-      if (s == "then")
+      if (s == "on") // designate the event handler type of the next top-level block
+         return true;
+      if (s == "or") // bridge conditions
+         return true;
+      if (s == "then") // close an if- or elseif-statement's conditions
          return true;
       return false;
    }
@@ -264,12 +289,6 @@ namespace Megalo {
       if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
       if (c == '(') {
-         this->call = new Script::FunctionCall;
-         this->call->set_start(this->token.pos);
-         if (!this->call->extract_stem(this->token.text))
-            this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
-         this->reset_token();
-         ++this->state.offset; // advance past the open-paren
          this->_parseFunctionCall(false);
          --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
@@ -283,8 +302,11 @@ namespace Megalo {
             this->assignment->target = new Script::VariableReference(this->token.text);
             auto ref = this->assignment->target;
             ref->owner = this->assignment;
+            ref->resolve(*this);
             if (ref->is_constant_integer())
                this->throw_error("Cannot assign to a constant integer.");
+            if (ref->is_read_only())
+               this->throw_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
          }
          this->reset_token();
          this->token.text = c;
@@ -337,14 +359,6 @@ namespace Megalo {
             if (this->assignment->op != ce_assignment_operator) {
                this->throw_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator =.").arg(this->assignment->op));
             }
-            this->call = new Script::FunctionCall;
-            this->call->set_start(this->token.pos);
-            if (!this->call->extract_stem(this->token.text))
-               this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
-            this->assignment->source = this->call;
-            this->call->owner = this->assignment;
-            this->reset_token();
-            ++this->state.offset; // advance past the open-paren
             this->_parseFunctionCall(false);
             --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
             return;
@@ -453,12 +467,6 @@ namespace Megalo {
       if (string_scanner::is_quote_char(c))
          this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
       if (c == '(') {
-         this->call = new Script::FunctionCall;
-         this->call->set_start(this->token.pos);
-         if (!this->call->extract_stem(this->token.text))
-            this->throw_error(QString("Invalid function context and/or name: \"%1\".").arg(this->token.text));
-         this->reset_token();
-         ++this->state.offset; // advance past the open-paren
          this->_parseFunctionCall(true);
          --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return false;
@@ -543,35 +551,21 @@ namespace Megalo {
       this->reset_token();
    }
    //
-   void Compiler::_parseFunctionCall(bool is_condition) {
+   void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode) {
+      auto& mapping = function.mapping;
       //
-      // When this function is called, the stream position should be just after the 
-      // opening parentheses for the call arguments. Assuming no syntax errors are 
-      // encountered, this function advances the stream position to just after the 
-      // ")" glyph that marks the end of the call arguments; if you are calling 
-      // this function from inside a functor being run by MSimpleParser.scan, then 
-      // you will need to rewind the stream position by one to avoid skipping the 
-      // glyph after the ")", because the functor is being run in a loop and the 
-      // loop will advance the stream by one more character.
+      int8_t opcode_arg_index = 0;
+      int8_t opcode_arg_part  = 0;
+      int8_t script_arg_index = 0;
       //
-      // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
-      //
-      assert(this->call);
-      auto start = this->backup_stream_state();
       bool comma = false;
-      //
-      // TODO: The below loop will need to be mostly rewritten once we're actually 
-      // compiling Opcodes.
-      //
-      while (!this->extract_specific_char(')')) {
-         if (this->state.offset >= this->text.size()) {
-            this->restore_stream_state(start);
-            this->throw_error("Unterminated function call.");
-         }
-         QString unparsed_argument;
+      do {
+         if (opcode_arg_index >= mapping.mapped_arg_count())
+            this->throw_error("Too many arguments passed to the function.");
+         QString raw_argument;
          {
             QChar delim = '\0';
-            this->scan([this, &comma, &delim, &unparsed_argument](QChar c) {
+            this->scan([this, &comma, &delim, &raw_argument](QChar c) {
                if (delim == '\0') { // can't use a constexpr for the "none" value because lambdas don't like that, and can't use !delim because a null QChar doesn't test as false, UGH
                   if (c == ',' || c == ')') {
                      comma = (c == ',');
@@ -585,26 +579,150 @@ namespace Megalo {
                   if (c == delim)
                      delim = '\0';
                }
-               unparsed_argument += c;
+               raw_argument += c;
                return false;
             });
          }
-         string_scanner argument(unparsed_argument);
          //
-         // TODO: Pass to OpcodeArgValue::compile
+         auto& base = function.arguments[mapping.arg_index_mappings[script_arg_index]];
+         script_arg_index++;
+         auto  arg  = (base.typeinfo.factory)();
+         if (!arg)
+            this->throw_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
          //
-         {
-            #if !_DEBUG
-               static_assert(false, "this is temporary code until we have argument parsing implemented");
-            #endif
-            argument.skip_to_end();
+         string_scanner argument(raw_argument);
+         arg_compile_result result = arg->compile(*this, argument);
+         switch (result) {
+            case arg_compile_result::success:
+               ++opcode_arg_index;
+               opcode_arg_part = 0;
+               break;
+            case arg_compile_result::failure:
+               this->throw_error(QString("Failed to parse script argument %1.").arg(script_arg_index - 1)); // TODO: this won't allow us to handle overloads
+            case arg_compile_result::needs_another:
+               ++opcode_arg_part;
+               if (!comma)
+                  this->throw_error("Not enough arguments passed to the function.");
+               break;
+            case arg_compile_result::can_take_another:
+               ++opcode_arg_part;
          }
-         if (!argument.is_at_end())
-            this->throw_error("Invalid argument.");
          this->state += argument.backup_stream_state();
+      } while (comma);
+      if (opcode_arg_index < mapping.mapped_arg_count())
+         this->throw_error("Not enough arguments passed to the function.");
+   }
+   namespace {
+      template<typename T, int I> void _find_opcode_bases(const std::array<T, I>& list, std::vector<OpcodeBase*>& results, QString function_name, Script::VariableReference* context) {
+         for (auto& action : list) {
+            auto& mapping = action.mapping;
+            if (context) {
+               if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+                  continue;
+               auto& base = action.arguments[mapping.arg_context];
+               if (&base.typeinfo != context->get_type())
+                  continue;
+            } else {
+               if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
+                  continue;
+            }
+            if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
+               results.push_back(&action);
+         }
       }
-      if (comma)
-         this->throw_error("Commas in function calls can only appear between arguments; func(a,) is not valid.");
+   }
+   void Compiler::_parseFunctionCall(bool is_condition) {
+      //
+      // When this function is called, the stream position should be just after the 
+      // opening parentheses for the call arguments. Assuming no syntax errors are 
+      // encountered, this function advances the stream position to just after the 
+      // ")" glyph that marks the end of the call arguments; if you are calling 
+      // this function from inside a functor being run by MSimpleParser.scan, then 
+      // you will need to rewind the stream position by one to avoid skipping the 
+      // glyph after the ")", because the functor is being run in a loop and the 
+      // loop will advance the stream by one more character.
+      //
+      // At the time this function is called, (this->token) should refer to the 
+      // combined context (if any) and function name.
+      //
+      // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
+      //
+      this->call = new Script::FunctionCall;
+      this->call->set_start(this->token.pos);
+      if (this->assignment) {
+         this->assignment->source = this->call;
+         this->call->owner = this->assignment;
+      }
+      QString function_name;
+      std::unique_ptr<Script::VariableReference> context = nullptr;
+      {
+         auto& text = this->token.text;
+         //
+         int size = text.size();
+         int i    = size - 1;
+         for (; i >= 0; --i) {
+            auto c = text[i];
+            if (QString("[]").indexOf(c) >= 0)
+               this->throw_error("Function names cannot contain square brackets.");
+            if (c == '.') {
+               function_name = text.chopped(i + 1); // oh, but be sure not to confuse this with (QString::chop), which does the literal exact opposite!
+               break;
+            }
+         }
+         if (function_name.isEmpty()) { // there was no '.', or it was at the end
+            if (i == size - 1) // "name.()"
+               this->throw_error("Constructions of the form {name.()} are syntax errors. A function name is required.");
+            function_name = text;
+         } else {
+            context.reset(new Script::VariableReference(text.mid(0, i)));
+            context->resolve(*this);
+         }
+      }
+      this->reset_token();
+      ++this->state.offset; // advance past the open-paren
+      //
+      std::vector<OpcodeBase*> opcode_bases;
+      if (is_condition) {
+         _find_opcode_bases(conditionFunctionList, opcode_bases, function_name, context.get());
+      } else {
+         _find_opcode_bases(actionFunctionList, opcode_bases, function_name, context.get());
+      }
+      if (!opcode_bases.size()) {
+         if (context)
+            this->throw_error(QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         this->throw_error(QString("There is no non-member function named \"%1\".").arg(function_name));
+      }
+      //
+      bool match = false;
+      auto start = this->backup_stream_state();
+      std::unique_ptr<Opcode> opcode = std::make_unique<Opcode>();
+      for (auto* function : opcode_bases) {
+         opcode->reset();
+         this->restore_stream_state(start);
+         try {
+            this->__parseFunctionArgs(*function);
+            match = true;
+            break;
+         } catch (compile_exception & e) {
+            if (opcode_bases.size() == 1)
+               //
+               // If we aren't dealing with function overloads, then just use the original parse error.
+               //
+               throw e;
+         }
+      }
+      if (!match)
+         //
+         // We'll get here if we're dealing with function overloads and none of the overloads matched.
+         //
+         this->throw_error(QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+      //
+      // TODO: Preserve the Opcode*.
+      //
+
+      //
+      // TODO: The below will need to be mostly rewritten once we're actually 
+      // compiling Opcodes.
       //
       // Function calls can exist as standalone statements or as the righthand side of 
       // assignment statements. In both cases, the end of the function call is the end 

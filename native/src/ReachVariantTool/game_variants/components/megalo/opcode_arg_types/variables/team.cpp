@@ -21,7 +21,7 @@ namespace Megalo {
       "A team.",
       //
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables | OpcodeArgTypeinfo::flags::can_be_static,
+      OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeam>,
       {
          Script::Property("score",       OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_score),
