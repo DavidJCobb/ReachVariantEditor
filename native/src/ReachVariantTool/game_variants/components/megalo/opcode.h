@@ -141,5 +141,7 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void decompile(Decompiler& out) noexcept = 0;
          virtual void reset() noexcept = 0;
+         //
+         std::vector<OpcodeArgValue*> arguments;
    };
 }

@@ -35,7 +35,6 @@ namespace Megalo {
             uint32_t    bit_offset = 0;
          #endif
          const ActionFunction* function = nullptr;
-         std::vector<OpcodeArgValue*> arguments;
          //
          virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;

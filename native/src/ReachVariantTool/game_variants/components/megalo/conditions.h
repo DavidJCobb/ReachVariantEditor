@@ -48,7 +48,6 @@ namespace Megalo {
          bool     inverted =  false;
          condition_index or_group = 0;
          action_index    action   = 0; // execute before this action (cannot be none, which implies that a condition can't be the last opcode in a trigger)
-         std::vector<OpcodeArgValue*> arguments;
          //
          virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;

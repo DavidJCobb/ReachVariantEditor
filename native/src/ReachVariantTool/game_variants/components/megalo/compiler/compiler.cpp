@@ -553,11 +553,12 @@ namespace Megalo {
    //
    void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode) {
       auto& mapping = function.mapping;
+      opcode.arguments.resize(function.arguments.size());
       //
       int8_t opcode_arg_index = 0;
       int8_t opcode_arg_part  = 0;
       int8_t script_arg_index = 0;
-      //
+      std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
       bool comma = false;
       do {
          if (opcode_arg_index >= mapping.mapped_arg_count())
@@ -586,14 +587,17 @@ namespace Megalo {
          //
          auto& base = function.arguments[mapping.arg_index_mappings[script_arg_index]];
          script_arg_index++;
-         auto  arg  = (base.typeinfo.factory)();
-         if (!arg)
-            this->throw_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
+         if (!current_argument) {
+            current_argument.reset((base.typeinfo.factory)());
+            if (!current_argument)
+               this->throw_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
+         }
          //
          string_scanner argument(raw_argument);
-         arg_compile_result result = arg->compile(*this, argument);
+         arg_compile_result result = current_argument->compile(*this, argument);
          switch (result) {
             case arg_compile_result::success:
+               opcode.arguments[opcode_arg_index] = current_argument.release();
                ++opcode_arg_index;
                opcode_arg_part = 0;
                break;
@@ -655,7 +659,7 @@ namespace Megalo {
       }
       QString function_name;
       std::unique_ptr<Script::VariableReference> context = nullptr;
-      {
+      {  // Identify the context and the function name, i.e. context.function_name(arg, arg, arg)
          auto& text = this->token.text;
          //
          int size = text.size();
@@ -693,15 +697,20 @@ namespace Megalo {
          this->throw_error(QString("There is no non-member function named \"%1\".").arg(function_name));
       }
       //
-      bool match = false;
-      auto start = this->backup_stream_state();
+      OpcodeBase* match = nullptr;
+      auto        start = this->backup_stream_state();
       std::unique_ptr<Opcode> opcode = std::make_unique<Opcode>();
       for (auto* function : opcode_bases) {
+         //
+         // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
+         // each other with different arguments. Use trial-and-error to determine which one the script 
+         // author is invoking.
+         //
          opcode->reset();
          this->restore_stream_state(start);
          try {
-            this->__parseFunctionArgs(*function);
-            match = true;
+            this->__parseFunctionArgs(*function, *opcode.get());
+            match = function;
             break;
          } catch (compile_exception & e) {
             if (opcode_bases.size() == 1)
@@ -716,34 +725,54 @@ namespace Megalo {
          // We'll get here if we're dealing with function overloads and none of the overloads matched.
          //
          this->throw_error(QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+      if (this->assignment) {
+         OpcodeArgBase* base  = nullptr;
+         size_t         index = 0;
+         for (; index < match->arguments.size(); ++index) {
+            auto& b = match->arguments[index];
+            if (b.is_out_variable) {
+               base = &b;
+               break;
+            }
+         }
+         if (!base)
+            this->throw_error(QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         {
+            auto target_type = this->assignment->target->get_type();
+            if (&base->typeinfo != target_type)
+               this->throw_error(QString("Function %1.%2 returns a %3, not a %4.")
+                  .arg(context->get_type()->internal_name.c_str())
+                  .arg(function_name)
+                  .arg(base->typeinfo.internal_name.c_str())
+                  .arg(target_type->internal_name.c_str())
+               );
+         }
+         
+
+         //
+         // TODO: If we're in an assignment statement, set the "out" argument.
+         //
+      }
       //
       // TODO: Preserve the Opcode*.
       //
-
-      //
-      // TODO: The below will need to be mostly rewritten once we're actually 
-      // compiling Opcodes.
-      //
-      // Function calls can exist as standalone statements or as the righthand side of 
-      // assignment statements. In both cases, the end of the function call is the end 
-      // of the statement. (You can assign the result of a function call to a variable 
-      // (or rather, that's the syntax we're going with for specific trigger opcodes), 
-      // but we don't support arbitrary expressions so things like (a = b() + c) won't 
-      // be valid.)
-      //
-      this->reset_token();
-      Script::ParsedItem* statement = this->call;
-      if (is_condition) {
-         this->block->insert_condition(this->call);
-      } else {
-         if (this->assignment)
-            statement = this->assignment;
-         this->block->insert_item(statement);
+      {
+         this->reset_token();
+         Script::ParsedItem* statement = this->call;
+         if (is_condition) {
+            this->block->insert_condition(this->call);
+         } else {
+            if (this->assignment)
+               statement = this->assignment;
+            this->block->insert_item(statement);
+         }
+         statement->set_end(this->state);
+         this->call->set_end(this->state);
+         this->call = nullptr;
+         this->assignment = nullptr;
       }
-      statement->set_end(this->state);
-      this->call->set_end(this->state);
-      this->call       = nullptr;
-      this->assignment = nullptr;
+      if (!this->extract_specific_char(')'))
+         this->throw_error("Expected ')'.");
    }
    //
    bool Compiler::is_in_statement() const {

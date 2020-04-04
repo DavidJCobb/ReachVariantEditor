@@ -65,9 +65,9 @@ namespace Megalo {
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
       };
-      class StringLiteral : public ParsedItem {
+      class Statement : public ParsedItem {
          public:
-            QString value;
+            Opcode* opcode = nullptr;
       };
       class FunctionCall : public ParsedItem {
          public:
@@ -77,13 +77,13 @@ namespace Megalo {
             //
             bool extract_stem(QString);
       };
-      class Assignment : public ParsedItem {
+      class Assignment : public Statement {
          public:
             VariableReference* target = nullptr; // lhs
             ParsedItem* source = nullptr; // rhs
             QString op;
       };
-      class Comparison : public ParsedItem {
+      class Comparison : public Statement {
          public:
             VariableReference* lhs = nullptr;
             VariableReference* rhs = nullptr;
