@@ -31,165 +31,63 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
-//     - Port namespace, etc., definitions from JavaScript.
+//     - Script::VariableReference::_transclude still needs to be coded. It is responsible 
+//       for replacing a Part with the contents of an Alias.
 //
-//     - Begin creating a Compiler singleton with parser logic.
+//     - Script::VariableReference::is_read_only still needs to be coded.
 //
-//        - Code to parse blocks, assignments, and comparisons
+//        - Prerequisite: scope indicators need to be able to indicate that they're read-
+//          only, so that we can adequately handle properties.
 //
-//           = Mostly done, though some things are obviously missing since we can't handle 
-//             variable references, etc..
+//        - Prerequisite: properties need to be able to specify a functor to resolve their 
+//          scope-indicator. This is needed for the "biped" property, since its scope can 
+//          vary depending on the types of both variables used to access it.
 //
-//           = Assignments should fail when assigning to a constant integer, or to an alias 
-//             of a constant integer. (We'll probably have to do this when compiling, not 
-//             sooner.)
+//        - Prerequisite: VariableReference needs to store the scope that its property 
+//          resolves to.
 //
-//        - Code to parse function calls (for now, don't bother with args)
+//     - Alias resolution needs to be completed, including disallowing the shadowing of all 
+//       built-ins, and allowing an alias to refer to a built-in.
 //
-//           = Mostly done, but a lot will need rewriting once we're compiling Opcodes.
+//        - This includes handling enum values and other such content. To accomplish this, 
+//          we'll need to make it so that OpcodeArgTypeinfo can specify a DetailedEnum or 
+//          DetailedFlags (currently it can specify an initializer list of const char*s).
 //
-//        - Code to interpret variable references
+//     - The compiler still needs code for setting the value of a call's out-argument. Now 
+//       that OpcodeArgValue::compile can take a VariableReference, it should be pretty 
+//       straightforward to fill this in.
 //
-//           - Basic references
+//     - When the compiler finishes compiling a call, it needs to actually store the Opcode 
+//       somewhere i.e. in a Statement that gets appended to the current Block.
 //
-//              - We need to make "name[1][2]" a syntax error.
+//     - The compiler should fail to compile a call if the call result is being assigned 
+//       to an abstract property.
 //
-//              - Identify the parts. The only possible patterns are:
+//     - The compiler needs code to compile non-function-call assignments and comparisons.
 //
-//                member // global.object[n]; current_object; global.number[1]; etc.
-//                member.property
-//                member.var
-//                member.var.property (only for biped, I think)
-//                static
-//                static.property
-//                static.var
-//                static.var.property (only for biped, I think)
+//        - This includes abstract getters and setters.
 //
-//                 = REQUIRES SETTING UP NAMESPACE DEFINITIONS, THEN NAMESPACE MEMBER 
-//                   DEFINITIONS, THEN PROPERTY LISTS ON THE TYPEINFOS.
+//     - The compiler needs code to compile a top-level Block that has just closed.
 //
-//                    - Need to revamp VariableScopeIndicatorValue so we can more easily 
-//                      control the is_readonly flag on entries.
+//        - We can't compile nested blocks when they close because we want a consistent 
+//          trigger order with Bungie's output; compiling nested blocks as they close will 
+//          result in their triggers preceding the triggers of their containing blocks.
 //
-//                    - We're not porting the "readonly" or "hard max index" values from 
-//                      the JS Property class; we can get the former from scope indicator 
-//                      values (or assume it's read-only if one is not specified), and we 
-//                      can get the latter if we modify scope indicator values to list 
-//                      indexed lists' max indices in addition to their index bitcounts.
+//     - The compiler needs code to parse variable declarations, including scope-relative 
+//       declarations e.g. (declare player.number[0]).
 //
-//                 - When resolving properties: if the name doesn't match any properties 
-//                   defined in the typenames, then search the opcode-function list for 
-//                   any functions with a (property_set) mapping and a blank primary 
-//                   name (i.e. where the property name is an argument). If any are 
-//                   found, build an Opcode and arguments and try passing the current 
-//                   property name to OpcodeArgValue::compile to see if it matches.
+//     - We're gonna have to take some time to work out how to negate if-statements that 
+//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
+//       to know that when it comes time to actually compile the blocks... assuming we 
+//       don't decide to just drop support for else(if)s at that point. (Think about it: 
+//       first of all, they abstract away conditions, so you can't see the full "cost" 
+//       of your code; and second, there's no code to detect equivalent ifs and decompile 
+//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
+//       any means essential; we've already decided that conciseness is not required.)
 //
-//           - Aliases
+//     = AUDITING
 //
-//        - Code to parse variable declarations. Remember that you can declare variables 
-//          in any scope (i.e. "player.number[0]" without a specific player specified), 
-//          that specifying an initial value is optional, and that only some types can 
-//          even have initial values in the first place.
-//
-//        - Code to generate Opcode*s from assignments, comparisons, and function calls
-//
-//           - For non-condition statements, we can identify the opcode function being 
-//             invoked once we detect the presence or absence of an opening parentheses, 
-//             i.e. all statements are either {func()}, {var = var}, or {var = func()}, 
-//             and once we hit that opening parentheses (or detect that there isn't one), 
-//             we've seen enough (the lefthand side, operator, and righthand side) to 
-//             begin trying to ID the opcode function.
-//
-//           - By the time we hit this point, we'll need the Compiler to have a reference 
-//             to the game variant MP data just like Decompiler does, since we'll need to 
-//             set up references to indexed list items and whatnot.
-//
-//              - We're also gonna wanna write teardown code and make sure that anything 
-//                we're doing can survive an exception being thrown, i.e. make sure we 
-//                don't leak things allocated with (new) when we throw exceptions. That 
-//                will require careful coding at every site that can raise an exception.
-//
-//           - Once we've parsed a function's name (and context, for thiscalls), we can 
-//             identify the opcode function being invoked. We can then create an Opcode 
-//             instance and its args, and ask the args to handle their own parsing: have 
-//             a function like OpcodeArgValue::compile(Compiler&, uint8_t part), with it 
-//             having access to the "extract" functions for argument parsing. That function 
-//             should be able to return one of four status codes: success; failure; need 
-//             another argument; can receive another argument. The latter two are for 
-//             varargs types e.g. Shape (which always knows how many more arguments it 
-//             needs) and Formatted String (which receives a format string and between 0 
-//             and 2 additional tokens, inclusive).
-//
-//              = NO. THIS WON'T WORK FOR THINGS THAT USE AN ALTERNATE SYNTAX, E.G. 
-//                COMPARISONS, ASSIGNMENTS, AND THE "Modify Grenades" OPCODE WHEREIN THE 
-//                PROPERTY NAME IS ITSELF AN OPCODE ARGUMENT.
-//
-//                How about this instead:
-//
-//                 - Move the string stuff -- scan, extract, etc. -- from Compiler to a 
-//                   new base class. Perhaps "StringScanner."
-//
-//                 - Define Script::ParserPosition::operator+ and such.
-//
-//                 - To compile a function call argument, extract everything up to the 
-//                   next ',' or ')' and stuff that content into a new StringScanner. 
-//                   Then, have OpcodeArgValue::compile take both a reference to the 
-//                   Compiler, a part index, and the StringScanner, and have it use the 
-//                   StringScanner to extract the argument. (Compiler should also provide 
-//                   a function that takes a QString and produces a variable reference.) 
-//                   If we return a failure code, then the compiler can add the string-
-//                   scanner's position to its own position and then raise the error.
-//
-//                    - If a non-failure code is returned, add the StringScanner's state 
-//                      to the Compiler's state in order to advance to the end of the 
-//                      parsed argument. Then, look for a ',' or ')'; if we find any-
-//                      thing else instead (or hit EOF), raise an error; otherwise, 
-//                      repeat for the next argument.
-//
-//                 - Once that's done? We can handle "Modify Grenades" via special-case 
-//                   behavior for when the OpcodeFuncToScriptMapping has a blank primary 
-//                   name and a defined (arg_name): we just pass the property name to 
-//                   OpcodeArgValue::compile.
-//
-//           - Once we've parsed a function's name (and context, for thiscalls), we can 
-//             identify the opcode function being invoked... but some Opcodes share the 
-//             same name. Specifically, there are two (send_incident) opcodes, one of 
-//             which accepts an additional integer argument. So how do we allow that? By 
-//             simple trial-and-error. When we know the function's name and context, we 
-//             grab a vector of ALL opcodes that have a matching name and context, and 
-//             then we try each one until one of them returns a success code. If all of 
-//             them return failure codes, then we raise an error. (If there was only one 
-//             matching opcode, then we should raise whatever error text it gave us; 
-//             otherwise: "The arguments did not match any of the signatures for the X 
-//             function.")
-//
-//              - So: get a list of all matching functions; create an Opcode; back up the 
-//                stream state. Then, for each function: clear the Opcode's arguments; 
-//                create arguments based on the function signature; try parsing them; if 
-//                we fail, restore stream state from the backup (i.e. rewind) and try the 
-//                next function.
-//
-//        - Code to compile a Block and its contained Blocks.
-//
-//           - We can run this whenever we close a top-level Block. We can't run it the 
-//             instant we close a nested Block because we want a consistent Trigger order 
-//             with Bungie, and compiling nested Blocks on closure will result in inner 
-//             Triggers being numbered before outer Triggers.
-//
-//        - Code to allow the aliasing of enum and flag values
-//
-//           - OpcodeArgTypeinfo has a system to declare names, but it requires a list of 
-//             const char*s whereas basically everything we have now is based on DetailedEnum 
-//             or DetailedFlags. We should upgrade it.
-//
-//        - We're gonna have to take some time to work out how to negate if-statements that 
-//          mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
-//          to know that when it comes time to actually compile the blocks... assuming we 
-//          don't decide to just drop support for else(if)s at that point. (Think about it: 
-//          first of all, they abstract away conditions, so you can't see the full "cost" 
-//          of your code; and second, there's no code to detect equivalent ifs and decompile 
-//          them to else(if)s yet. We should support else(if)s if we can but they aren't by 
-//          any means essential; we've already decided that conciseness is not required.)
+//        - Exception safety for anything that gets heap-allocated.
 //
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..
