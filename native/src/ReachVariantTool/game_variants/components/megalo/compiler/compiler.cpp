@@ -107,29 +107,6 @@ namespace Megalo {
             return nullptr;
          return this->items[i];
       }
-      //
-      bool FunctionCall::extract_stem(QString text) {
-         int size = text.size();
-         int i    = size - 1;
-         for (; i >= 0; --i) {
-            auto c = text[i];
-            if (QString("[]").indexOf(c) >= 0)
-               return false;
-            if (c == '.') {
-               this->name = text.chopped(i + 1); // oh, but be sure not to confuse this with (QString::chop), which does the literal exact opposite!
-               break;
-            }
-         }
-         if (this->name.isEmpty()) { // there was no '.', or it was at the end
-            if (i == size - 1) // "name.()"
-               return false;
-            this->name = text;
-         } else {
-            this->context = new VariableReference(text.mid(0, i));
-            this->context->owner = this;
-         }
-         return true;
-      }
    }
    //
    /*static*/ bool Compiler::is_keyword(QString s) {
@@ -182,7 +159,6 @@ namespace Megalo {
       //
       this->assignment = nullptr;
       this->comparison = nullptr;
-      this->call       = nullptr;
       this->reset_token();
       this->scan([this](QChar c) {
          if (!this->is_in_statement())
@@ -201,8 +177,6 @@ namespace Megalo {
          this->throw_error("Unclosed block.");
       if (this->assignment)
          this->throw_error("An assignment statement is missing its righthand side.");
-      if (this->call)
-         this->throw_error("A function call statement is unterminated.");
       if (this->comparison)
          this->throw_error("The file ended before a statement could be fully processed.");
       if (this->next_event != Script::Block::Event::none)
@@ -296,11 +270,11 @@ namespace Megalo {
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
       if (string_scanner::is_operator_char(c)) {
-         this->assignment = new Script::Assignment;
+         this->assignment = new Script::Statement;
          this->assignment->set_start(this->token.pos);
          {
-            this->assignment->target = new Script::VariableReference(this->token.text);
-            auto ref = this->assignment->target;
+            this->assignment->lhs = new Script::VariableReference(this->token.text);
+            auto ref = this->assignment->lhs;
             ref->owner = this->assignment;
             ref->resolve(*this);
             if (ref->is_constant_integer())
@@ -382,15 +356,14 @@ namespace Megalo {
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
       this->assignment->set_end(this->state);
-      this->assignment->source = new Script::VariableReference(this->token.text);
-      this->assignment->source->owner = this->assignment;
+      this->assignment->rhs = new Script::VariableReference(this->token.text);
+      this->assignment->rhs->owner = this->assignment;
       this->block->insert_item(this->assignment);
       this->assignment = nullptr;
       this->reset_token();
    }
    void Compiler::_parseBlockConditions() {
       this->comparison = nullptr;
-      this->call       = nullptr;
       this->reset_token();
       this->scan([this](QChar c) {
          if (!this->comparison) {
@@ -651,12 +624,7 @@ namespace Megalo {
       //
       // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
       //
-      this->call = new Script::FunctionCall;
-      this->call->set_start(this->token.pos);
-      if (this->assignment) {
-         this->assignment->source = this->call;
-         this->call->owner = this->assignment;
-      }
+      auto call_start = this->token.pos;
       QString function_name;
       std::unique_ptr<Script::VariableReference> context = nullptr;
       {  // Identify the context and the function name, i.e. context.function_name(arg, arg, arg)
@@ -699,7 +667,12 @@ namespace Megalo {
       //
       OpcodeBase* match = nullptr;
       auto        start = this->backup_stream_state();
-      std::unique_ptr<Opcode> opcode = std::make_unique<Opcode>();
+      std::unique_ptr<Opcode> opcode;
+      if (is_condition) {
+         opcode.reset(new Condition);
+      } else {
+         opcode.reset(new Action);
+      }
       for (auto* function : opcode_bases) {
          //
          // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
@@ -738,7 +711,7 @@ namespace Megalo {
          if (!base)
             this->throw_error(QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          {
-            auto target_type = this->assignment->target->get_type();
+            auto target_type = this->assignment->lhs->get_type();
             if (&base->typeinfo != target_type)
                this->throw_error(QString("Function %1.%2 returns a %3, not a %4.")
                   .arg(context->get_type()->internal_name.c_str())
@@ -753,30 +726,24 @@ namespace Megalo {
          // TODO: If we're in an assignment statement, set the "out" argument.
          //
       }
-      //
-      // TODO: Preserve the Opcode*.
-      //
-      {
-         this->reset_token();
-         Script::ParsedItem* statement = this->call;
-         if (is_condition) {
-            this->block->insert_condition(this->call);
-         } else {
-            if (this->assignment)
-               statement = this->assignment;
-            this->block->insert_item(statement);
-         }
-         statement->set_end(this->state);
-         this->call->set_end(this->state);
-         this->call = nullptr;
-         this->assignment = nullptr;
-      }
       if (!this->extract_specific_char(')'))
          this->throw_error("Expected ')'.");
+      this->reset_token();
+      Script::Statement* statement = this->assignment;
+      if (!statement)
+         statement = new Script::Statement;
+      statement->opcode = opcode.release();
+      statement->set_end(this->state);
+      if (is_condition) {
+         this->block->insert_condition(statement);
+      } else {
+         this->block->insert_item(statement);
+      }
+      this->assignment = nullptr;
    }
    //
    bool Compiler::is_in_statement() const {
-      return this->assignment || this->comparison || this->call;
+      return this->assignment || this->comparison;
    }
    //
    bool Compiler::_closeCurrentBlock() {

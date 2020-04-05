@@ -46,6 +46,8 @@ namespace Megalo {
                const OpcodeArgTypeinfo* type = nullptr;
                int32_t       disambiguator = 0;
                disambig_type disambig_type = disambig_type::scope;
+               //
+               bool is_variable() const noexcept;
             };
             //
             std::vector<Part> parts;

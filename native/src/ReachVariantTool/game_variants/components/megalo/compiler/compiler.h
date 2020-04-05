@@ -68,27 +68,13 @@ namespace Megalo {
       class Statement : public ParsedItem {
          public:
             Opcode* opcode = nullptr;
-      };
-      class FunctionCall : public ParsedItem {
-         public:
-            VariableReference* context = nullptr;
-            QString name;
-            std::vector<std::string> args;
-            //
-            bool extract_stem(QString);
-      };
-      class Assignment : public Statement {
-         public:
-            VariableReference* target = nullptr; // lhs
-            ParsedItem* source = nullptr; // rhs
+            VariableReference* lhs = nullptr;
+            VariableReference* rhs = nullptr;
             QString op;
       };
       class Comparison : public Statement {
          public:
-            VariableReference* lhs = nullptr;
-            VariableReference* rhs = nullptr;
-            QString op;
-            bool negated = false;
+            bool negated = false; // TODO: not needed if we compile the Opcode when it's found; see: Compiler::negate_next_condition
       };
    }
    //
@@ -103,11 +89,10 @@ namespace Megalo {
          using scan_functor_t = std::function<bool(QChar)>;
          //
       public:
-         Script::Block*         root       = nullptr;
-         Script::Block*         block      = nullptr; // current block being parsed
-         Script::Assignment*    assignment = nullptr; // current assignment being parsed, if any
-         Script::Comparison*    comparison = nullptr; // current comparison being parsed, if any
-         Script::FunctionCall*  call       = nullptr; // current call being parsed, if any
+         Script::Block*      root       = nullptr;
+         Script::Block*      block      = nullptr; // current block being parsed
+         Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
+         Script::Comparison* comparison = nullptr; // current comparison being parsed, if any
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
          bool negate_next_condition = false;

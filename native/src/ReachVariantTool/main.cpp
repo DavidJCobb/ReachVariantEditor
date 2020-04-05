@@ -31,8 +31,34 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
+//     - SHORT-TERM PLANS
+//
+//        - Script stats are a player/team property with an index. However, I don't think 
+//          the current system for parsing properties supports indexed properties. In order 
+//          to determine whether a property is indexed, we would want to check the relevant 
+//          data on its corresponding VariableScopeIndicatorValue.
+//
+//        - If a VariableReference refers to an abstract property, we should look for both 
+//          a (property_get) OpcodeFunction and a (property_set) OpcodeFunction, and we 
+//          should store both (i.e. VariableReference::property::getter and ...::setter). 
+//          That way, we don't have to repeatedly resolve the property name; we can resolve 
+//          it once, and then easily check for a getter or a setter. (Some abstract proper-
+//          ties only have the one or the other, so we need code to check that you're not 
+//          assigning to an abstract property with no setter or assigning from an abstract 
+//          property with no getter.)
+//
+//        - Get rid of the Script::Comparison class and just use Script::Statement.
+//
+//           - We can do this once we've actually written the code to compile comparisons 
+//             into Opcodes. The Compiler class already has a (negate_next_condition) bool, 
+//             and we can add an enum for the current condition joiner, and use that and 
+//             the bool when compiling; the Statement itself doesn't need to retain the 
+//             "negated" bool (which is the only purpose of the Comparison class).
+//
 //     - Script::VariableReference::_transclude still needs to be coded. It is responsible 
 //       for replacing a Part with the contents of an Alias.
+//
+//     - VariableReference should detect and disallow triply-nested variables (var.var.var).
 //
 //     - Script::VariableReference::is_read_only still needs to be coded.
 //
@@ -65,7 +91,9 @@ int main(int argc, char *argv[]) {
 //
 //     - The compiler needs code to compile non-function-call assignments and comparisons.
 //
-//        - This includes abstract getters and setters.
+//        - This includes abstract getters and setters, which will require additional 
+//          validation in some cases (e.g. no += for a getter unless that's supported via 
+//          a defined OpcodeFuncToScriptMapping::arg_operator).
 //
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
@@ -84,6 +112,19 @@ int main(int argc, char *argv[]) {
 //       of your code; and second, there's no code to detect equivalent ifs and decompile 
 //       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
 //       any means essential; we've already decided that conciseness is not required.)
+//
+//     - Currently every parse error is a fatal error, throwing an exception and stopping 
+//       all further parsing. However, 90% of these should be non-fatal errors instead. 
+//       We need to build a system for logging non-fatal errors, and then begin converting 
+//       fatal errors over.
+//
+//        - Basically, if something is incorrect but the parser is still capable of 
+//          understanding it (e.g. var.var.var as opposed to a misplaced keyword), then 
+//          it should be a non-fatal error.
+//
+//        - Some non-fatal errors will require additional handling. For example, if a 
+//          function fails to parse (unrecognized name, bad argument(s), etc.), then we 
+//          will need code to log a non-fatal error and skip the function's argument list.
 //
 //     = AUDITING
 //

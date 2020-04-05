@@ -55,6 +55,14 @@ namespace Megalo::Script {
       this->index_str.clear();
    }
 
+   bool VariableReference::InterpretedPart::is_variable() const noexcept {
+      if (!this->type)
+         return false;
+      if (!this->type->is_variable())
+         return false;
+      return this->disambig_type == disambig_type::index || this->disambig_type == disambig_type::static_var;
+   }
+
    VariableReference::VariableReference(int32_t i) {
       this->set_to_constant_integer(i);
       #if _DEBUG
@@ -367,6 +375,8 @@ namespace Megalo::Script {
          if (prev.type->can_have_variables()) {
             //
             // Handle nested variables, e.g. global.player[0].number[1]
+            //
+            // TODO: Do not allow (static.var.var) or (var.var.var)
             //
             auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
             if (type) {
