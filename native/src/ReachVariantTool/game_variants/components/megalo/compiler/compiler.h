@@ -11,10 +11,6 @@ namespace Megalo {
    class Compiler;
    //
    namespace Script {
-      class ParsedOpcode { // used for once we've fully parsed an opcode, so we can retain it in a Block
-         public:
-            Opcode* data = nullptr;
-      };
       class Alias : public ParsedItem {
          public:
             QString name;

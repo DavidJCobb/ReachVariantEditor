@@ -47,7 +47,7 @@ namespace Megalo::Script {
          return;
       auto abs = compiler.lookup_absolute_alias(this->index_str);
       if (!abs)
-         throw compile_exception(QString("\"%1\" is not a valid index.").arg(this->index_str));
+         throw compile_exception(QString("\"%1\" is not a valid index. Only integer constants and aliases of integer constants can be indices.").arg(this->index_str));
       if (!abs->is_integer_constant())
          throw compile_exception(QString("Alias \"%1\" is not an integer constant and therefore cannot be used as an index.").arg(abs->name));
       this->index = abs->get_integer_constant();

@@ -33,6 +33,9 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
+//        - Function call parsing needs to set the out-argument if we're in an assignment 
+//          statement.
+//
 //        - Script stats are a player/team property with an index. However, I don't think 
 //          the current system for parsing properties supports indexed properties. In order 
 //          to determine whether a property is indexed, we would want to check the relevant 
@@ -95,6 +98,10 @@ int main(int argc, char *argv[]) {
 //          validation in some cases (e.g. no += for a getter unless that's supported via 
 //          a defined OpcodeFuncToScriptMapping::arg_operator).
 //
+//           - I'm pretty sure all property setters support all operators e.g. += by way 
+//             of OpcodeFuncToScriptMapping::arg_operator, but we should still have code 
+//             for operators which lack that support.
+//
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
 //        - We can't compile nested blocks when they close because we want a consistent 
@@ -103,6 +110,10 @@ int main(int argc, char *argv[]) {
 //
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
+//
+//     - Compiling should fail if multiple triggers use the same event type (via the "on" 
+//       keyword; requires that the Compiler keep track of what events have been used so 
+//       far).
 //
 //     - We're gonna have to take some time to work out how to negate if-statements that 
 //       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
@@ -125,6 +136,24 @@ int main(int argc, char *argv[]) {
 //        - Some non-fatal errors will require additional handling. For example, if a 
 //          function fails to parse (unrecognized name, bad argument(s), etc.), then we 
 //          will need code to log a non-fatal error and skip the function's argument list.
+//
+//        = List of errors that should be non-fatal:
+//
+//           - Unrecognized variable reference (or other "resolve" failures)
+//           - Some kinds of invalid variable references (before the "resolve" step)
+//              - Index is not an integer, or is an alias of a non-integer
+//           - Unrecognized function name
+//           - Bad function arguments
+//           - Bad function return type
+//           - Bad operator (e.g. comparison operator outside of an if-condition)
+//           - Assigning the return value of a function call to a property setter
+//           - Property setter that illegally uses a non-"=" operator e.g. "+="
+//           - Assigning to a constant integer or other read-only value
+//           - Alias name that shadows a built-in
+//           - Alias name that is an integer literal
+//           - Invalid event name for "on" keyword
+//           - "On" keyword used for a nested trigger
+//           - Multiple triggers using the same event type via "on"
 //
 //     = AUDITING
 //

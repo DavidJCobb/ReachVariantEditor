@@ -42,6 +42,31 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
+      namespace {
+         template<typename T, int I> OpcodeFuncToScriptMapping* _check_rel_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name, const OpcodeArgTypeinfo* type) {
+            for (auto& function : list) {
+               auto& mapping = function.mapping;
+               if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+                  continue;
+               auto& base = function.arguments[mapping.arg_context];
+               if (&base.typeinfo == type) {
+                  if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0)
+                     return mapping;
+               }
+            }
+            return nullptr;
+         }
+         template<typename T, int I> bool _check_abs_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name) {
+            for (auto& function : list) {
+               auto& mapping = function.mapping;
+               if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
+                  continue;
+               if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0)
+                  return true;
+            }
+            return false;
+         }
+      }
       Alias::Alias(Compiler& compiler, QString name, QString target) {
          this->name = name;
          {  // Validate name.
@@ -56,7 +81,7 @@ namespace Megalo {
             //
             // TODO: Disallow aliasing typenames and the names of members of the unnamed namespace.
             //
-            // TODO: For absolute aloases, do not allow the shadowing of a non-member opcode name.
+            // TODO: For absolute aliases, do not allow the shadowing of a non-member opcode name.
             //
          }
          this->target = new VariableReference(target);
@@ -72,17 +97,52 @@ namespace Megalo {
          }
          if (this->is_relative_alias()) {
             //
-            // TODO: For relative aliases, do not allow the shadowing of a property name, thiscall-opcode name, or variable typename 
-            // accessible through the type that (this->target) has. For example, (alias spawn_sequence = object.number[0]) should be 
-            // rejected but (alias spawn_sequence = player.number[0]) should be permitted.
+            // Restrictions on relative aliases:
             //
-
+            auto type = this->target->get_type();
+            if (type->can_have_variables()) {
+               //
+               // Do not allow aliases to shadow nested variables.
+               //
+               if (auto nested = OpcodeArgTypeRegistry::get().get_variable_type(name))
+                  compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.%2.").arg(type->internal_name.c_str()).arg(nested->internal_name.c_str()));
+            }
+            if (auto prop = type->get_property_by_name(name))
+               //
+               // Do not allow aliases to shadow properties.
+               //
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(prop->name.c_str()));
+            //
+            // Do not allow aliases to shadow member functions or abstract properties:
+            //
+            auto mapping = _check_rel_alias_name_against_opcodes(conditionFunctionList, name, type);
+            if (!mapping)
+               auto mapping = _check_rel_alias_name_against_opcodes(actionFunctionList, name, type);
+            if (mapping) {
+               switch (mapping->type) {
+                  case OpcodeFuncToScriptMapping::mapping_type::property_get:
+                  case OpcodeFuncToScriptMapping::mapping_type::property_set:
+                     compiler.throw_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(name));
+                     break;
+               }
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow member functions like %1.%2.").arg(type->internal_name.c_str()).arg(name));
+            }
          } else {
-            if (auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(name))
-               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(type->internal_name.c_str()));
             //
-            // TODO: for absolute aliases, do not allow the shadowing of a non-member opcode name, a statically-indexable typename, 
-            // or a term defined by any opcode (enum values, etc..)
+            // Restrictions on absolute aliases:
+            //
+            if (auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(name))
+               //
+               // Do not allow aliases to shadow statically-indexable typenames.
+               //
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(type->internal_name.c_str()));
+            if (_check_abs_alias_name_against_opcodes(conditionFunctionList, name) || _check_abs_alias_name_against_opcodes(actionFunctionList, name))
+               //
+               // Do not allow aliases to shadow non-member functions.
+               //
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow a non-member function like %1.").arg(name));
+            //
+            // TODO: Do not allow the shadowing of terms defined by opcodes i.e. enum values.
             //
          }
       }
@@ -425,6 +485,8 @@ namespace Megalo {
          else if (word == "on")
             this->throw_error("You cannot mark event handlers inside of conditions.");
          else if (word == "and" || word == "or") {
+            if (this->negate_next_condition)
+               this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
             //
             // TODO
             //
