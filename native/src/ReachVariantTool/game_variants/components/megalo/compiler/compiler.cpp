@@ -252,6 +252,8 @@ namespace Megalo {
             this->throw_error(QString("Unexpected %1.").arg(c));
          if (string_scanner::is_quote_char(c))
             this->throw_error(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
+         if (c == '(' || c == ')')
+            this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
          if (string_scanner::is_whitespace_char(c))
             return;
          this->token.text += c;
@@ -446,6 +448,8 @@ namespace Megalo {
             this->throw_error(QString("Unexpected %1.").arg(c));
          if (string_scanner::is_quote_char(c))
             this->throw_error(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
+         if (c == '(' || c == ')')
+            this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
          if (string_scanner::is_whitespace_char(c))
             return false;
          this->token.text += c;
@@ -485,7 +489,7 @@ namespace Megalo {
          else if (word == "on")
             this->throw_error("You cannot mark event handlers inside of conditions.");
          else if (word == "and" || word == "or") {
-            if (this->negate_next_condition)
+            if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
                this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
             //
             // TODO
@@ -493,6 +497,12 @@ namespace Megalo {
             this->reset_token();
          } else if (word == "not") {
             if (this->negate_next_condition)
+               //
+               // NOTE: If we decide to allow (not not condition) and just have each "not" toggle the negate-next-condition flag, 
+               // then we also need to modify the code that checks for (not and condition) and (not or condition) in order to make 
+               // sure that (not not and condition) and (not not or condition) are still considered invalid. That code is in this 
+               // same function.
+               //
                this->throw_error("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
             this->negate_next_condition = true;
             this->reset_token();
