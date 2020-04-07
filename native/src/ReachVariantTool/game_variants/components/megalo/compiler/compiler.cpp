@@ -209,7 +209,10 @@ namespace Megalo {
    }
    //
    void Compiler::throw_error(const QString& text) {
-      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(this->state.line + 1).arg(this->state.offset - this->state.last_newline + 1).arg(text));
+      this->throw_error(this->state, text);
+   }
+   void Compiler::throw_error(const Script::string_scanner::pos& pos, const QString& text) {
+      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(pos.line + 1).arg(pos.offset - pos.last_newline + 1).arg(text));
    }
    void Compiler::reset_token() {
       this->token = Token();
@@ -317,7 +320,8 @@ namespace Megalo {
                //
                // The handler code advanced the position to the end of the keyword's relevant 
                // content (e.g. the end of a block declaration). However, our containing loop 
-               // will increment the position one more time, so we need to rewind by one.
+               // (or rather, Compiler::scan call) will increment the position one more time, 
+               // so we need to rewind by one.
                //
                --this->state.offset;
             }
@@ -426,6 +430,17 @@ namespace Megalo {
       this->assignment->set_end(this->state);
       this->assignment->rhs = new Script::VariableReference(this->token.text);
       this->assignment->rhs->owner = this->assignment;
+      //
+      // TODO: Compile the assignment, and run correctness checks if we're assigning a property (e.g. 
+      // property is non-abstract or has a setter; if property is abstract, ensure operator is = or 
+      // setter has an operator argument (which we'll need to then compile); et cetera).
+      //
+      // TODO: Consider writing code for type checking non-abstract-property assignments in advance... 
+      // but maybe leave it turned off: I want to check the results of type-mismatched assignments in-
+      // game. I'm pretty sure that numbers and timers can be assigned to each other, but I want to 
+      // know if other types do anything sensible, do nothing at all, clear the target variable, or 
+      // crash, so that I can program in a compiler warning or compiler error as appropriate.
+      //
       this->block->insert_item(this->assignment);
       this->assignment = nullptr;
       this->reset_token();
@@ -498,7 +513,9 @@ namespace Megalo {
             if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
                this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
             //
-            // TODO
+            // TODO: Fatal error if we already have a joiner (i.e. {condition and or condition} is a syntax error)
+            //
+            // TODO: Keep track of which joiner we're using.
             //
             this->reset_token();
          } else if (word == "not") {
@@ -597,6 +614,11 @@ namespace Megalo {
       this->comparison->set_end(this->state);
       this->comparison->rhs = new Script::VariableReference(this->token.text);
       this->comparison->rhs->owner = this->comparison;
+      //
+      // TODO: Compile the comparison.
+      //
+      // TODO: Comparing an abstract property is an error
+      //
       this->block->insert_condition(this->comparison);
       this->comparison = nullptr;
       this->reset_token();
@@ -713,7 +735,7 @@ namespace Megalo {
          for (; i >= 0; --i) {
             auto c = text[i];
             if (QString("[]").indexOf(c) >= 0)
-               this->throw_error("Function names cannot contain square brackets.");
+               this->throw_error(call_start, "Function names cannot contain square brackets.");
             if (c == '.') {
                function_name = text.chopped(i + 1); // oh, but be sure not to confuse this with (QString::chop), which does the literal exact opposite!
                break;
@@ -721,7 +743,7 @@ namespace Megalo {
          }
          if (function_name.isEmpty()) { // there was no '.', or it was at the end
             if (i == size - 1) // "name.()"
-               this->throw_error("Constructions of the form {name.()} are syntax errors. A function name is required.");
+               this->throw_error(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
             function_name = text;
          } else {
             context.reset(new Script::VariableReference(text.mid(0, i)));
@@ -739,8 +761,8 @@ namespace Megalo {
       }
       if (!opcode_bases.size()) {
          if (context)
-            this->throw_error(QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-         this->throw_error(QString("There is no non-member function named \"%1\".").arg(function_name));
+            this->throw_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         this->throw_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
       }
       //
       OpcodeBase* match = nullptr;
@@ -748,6 +770,7 @@ namespace Megalo {
       std::unique_ptr<Opcode> opcode;
       if (is_condition) {
          opcode.reset(new Condition);
+         this->_applyConditionModifiers(*(Condition*)opcode.get());
       } else {
          opcode.reset(new Action);
       }
@@ -763,7 +786,7 @@ namespace Megalo {
             this->__parseFunctionArgs(*function, *opcode.get());
             match = function;
             break;
-         } catch (compile_exception & e) {
+         } catch (compile_exception& e) {
             if (opcode_bases.size() == 1)
                //
                // If we aren't dealing with function overloads, then just use the original parse error.
@@ -775,7 +798,7 @@ namespace Megalo {
          //
          // We'll get here if we're dealing with function overloads and none of the overloads matched.
          //
-         this->throw_error(QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         this->throw_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
       if (this->assignment) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
@@ -791,7 +814,7 @@ namespace Megalo {
             }
          }
          if (!base)
-            this->throw_error(QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            this->throw_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          //
          // TODO: If we are assigning to an abstract property, then throw an error if that property 
          // has no setter, or if the assignment operator is not = AND the abstract property has no 
@@ -802,7 +825,7 @@ namespace Megalo {
          //
          auto target_type = this->assignment->lhs->get_type();
          if (&base->typeinfo != target_type)
-            this->throw_error(QString("Function %1.%2 returns a %3, not a %4.")
+            this->throw_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
                .arg(context->get_type()->internal_name.c_str())
                .arg(function_name)
                .arg(base->typeinfo.internal_name.c_str())

@@ -16,6 +16,7 @@ namespace Megalo {
             return "this is a QString";
          }
          const QChar* why() const noexcept { return reason.constData(); }
+         const QString& why_ref() const noexcept { return reason; }
    };
    //
    namespace Script {

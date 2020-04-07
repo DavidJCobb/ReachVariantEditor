@@ -93,7 +93,8 @@ namespace Megalo {
          Script::Block::Event next_event = Script::Block::Event::none;
          bool negate_next_condition = false;
          //
-         void throw_error(const QString& text); // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
+         void throw_error(const QString& text);
+         void throw_error(const Script::string_scanner::pos& pos, const QString& text);
          void reset_token();
          //
          void parse(QString text); // can throw compile_exception
@@ -112,6 +113,8 @@ namespace Megalo {
          void _parseBlockConditions();
          bool _parseConditionStart(QChar); // returns "true" at the end of the condition list, i.e. upon reaching the keywrod "then"
          void _parseComparison(QChar);
+         //
+         void _applyConditionModifiers(Condition&); // applies "not", "and", "or", and then resets the relevant state on the Compiler
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&);
          void _parseFunctionCall(bool is_condition);
