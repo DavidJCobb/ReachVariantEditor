@@ -118,11 +118,10 @@ these types consist of four parts:
       variable exists on a player variable. Each variable type has its own scope enum 
       because...
 
-      Some variable types can refer to game state values, such as the current round time. 
-      These are encoded in the scope enum as well. Some variable types can also refer to 
-      the contents of an indexed list, such as script options, and the scope enumeration 
-      covers this as well. Different variable types can refer to different "environment" 
-      data.
+      Variables can also represent access to game state values, such as the current round 
+      time, and properties on classes, such as a player's score. Both of these things are 
+      mutually exclusive with conventional variable scopes, and they're type-specific, so 
+      they are also encoded into the scope enum.
 
    WHICH
       If the scope-indicator specifies that the scope is an object, player, or team, then 
@@ -150,11 +149,6 @@ game.betrayal_booting            | betrayal_booting  | <none>           | <none>
 global.player[1].team            | player_owner_team | global.player[1] | <none> | Note that here, "team"  is a property, not a nested variable.
 global.player[1].object[0].biped | player_biped      | global.player[1] | 0      | Note that here, "biped" is a property, not a nested variable.
 55                               | constant          | <none>           | 55     | 
-
-The interactions between this system and properties are worth knowing about. All 
-properties are implemented as scopes; this means that you cannot access one property 
-through another (e.g. global.player[0].team.score), because a variable reference can 
-only have one scope indicator.
 
 
 

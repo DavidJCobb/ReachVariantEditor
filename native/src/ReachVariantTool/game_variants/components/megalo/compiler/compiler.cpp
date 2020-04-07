@@ -777,6 +777,10 @@ namespace Megalo {
          //
          this->throw_error(QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
       if (this->assignment) {
+         //
+         // We're assigning the return value of this function call to something, so let's first make 
+         // sure that the function actually returns a value.
+         //
          OpcodeArgBase* base  = nullptr;
          size_t         index = 0;
          for (; index < match->arguments.size(); ++index) {
@@ -789,8 +793,12 @@ namespace Megalo {
          if (!base)
             this->throw_error(QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          //
-         // If we're in an assignment, verify that the variable we're assigning our return value to is 
-         // of the right type.
+         // TODO: If we are assigning to an abstract property, then throw an error if that property 
+         // has no setter, or if the assignment operator is not = AND the abstract property has no 
+         // "operator" argument. Do NOT throw an error when using operators other than = to assign 
+         // to a non-abstract property; constructs like (current_player.score += 5) are valid.
+         //
+         // Next, verify that the variable we're assigning our return value to is of the right type.
          //
          auto target_type = this->assignment->lhs->get_type();
          if (&base->typeinfo != target_type)

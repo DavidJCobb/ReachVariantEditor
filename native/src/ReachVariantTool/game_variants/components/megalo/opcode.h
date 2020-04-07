@@ -160,6 +160,8 @@ namespace Megalo {
             Definition() {}
             Definition(const char* n) : name(n) {}
             Definition(const std::string& n) : name(n) {}
+            //
+            inline bool is_variably_named() const noexcept { return this->name.empty(); }
          };
          std::vector<Definition> definitions;
          //

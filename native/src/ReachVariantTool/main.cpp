@@ -60,6 +60,15 @@ int main(int argc, char *argv[]) {
 //             properties, and it will allow us to more quickly check whether any given 
 //             abstract property supports a [gs]etter.
 //
+//           - We should allow the registry to search for variably-named properties using 
+//             a Script::string_scanner, via the same strategy currently used in the 
+//             VariableReference resolve code (but with the registry only searching 
+//             variably-named properties).
+//
+//        - Function call parsing should throw an error if assigning to an abstract 
+//          property that does not have a setter, or if using an operator other than = 
+//          for an abstract property with no operator argument.
+//
 //        - Get rid of the Script::Comparison class and just use Script::Statement.
 //
 //           - We can do this once we've actually written the code to compile comparisons 
