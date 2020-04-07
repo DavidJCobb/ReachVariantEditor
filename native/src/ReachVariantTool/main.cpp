@@ -69,6 +69,12 @@ int main(int argc, char *argv[]) {
 //          property that does not have a setter, or if using an operator other than = 
 //          for an abstract property with no operator argument.
 //
+//        - Compiling assignments
+//
+//        - Compiling comparisons
+//
+//           - Compiler::_applyConditionModifiers
+//
 //        - Get rid of the Script::Comparison class and just use Script::Statement.
 //
 //           - We can do this once we've actually written the code to compile comparisons 
@@ -177,6 +183,8 @@ int main(int argc, char *argv[]) {
 //     = AUDITING
 //
 //        - Exception safety for anything that gets heap-allocated.
+//
+//        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
 //
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..

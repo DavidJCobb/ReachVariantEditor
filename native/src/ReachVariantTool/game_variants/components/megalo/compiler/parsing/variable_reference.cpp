@@ -343,12 +343,24 @@ namespace Megalo::Script {
       return ++i;
    }
    //
+   bool VariableReference::_resolve_abstract_property(Compiler& compiler, QString name, const OpcodeArgTypeinfo& property_is_on) {
+      auto&       manager = AbstractPropertyRegistry::get();
+      const auto* entry   = manager.get_by_name(name.toStdString().c_str());
+      if (!entry)
+         entry = manager.get_variably_named_property(compiler, name, property_is_on);
+      if (entry) {
+         this->property.abstract = entry;
+         return true;
+      }
+      return false;
+   }
+   //
    void VariableReference::resolve(Compiler& compiler, bool is_alias_definition) {
       if (this->resolved)
          return;
       size_t i = this->_resolve_first_parts(compiler, is_alias_definition);
       assert(this->interpreted.size() > 0 && "We failed to interpret the first parts of a VariableReference, but also failed to log an error. How did this happen?");
-      while (i < this->parts.size()) {
+      for (; i < this->parts.size(); ++i) {
          auto* part = &this->parts[i];
          auto& prev = this->interpreted.back();
          {
@@ -407,77 +419,64 @@ namespace Megalo::Script {
          if (prop) {
             if (part->has_index())
                throw compile_exception(QString("Properties, such as \"%1\" on the %2 type, cannot be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
-            this->property.definition = prop;
+            this->property.normal = prop;
+            ++i; // move to the next part, and then bail out of the loop so we can use property-specific logic
             break;
          }
          //
-         // The name didn't match any properties that are explicitly defined on the previous type. However, some 
-         // properties exist not as "real" definitions but as getter/setter opcodes which use property syntax, so 
-         // we need to loop over those and see if any match:
+         // The name didn't match any properties that are explicitly defined on the previous type. Let's try the 
+         // abstract properties:
          //
-         for (auto& action : actionFunctionList) {
-            //
-            // TODO: ADD AN ARGUMENT TO SKIP THIS IF THE REFERENCE THAT WE'RE COMPILING IS INSIDE OF A FUNCTION 
-            // CALL ARGUMENT LIST OR A COMPARISON; BETTER YET: DON'T SKIP, BUT DISPLAY A UNIQUE ERROR MESSAGE IF 
-            // IT MATCHES.
-            //
-            using mapping_type = OpcodeFuncToScriptMapping::mapping_type;
-            //
-            auto& mapping = action.mapping;
-            if (mapping.type != mapping_type::property_get && mapping.type != mapping_type::property_set)
-               continue;
-            if (mapping.primary_name.empty()) {
-               //
-               // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
-               // is the name. The easiest way to test against such getters/setters is to simply instantiate that 
-               // argument, pass the current property name to its compile method, and see if that succeeds. I know that 
-               // that's kinda ugly. Maybe we can alter the code to retain a successfully-compiled argument for use in 
-               // the Opcode we'll eventually create. [TODO]
-               //
-               int ai = mapping.arg_name;
-               assert(ai >= 0 && "If a property-getter or property-setter has no defined primary name, then one of the opcode arguments should be the name. Specify which one!");
-               auto& base = action.arguments[ai];
-               auto& type = base.typeinfo;
-               #if _DEBUG
-                  assert(type.factory && "The typeinfo has no factory.");
-               #endif
-               std::unique_ptr<OpcodeArgValue> arg;
-               arg.reset((type.factory)());
-               #if _DEBUG
-                  assert(arg && "The typeinfo factory failed to create an argument. How?");
-               #endif
-               if (arg->compile(compiler, string_scanner(part->name)) == arg_compile_result::success)
-                  this->property.name = part->name;
-               break;
-            } else {
-               if (cobb::qt::stricmp(part->name, mapping.primary_name)) {
-                  this->property.name = part->name;
-                  break;
-               }
-            }
-         }
-         if (this->is_property()) // we matched a property
+         if (this->_resolve_abstract_property(compiler, part->name)) {
+            ++i; // move to the next part, and then bail out of the loop so we can use property-specific logic
             break;
+         }
          throw compile_exception(QString("Member name \"%1\" is not defined for type %2.").arg(part->name).arg(prev.type->internal_name.c_str()));
       }
-      if (i < this->parts.size()) { // we didn't process everything for some reason
+      if (i < this->parts.size()) {
          //
-         // For some reason, we stopped early. That should only happen if a problem has occurred. For 
-         // example, properties cannot have members, so we stop immediately after reading a property; 
-         // if "immediately after reading a property" is before the end of the part list, then the 
-         // user is trying to access a member on a property.
+         // We've handled everything up to the first property access, if any. If there is any more left to handle, 
+         // then it means that the script author is trying to access the member of a property. This is allowed if 
+         // they are accessing an abstract property through a non-abstract property, and disallowed in all other 
+         // cases.
          //
-         if (this->is_property()) {
-            assert(this->interpreted.size() && "How did we resolve property access when we didn't resolve what the property was *on*?");
-            auto& interpreted = this->interpreted.back();
-            QString name = this->property.name;
-            if (this->property.definition)
-               name = QString::fromLatin1(this->property.definition->name.c_str());
-            throw compile_exception(QString("You cannot access the members of a property like \"%1.%2\". Copy the property value into an intermediate variable and access through that.").arg(interpreted.type->internal_name.c_str()).arg(name));
+         #if _DEBUG
+            assert(!(this->property.normal && this->property.abstract) && "Only one of these should've been set; we should've bailed out of the above loop at the first property we found.");
+         #endif
+         auto* part = &this->parts[i];
+         auto& prev = this->interpreted.back();
+         //
+         if (this->property.abstract) {
+            //
+            // You cannot access the members of an abstract property.
+            //
+            QString name = this->property.abstract_name;
+            throw compile_exception(QString("You cannot access the members of an abstract property like \"%1.%2\".").arg(prev.type->internal_name.c_str()).arg(name));
          }
-         throw compile_exception(QString("Unknown error."));
+         if (this->property.normal) {
+            //
+            // You can access an abstract property through a non-abstract property, but you cannot access 
+            // anything else through a non-abstract property: current_player.biped.shields is allowed, but 
+            // current_player.team.score is not.
+            //
+            auto& prop_type = this->property.normal->type;
+            if (!this->_resolve_abstract_property(compiler, part->name, prop_type))
+               throw compile_exception(QString("The %1 type does not have an abstract property named \"%2\", and in this context, no other members are accessible.")
+                  .arg(prop_type.internal_name.c_str())
+                  .arg(part->name)
+               );
+         }
+         if (++i < this->parts.size())
+            //
+            // We did something like (var.normal_property.abstract_property.something_else).
+            //
+            throw compile_exception(QString("No further members are accessible here. Use an intermediate variable."));
       }
-      if (is_alias_definition && this->interpreted.size() == 1) {
+      if (is_alias_definition && this->interpreted.size() == 1 && !this->is_property()) {
+         //
+         // If this is an alias definition, then we would interpret something like "player" or "team" as the type 
+         // that the alias is relative to, but specifying only a type should be a syntax error.
+         //
          auto& first = this->interpreted[0];
          if (first.disambig_type == disambig_type::alias_relative_to)
             throw compile_exception(QString("You cannot alias a typename such as \"%1\".").arg(first.type->internal_name.c_str()));

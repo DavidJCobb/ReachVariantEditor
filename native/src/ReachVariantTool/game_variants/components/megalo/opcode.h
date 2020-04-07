@@ -10,6 +10,7 @@
 #include "opcode_arg.h"
 #include "variables_and_scopes.h"
 #include "decompiler/decompiler.h"
+#include <QString>
 
 class GameVariantDataMultiplayer;
 
@@ -167,6 +168,7 @@ namespace Megalo {
          //
          Definition* get_by_name(const char*) const noexcept;
          Definition* get_variably_named_property(const OpcodeArgTypeinfo& property_name_type) const noexcept;
+         const Definition* get_variably_named_property(Compiler&, const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
          //
       protected:
          AbstractPropertyRegistry();

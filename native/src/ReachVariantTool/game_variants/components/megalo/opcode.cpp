@@ -1,6 +1,7 @@
 #include "opcode.h"
 #include <cassert>
 #include "actions.h"
+#include "compiler/string_scanner.h"
 
 namespace Megalo {
    void OpcodeBase::decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept {
@@ -164,6 +165,36 @@ namespace Megalo {
          auto& base = function->arguments[mapping.arg_name];
          if (&base.typeinfo == &property_name_type)
             return (Definition*)&entry; // cast needed to strip const
+      }
+      return nullptr;
+   }
+   const AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_variably_named_property(Compiler& compiler, const QString& name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
+      //
+      // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
+      // is the name. The easiest way to test against such getters/setters is to simply instantiate that 
+      // argument, pass the current property name to its compile method, and see if that succeeds. I know that 
+      // that's kinda ugly. Maybe we can alter the code to retain a successfully-compiled argument for use in 
+      // the Opcode we'll eventually create.
+      //
+      std::unique_ptr<OpcodeArgValue> arg;
+      for (auto& entry : this->definitions) {
+         if (!entry.is_variably_named())
+            continue;
+         const OpcodeBase* function = nullptr;
+         if (entry.getter)
+            function = entry.getter;
+         else
+            function = entry.setter;
+         //
+         auto& mapping = function->mapping;
+         if (&function->arguments[mapping.arg_context].typeinfo != &property_is_on) // validate context type
+            continue;
+         auto& base = function->arguments[mapping.arg_name];
+         auto& type = base.typeinfo;
+         //
+         arg.reset((type.factory)());
+         if (arg->compile(compiler, Script::string_scanner(name)) == arg_compile_result::success)
+            return &entry;
       }
       return nullptr;
    }
