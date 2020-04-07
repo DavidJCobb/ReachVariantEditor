@@ -69,6 +69,12 @@ namespace Megalo {
       }
       Alias::Alias(Compiler& compiler, QString name, QString target) {
          this->name = name;
+         //
+         // Aliases need to perform some very strict validation, because when we resolve variable references, 
+         // we check for aliases before we check for built-ins. (More efficient that way.) We don't want 
+         // aliases to shadow built-ins, so we have to do all of the checking to prevent that shadowing when 
+         // we're actually instantiating the alias.
+         //
          {  // Validate name.
             if (Compiler::is_keyword(name))
                compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
@@ -782,21 +788,23 @@ namespace Megalo {
          }
          if (!base)
             this->throw_error(QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-         {
-            auto target_type = this->assignment->lhs->get_type();
-            if (&base->typeinfo != target_type)
-               this->throw_error(QString("Function %1.%2 returns a %3, not a %4.")
-                  .arg(context->get_type()->internal_name.c_str())
-                  .arg(function_name)
-                  .arg(base->typeinfo.internal_name.c_str())
-                  .arg(target_type->internal_name.c_str())
-               );
-         }
-         
-
          //
-         // TODO: If we're in an assignment statement, set the "out" argument.
+         // If we're in an assignment, verify that the variable we're assigning our return value to is 
+         // of the right type.
          //
+         auto target_type = this->assignment->lhs->get_type();
+         if (&base->typeinfo != target_type)
+            this->throw_error(QString("Function %1.%2 returns a %3, not a %4.")
+               .arg(context->get_type()->internal_name.c_str())
+               .arg(function_name)
+               .arg(base->typeinfo.internal_name.c_str())
+               .arg(target_type->internal_name.c_str())
+            );
+         //
+         // The type is correct, so set the out-argument.
+         //
+         opcode->arguments[index] = (base->typeinfo.factory)();
+         opcode->arguments[index]->compile(*this, *this->assignment->lhs);
       }
       if (!this->extract_specific_char(')'))
          this->throw_error("Expected ')'.");

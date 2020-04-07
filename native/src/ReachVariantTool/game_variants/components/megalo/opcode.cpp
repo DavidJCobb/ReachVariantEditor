@@ -1,5 +1,6 @@
 #include "opcode.h"
 #include <cassert>
+#include "actions.h"
 
 namespace Megalo {
    void OpcodeBase::decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept {
@@ -110,5 +111,60 @@ namespace Megalo {
             }
             return;
       }
+   }
+
+   AbstractPropertyRegistry::AbstractPropertyRegistry() {
+      using mapping_type = OpcodeFuncToScriptMapping::mapping_type;
+      //
+      // Build the registry.
+      //
+      for (auto& action : actionFunctionList) {
+         auto& mapping = action.mapping;
+         if (mapping.type != mapping_type::property_get && mapping.type != mapping_type::property_set)
+            continue;
+         Definition* entry = nullptr;
+         if (mapping.primary_name.empty() && mapping.arg_name != OpcodeFuncToScriptMapping::no_argument) {
+            auto& base = action.arguments[mapping.arg_name];
+            entry = this->get_variably_named_property(base.typeinfo);
+            if (!entry)
+               entry = &this->definitions.emplace_back();
+         } else {
+            entry = this->get_by_name(mapping.primary_name.c_str());
+            if (!entry)
+               entry = &this->definitions.emplace_back(mapping.primary_name.c_str());
+         }
+         if (mapping.type == mapping_type::property_get)
+            entry->getter = &action;
+         else
+            entry->setter = &action;
+      }
+   }
+   AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_by_name(const char* name) const noexcept {
+      for (auto& entry : this->definitions) {
+         if (entry.name == name)
+            return (Definition*)&entry; // cast needed to strip const
+      }
+      return nullptr;
+   }
+   AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_variably_named_property(const OpcodeArgTypeinfo& property_name_type) const noexcept {
+      for (auto& entry : this->definitions) {
+         if (!entry.name.empty())
+            continue;
+         const OpcodeBase* function = nullptr;
+         if (entry.getter)
+            function = entry.getter;
+         else
+            function = entry.setter;
+         #if _DEBUG
+            assert(function && "An entry for a variably-named abstract property should not exist unless we've identified at least one of its opcodes.");
+         #endif
+         auto& mapping = function->mapping;
+         if (mapping.arg_name != OpcodeFuncToScriptMapping::no_argument)
+            continue;
+         auto& base = function->arguments[mapping.arg_name];
+         if (&base.typeinfo == &property_name_type)
+            return (Definition*)&entry; // cast needed to strip const
+      }
+      return nullptr;
    }
 }

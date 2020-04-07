@@ -44,7 +44,7 @@ namespace Megalo {
       public:
          mapping_type type = mapping_type::none;
          std::string  primary_name;   // for functions this is NOT required to be unique; we DO support function overloads; the name "send_incident" is shared by two different actions
-         std::string  secondary_name; // an alternate name through which the opcode can be invoked
+         std::string  secondary_name; // an alternate name through which the opcode can be invoked; note: currently, secondary names are NOT supported for properties
          int8_t       arg_context  = no_context;  // if non-negative, refers to one of the arguments and indicates that the opcode function is a member of that argument type
          int8_t       arg_name     = no_argument; // only used by property mappings, and only if (primary_name) is blank; indicates that one of the arguments (which must be an enum type) should be treated as a property name; needed for "modify grenade count" action
          int8_t       arg_operator = no_argument; // for comparisons, assignments, and property setters, this indicates which argument is the operator
@@ -143,5 +143,30 @@ namespace Megalo {
          virtual void reset() noexcept = 0;
          //
          std::vector<OpcodeArgValue*> arguments;
+   };
+
+   class AbstractPropertyRegistry {
+      public:
+         static AbstractPropertyRegistry& get() {
+            static AbstractPropertyRegistry instance;
+            return instance;
+         }
+         //
+         struct Definition {
+            std::string name; // will be blank if the property's name is determined by an opcode argument (see OpcodeFuncToScriptMapping::arg_name above)
+            const OpcodeBase* getter = nullptr;
+            const OpcodeBase* setter = nullptr;
+            //
+            Definition() {}
+            Definition(const char* n) : name(n) {}
+            Definition(const std::string& n) : name(n) {}
+         };
+         std::vector<Definition> definitions;
+         //
+         Definition* get_by_name(const char*) const noexcept;
+         Definition* get_variably_named_property(const OpcodeArgTypeinfo& property_name_type) const noexcept;
+         //
+      protected:
+         AbstractPropertyRegistry();
    };
 }

@@ -33,22 +33,32 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - Function call parsing needs to set the out-argument if we're in an assignment 
-//          statement.
+//        - It's possible to access an abstract property through a non-abstract property. 
+//          Our current code for resolving VariableReferences doesn't allow for this.
+//
+//           - VariableReference should store:
+//
+//                struct {
+//                   const Property* normal = nullptr;
+//                   int32_t normal_index = 0;
+//                   const AbstractPropertyRegistry::Definition* abstract = nullptr; // see below in to-do list
+//                } property;
 //
 //        - Script stats are a player/team property with an index. However, I don't think 
 //          the current system for parsing properties supports indexed properties. In order 
 //          to determine whether a property is indexed, we would want to check the relevant 
-//          data on its corresponding VariableScopeIndicatorValue.
+//          data on its corresponding VariableScopeIndicatorValue. (It's worth remembering 
+//          that only non-abstract properties correspond to scopes, and abstract properties 
+//          therefore can never be indexed. If 343i ever adds a getter/setter opcode that 
+//          would best be represented as an abstract property with an index, we will have 
+//          to change the system, but for now let's assume they'll never do that.)
 //
-//        - If a VariableReference refers to an abstract property, we should look for both 
-//          a (property_get) OpcodeFunction and a (property_set) OpcodeFunction, and we 
-//          should store both (i.e. VariableReference::property::getter and ...::setter). 
-//          That way, we don't have to repeatedly resolve the property name; we can resolve 
-//          it once, and then easily check for a getter or a setter. (Some abstract proper-
-//          ties only have the one or the other, so we need code to check that you're not 
-//          assigning to an abstract property with no setter or assigning from an abstract 
-//          property with no getter.)
+//        - If a VariableReference refers to an abstract property, it should hold a pointer 
+//          to an entry in AbstractPropertyRegistry.
+//
+//           - This will make it faster and easier to resolve references to abstract 
+//             properties, and it will allow us to more quickly check whether any given 
+//             abstract property supports a [gs]etter.
 //
 //        - Get rid of the Script::Comparison class and just use Script::Statement.
 //

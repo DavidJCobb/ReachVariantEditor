@@ -14,19 +14,33 @@ Variables can be referred to by no more than two levels of depth:
    global.player[0].player[1]           -- valid
    global.player[0].player[1].player[2] -- invalid
 
-A PROPERTY is a member of a variable. Properties are "dead ends:" you cannot access 
-nested variables or other properties through them (e.g. player[0].biped.team).
 
-An ABSTRACT PROPERTY is a property whose getter or setter access is handled by opcodes 
-under the hood. Abstract properties can only appear in assignment statements, and some 
-abstract properties may only have a getter or only have a setter. (We basically only use 
-abstract properties when there is an opcode to modify some value using an assignment 
-operator, e.g. to facilitate syntax like "object.shields += 3"). The following limitations 
-apply to abstract properties:
+A PROPERTY is a member of a variable. There are two major kinds of properties:
 
- - They cannot be passed as an argument in a function call.
+ - A "normal" property can be used in any place where a variable of the same type can be 
+   used. Internally, these exist as "scope" values for variables (see below section on 
+   how variables work).
+   
+ - An "abstract" property can only be used in assignment statements. Internally, these 
+   exist as "getter" and "setter" functions.
 
- - They cannot be used in a comparison.
+You cannot access a normal property through another normal property. If, for example, 
+you want to get the current score of a player's team, you cannot do the following:
+
+   global.number[0] = current_player.team.score
+
+Instead, you must use an intermediate variable:
+
+   global.team[0]   = current_player.team
+   global.number[0] = global.team[0].score
+
+You can, however, access an abstract property through a normal property:
+
+   global.player[0].biped.shields += 5
+
+Internally, the normal property is an argument being passed to the "setter" function 
+that the abstract property represents.
+
 
 An OPCODE is any condition or action that can exist in a script. This includes ordinary 
 assignments to variables and comparisons of variables, as well as every function call that 
@@ -38,6 +52,7 @@ flat list, with nested triggers flagged to be skipped during normal execution, a
 exists an opcode that executes the trigger with a given index. For the sake of parsing and 
 compiling we can mostly pretend that this opcode doesn't exist; our syntax allows for nested 
 blocks and we just generate these opcodes as part of the compile process.
+
 
 An OPCODE ARGUMENT is a parameter passed to an opcode. For assignments, this includes the 
 destination, the operator, and the operand; for comparisons, this includes the left- and 
@@ -53,6 +68,7 @@ following two statements use the same opcode with different arguments:
 As you might expect, every opcode argument has a value (held in memory by an OpcodeArgValue 
 instance) and a type (managed by OpcodeArgValue subclasses, and described by instances of 
 OpcodeArgTypeinfo).
+
 
 An ALIAS is a user-defined name for any variable, constant integer, or enumeration value. 
 Examples of aliases include:
