@@ -349,7 +349,8 @@ namespace Megalo::Script {
       if (!entry)
          entry = manager.get_variably_named_property(compiler, name, property_is_on);
       if (entry) {
-         this->property.abstract = entry;
+         this->property.abstract      = entry;
+         this->property.abstract_name = name;
          return true;
       }
       return false;
@@ -418,6 +419,11 @@ namespace Megalo::Script {
          auto prop = prev.type->get_property_by_name(part->name);
          if (prop) {
             if (part->has_index())
+               //
+               // TODO: We implement (script_stat) as a property on players and teams, and that allows indices. 
+               // We need to allow that here -- specifically, we need to make it possible to obtain a reference 
+               // to the appropriate VariableScopeIndicatorValue via the property definition.
+               //
                throw compile_exception(QString("Properties, such as \"%1\" on the %2 type, cannot be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
             this->property.normal = prop;
             ++i; // move to the next part, and then bail out of the loop so we can use property-specific logic
@@ -427,7 +433,7 @@ namespace Megalo::Script {
          // The name didn't match any properties that are explicitly defined on the previous type. Let's try the 
          // abstract properties:
          //
-         if (this->_resolve_abstract_property(compiler, part->name)) {
+         if (this->_resolve_abstract_property(compiler, part->name, *prev.type)) {
             ++i; // move to the next part, and then bail out of the loop so we can use property-specific logic
             break;
          }
