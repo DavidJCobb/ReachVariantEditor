@@ -34,6 +34,7 @@ namespace {
       return Megalo::variable_type::not_a_variable;
    }
 }
+
 namespace Megalo::Script {
    VariableReference::Part& VariableReference::Part::operator=(const VariableReference::Part& other) noexcept {
       this->name = other.name;

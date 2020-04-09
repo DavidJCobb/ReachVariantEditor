@@ -78,6 +78,9 @@ namespace Megalo {
             inline bool is_abstract_property() const noexcept {
                return this->property.abstract != nullptr;
             }
+            inline const AbstractPropertyRegistry::Definition* get_abstract_property_definition() const noexcept {
+               return this->is_abstract_property() ? this->property.abstract : nullptr;
+            }
             bool is_read_only() const noexcept;
             bool is_statically_indexable_value() const noexcept;
             const OpcodeArgTypeinfo* get_type() const noexcept;

@@ -33,22 +33,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - If a VariableReference refers to an abstract property, it should hold a pointer 
-//          to an entry in AbstractPropertyRegistry.
-//
-//           - This will make it faster and easier to resolve references to abstract 
-//             properties, and it will allow us to more quickly check whether any given 
-//             abstract property supports a [gs]etter.
-//
-//           - We should allow the registry to search for variably-named properties using 
-//             a Script::string_scanner, via the same strategy currently used in the 
-//             VariableReference resolve code (but with the registry only searching 
-//             variably-named properties).
-//
-//        - Function call parsing should throw an error if assigning to an abstract 
-//          property that does not have a setter, or if using an operator other than = 
-//          for an abstract property with no operator argument.
-//
 //        - Compiling assignments
 //
 //        - Compiling comparisons
@@ -68,34 +52,12 @@ int main(int argc, char *argv[]) {
 //
 //     - VariableReference should detect and disallow triply-nested variables (var.var.var).
 //
-//     - Script::VariableReference::is_read_only still needs to be coded.
-//
-//        - Prerequisite: scope indicators need to be able to indicate that they're read-
-//          only, so that we can adequately handle properties.
-//
-//        - Prerequisite: properties need to be able to specify a functor to resolve their 
-//          scope-indicator. This is needed for the "biped" property, since its scope can 
-//          vary depending on the types of both variables used to access it.
-//
-//        - Prerequisite: VariableReference needs to store the scope that its property 
-//          resolves to.
-//
 //     - Alias resolution needs to be completed, including disallowing the shadowing of all 
 //       built-ins, and allowing an alias to refer to a built-in.
 //
 //        - This includes handling enum values and other such content. To accomplish this, 
 //          we'll need to make it so that OpcodeArgTypeinfo can specify a DetailedEnum or 
 //          DetailedFlags (currently it can specify an initializer list of const char*s).
-//
-//     - The compiler still needs code for setting the value of a call's out-argument. Now 
-//       that OpcodeArgValue::compile can take a VariableReference, it should be pretty 
-//       straightforward to fill this in.
-//
-//     - When the compiler finishes compiling a call, it needs to actually store the Opcode 
-//       somewhere i.e. in a Statement that gets appended to the current Block.
-//
-//     - The compiler should fail to compile a call if the call result is being assigned 
-//       to an abstract property.
 //
 //     - The compiler needs code to compile non-function-call assignments and comparisons.
 //
@@ -151,8 +113,8 @@ int main(int argc, char *argv[]) {
 //           - Bad function arguments
 //           - Bad function return type
 //           - Bad operator (e.g. comparison operator outside of an if-condition)
+//           - Property setter that only supports operator "=" invoked with another operator
 //           - Assigning the return value of a function call to a property setter
-//           - Property setter that illegally uses a non-"=" operator e.g. "+="
 //           - Assigning to a constant integer or other read-only value
 //           - Alias name that shadows a built-in
 //           - Alias name that is an integer literal

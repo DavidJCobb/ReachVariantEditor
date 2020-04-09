@@ -20,7 +20,7 @@ namespace Megalo {
             //
             bool    is_integer_constant()  const noexcept;
             int32_t get_integer_constant() const noexcept;
-            bool is_relative_alias() const noexcept;
+            bool    is_relative_alias() const noexcept;
       };
       class Block : public ParsedItem {
          public:

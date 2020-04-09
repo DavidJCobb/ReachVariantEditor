@@ -24,8 +24,8 @@ namespace Megalo {
          extern VariableScopeIndicatorValue player_team       = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::team);
          extern VariableScopeIndicatorValue object_team       = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::team);
          extern VariableScopeIndicatorValue team_team         = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::team);
-         extern VariableScopeIndicatorValue player_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
-         extern VariableScopeIndicatorValue object_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue player_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none); // NOT read-only
+         extern VariableScopeIndicatorValue object_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none); // NOT read-only
       }
    }
    OpcodeArgValueTeam::OpcodeArgValueTeam() : Variable(scopes) {}

@@ -24,9 +24,9 @@ namespace Megalo {
          extern VariableScopeIndicatorValue player_timer       = VariableScopeIndicatorValue("%w.timer[%i]", "%w's timer[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::timer);
          extern VariableScopeIndicatorValue team_timer         = VariableScopeIndicatorValue("%w.timer[%i]", "%w's timer[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::timer);
          extern VariableScopeIndicatorValue object_timer       = VariableScopeIndicatorValue("%w.timer[%i]", "%w's timer[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::timer);
-         extern VariableScopeIndicatorValue round_timer        = VariableScopeIndicatorValue::make_game_value("game.round_timer",        "Round Timer",        VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue sudden_death_timer = VariableScopeIndicatorValue::make_game_value("game.sudden_death_timer", "Sudden Death Timer", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue grace_period_timer = VariableScopeIndicatorValue::make_game_value("game.grace_period_timer", "Grace Period Timer", VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue round_timer        = VariableScopeIndicatorValue::make_game_value("game.round_timer",        "Round Timer"); // NOT read-only; see Invasion
+         extern VariableScopeIndicatorValue sudden_death_timer = VariableScopeIndicatorValue::make_game_value("game.sudden_death_timer", "Sudden Death Timer", VariableScopeIndicatorValue::flags::is_readonly); // TODO: test to determine whether this is actually read-only
+         extern VariableScopeIndicatorValue grace_period_timer = VariableScopeIndicatorValue::make_game_value("game.grace_period_timer", "Grace Period Timer"); // NOT read-only; see Invasion
       }
    }
    OpcodeArgValueTimer::OpcodeArgValueTimer() : Variable(scopes) {}

@@ -27,10 +27,10 @@ namespace Megalo {
          extern VariableScopeIndicatorValue player_object       = VariableScopeIndicatorValue("%w.object[%i]",       "%w's object[%i]",         &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::object);
          extern VariableScopeIndicatorValue object_object       = VariableScopeIndicatorValue("%w.object[%i]",       "%w's object[%i]",         &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::object);
          extern VariableScopeIndicatorValue team_object         = VariableScopeIndicatorValue("%w.object[%i]",       "%w's object[%i]",         &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::object);
-         extern VariableScopeIndicatorValue player_biped        = VariableScopeIndicatorValue("%w.biped",            "%w's biped",              &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
-         extern VariableScopeIndicatorValue player_player_biped = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::player);
-         extern VariableScopeIndicatorValue object_player_biped = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::player);
-         extern VariableScopeIndicatorValue team_player_biped   = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::player);
+         extern VariableScopeIndicatorValue player_biped        = VariableScopeIndicatorValue("%w.biped",            "%w's biped",              &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none,   VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue player_player_biped = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::player, VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue object_player_biped = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::player, VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue team_player_biped   = VariableScopeIndicatorValue("%w.player[%i].biped", "%w's player[%i]'s biped", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::player, VariableScopeIndicatorValue::flags::is_readonly);
       }
    }
    OpcodeArgValueObject::OpcodeArgValueObject() : Variable(scopes) {}

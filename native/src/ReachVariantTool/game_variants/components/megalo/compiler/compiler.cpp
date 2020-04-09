@@ -431,15 +431,36 @@ namespace Megalo {
       this->assignment->rhs = new Script::VariableReference(this->token.text);
       this->assignment->rhs->owner = this->assignment;
       //
-      // TODO: Compile the assignment, and run correctness checks if we're assigning a property (e.g. 
-      // property is non-abstract or has a setter; if property is abstract, ensure operator is = or 
-      // setter has an operator argument (which we'll need to then compile); et cetera).
-      //
       // TODO: Consider writing code for type checking non-abstract-property assignments in advance... 
       // but maybe leave it turned off: I want to check the results of type-mismatched assignments in-
       // game. I'm pretty sure that numbers and timers can be assigned to each other, but I want to 
       // know if other types do anything sensible, do nothing at all, clear the target variable, or 
       // crash, so that I can program in a compiler warning or compiler error as appropriate.
+      //
+      // ---------------------------------------------------------------------------------------------
+      //
+      // TODO: Begin compiling an assignment opcode.
+      //
+      {
+         auto lhs = this->assignment->lhs;
+         if (lhs->is_abstract_property()) {
+            auto  def     = lhs->get_abstract_property_definition();
+            auto  setter  = def->setter;
+            if (!setter)
+               this->throw_error("This abstract property cannot be assigned to.");
+            auto& mapping = setter->mapping;
+            if (mapping.arg_operator == OpcodeFuncToScriptMapping::no_argument) {
+               if (this->assignment->op != "=")
+                  this->throw_error("This property can only be modified using the = operator.");
+            } else {
+               //
+               // TODO: Compile the assignment operator.
+               //
+            }
+         }
+      }
+      //
+      // TODO: Finish compiling an assignment opcode.
       //
       this->block->insert_item(this->assignment);
       this->assignment = nullptr;
@@ -815,13 +836,12 @@ namespace Megalo {
          }
          if (!base)
             this->throw_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         if (this->assignment->lhs->is_read_only())
+            this->throw_error("You cannot assign to this value.");
+         if (this->assignment->lhs->is_abstract_property())
+            this->throw_error("You cannot assign the return value of a function to an abstract property.");
          //
-         // TODO: If we are assigning to an abstract property, then throw an error if that property 
-         // has no setter, or if the assignment operator is not = AND the abstract property has no 
-         // "operator" argument. Do NOT throw an error when using operators other than = to assign 
-         // to a non-abstract property; constructs like (current_player.score += 5) are valid.
-         //
-         // Next, verify that the variable we're assigning our return value to is of the right type.
+         // Verify that the variable we're assigning our return value to is of the right type:
          //
          auto target_type = this->assignment->lhs->get_type();
          if (&base->typeinfo != target_type)
