@@ -12,6 +12,21 @@ namespace Megalo {
    namespace Script {
       class Namespace;
       class NamespaceMember {
+         //
+         // What is a namespace member? Well, it's a member of one of the namespaces defined our gametype scripting language, 
+         // obviously. But what does being a namespace member entail? Well, there are two kinds of namespace members.
+         //
+         // A "which" member represents a single top-level value described by a "which" value -- so, a top-level object, 
+         // player, or team, then. Some of these values enable access to nested variables, like current_object, others, like 
+         // no_object, don't, for reasons that are hopefully self-evident.
+         //
+         // A "scope" member doesn't necessarily represent a single top-level value, but rather a single value. Variables 
+         // consist of a "scope" and, depending on that scope, a "which" and an "index," yes? Well, a "scope" member refers 
+         // not to a "scope" in isolation, but to an entire variable value consisting solely of a scope. If a script refers 
+         // to a "scope" member, then, it's referring to an entire value, whereas a "which" member can be an entire value 
+         // (access to a top-level variable) or part of a value (access to a variable, property, or accessor nested under 
+         // that top-level variable).
+         //
          public:
             static constexpr VariableScopeWhichValue*     no_which = nullptr;
             static constexpr VariableScopeIndicatorValue* no_scope = nullptr;

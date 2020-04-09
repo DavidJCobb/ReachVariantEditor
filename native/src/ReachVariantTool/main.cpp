@@ -31,6 +31,84 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
+//     = RENAME "ABSTRACT PROPERTIES" TO "ACCESSORS." NOTE THAT THIS TERMINOLOGY CHANGE IS 
+//       ALREADY USED IN THE NEXT TO-DO LIST ITEM.
+//
+//     = STRONGLY CONSIDER REDESIGNING HOW WE RESOLVE VARIABLE REFERENCES. Right now, we use 
+//       a function for the first InterpretedPart but a loop for every (non-property) part 
+//       thereafter, and this just feels... hard to audit? Like, it feels like everything 
+//       that could possibly appear at *some* point is being checked for at *every* point, 
+//       if that makes any sense.
+//
+//       Okay, so, like -- ignore *how* we're accessing things; ignore namespace members 
+//       and whatnot, and just focus on *what* we're accessing. Absolutely all of it falls 
+//       into one of the following patterns:
+//
+//          dead_end_value
+//          var
+//          var.var
+//          var.property
+//          var.var.property
+//          var.accessor
+//          var.property.accessor
+//          var.var.accessor
+//          var.var.property.accessor
+//
+//       If we treat that as a flat list, then of course it's a lot of possibilities and 
+//       it looks messy -- but we don't have to use a loop or a blind, flat list. The key 
+//       thing to realize is that we can have at most two variables; any variable can be 
+//       followed by a property or an accessor; and any property can be followed by an 
+//       accessor. So what we do, then, is:
+//
+//          size_t i    = this->parse_top_level_part(); // in the current code, this is VariableReference::_resolve_first_parts
+//          if (this->has_known_scope()) {
+//             // 
+//             // If we have a known scope, then that means that we found a namespace member 
+//             // that is, itself, a fully-resolved reference to a value with a scope, no 
+//             // which, and no index, such as (game.round_timer). Member access past that 
+//             // point is not possible.
+//             // 
+//             if (i < this->parts.size())
+//                throw compile_exception("You can't access the X member on Y.");
+//          }
+//          auto*  part = this->part(i);
+//          if (this->parse_nested_variable(part)) {
+//             part = this->part(++i);
+//          }
+//          if (thiS->parse_property(part)) {
+//             part = this->part(++i);
+//          }
+//          if (this->parse_accessor(part)) {
+//             if (++i < this->parts.size())
+//                throw compile_exception("Attempted to access a member of an accessor.");
+//             return true; // Done!
+//          }
+//          throw compile_exception("The X type does not have a member named Y.");
+//
+//       Though of course, since all of those things can only appear once (only one top-
+//       level variable; only one nested variable; only one property; only one accessor), 
+//       we don't actually need separate member functions for them. Having separate member 
+//       functions will be helpful to keep the high-level logic clean, though, especially 
+//       given that resolving the first part (VariableReference::_resolve_first_parts) is 
+//       currently about 110 lines of code.
+//
+//       This also allows us to change how a resolved variable is represented; instead of 
+//       a vector of InterpretedParts of arbitrary length, we need only these units, all 
+//       optional:
+//
+//        - Scope (only applicable to "scope" namespace members; represents a dead-end)
+//        - Two variables
+//           - Type
+//           - Which (only applicable to first variable; used for "which" namespace members)
+//           - Index
+//           - Bool for whether it's a static var (only applicable to first variable)
+//        - Property
+//           - Definition pointer
+//           - Index
+//        - Accessor
+//           - Definition pointer
+//           - Optionally a name, for error reporting, if we don't want to have to bother going through the definition
+//
 //     - SHORT-TERM PLANS
 //
 //        - Compiling assignments
