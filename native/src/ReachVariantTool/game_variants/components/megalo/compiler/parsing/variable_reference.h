@@ -4,6 +4,8 @@
 #include "../../opcode_arg.h"
 
 namespace Megalo {
+   class VariableScopeIndicatorValue;
+   //
    namespace Script {
       class Property;
 
@@ -43,10 +45,12 @@ namespace Megalo {
                void resolve_index(Compiler&);
             };
             struct InterpretedPart {
-               const OpcodeArgTypeinfo* type = nullptr;
+               const OpcodeArgTypeinfo*           type  = nullptr;
+               const VariableScopeIndicatorValue* scope = nullptr;
                int32_t       disambiguator = 0;
                disambig_type disambig_type = disambig_type::scope;
                //
+               bool is_none() const noexcept;
                bool is_variable() const noexcept;
             };
             //

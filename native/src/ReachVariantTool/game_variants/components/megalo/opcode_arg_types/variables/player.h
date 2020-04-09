@@ -7,15 +7,15 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValuePlayer();
-         //
-         struct scope_indicator_id {
-            scope_indicator_id() = delete;
-            enum type : uint8_t {
-               p_p,
-               o_p,
-               t_p,
-               g_p,
-            };
-         };
    };
+   namespace variable_scope_indicators {
+      namespace player {
+         extern VariableScopeIndicatorValueList& as_list();
+         //
+         extern VariableScopeIndicatorValue global_player;
+         extern VariableScopeIndicatorValue player_player;
+         extern VariableScopeIndicatorValue object_player;
+         extern VariableScopeIndicatorValue team_player;
+      }
+   }
 }

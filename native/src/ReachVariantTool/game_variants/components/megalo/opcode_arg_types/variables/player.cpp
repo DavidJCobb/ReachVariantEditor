@@ -5,15 +5,27 @@
 
 namespace {
    using namespace Megalo;
-   using id = OpcodeArgValuePlayer::scope_indicator_id;
-   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(variable_type::player, {
-      VariableScopeIndicatorValue(id::g_p, "%w",            "%w",              &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none),   // global.player, current_player, etc.
-      VariableScopeIndicatorValue(id::p_p, "%w.player[%i]", "%w's player[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::player), // player.player
-      VariableScopeIndicatorValue(id::o_p, "%w.player[%i]", "%w's player[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::player), // object.player
-      VariableScopeIndicatorValue(id::t_p, "%w.player[%i]", "%w's player[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::player), // team.player
+   using namespace Megalo::variable_scope_indicators::player;
+   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::player, {
+      &global_player,
+      &player_player,
+      &object_player,
+      &team_player,
    });
 }
 namespace Megalo {
+   namespace variable_scope_indicators {
+      namespace player {
+         extern VariableScopeIndicatorValueList& as_list() {
+            return scopes;
+         }
+         //
+         extern VariableScopeIndicatorValue global_player = VariableScopeIndicatorValue("%w",            "%w",              &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue player_player = VariableScopeIndicatorValue("%w.player[%i]", "%w's player[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::player);
+         extern VariableScopeIndicatorValue object_player = VariableScopeIndicatorValue("%w.player[%i]", "%w's player[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::player);
+         extern VariableScopeIndicatorValue team_player   = VariableScopeIndicatorValue("%w.player[%i]", "%w's player[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::player);
+      }
+   }
    OpcodeArgValuePlayer::OpcodeArgValuePlayer() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayer::typeinfo = OpcodeArgTypeinfo(
       "player",
@@ -24,12 +36,12 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayer>,
       {
-         Script::Property("biped",       OpcodeArgValueObject::typeinfo, -1, true),
-         Script::Property("rating",      OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::p_rating),
-         Script::Property("score",       OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::p_score),
-         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::p_stat),
-         Script::Property("team",        OpcodeArgValueTeam::typeinfo,   OpcodeArgValueTeam::scope_indicator_id::p_owner_team),
-         Script::Property("unknown_09",  OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::p_unk09),
+         Script::Property("biped",       OpcodeArgValueObject::typeinfo, Script::Property::no_scope, true),
+         Script::Property("rating",      OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_rating),
+         Script::Property("score",       OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_score),
+         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_stat),
+         Script::Property("team",        OpcodeArgValueTeam::typeinfo,   &Megalo::variable_scope_indicators::team::player_owner_team),
+         Script::Property("unknown_09",  OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_unk09),
       },
       'g_00', // "global.player[0]"
       's_00', // "player[0]"

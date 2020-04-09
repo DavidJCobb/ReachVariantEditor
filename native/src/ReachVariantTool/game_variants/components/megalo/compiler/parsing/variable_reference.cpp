@@ -336,7 +336,7 @@ namespace Megalo::Script {
          interpreted.disambiguator = member->which;
          interpreted.disambig_type = disambig_type::which;
       } else {
-         interpreted.disambiguator = member->scope_indicator_id;
+         interpreted.scope         = member->scope;
          interpreted.disambig_type = disambig_type::scope;
       }
       this->interpreted.push_back(interpreted);
@@ -384,6 +384,11 @@ namespace Megalo::Script {
          //
          // If a relative alias was used, it has now been resolved, which means that now, either we're looking at a 
          // built-in, or we're looking at something invalid.
+         //
+         if (prev.is_none())
+            throw compile_exception("Cannot access members on a none value.");
+         if (prev.disambig_type == disambig_type::scope)
+            throw compile_exception(QString("Cannot access members on this value. Copy it into an intermediate variable."));
          //
          if (prev.type->can_have_variables()) {
             //

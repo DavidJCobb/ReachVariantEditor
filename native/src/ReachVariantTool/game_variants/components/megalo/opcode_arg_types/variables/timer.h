@@ -7,18 +7,18 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValueTimer();
-         //
-         struct scope_indicator_id {
-            scope_indicator_id() = delete;
-            enum type : uint8_t {
-               p_t,
-               o_t,
-               t_t,
-               g_t,
-               round,
-               sudden,
-               grace,
-            };
-         };
    };
+   namespace variable_scope_indicators {
+      namespace timer {
+         extern VariableScopeIndicatorValueList& as_list();
+         //
+         extern VariableScopeIndicatorValue global_timer;
+         extern VariableScopeIndicatorValue player_timer;
+         extern VariableScopeIndicatorValue team_timer;
+         extern VariableScopeIndicatorValue object_timer;
+         extern VariableScopeIndicatorValue round_timer;
+         extern VariableScopeIndicatorValue sudden_death_timer;
+         extern VariableScopeIndicatorValue grace_period_timer;
+      }
+   }
 }

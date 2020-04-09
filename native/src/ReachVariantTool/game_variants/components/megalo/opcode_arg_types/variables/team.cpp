@@ -3,17 +3,31 @@
 
 namespace {
    using namespace Megalo;
-   using id = OpcodeArgValueTeam::scope_indicator_id;
+   using namespace Megalo::variable_scope_indicators::team;
    VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::team, {
-      VariableScopeIndicatorValue(id::g_t,          "%w",          "%w",            &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::none), // global.team[i], current_team, etc.
-      VariableScopeIndicatorValue(id::p_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::team), // player.team[i]
-      VariableScopeIndicatorValue(id::o_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::team), // object.team[i]
-      VariableScopeIndicatorValue(id::t_t,          "%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::team), // team.team[i]
-      VariableScopeIndicatorValue(id::p_owner_team, "%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none), // player.team
-      VariableScopeIndicatorValue(id::o_owner_team, "%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none), // object.team
+      &global_team,
+      &player_team,
+      &object_team,
+      &team_team,
+      &player_owner_team,
+      &object_owner_team,
    });
 }
 namespace Megalo {
+   namespace variable_scope_indicators {
+      namespace team {
+         extern VariableScopeIndicatorValueList& as_list() {
+            return scopes;
+         }
+         //
+         extern VariableScopeIndicatorValue global_team       = VariableScopeIndicatorValue("%w",          "%w",            &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue player_team       = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::team);
+         extern VariableScopeIndicatorValue object_team       = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::team);
+         extern VariableScopeIndicatorValue team_team         = VariableScopeIndicatorValue("%w.team[%i]", "%w's team[%i]", &MegaloVariableScopeTeam,   VariableScopeIndicatorValue::index_type::team);
+         extern VariableScopeIndicatorValue player_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue object_owner_team = VariableScopeIndicatorValue("%w.team",     "%w's team",     &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none);
+      }
+   }
    OpcodeArgValueTeam::OpcodeArgValueTeam() : Variable(scopes) {}
    OpcodeArgTypeinfo OpcodeArgValueTeam::typeinfo = OpcodeArgTypeinfo(
       "team",
@@ -24,8 +38,8 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeam>,
       {
-         Script::Property("score",       OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_score),
-         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, OpcodeArgValueScalar::scope_indicator_id::t_stat),
+         Script::Property("score",       OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::team_score),
+         Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::team_stat),
       },
       'g_00', // "global.team[0]"
       's_00', // "team[0]"

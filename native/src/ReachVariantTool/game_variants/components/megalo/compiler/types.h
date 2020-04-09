@@ -4,6 +4,7 @@
 
 namespace Megalo {
    class OpcodeArgTypeinfo;
+   class VariableScopeIndicatorValue;
    //
    namespace Script {
       class Property {
@@ -16,12 +17,15 @@ namespace Megalo {
          // Do not use this for abstract properties.
          //
          public:
+            static constexpr VariableScopeIndicatorValue* no_scope = nullptr;
+            //
+         public:
             std::string name;
             const OpcodeArgTypeinfo& type;
             bool    allow_from_nested  = false; // allow (namespace.var.var.property)? only for biped accessors
-            int16_t scope_indicator_id = -1;    // use -1 if the scope is to be determined dynamically
+            VariableScopeIndicatorValue* scope = nullptr;
             //
-            Property(const char* n, const OpcodeArgTypeinfo& t, int16_t scope = -1, bool afn = false) : name(n), type(t), scope_indicator_id(scope), allow_from_nested(afn) {}
+            Property(const char* n, const OpcodeArgTypeinfo& t, VariableScopeIndicatorValue* scope = no_scope, bool afn = false) : name(n), type(t), scope(scope), allow_from_nested(afn) {}
       };
    }
 }

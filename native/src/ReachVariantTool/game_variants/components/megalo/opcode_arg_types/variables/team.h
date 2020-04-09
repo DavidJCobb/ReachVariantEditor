@@ -7,17 +7,17 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValueTeam();
-         //
-         struct scope_indicator_id {
-            scope_indicator_id() = delete;
-            enum type : uint8_t {
-               p_t,
-               o_t,
-               t_t,
-               g_t,
-               p_owner_team,
-               o_owner_team,
-            };
-         };
    };
+   namespace variable_scope_indicators {
+      namespace team {
+         extern VariableScopeIndicatorValueList& as_list();
+         //
+         extern VariableScopeIndicatorValue global_team;
+         extern VariableScopeIndicatorValue player_team;
+         extern VariableScopeIndicatorValue object_team;
+         extern VariableScopeIndicatorValue team_team;
+         extern VariableScopeIndicatorValue player_owner_team;
+         extern VariableScopeIndicatorValue object_owner_team;
+      }
+   }
 }

@@ -97,14 +97,11 @@ namespace Megalo {
    }
    #pragma endregion
 
-   const VariableScopeIndicatorValue& VariableScopeIndicatorValueList::by_id(uint8_t id) const noexcept {
-      for (auto& indic : this->scopes)
-         if (indic.uniqueID == id)
-            return indic;
-      #if _DEBUG
-         __debugbreak();
-      #endif
-      assert(false && "Something referred to a non-existent VariableScopeIndicatorValue ID.");
+   VariableScopeIndicatorValueList::VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue*> sl) {
+      this->var_type = vt;
+      this->scopes.reserve(sl.size());
+      for (auto it = sl.begin(); it != sl.end(); ++it)
+         this->scopes.push_back(*it);
    }
 
    bool Variable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
@@ -119,7 +116,7 @@ namespace Megalo {
          error.extra[1] = si;
          return false;
       }
-      auto& scope = type.scopes[si];
+      auto& scope = type[si];
       this->scope = &scope;
       if (scope.has_which())
          this->which = stream.read_bits(scope.which_bits());

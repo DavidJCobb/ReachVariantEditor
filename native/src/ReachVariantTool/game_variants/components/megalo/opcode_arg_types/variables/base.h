@@ -82,7 +82,6 @@ namespace Megalo {
             generic, // not a variable or an indexed object
          };
          //
-         uint8_t        uniqueID       = -1; // exists so that outside actors can refer to a scope indicator by a reliable ID rather than by index
          flags_t        flags          = flags::none;
          index_type     index_type     = index_type::none;
          uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data and index_type::generic
@@ -100,19 +99,17 @@ namespace Megalo {
          int index_bits() const noexcept;
          //
          VariableScopeIndicatorValue() {}
-         VariableScopeIndicatorValue(uint8_t uid, const char* fd, const char* fe, enum index_type it, uint8_t bc) : uniqueID(uid), format(fd), format_english(fe), index_type(it), index_bitcount(bc) {}
-         VariableScopeIndicatorValue(uint8_t uid, const char* fd, const char* fe, const VariableScope* which, enum index_type it) : uniqueID(uid), format(fd), format_english(fe), base(which), index_type(it) {}
-         static VariableScopeIndicatorValue make_game_value(uint8_t uid, const char* fd, const char* fe, uint8_t flg = 0) {
+         VariableScopeIndicatorValue(const char* fd, const char* fe, enum index_type it, uint8_t bc, flags_t flg = 0) : format(fd), format_english(fe), index_type(it), index_bitcount(bc), flags(flg) {}
+         VariableScopeIndicatorValue(const char* fd, const char* fe, const VariableScope* which, enum index_type it, flags_t flg = 0) : format(fd), format_english(fe), base(which), index_type(it), flags(flg) {}
+         static VariableScopeIndicatorValue make_game_value(const char* fd, const char* fe, uint8_t flg = 0) {
             VariableScopeIndicatorValue result;
-            result.uniqueID       = uid;
             result.flags          = flg;
             result.format         = fd;
             result.format_english = fe;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(uint8_t uid, const char* fd, const char* fe, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
             VariableScopeIndicatorValue result;
-            result.uniqueID          = uid;
             result.flags             = flg;
             result.format            = fd;
             result.format_english    = fe;
@@ -121,15 +118,15 @@ namespace Megalo {
             result.indexed_list_accessor = f;
             return result;
          }
-         static VariableScopeIndicatorValue make_indexed_data_indicator(uint8_t uid, const char* fd, const char* fe, const VariableScope* which, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
-            VariableScopeIndicatorValue result = make_indexed_data_indicator(uid, fd, fe, bc, f, flg);
+         static VariableScopeIndicatorValue make_indexed_data_indicator(const char* fd, const char* fe, const VariableScope* which, uint8_t bc, indexed_access_functor_t f, flags_t flg = 0) {
+            VariableScopeIndicatorValue result = make_indexed_data_indicator(fd, fe, bc, f, flg);
             result.base = which;
             return result;
          }
    };
    class VariableScopeIndicatorValueList {
       public:
-         std::vector<VariableScopeIndicatorValue> scopes;
+         std::vector<VariableScopeIndicatorValue*> scopes;
          variable_type var_type = Megalo::variable_type::not_a_variable;
          //
          inline int scope_bits() const noexcept {
@@ -138,14 +135,13 @@ namespace Megalo {
          inline int index_of(const VariableScopeIndicatorValue* iv) const noexcept {
             size_t size = this->scopes.size();
             for (size_t i = 0; i < size; i++)
-               if (&this->scopes[i] == iv)
+               if (this->scopes[i] == iv)
                   return i;
             return -1;
          }
          //
-         const VariableScopeIndicatorValue& by_id(uint8_t id) const noexcept; // provided for use by the compiler; fails an assert if the ID is not found; this is intentional -- if it searches for a bad ID then that's a programmer mistake
-         //
-         VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue> sl) : var_type(vt), scopes(sl) {}
+         VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue*> sl);
+         const VariableScopeIndicatorValue& operator[](int i) const noexcept { return *this->scopes[i]; }
    };
 
    class Variable : public OpcodeArgValue {

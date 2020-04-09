@@ -6,6 +6,8 @@
 #include <QString>
 
 namespace Megalo {
+   class VariableScopeIndicatorValue;
+   //
    namespace Script {
       class Namespace;
       class NamespaceMember {
@@ -21,27 +23,27 @@ namespace Megalo {
             using flags_t = std::underlying_type_t<flag::type>;
             //
             static constexpr int8_t  no_which = 0;
-            static constexpr int16_t no_scope = -1;
+            static constexpr VariableScopeIndicatorValue* no_scope = nullptr;
             //
          public:
             std::string name;
             const OpcodeArgTypeinfo& type;
             flags_t     flags = flag::none;
             uint32_t    which = no_which; // signature
-            int16_t     scope_indicator_id = no_scope;
+            const VariableScopeIndicatorValue* scope = no_scope;
             //
             Namespace* owner = nullptr;
             //
-            NamespaceMember(const char* n, const OpcodeArgTypeinfo& t, int8_t w, int16_t s, flags_t fl = flag::none) : name(n), type(t), which(w), scope_indicator_id(s), flags(fl) {}
+            NamespaceMember(const char* n, const OpcodeArgTypeinfo& t, int8_t w, const VariableScopeIndicatorValue* s, flags_t fl = flag::none) : name(n), type(t), which(w), scope(s), flags(fl) {}
             static NamespaceMember make_which_member(const char* n, const OpcodeArgTypeinfo& t, int8_t w, flags_t fl = flag::none) {
                return NamespaceMember(n, t, w, no_scope, fl);
             }
-            static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, int16_t s) {
-               return NamespaceMember(n, t, no_which, s);
+            static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, const VariableScopeIndicatorValue& s) {
+               return NamespaceMember(n, t, no_which, &s);
             }
             //
             inline bool is_which_member() const noexcept { return this->which != no_which; }
-            inline bool is_scope_member() const noexcept { return this->scope_indicator_id != no_scope; }
+            inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
       };
       class Namespace {
          public:
