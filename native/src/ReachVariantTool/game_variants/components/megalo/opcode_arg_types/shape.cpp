@@ -7,7 +7,7 @@ namespace Megalo {
       "A boundary volume that an object can have.",
       //
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::can_be_multiple,
+      0,
       { "none", "sphere", "cylinder", "box" },
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueShape>
    );

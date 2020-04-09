@@ -46,7 +46,7 @@ namespace Megalo {
       "The icon to use for a waypoint.",
       //
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::can_be_multiple,
+      0,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>
    );
    //

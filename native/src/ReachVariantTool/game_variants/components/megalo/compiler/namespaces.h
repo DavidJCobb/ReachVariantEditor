@@ -7,36 +7,26 @@
 
 namespace Megalo {
    class VariableScopeIndicatorValue;
+   class VariableScopeWhichValue;
    //
    namespace Script {
       class Namespace;
       class NamespaceMember {
          public:
-            struct flag {
-               flag() = delete;
-               enum type : uint8_t {
-                  none = 0,
-                  is_none      = 0x01,
-                  is_read_only = 0x02, // needed for members that consist only of a (which)
-               };
-            };
-            using flags_t = std::underlying_type_t<flag::type>;
-            //
-            static constexpr int8_t  no_which = 0;
+            static constexpr VariableScopeWhichValue*     no_which = nullptr;
             static constexpr VariableScopeIndicatorValue* no_scope = nullptr;
             //
          public:
             std::string name;
             const OpcodeArgTypeinfo& type;
-            flags_t     flags = flag::none;
-            uint32_t    which = no_which; // signature
+            const VariableScopeWhichValue*     which = no_which;
             const VariableScopeIndicatorValue* scope = no_scope;
             //
             Namespace* owner = nullptr;
             //
-            NamespaceMember(const char* n, const OpcodeArgTypeinfo& t, int8_t w, const VariableScopeIndicatorValue* s, flags_t fl = flag::none) : name(n), type(t), which(w), scope(s), flags(fl) {}
-            static NamespaceMember make_which_member(const char* n, const OpcodeArgTypeinfo& t, int8_t w, flags_t fl = flag::none) {
-               return NamespaceMember(n, t, w, no_scope, fl);
+            NamespaceMember(const char* n, const OpcodeArgTypeinfo& t, const VariableScopeWhichValue* w, const VariableScopeIndicatorValue* s) : name(n), type(t), which(w), scope(s) {}
+            static NamespaceMember make_which_member(const char* n, const OpcodeArgTypeinfo& t, const VariableScopeWhichValue& w) {
+               return NamespaceMember(n, t, &w, no_scope);
             }
             static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, const VariableScopeIndicatorValue& s) {
                return NamespaceMember(n, t, no_which, &s);
@@ -44,6 +34,7 @@ namespace Megalo {
             //
             inline bool is_which_member() const noexcept { return this->which != no_which; }
             inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
+            bool is_read_only() const noexcept;
       };
       class Namespace {
          public:

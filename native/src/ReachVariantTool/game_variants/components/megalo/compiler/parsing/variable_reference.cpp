@@ -36,8 +36,8 @@ namespace {
 }
 namespace Megalo::Script {
    VariableReference::Part& VariableReference::Part::operator=(const VariableReference::Part& other) noexcept {
-      this->name      = other.name;
-      this->index     = other.index;
+      this->name = other.name;
+      this->index = other.index;
       this->index_str = other.index_str;
       this->index_is_numeric = other.index_is_numeric;
       return *this;
@@ -55,6 +55,23 @@ namespace Megalo::Script {
       this->index_str.clear();
    }
 
+   bool VariableReference::InterpretedPart::is_none() const noexcept {
+      if (this->disambig_type != disambig_type::which)
+         return false;
+      return this->which->is_none();
+   }
+   bool VariableReference::InterpretedPart::is_read_only() const noexcept {
+      switch (this->disambig_type) {
+         case disambig_type::static_var:
+         case disambig_type::constant_integer:
+            return true;
+         case disambig_type::scope:
+            return this->scope->is_readonly();
+         case disambig_type::which:
+            return this->which->is_read_only();
+      }
+      return false;
+   }
    bool VariableReference::InterpretedPart::is_variable() const noexcept {
       if (!this->type)
          return false;
@@ -66,12 +83,12 @@ namespace Megalo::Script {
    VariableReference::VariableReference(int32_t i) {
       this->set_to_constant_integer(i);
       #if _DEBUG
-         this->content = QString("%1").arg(i);
+      this->content = QString("%1").arg(i);
       #endif
    }
    VariableReference::VariableReference(QString text) {
       #if _DEBUG
-         this->content = text;
+      this->content = text;
       #endif
       {
          bool ok = false;
@@ -85,7 +102,7 @@ namespace Megalo::Script {
       // The text isn't an integer literal, so we need to split it up into parts, dividing it at 
       // each '.' glyph.
       //
-      auto    size  = text.size();
+      auto    size = text.size();
       QString name;
       QString index;
       bool    is_index = false;
@@ -133,7 +150,7 @@ namespace Megalo::Script {
                }
                auto part = Part(name, index);
                this->parts.push_back(part);
-               name  = "";
+               name = "";
                index = "";
                continue;
             }
@@ -187,11 +204,21 @@ namespace Megalo::Script {
    void VariableReference::set_to_constant_integer(int32_t v) {
       this->interpreted.clear();
       InterpretedPart part;
-      part.type          = nullptr;
+      part.type = nullptr;
       part.disambiguator = v;
       part.disambig_type = disambig_type::constant_integer;
       this->interpreted.push_back(part);
       this->resolved = true;
+   }
+   bool VariableReference::is_read_only() const noexcept {
+      if (this->property.abstract)
+         return this->property.abstract->setter != nullptr;
+      if (this->property.normal)
+         return this->property.normal->scope->is_readonly();
+      if (!this->interpreted.size())
+         return false;
+      auto& last = this->interpreted.back();
+      return last.is_read_only();
    }
    bool VariableReference::is_statically_indexable_value() const noexcept {
       if (!this->interpreted.size())
@@ -222,6 +249,7 @@ namespace Megalo::Script {
       return result;
    }
 
+   #pragma region Variable reference resolution code
    size_t VariableReference::_resolve_first_parts(Compiler& compiler, bool is_alias_definition) {
       size_t i    = 0;
       auto   part = this->_part(i);
@@ -303,19 +331,6 @@ namespace Megalo::Script {
             interpreted.type          = type;
             interpreted.disambiguator = part->index;
             interpreted.disambig_type = disambig_type::index;
-            {  // TODO: move this to the generic Variable class
-               auto var_scope = _var_scope_for_type(*type);
-               if (var_scope) {
-                  //
-                  // Global instances of this variable type can be represented by a "which" value, so use 
-                  // that instead.
-                  //
-                  auto which = var_scope->list.lookup_by_signature(type->which_sig_global);
-                  assert(which >= 0 && "Bad OpcodeArgTypeinfo::which_sig_global for the type being matched here.");
-                  interpreted.disambiguator += which;
-                  interpreted.disambig_type = disambig_type::which;
-               }
-            }
             this->interpreted.push_back(interpreted);
             return ++i;
          }
@@ -333,7 +348,7 @@ namespace Megalo::Script {
       InterpretedPart interpreted;
       interpreted.type = &member->type;
       if (member->is_which_member()) {
-         interpreted.disambiguator = member->which;
+         interpreted.which         = member->which;
          interpreted.disambig_type = disambig_type::which;
       } else {
          interpreted.scope         = member->scope;
@@ -423,13 +438,16 @@ namespace Megalo::Script {
          }
          auto prop = prev.type->get_property_by_name(part->name);
          if (prop) {
-            if (part->has_index())
-               //
-               // TODO: We implement (script_stat) as a property on players and teams, and that allows indices. 
-               // We need to allow that here -- specifically, we need to make it possible to obtain a reference 
-               // to the appropriate VariableScopeIndicatorValue via the property definition.
-               //
-               throw compile_exception(QString("Properties, such as \"%1\" on the %2 type, cannot be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
+            bool has_index         = part->has_index();
+            auto should_have_index = prop->scope->has_index();
+            if (has_index != should_have_index) {
+               if (should_have_index)
+                  throw compile_exception(QString("The \"%1\" property on the %2 type must be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
+               else
+                  throw compile_exception(QString("The \"%1\" property on the %2 type cannot be indexed.").arg(prop->name.c_str()).arg(prev.type->internal_name.c_str()));
+            }
+            if (has_index)
+               this->property.normal_index = part->index;
             this->property.normal = prop;
             ++i; // move to the next part, and then bail out of the loop so we can use property-specific logic
             break;
@@ -494,4 +512,5 @@ namespace Megalo::Script {
       }
       this->resolved = true;
    }
+   #pragma endregion
 }

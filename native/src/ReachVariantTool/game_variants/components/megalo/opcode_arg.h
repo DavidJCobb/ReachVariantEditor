@@ -78,8 +78,6 @@ namespace Megalo {
             enum type : uint32_t {
                is_variable        = 0x00000001, // number, object, player, team, timer
                can_hold_variables = 0x00000002, // object, player, team
-               always_read_only   = 0x00000004, // only relevant for (is_variable); only variables and properties can appear in assign statements, and properties have their own "is read only" attribute
-               can_be_multiple    = 0x00000008, // this type represents one argument internally but multiple arguments in script code
             };
          };
          using flags_type = std::underlying_type_t<flags::type>;

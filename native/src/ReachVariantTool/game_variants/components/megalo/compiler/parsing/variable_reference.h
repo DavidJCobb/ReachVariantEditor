@@ -5,6 +5,7 @@
 
 namespace Megalo {
    class VariableScopeIndicatorValue;
+   class VariableScopeWhichValue;
    //
    namespace Script {
       class Property;
@@ -47,10 +48,12 @@ namespace Megalo {
             struct InterpretedPart {
                const OpcodeArgTypeinfo*           type  = nullptr;
                const VariableScopeIndicatorValue* scope = nullptr;
+               const VariableScopeWhichValue*     which = nullptr; // needed for namespaces
                int32_t       disambiguator = 0;
                disambig_type disambig_type = disambig_type::scope;
                //
                bool is_none() const noexcept;
+               bool is_read_only() const noexcept;
                bool is_variable() const noexcept;
             };
             //

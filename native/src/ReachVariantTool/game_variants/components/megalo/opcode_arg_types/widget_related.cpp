@@ -76,7 +76,7 @@ namespace Megalo {
          "Options for displaying a meter on the HUD.",
          //
          OpcodeArgTypeinfo::typeinfo_type::default,
-         OpcodeArgTypeinfo::flags::can_be_multiple,
+         0,
          { "none", "timer", "number" },
          OpcodeArgTypeinfo::default_factory<OpcodeArgValueMeterParameters>
       );

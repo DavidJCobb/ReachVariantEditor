@@ -7,19 +7,22 @@ namespace {
 
    const char* _which_to_string(const VariableScope* which_type, uint8_t which) {
       if (which_type == &MegaloVariableScopeObject) {
-         if (which >= megalo_objects.size())
+         auto& list = Megalo::variable_which_values::object::list;
+         if (which >= list.size())
             return "invalid_object"; // not ideal... we should find a way to print the bad index
-         return megalo_objects[which].name.c_str();
+         return list[which].name.c_str();
       }
       if (which_type == &MegaloVariableScopePlayer) {
-         if (which >= megalo_players.size())
+         auto& list = Megalo::variable_which_values::player::list;
+         if (which >= list.size())
             return "invalid_player"; // not ideal... we should find a way to print the bad index
-         return megalo_players[which].name.c_str();
+         return list[which].name.c_str();
       }
       if (which_type == &MegaloVariableScopeTeam) {
-         if (which >= megalo_teams.size())
+         auto& list = Megalo::variable_which_values::team::list;
+         if (which >= list.size())
             return "invalid_team"; // not ideal... we should find a way to print the bad index
-         return megalo_teams[which].name.c_str();
+         return list[which].name.c_str();
       }
       if (which_type == &MegaloVariableScopeGlobal)
          return "global";

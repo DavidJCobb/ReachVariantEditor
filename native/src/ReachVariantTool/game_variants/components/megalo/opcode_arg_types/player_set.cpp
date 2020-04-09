@@ -8,7 +8,7 @@ namespace Megalo {
       "A group of players.",
       //
       OpcodeArgTypeinfo::typeinfo_type::default,
-      OpcodeArgTypeinfo::flags::can_be_multiple,
+      0,
       { "no_one", "anyone", "allies", "enemies", "specific_player", "no_one_2" },
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerSet>
    );

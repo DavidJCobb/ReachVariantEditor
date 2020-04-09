@@ -41,6 +41,16 @@ You can, however, access an abstract property through a normal property:
 Internally, the normal property is an argument being passed to the "setter" function 
 that the abstract property represents.
 
+Most properties do not have indices. There is one exception: the (script_stat) property 
+on players and teams. There, you must use an index to specify the target stat:
+
+   current_player.script_stat[3]
+
+When I write the user-facing documentation, I might just lie about that being implemented 
+as a property and tell people that it's the same as nested variables, just to keep things 
+conceptually simple for script authors -- hide the messy implementation needs from them. 
+We'll see.
+
 
 An OPCODE is any condition or action that can exist in a script. This includes ordinary 
 assignments to variables and comparisons of variables, as well as every function call that 

@@ -33,41 +33,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - Script stats are a player/team property with an index. However, I don't think 
-//          the current system for parsing properties supports indexed properties. In order 
-//          to determine whether a property is indexed, we would want to check the relevant 
-//          data on its corresponding VariableScopeIndicatorValue. (It's worth remembering 
-//          that only non-abstract properties correspond to scopes, and abstract properties 
-//          therefore can never be indexed. If 343i ever adds a getter/setter opcode that 
-//          would best be represented as an abstract property with an index, we will have 
-//          to change the system, but for now let's assume they'll never do that.)
-//
-//           - OpcodeArgTypeinfo needs to be able to be constructed with a pointer to a 
-//             VariableScopeIndicatorValueList, so that the variable types' typeinfos can 
-//             provide access to their scope-indicator-lists. Then, it will be possible 
-//             for Script::Property to offer a method that checks: whether the property's 
-//             scope makes the property read-only; and whether the property's scope has 
-//             an index.
-//
-//              = HERE'S HOW WE SHOULD DO THIS: DEFINE THE VariableScopeIndicatorValues AS 
-//                NAMED MEMBERS IN A NAMESPACE, AND HAVE VariableScopeIndicatorValueList 
-//                ACCEPT AN INITIALIZER LIST OF REFERENCES AND CONSTRUCT A VECTOR OF 
-//                POINTERS. THEN, DEFINE THE VariableScopeIndicatorValueList FOR EACH 
-//                VARIABLE TYPE THE SAME WAY YOU WOULD A SINGLETON (A STATIC VARIABLE IN 
-//                A GETTER). THEN, YOU CAN DO THINGS LIKE:
-//
-//                Megalo::variable_scopes::number::as_list()
-//                Megalo::variable_scopes::number::script_option
-//
-//                THIS WILL ALLOW YOU TO HAVE PROPERTIES, NAMESPACE MEMBERS, ETC., REFER 
-//                DIRECTLY TO VariableScopeIndicatorValues INSTEAD OF HAVING TO USE ANY 
-//                SORT OF "UNIQUE ID." (Accordingly, we should apply this same approach 
-//                to the megalo_objects, megalo_players, and megalo_teams enums.)
-//
-//                 - We can't have the VariableScopeIndicatorValue constructor simply add 
-//                   itself to the list, because we can't guarantee that the instances 
-//                   will be constructed in any particular order.
-//
 //        - If a VariableReference refers to an abstract property, it should hold a pointer 
 //          to an entry in AbstractPropertyRegistry.
 //

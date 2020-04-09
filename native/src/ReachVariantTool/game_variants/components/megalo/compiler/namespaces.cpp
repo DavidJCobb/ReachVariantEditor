@@ -4,6 +4,16 @@
 
 namespace Megalo {
    namespace Script {
+      bool NamespaceMember::is_read_only() const noexcept {
+         if (this->scope) {
+            return this->scope->is_readonly();
+         }
+         if (this->which) {
+            return this->which->is_read_only();
+         }
+         return false;
+      }
+      //
       const NamespaceMember* Namespace::get_member(const QString& name) const noexcept {
          for (auto& member : this->members)
             if (cobb::qt::stricmp(name, member.name) == 0)
@@ -21,21 +31,21 @@ namespace Megalo {
          }
          //
          Namespace unnamed = Namespace("game", true, false, {
-            NamespaceMember::make_which_member("no_object",         OpcodeArgValueObject::typeinfo, 'none', NamespaceMember::flag::is_none),
-            NamespaceMember::make_which_member("no_player",         OpcodeArgValuePlayer::typeinfo, 'none', NamespaceMember::flag::is_none),
-            NamespaceMember::make_which_member("no_team",           OpcodeArgValueTeam::typeinfo,   'none', NamespaceMember::flag::is_none),
-            NamespaceMember::make_which_member("current_object",    OpcodeArgValueObject::typeinfo, 'loop', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("current_player",    OpcodeArgValuePlayer::typeinfo, 'loop', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("current_team",      OpcodeArgValueTeam::typeinfo,   'loop', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("neutral_team",      OpcodeArgValueTeam::typeinfo,   'neut', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("hud_target_object", OpcodeArgValueObject::typeinfo, 'hudt', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("hud_target_player", OpcodeArgValuePlayer::typeinfo, 'hudt', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("hud_player",        OpcodeArgValuePlayer::typeinfo, 'hudp', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("killed_object",     OpcodeArgValueObject::typeinfo, 'kild', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("killer_object",     OpcodeArgValueObject::typeinfo, 'kilr', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, 'kilr', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("unk_14_team",       OpcodeArgValueTeam::typeinfo,   'u_14', NamespaceMember::flag::is_read_only),
-            NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   'u_14', NamespaceMember::flag::is_read_only),
+            NamespaceMember::make_which_member("no_object",         OpcodeArgValueObject::typeinfo, variable_which_values::object::no_object),
+            NamespaceMember::make_which_member("no_player",         OpcodeArgValuePlayer::typeinfo, variable_which_values::player::no_player),
+            NamespaceMember::make_which_member("no_team",           OpcodeArgValueTeam::typeinfo,   variable_which_values::team::no_team),
+            NamespaceMember::make_which_member("current_object",    OpcodeArgValueObject::typeinfo, variable_which_values::object::current),
+            NamespaceMember::make_which_member("current_player",    OpcodeArgValuePlayer::typeinfo, variable_which_values::player::current),
+            NamespaceMember::make_which_member("current_team",      OpcodeArgValueTeam::typeinfo,   variable_which_values::team::current),
+            NamespaceMember::make_which_member("neutral_team",      OpcodeArgValueTeam::typeinfo,   variable_which_values::team::neutral_team),
+            NamespaceMember::make_which_member("hud_target_object", OpcodeArgValueObject::typeinfo, variable_which_values::object::hud_target),
+            NamespaceMember::make_which_member("hud_target_player", OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud_target),
+            NamespaceMember::make_which_member("hud_player",        OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud),
+            NamespaceMember::make_which_member("killed_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killed),
+            NamespaceMember::make_which_member("killer_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killer),
+            NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, variable_which_values::player::killer),
+            NamespaceMember::make_which_member("unk_14_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_14),
+            NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_15),
          });
          Namespace global = Namespace("global", false, true);
          Namespace game = Namespace("game", false, false, {
