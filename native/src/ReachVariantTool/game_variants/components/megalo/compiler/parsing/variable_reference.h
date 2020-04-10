@@ -54,7 +54,7 @@ namespace Megalo {
                   const VariableScopeIndicatorValue* scope = nullptr; // needed for namespace members; indicates a "dead-end" top-level value
                   const VariableScopeWhichValue*     which = nullptr; // needed for namespace members
                   const OpcodeArgTypeinfo* type = nullptr;
-                  int32_t index       = 0;     // always present for global variables and static variables; used to hold integer constants; otherwise, not used, and scope or which are used
+                  int32_t index       = 0;     // always present for global variables and static variables; used to hold integer constants; for scopes, used to hold the index if the scope has an index
                   bool    is_static   = false; // if false, then we're accessing a global variable
                   bool    is_constant = false; // true if this is an integer constant
                } top_level;
@@ -66,7 +66,8 @@ namespace Megalo {
                   const Property* definition = nullptr;
                   int32_t index = 0; // present only if the property uses an index
                } property;
-               const AbstractPropertyRegistry::Definition* accessor = nullptr;
+               const AccessorRegistry::Definition* accessor = nullptr;
+               QString accessor_name; // needed for VariableReference::to_string, for accessor-arguments e.g. player.frag_grenades
             } resolved;
             //
             VariableReference(QString); // can throw compile_exception
@@ -77,7 +78,7 @@ namespace Megalo {
             [[nodiscard]] inline bool is_accessor() const noexcept { return this->resolved.accessor; }
             [[nodiscard]] inline bool is_constant_integer() const noexcept { return this->resolved.top_level.is_constant; }
             [[nodiscard]] inline bool is_property() const noexcept { return this->resolved.property.definition; }
-            [[nodiscard]] inline const AbstractPropertyRegistry::Definition* get_accessor_definition() const noexcept { return this->resolved.accessor; }
+            [[nodiscard]] inline const AccessorRegistry::Definition* get_accessor_definition() const noexcept { return this->resolved.accessor; }
             [[nodiscard]] bool is_none() const noexcept;
             [[nodiscard]] bool is_read_only() const noexcept;
             [[nodiscard]] bool is_statically_indexable_value() const noexcept;

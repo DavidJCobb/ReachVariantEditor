@@ -4,6 +4,11 @@
 
 namespace Megalo {
    namespace Script {
+      bool NamespaceMember::has_index() const noexcept {
+         if (this->scope)
+            return this->scope->has_index();
+         return false;
+      }
       bool NamespaceMember::is_read_only() const noexcept {
          if (this->scope) {
             return this->scope->is_readonly();

@@ -14,18 +14,15 @@ namespace Megalo {
       class NamespaceMember {
          //
          // What is a namespace member? Well, it's a member of one of the namespaces defined our gametype scripting language, 
-         // obviously. But what does being a namespace member entail? Well, there are two kinds of namespace members.
+         // obviously. But what does being a namespace member entail? Well, there are two kinds of namespace members. Both 
+         // represent top-level values -- that is, values that aren't nested under any other object.
          //
          // A "which" member represents a single top-level value described by a "which" value -- so, a top-level object, 
          // player, or team, then. Some of these values enable access to nested variables, like current_object, others, like 
          // no_object, don't, for reasons that are hopefully self-evident.
          //
-         // A "scope" member doesn't necessarily represent a single top-level value, but rather a single value. Variables 
-         // consist of a "scope" and, depending on that scope, a "which" and an "index," yes? Well, a "scope" member refers 
-         // not to a "scope" in isolation, but to an entire variable value consisting solely of a scope. If a script refers 
-         // to a "scope" member, then, it's referring to an entire value, whereas a "which" member can be an entire value 
-         // (access to a top-level variable) or part of a value (access to a variable, property, or accessor nested under 
-         // that top-level variable).
+         // A "scope" member represents a single top-level value described by a "scope" value and, potentially, an index. 
+         // This includes things like (game.round_timer) and (script_option[3]).
          //
          public:
             static constexpr VariableScopeWhichValue*     no_which = nullptr;
@@ -47,6 +44,7 @@ namespace Megalo {
                return NamespaceMember(n, t, no_which, &s);
             }
             //
+            bool has_index() const noexcept;
             inline bool is_which_member() const noexcept { return this->which != no_which; }
             inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
             bool is_read_only() const noexcept;

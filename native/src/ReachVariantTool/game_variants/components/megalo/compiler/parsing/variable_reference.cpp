@@ -190,13 +190,19 @@ namespace Megalo::Script {
       auto& nested    = resolved.nested;
       if (top_level.is_constant)
          return QString("%1").arg(top_level.index);
-      if (top_level.scope)
+      if (top_level.scope) {
          //
          // If the (scope) is set, then we're dealing with a dead-end value that has no 
-         // which or index. We can just use its decompile format string; there's nothing 
-         // we need to pass to it.
+         // which. If it also lacks an index, then we can just use its decompile format 
+         // string; there's nothing we need to pass to it.
          //
-         return QString(top_level.scope->format);
+         auto    scope  = top_level.scope;
+         QString result = scope->format;
+         if (!scope->has_index())
+            return result;
+         result.replace("%i", QString("%1").arg(top_level.index));
+         return result;
+      }
       //
       QString result;
       if (top_level.which) {
@@ -228,7 +234,10 @@ namespace Megalo::Script {
       }
       if (auto accessor = resolved.accessor) {
          result += '.';
-         result += accessor->name.c_str();
+         if (accessor->name.empty())
+            result += resolved.accessor_name;
+         else
+            result += accessor->name.c_str();
       }
       return result;
    }
@@ -394,6 +403,20 @@ namespace Megalo::Script {
       res.type  = &member->type;
       res.which = member->which;
       res.scope = member->scope;
+      {
+         //
+         // Validate the presence or absence of an index.
+         //
+         bool should_have_index = member->has_index();
+         if (part->has_index() != should_have_index) {
+            if (should_have_index)
+               throw compile_exception(QString("The \"%1.%2\" value must be indexed.").arg(member->name.c_str()).arg(part->name));
+            else
+               throw compile_exception(QString("The \"%1.%2\" value cannot be indexed.").arg(member->name.c_str()).arg(part->name));
+         }
+         if (should_have_index)
+            res.index = part->index;
+      }
       return ++i;
    }
    bool VariableReference::_resolve_nested_variable(Compiler& compiler, size_t raw_index) {
@@ -452,14 +475,15 @@ namespace Megalo::Script {
       auto type = this->get_type();
       this->_resolve_aliases_from(compiler, raw_index, type); // handle relative aliases, if any are present
       const QString& name = this->_get_raw_part(raw_index)->name;
-      auto&       manager = AbstractPropertyRegistry::get();
+      auto&       manager = AccessorRegistry::get();
       const auto* entry   = manager.get_by_name(name.toStdString().c_str());
       if (!entry) {
          assert(type && "Problem in VariableReference::_resolve_accessor; somehow we do not have an identifiable type.");
-         entry = manager.get_variably_named_property(compiler, name, *type);
+         entry = manager.get_variably_named_accessor(compiler, name, *type);
       }
       if (entry) {
-         this->resolved.accessor = entry;
+         this->resolved.accessor      = entry;
+         this->resolved.accessor_name = name;
          return true;
       }
       return false;
@@ -467,6 +491,17 @@ namespace Megalo::Script {
    void VariableReference::resolve(Compiler& compiler, bool is_alias_definition) {
       if (this->is_resolved)
          return;
+      //
+      // All variable references take one of the two following forms:
+      //
+      //  - dead_end_value
+      //  - var.var.property.accessor, where everything after the first (var) is optional
+      //    (e.g. var.property.accessor, var.var.accessor, etc.)
+      //
+      // Accordingly, once we resolve that first chunk, everything else is simple: check for 
+      // an X and handle it if it's present, and then either way, fall through to checking 
+      // for a Y; and then a Z.
+      //
       auto& res = this->resolved;
       //
       for (auto& part : this->raw)
@@ -492,25 +527,36 @@ namespace Megalo::Script {
       }
       if (this->is_none())
          compiler.throw_error("You cannot access the members of a none value.");
-      auto* part = this->_get_raw_part(i);
       if (res.top_level.scope) {
          //
          // If the top-level value has a scope listed, then that means we found a namespace member that is, 
          // itself, a fully-resolved reference to a value consisting of a scope, no which, and no index, 
          // such as (game.round_timer). Member access past that point is not possible.
          //
-         compiler.throw_error(QString("You cannot access the %1 member on %2.").arg(part->name).arg(this->to_string_from_raw(0, i)));
+         compiler.throw_error(QString("You cannot access the %1 member on %2.").arg(this->_get_raw_part(i)->name).arg(this->to_string_from_raw(0, i)));
       }
       if (this->_resolve_nested_variable(compiler, i)) {
-         part = this->_get_raw_part(++i);
-         if (!part) {
+         if (++i >= this->raw.size()) {
             this->is_resolved = true;
             return;
          }
       }
       if (this->_resolve_property(compiler, i)) {
-         part = this->_get_raw_part(++i);
-         if (!part) {
+         auto prev = this->resolved.nested.type;
+         if (prev) {
+            //
+            // Not all properties can be accessed as (var.var.property). Enforce this.
+            //
+            auto prop = this->resolved.property.definition;
+            if (prop && !prop->allow_from_nested)
+               compiler.throw_error(
+                  QString("The %1 property can only be accessed from a top-level %2 variable. Copy the value (%3) into an intermediate %2 variable and then access the property through that.")
+                     .arg(prop->name.c_str())
+                     .arg(prev->internal_name.c_str())
+                     .arg(this->to_string_from_raw(0, i))
+               );
+         }
+         if (++i >= this->raw.size()) {
             this->is_resolved = true;
             return;
          }
@@ -520,6 +566,30 @@ namespace Megalo::Script {
             compiler.throw_error("Attempted to access a member of an accessor.");
          this->is_resolved = true;
          return;
+      }
+      //
+      // If we reach this point, then the raw part that we're currently looking at is unrecognized. That's 
+      // an error, but let's do some work and see if we can't display a good error message to the script 
+      // author.
+      //
+      auto part = this->_get_raw_part(i);
+      if (this->resolved.nested.type && !this->resolved.property.definition && !this->resolved.accessor) {
+         //
+         // Let's check for excess variable depth (e.g. var.var.var) and if that's what's happening here, 
+         // show a detailed error message.
+         //
+         auto prev = this->resolved.nested.type;
+         if (prev->can_have_variables()) {
+            auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
+            if (type) {
+               compiler.throw_error(
+                  QString("Variable access can only go two levels deep; references of the form (var.var.var) are not possible. Copy the target variable (%1) into an intermediate %2 variable first.")
+                     .arg(this->to_string_from_raw(0, i))
+                     .arg(prev->internal_name.c_str())
+               );
+            }
+         }
+         compiler.throw_error(QString("The %1 type does not have a member named \"%2\".").arg(prev->internal_name.c_str()).arg(part->name));
       }
       auto type = this->get_type();
       if (type)

@@ -15,41 +15,47 @@ Variables can be referred to by no more than two levels of depth:
    global.player[0].player[1].player[2] -- invalid
 
 
-A PROPERTY is a member of a variable. There are two major kinds of properties:
 
- - A "normal" property can be used in any place where a variable of the same type can be 
-   used. Internally, these exist as "scope" values for variables (see below section on 
-   how variables work).
-   
- - An "abstract" property can only be used in assignment statements. Internally, these 
-   exist as "getter" and "setter" functions.
+A PROPERTY is a member of a variable. Properties can appear in any place where a variable 
+of the same type can be used. Internally, these exist as "scope" values for variables (see 
+below section on how variables work). You cannot access variables or other properties 
+through a property.
 
-You cannot access a normal property through another normal property. If, for example, 
-you want to get the current score of a player's team, you cannot do the following:
+   current_player.team           -- valid
+   current_player.team.score     -- invalid
+   current_player.team.number[0] -- invalid
 
-   global.number[0] = current_player.team.score
+Most properties do not have indices. There is one exception: the (script_stat) property on 
+players and teams. There, you must use an index to specify the target stat:
 
-Instead, you must use an intermediate variable:
-
-   global.team[0]   = current_player.team
-   global.number[0] = global.team[0].score
-
-You can, however, access an abstract property through a normal property:
-
-   global.player[0].biped.shields += 5
-
-Internally, the normal property is an argument being passed to the "setter" function 
-that the abstract property represents.
-
-Most properties do not have indices. There is one exception: the (script_stat) property 
-on players and teams. There, you must use an index to specify the target stat:
-
-   current_player.script_stat[3]
+   current_player.script_stat[0]
 
 When I write the user-facing documentation, I might just lie about that being implemented 
 as a property and tell people that it's the same as nested variables, just to keep things 
 conceptually simple for script authors -- hide the messy implementation needs from them. 
 We'll see.
+
+
+
+An ACCESSOR uses similar syntax to a property, but can only appear in assignment statements. 
+Internally, these exist as "getter" and "setter" functions. As such, you can use accessors 
+on variables and properties.
+
+   current_object.shields       += 50 -- valid; access through variable
+   current_player.biped.shields += 50 -- valid; access through property
+
+Most accessors have both getters and setters. Some do not, which means that they can only 
+appear on the appropriate side of an assignment statement.
+
+   current_object.max_shields += 50              -- valid; there is a setter for this
+   global.number[0] = current_object.max_shields -- invalid; there is no getter for this
+
+From a language design standpoint, accessors were preferred over getter/setter functions 
+in cases where the internal getter or setter takes the same range of assignment operators 
+as an assignment statement. Although the parser as currently designed could accept an 
+assignment operator as an argument (e.g. foo.set_bar(+=, 5)), it seems best to instead 
+use assignment statements.
+
 
 
 An OPCODE is any condition or action that can exist in a script. This includes ordinary 
@@ -62,6 +68,7 @@ flat list, with nested triggers flagged to be skipped during normal execution, a
 exists an opcode that executes the trigger with a given index. For the sake of parsing and 
 compiling we can mostly pretend that this opcode doesn't exist; our syntax allows for nested 
 blocks and we just generate these opcodes as part of the compile process.
+
 
 
 An OPCODE ARGUMENT is a parameter passed to an opcode. For assignments, this includes the 
@@ -78,6 +85,7 @@ following two statements use the same opcode with different arguments:
 As you might expect, every opcode argument has a value (held in memory by an OpcodeArgValue 
 instance) and a type (managed by OpcodeArgValue subclasses, and described by instances of 
 OpcodeArgTypeinfo).
+
 
 
 An ALIAS is a user-defined name for any variable, constant integer, or enumeration value. 
@@ -119,8 +127,8 @@ are simple values; they can't have members. Objects, players, and teams, however
 complex: they have a full complement of variables as members, and they can also have 
 properties.
 
-Internally, the same types are used for "variables" and (non-abstract) "properties," and 
-these types consist of four parts:
+Internally, the same types are used for "variables" and "properties," and these types 
+consist of four parts:
 
    SCOPE
       An enum indicating the scope of the variable. For example, given a reference to the 
@@ -219,18 +227,14 @@ So what information needs to exist for detailed typeinfos?
 
     - Only variables can have properties.
 
-    - Typeinfos should not specify abstract properties here.
+    - Typeinfos should not specify accessors here.
 
     - Each property has a name and a type. Some properties specify a scope indicator ID 
       for their parent variable, which is enough information to fully resolve a reference         <------- IN ADDITION TO THINGS LIKE object.spawn_sequence, THIS IS ALSO HOW WE'LL IMPLEMENT SCRIPT STATS
       (the scope indicator will specify whether the property is read-only, and whether it 
       can be indexed). The "biped" property on players is a notable exception: there are 
-      four possible scope indicators that it can use, so that property must instead rely 
-      on a functor.
-
-       = TODO: VARIABLE SCOPE INDICATORS NEED TO ALL SPECIFY WHETHER THEY'RE READ-ONLY
-
-       = TODO: PROPERTIES MUST BE ABLE TO SPECIFY FUNCTORS
+      four possible scope indicators that it can use, so its scope can only be determined 
+      at compile-time by OpcodeArgValueObject::compile.
 
 
 
@@ -251,25 +255,11 @@ Each namespace member can have:
 
  - A "which" value, for unnamed-namespace members like (no_team) or (current_object). 
    This value indicates which object, player, or team is being defined as a member. This 
-   value is mutually exclusive with the scope ID.
+   value is mutually exclusive with the scope.
 
- - A scope indicator ID, for things like (script_option[0]) in the unnamed namespace or 
-   (game.round_timer) in the "game" namespace. This ID should match those used for the            <------- THIS IS HOW WE'LL IMPLEMENT SCRIPT OPTIONS, IN CONTRAST TO TRAITS AND WIDGETS
-   appropriate variable type's VariableScopeIndicatorValues. This value is mutually 
-   exclusive with the "which" value.
-
- - A "read only" flag, used to indicate whether members like (current_object) can have 
-   their values assigned to.
-
-    - This is only needed for "which" members. "Scope" members can rely on read-only 
-      data provided by the VariableScopeIndicatorValue.
-
-       = TODO: VARIABLE SCOPE INDICATORS NEED TO ALL SPECIFY WHETHER THEY'RE READ-ONLY
-
- - An "is none" flag, used to indicate that members like (no_object) represent the absence 
-   of a value.
-
-    - This is only needed for "which" members. "Scope" members cannot ever be none.
+ - A scope indicator, for things like (script_option[0]) in the unnamed namespace or 
+   (game.round_timer) in the "game" namespace. This value is mutually exclusive with the 
+   "which" value.
 
 
 

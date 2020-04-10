@@ -14,7 +14,7 @@ namespace Megalo {
          // but it's not super required; their main role is just so that the compiler can identify 
          // references to the properties during parsing.
          //
-         // Do not use this for abstract properties.
+         // Do not use this for accessors.
          //
          public:
             static constexpr VariableScopeIndicatorValue* no_scope = nullptr;

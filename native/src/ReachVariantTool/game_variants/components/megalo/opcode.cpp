@@ -114,7 +114,7 @@ namespace Megalo {
       }
    }
 
-   AbstractPropertyRegistry::AbstractPropertyRegistry() {
+   AccessorRegistry::AccessorRegistry() {
       using mapping_type = OpcodeFuncToScriptMapping::mapping_type;
       //
       // Build the registry.
@@ -140,14 +140,14 @@ namespace Megalo {
             entry->setter = &action;
       }
    }
-   AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_by_name(const char* name) const noexcept {
+   AccessorRegistry::Definition* AccessorRegistry::get_by_name(const char* name) const noexcept {
       for (auto& entry : this->definitions) {
          if (entry.name == name)
             return (Definition*)&entry; // cast needed to strip const
       }
       return nullptr;
    }
-   AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_variably_named_property(const OpcodeArgTypeinfo& property_name_type) const noexcept {
+   AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type) const noexcept {
       for (auto& entry : this->definitions) {
          if (!entry.name.empty())
             continue;
@@ -157,7 +157,7 @@ namespace Megalo {
          else
             function = entry.setter;
          #if _DEBUG
-            assert(function && "An entry for a variably-named abstract property should not exist unless we've identified at least one of its opcodes.");
+            assert(function && "An entry for a variably-named accessor should not exist unless we've identified at least one of its opcodes.");
          #endif
          auto& mapping = function->mapping;
          if (mapping.arg_name != OpcodeFuncToScriptMapping::no_argument)
@@ -168,7 +168,7 @@ namespace Megalo {
       }
       return nullptr;
    }
-   const AbstractPropertyRegistry::Definition* AbstractPropertyRegistry::get_variably_named_property(Compiler& compiler, const QString& name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
+   const AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(Compiler& compiler, const QString& name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
       //
       // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
       // is the name. The easiest way to test against such getters/setters is to simply instantiate that 

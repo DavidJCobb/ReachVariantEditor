@@ -146,10 +146,10 @@ namespace Megalo {
          std::vector<OpcodeArgValue*> arguments;
    };
 
-   class AbstractPropertyRegistry {
+   class AccessorRegistry {
       public:
-         static AbstractPropertyRegistry& get() {
-            static AbstractPropertyRegistry instance;
+         static AccessorRegistry& get() {
+            static AccessorRegistry instance;
             return instance;
          }
          //
@@ -167,10 +167,10 @@ namespace Megalo {
          std::vector<Definition> definitions;
          //
          Definition* get_by_name(const char*) const noexcept;
-         Definition* get_variably_named_property(const OpcodeArgTypeinfo& property_name_type) const noexcept;
-         const Definition* get_variably_named_property(Compiler&, const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
+         Definition* get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type) const noexcept;
+         const Definition* get_variably_named_accessor(Compiler&, const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
          //
       protected:
-         AbstractPropertyRegistry();
+         AccessorRegistry();
    };
 }

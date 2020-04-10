@@ -119,7 +119,7 @@ namespace Megalo {
                //
                compiler.throw_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(prop->name.c_str()));
             //
-            // Do not allow aliases to shadow member functions or abstract properties:
+            // Do not allow aliases to shadow member functions or accessors:
             //
             auto mapping = _check_rel_alias_name_against_opcodes(conditionFunctionList, name, type);
             if (!mapping)
@@ -128,7 +128,7 @@ namespace Megalo {
                switch (mapping->type) {
                   case OpcodeFuncToScriptMapping::mapping_type::property_get:
                   case OpcodeFuncToScriptMapping::mapping_type::property_set:
-                     compiler.throw_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(name));
+                     compiler.throw_error(QString("Invalid alias name. An alias cannot shadow accessors like %1.%2.").arg(type->internal_name.c_str()).arg(name));
                      break;
                }
                compiler.throw_error(QString("Invalid alias name. An alias cannot shadow member functions like %1.%2.").arg(type->internal_name.c_str()).arg(name));
@@ -431,8 +431,8 @@ namespace Megalo {
       this->assignment->rhs = new Script::VariableReference(this->token.text);
       this->assignment->rhs->owner = this->assignment;
       //
-      // TODO: Consider writing code for type checking non-abstract-property assignments in advance... 
-      // but maybe leave it turned off: I want to check the results of type-mismatched assignments in-
+      // TODO: Consider writing code for type checking non-accessor assignments in advance... but 
+      // maybe leave it turned off: I want to check the results of type-mismatched assignments in-
       // game. I'm pretty sure that numbers and timers can be assigned to each other, but I want to 
       // know if other types do anything sensible, do nothing at all, clear the target variable, or 
       // crash, so that I can program in a compiler warning or compiler error as appropriate.
@@ -637,7 +637,7 @@ namespace Megalo {
       //
       // TODO: Compile the comparison.
       //
-      // TODO: Comparing an abstract property is an error
+      // TODO: Comparing an accessor is an error
       //
       this->block->insert_condition(this->comparison);
       this->comparison = nullptr;
