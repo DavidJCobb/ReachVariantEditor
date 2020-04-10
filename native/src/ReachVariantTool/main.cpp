@@ -38,6 +38,15 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
+//        - VariableReference string constructor: we need to catch the following syntax 
+//          errors:
+//
+//           - name[1 2]
+//           - name[ ]   // we check for an empty index string but not a whitespace-only one
+//
+//        - VariableReference string constructor: we need to trim the index string when 
+//          committing a RawPart.
+//
 //        - Compiling assignments
 //
 //           - If the lefthand side is an accessor, then compile the accessor name, strip 

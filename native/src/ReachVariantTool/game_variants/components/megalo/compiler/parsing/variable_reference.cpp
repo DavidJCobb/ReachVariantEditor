@@ -505,9 +505,13 @@ namespace Megalo::Script {
       auto& res = this->resolved;
       //
       for (auto& part : this->raw)
+         //
+         // Let's resolve raw part indices first: if any of them are still strings, then we 
+         // need to either resolve them (if they are absolute integer aliases) or error.
+         //
          part.resolve_index(compiler);
       //
-      if (this->_resolve_aliases_from(compiler, 0)) { // absolute alias need to be handled here so we can handle the case of them resolving to an integer, etc..
+      if (this->_resolve_aliases_from(compiler, 0)) { // absolute aliases need to be handled here so we can handle the case of them resolving to an integer, etc..
          bool has_more = this->raw.size() > 1;
          if (this->is_constant_integer()) {
             if (has_more)

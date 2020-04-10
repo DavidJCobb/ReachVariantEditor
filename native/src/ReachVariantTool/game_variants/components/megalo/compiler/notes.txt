@@ -273,8 +273,8 @@ then we must be inside of an assignment statement, and the previously found word
 variable reference. We ensure that it's valid, and that it isn't a read-only value, and then 
 we get the next word after the operator. We then look for an opening parentheses; if none is 
 found, then we take the newly-found word and interpret it as a variable reference, and at that 
-point, we're done: we can compile an ordinary assignment operator or a property setter opcode 
-as appropriate.
+point, we're done: we can compile an ordinary assignment operator or an accessor opcode as 
+appropriate.
 
 If an opening parentheses is found, then we double-check that the operator found was "=", a 
 vanilla assignment, because modify-and-assign operators like "+=" cannot be used on functions. 
