@@ -34,6 +34,8 @@ int main(int argc, char *argv[]) {
 //     = RENAME "ABSTRACT PROPERTIES" TO "ACCESSORS." NOTE THAT THIS TERMINOLOGY CHANGE IS 
 //       ALREADY USED IN THE NEXT TO-DO LIST ITEM.
 //
+//        - CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0], TOO?
+//
 //     = STRONGLY CONSIDER REDESIGNING HOW WE RESOLVE VARIABLE REFERENCES. Right now, we use 
 //       a function for the first InterpretedPart but a loop for every (non-property) part 
 //       thereafter, and this just feels... hard to audit? Like, it feels like everything 
@@ -60,7 +62,9 @@ int main(int argc, char *argv[]) {
 //       followed by a property or an accessor; and any property can be followed by an 
 //       accessor. So what we do, then, is:
 //
-//          size_t i    = this->parse_top_level_part(); // in the current code, this is VariableReference::_resolve_first_parts
+//          size_t i = this->parse_top_level_part(); // in the current code, this is VariableReference::_resolve_first_parts
+//          if (i >= this->parts.size())
+//             return true; // Done!
 //          if (this->has_known_scope()) {
 //             // 
 //             // If we have a known scope, then that means that we found a namespace member 
@@ -68,15 +72,18 @@ int main(int argc, char *argv[]) {
 //             // which, and no index, such as (game.round_timer). Member access past that 
 //             // point is not possible.
 //             // 
-//             if (i < this->parts.size())
-//                throw compile_exception("You can't access the X member on Y.");
+//             throw compile_exception("You can't access the X member on Y.");
 //          }
-//          auto*  part = this->part(i);
-//          if (this->parse_nested_variable(part)) {
+//          auto* part = this->part(i);
+//          if (this->parse_nested_variable(part)) { // simplified; in reality we need to also check whether the top-level variable's type is allowed to have nested variables
 //             part = this->part(++i);
+//             if (!part)
+//                return true; // Done!
 //          }
 //          if (thiS->parse_property(part)) {
 //             part = this->part(++i);
+//             if (!part)
+//                return true; // Done!
 //          }
 //          if (this->parse_accessor(part)) {
 //             if (++i < this->parts.size())

@@ -12,15 +12,27 @@ namespace Megalo {
 
       class Alias;
       class VariableReference : public ParsedItem {
-         public:
-            enum class disambig_type : uint8_t {
-               scope,
-               which,
-               index,
-               static_var, // typename[3] e.g. "player[0]"; only valid for the first interpreted part
-               constant_integer,
-               alias_relative_to, // only use in alias definitions, e.g. for the "player" in "alias is_zombie = player.number[0]"
+         protected:
+            struct RawPart {
+               //
+               // Represents a raw segment from the variable. For example, given "global.player[0]" you'd 
+               // have two RawParts, one for "global" and another for "player" with index 0.
+               //
+               QString name;
+               QString index_str;
+               int32_t index = -1;
+               bool    index_is_numeric = false;
+               //
+               RawPart() {} // needed for std::vector::push_back
+               RawPart(QString n, QString i) : name(n), index_str(i) {}
+               RawPart(QString n, int32_t i) : name(n), index(i) {};
+               //
+               RawPart& operator=(const RawPart& other) noexcept;
+               //
+               [[nodiscard]] inline bool has_index() const noexcept { return this->index_is_numeric || !this->index_str.isEmpty(); }
+               void resolve_index(Compiler&);
             };
+            std::vector<RawPart> raw;
             //
          public:
             QString content;
@@ -28,78 +40,69 @@ namespace Megalo {
                static_assert(false, "replace (content) with logic to actually parse parts");
             #endif
             //
-            struct Part {
-               QString name;
-               QString index_str;
-               int32_t index = -1;
-               bool    index_is_numeric = false;
-               //
-               Part() {} // needed for std::vector::push_back
-               Part(QString n, QString i) : name(n), index_str(i) {}
-               Part(QString n, int32_t i) : name(n), index(i) {};
-               //
-               Part& operator=(const Part& other) noexcept;
-               //
-               inline bool has_index() const noexcept {
-                  return this->index_is_numeric || !this->index_str.isEmpty();
-               }
-               void resolve_index(Compiler&);
-            };
-            struct InterpretedPart {
-               const OpcodeArgTypeinfo*           type  = nullptr;
-               const VariableScopeIndicatorValue* scope = nullptr;
-               const VariableScopeWhichValue*     which = nullptr; // needed for namespaces
-               int32_t       disambiguator = 0;
-               disambig_type disambig_type = disambig_type::scope;
-               //
-               bool is_none() const noexcept;
-               bool is_read_only() const noexcept;
-               bool is_variable() const noexcept;
-            };
+            bool is_resolved = false;
             //
-            std::vector<Part> parts;
-            std::vector<InterpretedPart> interpreted;
             struct {
-               const Property* normal = nullptr;
-               int32_t normal_index = 0;
-               const AbstractPropertyRegistry::Definition* abstract = nullptr;
-               QString abstract_name; // used for error reporting
-            } property;
-            bool resolved = false;
+               //
+               // A resolved variable-reference can take either of two forms:
+               //
+               //  - dead_end_value
+               //  - var.var.property.accessor, where everything after the first (var) is optional
+               //
+               const OpcodeArgTypeinfo* alias_basis = nullptr; // only for aliases
+               struct {
+                  const VariableScopeIndicatorValue* scope = nullptr; // needed for namespace members; indicates a "dead-end" top-level value
+                  const VariableScopeWhichValue*     which = nullptr; // needed for namespace members
+                  const OpcodeArgTypeinfo* type = nullptr;
+                  int32_t index       = 0;     // always present for global variables and static variables; used to hold integer constants; otherwise, not used, and scope or which are used
+                  bool    is_static   = false; // if false, then we're accessing a global variable
+                  bool    is_constant = false; // true if this is an integer constant
+               } top_level;
+               struct {
+                  const OpcodeArgTypeinfo* type = nullptr;
+                  int32_t index = 0; // always present
+               } nested;
+               struct {
+                  const Property* definition = nullptr;
+                  int32_t index = 0; // present only if the property uses an index
+               } property;
+               const AbstractPropertyRegistry::Definition* accessor = nullptr;
+            } resolved;
             //
             VariableReference(QString); // can throw compile_exception
             VariableReference(int32_t);
             //
             void set_to_constant_integer(int32_t);
-            inline bool is_constant_integer() const noexcept { return this->parts.empty(); }
-            inline bool is_property() const noexcept {
-               return this->property.normal || !this->property.abstract;
-            }
-            inline bool is_abstract_property() const noexcept {
-               return this->property.abstract != nullptr;
-            }
-            inline const AbstractPropertyRegistry::Definition* get_abstract_property_definition() const noexcept {
-               return this->is_abstract_property() ? this->property.abstract : nullptr;
-            }
-            bool is_read_only() const noexcept;
-            bool is_statically_indexable_value() const noexcept;
-            const OpcodeArgTypeinfo* get_type() const noexcept;
+            [[nodiscard]] const OpcodeArgTypeinfo* get_type() const noexcept;
+            [[nodiscard]] inline bool is_accessor() const noexcept { return this->resolved.accessor; }
+            [[nodiscard]] inline bool is_constant_integer() const noexcept { return this->resolved.top_level.is_constant; }
+            [[nodiscard]] inline bool is_property() const noexcept { return this->resolved.property.definition; }
+            [[nodiscard]] inline const AbstractPropertyRegistry::Definition* get_accessor_definition() const noexcept { return this->resolved.accessor; }
+            [[nodiscard]] bool is_none() const noexcept;
+            [[nodiscard]] bool is_read_only() const noexcept;
+            [[nodiscard]] bool is_statically_indexable_value() const noexcept;
             //
             void resolve(Compiler&, bool is_alias_definition = false); // can throw compile_exception
             //
-            QString to_string() const noexcept;
+            [[nodiscard]] QString to_string() const noexcept;
+            [[nodiscard]] QString to_string_from_raw(int8_t start = 0, int8_t up_to = -1) const noexcept;
             //
          protected:
-            inline Part* _part(int i) {
+            bool _resolve_aliases_from(Compiler&, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr); // replaces the raw part with the content of a found alias, unless it's an absolute alias that resolves to a constant integer, in which case: sets resolved.top_level
+            //
+            size_t _resolve_top_level(Compiler&, bool is_alias_definition = false);
+            bool   _resolve_nested_variable(Compiler&, size_t raw_index);
+            bool   _resolve_property(Compiler&, size_t raw_index);
+            bool   _resolve_accessor(Compiler&, size_t raw_index);
+            //
+            [[nodiscard]] inline RawPart* _get_raw_part(int i) {
                if (i < 0)
-                  i += this->parts.size();
-               else if (i >= this->parts.size())
+                  i += this->raw.size();
+               else if (i >= this->raw.size())
                   return nullptr;
-               return &this->parts[i];
+               return &this->raw[i];
             }
             void _transclude(uint32_t index, Alias&); // replaces (this->parts[index]) with the contents of the alias. if the alias is a relative alias, does not include the alias typename
-            size_t _resolve_first_parts(Compiler&, bool is_alias_definition = false);
-            bool _resolve_abstract_property(Compiler&, QString property_name, const OpcodeArgTypeinfo& property_is_on);
       };
    }
 }

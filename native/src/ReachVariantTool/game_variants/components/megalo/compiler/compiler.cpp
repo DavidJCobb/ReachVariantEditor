@@ -443,15 +443,14 @@ namespace Megalo {
       //
       {
          auto lhs = this->assignment->lhs;
-         if (lhs->is_abstract_property()) {
-            auto  def     = lhs->get_abstract_property_definition();
-            auto  setter  = def->setter;
+         if (auto def = lhs->get_accessor_definition()) {
+            auto setter = def->setter;
             if (!setter)
-               this->throw_error("This abstract property cannot be assigned to.");
+               this->throw_error("This accessor cannot be assigned to.");
             auto& mapping = setter->mapping;
             if (mapping.arg_operator == OpcodeFuncToScriptMapping::no_argument) {
                if (this->assignment->op != "=")
-                  this->throw_error("This property can only be modified using the = operator.");
+                  this->throw_error("This accessor can only be modified using the = operator.");
             } else {
                //
                // TODO: Compile the assignment operator.
@@ -838,8 +837,8 @@ namespace Megalo {
             this->throw_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          if (this->assignment->lhs->is_read_only())
             this->throw_error("You cannot assign to this value.");
-         if (this->assignment->lhs->is_abstract_property())
-            this->throw_error("You cannot assign the return value of a function to an abstract property.");
+         if (this->assignment->lhs->is_accessor())
+            this->throw_error("You cannot assign the return value of a function to an accessor.");
          //
          // Verify that the variable we're assigning our return value to is of the right type:
          //
