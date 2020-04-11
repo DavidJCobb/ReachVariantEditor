@@ -32,7 +32,6 @@ namespace Megalo {
       "Player",
       "A player participating in the match. Note that players are a distinct concept from \"bipeds,\" the character objects that players control.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayer>,
       {

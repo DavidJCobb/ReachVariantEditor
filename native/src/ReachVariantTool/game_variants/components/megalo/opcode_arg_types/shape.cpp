@@ -1,15 +1,22 @@
 #include "shape.h"
 
 namespace Megalo {
+   namespace enums {
+      auto shape_type = DetailedEnum({ // currently only needed so we can import names via OpcodeArgTypeinfo
+         DetailedEnumValue("none"),
+         DetailedEnumValue("sphere"),
+         DetailedEnumValue("cylinder"),
+         DetailedEnumValue("box"),
+      });
+   }
    OpcodeArgTypeinfo OpcodeArgValueShape::typeinfo = OpcodeArgTypeinfo(
       "_shape",
       "Shape",
       "A boundary volume that an object can have.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
-      { "none", "sphere", "cylinder", "box" },
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueShape>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueShape>,
+      enums::shape_type
    );
    //
    bool OpcodeArgValueShape::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

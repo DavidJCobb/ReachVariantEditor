@@ -6,8 +6,7 @@ namespace Megalo {
       "Requisition Palette",
       "A remnant of a scrapped feature.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueRequisitionPalette>
    );
 
@@ -16,8 +15,7 @@ namespace Megalo {
       "Trigger Index",
       "This type should only be used for running nested triggers; the compiler should manage it invisibly. How did you end up seeing it?",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTrigger>
    );
 
@@ -26,8 +24,7 @@ namespace Megalo {
       "Icon Index, 6-Bit",
       "An icon.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueIconIndex6Bits>
    );
 
@@ -36,8 +33,7 @@ namespace Megalo {
       "Icon Index, 7-Bit",
       "An icon.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueIconIndex7Bits>
    );
 }

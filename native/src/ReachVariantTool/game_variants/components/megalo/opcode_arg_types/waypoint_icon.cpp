@@ -45,9 +45,9 @@ namespace Megalo {
       "Waypoint Icon",
       "The icon to use for a waypoint.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointIcon>,
+      enums::waypoint_icon
    );
    //
    bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

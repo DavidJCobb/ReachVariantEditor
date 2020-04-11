@@ -373,6 +373,8 @@ This procedure allows us to weed out the following syntax errors:
 
   - A mismatched closing bracket e.g. "name]"
 
+  - Multiple space-separated terms in an index, e.g. "name[1 2]"
+
 Once we've split the variable reference into parts, we need to validate each raw part's 
 indices. For any part: if the index consists of non-numeric text, then we need to check 
 whether it matches an absolute alias. If so: if that absolute alias is not a constant integer, 

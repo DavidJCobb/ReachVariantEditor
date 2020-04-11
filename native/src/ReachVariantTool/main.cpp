@@ -31,39 +31,30 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
-//     = RENAME "ABSTRACT PROPERTIES" TO "ACCESSORS." NOTE THAT THIS TERMINOLOGY CHANGE IS 
-//       ALREADY USED IN THE NEXT TO-DO LIST ITEM.
-//
-//        - CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0], TOO?
+//     = CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0]?
 //
 //     - SHORT-TERM PLANS
 //
-//        - IMPORTED NAMES: OpcodeArgTypeinfo has a mechanism to import names into the 
-//          global scope, intended for use with enum types, but it's out-of-date -- just 
-//          an initializer list of bare strings. Change it to take a DetailedEnum*, and 
-//          have all types that are/contain enums supply that.
+//        - IMPORTED NAMES: Let aliases target an imported name, but do not let them 
+//          shadow one. Have Script::Alias check for these before trying to resolve as a 
+//          VariableReference. If an imported name is matched, Script::Alias should retain 
+//          the original imported name as a QString as well as the typeinfo that imported 
+//          it.
 //
-//          Once that's done, give OpcodeArgTypeRegistry a function that takes a string 
-//          and searches all types' imported names for a case-insensitive match, returning 
-//          the matching type.
+//           - If VariableReference runs into an imported name at any point, it should 
+//             error.
 //
-//           = Enum values should only ever appear as the targets of absolute aliases, or 
-//             as function call arguments parsed directly by OpcodeArgValue::compile, so 
-//             what we should do is:
+//              - This means that if Alias handles imported names itself, it needs to 
+//                do so transitively i.e. we need to avoid breaking this:
 //
-//              - Have Script::Alias check for these before trying to resolve as a 
-//                VariableReference. If an imported name is matched, Script::Alias should 
-//                retain the original imported name as a QString as well as the typeinfo 
-//                that imported it.
+//                alias foo = warthog
+//                alias bar = foo
 //
-//              - If VariableReference runs into an imported name at any point, it should 
-//                error.
+//           - Program the Compiler to keep track of what Aliases are in scope.
 //
-//                 - This means that if Alias handles imported names itself, it needs to 
-//                   do so transitively i.e. we need to avoid breaking this:
-//
-//                   alias foo = warthog
-//                   alias bar = foo
+//           = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
+//             COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 
+//             WILL BE COMPLETE.
 //
 //        - Compiling assignments
 //
@@ -82,13 +73,6 @@ int main(int argc, char *argv[]) {
 //             and we can add an enum for the current condition joiner, and use that and 
 //             the bool when compiling; the Statement itself doesn't need to retain the 
 //             "negated" bool (which is the only purpose of the Comparison class).
-//
-//     - Alias resolution needs to be completed, including disallowing the shadowing of all 
-//       built-ins, and allowing an alias to refer to a built-in.
-//
-//        - This includes handling enum values and other such content. To accomplish this, 
-//          we'll need to make it so that OpcodeArgTypeinfo can specify a DetailedEnum or 
-//          DetailedFlags (currently it can specify an initializer list of const char*s).
 //
 //     - The compiler needs code to compile non-function-call assignments and comparisons.
 //
@@ -165,12 +149,19 @@ int main(int argc, char *argv[]) {
 //
 //     = RANDOM NOTES
 //
+//        - The const-bool OpcodeArgValue type should probably be converted to an enum 
+//          type, so that one can write "true" and "false" as values and so that aliases 
+//          can interact consistently with those (e.g. no shadowing them).
+//
 //        - The "object type" OpcodeArgValue type should accept an integer index in 
 //          addition to an enum value, so that we can account for future additions to 
 //          the type list (which may occur as part of "Thorage" or similar future MCC 
 //          updates). Ditto for the "variant string ID" type.
 //
 //        - Vector3 and friends need to be able to allow integer-aliases when compiling.
+//
+//        - It'd be cool if the "object player variable" type accepted either the index 
+//          of an object.player variable, or a relative alias of an object.player var.
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
 //

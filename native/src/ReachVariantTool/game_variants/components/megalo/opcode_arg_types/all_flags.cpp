@@ -1,28 +1,6 @@
 #include "all_flags.h"
 #include "../enums.h"
 
-namespace {
-   namespace _MegaloArgValueFlagsBase {
-      megalo_define_smart_flags(CreateObject,
-         "never garbage-collect",
-         "unk_1",
-         "unk_2"
-      );
-      megalo_define_smart_flags(KillerType,
-         "guardians",
-         "suicide",
-         "kill",
-         "betrayal",
-         "quit"
-      );
-      megalo_define_smart_flags(PlayerUnusedMode,
-         "unk_0",
-         "unk_1",
-         "unk_2",
-         "unk_3",
-      );
-   }
-}
 namespace Megalo {
    namespace flags_masks {
       auto create_object = DetailedFlags({
@@ -117,9 +95,9 @@ namespace Megalo {
       "Create Object Flags",
       "Options for creating objects.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCreateObjectFlags>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCreateObjectFlags>,
+      flags_masks::create_object
    );
    //
    OpcodeArgValueKillerTypeFlags::OpcodeArgValueKillerTypeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::killer_type) {}
@@ -128,9 +106,9 @@ namespace Megalo {
       "Killer Type Flags",
       "Overall causes of death for players.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueKillerTypeFlags>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueKillerTypeFlags>,
+      flags_masks::killer_type
    );
    //
    OpcodeArgValuePlayerUnusedModeFlags::OpcodeArgValuePlayerUnusedModeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
@@ -139,8 +117,8 @@ namespace Megalo {
       "Player Unused Mode",
       "Unknown.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerUnusedModeFlags>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerUnusedModeFlags>,
+      flags_masks::player_unused_mode
    );
 }

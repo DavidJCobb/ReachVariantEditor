@@ -52,9 +52,9 @@ namespace Megalo {
       "Variant String",
       "A small name indicating a variation of an object type, such as an armor permutation for a biped.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueVariantStringID>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueVariantStringID>,
+      enums::variant_string_id
    );
 
    bool OpcodeArgValueVariantStringID::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

@@ -57,8 +57,7 @@ namespace Megalo {
       "Formatted String",
       "A format string and up to two tokens to insert into it.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueStringTokens2>
    );
    //

@@ -44,8 +44,7 @@ namespace Megalo {
       "Object Timer Variable Index",
       "A number indicating one of the timer variables on an object.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectTimerVariable>
    );
    //
@@ -56,8 +55,7 @@ namespace Megalo {
       "Object Player Variable",
       "An object-and-player reference.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectPlayerVariable>
    );
    //

@@ -993,9 +993,9 @@ namespace Megalo {
       "Incident",
       "A notification that can be sent to the game engine to award medals, trigger announcer voiceovers, and so on.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueIncident>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueIncident>,
+      enums::incident
    );
 
    bool OpcodeArgValueIncident::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

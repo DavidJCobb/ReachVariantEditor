@@ -10,9 +10,9 @@ namespace Megalo {
       "Object Type",
       "A type of object to spawn in the game world.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectType>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectType>,
+      enums::object_type
    );
 
    bool OpcodeArgValueObjectType::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

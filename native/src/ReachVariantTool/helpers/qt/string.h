@@ -22,5 +22,7 @@ namespace cobb {
    namespace qt {
       bool string_has_any_of(const QString& text, const QString& charset); // compare to strpbrk
       bool string_has_any_of(const QString& text, const char* charset); // (charset) is treated as Latin-1
+      bool string_is_integer(const QString& text);
+      int  stricmp(const QString& a, const std::string& b);
    }
 }

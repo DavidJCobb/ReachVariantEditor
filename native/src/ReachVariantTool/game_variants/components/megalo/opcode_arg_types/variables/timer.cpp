@@ -35,7 +35,6 @@ namespace Megalo {
       "Timer",
       "A numeric timer. You can control whether timers increase or decrease, and at what rate.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTimer>
    );

@@ -15,10 +15,9 @@ namespace Megalo {
       "Player Traits",
       "A set of player traits. These are not applied and removed; rather, a script must apply them for every tick that the script wishes them to be active.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerTraits>,
-      {},
+      OpcodeArgTypeinfo::no_properties,
       Limits::max_script_traits
    );
    //

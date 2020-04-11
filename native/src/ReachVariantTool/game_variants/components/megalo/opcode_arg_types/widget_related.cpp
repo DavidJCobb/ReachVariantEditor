@@ -16,10 +16,9 @@ namespace Megalo {
          "HUD Widget",
          "A HUD widget controllable by script.",
          //
-         OpcodeArgTypeinfo::typeinfo_type::default,
-         0,
+         OpcodeArgTypeinfo::flags::none,
          OpcodeArgTypeinfo::default_factory<OpcodeArgValueWidget>,
-         {},
+         OpcodeArgTypeinfo::no_properties,
          Limits::max_script_widgets
       );
       //
@@ -70,15 +69,21 @@ namespace Megalo {
    #pragma endregion
    //
    #pragma region OpcodeArgValueMeterParameters
+      namespace enums {
+         auto widget_meter_parameters_type = DetailedEnum({ // currently only needed so we can import names via OpcodeArgTypeinfo
+            DetailedEnumValue("none"),
+            DetailedEnumValue("timer"),
+            DetailedEnumValue("number"),
+         });
+      }
       OpcodeArgTypeinfo OpcodeArgValueMeterParameters::typeinfo = OpcodeArgTypeinfo(
          "_meter_parameters",
          "HUD Widget Meter Parameters",
          "Options for displaying a meter on the HUD.",
          //
-         OpcodeArgTypeinfo::typeinfo_type::default,
-         0,
-         { "none", "timer", "number" },
-         OpcodeArgTypeinfo::default_factory<OpcodeArgValueMeterParameters>
+         OpcodeArgTypeinfo::flags::none,
+         OpcodeArgTypeinfo::default_factory<OpcodeArgValueMeterParameters>,
+         enums::widget_meter_parameters_type
       );
       //
       bool OpcodeArgValueMeterParameters::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

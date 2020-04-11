@@ -119,7 +119,7 @@ struct DetailedEnum {
       return &this->values[i];
    }
    int lookup(const char* name) const noexcept;
-   int lookup_by_signature(uint32_t s) const noexcept;
+   int lookup(const QString& name) const noexcept;
    //
    inline bool is_in_bounds(int v) const noexcept {
       if (v < 0)

@@ -34,7 +34,6 @@ namespace Megalo {
       "Team",
       "A team.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeam>,
       {

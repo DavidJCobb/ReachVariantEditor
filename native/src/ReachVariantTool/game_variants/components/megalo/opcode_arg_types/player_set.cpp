@@ -2,15 +2,24 @@
 #include "../../../../helpers/strings.h"
 
 namespace Megalo {
+   namespace enums {
+      auto player_set_group_name = DetailedEnum({ // currently only needed so we can import names via OpcodeArgTypeinfo
+         DetailedEnumValue("no_one"),
+         DetailedEnumValue("anyone"),
+         DetailedEnumValue("allies"),
+         DetailedEnumValue("enemies"),
+         DetailedEnumValue("specific_player"),
+         DetailedEnumValue("no_one_2"),
+      });
+   }
    OpcodeArgTypeinfo OpcodeArgValuePlayerSet::typeinfo = OpcodeArgTypeinfo(
       "_player_set",
       "Player Set",
       "A group of players.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
-      { "no_one", "anyone", "allies", "enemies", "specific_player", "no_one_2" },
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerSet>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerSet>,
+      enums::player_set_group_name
    );
    //
    bool OpcodeArgValuePlayerSet::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {

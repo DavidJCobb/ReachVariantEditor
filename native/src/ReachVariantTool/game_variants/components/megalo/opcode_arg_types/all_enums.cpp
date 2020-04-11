@@ -142,9 +142,9 @@ namespace Megalo {
       "Add-Weapon Type",
       "Determines how a weapon should be given to a biped.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueAddWeaponEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueAddWeaponEnum>,
+      enums::add_weapon_type
    );
 
    OpcodeArgValueCHUDDestinationEnum::OpcodeArgValueCHUDDestinationEnum() : OpcodeArgValueEnumSuperclass(enums::c_hud_destination) {}
@@ -153,9 +153,9 @@ namespace Megalo {
       "CHUD Destination",
       "Meaning unknown.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCHUDDestinationEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCHUDDestinationEnum>,
+      enums::c_hud_destination
    );
 
    OpcodeArgValueCompareOperatorEnum::OpcodeArgValueCompareOperatorEnum() : OpcodeArgValueEnumSuperclass(enums::compare_operator) {}
@@ -164,9 +164,9 @@ namespace Megalo {
       "Comparison Operator",
       "A comparison operator.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueCompareOperatorEnum>
+      // DO NOT import any names, because all of the enum values are operators and the compiler has handling for them built-in
    );
 
    OpcodeArgValueDropWeaponEnum::OpcodeArgValueDropWeaponEnum() : OpcodeArgValueEnumSuperclass(enums::drop_weapon_type) {}
@@ -175,9 +175,9 @@ namespace Megalo {
       "Weapon Slot",
       "Determines which weapon a player will be made to drop.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueDropWeaponEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueDropWeaponEnum>,
+      enums::drop_weapon_type
    );
 
    OpcodeArgValueGrenadeTypeEnum::OpcodeArgValueGrenadeTypeEnum() : OpcodeArgValueEnumSuperclass(enums::grenade_type) {}
@@ -186,9 +186,9 @@ namespace Megalo {
       "Grenade Type",
       "A grenade type.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueGrenadeTypeEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueGrenadeTypeEnum>,
+      enums::grenade_type
    );
 
    OpcodeArgValueMathOperatorEnum::OpcodeArgValueMathOperatorEnum() : OpcodeArgValueEnumSuperclass(enums::math_operator) {}
@@ -197,9 +197,9 @@ namespace Megalo {
       "Assignment Operator",
       "An assignment operator.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueMathOperatorEnum>
+      // DO NOT import any names, because all of the enum values are operators and the compiler has handling for them built-in
    );
 
    OpcodeArgValuePickupPriorityEnum::OpcodeArgValuePickupPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::pickup_priority) {}
@@ -208,9 +208,9 @@ namespace Megalo {
       "Pickup Priority",
       "Determines how a player can pick up a weapon.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePickupPriorityEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePickupPriorityEnum>,
+      enums::pickup_priority
    );
 
    OpcodeArgValueTeamDispositionEnum::OpcodeArgValueTeamDispositionEnum() : OpcodeArgValueEnumSuperclass(enums::team_disposition) {}
@@ -219,9 +219,9 @@ namespace Megalo {
       "Team Disposition",
       "Unknown. It's possible that this is an \"alliance status.\"",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamDispositionEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamDispositionEnum>,
+      enums::team_disposition
    );
 
    OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum() : OpcodeArgValueEnumSuperclass(enums::timer_rate) {}
@@ -230,9 +230,9 @@ namespace Megalo {
       "Timer Rate",
       "The direction and rate at which a timer's value changes.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTimerRateEnum>
+      // DO NOT import any names, because all of the enum values are just integer constants
    );
 
    OpcodeArgValueWaypointPriorityEnum::OpcodeArgValueWaypointPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::waypoint_priority) {}
@@ -241,9 +241,9 @@ namespace Megalo {
       "Waypoint Priority",
       "A waypoint's priority. Influences whether it blinks, how visible it is, and so on.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointPriorityEnum>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointPriorityEnum>,
+      enums::waypoint_priority
    );
 
    OpcodeArgValueLoadoutPalette::OpcodeArgValueLoadoutPalette() : OpcodeArgValueEnumSuperclass(enums::loadout_palette) {}
@@ -252,8 +252,8 @@ namespace Megalo {
       "Loadout Palette",
       "A loadout palette. Though palettes are named in terms of Spartan-versus-Elite Invasion, scripts determine which players get to use which palettes.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueLoadoutPalette>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueLoadoutPalette>,
+      enums::loadout_palette
    );
 }

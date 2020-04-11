@@ -77,4 +77,6 @@ struct DetailedFlags {
          return nullptr;
       return &this->values[i];
    }
+   int lookup(const char* name) const noexcept;
+   int lookup(const QString& name) const noexcept;
 };

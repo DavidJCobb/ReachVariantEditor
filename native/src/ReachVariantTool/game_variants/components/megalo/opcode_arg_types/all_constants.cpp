@@ -7,8 +7,7 @@ namespace Megalo {
       "Boolean",
       "A single \"true\" or \"false\" constant value.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstBool>
    );
    //
@@ -42,8 +41,7 @@ namespace Megalo {
       "Integer, 8-Bit",
       "A numeric constant ranging from -128 to +127.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstSInt8>
    );
    //

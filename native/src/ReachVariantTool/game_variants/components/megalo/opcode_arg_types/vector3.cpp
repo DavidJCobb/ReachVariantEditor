@@ -6,8 +6,7 @@ namespace Megalo {
       "Vector3",
       "A 3D vector indicating a position or position offset.", // TODO: for create-object, is it relative to the basis-object's axes?
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVector3>
    );
    //

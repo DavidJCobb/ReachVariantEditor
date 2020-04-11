@@ -12,8 +12,7 @@ namespace Megalo {
       "Any Variable",
       "A number, object, player, team, or timer can appear here.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none, // don't flag this as a variable, because you can't write an "any" variable in a script
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueAnyVariable>
    );
    //

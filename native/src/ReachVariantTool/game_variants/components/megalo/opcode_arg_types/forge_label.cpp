@@ -15,8 +15,7 @@ namespace Megalo {
       "Forge Label",
       "A Forge label. Players can apply these to objects when creating maps in Forge.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
-      0,
+      OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueForgeLabel>
    );
    //

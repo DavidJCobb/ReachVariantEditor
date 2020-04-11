@@ -3,6 +3,8 @@
 #include "opcode_arg_types/variables/all_core.h"
 #include "../../errors.h"
 #include "../../../helpers/qt/string.h"
+#include "../../../formats/detailed_enum.h"
+#include "../../../formats/detailed_flags.h"
 
 namespace Megalo {
    void OpcodeArgTypeRegistry::register_type(const OpcodeArgTypeinfo& type) {
@@ -25,6 +27,22 @@ namespace Megalo {
          if (type->is_variable() && cobb::qt::stricmp(name, type->internal_name) == 0)
             return type;
       return nullptr;
+   }
+   void OpcodeArgTypeRegistry::lookup_imported_name(const QString& name, type_list_t& out) const {
+      out.clear();
+      for (auto type : this->types) {
+         auto& imp = type->imported_names;
+         auto  e   = imp.enum_values;
+         auto  f   = imp.flag_values;
+         if (e && e->lookup(name)) {
+            out.push_back(type);
+            continue;
+         }
+         if (f && f->lookup(name)) {
+            out.push_back(type);
+            continue;
+         }
+      }
    }
 
    const Script::Property* OpcodeArgTypeinfo::get_property_by_name(QString name) const {

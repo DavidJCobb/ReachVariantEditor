@@ -1,4 +1,5 @@
 #include "detailed_enum.h"
+#include "../helpers/qt/string.h"
 
 QString DetailedEnumValue::get_description() const noexcept {
    for (size_t i = 0; i < std::extent<decltype(this->infos)>::value; i++) {
@@ -26,14 +27,12 @@ int DetailedEnum::lookup(const char* name) const noexcept {
    }
    return -1;
 }
-int DetailedEnum::lookup_by_signature(uint32_t sig) const noexcept {
+int DetailedEnum::lookup(const QString& name) const noexcept {
    size_t s = this->size();
    for (size_t i = 0; i < s; ++i) {
-      const auto& item  = this->values[i];
-      const auto& infos = item.infos;
-      for (auto& info : infos)
-         if (info.type == DetailedEnumValueInfo::info_type::signature && info.signature == sig)
-            return i;
+      const auto& item = this->values[i];
+      if (cobb::qt::stricmp(name, item.name) == 0)
+         return i;
    }
    return -1;
 }

@@ -39,7 +39,6 @@ namespace Megalo {
       "Object",
       "A physical object existing in the game world.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::default,
       OpcodeArgTypeinfo::flags::is_variable | OpcodeArgTypeinfo::flags::can_hold_variables,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObject>,
       {

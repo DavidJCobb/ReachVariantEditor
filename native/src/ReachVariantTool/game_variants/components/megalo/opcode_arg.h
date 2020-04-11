@@ -2,6 +2,7 @@
 #include <cassert>
 #include <functional>
 #include <string>
+#include <vector>
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
@@ -43,6 +44,8 @@
 // allowed, e.g. a trigger action cannot modify the value of a constant integer).
 //
 
+class DetailedEnum;
+class DetailedFlags;
 class GameVariantDataMultiplayer;
 
 namespace Megalo {
@@ -52,6 +55,9 @@ namespace Megalo {
    class OpcodeArgTypeinfo;
 
    class OpcodeArgTypeRegistry {
+      public:
+         using type_list_t = std::vector<const OpcodeArgTypeinfo*>;
+         //
       public:
          static OpcodeArgTypeRegistry& get() {
             static OpcodeArgTypeRegistry instance;
@@ -64,18 +70,16 @@ namespace Megalo {
          const OpcodeArgTypeinfo* get_by_internal_name(const QString& name) const;
          const OpcodeArgTypeinfo* get_static_indexable_type(const QString& name) const;
          const OpcodeArgTypeinfo* get_variable_type(const QString& name) const;
+         void lookup_imported_name(const QString& name, type_list_t& out) const;
    };
 
    class OpcodeArgTypeinfo {
       public:
-         enum class typeinfo_type {
-            default,
-            enumeration,
-            flags_mask,
-         };
          struct flags {
             flags() = delete;
             enum type : uint32_t {
+               none = 0,
+               //
                is_variable        = 0x00000001, // number, object, player, team, timer
                can_hold_variables = 0x00000002, // object, player, team
             };
@@ -85,12 +89,17 @@ namespace Megalo {
          //
          template<typename T> static OpcodeArgValue* default_factory() { return new T; }
          //
+         static constexpr std::initializer_list<Script::Property> no_properties = {};
+         //
       public:
          std::string internal_name;
          QString     friendly_name;
          QString     description;
-         typeinfo_type            type    = typeinfo_type::default;
-         flags_type               flags   = 0;
+         flags_type  flags = 0;
+         struct {
+            const DetailedEnum*  enum_values = nullptr;
+            const DetailedFlags* flag_values = nullptr;
+         } imported_names;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          factory_t                factory = nullptr;
          std::vector<Script::Property> properties; // for the compiler; do not list abstract properties here
@@ -101,17 +110,21 @@ namespace Megalo {
          OpcodeArgTypeinfo() {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), factory(fac) {
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, typeinfo_type t, flags_type f, std::initializer_list<const char*> e, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), type(t), flags(f), elements(e), factory(fac) {
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedEnum&  names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
+            this->imported_names.enum_values = &names_to_import;
+            OpcodeArgTypeRegistry::get().register_type(*this);
+         }
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedFlags& names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
+            this->imported_names.flag_values = &names_to_import;
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
          OpcodeArgTypeinfo(
             const char* in,
             QString fn,
             QString desc,
-            typeinfo_type t,
             flags_type f,
             factory_t fac,
             std::initializer_list<Script::Property> pr,
@@ -122,7 +135,6 @@ namespace Megalo {
             internal_name(in),
             friendly_name(fn),
             description(desc),
-            type(t),
             flags(f),
             factory(fac),
             properties(pr),

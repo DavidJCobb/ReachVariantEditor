@@ -445,9 +445,9 @@ namespace Megalo {
       "Sound",
       "One of a limited set of sounds available to scripts to play.",
       //
-      OpcodeArgTypeinfo::typeinfo_type::enumeration,
-      0,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>,
+      enums::sound
    );
 
    bool OpcodeArgValueSound::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
