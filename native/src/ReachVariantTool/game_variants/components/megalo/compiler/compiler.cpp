@@ -877,6 +877,8 @@ namespace Megalo {
    }
    //
    bool Compiler::_closeCurrentBlock() {
+      if (this->block == this->root)
+         return false;
       this->block->set_end(this->state);
       auto parent = dynamic_cast<Script::Block*>(this->block->parent);
       if (!parent)

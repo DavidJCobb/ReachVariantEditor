@@ -38,14 +38,32 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - VariableReference string constructor: we need to catch the following syntax 
-//          errors:
+//        - IMPORTED NAMES: OpcodeArgTypeinfo has a mechanism to import names into the 
+//          global scope, intended for use with enum types, but it's out-of-date -- just 
+//          an initializer list of bare strings. Change it to take a DetailedEnum*, and 
+//          have all types that are/contain enums supply that.
 //
-//           - name[1 2]
-//           - name[ ]   // we check for an empty index string but not a whitespace-only one
+//          Once that's done, give OpcodeArgTypeRegistry a function that takes a string 
+//          and searches all types' imported names for a case-insensitive match, returning 
+//          the matching type.
 //
-//        - VariableReference string constructor: we need to trim the index string when 
-//          committing a RawPart.
+//           = Enum values should only ever appear as the targets of absolute aliases, or 
+//             as function call arguments parsed directly by OpcodeArgValue::compile, so 
+//             what we should do is:
+//
+//              - Have Script::Alias check for these before trying to resolve as a 
+//                VariableReference. If an imported name is matched, Script::Alias should 
+//                retain the original imported name as a QString as well as the typeinfo 
+//                that imported it.
+//
+//              - If VariableReference runs into an imported name at any point, it should 
+//                error.
+//
+//                 - This means that if Alias handles imported names itself, it needs to 
+//                   do so transitively i.e. we need to avoid breaking this:
+//
+//                   alias foo = warthog
+//                   alias bar = foo
 //
 //        - Compiling assignments
 //
@@ -64,11 +82,6 @@ int main(int argc, char *argv[]) {
 //             and we can add an enum for the current condition joiner, and use that and 
 //             the bool when compiling; the Statement itself doesn't need to retain the 
 //             "negated" bool (which is the only purpose of the Comparison class).
-//
-//     - Script::VariableReference::_transclude still needs to be coded. It is responsible 
-//       for replacing a Part with the contents of an Alias.
-//
-//     - VariableReference should detect and disallow triply-nested variables (var.var.var).
 //
 //     - Alias resolution needs to be completed, including disallowing the shadowing of all 
 //       built-ins, and allowing an alias to refer to a built-in.
@@ -95,6 +108,10 @@ int main(int argc, char *argv[]) {
 //
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
+//
+//        = DO NOT write to the variant's declarations. Maintain our own set and commit 
+//          it to the variant after successful compiling. That way, we don't trash the 
+//          loaded file if compiling hits an error.
 //
 //     - Compiling should fail if multiple triggers use the same event type (via the "on" 
 //       keyword; requires that the Compiler keep track of what events have been used so 
@@ -145,6 +162,65 @@ int main(int argc, char *argv[]) {
 //        - Exception safety for anything that gets heap-allocated.
 //
 //        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
+//
+//     = RANDOM NOTES
+//
+//        - The "object type" OpcodeArgValue type should accept an integer index in 
+//          addition to an enum value, so that we can account for future additions to 
+//          the type list (which may occur as part of "Thorage" or similar future MCC 
+//          updates). Ditto for the "variant string ID" type.
+//
+//        - Vector3 and friends need to be able to allow integer-aliases when compiling.
+//
+//     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
+//
+//        - Round-trip decompiling/recompiling for all vanilla gametype scripts and for 
+//          SvE Mythic Slayer. Tests should include modified versions of the decompiled 
+//          scripts that use aliases where appropriate (both because I want to provide 
+//          such "source scripts" to script authors to learn from, and so we can test to 
+//          ensure that aliases work properly).
+//
+//        - What happens when we perform an invalid assignment, such as the assignment 
+//          of a number to an object? Be sure to check the resulting value of the target 
+//          object and to try to access a member on it. I'm wondering whether the game 
+//          does nothing, clears the target variable, crashes immediately, or breaks the 
+//          variable such that meaningful use will crash. This will determine whether we 
+//          add a compiler warning or compiler error for bad assignments.
+//
+//           - While we're at it, verify the exact result of assigning a number to a 
+//             timer (which we know from vanilla scripts is valid) and of assigning a 
+//             timer to a number (which I don't remember seeing in vanilla content).
+//
+//        - We need to test whether our subroutine (user-defined function) approach is 
+//          actually supported by the game. It entails defining a trigger that is 
+//          flagged as nested but actually called from multiple places, rather than 
+//          being a block "inside" of another block. It would also be worthwhile to see 
+//          if this is compatible with the subroutine being an event handler.
+//
+//        - Does the "Create Object" opcode use an absolute position offset or a relative 
+//          one (i.e. using the "basis" object's rotation axes)? Are the units the same 
+//          as in Forge, or are they scaled (i.e. script 1 = Forge 0.1)?
+//
+//        - Why did Bungie use Condition::or_group instead of a simple bool to indicate 
+//          an OR-relationship with the next condition? The only reason I can think of 
+//          is if they supported parenthetical conditions, but I haven't seen any 
+//          obvious uses of this in gametype scripts. We should devise a test such as 
+//          
+//             (A and B) or (C and D)
+//
+//          Then, we should write the code without parentheses:
+//
+//             A and B or C and D
+//
+//          And then we should manually tamper with the Condition::or_group values in 
+//          the compiled script, and test different setups in-game to see if any give 
+//          us results comparable to what we'd see with parenthetical expressions. For 
+//          our actual tests, each individual condition can just be a test to see if 
+//          the player is inside of a given shape, and we can place overlapping shapes 
+//          on the map.
+//
+//        - What happens if the script tries to use a variable that is not declared? We 
+//          would need to tamper with the variant data manually to check this.
 //
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..

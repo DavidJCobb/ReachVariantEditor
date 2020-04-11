@@ -124,6 +124,11 @@ namespace Megalo::Script {
                      throw compile_exception("An integer literal cannot have properties or nested variables."); // 1234.name"
                   throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.1234.name"
                }
+               index = index.trimmed();
+               for (auto c : index) {
+                  if (c.isSpace()) // "name[1 2]", "name[word word]", etc.
+                     throw compile_exception("An index cannot consist of multiple space-separated terms.");
+               }
                auto part = RawPart(name, index);
                this->raw.push_back(part);
                name = "";
@@ -142,6 +147,8 @@ namespace Megalo::Script {
       {
          if (name.isEmpty()) // text ended in '.' or was empty string
             throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
+         if (is_index)
+            throw compile_exception("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
          if (cobb::qt::string_is_integer(name)) {
             if (this->raw.empty())
                //
@@ -152,8 +159,11 @@ namespace Megalo::Script {
                throw compile_exception("An integer literal cannot be indexed.");
             throw compile_exception("An integer literal cannot be a property or nested variable.");
          }
-         if (is_index)
-            throw compile_exception("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
+         index = index.trimmed();
+         for (auto c : index) {
+            if (c.isSpace()) // "name[1 2]", "name[word word]", etc.
+               throw compile_exception("An index cannot consist of multiple space-separated terms.");
+         }
          auto part = RawPart(name, index);
          this->raw.push_back(part);
       }
@@ -299,6 +309,70 @@ namespace Megalo::Script {
    }
    //
    #pragma region Variable reference resolution code
+   void VariableReference::__transclude_alias(uint32_t raw_index, Alias& alias) {
+      #if _DEBUG
+         assert(alias.target);
+         assert(raw_index < this->raw.size());
+      #endif
+      auto& resolved = alias.target->resolved;
+      //
+      std::vector<RawPart> replacements;
+      if (!resolved.alias_basis) {
+         //
+         // If we're transcluding an absolute alias, then start with the top level. If we're 
+         // transcluding a relative alias, then there is no top level.
+         //
+         auto& top_level = resolved.top_level;
+         //
+         QString name;
+         int32_t index = top_level.index;
+         bool    has_index = false;
+         //
+         if (auto scope = top_level.scope) {
+            name = scope->format;
+            has_index = scope->has_index();
+         } else if (auto which = top_level.which) {
+            name = top_level.which->name.c_str();
+         } else {
+            has_index = true;
+            if (!top_level.is_static)
+               replacements.emplace_back("global");
+            name = top_level.type->internal_name.c_str();
+         }
+         //
+         if (has_index)
+            replacements.emplace_back(name, index);
+         else
+            replacements.emplace_back(name);
+      }
+      if (auto type = resolved.nested.type) {
+         QString name = type->internal_name.c_str();
+         replacements.emplace_back(name, resolved.nested.index);
+      }
+      if (auto prop = resolved.property.definition) {
+         QString name = prop->name.c_str();
+         if (prop->has_index())
+            replacements.emplace_back(name, resolved.property.index);
+         else
+            replacements.emplace_back(name);
+      }
+      if (auto accessor = resolved.accessor) {
+         QString name;
+         if (accessor->name.empty())
+            name = resolved.accessor_name;
+         else
+            name = accessor->name.c_str();
+         replacements.emplace_back(name);
+      }
+      //
+      // Now that we've generated RawParts from the alias content, we need to replace the 
+      // target raw-part with them.
+      //
+      auto it = this->raw.begin() + raw_index + 1; // we want to insert after the target element, but (insert) inserts before, so add one
+      this->raw.insert(it, replacements.begin(), replacements.end());
+      this->raw.erase(this->raw.begin() + raw_index);
+   }
+   //
    bool VariableReference::_resolve_aliases_from(Compiler& compiler, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr) {
       auto   part  = this->_get_raw_part(raw_index);
       Alias* alias = nullptr;
@@ -315,7 +389,7 @@ namespace Megalo::Script {
          this->resolved.top_level.index       = alias->get_integer_constant();
          return true;
       }
-      this->_transclude(raw_index, *alias);
+      this->__transclude_alias(raw_index, *alias);
       return true;
    }
    size_t VariableReference::_resolve_top_level(Compiler& compiler, bool is_alias_definition = false) {

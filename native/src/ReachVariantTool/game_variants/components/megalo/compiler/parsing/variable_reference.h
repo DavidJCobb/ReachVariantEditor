@@ -24,8 +24,9 @@ namespace Megalo {
                bool    index_is_numeric = false;
                //
                RawPart() {} // needed for std::vector::push_back
+               RawPart(QString n) : name(n) {}
                RawPart(QString n, QString i) : name(n), index_str(i) {}
-               RawPart(QString n, int32_t i) : name(n), index(i) {};
+               RawPart(QString n, int32_t i) : name(n), index(i), index_is_numeric(true) {}
                //
                RawPart& operator=(const RawPart& other) noexcept;
                //
@@ -103,7 +104,7 @@ namespace Megalo {
                   return nullptr;
                return &this->raw[i];
             }
-            void _transclude(uint32_t index, Alias&); // replaces (this->parts[index]) with the contents of the alias. if the alias is a relative alias, does not include the alias typename
+            void __transclude_alias(uint32_t raw_index, Alias&); // replaces (this->raw[index]) with the contents of the alias. if the alias is a relative alias, does not include the alias typename
       };
    }
 }
