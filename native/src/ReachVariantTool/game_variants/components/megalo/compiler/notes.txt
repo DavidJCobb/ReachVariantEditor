@@ -120,6 +120,23 @@ or shadow each other if they are relative to different types.
 
 
 
+An IMPORTED NAME is any value imported into the global scope by an opcode argument type. 
+These include:
+
+   box     -- from the "shape" type
+   warthog -- from the "object type" type
+
+Imported names are single values that can only appear when the appropriate opcode argument 
+type calls for them to appear (which, by implication, means that they can only appear as 
+an argument to a function call). Imported names can be the target of an alias, as shown 
+above in the description for aliases.
+
+Imported names do not have to be unique to a given type; two types can import the same 
+name. As an example, the name "kill" is imported by both the "incident" type and the 
+"killer type flags" type.
+
+
+
 == How do variables work in Megalo? ==
 
 There are five variable types: number, object, player, team, and timer. Numbers and timers 

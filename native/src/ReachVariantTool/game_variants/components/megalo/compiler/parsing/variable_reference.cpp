@@ -669,6 +669,18 @@ namespace Megalo::Script {
          }
          compiler.throw_error(QString("The %1 type does not have a member named \"%2\".").arg(prev->internal_name.c_str()).arg(part->name));
       }
+      if (this->raw.size() == 1) {
+         auto& first = this->raw[0];
+         if (!first.has_index()) {
+            //
+            // Let's check for an attempt to use an imported name where a variable was expected.
+            //
+            OpcodeArgTypeRegistry::type_list_t types;
+            OpcodeArgTypeRegistry::get().lookup_imported_name(first.name, types);
+            if (types.size())
+               compiler.throw_error(QString("The \"%1\" value cannot appear here.").arg(first.name));
+         }
+      }
       auto type = this->get_type();
       if (type)
          compiler.throw_error(QString("The %1 type does not have a member named \"%2\".").arg(type->internal_name.c_str()).arg(part->name));

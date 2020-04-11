@@ -41,20 +41,33 @@ int main(int argc, char *argv[]) {
 //          the original imported name as a QString as well as the typeinfo that imported 
 //          it.
 //
-//           - If VariableReference runs into an imported name at any point, it should 
-//             error.
-//
-//              - This means that if Alias handles imported names itself, it needs to 
-//                do so transitively i.e. we need to avoid breaking this:
+//           - Imported names should be handled solely at the Alias level, and should not 
+//             be paid attention to by VariableReference::resolve. This means that the 
+//             Alias class will need to do a little extra work to ensure that transitivity 
+//             is maintained i.e. we need to avoid breaking this:
 //
 //                alias foo = warthog
 //                alias bar = foo
 //
-//           - Program the Compiler to keep track of what Aliases are in scope.
+//             Probably easiest to program this to occur before we try to resolve the 
+//             variable name: do a quick check to see if the target string contains any 
+//             brackets or periods and if not, try to match it as an imported name first. 
+//             We'll also want Alias to have a QString field (target_imported_name) to 
+//             hold the target-string if there is indeed a match.
 //
-//           = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
-//             COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 
-//             WILL BE COMPLETE.
+//           - There is one exception: if we hit the end of VariableReference::resolve 
+//             (i.e. the code to deal with an unrecognized member), and if there is only 
+//             one raw part with no index, then we should check if it matches any imported 
+//             names. If so, we should have a unique error message for that: "NAME cannot 
+//             appear here."
+//
+//              = WENT AHEAD AND CODED THIS EARLY.
+//
+//        - Program the Compiler to keep track of what Aliases are in scope.
+//
+//        = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
+//          COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 
+//          WILL BE COMPLETE.
 //
 //        - Compiling assignments
 //
