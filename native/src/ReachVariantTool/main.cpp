@@ -38,30 +38,88 @@ int main(int argc, char *argv[]) {
 //       PLACES), ESPECIALLY RECURSION. THIS WILL BE SIGNIFICANT ONCE WE HAVE THE COMPILER 
 //       WORKING; WE DON'T WANT TO BE UNABLE TO DECOMPILE OUR OWN COMPILER OUTPUT.
 //
-//        - Before decompiling any triggers, we should build an vector of integers -- one 
-//          for every trigger. Then, we should scan the triggers just looking for the 
-//          "call nested trigger" action; we should count the number of times that every 
-//          trigger is called. This will allow us to distinguish a user-defined function 
-//          from a nested trigger at decompile time.
+//       Specifically, we need to be able to handle this:
 //
-//          Then, we just need to:
+//          function foo()
+//             action
+//             if condition then
+//                foo()
+//             end
+//             action -- this being here makes the "if" a nested trigger calling an ancestor
+//          end
+//          function bar()
+//             action
+//             if condition then -- no actions after this if, so it's the same trigger
+//                bar()
+//             end
+//          end
 //
-//           - Decide on a standard name for user-defined functions. I'm thinking we 
-//             can just name them "trigger_XXX" where "XXX" is the index in the trigger 
-//             list.
+//       So how do we make that possible? Well,...
 //
-//           - Make Trigger::decompile accept that vector of integers. When it finds a 
-//             "call nested trigger" opcode, it should test whether the target trigger 
-//             is a user-defined function, and produce the appropriate output.
+//        - In decompiler.cpp, we should define a class called _TriggerTreeNode:
 //
-//           - Decompile user-defined functions in advance of all other triggers, passing 
-//             a boolean so that they wrap their content in a "function" declaration (or 
-//             use "function" in place of their normal block type if their normal block 
-//             type is the generic "do" block).
+//             struct _TriggerTreeNode {
+//                using list_t = std::vector<_TriggerTreeNode*>;
+//                
+//                int32_t index; // trigger index; -1 == root
+//                list_t  callers;
+//                list_t  callees;
+//             }
+//
+//          Before decompiling triggers, we would scan all triggers in the list to construct 
+//          a tree of _TriggerTreeNodes. Then, after the tree is fully constructed, we would 
+//          construct a std::vector<uint32_t> of trigger indices that need to be decompiled 
+//          as user-defined functions. A trigger needs to be decompiled as a user-defined 
+//          function if any of the conditions are met:
+//
+//           - The trigger has more than one caller.
+//
+//           - The trigger's callees include itself.
+//
+//           - The trigger's callees include any of its callers.
+//
+//           - The trigger's callees include any of its callers' callers, or its callers' 
+//             callers' callers, or so on.
+//
+//          (Kind of wondering whether traversing the tree to do that is the best idea; it 
+//          may be better to have a flat list of _TriggerTreeNode*s that point to each 
+//          other as appropriate, and then loop over them. Mainly, this would make it easier 
+//          to ensure that we only run the above checks once per trigger even when a trigger 
+//          is called from multiple places.)
+//
+//          User-defined functions would be decompiled in advance of all triggers, with 
+//          auto-generated names (e.g. "trigger_1"). The function to decompile an individual 
+//          Trigger object would need to accept a boolean indicating whether it should wrap 
+//          its block header in a "function" declaration (or replace the block header 
+//          entirely if it's a generic "do" block).
+//
+//           - If an event Trigger is told to decompile as a function, it should place the 
+//             event name before the "function" keyword.
 //
 //     - SHORT-TERM PLANS
 //
+//        - MOST ParsedItem SUBCLASSES USE BARE POINTERS AND WE CURRENTLY DON'T HAVE THE 
+//          MEMORY MANAGEMENT IN PLACE FOR THAT. While we could manually write new/delete 
+//          code, we should instead prefer smart pointers (especially since we already use 
+//          them in a few parts of the compiler for exception safety). WE NEED TO AUDIT ALL 
+//          PARSEDITEM SUBCLASSES AND SET THESE POINTERS UP WHERE APPROPRIATE, AND THEN WE 
+//          NEED TO EXAMINE EXISTING CODE TO REMOVE ANY (delete) STATEMENTS, AND SWAP ANY 
+//          (new) STATEMENTS FOR (make_unique) WHERE APPROPRIATE (just use Ctrl+F).
+//
 //        - Program the Compiler to keep track of what Aliases are in scope.
+//
+//           - The compiler should maintain a vector of all in-scope Alias*es, with newly-
+//             parsed Aliases added to the end. When searching for an alias, it should 
+//             search the list in reverse order. When a block is closed, we should loop 
+//             over the Compiler's Alias list in reverse order, removing all aliases 
+//             whose (owner) is the block and stopping when we find any alias whose 
+//             (owner) is not the block.
+//
+//              - Do this BEFORE we throw out the block, so that we don't run into object 
+//                lifetime/deletion mishaps.
+//
+//        - Program the Compiler to keep track of what user-defined functions are in 
+//          scope. Similar approach to Aliases.
 //
 //        = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
 //          COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 
@@ -69,9 +127,10 @@ int main(int argc, char *argv[]) {
 //
 //        - Compiling assignments
 //
-//           - If the lefthand side is an accessor, then compile the accessor name, strip 
-//             the accessor from the VariableReference, and compile the VariableReference 
-//             by creating the assignment LHS argument and passing it.
+//           - If either side is an accessor, then compile the accessor name, strip the 
+//             accessor from the VariableReference, and compile the VariableReference by 
+//             creating the assignment LHS argument and passing it. If the accessor 
+//             opcode has an OpcodeFuncToScriptMapping::arg_operator, compile that, too.
 //
 //        - Compiling comparisons
 //
@@ -85,17 +144,7 @@ int main(int argc, char *argv[]) {
 //             the bool when compiling; the Statement itself doesn't need to retain the 
 //             "negated" bool (which is the only purpose of the Comparison class).
 //
-//     - The compiler needs code to compile non-function-call assignments and comparisons.
-//
-//        - This includes abstract getters and setters, which will require additional 
-//          validation in some cases (e.g. no += for a getter unless that's supported via 
-//          a defined OpcodeFuncToScriptMapping::arg_operator).
-//
-//           - I'm pretty sure all property setters support all operators e.g. += by way 
-//             of OpcodeFuncToScriptMapping::arg_operator, but we should still have code 
-//             for operators which lack that support.
-//
-//     - OpcodeArgValue::compile overloads
+//     - OpcodeArgValue::compile overrides on subclasses
 //
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
@@ -183,6 +232,13 @@ int main(int argc, char *argv[]) {
 //          scripts that use aliases where appropriate (both because I want to provide 
 //          such "source scripts" to script authors to learn from, and so we can test to 
 //          ensure that aliases work properly).
+//
+//        - Do user-defined functions actually work? Don't just test whether the game 
+//          can load a script that contains triggers called from multiple places; test 
+//          to ensure that if a trigger is called multiple times from multiple places in 
+//          the same tick, it will actually run each time. The file format as designed 
+//          allows for user-defined functions to exist, but it's unknown how the runtime 
+//          will actually handle them.
 //
 //        - What happens when we perform an invalid assignment, such as the assignment 
 //          of a number to an object? Be sure to check the resulting value of the target 
