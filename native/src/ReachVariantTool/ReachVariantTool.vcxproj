@@ -100,6 +100,7 @@
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\namespaces.cpp" />
+    <ClCompile Include="game_variants\components\megalo\compiler\parsing\alias.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\base.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\namespaces.h" />
+    <ClInclude Include="game_variants\components\megalo\compiler\parsing\alias.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\base.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\variable_reference.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h" />

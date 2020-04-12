@@ -33,35 +33,33 @@ int main(int argc, char *argv[]) {
 //
 //     = CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0]?
 //
+//     = REAL QUICK, WE SHOULD ADDRESS THE PROBLEM OF THE DECOMPILER NOT BEING ABLE TO 
+//       HANDLE USER-DEFINED FUNCTIONS (I.E. "SUBROUTINE" TRIGGERS CALLED FROM MULTIPLE 
+//       PLACES), ESPECIALLY RECURSION. THIS WILL BE SIGNIFICANT ONCE WE HAVE THE COMPILER 
+//       WORKING; WE DON'T WANT TO BE UNABLE TO DECOMPILE OUR OWN COMPILER OUTPUT.
+//
+//        - Before decompiling any triggers, we should build an vector of integers -- one 
+//          for every trigger. Then, we should scan the triggers just looking for the 
+//          "call nested trigger" action; we should count the number of times that every 
+//          trigger is called. This will allow us to distinguish a user-defined function 
+//          from a nested trigger at decompile time.
+//
+//          Then, we just need to:
+//
+//           - Decide on a standard name for user-defined functions. I'm thinking we 
+//             can just name them "trigger_XXX" where "XXX" is the index in the trigger 
+//             list.
+//
+//           - Make Trigger::decompile accept that vector of integers. When it finds a 
+//             "call nested trigger" opcode, it should test whether the target trigger 
+//             is a user-defined function, and produce the appropriate output.
+//
+//           - Decompile user-defined functions in advance of all other triggers, passing 
+//             a boolean so that they wrap their content in a "function" declaration (or 
+//             use "function" in place of their normal block type if their normal block 
+//             type is the generic "do" block).
+//
 //     - SHORT-TERM PLANS
-//
-//        - IMPORTED NAMES: Let aliases target an imported name, but do not let them 
-//          shadow one. Have Script::Alias check for these before trying to resolve as a 
-//          VariableReference. If an imported name is matched, Script::Alias should retain 
-//          the original imported name as a QString as well as the typeinfo that imported 
-//          it.
-//
-//           - Imported names should be handled solely at the Alias level, and should not 
-//             be paid attention to by VariableReference::resolve. This means that the 
-//             Alias class will need to do a little extra work to ensure that transitivity 
-//             is maintained i.e. we need to avoid breaking this:
-//
-//                alias foo = warthog
-//                alias bar = foo
-//
-//             Probably easiest to program this to occur before we try to resolve the 
-//             variable name: do a quick check to see if the target string contains any 
-//             brackets or periods and if not, try to match it as an imported name first. 
-//             We'll also want Alias to have a QString field (target_imported_name) to 
-//             hold the target-string if there is indeed a match.
-//
-//           - There is one exception: if we hit the end of VariableReference::resolve 
-//             (i.e. the code to deal with an unrecognized member), and if there is only 
-//             one raw part with no index, then we should check if it matches any imported 
-//             names. If so, we should have a unique error message for that: "NAME cannot 
-//             appear here."
-//
-//              = WENT AHEAD AND CODED THIS EARLY.
 //
 //        - Program the Compiler to keep track of what Aliases are in scope.
 //
@@ -96,6 +94,8 @@ int main(int argc, char *argv[]) {
 //           - I'm pretty sure all property setters support all operators e.g. += by way 
 //             of OpcodeFuncToScriptMapping::arg_operator, but we should still have code 
 //             for operators which lack that support.
+//
+//     - OpcodeArgValue::compile overloads
 //
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //

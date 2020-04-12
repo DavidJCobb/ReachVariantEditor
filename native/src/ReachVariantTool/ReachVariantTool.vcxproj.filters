@@ -346,6 +346,9 @@
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\compiler\parsing\alias.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -874,6 +877,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\variable_reference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\compiler\parsing\alias.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

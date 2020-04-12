@@ -5,23 +5,13 @@
 #include "string_scanner.h"
 #include "../trigger.h"
 #include "parsing/base.h"
+#include "parsing/alias.h"
 #include "parsing/variable_reference.h"
 
 namespace Megalo {
    class Compiler;
    //
    namespace Script {
-      class Alias : public ParsedItem {
-         public:
-            QString name;
-            VariableReference* target = nullptr;
-            //
-            Alias(Compiler&, QString name, QString target);
-            //
-            bool    is_integer_constant()  const noexcept;
-            int32_t get_integer_constant() const noexcept;
-            bool    is_relative_alias() const noexcept;
-      };
       class Block : public ParsedItem {
          public:
             enum class Type : uint8_t {
