@@ -10,7 +10,6 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
    //
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorBottomPane::updateFromVariant);
    //
-   //
    auto  widget  = this->ui.meter;
    auto& indices = this->indices;
    widget->setMaximum(0x5028 * 8);
@@ -18,23 +17,23 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
    indices.header = this->ui.meter->segmentCount();
    widget->addSegment(
       tr("Header data"),
-      tr("Bits spent on mandatory header data."),
-      QColor(20, 20, 140),
+      tr("Bits spent on mandatory header data. This data cannot be made smaller."),
+      QColor(70, 70, 140),
       1828 // bits
    );
    //
    indices.cg_options = this->ui.meter->segmentCount();
    widget->addSegment(
       tr("Custom Game options"),
-      tr("Bits used to define all non-gametype-specific Custom Game options, including those not configurable in the UI."),
-      QColor(15, 50, 140),
+      tr("Bits used to define all non-gametype-specific Custom Game options, including those not configurable in the UI. This data cannot be made smaller."),
+      QColor(65, 90, 140),
       3471 // bits
    );
    //
    indices.team_config = this->ui.meter->segmentCount();
    widget->addSegment(
       tr("Team configuration"),
-      tr("Bits used to define hidden team configuration data, including name and color overrides."),
+      tr("Bits used to define hidden team configuration data, including name and color overrides. A team's data will be longer if it uses name or color overrides."),
       QColor(15, 130, 70),
       0 // bits
    );
@@ -97,15 +96,15 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
    //
    widget->addSegment(
       tr("Player rating parameters"),
-      tr("Bits used to encode player rating parameters."),
-      QColor(140, 30, 20),
+      tr("Bits used to encode player rating parameters. This data cannot be made smaller."),
+      QColor(140, 80, 60),
       ReachPlayerRatingParams::bitcount() // bits
    );
    //
    widget->addSegment(
       tr("Option toggles"),
-      tr("Bits used to encode option visibility and availability toggles."),
-      QColor(130, 30, 60),
+      tr("Bits used to encode option visibility and availability toggles. This data cannot be made smaller."),
+      QColor(130, 70, 100),
       (ReachGameVariantEngineOptionToggles::dword_count + ReachGameVariantMegaloOptionToggles::dword_count) * 32 * 2 // bits
    );
    //
@@ -119,8 +118,8 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
    //
    widget->addSegment(
       tr("TU1 Configuration"),
-      tr("Bits used to encode the Title Update settings."),
-      QColor(90, 25, 120),
+      tr("Bits used to encode the Title Update settings. This data cannot be made smaller."),
+      QColor(100, 75, 120),
       88 // bits // not conditional; we always upgrade the version to TU1 before saving
    );
    //
@@ -163,7 +162,7 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       //
       auto& bits = writer.bits;
       //
-      mp->variantHeader.write(bits);
+      mp->variantHeader.write(bits); // TODO: This isn't great, because it doesn't account for the extra space we need to reserve for the variant title and description
       mp->localizedName.write(bits);
       mp->localizedDesc.write(bits);
       mp->localizedCategory.write(bits);
@@ -191,19 +190,17 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += decltype(options.respawn.respawnGrowth)::bitcount;
       bitcount += decltype(options.respawn.loadoutCamTime)::bitcount;
       bitcount += decltype(options.respawn.traitsDuration)::bitcount;
-      bitcount += options.respawn.traits.bitcount();
+      bitcount += ReachPlayerTraits::bitcount(); // respawn traits
       //
       bitcount += decltype(options.social.observers)::bitcount;
       bitcount += decltype(options.social.teamChanges)::bitcount;
       bitcount += decltype(options.social.flags)::bitcount;
       //
       bitcount += decltype(options.map.flags)::bitcount;
-      bitcount += options.map.baseTraits.bitcount();
+      bitcount += ReachPlayerTraits::bitcount(); // base player traits
       bitcount += decltype(options.map.weaponSet)::bitcount;
       bitcount += decltype(options.map.vehicleSet)::bitcount;
-      bitcount += options.map.powerups.red.traits.bitcount();
-      bitcount += options.map.powerups.blue.traits.bitcount();
-      bitcount += options.map.powerups.yellow.traits.bitcount();
+      bitcount += ReachPlayerTraits::bitcount() * 3; // powerup traits
       bitcount += decltype(options.map.powerups.red.duration)::bitcount;
       bitcount += decltype(options.map.powerups.blue.duration)::bitcount;
       bitcount += decltype(options.map.powerups.yellow.duration)::bitcount;
@@ -218,14 +215,9 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += decltype(mp->unkF7A6)::bitcount;
       bitcount += decltype(mp->unkF7A7)::bitcount;
       //
-      auto& l = options.loadouts;
-      auto& bits = writer.bits;
-      //
-      for (size_t i = 0; i < l.palettes.size(); i++)
-         l.palettes[i].write(bits);
+      bitcount += ReachLoadoutPalette::bitcount() * options.loadouts.palettes.size();
       //
       widget->modifySegmentQuantity(indices.cg_options, writer.bits.get_bitpos() + bitcount);
-      writer.bits.go_to_bitpos(0);
    }
    {  // Team configuration
       auto& list = mp->options.team.teams;
@@ -236,10 +228,7 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       writer.bits.go_to_bitpos(0);
    }
    {  // Script Traits
-      uint32_t bitcount = 0;
-      for (auto& item : mp->scriptData.traits)
-         bitcount += item.bitcount();
-      //
+      uint32_t bitcount = ReachMegaloPlayerTraits::bitcount() * mp->scriptData.traits.size();
       widget->modifySegmentQuantity(indices.script_traits, bitcount); // don't write the list count; we're including that as part of the "header information"
    }
    {  // Script Options

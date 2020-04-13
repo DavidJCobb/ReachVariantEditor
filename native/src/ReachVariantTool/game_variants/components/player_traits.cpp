@@ -1,13 +1,46 @@
 #include "player_traits.h"
 
-uint32_t ReachPlayerTraits::bitcount() const noexcept {
-   uint32_t bitcount = ReachPlayerTraits::_fixed_bitcount();
+/*static*/ uint32_t ReachPlayerTraits::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(defense.damageResist)::bitcount;
+   bitcount += decltype(defense.healthMult)::bitcount;
+   bitcount += decltype(defense.healthRate)::bitcount;
+   bitcount += decltype(defense.shieldMult)::bitcount;
+   bitcount += decltype(defense.shieldRate)::bitcount;
+   bitcount += decltype(defense.shieldDelay)::bitcount;
+   bitcount += decltype(defense.headshotImmune)::bitcount;
+   bitcount += decltype(defense.vampirism)::bitcount;
+   bitcount += decltype(defense.assassinImmune)::bitcount;
+   bitcount += decltype(defense.cannotDieFromDamage)::bitcount;
    //
-   if (this->movement.jumpHeight < 0) {
-      bitcount += 1; // include the presence bit
-   } else {
-      bitcount += decltype(this->movement.jumpHeight)::bitcount + 1; // include the presence bit
-   }
+   bitcount += decltype(offense.damageMult)::bitcount;
+   bitcount += decltype(offense.meleeMult)::bitcount;
+   bitcount += decltype(offense.weaponPrimary)::bitcount;
+   bitcount += decltype(offense.weaponSecondary)::bitcount;
+   bitcount += decltype(offense.grenadeCount)::bitcount;
+   bitcount += decltype(offense.infiniteAmmo)::bitcount;
+   bitcount += decltype(offense.grenadeRegen)::bitcount;
+   bitcount += decltype(offense.weaponPickup)::bitcount;
+   bitcount += decltype(offense.abilityUsage)::bitcount;
+   bitcount += decltype(offense.abilitiesDropOnDeath)::bitcount;
+   bitcount += decltype(offense.infiniteAbility)::bitcount;
+   bitcount += decltype(offense.ability)::bitcount;
+   //
+   bitcount += decltype(movement.speed)::bitcount;
+   bitcount += decltype(movement.gravity)::bitcount;
+   bitcount += decltype(movement.vehicleUsage)::bitcount;
+   bitcount += decltype(movement.unknown)::bitcount;
+   bitcount += decltype(movement.jumpHeight)::bitcount + 1; // don't forget the presence bit
+   //
+   bitcount += decltype(appearance.activeCamo)::bitcount;
+   bitcount += decltype(appearance.waypoint)::bitcount;
+   bitcount += decltype(appearance.visibleName)::bitcount;
+   bitcount += decltype(appearance.aura)::bitcount;
+   bitcount += decltype(appearance.forcedColor)::bitcount;
+   //
+   bitcount += decltype(sensors.radarState)::bitcount;
+   bitcount += decltype(sensors.radarRange)::bitcount;
+   bitcount += decltype(sensors.directionalDamageIndicator)::bitcount;
    //
    return bitcount;
 }

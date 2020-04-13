@@ -49,7 +49,7 @@ bool AllocationMeter::event(QEvent* event) {
       if (index != -1) {
          //QToolTip::showText(helpEvent->globalPos(), this->_segments[index].tooltip);
          auto& seg = this->_segments[index];
-         QString full = QString("<b>%1 (%2/%3)</b><br/>%4").arg(seg.name).arg(seg.quantity).arg(this->_maximum).arg(seg.tooltip);
+         QString full = QString("<span style='white-space:pre'><b>%1 (%2 / %3 bits)</b></span><br/>%4").arg(seg.name).arg(seg.quantity).arg(this->_maximum).arg(seg.tooltip);
          QToolTip::showText(helpEvent->globalPos(), full);
       } else {
          QToolTip::hideText();

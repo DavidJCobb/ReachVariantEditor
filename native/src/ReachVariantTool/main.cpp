@@ -124,7 +124,9 @@ int main(int argc, char *argv[]) {
 //              - KOTH uses the opcode to modify the score, but reads the score as a 
 //                property, typically to do the "X seconds to win" voiceovers.
 //
-//             It looks like we *are* gonna have to change things a bit, then.
+//             It looks like we *are* gonna have to change things a bit, then. Even if the 
+//             property is writeable, Bungie and 343i don't do that, and we should aim to 
+//             be consistent with them.
 //
 //        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
 //          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
@@ -255,6 +257,9 @@ int main(int argc, char *argv[]) {
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
 //
+//        - Someone has commented on Github that unkF7A6 is "Fireteams Enabled." We 
+//          should test this.
+//
 //        - Round-trip decompiling/recompiling for all vanilla gametype scripts and for 
 //          SvE Mythic Slayer. Tests should include modified versions of the decompiled 
 //          scripts that use aliases where appropriate (both because I want to provide 
@@ -319,19 +324,13 @@ int main(int argc, char *argv[]) {
 //    these to blocks on the bar if we give them distinct colors (e.g. a colored box 
 //    before each limit like "[ ] Conditions: 317 / 512").
 //
-//     - WE MESSED UP WITH PLAYER TRAITS. We need the maximum possible bitcount for a 
-//       set of player traits, not the current bitcount, because traits are alterable 
-//       in-game. Like -- Jump Height is 10 bits if it's set and 1 bit if it's not, 
-//       right? So consider what happens if you make a gametype that's just 5 bits shy 
-//       of the filesize limit, with a set of player traits that has no Jump Height: if 
-//       the user changes that trait in-game, then they break the file.
-//
-//       So, what we need to do is: make ReachPlayerTraits::bitcount a static member 
-//       again, and always add the bitcount for Jump Height plus one (for the presence 
-//       bit). The space that Jump Height *can* use should always *display* as in use.
-//
 //     = THE METER NEEDS TO UPDATE WHENEVER INDEXED LISTS OR THEIR CONTAINED OBJECTS ARE 
 //       ALTERED IN ANY WAY.
+//
+//     - The meter measures the MPVR variant header by just writing it to a disposable 
+//       bitwriter, but that's not optimal: it doesn't account for the maximum length of 
+//       the title and description, and we need to do that since those can be altered by 
+//       users in-game.
 //
 //     - Continue improving the code for the meter: add bitcount getters to more objects 
 //       so we aren't just reaching into them from outside and counting stuff ourselves. 
