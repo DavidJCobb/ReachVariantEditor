@@ -106,15 +106,43 @@ int main(int argc, char *argv[]) {
 //          ACCESSOR OPCODE AS THE SETTER. DOES OUR CURRENT SYSTEM HANDLE THIS PROPERLY? 
 //          IF NOT, HOW CAN WE REMEDY THAT?
 //
+//           - Well, actually,... What if the "score" accessor exists to facilitate 
+//             modifying the score of a property, e.g. (current_player.team.score += 5)? 
+//             We need to check Bungie and 343i's gametypes and look at how they modify 
+//             scores: do they use the accessor or a standard assignment, and when?
+//
+//             (Evidence to support this idea: KSoft doesn't list the "score" property 
+//             as read-only for players or teams.)
+//
+//             If I'm right and this is why the "score" accessor exists, then we don't 
+//             need to change anything about variable reference resolution.
+//
 //        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
 //          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
 //          OR "all_players". OUR CURRENT ACCESSOR-MATCHING SYSTEM CAN'T COPE WITH THIS 
 //          SORT OF THING.
 //
-//           - This is only solveable if VariableReference knows which side of a statement 
-//             it's appearing on (left/right for assignments, or "doesn't matter" for 
-//             aliases and comparisons). Then, if we match a property but it's read-only, 
-//             we can try matching a setter-accessor instead.
+//          WE NEED TO GIVE OpcodeArgTypeinfo THE ABILITY TO SPECIFY OTHER TYPEINFOS THAT 
+//          IT CAN "RESOLVE" TO, SO THAT WE CAN IDENTIFY WHEN THE "SCORE" ACCESSOR (AND 
+//          ANY OTHER ACCESSORS THAT HAVE A "DYNAMIC" CONTEXT TYPE) IS BEING INVOKED. 
+//          THIS DATA SHOULD ONLY BE USED FOR ACCESSORS AND NEVER FOR ANYTHING ELSE. OF 
+//          COURSE, EVEN THAT DOESN'T SOLVE "all_players", AND I'M NOT REALLY SURE HOW 
+//          TO ADDRESS THAT YET.
+//
+//           - We honestly may just have to hardcode this -- make "all_players" a 
+//             NamespaceMember that is hardcoded to compile to the appropriate content. 
+//             The NamespaceMember would use OpcodeArgValuePlayerOrGroup as its type, so 
+//             it would be capable of using accessors for that type, but it wouldn't be 
+//             able to appear in the same contexts (or have the same members) as an 
+//             ordinary player variable or team variable.
+//
+//              - Well, really, the NamespaceMember itself wouldn't "compile" anything; 
+//                rather, OpcodeArgValuePlayerOrGroup::compile would check an incoming 
+//                VariableReference to see if it's using that NamespaceMember. All we 
+//                really need is the ability to define a "bare" NamespaceMember with 
+//                just a name and a type, and no scope or which. That should work 
+//                without requiring any changes to any existing systems, i.e. the 
+//                "all_players" value wouldn't have to be a special case after all.
 //
 //        - Compiling assignments
 //
