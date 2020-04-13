@@ -102,6 +102,20 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
+//        = THE "SCORE" VALUE FOR PLAYERS AND TEAMS USES A PROPERTY AS THE GETTER BUT AN 
+//          ACCESSOR OPCODE AS THE SETTER. DOES OUR CURRENT SYSTEM HANDLE THIS PROPERLY? 
+//          IF NOT, HOW CAN WE REMEDY THAT?
+//
+//        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
+//          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
+//          OR "all_players". OUR CURRENT ACCESSOR-MATCHING SYSTEM CAN'T COPE WITH THIS 
+//          SORT OF THING.
+//
+//           - This is only solveable if VariableReference knows which side of a statement 
+//             it's appearing on (left/right for assignments, or "doesn't matter" for 
+//             aliases and comparisons). Then, if we match a property but it's read-only, 
+//             we can try matching a setter-accessor instead.
+//
 //        - Compiling assignments
 //
 //           - If either side is an accessor, then compile the accessor name, strip the 

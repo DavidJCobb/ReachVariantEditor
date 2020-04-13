@@ -40,6 +40,21 @@ namespace {
             return true;
       return false;
    }
+   const Megalo::ActionFunction& _get_assignment_opcode() {
+      using namespace Megalo;
+      static const ActionFunction* result = nullptr;
+      if (result)
+         return *result;
+      //
+      for (auto& opcode : actionFunctionList) {
+         auto& mapping = opcode.mapping;
+         if (mapping.type == OpcodeFuncToScriptMapping::mapping_type::assign) {
+            result = &opcode;
+            return *result;
+         }
+      }
+      assert(false && "Where is the assignment opcode?");
+   }
 }
 namespace Megalo {
    namespace Script {
@@ -477,29 +492,84 @@ namespace Megalo {
       // know if other types do anything sensible, do nothing at all, clear the target variable, or 
       // crash, so that I can program in a compiler warning or compiler error as appropriate.
       //
-      // ---------------------------------------------------------------------------------------------
+
       //
-      // TODO: Begin compiling an assignment opcode.
+      // Compile the assignment opcode:
       //
+      auto opcode = std::make_unique<Action>();
       {
          auto lhs = this->assignment->lhs;
-         if (auto def = lhs->get_accessor_definition()) {
-            auto setter = def->setter;
-            if (!setter)
-               this->throw_error("This accessor cannot be assigned to.");
-            auto& mapping = setter->mapping;
-            if (mapping.arg_operator == OpcodeFuncToScriptMapping::no_argument) {
-               if (this->assignment->op != "=")
-                  this->throw_error("This accessor can only be modified using the = operator.");
-            } else {
+         auto rhs = this->assignment->rhs;
+         auto l_accessor = lhs->get_accessor_definition();
+         auto r_accessor = rhs->get_accessor_definition();
+         if (l_accessor || r_accessor) {
+            //
+            // This is an accessor assignment, not a standard assignment.
+            //
+            if (l_accessor && r_accessor)
+               this->throw_error("Cannot assign one accessor to another accessor.");
+            const OpcodeFuncToScriptMapping* mapping = nullptr;
+            const OpcodeBase* accessor = nullptr;
+            if (l_accessor) {
+               auto setter = l_accessor->setter;
+               if (!setter)
+                  this->throw_error("This accessor cannot be assigned to.");
+               accessor = setter;
+               mapping  = &setter->mapping;
                //
-               // TODO: Compile the assignment operator.
+               // TODO: FINISH COMPILING A SETTER
+               //
+            } else {
+               auto getter = l_accessor->getter;
+               if (!getter)
+                  this->throw_error("This accessor cannot be read.");
+               accessor = getter;
+               mapping  = &getter->mapping;
+               //
+               // Compile the left-hand side (the out-argument):
+               //
+               int ai = accessor->index_of_out_argument();
+               assert(ai >= 0 && "How does a getter not have an out argument?");
+               auto arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               arg->compile(*this, *lhs); // TODO: THIS WILL NOT WORK, BECAUSE (lhs) IS AN ACCESSOR. WE NEED TO SHEAR THE "ACCESSOR" BIT OFF OF THE VariableReference, REMEMBER?
+               //
+               // TODO: FINISH COMPILING A GETTER
                //
             }
+            assert(mapping);
+            if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
+               //
+               // This accessor doesn't have an "operator" argument, so throw an error if we're using the 
+               // wrong argument. (We should only be using accessors in the first place if there *is* an 
+               // opcode argument, but it's possible that only one of the getter and setter may have it.)
+               //
+               if (this->assignment->op != "=")
+                  this->throw_error("This accessor can only be invoked using the = operator.");
+            } else {
+               //
+               // Compile the assignment operator.
+               //
+               auto op_string = string_scanner(this->assignment->op);
+               auto op_arg    = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
+               opcode->arguments[mapping->arg_operator] = op_arg;
+               op_arg->compile(*this, op_string);
+            }
+         } else {
+            auto base = &_get_assignment_opcode();
+            opcode->function = base;
+            opcode->arguments.resize(3);
+            opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
+            opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
+            opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
+            opcode->arguments[0]->compile(*this, *lhs);
+            opcode->arguments[1]->compile(*this, *rhs);
+            //
+            auto op_string = string_scanner(this->assignment->op);
+            opcode->arguments[2]->compile(*this, op_string);
          }
       }
-      //
-      // TODO: Finish compiling an assignment opcode.
+      this->assignment->opcode = opcode.release();
       //
       this->block->insert_item(this->assignment);
       this->assignment = nullptr;

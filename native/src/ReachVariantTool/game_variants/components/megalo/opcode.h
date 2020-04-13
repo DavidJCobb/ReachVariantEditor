@@ -132,6 +132,7 @@ namespace Megalo {
          }
          //
          void decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept;
+         int index_of_out_argument() const noexcept; // returns -1 if there is none
    };
 
    class Opcode { // base class for Condition and Action

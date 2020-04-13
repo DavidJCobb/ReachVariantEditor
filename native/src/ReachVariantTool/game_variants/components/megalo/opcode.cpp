@@ -113,6 +113,13 @@ namespace Megalo {
             return;
       }
    }
+   int OpcodeBase::index_of_out_argument() const noexcept {
+      size_t size = this->arguments.size();
+      for (size_t i = 0; i < size; ++i)
+         if (this->arguments[i].is_out_variable)
+            return i;
+      return -1;
+   }
 
    AccessorRegistry::AccessorRegistry() {
       using mapping_type = OpcodeFuncToScriptMapping::mapping_type;
@@ -126,7 +133,7 @@ namespace Megalo {
          Definition* entry = nullptr;
          if (mapping.primary_name.empty() && mapping.arg_name != OpcodeFuncToScriptMapping::no_argument) {
             auto& base = action.arguments[mapping.arg_name];
-            entry = this->get_variably_named_property(base.typeinfo);
+            entry = this->get_variably_named_accessor(base.typeinfo);
             if (!entry)
                entry = &this->definitions.emplace_back();
          } else {
