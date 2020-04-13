@@ -55,7 +55,7 @@ namespace Megalo {
       };
       class Statement : public ParsedItem {
          public:
-            Opcode* opcode = nullptr; // a fully-compiled opcode
+            Opcode* opcode = nullptr; // a fully-compiled opcode; can be any condition or action, including "run nested trigger" for calls to user-defined functions
             VariableReference* lhs = nullptr; // owned by this Statement and deleted in the destructor
             VariableReference* rhs = nullptr; // owned by this Statement and deleted in the destructor
             QString op;
@@ -66,9 +66,21 @@ namespace Megalo {
          public:
             bool negated = false; // TODO: not needed if we compile the Opcode when it's found; see: Compiler::negate_next_condition
       };
-      class UserDefinedFunctionCall : public ParsedItem {
+      class UserDefinedFunction {
+         //
+         // This struct maps the name of a user-defined function to its index in the trigger list, and to its block. 
+         // It is used to keep track of which user-defined functions are currently in-scope; the trigger index is 
+         // used to compile calls to these functions, while the Block pointer is used so that we can detect when 
+         // the function's containing block (i.e. this->block->parent) is closed (such that we can know when the 
+         // function goes out of scope).
+         //
          public:
-            Block* target = nullptr;
+            QString name;
+            int32_t trigger_index = -1;
+            Block*  block = nullptr; // used so we can tell when the function goes out of scope
+            //
+            UserDefinedFunction() {}
+            UserDefinedFunction(const QString& n, int32_t ti, Block* b) : name(n), trigger_index(ti), block(b) {}
       };
    }
    //
@@ -83,7 +95,7 @@ namespace Megalo {
          using scan_functor_t = std::function<bool(QChar)>;
          //
       protected:
-         Script::Block*      root       = nullptr;
+         Script::Block*      root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
          Script::Block*      block      = nullptr; // current block being parsed
          Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
          Script::Comparison* comparison = nullptr; // current comparison being parsed, if any
@@ -91,20 +103,27 @@ namespace Megalo {
          Script::Block::Event next_event = Script::Block::Event::none;
          bool negate_next_condition = false;
          std::vector<Script::Alias*> aliases_in_scope;
-         std::vector<Script::Block*> functions_in_scope;
+         std::vector<Script::UserDefinedFunction> functions_in_scope;
          //
       public:
+         struct {
+            bool success = false;
+            std::vector<Trigger*> triggers; // owned by the Compiler UNLESS (results.success) is true
+         } results;
+         //
+         ~Compiler();
+         //
          void throw_error(const QString& text);
          void throw_error(const Script::string_scanner::pos& pos, const QString& text);
          void reset_token();
          //
          void parse(QString text); // can throw compile_exception
          //
-         static bool is_keyword(QString word);
+         [[nodiscard]] static bool is_keyword(QString word);
          //
-         Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
-         Script::Alias* lookup_absolute_alias(QString name);
-         Script::Block* lookup_user_defined_function(QString name);
+         [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
+         [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name);
+         [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name);
          //
          enum class name_source {
             none,
@@ -115,7 +134,7 @@ namespace Megalo {
             static_typename,
             variable_typename,
          };
-         static name_source check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from);
+         [[nodiscard]] static name_source check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from);
          //
       protected:
          bool is_in_statement() const;

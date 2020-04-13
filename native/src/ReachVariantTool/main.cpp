@@ -102,38 +102,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - Program the Compiler to keep track of what user-defined functions are in 
-//          scope. Similar approach to Aliases.
-//
-//        = FINSH CODE TO COMPILE CALLS TO USER-DEFINED FUNCTIONS.
-//
-//           - The way we have to do this is:
-//
-//              - When we encounter a function block, immediately create a Trigger for it, 
-//                but flag that trigger as a "subroutine." Normally, we would only create 
-//                a Block's Trigger when we're compiling the block's content, but we need 
-//                to know a function's trigger list index in order to compile calls to it, 
-//                and functions should be compiled as being "outside" of all triggers even 
-//                if they're scoped to a containing trigger; as such, the best approach is 
-//                to create the Trigger straightaway upon opening the function block, and 
-//                then just compile content into that existing Trigger when the block 
-//                closes.
-//
-//                 = Requires that the Compiler be given a std::vector<Trigger*> for its 
-//                   compiled blocks, even though we won't be compiling blocks for a 
-//                   little while yet.
-//
-//              - Maintain a list that maps user-defined function names to Trigger list 
-//                indices.
-//
-//              - When we encounter a call to a user-defined function, look up the 
-//                function's trigger index and create the appropriate "call trigger" 
-//                compiled Opcode.
-//
-//        = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
-//          COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 
-//          WILL BE COMPLETE.
-//
 //        - Compiling assignments
 //
 //           - If either side is an accessor, then compile the accessor name, strip the 

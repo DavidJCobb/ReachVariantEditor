@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
+#include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
 
 namespace {
    constexpr char* ce_assignment_operator = "=";
@@ -83,6 +84,35 @@ namespace Megalo {
       }
    }
    //
+   Compiler::~Compiler() {
+      if (!this->results.success) {
+         for (auto trigger : this->results.triggers)
+            delete trigger;
+      }
+      this->results.triggers.clear();
+      //
+      if (this->block && this->block != this->root) {
+         delete this->block;
+         this->block = nullptr;
+      }
+      if (this->root) {
+         delete this->root;
+         this->root = nullptr;
+      }
+      if (auto statement = this->assignment) {
+         if (!statement->owner && !statement->parent) // only free the memory if it wasn't appended to a Block; otherwise, the memory should already be freed
+            delete statement;
+         this->assignment = nullptr;
+      }
+      if (auto statement = this->comparison) {
+         if (!statement->owner && !statement->parent) // only free the memory if it wasn't appended to a Block; otherwise, the memory should already be freed
+            delete statement;
+         this->comparison = nullptr;
+      }
+      this->aliases_in_scope.clear(); // don't free contents; every Alias should have been inside of a Block and freed by that Block
+      this->functions_in_scope.clear();
+   }
+   //
    /*static*/ bool Compiler::is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias") // declare an alias
@@ -154,6 +184,19 @@ namespace Megalo {
       }
       return nullptr;
    }
+   Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) {
+      auto&  list = this->functions_in_scope;
+      size_t size = list.size();
+      if (!size)
+         return nullptr;
+      for (size_t i = 0; i < size; i++) {
+         auto& func = list[i];
+         if (func.name.compare(name, Qt::CaseInsensitive) == 0)
+            return &func;
+      }
+      return nullptr;
+   }
+   //
    /*static*/ Compiler::name_source Compiler::check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from) {
       name_is_imported_from.clear();
       auto& type_registry = OpcodeArgTypeRegistry::get();
@@ -774,12 +817,38 @@ namespace Megalo {
          auto func = this->lookup_user_defined_function(function_name);
          if (func) {
             if (is_condition)
-               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
+               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot be called from inside of a condition.").arg(function_name));
             if (this->assignment)
                this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
+            if (!this->extract_specific_char(')')) {
+               this->throw_error(call_start, QString("Expected ')'. User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
+            }
             //
-            // TODO: Compile a call to a user-defined function.
+            // Now, we need to compile a call to the user-defined function.
             //
+            // Normally, we only create a Block's Trigger when we're compiling the block in full. 
+            // However, in order to compile calls to a user-defined function as we find them, we 
+            // need to be able to know the index of that function's final trigger... which means 
+            // that the function needs to *have* a trigger. So, we create the trigger at the 
+            // time that we open the function.
+            //
+            assert(func->trigger_index >= 0 && "A user-defined function, tracked by the compiler, has not had its trigger index stored properly.");
+            //
+            auto  opcode = new Action;
+            auto& base   = actionFunction_runNestedTrigger;
+            auto  arg    = (base.arguments[0].typeinfo.factory)();
+            opcode->function = &base;
+            opcode->arguments.push_back(arg);
+            auto arg_c   = dynamic_cast<OpcodeArgValueTrigger*>(arg);
+            assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the code?");
+            arg_c->value = func->trigger_index;
+            //
+            auto statement = new Script::Statement;
+            statement->opcode = opcode;
+            statement->set_start(call_start);
+            statement->set_end(this->state);
+            this->block->insert_item(statement);
+            return;
          }
       }
       //
@@ -896,13 +965,25 @@ namespace Megalo {
             signed int i = size - 1;
             for (; i >= 0; --i) {
                auto alias = this->aliases_in_scope[i];
-               if (alias->owner != this->block)
+               if (alias->parent != this->block)
                   break;
             }
             ++i; // convert from "index of last alias to keep" to "number of aliases to keep"
             if (i < size)
                this->aliases_in_scope.resize(i);
          }
+      }
+      {  // The block's contained functions are going out of scope.
+         auto& list = this->functions_in_scope;
+         list.erase(std::remove_if(list.begin(), list.end(),
+            [this](Script::UserDefinedFunction* entry) {
+               auto block = entry->block;
+               if (!block || block->parent == this->block)
+                  return true;
+               return false;
+            }),
+            list.end()
+         );
       }
       auto parent = dynamic_cast<Script::Block*>(this->block->parent);
       if (!parent)
@@ -1129,6 +1210,15 @@ namespace Megalo {
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
       this->block = item;
+      //
+      // Normally, we only create a Block's Trigger when we're compiling the block in full. However, 
+      // in order to compile calls to this user-defined function as we find them, we need to know 
+      // the index of the function's trigger... which means that the function needs to *have* a 
+      // trigger. So, we'll create it early.
+      //
+      item->trigger = new Trigger;
+      this->functions_in_scope.emplace_back(name, this->results.triggers.size(), item); // remember this function and its index
+      this->results.triggers.push_back(item->trigger);
    }
    void Compiler::_handleKeyword_On() {
       if (this->block != this->root)
