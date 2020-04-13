@@ -98,28 +98,19 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - MOST ParsedItem SUBCLASSES USE BARE POINTERS AND WE CURRENTLY DON'T HAVE THE 
-//          MEMORY MANAGEMENT IN PLACE FOR THAT. While we could manually write new/delete 
-//          code, we should instead prefer smart pointers (especially since we already use 
-//          them in a few parts of the compiler for exception safety). WE NEED TO AUDIT ALL 
-//          PARSEDITEM SUBCLASSES AND SET THESE POINTERS UP WHERE APPROPRIATE, AND THEN WE 
-//          NEED TO EXAMINE EXISTING CODE TO REMOVE ANY (delete) STATEMENTS, AND SWAP ANY 
-//          (new) STATEMENTS FOR (make_unique) WHERE APPROPRIATE (just use Ctrl+F).
-//
-//        - Program the Compiler to keep track of what Aliases are in scope.
-//
-//           - The compiler should maintain a vector of all in-scope Alias*es, with newly-
-//             parsed Aliases added to the end. When searching for an alias, it should 
-//             search the list in reverse order. When a block is closed, we should loop 
-//             over the Compiler's Alias list in reverse order, removing all aliases 
-//             whose (owner) is the block and stopping when we find any alias whose 
-//             (owner) is not the block.
-//
-//              - Do this BEFORE we throw out the block, so that we don't run into object 
-//                lifetime/deletion mishaps.
-//
 //        - Program the Compiler to keep track of what user-defined functions are in 
 //          scope. Similar approach to Aliases.
+//
+//        = FINSH CODE TO COMPILE CALLS TO USER-DEFINED FUNCTIONS.
+//
+//           - This may not be 100% doable right now. I think what we'll likely have to do 
+//             is program the Compiler to retain two lists: one which maps already-compiled 
+//             user-defined functions' names to their Triggers; and another which lists each 
+//             Opcode that is a call to a user-defined function, along with the name of that 
+//             function. Then, we can do fix-up at the end of the compile process.
+//
+//             Worth noting that when we handle that, we need to account for a function (or 
+//             any of its contained blocks) calling itself.
 //
 //        = ONCE WE'VE FINISHED PROGRAMMING IN THE HANDLING FOR IMPORTED NAMES AND THE 
 //          COMPILER BOOKKEEPING FOR ALIASES, ALL ALIAS AND VARIABLE REFERENCE WORK 

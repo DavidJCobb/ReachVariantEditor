@@ -37,6 +37,7 @@ namespace Megalo {
                local,
                pregame,
             };
+            //
          public:
             Trigger* trigger  = nullptr;
             QString  name; // only for functions
@@ -44,23 +45,30 @@ namespace Megalo {
             int32_t  label_index = -1;
             Type     type;
             Event    event;
-            std::vector<ParsedItem*> items;
-            std::vector<ParsedItem*> conditions; // only for if/elseif blocks
+            std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
+            std::vector<ParsedItem*> conditions; // only for if/elseif blocks // contents are owned by this Block and deleted in the destructor
             //
+            ~Block();
             void insert_condition(ParsedItem*);
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
       };
       class Statement : public ParsedItem {
          public:
-            Opcode* opcode = nullptr;
-            VariableReference* lhs = nullptr;
-            VariableReference* rhs = nullptr;
+            Opcode* opcode = nullptr; // a fully-compiled opcode
+            VariableReference* lhs = nullptr; // owned by this Statement and deleted in the destructor
+            VariableReference* rhs = nullptr; // owned by this Statement and deleted in the destructor
             QString op;
+            //
+            ~Statement();
       };
       class Comparison : public Statement {
          public:
             bool negated = false; // TODO: not needed if we compile the Opcode when it's found; see: Compiler::negate_next_condition
+      };
+      class UserDefinedFunctionCall : public ParsedItem {
+         public:
+            Block* target = nullptr;
       };
    }
    //
@@ -74,7 +82,7 @@ namespace Megalo {
          };
          using scan_functor_t = std::function<bool(QChar)>;
          //
-      public:
+      protected:
          Script::Block*      root       = nullptr;
          Script::Block*      block      = nullptr; // current block being parsed
          Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
@@ -82,7 +90,10 @@ namespace Megalo {
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
          bool negate_next_condition = false;
+         std::vector<Script::Alias*> aliases_in_scope;
+         std::vector<Script::Block*> functions_in_scope;
          //
+      public:
          void throw_error(const QString& text);
          void throw_error(const Script::string_scanner::pos& pos, const QString& text);
          void reset_token();
@@ -93,6 +104,18 @@ namespace Megalo {
          //
          Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
          Script::Alias* lookup_absolute_alias(QString name);
+         Script::Block* lookup_user_defined_function(QString name);
+         //
+         enum class name_source {
+            none,
+            action,
+            condition,
+            imported_name,
+            namespace_member,
+            static_typename,
+            variable_typename,
+         };
+         static name_source check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from);
          //
       protected:
          bool is_in_statement() const;

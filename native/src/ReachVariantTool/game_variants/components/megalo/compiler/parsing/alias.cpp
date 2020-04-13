@@ -20,16 +20,6 @@ namespace {
       }
       return nullptr;
    }
-   template<typename T, int I> bool _check_abs_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name) {
-      for (auto& function : list) {
-         auto& mapping = function.mapping;
-         if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
-            continue;
-         if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0)
-            return true;
-      }
-      return false;
-   }
 }
 namespace Megalo::Script {
    Alias::Alias(Compiler& compiler, QString name, QString target) {
@@ -134,41 +124,43 @@ namespace Megalo::Script {
          //
          // Restrictions on absolute aliases:
          //
-         if (auto type = type_registry.get_static_indexable_type(name))
-            //
-            // Do not allow aliases to shadow statically-indexable typenames.
-            //
-            compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(type->internal_name.c_str()));
-         if (_check_abs_alias_name_against_opcodes(conditionFunctionList, name) || _check_abs_alias_name_against_opcodes(actionFunctionList, name))
-            //
-            // Do not allow aliases to shadow non-member functions.
-            //
-            compiler.throw_error(QString("Invalid alias name. An alias cannot shadow a non-member function like %1.").arg(name));
-         //
-         // Do not allow the shadowing of members of the unnamed namespace:
-         //
-         for (auto& member : namespaces::unnamed.members)
-            if (cobb::qt::stricmp(name, member.name) == 0)
-               compiler.throw_error(QString("Invalid alias name. The specified name is already in use by the \"%1\" value.").arg(member.name.c_str()));
-         {
-            //
-            // Do not allow the shadowing of imported names.
-            //
-            OpcodeArgTypeRegistry::type_list_t types;
-            type_registry.lookup_imported_name(this->name, types);
-            if (types.size()) {
-               if (types.size() == 1)
-                  compiler.throw_error(QString("The \"%1\" value defined by the %2 type cannot be used as an alias name.").arg(name).arg(types[0]->internal_name.c_str()));
-               auto error = QString("Invalid alias name. The \"%1\" value is defined by the following types: %2.");
-               auto list  = QString();
-               for (auto type : types) {
-                  if (!list.isEmpty())
-                     list += ", ";
-                  list += type->internal_name.c_str();
+         OpcodeArgTypeRegistry::type_list_t types;
+         auto name_source = Compiler::check_name_is_taken(name, types);
+         switch (name_source) {
+            case Compiler::name_source::none:
+               break;
+            case Compiler::name_source::action:
+            case Compiler::name_source::condition:
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow a non-member function like %1.").arg(name));
+               break;
+            case Compiler::name_source::static_typename:
+            case Compiler::name_source::variable_typename:
+               compiler.throw_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(name));
+               break;
+            case Compiler::name_source::namespace_member:
+               compiler.throw_error(QString("Invalid alias name. The specified name is already in use by the \"%1\" value.").arg(name));
+               break;
+            case Compiler::name_source::imported_name:
+               {
+                  if (types.size() == 1)
+                     compiler.throw_error(QString("The \"%1\" value defined by the %2 type cannot be used as an alias name.").arg(name).arg(types[0]->internal_name.c_str()));
+                  auto error = QString("Invalid alias name. The \"%1\" value is defined by the following types: %2.");
+                  auto list = QString();
+                  for (auto type : types) {
+                     if (!list.isEmpty())
+                        list += ", ";
+                     list += type->internal_name.c_str();
+                  }
+                  compiler.throw_error(error.arg(name).arg(list));
                }
-               compiler.throw_error(error.arg(name).arg(list));
-            }
+               break;
          }
+      }
+   }
+   Alias::~Alias() {
+      if (this->target) {
+         delete this->target;
+         this->target = nullptr;
       }
    }
 
@@ -194,5 +186,10 @@ namespace Megalo::Script {
    }
    bool Alias::is_imported_name() const noexcept {
       return !this->target && !this->target_imported_name.isEmpty();
+   }
+   const OpcodeArgTypeinfo* Alias::get_basis_type() const noexcept {
+      if (!this->target)
+         return nullptr;
+      return this->target->resolved.alias_basis;
    }
 }

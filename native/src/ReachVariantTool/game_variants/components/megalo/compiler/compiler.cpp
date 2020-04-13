@@ -42,7 +42,14 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
-      //
+      Block::~Block() {
+         for (auto item : this->items)
+            delete item;
+         this->items.clear();
+         for (auto condition : this->conditions)
+            delete condition;
+         this->conditions.clear();
+      }
       void Block::insert_condition(ParsedItem* item) {
          this->conditions.push_back(item);
          //
@@ -62,6 +69,17 @@ namespace Megalo {
          } else if (i >= this->items.size())
             return nullptr;
          return this->items[i];
+      }
+      //
+      Statement::~Statement() {
+         if (this->lhs) {
+            delete this->lhs;
+            this->lhs = nullptr;
+         }
+         if (this->rhs) {
+            delete this->rhs;
+            this->rhs = nullptr;
+         }
       }
    }
    //
@@ -96,6 +114,95 @@ namespace Megalo {
       if (s == "then") // close an if- or elseif-statement's conditions
          return true;
       return false;
+   }
+   //
+   Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
+      auto& list = this->aliases_in_scope;
+      size_t size = list.size();
+      if (!size)
+         return nullptr;
+      //
+      // Search the list in reverse order, so that newer aliases shadow older ones, and aliases in an 
+      // inner scope shadow aliases in an outer scope.
+      //
+      for (signed int i = size - 1; i >= 0; --i) {
+         auto alias = list[i];
+         if (!alias->is_relative_alias())
+            continue;
+         if (alias->get_basis_type() != relative_to)
+            continue;
+         if (name.compare(alias->name, Qt::CaseInsensitive) == 0)
+            return alias;
+      }
+      return nullptr;
+   }
+   Script::Alias* Compiler::lookup_absolute_alias(QString name) {
+      auto&  list = this->aliases_in_scope;
+      size_t size = list.size();
+      if (!size)
+         return nullptr;
+      //
+      // Search the list in reverse order, so that newer aliases shadow older ones, and aliases in an 
+      // inner scope shadow aliases in an outer scope.
+      //
+      for (signed int i = size - 1; i >= 0; --i) {
+         auto alias = list[i];
+         if (alias->is_relative_alias())
+            continue;
+         if (name.compare(alias->name, Qt::CaseInsensitive) == 0)
+            return alias;
+      }
+      return nullptr;
+   }
+   /*static*/ Compiler::name_source Compiler::check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from) {
+      name_is_imported_from.clear();
+      auto& type_registry = OpcodeArgTypeRegistry::get();
+      //
+      if (auto type = type_registry.get_variable_type(name))
+         return name_source::variable_typename;
+      if (auto type = type_registry.get_static_indexable_type(name))
+         return name_source::static_typename;
+      for (auto& member : Script::namespaces::unnamed.members)
+         if (cobb::qt::stricmp(name, member.name) == 0)
+            return name_source::namespace_member;
+      //
+      // Search the opcode lists to see if the name is in use by a non-member function:
+      //
+      for (auto& opcode : actionFunctionList) {
+         auto& mapping = opcode.mapping;
+         if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
+            //
+            // We don't care about member functions.
+            //
+            continue;
+         if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0) {
+            switch (mapping.type) {
+               case OpcodeFuncToScriptMapping::mapping_type::property_get:
+               case OpcodeFuncToScriptMapping::mapping_type::property_set:
+                  //
+                  // Accessors are members; we don't care about them.
+                  //
+                  break;
+               default:
+                  return name_source::action;
+            }
+         }
+      }
+      for (auto& opcode : conditionFunctionList) {
+         auto& mapping = opcode.mapping;
+         if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
+            continue;
+         if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0)
+            return name_source::condition;
+      }
+      //
+      // Do not allow the shadowing of imported names:
+      //
+      type_registry.lookup_imported_name(name, name_is_imported_from);
+      if (name_is_imported_from.size())
+         return name_source::imported_name;
+      //
+      return name_source::none;
    }
    //
    void Compiler::throw_error(const QString& text) {
@@ -663,6 +770,19 @@ namespace Megalo {
       this->reset_token();
       ++this->state.offset; // advance past the open-paren
       //
+      if (!context) {  // Handle user-defined function calls
+         auto func = this->lookup_user_defined_function(function_name);
+         if (func) {
+            if (is_condition)
+               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
+            if (this->assignment)
+               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
+            //
+            // TODO: Compile a call to a user-defined function.
+            //
+         }
+      }
+      //
       std::vector<OpcodeBase*> opcode_bases;
       if (is_condition) {
          _find_opcode_bases(conditionFunctionList, opcode_bases, function_name, context.get());
@@ -770,6 +890,20 @@ namespace Megalo {
       if (this->block == this->root)
          return false;
       this->block->set_end(this->state);
+      {  // The block's aliases are going out of scope.
+         size_t size = this->aliases_in_scope.size();
+         if (size > 0) {
+            signed int i = size - 1;
+            for (; i >= 0; --i) {
+               auto alias = this->aliases_in_scope[i];
+               if (alias->owner != this->block)
+                  break;
+            }
+            ++i; // convert from "index of last alias to keep" to "number of aliases to keep"
+            if (i < size)
+               this->aliases_in_scope.resize(i);
+         }
+      }
       auto parent = dynamic_cast<Script::Block*>(this->block->parent);
       if (!parent)
          return false;
@@ -793,6 +927,7 @@ namespace Megalo {
       item->set_start(start);
       item->set_end(this->state);
       this->block->insert_item(item);
+      this->aliases_in_scope.push_back(item);
    }
    void Compiler::_handleKeyword_Declare() {
       auto start = this->token.pos;
@@ -960,6 +1095,31 @@ namespace Megalo {
          this->throw_error("Expected \"(\".");
       if (!this->extract_specific_char(')'))
          this->throw_error("Expected \")\". User-defined functions cannot have arguments.");
+      {  // Run additional checks on the function name.
+         if (this->lookup_user_defined_function(name))
+            this->throw_error(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
+         //
+         // Do not allow user-defined functions to shadow built-ins:
+         //
+         OpcodeArgTypeRegistry::type_list_t sources;
+         auto built_in_type = Compiler::check_name_is_taken(name, sources);
+         switch (built_in_type) {
+            case name_source::none:
+               break;
+            case name_source::action:
+            case name_source::condition:
+               this->throw_error(QString("User-defined functions cannot shadow built-in functions such as %1.").arg(name));
+               break;
+            case name_source::static_typename:
+            case name_source::variable_typename:
+               this->throw_error(QString("User-defined functions cannot shadow built-in type names such as %1.").arg(name));
+               break;
+            case name_source::namespace_member:
+            case name_source::imported_name:
+               this->throw_error(QString("User-defined functions cannot shadow built-in values such as %1.").arg(name));
+               break;
+         }
+      }
       //
       auto item = new Script::Block;
       item->type = Script::Block::Type::function;
