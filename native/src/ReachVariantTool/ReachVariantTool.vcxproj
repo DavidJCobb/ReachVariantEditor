@@ -104,6 +104,7 @@
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\base.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp" />
+    <ClCompile Include="game_variants\components\megalo\compiler\types.cpp" />
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\enums.cpp" />

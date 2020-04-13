@@ -27,11 +27,7 @@ namespace Megalo {
             //
             Property(const char* n, const OpcodeArgTypeinfo& t, VariableScopeIndicatorValue* scope = no_scope, bool afn = false) : name(n), type(t), scope(scope), allow_from_nested(afn) {}
             //
-            bool has_index() const noexcept {
-               if (!this->scope)
-                  return false;
-               return this->scope->has_index();
-            }
+            bool has_index() const noexcept;
       };
    }
 }

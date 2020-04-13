@@ -117,6 +117,15 @@ int main(int argc, char *argv[]) {
 //             If I'm right and this is why the "score" accessor exists, then we don't 
 //             need to change anything about variable reference resolution.
 //
+//              - Freeze Tag uses the opcode for hud_player.team.score, but also for 
+//                global.team[3].score and global.player[0].score. It never writes to the 
+//                property.
+//
+//              - KOTH uses the opcode to modify the score, but reads the score as a 
+//                property, typically to do the "X seconds to win" voiceovers.
+//
+//             It looks like we *are* gonna have to change things a bit, then.
+//
 //        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
 //          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
 //          OR "all_players". OUR CURRENT ACCESSOR-MATCHING SYSTEM CAN'T COPE WITH THIS 

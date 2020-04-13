@@ -1,6 +1,7 @@
 #pragma once
 #include "base.h"
 #include <vector>
+#include "../../opcode.h"
 #include "../../opcode_arg.h"
 
 namespace Megalo {

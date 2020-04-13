@@ -166,6 +166,7 @@ namespace Megalo {
          extern VariableScopeWhichValue unk_15   = VariableScopeWhichValue("unk_15_team");
       }
    }
+   extern const VariableScopeWhichValueList megalo_scope_does_not_have_specifier = VariableScopeWhichValueList({});
 
    extern const VariableScope MegaloVariableScopeGlobal = VariableScope(megalo_scope_does_not_have_specifier, 12, 8, 8, 8, 16);
    extern const VariableScope MegaloVariableScopePlayer = VariableScope(variable_which_values::player::list, 8, 4, 4, 4, 4);

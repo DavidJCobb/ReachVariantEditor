@@ -251,7 +251,7 @@ namespace Megalo::Script {
       }
       return result;
    }
-   QString VariableReference::to_string_from_raw(int8_t start = 0, int8_t up_to = -1) const noexcept {
+   QString VariableReference::to_string_from_raw(int8_t start, int8_t up_to) const noexcept {
       if (up_to < 0)
          up_to += this->raw.size();
       QString result;
@@ -373,7 +373,7 @@ namespace Megalo::Script {
       this->raw.erase(this->raw.begin() + raw_index);
    }
    //
-   bool VariableReference::_resolve_aliases_from(Compiler& compiler, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr) {
+   bool VariableReference::_resolve_aliases_from(Compiler& compiler, size_t raw_index, const OpcodeArgTypeinfo* basis) {
       auto   part  = this->_get_raw_part(raw_index);
       Alias* alias = nullptr;
       if (basis)
@@ -392,7 +392,7 @@ namespace Megalo::Script {
       this->__transclude_alias(raw_index, *alias);
       return true;
    }
-   size_t VariableReference::_resolve_top_level(Compiler& compiler, bool is_alias_definition = false) {
+   size_t VariableReference::_resolve_top_level(Compiler& compiler, bool is_alias_definition) {
       size_t i    = 0;
       auto   part = this->_get_raw_part(i);
       if (is_alias_definition && !part->has_index()) {

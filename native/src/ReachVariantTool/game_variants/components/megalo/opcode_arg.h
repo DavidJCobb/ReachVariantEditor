@@ -11,7 +11,6 @@
 #include "variables_and_scopes.h"
 #include "compiler/string_scanner.h"
 #include "decompiler/decompiler.h"
-#include "compiler/parsing/variable_reference.h"
 #include "compiler/types.h"
 #include <QString>
 
@@ -53,6 +52,9 @@ namespace Megalo {
    class OpcodeArgBase;
    class OpcodeArgValue;
    class OpcodeArgTypeinfo;
+   namespace Script {
+      class VariableReference;
+   }
 
    class OpcodeArgTypeRegistry {
       public:
@@ -171,8 +173,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&) noexcept {};
-         virtual arg_compile_result compile(Compiler&, Script::VariableReference&) noexcept {};
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&) noexcept { return arg_compile_result::failure; };
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&) noexcept { return arg_compile_result::failure; };
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;

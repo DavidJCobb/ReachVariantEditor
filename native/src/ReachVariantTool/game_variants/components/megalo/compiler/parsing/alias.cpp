@@ -7,7 +7,7 @@
 namespace {
    using namespace Megalo;
    //
-   template<typename T, int I> OpcodeFuncToScriptMapping* _check_rel_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name, const OpcodeArgTypeinfo* type) {
+   template<typename T, int I> const OpcodeFuncToScriptMapping* _check_rel_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name, const OpcodeArgTypeinfo* type) {
       for (auto& function : list) {
          auto& mapping = function.mapping;
          if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
@@ -15,7 +15,7 @@ namespace {
          auto& base = function.arguments[mapping.arg_context];
          if (&base.typeinfo == type) {
             if (cobb::qt::stricmp(name, mapping.primary_name) == 0 || cobb::qt::stricmp(name, mapping.secondary_name) == 0)
-               return mapping;
+               return &mapping;
          }
       }
       return nullptr;
@@ -110,7 +110,7 @@ namespace Megalo::Script {
          //
          auto mapping = _check_rel_alias_name_against_opcodes(conditionFunctionList, name, type);
          if (!mapping)
-            auto mapping = _check_rel_alias_name_against_opcodes(actionFunctionList, name, type);
+            mapping = _check_rel_alias_name_against_opcodes(actionFunctionList, name, type);
          if (mapping) {
             switch (mapping->type) {
                case OpcodeFuncToScriptMapping::mapping_type::property_get:

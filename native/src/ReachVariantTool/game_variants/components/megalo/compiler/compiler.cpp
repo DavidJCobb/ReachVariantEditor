@@ -54,6 +54,7 @@ namespace {
          }
       }
       assert(false && "Where is the assignment opcode?");
+      __assume(0); // tell MSVC this is unreachable
    }
 }
 namespace Megalo {
@@ -820,7 +821,7 @@ namespace Megalo {
          this->throw_error("Not enough arguments passed to the function.");
    }
    namespace {
-      template<typename T, int I> void _find_opcode_bases(const std::array<T, I>& list, std::vector<OpcodeBase*>& results, QString function_name, Script::VariableReference* context) {
+      template<typename T, int I> void _find_opcode_bases(const std::array<T, I>& list, std::vector<const OpcodeBase*>& results, QString function_name, Script::VariableReference* context) {
          for (auto& action : list) {
             auto& mapping = action.mapping;
             if (context) {
@@ -922,7 +923,7 @@ namespace Megalo {
          }
       }
       //
-      std::vector<OpcodeBase*> opcode_bases;
+      std::vector<const OpcodeBase*> opcode_bases;
       if (is_condition) {
          _find_opcode_bases(conditionFunctionList, opcode_bases, function_name, context.get());
       } else {
@@ -934,8 +935,8 @@ namespace Megalo {
          this->throw_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
       }
       //
-      OpcodeBase* match = nullptr;
-      auto        start = this->backup_stream_state();
+      const OpcodeBase* match = nullptr;
+      auto start = this->backup_stream_state();
       std::unique_ptr<Opcode> opcode;
       if (is_condition) {
          opcode.reset(new Condition);
@@ -973,8 +974,8 @@ namespace Megalo {
          // We're assigning the return value of this function call to something, so let's first make 
          // sure that the function actually returns a value.
          //
-         OpcodeArgBase* base  = nullptr;
-         size_t         index = 0;
+         const OpcodeArgBase* base  = nullptr;
+         size_t index = 0;
          for (; index < match->arguments.size(); ++index) {
             auto& b = match->arguments[index];
             if (b.is_out_variable) {
@@ -1046,8 +1047,8 @@ namespace Megalo {
       {  // The block's contained functions are going out of scope.
          auto& list = this->functions_in_scope;
          list.erase(std::remove_if(list.begin(), list.end(),
-            [this](Script::UserDefinedFunction* entry) {
-               auto block = entry->block;
+            [this](Script::UserDefinedFunction& entry) {
+               auto block = entry.block;
                if (!block || block->parent == this->block)
                   return true;
                return false;
@@ -1287,7 +1288,7 @@ namespace Megalo {
       // trigger. So, we'll create it early.
       //
       item->trigger = new Trigger;
-      this->functions_in_scope.emplace_back(name, this->results.triggers.size(), item); // remember this function and its index
+      this->functions_in_scope.push_back(Script::UserDefinedFunction(name, this->results.triggers.size(), item)); // remember this function and its index
       this->results.triggers.push_back(item->trigger);
    }
    void Compiler::_handleKeyword_On() {
