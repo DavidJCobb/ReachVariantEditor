@@ -141,8 +141,6 @@ int main(int argc, char *argv[]) {
 //          special-case compiler code; OpcodeArgValuePlayerOrGroup::compile can check for 
 //          that case (versus access to a player- or team-type value) very easily.
 //
-//        - Compiler::_applyConditionModifiers
-//
 //        - When we open a top-level Block, we should check to see if the root Block contains 
 //          any Statements. If so, those should be compiled into their own Trigger.
 //
@@ -156,6 +154,23 @@ int main(int argc, char *argv[]) {
 //
 //        - WHEN COMPILING A Block, DOUBLE-CHECK ITS Opcodes: IF ANY HAVE A nullptr ARGUMENT, 
 //          THEN ASSERT, BECAUSE THAT MEANS WE MISSED SOMETHING IN OUR Opcode-COMPILING CODE.
+//
+//        = HERE'S HOW TO COMPILE THE "OR-GROUP" VALUES ON CONDITIONS IN A TRIGGER. First, 
+//          start a counter off at 0. For each condition you write into that same trigger, 
+//          set its or-group value to the counter; if the condition is linked to the next 
+//          with "and", increment the counter. Here's an example from Freeze Tag:
+//
+//             if  a -- 0
+//             and b -- 1
+//             then
+//                if  c -- 2
+//                or  d -- 2
+//                and e -- 3
+//                and f -- 4
+//                then
+//                   ...
+//                end
+//             end
 //
 //        - Block::compile would check if it has a (this->trigger) already and if so, 
 //          compile into the existing trigger. That's needed for user-defined functions, 

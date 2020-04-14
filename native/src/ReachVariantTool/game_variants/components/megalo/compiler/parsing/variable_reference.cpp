@@ -384,8 +384,11 @@ namespace Megalo::Script {
       Alias* alias = nullptr;
       if (basis)
          alias = compiler.lookup_relative_alias(part->name, basis);
-      else
+      else {
          alias = compiler.lookup_absolute_alias(part->name);
+         if (alias->is_imported_name())
+            throw compile_exception(QString("Alias \"%1\" refers to imported name \"%2\" and cannot appear where a variable can.").arg(alias->name).arg(alias->target_imported_name));
+      }
       if (!alias)
          return false;
       if (part->has_index())
@@ -599,10 +602,6 @@ namespace Megalo::Script {
             this->is_resolved = true;
             return;
          }
-         //
-         // TODO: If the alias resolved to an argument-defined word, e.g. an object type name or something 
-         // else that isn't a variable, then throw an error if (has_more) is true.
-         //
       }
       size_t i = this->_resolve_top_level(compiler, is_alias_definition);
       if (i >= this->raw.size()) {

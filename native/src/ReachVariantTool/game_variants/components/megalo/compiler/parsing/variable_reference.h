@@ -13,6 +13,12 @@ namespace Megalo {
 
       class Alias;
       class VariableReference : public ParsedItem {
+         //
+         // VariableReference represents a reference to any variable, or to certain other types' values 
+         // e.g. script_widget[0]. It can be used to resolve aliases of variables, properties, accessors, 
+         // and integer constants. It notably *cannot* be used to resolve aliases of imported names; if 
+         // it encounters one, it will throw an exception.
+         //
          protected:
             struct RawPart {
                //

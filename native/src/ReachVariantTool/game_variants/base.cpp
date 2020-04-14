@@ -171,8 +171,8 @@ void GameVariantHeader::set_description(const char16_t* value) noexcept {
 //
 /*static*/ uint32_t GameVariantHeader::bitcount() noexcept {
    uint32_t bitcount = 0;
-   bitcount += cobb::bits_in<decltype(build.major)>;
-   bitcount += cobb::bits_in<decltype(build.minor)>;
+   bitcount += decltype(build.major)::max_bitcount;
+   bitcount += decltype(build.minor)::max_bitcount;
    bitcount += decltype(contentType)::max_bitcount;
    bitcount += decltype(fileLength)::max_bitcount;
    bitcount += decltype(unk08)::max_bitcount;

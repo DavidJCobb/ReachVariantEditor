@@ -629,6 +629,19 @@ namespace Megalo {
          this->reset_token();
       #pragma endregion
    }
+   //
+   void Compiler::_applyConditionModifiers(Script::Comparison* condition) {
+      if (!condition)
+         return;
+      auto opcode = dynamic_cast<Condition*>(condition->opcode);
+      assert(opcode);
+      opcode->inverted = this->negate_next_condition;
+      if (this->next_condition_joiner == c_joiner::or)
+         condition->next_is_or = true;
+      this->next_condition_joiner = c_joiner::none;
+      this->negate_next_condition = false;
+   }
+   //
    void Compiler::_parseBlockConditions() {
       this->comparison = nullptr;
       this->reset_token();
@@ -681,6 +694,14 @@ namespace Megalo {
          if (word == "then") {
             if (this->negate_next_condition)
                this->throw_error("Expected a condition after \"not\".");
+            switch (this->next_condition_joiner) {
+               case c_joiner::and:
+                  this->throw_error("Expected a condition after \"and\".");
+                  break;
+               case c_joiner::or:
+                  this->throw_error("Expected a condition after \"or\".");
+                  break;
+            }
             return true;
          }
          if (word == "alias")
@@ -693,13 +714,20 @@ namespace Megalo {
             this->throw_error("You cannot open or close blocks inside of conditions. End the list of conditions using the \"then\" keyword.");
          else if (word == "on")
             this->throw_error("You cannot mark event handlers inside of conditions.");
-         else if (word == "and" || word == "or") {
+         else if (word == "and") {
             if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
                this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
+            if (this->next_condition_joiner != c_joiner::none)
+               this->throw_error("Constructions of the form {or and} and {and and} are not valid.");
+            this->next_condition_joiner = c_joiner::and;
             //
-            // TODO: Fatal error if we already have a joiner (i.e. {condition and or condition} is a syntax error)
-            //
-            // TODO: Keep track of which joiner we're using.
+            this->reset_token();
+         } else if (word == "or") {
+            if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
+               this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
+            if (this->next_condition_joiner != c_joiner::none)
+               this->throw_error("Constructions of the form {and or} and {or or} are not valid.");
+            this->next_condition_joiner = c_joiner::or;
             //
             this->reset_token();
          } else if (word == "not") {
@@ -726,7 +754,7 @@ namespace Megalo {
       if (c == ')' || c == ',')
          this->throw_error(QString("Unexpected %1.").arg(c));
       if (string_scanner::is_operator_char(c)) {
-         this->comparison = new Script::Statement;
+         this->comparison = new Script::Comparison;
          this->comparison->set_start(this->token.pos);
          this->comparison->lhs = new Script::VariableReference(this->token.text);
          this->comparison->lhs->owner = this->assignment;
@@ -820,8 +848,8 @@ namespace Megalo {
             auto op_string = string_scanner(this->assignment->op);
             opcode->arguments[2]->compile(*this, op_string, 0);
          }
-         this->_applyConditionModifiers(*opcode);
          this->comparison->opcode = opcode.release();
+         this->_applyConditionModifiers(this->comparison);
          //
          this->block->insert_condition(this->comparison);
          this->comparison = nullptr;
@@ -1014,7 +1042,6 @@ namespace Megalo {
       std::unique_ptr<Opcode> opcode;
       if (is_condition) {
          opcode.reset(new Condition);
-         this->_applyConditionModifiers(*(Condition*)opcode.get());
       } else {
          opcode.reset(new Action);
       }
@@ -1077,11 +1104,16 @@ namespace Megalo {
          this->throw_error("Expected ')'.");
       this->reset_token();
       Script::Statement* statement = this->assignment;
-      if (!statement)
-         statement = new Script::Statement;
+      if (!statement) {
+         if (is_condition)
+            statement = new Script::Comparison;
+         else
+            statement = new Script::Statement;
+      }
       statement->opcode = opcode.release();
       statement->set_end(this->state);
       if (is_condition) {
+         this->_applyConditionModifiers(dynamic_cast<Script::Comparison*>(statement));
          this->block->insert_condition(statement);
       } else {
          this->block->insert_item(statement);

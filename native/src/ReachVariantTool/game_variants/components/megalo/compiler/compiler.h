@@ -62,6 +62,10 @@ namespace Megalo {
             //
             ~Statement();
       };
+      class Comparison : public Statement {
+         public:
+            bool next_is_or = false;
+      };
       class UserDefinedFunction {
          //
          // This struct maps the name of a user-defined function to its index in the trigger list, and to its block. 
@@ -90,14 +94,21 @@ namespace Megalo {
          };
          using scan_functor_t = std::function<bool(QChar)>;
          //
+         enum class c_joiner {
+            none,
+            and,
+            or,
+         };
+         //
       protected:
-         Script::Block*     root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
-         Script::Block*     block      = nullptr; // current block being parsed
-         Script::Statement* assignment = nullptr; // current assignment being parsed, if any
-         Script::Statement* comparison = nullptr; // current comparison being parsed, if any
+         Script::Block*      root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
+         Script::Block*      block      = nullptr; // current block being parsed
+         Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
+         Script::Comparison* comparison = nullptr; // current comparison being parsed, if any
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
-         bool negate_next_condition = false;
+         bool     negate_next_condition = false;
+         c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          //
@@ -142,7 +153,7 @@ namespace Megalo {
          bool _parseConditionStart(QChar); // returns "true" at the end of the condition list, i.e. upon reaching the keywrod "then"
          void _parseComparison(QChar);
          //
-         void _applyConditionModifiers(Condition&); // applies "not", "and", "or", and then resets the relevant state on the Compiler
+         void _applyConditionModifiers(Script::Comparison*); // applies "not", "and", "or", and then resets the relevant state on the Compiler
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&);
          void _parseFunctionCall(bool is_condition);
