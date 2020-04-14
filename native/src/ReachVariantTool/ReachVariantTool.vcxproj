@@ -276,6 +276,7 @@
     <ClInclude Include="helpers\iterators\pointer_based.h" />
     <ClInclude Include="helpers\indexed_list.h" />
     <ClInclude Include="helpers\miscellaneous.h" />
+    <ClInclude Include="helpers\numeric.h" />
     <ClInclude Include="helpers\pointer_list.h" />
     <QtMoc Include="ui\script_editor\page_script_code.h" />
     <QtMoc Include="ui\script_editor\page_map_perms.h" />

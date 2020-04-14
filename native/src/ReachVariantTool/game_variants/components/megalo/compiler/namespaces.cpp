@@ -1,5 +1,6 @@
 #include "namespaces.h"
 #include "../opcode_arg_types/variables/all_core.h"
+#include "../opcode_arg_types/variables/player_or_group.h"
 #include "../../../helpers/qt/string.h"
 
 namespace Megalo {
@@ -16,7 +17,7 @@ namespace Megalo {
          if (this->which) {
             return this->which->is_read_only();
          }
-         return false;
+         return true; // bare members are always read-only
       }
       //
       const NamespaceMember* Namespace::get_member(const QString& name) const noexcept {
@@ -35,7 +36,7 @@ namespace Megalo {
             return nullptr;
          }
          //
-         Namespace unnamed = Namespace("game", true, false, {
+         Namespace unnamed = Namespace("", true, false, {
             NamespaceMember::make_which_member("no_object",         OpcodeArgValueObject::typeinfo, variable_which_values::object::no_object),
             NamespaceMember::make_which_member("no_player",         OpcodeArgValuePlayer::typeinfo, variable_which_values::player::no_player),
             NamespaceMember::make_which_member("no_team",           OpcodeArgValueTeam::typeinfo,   variable_which_values::team::no_team),
@@ -51,6 +52,8 @@ namespace Megalo {
             NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, variable_which_values::player::killer),
             NamespaceMember::make_which_member("unk_14_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_14),
             NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_15),
+            //
+            NamespaceMember::make_bare_member("all_players", OpcodeArgValuePlayerOrGroup::typeinfo),
          });
          Namespace global = Namespace("global", false, true);
          Namespace game = Namespace("game", false, false, {

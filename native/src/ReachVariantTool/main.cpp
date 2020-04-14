@@ -128,19 +128,6 @@ int main(int argc, char *argv[]) {
 //             property is writeable, Bungie and 343i don't do that, and we should aim to 
 //             be consistent with them.
 //
-//        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
-//          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
-//          OR "all_players". WE'VE AMENDED OUR ACCESSOR-MATCHING SYSTEM TO COPE WITH THE 
-//          FORMER TWO CASES, BUT THERE IS ONLY ONE WAY TO ADDRESS THE LATTER CASE:
-//
-//          We need to make it possible to define a NamespaceMember that consists only of 
-//          a type. Then, we create an unnamed-namespace member named "all_players" whose 
-//          type is OpcodeArgValuePlayerOrGroup. When VariableReference resolves access to 
-//          this member, it should end up with a (resolved.top_level) specifying the type 
-//          as OpcodeArgValuePlayerOrGroup. Crucially this means that we don't need any 
-//          special-case compiler code; OpcodeArgValuePlayerOrGroup::compile can check for 
-//          that case (versus access to a player- or team-type value) very easily.
-//
 //        - When we open a top-level Block, we should check to see if the root Block contains 
 //          any Statements. If so, those should be compiled into their own Trigger.
 //

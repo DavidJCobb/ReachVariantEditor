@@ -14,7 +14,7 @@ namespace Megalo {
       class NamespaceMember {
          //
          // What is a namespace member? Well, it's a member of one of the namespaces defined our gametype scripting language, 
-         // obviously. But what does being a namespace member entail? Well, there are two kinds of namespace members. Both 
+         // obviously. But what does being a namespace member entail? Well, there are three kinds of namespace members. All 
          // represent top-level values -- that is, values that aren't nested under any other object.
          //
          // A "which" member represents a single top-level value described by a "which" value -- so, a top-level object, 
@@ -23,6 +23,11 @@ namespace Megalo {
          //
          // A "scope" member represents a single top-level value described by a "scope" value and, potentially, an index. 
          // This includes things like (game.round_timer) and (script_option[3]).
+         //
+         // A "bare" member represents a single top-level value described solely by its type. As of this writing, bare members 
+         // literally only exist to facilitate expressions of the form (all_players.score += 5), where (all_players) is the 
+         // member and is of type OpcodeArgValuePlayerOrGroup. That type's (compile) overload will be expected to check for 
+         // the bare member and react appropriately.
          //
          public:
             static constexpr VariableScopeWhichValue*     no_which = nullptr;
@@ -43,10 +48,14 @@ namespace Megalo {
             static NamespaceMember make_scope_member(const char* n, const OpcodeArgTypeinfo& t, const VariableScopeIndicatorValue& s) {
                return NamespaceMember(n, t, no_which, &s);
             }
+            static NamespaceMember make_bare_member(const char* n, const OpcodeArgTypeinfo& t) {
+               return NamespaceMember(n, t, no_which, no_scope);
+            }
             //
             bool has_index() const noexcept;
             inline bool is_which_member() const noexcept { return this->which != no_which; }
             inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
+            inline bool is_bare_member() const noexcept { return !this->is_which_member() && !this->is_scope_member(); }
             bool is_read_only() const noexcept;
       };
       class Namespace {

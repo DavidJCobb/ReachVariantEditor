@@ -16,4 +16,10 @@ namespace Megalo {
          //
          virtual variable_type get_variable_type() const noexcept;
    };
+
+   //
+   // TODO: When we write the overload OpcodeArgValuePlayerOrGroup::compile(Compiler&, Script::VariableReference&, uint8_t part), 
+   // we need to have it check whether the Script::VariableReference& resolved to the unnamed-namespace member "all_players". If 
+   // so, then obviously we need to handle that appropriately.
+   //
 }
