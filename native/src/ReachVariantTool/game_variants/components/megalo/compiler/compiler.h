@@ -62,10 +62,6 @@ namespace Megalo {
             //
             ~Statement();
       };
-      class Comparison : public Statement {
-         public:
-            bool negated = false; // TODO: not needed if we compile the Opcode when it's found; see: Compiler::negate_next_condition
-      };
       class UserDefinedFunction {
          //
          // This struct maps the name of a user-defined function to its index in the trigger list, and to its block. 
@@ -95,10 +91,10 @@ namespace Megalo {
          using scan_functor_t = std::function<bool(QChar)>;
          //
       protected:
-         Script::Block*      root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
-         Script::Block*      block      = nullptr; // current block being parsed
-         Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
-         Script::Comparison* comparison = nullptr; // current comparison being parsed, if any
+         Script::Block*     root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
+         Script::Block*     block      = nullptr; // current block being parsed
+         Script::Statement* assignment = nullptr; // current assignment being parsed, if any
+         Script::Statement* comparison = nullptr; // current comparison being parsed, if any
          Token token;
          Script::Block::Event next_event = Script::Block::Event::none;
          bool negate_next_condition = false;

@@ -141,17 +141,10 @@ int main(int argc, char *argv[]) {
 //          special-case compiler code; OpcodeArgValuePlayerOrGroup::compile can check for 
 //          that case (versus access to a player- or team-type value) very easily.
 //
-//        - Compiling comparisons
+//        - Compiler::_applyConditionModifiers
 //
-//           - Compiler::_applyConditionModifiers
-//
-//        - Get rid of the Script::Comparison class and just use Script::Statement.
-//
-//           - We can do this once we've actually written the code to compile comparisons 
-//             into Opcodes. The Compiler class already has a (negate_next_condition) bool, 
-//             and we can add an enum for the current condition joiner, and use that and 
-//             the bool when compiling; the Statement itself doesn't need to retain the 
-//             "negated" bool (which is the only purpose of the Comparison class).
+//        - When we open a top-level Block, we should check to see if the root Block contains 
+//          any Statements. If so, those should be compiled into their own Trigger.
 //
 //     - OpcodeArgValue::compile overrides on subclasses
 //
