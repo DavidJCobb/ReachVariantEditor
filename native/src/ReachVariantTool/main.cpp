@@ -182,6 +182,27 @@ int main(int argc, char *argv[]) {
 //          trigger order with Bungie's output; compiling nested blocks as they close will 
 //          result in their triggers preceding the triggers of their containing blocks.
 //
+//        - Block::compile would check if it has a (this->trigger) already and if so, 
+//          compile into the existing trigger. That's needed for user-defined functions, 
+//          but we can also use it for if-statements at the end of their containing Block: 
+//          
+//             for each player do
+//                action
+//                if condition then -- not the last thing in the block, so needs its own Trigger
+//                   action
+//                end
+//                if condition then -- the last thing in the block, so writes into parent block's Trigger
+//                   action
+//                end
+//             end
+//
+//          When we are compiling a parent block and we hit an item that is itself a 
+//          Block (hereafter the "child block") and that is an if-statement, we check 
+//          if that child block is the last child (of any type other than Alias and 
+//          user-defined function) of the parent block. If so, we set the child block's 
+//          Trigger* to the same as the parent block, so that the child block writes its 
+//          conditions and contents directly into the parent block.
+//
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
@@ -260,6 +281,10 @@ int main(int argc, char *argv[]) {
 //        - Someone has commented on Github that unkF7A6 is "Fireteams Enabled." We 
 //          should test this.
 //
+//           - Easiest way is to just real quick check variants that use fireteam spawn-
+//             ing and see which ones use it, e.g. Bro Slayer versus normal Slayer and 
+//             such.
+//
 //        - Round-trip decompiling/recompiling for all vanilla gametype scripts and for 
 //          SvE Mythic Slayer. Tests should include modified versions of the decompiled 
 //          scripts that use aliases where appropriate (both because I want to provide 
@@ -325,24 +350,14 @@ int main(int argc, char *argv[]) {
 //    before each limit like "[ ] Conditions: 317 / 512").
 //
 //     = THE METER NEEDS TO UPDATE WHENEVER INDEXED LISTS OR THEIR CONTAINED OBJECTS ARE 
-//       ALTERED IN ANY WAY.
-//
-//     - The meter measures the MPVR variant header by just writing it to a disposable 
-//       bitwriter, but that's not optimal: it doesn't account for the maximum length of 
-//       the title and description, and we need to do that since those can be altered by 
-//       users in-game.
+//       ALTERED IN ANY WAY. BONUS POINTS IF WE ONLY UPDATE THE PART OF THE METER THAT 
+//       ACTUALLY REPRESENTS THE CHANGED DATA.
 //
 //     - Continue improving the code for the meter: add bitcount getters to more objects 
 //       so we aren't just reaching into them from outside and counting stuff ourselves. 
 //       Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
 //       standard_options_bitcount, etc., or perhaps a single getter that switch-cases on 
 //       an enum indicating what we want counted.
-//
-//  - Modify the Vector3 type so that it's just treated as three script arguments. That odd 
-//    "multi-part argument" syntax I came up with the parens should probably only be used 
-//    for flags, and maybe not even for that.
-//
-//     = HOLD OFF ON THIS UNTIL THE PARSER'S IN GOOD SHAPE.
 //
 //  - Format string arguments: use QStrings so we have UTF-8 support, and modify the 
 //    escaping code in the decompiler to do UTF-8 printable checks.
