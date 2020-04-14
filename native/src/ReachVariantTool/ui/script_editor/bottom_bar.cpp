@@ -159,10 +159,10 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += cobb::bitcount(Megalo::Limits::max_script_labels);
       bitcount += cobb::bitcount(Megalo::Limits::max_script_widgets);
       bitcount += ReachGameVariantUsedMPObjectTypeList::flag_count;
+      bitcount += decltype(mp->variantHeader)::bitcount();
       //
       auto& bits = writer.bits;
       //
-      mp->variantHeader.write(bits); // TODO: This isn't great, because it doesn't account for the extra space we need to reserve for the variant title and description
       mp->localizedName.write(bits);
       mp->localizedDesc.write(bits);
       mp->localizedCategory.write(bits);

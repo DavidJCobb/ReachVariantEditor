@@ -119,6 +119,8 @@ class GameVariantHeader {
       //
       void set_title(const char16_t* value) noexcept;
       void set_description(const char16_t* value) noexcept;
+      //
+      static uint32_t bitcount() noexcept;
 };
 class ReachBlockCHDR {
    public:

@@ -168,6 +168,28 @@ void GameVariantHeader::set_description(const char16_t* value) noexcept {
       this->description[i] = c;
    }
 }
+//
+/*static*/ uint32_t GameVariantHeader::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += cobb::bits_in<decltype(build.major)>;
+   bitcount += cobb::bits_in<decltype(build.minor)>;
+   bitcount += decltype(contentType)::max_bitcount;
+   bitcount += decltype(fileLength)::max_bitcount;
+   bitcount += decltype(unk08)::max_bitcount;
+   bitcount += decltype(unk10)::max_bitcount;
+   bitcount += decltype(unk18)::max_bitcount;
+   bitcount += decltype(unk20)::max_bitcount;
+   bitcount += decltype(activity)::max_bitcount;
+   bitcount += decltype(gameMode)::max_bitcount;
+   bitcount += decltype(engine)::max_bitcount;
+   bitcount += decltype(unk2C)::max_bitcount;
+   bitcount += decltype(engineCategory)::max_bitcount;
+   bitcount += ReachContentAuthor::bitcount() * 2; // created by; modified by
+   bitcount += (cobb::bits_in<char16_t> * 128) * 2; // title; description
+   bitcount += decltype(engineIcon)::max_bitcount; // only if contentType == ReachFileType::game_variant
+   bitcount += 16; // only if activity == 2
+   return bitcount;
+}
 
 bool ReachBlockMPVR::read(reach_block_stream& reader) {
    auto& error_report = GameEngineVariantLoadError::get();

@@ -539,6 +539,9 @@ namespace Megalo {
                //
             }
             assert(mapping);
+            //
+            // TODO: DON'T FORGET TO HANDLE VARIABLY-NAMED ACCESSORS
+            //
             if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
                //
                // This accessor doesn't have an "operator" argument, so throw an error if we're using the 
@@ -554,7 +557,7 @@ namespace Megalo {
                auto op_string = string_scanner(this->assignment->op);
                auto op_arg    = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
                opcode->arguments[mapping->arg_operator] = op_arg;
-               op_arg->compile(*this, op_string);
+               op_arg->compile(*this, op_string, 0);
             }
          } else {
             auto base = &_get_assignment_opcode();
@@ -567,7 +570,7 @@ namespace Megalo {
             opcode->arguments[1]->compile(*this, *rhs);
             //
             auto op_string = string_scanner(this->assignment->op);
-            opcode->arguments[2]->compile(*this, op_string);
+            opcode->arguments[2]->compile(*this, op_string, 0);
          }
       }
       this->assignment->opcode = opcode.release();
@@ -798,7 +801,7 @@ namespace Megalo {
          }
          //
          string_scanner argument(raw_argument);
-         arg_compile_result result = current_argument->compile(*this, argument);
+         arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
          switch (result) {
             case arg_compile_result::success:
                opcode.arguments[opcode_arg_index] = current_argument.release();

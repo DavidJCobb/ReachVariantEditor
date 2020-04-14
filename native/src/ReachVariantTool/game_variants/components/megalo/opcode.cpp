@@ -200,7 +200,7 @@ namespace Megalo {
          auto& type = base.typeinfo;
          //
          arg.reset((type.factory)());
-         if (arg->compile(compiler, Script::string_scanner(name)) == arg_compile_result::success)
+         if (arg->compile(compiler, Script::string_scanner(name), 0) == arg_compile_result::success)
             return &entry;
       }
       return nullptr;
