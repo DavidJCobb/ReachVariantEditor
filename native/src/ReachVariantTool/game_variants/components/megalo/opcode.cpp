@@ -136,6 +136,20 @@ namespace Megalo {
          return nullptr;
       return &this->arguments[mapping.arg_name].typeinfo;
    }
+   int OpcodeBase::index_of_operand_argument() const noexcept {
+      auto&  mapping = this->mapping;
+      size_t size    = this->arguments.size();
+      for (size_t i = 0; i < size; ++i) {
+         if (i == mapping.arg_context)
+            continue;
+         if (i == mapping.arg_name)
+            continue;
+         if (i == mapping.arg_operator)
+            continue;
+         return i;
+      }
+      return -1;
+   }
    int OpcodeBase::index_of_out_argument() const noexcept {
       size_t size = this->arguments.size();
       for (size_t i = 0; i < size; ++i)

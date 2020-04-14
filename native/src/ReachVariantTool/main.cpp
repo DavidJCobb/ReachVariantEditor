@@ -141,13 +141,6 @@ int main(int argc, char *argv[]) {
 //          special-case compiler code; OpcodeArgValuePlayerOrGroup::compile can check for 
 //          that case (versus access to a player- or team-type value) very easily.
 //
-//        - Compiling assignments
-//
-//           - If either side is an accessor, then compile the accessor name, strip the 
-//             accessor from the VariableReference, and compile the VariableReference by 
-//             creating the assignment LHS argument and passing it. If the accessor 
-//             opcode has an OpcodeFuncToScriptMapping::arg_operator, compile that, too.
-//
 //        - Compiling comparisons
 //
 //           - Compiler::_applyConditionModifiers
@@ -167,6 +160,9 @@ int main(int argc, char *argv[]) {
 //        - We can't compile nested blocks when they close because we want a consistent 
 //          trigger order with Bungie's output; compiling nested blocks as they close will 
 //          result in their triggers preceding the triggers of their containing blocks.
+//
+//        - WHEN COMPILING A Block, DOUBLE-CHECK ITS Opcodes: IF ANY HAVE A nullptr ARGUMENT, 
+//          THEN ASSERT, BECAUSE THAT MEANS WE MISSED SOMETHING IN OUR Opcode-COMPILING CODE.
 //
 //        - Block::compile would check if it has a (this->trigger) already and if so, 
 //          compile into the existing trigger. That's needed for user-defined functions, 

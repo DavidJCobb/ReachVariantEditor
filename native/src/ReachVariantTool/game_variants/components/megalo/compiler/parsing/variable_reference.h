@@ -90,6 +90,8 @@ namespace Megalo {
             [[nodiscard]] QString to_string() const noexcept;
             [[nodiscard]] QString to_string_from_raw(int8_t start = 0, int8_t up_to = -1) const noexcept;
             //
+            void strip_accessor() noexcept;
+            //
          protected:
             bool _resolve_aliases_from(Compiler&, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr); // replaces the raw part with the content of a found alias, unless it's an absolute alias that resolves to a constant integer, in which case: sets resolved.top_level
             //

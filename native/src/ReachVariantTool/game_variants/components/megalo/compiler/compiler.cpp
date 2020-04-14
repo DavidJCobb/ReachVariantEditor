@@ -511,37 +511,67 @@ namespace Megalo {
                this->throw_error("Cannot assign one accessor to another accessor.");
             const OpcodeFuncToScriptMapping* mapping = nullptr;
             const OpcodeBase* accessor = nullptr;
+            QString acc_name;
             if (l_accessor) {
                auto setter = l_accessor->setter;
-               if (!setter)
+               if (!setter) {
                   this->throw_error("This accessor cannot be assigned to.");
+                  return;
+               }
                accessor = setter;
+               acc_name = lhs->resolved.accessor_name;
                mapping  = &setter->mapping;
+               lhs->strip_accessor();
                //
-               // TODO: FINISH COMPILING A SETTER
+               // Compile the left-hand side (the context-argument):
                //
+               auto ai  = mapping->arg_context;
+               auto arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               arg->compile(*this, *lhs, 0);
+               //
+               // Compile the right-hand side (the value to assign):
+               //
+               ai  = accessor->index_of_operand_argument();
+               arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               arg->compile(*this, *rhs, 0);
             } else {
-               auto getter = l_accessor->getter;
-               if (!getter)
+               auto getter = r_accessor->getter;
+               if (!getter) {
                   this->throw_error("This accessor cannot be read.");
+                  return;
+               }
                accessor = getter;
+               acc_name = rhs->resolved.accessor_name;
                mapping  = &getter->mapping;
+               rhs->strip_accessor();
                //
                // Compile the left-hand side (the out-argument):
                //
-               int ai = accessor->index_of_out_argument();
-               assert(ai >= 0 && "How does a getter not have an out argument?");
+               int  ai  = accessor->index_of_out_argument();
                auto arg = (accessor->arguments[ai].typeinfo.factory)();
                opcode->arguments[ai] = arg;
-               arg->compile(*this, *lhs); // TODO: THIS WILL NOT WORK, BECAUSE (lhs) IS AN ACCESSOR. WE NEED TO SHEAR THE "ACCESSOR" BIT OFF OF THE VariableReference, REMEMBER?
+               arg->compile(*this, *lhs, 0);
                //
-               // TODO: FINISH COMPILING A GETTER
+               // Compile the right-hand side (the value to assign):
                //
+               ai  = mapping->arg_context;
+               arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               arg->compile(*this, *rhs, 0);
             }
             assert(mapping);
-            //
-            // TODO: DON'T FORGET TO HANDLE VARIABLY-NAMED ACCESSORS
-            //
+            if (accessor->get_name_type()) {
+               //
+               // The accessor is variably named. We need to compile the name.
+               //
+               auto  op_string = string_scanner(acc_name);
+               auto  ai   = mapping->arg_name;
+               auto& base = accessor->arguments[ai];
+               opcode->arguments[ai] = (base.typeinfo.factory)();
+               opcode->arguments[ai]->compile(*this, op_string, 0);
+            }
             if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
                //
                // This accessor doesn't have an "operator" argument, so throw an error if we're using the 
@@ -566,8 +596,8 @@ namespace Megalo {
             opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
             opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
             opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
-            opcode->arguments[0]->compile(*this, *lhs);
-            opcode->arguments[1]->compile(*this, *rhs);
+            opcode->arguments[0]->compile(*this, *lhs, 0);
+            opcode->arguments[1]->compile(*this, *rhs, 0);
             //
             auto op_string = string_scanner(this->assignment->op);
             opcode->arguments[2]->compile(*this, op_string, 0);
@@ -914,7 +944,7 @@ namespace Megalo {
             opcode->function = &base;
             opcode->arguments.push_back(arg);
             auto arg_c   = dynamic_cast<OpcodeArgValueTrigger*>(arg);
-            assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the code?");
+            assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
             arg_c->value = func->trigger_index;
             //
             auto statement = new Script::Statement;
@@ -977,37 +1007,30 @@ namespace Megalo {
          // We're assigning the return value of this function call to something, so let's first make 
          // sure that the function actually returns a value.
          //
-         const OpcodeArgBase* base  = nullptr;
-         size_t index = 0;
-         for (; index < match->arguments.size(); ++index) {
-            auto& b = match->arguments[index];
-            if (b.is_out_variable) {
-               base = &b;
-               break;
-            }
-         }
-         if (!base)
+         auto index = match->index_of_out_argument();
+         if (index < 0)
             this->throw_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          if (this->assignment->lhs->is_read_only())
             this->throw_error("You cannot assign to this value.");
          if (this->assignment->lhs->is_accessor())
             this->throw_error("You cannot assign the return value of a function to an accessor.");
+         const OpcodeArgBase& base = match->arguments[index];
          //
          // Verify that the variable we're assigning our return value to is of the right type:
          //
          auto target_type = this->assignment->lhs->get_type();
-         if (&base->typeinfo != target_type)
+         if (&base.typeinfo != target_type)
             this->throw_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
                .arg(context->get_type()->internal_name.c_str())
                .arg(function_name)
-               .arg(base->typeinfo.internal_name.c_str())
+               .arg(base.typeinfo.internal_name.c_str())
                .arg(target_type->internal_name.c_str())
             );
          //
          // The type is correct, so set the out-argument.
          //
-         opcode->arguments[index] = (base->typeinfo.factory)();
-         opcode->arguments[index]->compile(*this, *this->assignment->lhs);
+         opcode->arguments[index] = (base.typeinfo.factory)();
+         opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
       }
       if (!this->extract_specific_char(')'))
          this->throw_error("Expected ')'.");

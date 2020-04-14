@@ -135,6 +135,7 @@ namespace Megalo {
          void decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept;
          const OpcodeArgTypeinfo* get_context_type() const noexcept;
          const OpcodeArgTypeinfo* get_name_type() const noexcept;
+         int  index_of_operand_argument() const noexcept; // only returns a sensible result for setter-accessors
          int  index_of_out_argument() const noexcept; // returns -1 if there is none
    };
 

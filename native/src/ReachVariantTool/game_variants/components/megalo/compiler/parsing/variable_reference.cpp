@@ -308,6 +308,12 @@ namespace Megalo::Script {
       return this->resolved.top_level.is_static;
    }
    //
+   void VariableReference::strip_accessor() noexcept {
+      auto& res = this->resolved;
+      res.accessor = nullptr;
+      res.accessor_name.clear();
+   }
+   //
    #pragma region Variable reference resolution code
    void VariableReference::__transclude_alias(uint32_t raw_index, Alias& alias) {
       #if _DEBUG
