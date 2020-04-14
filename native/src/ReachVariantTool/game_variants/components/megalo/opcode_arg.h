@@ -108,6 +108,7 @@ namespace Megalo {
          uint8_t static_count      = 0; // e.g. 8 for player[7]
          uint32_t which_sig_static = 0; // e.g. for the (player) type, this would be the signature corresponding to "player[0]" in megalo_players (TODO: move this to the generic Variable class)
          uint32_t which_sig_global = 0; // e.g. for the (player) type, this would be the signature corresponding to "global.player[0]" in megalo_players (TODO: move this to the generic Variable class)
+         std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // used so that types like OpcodeArgValuePlayerOrGroup can declare themselves eligible for accessors on "team" and "player"
          //
          OpcodeArgTypeinfo() {
             OpcodeArgTypeRegistry::get().register_type(*this);
@@ -147,6 +148,27 @@ namespace Megalo {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
          //
+         #pragma region Decorator methods
+            //
+            // These methods should only be called immediately after constructing an instance; they should not be 
+            // called at any later point. They exist in an attempt to alleviate the problems that result from C++ 
+            // not supporting named arguments.
+            //
+            // These methods return the instance they're called on, allowing you to write variable definitions 
+            // such as:
+            //
+            //    OpcodeArgTypeinfo some_type = OpcodeArgTypeinfo(
+            //       config_arguments
+            //    ).decorator(
+            //       more_config_arguments
+            //    );
+            //
+            OpcodeArgTypeinfo& set_accessor_proxy_types(std::initializer_list<const OpcodeArgTypeinfo*> types) {
+               this->accessor_proxy_types = types;
+               return *this;
+            }
+         #pragma endregion
+         //
          inline bool can_be_static() const noexcept {
             return this->static_count > 0;
          }
@@ -157,6 +179,7 @@ namespace Megalo {
             return this->flags & flags::can_hold_variables;
          }
          const Script::Property* get_property_by_name(QString) const;
+         bool has_accessor_proxy_type(const OpcodeArgTypeinfo& type) const noexcept;
    };
 
    enum class arg_compile_result {
@@ -185,7 +208,7 @@ namespace Megalo {
       public:
          const char* name = "";
          bool is_out_variable = false;
-         OpcodeArgTypeinfo& typeinfo;
+         const OpcodeArgTypeinfo& typeinfo;
          //
          const char* text_true  = "true";
          const char* text_false = "false";

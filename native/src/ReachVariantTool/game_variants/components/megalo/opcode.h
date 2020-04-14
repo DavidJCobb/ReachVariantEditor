@@ -131,8 +131,11 @@ namespace Megalo {
             this->mapping.owner = this;
          }
          //
+         bool context_is(const OpcodeArgTypeinfo&) const noexcept;
          void decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept;
-         int index_of_out_argument() const noexcept; // returns -1 if there is none
+         const OpcodeArgTypeinfo* get_context_type() const noexcept;
+         const OpcodeArgTypeinfo* get_name_type() const noexcept;
+         int  index_of_out_argument() const noexcept; // returns -1 if there is none
    };
 
    class Opcode { // base class for Condition and Action
@@ -163,12 +166,13 @@ namespace Megalo {
             Definition(const char* n) : name(n) {}
             Definition(const std::string& n) : name(n) {}
             //
+            const OpcodeBase* get_opcode_base() const noexcept; // returns getter or setter -- whichever is defined, preferring the former
             inline bool is_variably_named() const noexcept { return this->name.empty(); }
          };
          std::vector<Definition> definitions;
          //
-         Definition* get_by_name(const char*) const noexcept;
-         Definition* get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type) const noexcept;
+         Definition* get_by_name(const char*, const OpcodeArgTypeinfo& base) const noexcept;
+         Definition* get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type, const OpcodeArgTypeinfo& base) const noexcept;
          const Definition* get_variably_named_accessor(Compiler&, const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
          //
       protected:

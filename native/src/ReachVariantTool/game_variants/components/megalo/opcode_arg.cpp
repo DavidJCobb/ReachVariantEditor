@@ -52,4 +52,10 @@ namespace Megalo {
             return &prop;
       return nullptr;
    }
+   bool OpcodeArgTypeinfo::has_accessor_proxy_type(const OpcodeArgTypeinfo& type) const noexcept {
+      for (auto t : this->accessor_proxy_types)
+         if (t == &type)
+            return true;
+      return false;
+   }
 }

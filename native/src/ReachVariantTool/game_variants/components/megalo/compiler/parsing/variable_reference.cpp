@@ -550,7 +550,7 @@ namespace Megalo::Script {
       this->_resolve_aliases_from(compiler, raw_index, type); // handle relative aliases, if any are present
       const QString& name = this->_get_raw_part(raw_index)->name;
       auto&       manager = AccessorRegistry::get();
-      const auto* entry   = manager.get_by_name(name.toStdString().c_str());
+      const auto* entry   = manager.get_by_name(name.toStdString().c_str(), *type);
       if (!entry) {
          assert(type && "Problem in VariableReference::_resolve_accessor; somehow we do not have an identifiable type.");
          entry = manager.get_variably_named_accessor(compiler, name, *type);

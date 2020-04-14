@@ -11,7 +11,10 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerOrGroup>
-   );
+   ).set_accessor_proxy_types({
+      &OpcodeArgValuePlayer::typeinfo,
+      &OpcodeArgValueTeam::typeinfo
+   });
    //
    bool OpcodeArgValuePlayerOrGroup::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       uint8_t type = stream.read_bits(2);

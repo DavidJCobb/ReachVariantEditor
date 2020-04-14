@@ -130,30 +130,16 @@ int main(int argc, char *argv[]) {
 //
 //        = THE "SCORE" SETTER-ACCESSOR USES A OpcodeArgValuePlayerOrGroup ARGUMENT AS ITS 
 //          CONTEXT. THIS ARGUMENT TYPE CAN RESOLVE TO A PLAYER VARIABLE, A TEAM VARIABLE, 
-//          OR "all_players". OUR CURRENT ACCESSOR-MATCHING SYSTEM CAN'T COPE WITH THIS 
-//          SORT OF THING.
+//          OR "all_players". WE'VE AMENDED OUR ACCESSOR-MATCHING SYSTEM TO COPE WITH THE 
+//          FORMER TWO CASES, BUT THERE IS ONLY ONE WAY TO ADDRESS THE LATTER CASE:
 //
-//          WE NEED TO GIVE OpcodeArgTypeinfo THE ABILITY TO SPECIFY OTHER TYPEINFOS THAT 
-//          IT CAN "RESOLVE" TO, SO THAT WE CAN IDENTIFY WHEN THE "SCORE" ACCESSOR (AND 
-//          ANY OTHER ACCESSORS THAT HAVE A "DYNAMIC" CONTEXT TYPE) IS BEING INVOKED. 
-//          THIS DATA SHOULD ONLY BE USED FOR ACCESSORS AND NEVER FOR ANYTHING ELSE. OF 
-//          COURSE, EVEN THAT DOESN'T SOLVE "all_players", AND I'M NOT REALLY SURE HOW 
-//          TO ADDRESS THAT YET.
-//
-//           - We honestly may just have to hardcode this -- make "all_players" a 
-//             NamespaceMember that is hardcoded to compile to the appropriate content. 
-//             The NamespaceMember would use OpcodeArgValuePlayerOrGroup as its type, so 
-//             it would be capable of using accessors for that type, but it wouldn't be 
-//             able to appear in the same contexts (or have the same members) as an 
-//             ordinary player variable or team variable.
-//
-//              - Well, really, the NamespaceMember itself wouldn't "compile" anything; 
-//                rather, OpcodeArgValuePlayerOrGroup::compile would check an incoming 
-//                VariableReference to see if it's using that NamespaceMember. All we 
-//                really need is the ability to define a "bare" NamespaceMember with 
-//                just a name and a type, and no scope or which. That should work 
-//                without requiring any changes to any existing systems, i.e. the 
-//                "all_players" value wouldn't have to be a special case after all.
+//          We need to make it possible to define a NamespaceMember that consists only of 
+//          a type. Then, we create an unnamed-namespace member named "all_players" whose 
+//          type is OpcodeArgValuePlayerOrGroup. When VariableReference resolves access to 
+//          this member, it should end up with a (resolved.top_level) specifying the type 
+//          as OpcodeArgValuePlayerOrGroup. Crucially this means that we don't need any 
+//          special-case compiler code; OpcodeArgValuePlayerOrGroup::compile can check for 
+//          that case (versus access to a player- or team-type value) very easily.
 //
 //        - Compiling assignments
 //

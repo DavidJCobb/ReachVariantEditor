@@ -4,6 +4,17 @@
 #include "compiler/string_scanner.h"
 
 namespace Megalo {
+   bool OpcodeBase::context_is(const OpcodeArgTypeinfo& type) const noexcept {
+      auto& mapping = this->mapping;
+      if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+         return nullptr;
+      auto& base = this->arguments[mapping.arg_context];
+      if (&base.typeinfo == &type)
+         return true;
+      if (type.has_accessor_proxy_type(base.typeinfo))
+         return true;
+      return false;
+   }
    void OpcodeBase::decompile(Decompiler& out, std::vector<OpcodeArgValue*>& args) const noexcept {
       auto& mapping = this->mapping;
       switch (mapping.type) {
@@ -113,12 +124,30 @@ namespace Megalo {
             return;
       }
    }
+   const OpcodeArgTypeinfo* OpcodeBase::get_context_type() const noexcept {
+      auto& mapping = this->mapping;
+      if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+         return nullptr;
+      return &this->arguments[mapping.arg_context].typeinfo;
+   }
+   const OpcodeArgTypeinfo* OpcodeBase::get_name_type() const noexcept {
+      auto& mapping = this->mapping;
+      if (mapping.arg_name == OpcodeFuncToScriptMapping::no_context)
+         return nullptr;
+      return &this->arguments[mapping.arg_name].typeinfo;
+   }
    int OpcodeBase::index_of_out_argument() const noexcept {
       size_t size = this->arguments.size();
       for (size_t i = 0; i < size; ++i)
          if (this->arguments[i].is_out_variable)
             return i;
       return -1;
+   }
+
+   const OpcodeBase* AccessorRegistry::Definition::get_opcode_base() const noexcept {
+      if (this->getter)
+         return this->getter;
+      return this->setter;
    }
 
    AccessorRegistry::AccessorRegistry() {
@@ -130,47 +159,53 @@ namespace Megalo {
          auto& mapping = action.mapping;
          if (mapping.type != mapping_type::property_get && mapping.type != mapping_type::property_set)
             continue;
+         auto context = action.get_context_type();
+         assert(context && "An accessor should have a context-argument.");
+         //
          Definition* entry = nullptr;
          if (mapping.primary_name.empty() && mapping.arg_name != OpcodeFuncToScriptMapping::no_argument) {
+            //
+            // Branch for variably-named accessors.
+            //
             auto& base = action.arguments[mapping.arg_name];
-            entry = this->get_variably_named_accessor(base.typeinfo);
+            entry = this->get_variably_named_accessor(base.typeinfo, *context);
             if (!entry)
                entry = &this->definitions.emplace_back();
          } else {
-            entry = this->get_by_name(mapping.primary_name.c_str());
+            //
+            // Branch for accessors that have a fixed name.
+            //
+            entry = this->get_by_name(mapping.primary_name.c_str(), *context);
             if (!entry)
                entry = &this->definitions.emplace_back(mapping.primary_name.c_str());
          }
+         //
          if (mapping.type == mapping_type::property_get)
             entry->getter = &action;
          else
             entry->setter = &action;
       }
    }
-   AccessorRegistry::Definition* AccessorRegistry::get_by_name(const char* name) const noexcept {
+   AccessorRegistry::Definition* AccessorRegistry::get_by_name(const char* name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
       for (auto& entry : this->definitions) {
+         if (entry.get_opcode_base()->context_is(property_is_on))
+            continue;
          if (entry.name == name)
             return (Definition*)&entry; // cast needed to strip const
       }
       return nullptr;
    }
-   AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type) const noexcept {
+   AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type, const OpcodeArgTypeinfo& base) const noexcept {
       for (auto& entry : this->definitions) {
-         if (!entry.name.empty())
+         if (!entry.is_variably_named())
             continue;
-         const OpcodeBase* function = nullptr;
-         if (entry.getter)
-            function = entry.getter;
-         else
-            function = entry.setter;
+         const OpcodeBase* function = entry.get_opcode_base();
          #if _DEBUG
             assert(function && "An entry for a variably-named accessor should not exist unless we've identified at least one of its opcodes.");
          #endif
-         auto& mapping = function->mapping;
-         if (mapping.arg_name != OpcodeFuncToScriptMapping::no_argument)
+         if (function->context_is(base))
             continue;
-         auto& base = function->arguments[mapping.arg_name];
-         if (&base.typeinfo == &property_name_type)
+         if (function->get_name_type() == &property_name_type)
             return (Definition*)&entry; // cast needed to strip const
       }
       return nullptr;
@@ -187,19 +222,18 @@ namespace Megalo {
       for (auto& entry : this->definitions) {
          if (!entry.is_variably_named())
             continue;
-         const OpcodeBase* function = nullptr;
-         if (entry.getter)
-            function = entry.getter;
-         else
-            function = entry.setter;
+         const OpcodeBase* function = entry.get_opcode_base();
+         #if _DEBUG
+            assert(function && "An entry for a variably-named accessor should not exist unless we've identified at least one of its opcodes.");
+         #endif
          //
-         auto& mapping = function->mapping;
-         if (&function->arguments[mapping.arg_context].typeinfo != &property_is_on) // validate context type
+         auto type = function->get_name_type();
+         if (!type)
             continue;
-         auto& base = function->arguments[mapping.arg_name];
-         auto& type = base.typeinfo;
+         if (!function->context_is(property_is_on))
+            continue;
          //
-         arg.reset((type.factory)());
+         arg.reset((type->factory)());
          if (arg->compile(compiler, Script::string_scanner(name), 0) == arg_compile_result::success)
             return &entry;
       }
