@@ -48,7 +48,7 @@ namespace Megalo {
          auto alias = compiler.lookup_absolute_alias(word);
          if (alias) {
             if (alias->is_integer_constant()) {
-               this->value = alias->get_integer_constant();
+               this->value = alias->get_integer_constant() != 0;
                return arg_compile_result::success;
             }
             if (alias->is_imported_name())

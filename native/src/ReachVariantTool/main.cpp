@@ -240,6 +240,12 @@ int main(int argc, char *argv[]) {
 //           - "On" keyword used for a nested trigger
 //           - Multiple triggers using the same event type via "on"
 //
+//        - Once we have a system for logging non-fatal errors, we should introduce a 
+//          similar system for warnings. Warnings should include:
+//
+//           - OpcodeArgValueConstSInt8::compile: number will overflow or underflow
+//           - OpcodeArgValueVector3::compile: number will overflow or underflow
+//
 //     = AUDITING
 //
 //        - Exception safety for anything that gets heap-allocated.

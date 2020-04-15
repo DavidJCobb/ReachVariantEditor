@@ -1,4 +1,5 @@
 #include "sound.h"
+#include "../compiler/compiler.h"
 
 namespace {
    constexpr int ce_bitcount = cobb::bitcount(Megalo::Limits::max_engine_sounds - 1);
@@ -446,9 +447,8 @@ namespace Megalo {
       "One of a limited set of sounds available to scripts to play.",
       //
       OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>,
-      enums::sound
-   );
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueSound>
+   ).import_names(enums::sound).import_names({ "none" });
 
    bool OpcodeArgValueSound::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->value = stream.read_bits(ce_bitcount) - 1;
@@ -492,5 +492,45 @@ namespace Megalo {
       if (temp.empty())
          cobb::sprintf(temp, "%u", this->value);
       out.write(temp);
+   }
+   arg_compile_result OpcodeArgValueSound::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      if (part > 0)
+         return arg_compile_result::failure;
+      //
+      constexpr int max_value = Megalo::Limits::max_incident_types - 1;
+      //
+      int32_t value = 0;
+      if (arg.extract_integer_literal(value)) {
+         if (value < 0 || value > max_value) // do not allow incident IDs to overflow
+            return arg_compile_result::failure;
+         this->value = value;
+         return arg_compile_result::success;
+      }
+      QString word = arg.extract_word();
+      if (word.isEmpty())
+         return arg_compile_result::failure;
+      auto alias = compiler.lookup_absolute_alias(word);
+      if (alias) {
+         if (alias->is_integer_constant()) {
+            value = alias->get_integer_constant();
+            if (value < 0 || value > max_value) // do not allow incident IDs to overflow
+               return arg_compile_result::failure;
+            this->value = value;
+            return arg_compile_result::success;
+         }
+         if (alias->is_imported_name())
+            word = alias->target_imported_name;
+         else
+            return arg_compile_result::failure;
+      }
+      if (word.compare("none", Qt::CaseInsensitive) == 0) {
+         this->value = -1;
+         return arg_compile_result::success;
+      }
+      value = enums::sound.lookup(word);
+      if (value < 0)
+         return arg_compile_result::failure;
+      this->value = value;
+      return arg_compile_result::success;
    }
 }

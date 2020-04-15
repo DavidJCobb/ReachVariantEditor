@@ -1337,6 +1337,11 @@ namespace Megalo {
       if (name.isEmpty())
          this->throw_error("A function must have a name.");
       if (name[0].isNumber())
+         //
+         // Do not allow a function's name to start with a number. We want this to be consistent with 
+         // alias names, which disallow numbers at their start so that it's easier for opcode argument 
+         // compile functions to check for both integer literals and integer alias names.
+         //
          this->throw_error("A function's name cannot begin with a number.");
       for (QChar c : name) {
          if (QString("[].").contains(c))

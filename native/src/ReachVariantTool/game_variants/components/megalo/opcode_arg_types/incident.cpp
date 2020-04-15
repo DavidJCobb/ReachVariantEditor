@@ -1049,7 +1049,7 @@ namespace Megalo {
       //
       int32_t value = 0;
       if (arg.extract_integer_literal(value)) {
-         if (value > max_value) // do not allow incident IDs to overflow
+         if (value < 0 || value > max_value) // do not allow incident IDs to overflow
             return arg_compile_result::failure;
          this->value = value;
          return arg_compile_result::success;
@@ -1061,7 +1061,7 @@ namespace Megalo {
       if (alias) {
          if (alias->is_integer_constant()) {
             value = alias->get_integer_constant();
-            if (value > max_value) // do not allow incident IDs to overflow
+            if (value < 0 || value > max_value) // do not allow incident IDs to overflow
                return arg_compile_result::failure;
             this->value = value;
             return arg_compile_result::success;
@@ -1072,7 +1072,7 @@ namespace Megalo {
             return arg_compile_result::failure;
       }
       if (word.compare("none", Qt::CaseInsensitive) == 0) {
-         this->value = value;
+         this->value = -1;
          return arg_compile_result::success;
       }
       value = enums::incident.lookup(word);

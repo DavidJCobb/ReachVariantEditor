@@ -34,6 +34,10 @@ namespace Megalo::Script {
          if (name.isEmpty())
             compiler.throw_error("An alias must have a name.");
          if (name[0].isNumber())
+            //
+            // Do not allow an alias's name to start with a number. This will make it easier for opcode 
+            // argument compile functions to check for both integer literals and integer alias names.
+            //
             compiler.throw_error("An alias's name cannot begin with a number.");
          if (Compiler::is_keyword(name))
             compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));

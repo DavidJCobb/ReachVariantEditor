@@ -1,4 +1,5 @@
 #include "all_enums.h"
+#include "../compiler/compiler.h"
 
 namespace Megalo {
    namespace enums {
@@ -133,6 +134,20 @@ namespace Megalo {
       if (temp.empty())
          cobb::sprintf(temp, "%u", this->value);
       out.write(temp);
+   }
+   arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      auto word  = arg.extract_word();
+      auto alias = compiler.lookup_absolute_alias(word);
+      if (alias) {
+         if (!alias->is_imported_name())
+            return arg_compile_result::failure;
+         word = alias->target_imported_name;
+      }
+      auto index = this->base.lookup(word);
+      if (index < 0)
+         return arg_compile_result::failure;
+      this->value = index;
+      return arg_compile_result::success;
    }
    #pragma endregion
 
