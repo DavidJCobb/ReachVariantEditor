@@ -39,7 +39,7 @@ namespace Megalo {
             };
             //
          public:
-            Trigger* trigger  = nullptr;
+            Trigger* trigger = nullptr;
             QString  name; // only for functions
             QString  label_name;
             int32_t  label_index = -1;
@@ -52,6 +52,14 @@ namespace Megalo {
             void insert_condition(ParsedItem*);
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
+            //
+            void clear();
+            void compile(Compiler&);
+            //
+         protected:
+            void _get_effective_items(std::vector<ParsedItem*>& out, bool include_functions = true); // returns the list of items with only Statements and Blocks, i.e. only things that generate compiled output
+            bool _is_if_block() const noexcept;
+            void _make_trigger(Compiler&);
       };
       class Statement : public ParsedItem {
          public:
@@ -143,6 +151,8 @@ namespace Megalo {
          };
          [[nodiscard]] static name_source check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from);
          //
+         int32_t _index_of_trigger(Trigger*) const noexcept; // is public for Block
+         //
       protected:
          bool is_in_statement() const;
          //
@@ -158,6 +168,7 @@ namespace Megalo {
          void __parseFunctionArgs(const OpcodeBase&, Opcode&);
          void _parseFunctionCall(bool is_condition);
          //
+         void _openBlock(Script::Block*);
          bool _closeCurrentBlock();
          //
          extract_result_t extract_integer_literal(int32_t& out) {

@@ -133,52 +133,16 @@ int main(int argc, char *argv[]) {
 //
 //     - OpcodeArgValue::compile overrides on subclasses
 //
+//        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
+//          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
+//          Currently, because it uses the same compile function as any basic enum, it just 
+//          matches as a string.
+//
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
 //        - We can't compile nested blocks when they close because we want a consistent 
 //          trigger order with Bungie's output; compiling nested blocks as they close will 
 //          result in their triggers preceding the triggers of their containing blocks.
-//
-//        - WHEN COMPILING A Block, DOUBLE-CHECK ITS Opcodes: IF ANY HAVE A nullptr ARGUMENT, 
-//          THEN ASSERT, BECAUSE THAT MEANS WE MISSED SOMETHING IN OUR Opcode-COMPILING CODE.
-//
-//        = HERE'S HOW TO COMPILE THE "OR-GROUP" VALUES ON CONDITIONS IN A TRIGGER. First, 
-//          start a counter off at 0. For each condition you write into that same trigger, 
-//          set its or-group value to the counter; if the condition is linked to the next 
-//          with "and", increment the counter. Here's an example from Freeze Tag:
-//
-//             if  a -- 0
-//             and b -- 1
-//             then
-//                if  c -- 2
-//                or  d -- 2
-//                and e -- 3
-//                and f -- 4
-//                then
-//                   ...
-//                end
-//             end
-//
-//        - Block::compile would check if it has a (this->trigger) already and if so, 
-//          compile into the existing trigger. That's needed for user-defined functions, 
-//          but we can also use it for if-statements at the end of their containing Block: 
-//          
-//             for each player do
-//                action
-//                if condition then -- not the last thing in the block, so needs its own Trigger
-//                   action
-//                end
-//                if condition then -- the last thing in the block, so writes into parent block's Trigger
-//                   action
-//                end
-//             end
-//
-//          When we are compiling a parent block and we hit an item that is itself a 
-//          Block (hereafter the "child block") and that is an if-statement, we check 
-//          if that child block is the last child (of any type other than Alias and 
-//          user-defined function) of the parent block. If so, we set the child block's 
-//          Trigger* to the same as the parent block, so that the child block writes its 
-//          conditions and contents directly into the parent block.
 //
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).

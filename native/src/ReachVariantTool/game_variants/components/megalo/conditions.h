@@ -35,6 +35,26 @@ namespace Megalo {
    extern std::array<ConditionFunction, 18> conditionFunctionList;
 
    class Condition : public Opcode {
+      //
+      // NOTES:
+      //
+      // Bungie implemented "or"-linked conditions using the (or_group) field. The (or_group) 
+      // field is set as follows: when compiling a Trigger, start a counter at 0. Every time 
+      // you compile a condition, copy the counter into its (or_group) and then, if the 
+      // condition is "and"-linked, increment the counter. Here's an example from Freeze Tag:
+      //
+      //    if  a -- 0
+      //    and b -- 1
+      //    then
+      //       if  c -- 2
+      //       or  d -- 2
+      //       and e -- 3
+      //       and f -- 4
+      //       then
+      //          ...
+      //       end
+      //    end
+      //
       public:
          virtual ~Condition() {
             this->reset();

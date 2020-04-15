@@ -72,16 +72,59 @@ namespace {
       assert(false && "Where is the comparison opcode?");
       __assume(0); // tell MSVC this is unreachable
    }
+   //
+   Megalo::block_type _block_type_to_trigger_type(Megalo::Script::Block::Type type) {
+      using namespace Megalo;
+      using namespace Megalo::Script;
+      switch (type) {
+         case Block::Type::basic:
+         case Block::Type::if_block:
+         case Block::Type::elseif_block:
+         case Block::Type::else_block:
+            break;
+         case Block::Type::for_each_object:
+            return block_type::for_each_object;
+            break;
+         case Block::Type::for_each_object_with_label:
+            return block_type::for_each_object_with_label;
+            break;
+         case Block::Type::for_each_player:
+            return block_type::for_each_player;
+            break;
+         case Block::Type::for_each_player_randomly:
+            return block_type::for_each_player_randomly;
+            break;
+         case Block::Type::for_each_team:
+            return block_type::for_each_team;
+            break;
+      }
+      return block_type::normal;
+   }
+   Megalo::entry_type _block_event_to_trigger_entry(Megalo::Script::Block::Event type) {
+      using namespace Megalo;
+      using namespace Megalo::Script;
+      switch (type) {
+         case Block::Event::double_host_migration:
+         case Block::Event::host_migration:
+            return Megalo::entry_type::on_host_migration;
+         case Block::Event::init:
+            return Megalo::entry_type::on_init;
+         case Block::Event::local:
+            return Megalo::entry_type::local;
+         case Block::Event::local_init:
+            return Megalo::entry_type::on_local_init;
+         case Block::Event::object_death:
+            return Megalo::entry_type::on_object_death;
+         case Block::Event::pregame:
+            return Megalo::entry_type::pregame;
+      }
+      return entry_type::normal;
+   }
 }
 namespace Megalo {
    namespace Script {
       Block::~Block() {
-         for (auto item : this->items)
-            delete item;
-         this->items.clear();
-         for (auto condition : this->conditions)
-            delete condition;
-         this->conditions.clear();
+         this->clear();
       }
       void Block::insert_condition(ParsedItem* item) {
          this->conditions.push_back(item);
@@ -102,6 +145,190 @@ namespace Megalo {
          } else if (i >= this->items.size())
             return nullptr;
          return this->items[i];
+      }
+      //
+      void Block::clear() {
+         for (auto item : this->items)
+            delete item;
+         this->items.clear();
+         for (auto condition : this->conditions)
+            delete condition;
+         this->conditions.clear();
+      }
+      //
+      void Block::_get_effective_items(std::vector<ParsedItem*>& out, bool include_functions) {
+         out.clear();
+         for (auto item : this->items) {
+            if (auto block = dynamic_cast<Block*>(item)) {
+               if (!include_functions) {
+                  if (block->type == Type::function)
+                     continue;
+               }
+               out.push_back(item);
+               continue;
+            }
+            if (dynamic_cast<Statement*>(item)) {
+               out.push_back(item);
+               continue;
+            }
+         }
+      }
+      bool Block::_is_if_block() const noexcept {
+         switch (this->type) {
+            case Type::if_block:
+            case Type::elseif_block:
+            case Type::else_block:
+               return true;
+         }
+         return false;
+      }
+      void Block::_make_trigger(Compiler& compiler) {
+         if (this->type == Type::function) {
+            assert(this->trigger && "The Compiler should've given this user-defined-function Block a trigger when it was first opened.");
+            this->trigger->blockType = block_type::normal;
+            this->trigger->entryType = entry_type::subroutine;
+            if (this->event != Event::none)
+               this->trigger->entryType = _block_event_to_trigger_entry(this->event);
+            //
+            std::vector<ParsedItem*> items;
+            this->_get_effective_items(items, false);
+            if (items.size() == 1) {
+               //
+               // If the function only contains a single block, then use that block's type. For example, the following 
+               // function should compile as a single for-loop trigger:
+               //
+               //    function example()    -- this Block owns   the Trigger
+               //       for each player do -- this Block shares the Trigger
+               //          action
+               //       end
+               //    end
+               //
+               auto item = dynamic_cast<Block*>(this->items[0]);
+               if (item) {
+                  item->trigger = this->trigger; // get the inner Block to write into the function's trigger
+                  this->trigger->blockType = _block_type_to_trigger_type(item->type);
+               }
+            }
+            return;
+         }
+         if (this->trigger)
+            //
+            // If we already have a trigger, then we're meant to compile our content directly into that 
+            // trigger. This will generally be the case for things like the last if-block inside of a 
+            // trigger:
+            //
+            //    for each player do
+            //       action
+            //       if condition then -- not the last thing in the block, so needs its own Trigger
+            //          action
+            //       end
+            //       if condition then -- the last thing in the block, so writes into parent block's Trigger
+            //          action
+            //       end
+            //    end
+            //
+            return;
+         //
+         auto t = this->trigger = new Trigger;
+         compiler.results.triggers.push_back(t);
+         if (this->parent)
+            t->entryType = entry_type::subroutine;
+         //
+         if (this->event != Event::none) {
+            t->entryType = _block_event_to_trigger_entry(this->event);
+         }
+         switch (this->type) {
+            case Type::basic:
+            case Type::if_block:
+            case Type::elseif_block:
+            case Type::else_block:
+               break;
+            case Type::for_each_object:
+               t->blockType = block_type::for_each_object;
+               break;
+            case Type::for_each_object_with_label:
+               t->blockType = block_type::for_each_object_with_label;
+               break;
+            case Type::for_each_player:
+               t->blockType = block_type::for_each_player;
+               break;
+            case Type::for_each_player_randomly:
+               t->blockType = block_type::for_each_player_randomly;
+               break;
+            case Type::for_each_team:
+               t->blockType = block_type::for_each_team;
+               break;
+         }
+      }
+      void Block::compile(Compiler& compiler) {
+         std::vector<ParsedItem*> items;
+         this->_get_effective_items(items);
+         if (!items.size()) {
+            return;
+         }
+         //
+         this->_make_trigger(compiler);
+         {
+            auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group
+            for (auto item : this->conditions) {
+               #if _DEBUG
+                  assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
+               #endif
+               auto cmp = dynamic_cast<Comparison*>(item);
+               assert(cmp);
+               auto cnd = dynamic_cast<Condition*>(cmp->opcode);
+               assert(cnd);
+               #if _DEBUG
+                  for (auto arg : cnd->arguments)
+                     assert(arg && "A compiled condition is missing an argument!");
+               #endif
+               this->trigger->opcodes.push_back(cnd);
+               //
+               // Handle or-groups:
+               //
+               cnd->or_group = count;
+               if (!cmp->next_is_or)
+                  count += 1;
+            }
+         }
+         std::vector<ParsedItem*> items;
+         this->_get_effective_items(items);
+         size_t size = items.size();
+         for (size_t i = 0; i < size; i++) {
+            bool is_last = (i == size - 1);
+            auto item    = items[i];
+            auto block   = dynamic_cast<Block*>(item);
+            if (block) {
+               if (is_last && block->_is_if_block())
+                  block->trigger = this->trigger;
+               block->compile(compiler);
+               if (block->trigger != this->trigger) {
+                  //
+                  // Create a "call nested trigger" opcode.
+                  //
+                  auto call  = new Action;
+                  this->trigger->opcodes.push_back(call);
+                  call->function = &actionFunction_runNestedTrigger;
+                  auto arg   = (call->function->arguments[0].typeinfo.factory)();
+                  call->arguments.push_back(arg);
+                  auto arg_c = dynamic_cast<OpcodeArgValueTrigger*>(arg);
+                  assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
+                  arg_c->value = compiler._index_of_trigger(block->trigger);
+                  assert(arg_c->value >= 0 && "Nested block trigger isn't in the Compiler's trigger list?!");
+               }
+               continue;
+            }
+            auto statement = dynamic_cast<Statement*>(item);
+            if (statement) {
+               assert(statement->opcode);
+               #if _DEBUG
+                  for (auto arg : statement->opcode->arguments)
+                     assert(arg && "A compiled opcode is missing an argument!");
+               #endif
+               this->trigger->opcodes.push_back(statement->opcode);
+               continue;
+            }
+         }
       }
       //
       Statement::~Statement() {
@@ -323,6 +550,7 @@ namespace Megalo {
       if (this->next_event != Script::Block::Event::none)
          this->throw_error("The file ended with an \"on\" keyword but no following block.");
       this->root->set_end(this->state);
+      this->results.success = true; // TODO: only if no errors encountered
       return;
    }
    void Compiler::_parseActionStart(QChar c) {
@@ -1124,7 +1352,28 @@ namespace Megalo {
    bool Compiler::is_in_statement() const {
       return this->assignment || this->comparison;
    }
+   int32_t Compiler::_index_of_trigger(Trigger* t) const noexcept {
+      auto&  list = this->results.triggers;
+      size_t size = list.size();
+      for (size_t i = 0; i < size; ++i)
+         if (list[i] == t)
+            return i;
+      return -1;
+   }
    //
+   void Compiler::_openBlock(Script::Block* block) {
+      if (this->block == this->root) {
+         //
+         // We're opening a top-level Block. Before we do that, let's see if the root block contains any 
+         // statements; if so, let's put those in their own trigger.
+         //
+         assert(this->root->trigger == nullptr);
+         this->root->compile(*this);
+         this->root->trigger = nullptr;
+         this->root->clear();
+      }
+      this->block = block;
+   }
    bool Compiler::_closeCurrentBlock() {
       if (this->block == this->root)
          return false;
@@ -1158,6 +1407,9 @@ namespace Megalo {
       auto parent = dynamic_cast<Script::Block*>(this->block->parent);
       if (!parent)
          return false;
+      if (parent == this->root) {
+         this->block->compile(*this);
+      }
       this->block = parent;
       return true;
    }
@@ -1210,7 +1462,7 @@ namespace Megalo {
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
    }
    void Compiler::_handleKeyword_Else() {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
@@ -1228,7 +1480,7 @@ namespace Megalo {
       item->type = Script::Block::Type::else_block;
       item->set_start(this->token.pos);
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
    }
    void Compiler::_handleKeyword_ElseIf() {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
@@ -1246,7 +1498,7 @@ namespace Megalo {
       item->type = Script::Block::Type::elseif_block;
       item->set_start(this->token.pos);
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
       this->_parseBlockConditions();
       this->reset_token();
    }
@@ -1261,7 +1513,7 @@ namespace Megalo {
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
       this->_parseBlockConditions();
       this->reset_token();
    }
@@ -1328,7 +1580,7 @@ namespace Megalo {
       item->event       = this->next_event;
       this->next_event  = Script::Block::Event::none;
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
    }
    void Compiler::_handleKeyword_Function() {
       auto start = this->token.pos;
@@ -1386,7 +1638,7 @@ namespace Megalo {
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
-      this->block = item;
+      this->_openBlock(item);
       //
       // Normally, we only create a Block's Trigger when we're compiling the block in full. However, 
       // in order to compile calls to this user-defined function as we find them, we need to know 

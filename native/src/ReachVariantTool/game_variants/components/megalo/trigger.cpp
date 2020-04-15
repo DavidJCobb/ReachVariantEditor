@@ -247,8 +247,8 @@ namespace Megalo {
          case block_type::for_each_player:
             out += "for each player";
             break;
-         case block_type::for_each_player_random:
-            out += "for each player random?";
+         case block_type::for_each_player_randomly:
+            out += "for each player randomly";
             break;
          case block_type::for_each_team:
             out += "for each team";
@@ -431,7 +431,7 @@ namespace Megalo {
             out.modify_indent_count(1);
             ++indent_count;
             break;
-         case block_type::for_each_player_random:
+         case block_type::for_each_player_randomly:
             out.write(u8"for each player randomly do");
             out.modify_indent_count(1);
             ++indent_count;
