@@ -103,30 +103,18 @@ int main(int argc, char *argv[]) {
 //     - SHORT-TERM PLANS
 //
 //        = THE "SCORE" VALUE FOR PLAYERS AND TEAMS USES A PROPERTY AS THE GETTER BUT AN 
-//          ACCESSOR OPCODE AS THE SETTER. DOES OUR CURRENT SYSTEM HANDLE THIS PROPERLY? 
-//          IF NOT, HOW CAN WE REMEDY THAT?
+//          ACCESSOR OPCODE AS THE SETTER. BUNGIE AND 343I'S SCRIPTS ALL EXCLUSIVELY USE 
+//          THE PROPERTY FOR GETTING AND THE ACCESSOR FOR SETTING. WE NEED TO AMEND OUR 
+//          VariableReference::resolve PROCESS TO MIMIC THIS BEHAVIOR. SPECIFICALLY, IT 
+//          NEEDS TO ACCEPT A (bool is_write_access = false) ARGUMENT AND WHEN THAT BOOL 
+//          IS (true), IT NEEDS TO HAVE A SPECIAL-CASE BUILT IN FOR READ-ONLY PROPERTIES.
 //
-//           - Well, actually,... What if the "score" accessor exists to facilitate 
-//             modifying the score of a property, e.g. (current_player.team.score += 5)? 
-//             We need to check Bungie and 343i's gametypes and look at how they modify 
-//             scores: do they use the accessor or a standard assignment, and when?
-//
-//             (Evidence to support this idea: KSoft doesn't list the "score" property 
-//             as read-only for players or teams.)
-//
-//             If I'm right and this is why the "score" accessor exists, then we don't 
-//             need to change anything about variable reference resolution.
-//
-//              - Freeze Tag uses the opcode for hud_player.team.score, but also for 
-//                global.team[3].score and global.player[0].score. It never writes to the 
-//                property.
-//
-//              - KOTH uses the opcode to modify the score, but reads the score as a 
-//                property, typically to do the "X seconds to win" voiceovers.
-//
-//             It looks like we *are* gonna have to change things a bit, then. Even if the 
-//             property is writeable, Bungie and 343i don't do that, and we should aim to 
-//             be consistent with them.
+//          Specifically, when a read-only property is accessed when we're resolving for 
+//          write-access, we check if there is a setter-accessor of the same name and if 
+//          so, we prefer that accessor. (If not, then we just resolve the property; 
+//          error-handling code upstream is already going to check for read-only values 
+//          in appropriate places and letting that fail "for" us will ensure consistent 
+//          error messaging.)
 //
 //        - When we open a top-level Block, we should check to see if the root Block contains 
 //          any Statements. If so, those should be compiled into their own Trigger.
@@ -137,6 +125,55 @@ int main(int argc, char *argv[]) {
 //          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
 //          Currently, because it uses the same compile function as any basic enum, it just 
 //          matches as a string.
+//
+//        - WE NEED CODE TO COMPILE VARIABLES. We should start with the "object" type, 
+//          because there's only one property ("player.biped") that can resolve to multiple 
+//          possible scopes and that property is of the "object" type. That means that the 
+//          OpcodeArgValue::compile overload for object VariableReferences will be the most 
+//          complex overload of all the variable types; we can code everything we need for 
+//          that, and then it should become apparent what bits of that will generalize to 
+//          other variable types and so can be moved to the base Variable class.
+//
+//        - WE NEED TO PROVIDE SOME COMPILER-LEVEL FUNCTIONALITY TO FACILITATE COMPILING 
+//          STRING ARGUMENTS. We want script authors to be able to specify a string as an 
+//          integer literal (denoting an index in the string table) or as a string literal 
+//          (denoting the English-language content of the string). If the integer literal 
+//          does not correspond to a string in the table, then we error; if the string 
+//          literal matches multiple strings, then we error; but if the string literal does 
+//          not match any string in the table, then we should give the script author an 
+//          opportunity to create it (or to pick an existing string).
+//
+//          To facilitate this, the Compiler needs to maintain a list of OpcodeArgValues 
+//          with unresolved string references. Each list entry would consist of an 
+//          OpcodeArgValue, a part number, and the original string literal. When we hit the 
+//          end of the script, we'd check if there are any entries in this table and if so, 
+//          we'd give the script author the opportunity to decide what to do with them 
+//          (including the opportunity to cancel compiling).
+//
+//          This presents an issue, of course: OpcodeArgValue::compile needs to be able to 
+//          signal that a string reference was unresolved, while also still sending back a 
+//          result code (success, needs another, or can take another).
+//
+//          For a little while now, I've also wanted OpcodeArgValue::compile to be able to 
+//          send back an error string if compiling fails. This would require returning a 
+//          struct... and so would alerting the Compiler to an unresolved string reference. 
+//          Accordingly, we should take the arg_compile_result enum and make it a struct 
+//          (so that we don't need to rename the return value on all the defined overrides) 
+//          that contains a result enum, a QString for error text, and a boolean indicating 
+//          the presence of an unresolved string reference.
+//
+//          Then, we'd modify everything in the Compiler that calls OpcodeArgValue::compile: 
+//          if we're alerted to an unresolved string reference, then we save the value, the 
+//          argument string that was passed, and the part number that was passed.
+//
+//          Crucial thing to remember: the list of unresolved string references does NOT 
+//          have ownership of the target OpcodeArgValues; if an exception is thrown and 
+//          their owning Opcode gets deleted, then they'll be deleted as well, leaving a 
+//          dangling pointer in the list of unresolved string references. We need to adjust 
+//          our code so that if an Opcode is nuked, its OpcodeArgValues are cleared from 
+//          the list of unresolved string references. This would require moving away from 
+//          throwing exceptions on all errors in favor of handling both fatal and non-fatal 
+//          errors in a more "manual" fashion (which we want to do anyway).
 //
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
