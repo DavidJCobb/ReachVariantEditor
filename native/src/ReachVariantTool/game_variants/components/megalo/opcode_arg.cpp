@@ -28,21 +28,28 @@ namespace Megalo {
             return type;
       return nullptr;
    }
+   bool OpcodeArgTypeinfo::has_imported_name(const QString& name) const noexcept {
+      for (auto p : this->imported_names.bare_values)
+         if (name.compare(p, Qt::CaseInsensitive) == 0)
+            return true;
+      if (auto e = this->imported_names.enum_values) {
+         auto i = e->lookup(name);
+         if (i >= 0)
+            return true;
+      }
+      if (auto f = this->imported_names.flag_values) {
+         auto i = f->lookup(name);
+         if (i >= 0)
+            return true;
+      }
+      return false;
+   }
+
    void OpcodeArgTypeRegistry::lookup_imported_name(const QString& name, type_list_t& out) const {
       out.clear();
-      for (auto type : this->types) {
-         auto& imp = type->imported_names;
-         auto  e   = imp.enum_values;
-         auto  f   = imp.flag_values;
-         if (e && e->lookup(name)) {
+      for (auto type : this->types)
+         if (type->has_imported_name(name))
             out.push_back(type);
-            continue;
-         }
-         if (f && f->lookup(name)) {
-            out.push_back(type);
-            continue;
-         }
-      }
    }
 
    const Script::Property* OpcodeArgTypeinfo::get_property_by_name(QString name) const {

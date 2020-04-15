@@ -1,4 +1,6 @@
 #include "all_constants.h"
+#include "../compiler/compiler.h"
+#include "../../../helpers/numeric.h"
 
 namespace Megalo {
    #pragma region bool
@@ -9,7 +11,7 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueConstBool>
-   );
+   ).import_names({ "true", "false" });
    //
    bool OpcodeArgValueConstBool::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       stream.read(this->value);
@@ -32,6 +34,38 @@ namespace Megalo {
          this->baseStringTrue = base.text_true;
       if (base.text_false)
          this->baseStringFalse = base.text_false;
+   }
+   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      if (part > 0)
+         return arg_compile_result::failure;
+      //
+      int32_t v = 0;
+      if (!arg.extract_integer_literal(v)) {
+         //
+         // Try to resolve the argument as an alias.
+         //
+         auto word  = arg.extract_word();
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (alias) {
+            if (alias->is_integer_constant()) {
+               this->value = alias->get_integer_constant();
+               return arg_compile_result::success;
+            }
+            if (alias->is_imported_name())
+               word = alias->target_imported_name;
+         }
+         if (word.compare("true", Qt::CaseInsensitive) == 0) {
+            this->value = true;
+            return arg_compile_result::success;
+         }
+         if (word.compare("false", Qt::CaseInsensitive) == 0) {
+            this->value = false;
+            return arg_compile_result::success;
+         }
+         return arg_compile_result::failure;
+      }
+      this->value = v;
+      return arg_compile_result::success;
    }
    #pragma endregion
    //
@@ -59,6 +93,29 @@ namespace Megalo {
       std::string temp;
       cobb::sprintf(temp, "%d", this->value);
       out.write(temp);
+   }
+   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      if (part > 0)
+         return arg_compile_result::failure;
+      //
+      int32_t v = 0;
+      if (!arg.extract_integer_literal(v)) {
+         //
+         // Try to resolve the argument as an alias.
+         //
+         auto word  = arg.extract_word();
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (!alias || !alias->is_integer_constant())
+            return arg_compile_result::failure;
+         v = alias->get_integer_constant();
+      }
+      if (!cobb::integral_type_can_hold<int8_t>(v)) {
+         //
+         // TODO: Warn if the coordinate exceeds what can be held in an int8_t.
+         //
+      }
+      this->value = v;
+      return arg_compile_result::success;
    }
    #pragma endregion
 }

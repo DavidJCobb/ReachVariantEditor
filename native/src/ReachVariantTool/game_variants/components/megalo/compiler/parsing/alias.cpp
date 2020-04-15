@@ -31,6 +31,10 @@ namespace Megalo::Script {
       // we're actually instantiating the alias.
       //
       {  // Validate name.
+         if (name.isEmpty())
+            compiler.throw_error("An alias must have a name.");
+         if (name[0].isNumber())
+            compiler.throw_error("An alias's name cannot begin with a number.");
          if (Compiler::is_keyword(name))
             compiler.throw_error(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
          if (cobb::qt::string_has_any_of(name, "[]."))

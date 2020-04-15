@@ -1336,6 +1336,8 @@ namespace Megalo {
       auto name = this->extract_word();
       if (name.isEmpty())
          this->throw_error("A function must have a name.");
+      if (name[0].isNumber())
+         this->throw_error("A function's name cannot begin with a number.");
       for (QChar c : name) {
          if (QString("[].").contains(c))
             this->throw_error(QString("Unexpected %1 inside of a function name.").arg(c));

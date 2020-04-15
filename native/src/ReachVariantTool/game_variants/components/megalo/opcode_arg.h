@@ -101,6 +101,7 @@ namespace Megalo {
          struct {
             const DetailedEnum*  enum_values = nullptr;
             const DetailedFlags* flag_values = nullptr;
+            std::vector<const char*> bare_values;
          } imported_names;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          factory_t                factory = nullptr;
@@ -163,6 +164,33 @@ namespace Megalo {
             //       more_config_arguments
             //    );
             //
+            OpcodeArgTypeinfo& import_names(const DetailedEnum& e) {
+               auto& p = this->imported_names.enum_values;
+               if (p != &e) {
+                  assert(!p && "Cannot import names from multiple enums.");
+                  p = &e;
+               }
+               return *this;
+            }
+            OpcodeArgTypeinfo& import_names(const DetailedFlags& e) {
+               auto& p = this->imported_names.flag_values;
+               if (p != &e) {
+                  assert(!p && "Cannot import names from multiple flags lists.");
+                  p = &e;
+               }
+               return *this;
+            }
+            OpcodeArgTypeinfo& import_names(std::initializer_list<const char*> types) {
+               auto& list = this->imported_names.bare_values;
+               if (list.empty())
+                  list = types;
+               else {
+                  list.reserve(list.size() + types.size());
+                  for (auto p : types)
+                     list.push_back(p);
+               }
+               return *this;
+            }
             OpcodeArgTypeinfo& set_accessor_proxy_types(std::initializer_list<const OpcodeArgTypeinfo*> types) {
                this->accessor_proxy_types = types;
                return *this;
@@ -180,6 +208,7 @@ namespace Megalo {
          }
          const Script::Property* get_property_by_name(QString) const;
          bool has_accessor_proxy_type(const OpcodeArgTypeinfo& type) const noexcept;
+         bool has_imported_name(const QString& name) const noexcept;
    };
 
    enum class arg_compile_result {

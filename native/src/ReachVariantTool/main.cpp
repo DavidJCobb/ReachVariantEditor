@@ -187,6 +187,15 @@ int main(int argc, char *argv[]) {
 //          it to the variant after successful compiling. That way, we don't trash the 
 //          loaded file if compiling hits an error.
 //
+//        - It'd probably be easiest to forego VariableReference for variable names in 
+//          favor of custom parsing. A variable declaration can only consist of: 
+//          
+//             global.typename[index]
+//             typename.typename[index]
+//          
+//          where both typenames are of variables; along with (where appropriate) a 
+//          VariableReference or team constant as the initial value.
+//
 //     - Compiling should fail if multiple triggers use the same event type (via the "on" 
 //       keyword; requires that the Compiler keep track of what events have been used so 
 //       far).
