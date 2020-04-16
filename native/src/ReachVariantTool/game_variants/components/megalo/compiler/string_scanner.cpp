@@ -72,6 +72,27 @@ namespace Megalo {
       void string_scanner::restore_stream_state(pos s) {
          this->state = s;
       }
+      void string_scanner::skip_to(QChar desired, bool even_if_in_string) {
+         QChar delim = '\0';
+         this->scan([desired, &delim, even_if_in_string](QChar c) {
+            if (!even_if_in_string) {
+               if (delim != '\0') {
+                  if (c == delim)
+                     delim = '\0';
+                  return false;
+               }
+               if (string_scanner::is_quote_char(c)) {
+                  delim = c;
+                  return false;
+               }
+            }
+            //
+            if (c == desired)
+               return true;
+            return false;
+         });
+         ++this->state.offset;
+      }
       void string_scanner::skip_to_end() {
          this->scan([](QChar c) { return false; });
       }

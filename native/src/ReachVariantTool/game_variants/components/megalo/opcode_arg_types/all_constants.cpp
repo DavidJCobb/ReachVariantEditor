@@ -110,9 +110,7 @@ namespace Megalo {
          v = alias->get_integer_constant();
       }
       if (!cobb::integral_type_can_hold<int8_t>(v)) {
-         //
-         // TODO: Warn if the coordinate exceeds what can be held in an int8_t.
-         //
+         compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer and will overflow or underflow.").arg(v));
       }
       this->value = v;
       return arg_compile_result::success;

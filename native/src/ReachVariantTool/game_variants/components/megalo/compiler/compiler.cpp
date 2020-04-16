@@ -513,6 +513,21 @@ namespace Megalo {
    void Compiler::throw_error(const Script::string_scanner::pos& pos, const QString& text) {
       throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(pos.line + 1).arg(pos.offset - pos.last_newline + 1).arg(text));
    }
+   void Compiler::raise_error(const QString& text) {
+      this->errors.emplace_back(text, this->state);
+   }
+   void Compiler::raise_error(const Compiler::pos& pos, const QString& text) {
+      this->errors.emplace_back(text, pos);
+   }
+   void Compiler::raise_fatal(const QString& text) {
+      this->fatal_errors.emplace_back(text, this->state);
+   }
+   void Compiler::raise_fatal(const Compiler::pos& pos, const QString& text) {
+      this->fatal_errors.emplace_back(text, pos);
+   }
+   void Compiler::raise_warning(const QString& text) {
+      this->warnings.emplace_back(text, this->state);
+   }
    void Compiler::reset_token() {
       this->token = Token();
    }
@@ -539,30 +554,45 @@ namespace Megalo {
             this->_parseActionStart(c);
          else if (this->assignment)
             this->_parseAssignment(c);
+         //
+         if (this->has_fatal())
+            return true;
          return false;
       });
-      if (this->block != this->root)
-         this->throw_error("Unclosed block.");
-      if (this->assignment)
-         this->throw_error("An assignment statement is missing its righthand side.");
-      if (this->comparison)
-         this->throw_error("The file ended before a statement could be fully processed.");
-      if (this->next_event != Script::Block::Event::none)
-         this->throw_error("The file ended with an \"on\" keyword but no following block.");
-      this->root->set_end(this->state);
-      this->results.success = true; // TODO: only if no errors encountered
+      if (!this->has_fatal()) {
+         if (this->assignment)
+            this->raise_fatal("An assignment statement is missing its righthand side.");
+         if (this->comparison)
+            this->raise_fatal("The file ended before a statement could be fully processed.");
+         if (this->block != this->root)
+            this->raise_fatal("Unclosed block.");
+         if (this->next_event != Script::Block::Event::none)
+            this->raise_fatal("The file ended with an \"on\" keyword but no following block.");
+         this->root->set_end(this->state);
+         //
+         if (!this->has_errors())
+            this->results.success = true;
+      }
       return;
    }
    void Compiler::_parseActionStart(QChar c) {
       if (this->token.text.isEmpty()) {
-         if (c != '-' && string_scanner::is_operator_char(c)) // minus-as-numeric-sign must be special-cased
-            this->throw_error(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
-         if (string_scanner::is_syntax_char(c))
-            this->throw_error(QString("Unexpected %1.").arg(c));
-         if (string_scanner::is_quote_char(c))
-            this->throw_error(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
-         if (c == '(' || c == ')')
-            this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+         if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
+            this->raise_fatal(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
+            return;
+         }
+         if (string_scanner::is_syntax_char(c)) {
+            this->raise_fatal(QString("Unexpected %1.").arg(c));
+            return;
+         }
+         if (string_scanner::is_quote_char(c)) {
+            this->raise_fatal(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
+            return;
+         }
+         if (c == '(' || c == ')') {
+            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+            return;
+         }
          if (string_scanner::is_whitespace_char(c))
             return;
          this->token.text += c;
@@ -589,8 +619,10 @@ namespace Megalo {
          _handler_t handler = nullptr;
          //
          auto& word = this->token.text;
-         if (word == "and" || word == "or" || word == "not" || word == "then")
-            this->throw_error(QString("The \"%1\" keyword cannot appear here.").arg(word));
+         if (word == "and" || word == "or" || word == "not" || word == "then") {
+            this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+            return;
+         }
          if (word == "alias")
             handler = &Compiler::_handleKeyword_Alias;
          else if (word == "declare")
@@ -632,15 +664,19 @@ namespace Megalo {
          //
          return;
       }
-      if (string_scanner::is_quote_char(c))
-         this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+      if (string_scanner::is_quote_char(c)) {
+         this->raise_fatal(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+         return;
+      }
       if (c == '(') {
          this->_parseFunctionCall(false);
          --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return;
       }
-      if (c == ')' || c == ',')
-         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (c == ')' || c == ',') {
+         this->raise_fatal(QString("Unexpected %1.").arg(c));
+         return;
+      }
       if (string_scanner::is_operator_char(c)) {
          this->assignment = new Script::Statement;
          this->assignment->set_start(this->token.pos);
@@ -650,25 +686,29 @@ namespace Megalo {
             ref->owner = this->assignment;
             ref->resolve(*this);
             if (ref->is_constant_integer())
-               this->throw_error("Cannot assign to a constant integer.");
-            if (ref->is_read_only())
-               this->throw_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
+               this->raise_error("Cannot assign to a constant integer.");
+            else if (ref->is_read_only())
+               this->raise_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
          }
          this->reset_token();
          this->token.text = c;
          this->token.pos  = this->backup_stream_state();
          return;
       }
-      if (this->token.ended)
-         this->throw_error("Statements of the form {word word} are not valid.");
+      if (this->token.ended) {
+         this->raise_fatal("Statements of the form {word word} are not valid.");
+         return;
+      }
       this->token.text += c;
-      if (this->token.text[0] == '-' && !c.isNumber())
+      if (this->token.text[0] == '-' && !c.isNumber()) {
          //
          // We allowed the word to start with "-" in case it was a number, but it 
          // has turned out not to be a number. That means that the "-" was an 
          // operator, not a numeric sign. Wait, that's illegal.
          //
-         this->throw_error("Unexpected -. Statements cannot begin with an operator.");
+         this->raise_fatal("Unexpected -. Statements cannot begin with an operator.");
+         return;
+      }
    }
    void Compiler::_parseAssignment(QChar c) {
       assert(this->assignment && "This should not have been called!");
@@ -685,26 +725,32 @@ namespace Megalo {
             auto a = this->assignment;
             a->op = this->token.text;
             if (!_is_assignment_operator(this->token.text))
-               this->throw_error(QString("Operator %1 is not a valid assignment operator.").arg(this->token.text));
+               this->raise_error(QString("Operator %1 is not a valid assignment operator.").arg(this->token.text));
             this->reset_token();
             //
             // Fall through to righthand-side handling so we don't miss the first character 
             // after the operator in cases like {a=b} where there's no whitespace.
             //
          }
-         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c))
-            this->throw_error(QString("Unexpected %1 on the righthand side of an assignment statement.").arg(c));
-         if (string_scanner::is_quote_char(c))
-            this->throw_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c)) {
+            this->raise_fatal(QString("Unexpected %1 on the righthand side of an assignment statement.").arg(c));
+            return;
+         }
+         if (string_scanner::is_quote_char(c)) {
+            this->raise_fatal(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+            return;
+         }
          if (this->token.text.isEmpty()) {
             if (string_scanner::is_whitespace_char(c))
                return;
-            if (c == '(')
-               this->throw_error("Unexpected (. Parentheses are only allowed as delimiters for function arguments.");
+            if (c == '(') {
+               this->raise_fatal("Unexpected (. Parentheses are only allowed as delimiters for function arguments.");
+               return;
+            }
          } else {
             if (c == '(') {
                if (this->assignment->op != ce_assignment_operator) {
-                  this->throw_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator =.").arg(this->assignment->op));
+                  this->raise_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator =.").arg(this->assignment->op));
                }
                this->_parseFunctionCall(false);
                --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
@@ -717,8 +763,10 @@ namespace Megalo {
                //
             }
          }
-         if (c == ')' || c == ',')
-            this->throw_error(QString("Unexpected %1.").arg(c));
+         if (c == ')' || c == ',') {
+            this->raise_fatal(QString("Unexpected %1.").arg(c));
+            return;
+         }
          if (!string_scanner::is_whitespace_char(c)) {
             if (this->token.text.isEmpty())
                this->token.pos = this->backup_stream_state();
@@ -762,7 +810,7 @@ namespace Megalo {
                if (l_accessor) {
                   auto setter = l_accessor->setter;
                   if (!setter) {
-                     this->throw_error("This accessor cannot be assigned to.");
+                     this->raise_error("This accessor cannot be assigned to.");
                      return;
                   }
                   accessor = setter;
@@ -786,7 +834,7 @@ namespace Megalo {
                } else {
                   auto getter = r_accessor->getter;
                   if (!getter) {
-                     this->throw_error("This accessor cannot be read.");
+                     this->raise_error("This accessor cannot be read.");
                      return;
                   }
                   accessor = getter;
@@ -826,7 +874,7 @@ namespace Megalo {
                   // opcode argument, but it's possible that only one of the getter and setter may have it.)
                   //
                   if (this->assignment->op != "=")
-                     this->throw_error("This accessor can only be invoked using the = operator.");
+                     this->raise_error("This accessor can only be invoked using the = operator.");
                } else {
                   //
                   // Compile the assignment operator.
@@ -862,8 +910,8 @@ namespace Megalo {
       if (!condition)
          return;
       auto opcode = dynamic_cast<Condition*>(condition->opcode);
-      assert(opcode);
-      opcode->inverted = this->negate_next_condition;
+      if (opcode) // it could have failed to compile
+         opcode->inverted = this->negate_next_condition;
       if (this->next_condition_joiner == c_joiner::or)
          condition->next_is_or = true;
       this->next_condition_joiner = c_joiner::none;
@@ -877,25 +925,37 @@ namespace Megalo {
          if (!this->comparison) {
             if (this->_parseConditionStart(c))
                return true; // stop the loop; we found the "then" keyword
+            if (this->has_fatal())
+               return true;
             return false;
          }
          //
          // If, on the other hand, we're in a statement, then we need to finish that up.
          //
          this->_parseComparison(c);
+         if (this->has_fatal())
+            return true;
          return false;
       });
    }
    bool Compiler::_parseConditionStart(QChar c) {
       if (this->token.text.isEmpty()) {
-         if (c != '-' && string_scanner::is_operator_char(c)) // minus-as-numeric-sign must be special-cased
-            this->throw_error(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
-         if (string_scanner::is_syntax_char(c))
-            this->throw_error(QString("Unexpected %1.").arg(c));
-         if (string_scanner::is_quote_char(c))
-            this->throw_error(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
-         if (c == '(' || c == ')')
-            this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+         if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
+            this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
+            return;
+         }
+         if (string_scanner::is_syntax_char(c)) {
+            this->raise_fatal(QString("Unexpected %1.").arg(c));
+            return;
+         }
+         if (string_scanner::is_quote_char(c)) {
+            this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
+            return;
+         }
+         if (c == '(' || c == ')') {
+            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+            return;
+         }
          if (string_scanner::is_whitespace_char(c))
             return false;
          this->token.text += c;
@@ -921,66 +981,73 @@ namespace Megalo {
          auto& word = this->token.text;
          if (word == "then") {
             if (this->negate_next_condition)
-               this->throw_error("Expected a condition after \"not\".");
+               this->raise_fatal("Expected a condition after \"not\".");
             switch (this->next_condition_joiner) {
                case c_joiner::and:
-                  this->throw_error("Expected a condition after \"and\".");
+                  this->raise_fatal("Expected a condition after \"and\".");
                   break;
                case c_joiner::or:
-                  this->throw_error("Expected a condition after \"or\".");
+                  this->raise_fatal("Expected a condition after \"or\".");
                   break;
             }
             return true;
          }
          if (word == "alias")
-            this->throw_error(QString("You cannot place %1 declarations inside of conditions.").arg(word));
+            this->raise_fatal(QString("You cannot place %1 declarations inside of conditions.").arg(word));
          else if (word == "do")
-            this->throw_error("You cannot open or close blocks inside of conditions. (If the \"do\" was meant to mark the end of conditions, use \"then\" instead.)");
+            this->raise_fatal("You cannot open or close blocks inside of conditions. (If the \"do\" was meant to mark the end of conditions, use \"then\" instead.)");
          else if (word == "else" || word == "elseif")
-            this->throw_error(QString("Unexpected \"%1\". A list of conditions must end with \"then\".").arg(word));
+            this->raise_fatal(QString("Unexpected \"%1\". A list of conditions must end with \"then\".").arg(word));
          else if (word == "for" || word == "function" || word == "if")
-            this->throw_error("You cannot open or close blocks inside of conditions. End the list of conditions using the \"then\" keyword.");
+            this->raise_fatal("You cannot open or close blocks inside of conditions. End the list of conditions using the \"then\" keyword.");
          else if (word == "on")
-            this->throw_error("You cannot mark event handlers inside of conditions.");
+            this->raise_fatal("You cannot mark event handlers inside of conditions.");
          else if (word == "and") {
             if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
-               this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
-            if (this->next_condition_joiner != c_joiner::none)
-               this->throw_error("Constructions of the form {or and} and {and and} are not valid.");
-            this->next_condition_joiner = c_joiner::and;
+               this->raise_fatal("Constructions of the form {not and} and {not or} are not valid.");
+            else if (this->next_condition_joiner != c_joiner::none)
+               this->raise_fatal("Constructions of the form {or and} and {and and} are not valid.");
+            else
+               this->next_condition_joiner = c_joiner::and;
             //
             this->reset_token();
          } else if (word == "or") {
             if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
-               this->throw_error("Constructions of the form {not and} and {not or} are not valid.");
-            if (this->next_condition_joiner != c_joiner::none)
-               this->throw_error("Constructions of the form {and or} and {or or} are not valid.");
-            this->next_condition_joiner = c_joiner::or;
+               this->raise_fatal("Constructions of the form {not and} and {not or} are not valid.");
+            else if (this->next_condition_joiner != c_joiner::none)
+               this->raise_fatal("Constructions of the form {and or} and {or or} are not valid.");
+            else
+               this->next_condition_joiner = c_joiner::or;
             //
             this->reset_token();
          } else if (word == "not") {
-            if (this->negate_next_condition)
+            if (this->negate_next_condition) {
                //
                // NOTE: If we decide to allow (not not condition) and just have each "not" toggle the negate-next-condition flag, 
                // then we also need to modify the code that checks for (not and condition) and (not or condition) in order to make 
                // sure that (not not and condition) and (not not or condition) are still considered invalid. That code is in this 
                // same function.
                //
-               this->throw_error("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
+               this->raise_fatal("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
+               return;
+            }
             this->negate_next_condition = true;
             this->reset_token();
          }
          return false;
       }
-      if (string_scanner::is_quote_char(c))
-         this->throw_error(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+      if (string_scanner::is_quote_char(c)) {
+         this->raise_fatal(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
+         return;
+      }
       if (c == '(') {
          this->_parseFunctionCall(true);
          --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
          return false;
       }
-      if (c == ')' || c == ',')
-         this->throw_error(QString("Unexpected %1.").arg(c));
+      if (c == ')' || c == ',') {
+         this->raise_fatal(QString("Unexpected %1.").arg(c));
+      }
       if (string_scanner::is_operator_char(c)) {
          this->comparison = new Script::Comparison;
          this->comparison->set_start(this->token.pos);
@@ -991,16 +1058,19 @@ namespace Megalo {
          this->token.pos = this->backup_stream_state();
          return false;
       }
-      if (this->token.ended)
-         this->throw_error("Statements of the form {word word} are not valid.");
+      if (this->token.ended) {
+         this->raise_fatal("Statements of the form {word word} are not valid.");
+      }
       this->token.text += c;
-      if (this->token.text[0] == '-' && !c.isNumber())
+      if (this->token.text[0] == '-' && !c.isNumber()) {
          //
          // We allowed the word to start with "-" in case it was a number, but it 
          // has turned out not to be a number. That means that the "-" was an 
          // operator, not a numeric sign. Wait, that's illegal.
          //
-         this->throw_error("Unexpected -. Statements cannot begin with an operator.");
+         this->raise_fatal("Unexpected -. Statements cannot begin with an operator.");
+         return;
+      }
       return false;
    }
    void Compiler::_parseComparison(QChar c) {
@@ -1018,7 +1088,7 @@ namespace Megalo {
             auto c = this->comparison;
             c->op = this->token.text;
             if (!_is_comparison_operator(this->token.text))
-               this->throw_error(QString("Operator %1 is not a valid comparison operator.").arg(this->token.text));
+               this->raise_error(QString("Operator %1 is not a valid comparison operator.").arg(this->token.text));
             this->reset_token();
             //
             // Fall through to righthand-side handling so we don't miss the first character 
@@ -1028,19 +1098,27 @@ namespace Megalo {
          //
          // Handle the righthand side.
          //
-         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c))
-            this->throw_error(QString("Unexpected %1 on the righthand side of a comparison statement.").arg(c));
-         if (string_scanner::is_quote_char(c))
-            this->throw_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
+         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c)) {
+            this->raise_fatal(QString("Unexpected %1 on the righthand side of a comparison statement.").arg(c));
+            return;
+         }
+         if (string_scanner::is_quote_char(c)) {
+            this->raise_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
+            this->skip_to(c); // TODO: double-check this; I'm not sure it'll work properly
+            return;
+         }
          if (this->token.text.isEmpty() && string_scanner::is_whitespace_char(c))
             return;
          if (c == "(") {
             if (!this->token.text.isEmpty())
-               this->throw_error(QString("Unexpected %1. You cannot compare variables to the result of a function call.").arg(c));
-            this->throw_error(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+               this->raise_fatal(QString("Unexpected %1. You cannot compare variables to the result of a function call.").arg(c));
+            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
+            return;
          }
-         if (c == ')' || c == ',')
-            this->throw_error(QString("Unexpected %1.").arg(c));
+         if (c == ')' || c == ',') {
+            this->raise_fatal(QString("Unexpected %1.").arg(c));
+            return;
+         }
          if (!string_scanner::is_whitespace_char(c)) {
             if (this->token.text.isEmpty())
                this->token.pos = this->backup_stream_state();
@@ -1056,27 +1134,36 @@ namespace Megalo {
          this->comparison->rhs = new Script::VariableReference(this->token.text);
          this->comparison->rhs->owner = this->comparison;
          //
-         auto opcode = std::make_unique<Condition>();
          {
-            auto lhs = this->assignment->lhs;
-            auto rhs = this->assignment->rhs;
-            if (lhs->get_accessor_definition())
-               this->throw_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(lhs->to_string()));
-            if (rhs->get_accessor_definition())
-               this->throw_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(rhs->to_string()));
-            auto base = &_get_comparison_opcode();
-            opcode->function = base;
-            opcode->arguments.resize(3);
-            opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
-            opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
-            opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
-            opcode->arguments[0]->compile(*this, *lhs, 0);
-            opcode->arguments[1]->compile(*this, *rhs, 0);
-            //
-            auto op_string = string_scanner(this->assignment->op);
-            opcode->arguments[2]->compile(*this, op_string, 0);
+            auto lhs  = this->assignment->lhs;
+            auto rhs  = this->assignment->rhs;
+            bool fail = false;
+            if (lhs->get_accessor_definition()) {
+               this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(lhs->to_string()));
+               fail = true;
+            }
+            if (rhs->get_accessor_definition()) {
+               this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(rhs->to_string()));
+               fail = true;
+            }
+            if (!fail) {
+               auto opcode = std::make_unique<Condition>();
+               //
+               auto base = &_get_comparison_opcode();
+               opcode->function = base;
+               opcode->arguments.resize(3);
+               opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
+               opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
+               opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
+               opcode->arguments[0]->compile(*this, *lhs, 0);
+               opcode->arguments[1]->compile(*this, *rhs, 0);
+               //
+               auto op_string = string_scanner(this->assignment->op);
+               opcode->arguments[2]->compile(*this, op_string, 0);
+               //
+               this->comparison->opcode = opcode.release();
+            }
          }
-         this->comparison->opcode = opcode.release();
          this->_applyConditionModifiers(this->comparison);
          //
          this->block->insert_condition(this->comparison);
@@ -1095,10 +1182,13 @@ namespace Megalo {
       std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
       bool comma = false;
       do {
-         if (opcode_arg_index >= mapping.mapped_arg_count())
+         if (opcode_arg_index >= mapping.mapped_arg_count()) {
             this->throw_error("Too many arguments passed to the function.");
+         }
          QString raw_argument;
          {
+            comma = false;
+            //
             QChar delim = '\0';
             this->scan([this, &comma, &delim, &raw_argument](QChar c) {
                if (delim == '\0') { // can't use a constexpr for the "none" value because lambdas don't like that, and can't use !delim because a null QChar doesn't test as false, UGH
@@ -1108,7 +1198,7 @@ namespace Megalo {
                   }
                   if (c == '[')
                      delim = ']';
-                  else if (c == '"' || c == '\'' || c == '`')
+                  else if (string_scanner::is_quote_char(c))
                      delim = c;
                } else {
                   if (c == delim)
@@ -1123,8 +1213,9 @@ namespace Megalo {
          script_arg_index++;
          if (!current_argument) {
             current_argument.reset((base.typeinfo.factory)());
-            if (!current_argument)
+            if (!current_argument) {
                this->throw_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
+            }
          }
          //
          string_scanner argument(raw_argument);
@@ -1139,8 +1230,9 @@ namespace Megalo {
                this->throw_error(QString("Failed to parse script argument %1.").arg(script_arg_index - 1)); // TODO: this won't allow us to handle overloads
             case arg_compile_result::needs_another:
                ++opcode_arg_part;
-               if (!comma)
+               if (!comma) {
                   this->throw_error("Not enough arguments passed to the function.");
+               }
                break;
             case arg_compile_result::can_take_another:
                ++opcode_arg_part;
@@ -1195,16 +1287,20 @@ namespace Megalo {
          int i    = size - 1;
          for (; i >= 0; --i) {
             auto c = text[i];
-            if (QString("[]").indexOf(c) >= 0)
-               this->throw_error(call_start, "Function names cannot contain square brackets.");
+            if (QString("[]").indexOf(c) >= 0) {
+               this->raise_fatal(call_start, "Function names cannot contain square brackets.");
+               return;
+            }
             if (c == '.') {
                function_name = text.chopped(i + 1); // oh, but be sure not to confuse this with (QString::chop), which does the literal exact opposite!
                break;
             }
          }
          if (function_name.isEmpty()) { // there was no '.', or it was at the end
-            if (i == size - 1) // "name.()"
-               this->throw_error(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
+            if (i == size - 1) { // "name.()"
+               this->raise_fatal(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
+               return;
+            }
             function_name = text;
          } else {
             context.reset(new Script::VariableReference(text.mid(0, i)));
@@ -1217,12 +1313,20 @@ namespace Megalo {
       if (!context) {  // Handle user-defined function calls
          auto func = this->lookup_user_defined_function(function_name);
          if (func) {
-            if (is_condition)
-               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot be called from inside of a condition.").arg(function_name));
-            if (this->assignment)
-               this->throw_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
+            if (is_condition) {
+               this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot be called from inside of a condition.").arg(function_name));
+               this->skip_to(')');
+               return;
+            }
+            if (this->assignment) {
+               this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
+               this->skip_to(')');
+               return;
+            }
             if (!this->extract_specific_char(')')) {
-               this->throw_error(call_start, QString("Expected ')'. User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
+               this->raise_error(call_start, QString("Expected ')'. User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
+               this->skip_to(')');
+               return;
             }
             //
             // Now, we need to compile a call to the user-defined function.
@@ -1261,8 +1365,11 @@ namespace Megalo {
       }
       if (!opcode_bases.size()) {
          if (context)
-            this->throw_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-         this->throw_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
+            this->raise_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         else
+            this->raise_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
+         this->skip_to(')');
+         return;
       }
       //
       const OpcodeBase* match = nullptr;
@@ -1298,38 +1405,54 @@ namespace Megalo {
          // We'll get here if we're dealing with function overloads and none of the overloads matched.
          //
          this->throw_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+      //
+      // If we've reached this point without any errors, then we should be just before the terminating ')' for the function call.
+      //
       if (this->assignment) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
          // sure that the function actually returns a value.
          //
          auto index = match->index_of_out_argument();
-         if (index < 0)
-            this->throw_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-         if (this->assignment->lhs->is_read_only())
-            this->throw_error("You cannot assign to this value.");
-         if (this->assignment->lhs->is_accessor())
-            this->throw_error("You cannot assign the return value of a function to an accessor.");
+         bool fail  = false;
+         if (index < 0) {
+            this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            fail = true;
+         }
+         if (this->assignment->lhs->is_read_only()) {
+            this->raise_error("You cannot assign to this value.");
+            fail = true;
+         } else if (this->assignment->lhs->is_accessor()) {
+            this->raise_error("You cannot assign the return value of a function to an accessor.");
+            fail = true;
+         }
          const OpcodeArgBase& base = match->arguments[index];
          //
          // Verify that the variable we're assigning our return value to is of the right type:
          //
          auto target_type = this->assignment->lhs->get_type();
-         if (&base.typeinfo != target_type)
-            this->throw_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
+         if (&base.typeinfo != target_type) {
+            this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
                .arg(context->get_type()->internal_name.c_str())
                .arg(function_name)
                .arg(base.typeinfo.internal_name.c_str())
                .arg(target_type->internal_name.c_str())
             );
+            fail = true;
+         }
          //
-         // The type is correct, so set the out-argument.
-         //
-         opcode->arguments[index] = (base.typeinfo.factory)();
-         opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
+         if (!fail) {
+            //
+            // The type is correct, so set the out-argument.
+            //
+            opcode->arguments[index] = (base.typeinfo.factory)();
+            opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
+         }
       }
-      if (!this->extract_specific_char(')'))
-         this->throw_error("Expected ')'.");
+      if (!this->extract_specific_char(')')) {
+         this->raise_fatal("Expected ')'.");
+         return;
+      }
       this->reset_token();
       Script::Statement* statement = this->assignment;
       if (!statement) {
@@ -1418,13 +1541,19 @@ namespace Megalo {
       auto start = this->token.pos;
       //
       auto name = this->extract_word();
-      if (name.isEmpty())
-         this->throw_error("An alias declaration must supply a name.");
-      if (!this->extract_specific_char('='))
-         this->throw_error("Expected \"=\".");
+      if (name.isEmpty()) {
+         this->raise_fatal("An alias declaration must supply a name.");
+         return;
+      }
+      if (!this->extract_specific_char('=')) {
+         this->raise_fatal("Expected \"=\".");
+         return;
+      }
       auto target = this->extract_word();
-      if (target.isEmpty())
-         this->throw_error("An alias declaration must supply a target.");
+      if (target.isEmpty()) {
+         this->raise_fatal("An alias declaration must supply a target.");
+         return;
+      }
       //
       auto item = new Script::Alias(*this, name, target);
       item->set_start(start);
@@ -1436,8 +1565,10 @@ namespace Megalo {
       auto start = this->token.pos;
       //
       auto name = this->extract_word();
-      if (name.isEmpty())
-         this->throw_error("The \"declare\" statement must be used to declare a variable.");
+      if (name.isEmpty()) {
+         this->raise_fatal("The \"declare\" statement must be used to declare a variable.");
+         return;
+      }
       //
       // TODO: process the name
       //
@@ -1470,12 +1601,15 @@ namespace Megalo {
          auto p_bl = dynamic_cast<Script::Block*>(prev);
          if (p_bl) {
             if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->throw_error("Unexpected \"else\". This keyword should not be preceded by the \"end\" keyword.");
+               this->raise_fatal("Unexpected \"else\". This keyword should not be preceded by the \"end\" keyword.");
          }
-         this->throw_error("Unexpected \"else\".");
+         this->raise_fatal("Unexpected \"else\".");
+         return;
       }
-      if (!this->_closeCurrentBlock())
-         this->throw_error("Unexpected \"else\".");
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"else\".");
+         return;
+      }
       auto item = new Script::Block;
       item->type = Script::Block::Type::else_block;
       item->set_start(this->token.pos);
@@ -1488,12 +1622,15 @@ namespace Megalo {
          auto p_bl = dynamic_cast<Script::Block*>(prev);
          if (p_bl) {
             if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->throw_error("Unexpected \"elseif\". This keyword should not be preceded by the \"end\" keyword.");
+               this->raise_fatal("Unexpected \"elseif\". This keyword should not be preceded by the \"end\" keyword.");
          }
-         this->throw_error("Unexpected \"elseif\".");
+         this->raise_fatal("Unexpected \"elseif\".");
+         return;
       }
-      if (!this->_closeCurrentBlock())
-         this->throw_error("Unexpected \"elseif\".");
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"elseif\".");
+         return;
+      }
       auto item = new Script::Block;
       item->type = Script::Block::Type::elseif_block;
       item->set_start(this->token.pos);
@@ -1504,7 +1641,7 @@ namespace Megalo {
    }
    void Compiler::_handleKeyword_End() {
       if (!this->_closeCurrentBlock())
-         this->throw_error("Unexpected \"end\".");
+         this->raise_fatal("Unexpected \"end\".");
    }
    void Compiler::_handleKeyword_If() {
       auto item = new Script::Block;
@@ -1586,25 +1723,37 @@ namespace Megalo {
       auto start = this->token.pos;
       //
       auto name = this->extract_word();
-      if (name.isEmpty())
-         this->throw_error("A function must have a name.");
-      if (name[0].isNumber())
+      if (name.isEmpty()) {
+         this->raise_fatal("A function must have a name.");
+         return;
+      }
+      if (name[0].isNumber()) {
          //
          // Do not allow a function's name to start with a number. We want this to be consistent with 
          // alias names, which disallow numbers at their start so that it's easier for opcode argument 
          // compile functions to check for both integer literals and integer alias names.
          //
          this->throw_error("A function's name cannot begin with a number.");
-      for (QChar c : name) {
-         if (QString("[].").contains(c))
-            this->throw_error(QString("Unexpected %1 inside of a function name.").arg(c));
+         return;
       }
-      if (Compiler::is_keyword(name))
-         this->throw_error(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
-      if (!this->extract_specific_char('('))
-         this->throw_error("Expected \"(\".");
-      if (!this->extract_specific_char(')'))
-         this->throw_error("Expected \")\". User-defined functions cannot have arguments.");
+      for (QChar c : name) {
+         if (QString("[].").contains(c)) {
+            this->raise_fatal(QString("Unexpected %1 inside of a function name.").arg(c));
+            return;
+         }
+      }
+      if (Compiler::is_keyword(name)) {
+         this->raise_fatal(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
+         return;
+      }
+      if (!this->extract_specific_char('(')) {
+         this->raise_fatal("Expected \"(\".");
+         return;
+      }
+      if (!this->extract_specific_char(')')) {
+         this->raise_fatal("Expected \")\". User-defined functions cannot have arguments.");
+         return;
+      }
       {  // Run additional checks on the function name.
          if (this->lookup_user_defined_function(name))
             this->throw_error(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
@@ -1650,8 +1799,11 @@ namespace Megalo {
       this->results.triggers.push_back(item->trigger);
    }
    void Compiler::_handleKeyword_On() {
-      if (this->block != this->root)
-         this->throw_error("Only top-level (non-nested) blocks can be event handlers.");
+      if (this->block != this->root) {
+         this->raise_error("Only top-level (non-nested) blocks can be event handlers.");
+         this->skip_to(':');
+         return;
+      }
       QString words;
       auto    prior = this->backup_stream_state();
       while (!this->extract_specific_char(':')) {
@@ -1697,7 +1849,6 @@ namespace Megalo {
          this->next_event = Script::Block::Event::pregame;
          return;
       }
-      this->restore_stream_state(prior);
-      this->throw_error(QString("Invalid event name: \"%s\".").arg(words));
+      this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
    }
 }

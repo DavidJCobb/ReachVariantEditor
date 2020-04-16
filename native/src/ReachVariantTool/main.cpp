@@ -116,8 +116,13 @@ int main(int argc, char *argv[]) {
 //          in appropriate places and letting that fail "for" us will ensure consistent 
 //          error messaging.)
 //
-//        - When we open a top-level Block, we should check to see if the root Block contains 
-//          any Statements. If so, those should be compiled into their own Trigger.
+//     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
+//       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
+//       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
+//       VARIANT AND THEN RELEASES OWNERSHIP AND DISCARDS POINTERS.
+//
+//        - The "apply" function should assert if there are any unresolved string references 
+//          (see below).
 //
 //     - OpcodeArgValue::compile overrides on subclasses
 //
@@ -133,6 +138,23 @@ int main(int argc, char *argv[]) {
 //          complex overload of all the variable types; we can code everything we need for 
 //          that, and then it should become apparent what bits of that will generalize to 
 //          other variable types and so can be moved to the base Variable class.
+//
+//        - WE ALREADY NEED TO CHANGE HOW OpcodeArgValue::compile RETURNS RESULTS PER THE 
+//          NEXT BULLET POINT, SO WE MAY AS WELL ADD ANOTHER FEATURE: WE SHOULD SPLIT THE 
+//          "FAILURE" CODE INTO TWO DIFFERENT CODES: A "RESOLVABLE FAILURE" CODE AND AN 
+//          "IRRESOLVABLE FAILURE" CODE. An "irresolvable failure" is one that makes it 
+//          impossible to parse the remaining function call arguments; for example, if an 
+//          opcode took a "shape" argument and the script author specified an invalid shape 
+//          type, it would be impossible to know how many more arguments there should be, 
+//          and so that would be an irresolvable failure. A "resolvable failure" is one 
+//          that would allow us to still try to compile the other function call arguments 
+//          (which we want to do; we want to alert the script author to as many errors at 
+//          once as possible, rather than forcing them to fix one error at a time and retry 
+//          compiling after each one).
+//
+//          For an irresolvable failure, we'd append a message to the error text: "This 
+//          error has also prevented the compiler from checking the remaining function call 
+//          arguments for correctness."
 //
 //        - WE NEED TO PROVIDE SOME COMPILER-LEVEL FUNCTIONALITY TO FACILITATE COMPILING 
 //          STRING ARGUMENTS. We want script authors to be able to specify a string as an 
@@ -175,6 +197,19 @@ int main(int argc, char *argv[]) {
 //          throwing exceptions on all errors in favor of handling both fatal and non-fatal 
 //          errors in a more "manual" fashion (which we want to do anyway).
 //
+//           - Bear in mind: the same string content may be referred to in multiple places, 
+//             i.e. multiple unresolved string references may target the same unresolved 
+//             string. We need to ensure that we don't end up creating duplicates of these 
+//             strings in the string table.
+//
+//           - Each unresolved string reference should have a slot for a "pending action," 
+//             i.e. the choice that the script author has made to resolve the reference. 
+//             (The UI should allow the author to create the string, or to use an existing 
+//             string of their choice instead.) There should be a function which resolves 
+//             all unresolved string references that have a pending action set, and another 
+//             function (a bool getter) which checks if there are any unresolved string 
+//             references.
+//
 //     - The compiler needs code to compile a top-level Block that has just closed.
 //
 //        - We can't compile nested blocks when they close because we want a consistent 
@@ -215,13 +250,15 @@ int main(int argc, char *argv[]) {
 //       We need to build a system for logging non-fatal errors, and then begin converting 
 //       fatal errors over.
 //
-//        - Basically, if something is incorrect but the parser is still capable of 
-//          understanding it (e.g. var.var.var as opposed to a misplaced keyword), then 
-//          it should be a non-fatal error.
+//        - Compiler::_parseFunctionCall uses a try-catch to detect a failure to parse a 
+//          call's arguments; this is needed for the trial-and-error approach to parsing 
+//          overloads e.g. (send_incident). We could have Compiler::__parseFunctionArgs 
+//          return a success bool, but we would still need to build a mechanism by which 
+//          all errors and warnings logged after a certain point could be discarded, in 
+//          order to fully replace the exception-based approach.
 //
-//        - Some non-fatal errors will require additional handling. For example, if a 
-//          function fails to parse (unrecognized name, bad argument(s), etc.), then we 
-//          will need code to log a non-fatal error and skip the function's argument list.
+//        - VariableReference's constructor needs to take a Compiler& so that it can log 
+//          errors without throwing an exception.
 //
 //        = List of errors that should be non-fatal:
 //

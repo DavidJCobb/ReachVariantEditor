@@ -96,19 +96,28 @@ namespace Megalo {
       public:
          struct Token {
             QString text;
-            Script::string_scanner::pos pos;
+            pos     pos;
             bool ended = false; // whether we hit whitspace, meaning that the current word is "over"
             bool brace = false; // whether we're in square brackets; needed to properly handle constructs like "abc[ d]" or "abc[-1]" at the starts of statements
          };
          using scan_functor_t = std::function<bool(QChar)>;
          //
+         struct LogEntry {
+            QString text;
+            pos     pos;
+            //
+            LogEntry() {}
+            LogEntry(const QString& t, Script::string_scanner::pos p) : text(t), pos(p) {}
+         };
+         using log_t = std::vector<LogEntry>;
+         //
+      protected:
          enum class c_joiner {
             none,
             and,
             or,
          };
          //
-      protected:
          Script::Block*      root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
          Script::Block*      block      = nullptr; // current block being parsed
          Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
@@ -120,6 +129,10 @@ namespace Megalo {
          std::vector<Script::Alias*> aliases_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          //
+         log_t warnings;
+         log_t errors;
+         log_t fatal_errors;
+         //
       public:
          struct {
             bool success = false;
@@ -129,10 +142,22 @@ namespace Megalo {
          ~Compiler();
          //
          void throw_error(const QString& text);
-         void throw_error(const Script::string_scanner::pos& pos, const QString& text);
+         void throw_error(const pos& pos, const QString& text);
          void reset_token();
          //
+         void raise_error(const QString& text);
+         void raise_error(const pos& pos, const QString& text);
+         void raise_fatal(const QString& text);
+         void raise_fatal(const pos& pos, const QString& text);
+         void raise_warning(const QString& text);
+         //
          void parse(QString text); // can throw compile_exception
+         //
+         inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
+         inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }
+         inline const log_t& get_warnings() const noexcept { return this->warnings; }
+         inline const log_t& get_non_fatal_errors() const noexcept { return this->errors; }
+         inline const log_t& get_fatal_errors() const noexcept { return this->fatal_errors; }
          //
          [[nodiscard]] static bool is_keyword(QString word);
          //

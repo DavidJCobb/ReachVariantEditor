@@ -40,6 +40,7 @@ namespace Megalo {
             void scan(scan_functor_t);
             pos  backup_stream_state();
             void restore_stream_state(pos);
+            void skip_to(QChar, bool even_if_in_string = false); // skip to the next instance of the desired character or, if it's not present, to the end of the string
             void skip_to_end();
             inline bool is_at_end() {
                return this->state.offset <= this->text.size();
