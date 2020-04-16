@@ -116,6 +116,24 @@ int main(int argc, char *argv[]) {
 //          in appropriate places and letting that fail "for" us will ensure consistent 
 //          error messaging.)
 //
+//        = THE CODE TO COMPILE ASSIGNMENTS AND CONDITIONS NEEDS TO ACTUALLY CHECK THE 
+//          arg_compile_result OF EACH OpcodeArgValue::compile CALL.
+//
+//           - Probably best if we revamp the result type as described below: make it a 
+//             struct containing not just the status enum, but also an optional QString 
+//             for error text and a bool for signaling unresolved string references. We 
+//             could give the struct some shortcut messages e.g. (typename::failure) to 
+//             quickly construct a "failure" result with or without error text.
+//
+//             We could also give the struct some methods like (is_recoverable_failure), 
+//             (is_failure), and such. (A general "is_failure" getter would be wanted for 
+//             compiling non-function-arguments, so we don't have to test both failure 
+//             codes ourselves.)
+//
+//        = The code to compile function call arguments should fail if an argument appears 
+//          to have successfully parsed, but we are not at the effective end (i.e. there 
+//          is non-whitespace content at the end that wasn't parsed).
+//
 //     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
 //       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
 //       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
@@ -257,26 +275,29 @@ int main(int argc, char *argv[]) {
 //          all errors and warnings logged after a certain point could be discarded, in 
 //          order to fully replace the exception-based approach.
 //
+//           - We'd probably want something like (_set_error_checkpoint), which stores 
+//             the (size)s of the error/warning lists, and (_revert_to_error_checkpoint), 
+//             which uses (resize) to reset the lists to those sizes and shear off any 
+//             errors/warnings that were logged since.
+//
 //        - VariableReference's constructor needs to take a Compiler& so that it can log 
 //          errors without throwing an exception.
 //
-//        = List of errors that should be non-fatal:
+//        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
 //
-//           - Unrecognized variable reference (or other "resolve" failures)
-//           - Some kinds of invalid variable references (before the "resolve" step)
-//              - Index is not an integer, or is an alias of a non-integer
-//           - Unrecognized function name
-//           - Bad function arguments
-//           - Bad function return type
-//           - Bad operator (e.g. comparison operator outside of an if-condition)
-//           - Property setter that only supports operator "=" invoked with another operator
-//           - Assigning the return value of a function call to a property setter
-//           - Assigning to a constant integer or other read-only value
-//           - Alias name that shadows a built-in
-//           - Alias name that is an integer literal
-//           - Invalid event name for "on" keyword
-//           - "On" keyword used for a nested trigger
+//           - Bad function call names. (Not yet sure how to handle these, since we still 
+//             need to open the function block successfully for these to be non-fatal.)
+//
+//           - Some VariableReference::VariableReference errors.
+//
+//           - All VariableReference::resolve errors.
+//
+//           - Bad Alias names.
+//
 //           - Multiple triggers using the same event type via "on"
+//
+//        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
+//          not even using (throw_error) and can remove it.
 //
 //        - Once we have a system for logging non-fatal errors, we should introduce a 
 //          similar system for warnings. Warnings should include:
@@ -289,6 +310,24 @@ int main(int argc, char *argv[]) {
 //        - Exception safety for anything that gets heap-allocated.
 //
 //        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
+//
+//        - Ensure that the error handling for comparing string literals to variables 
+//          (or to each other) works properly.
+//
+//             Wondering whether using Compiler::skip_to in that situation will cause 
+//             us to move one char too far, since we're using it from inside of a scan 
+//             functor.
+//
+//        - Ensure that the error handling for assigning a string literal to a variable 
+//          works properly.
+//
+//             Wondering whether using Compiler::skip_to in that situation will cause 
+//             us to move one char too far, since we're using it from inside of a scan 
+//             functor.
+//
+//        - More generally, test every non-fatal error and every fatal error. Once the 
+//          compiler's fully written, write a single test script containing every possible 
+//          non-fatal error.
 //
 //     = RANDOM NOTES
 //
