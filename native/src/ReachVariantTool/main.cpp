@@ -102,20 +102,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        = THE "SCORE" VALUE FOR PLAYERS AND TEAMS USES A PROPERTY AS THE GETTER BUT AN 
-//          ACCESSOR OPCODE AS THE SETTER. BUNGIE AND 343I'S SCRIPTS ALL EXCLUSIVELY USE 
-//          THE PROPERTY FOR GETTING AND THE ACCESSOR FOR SETTING. WE NEED TO AMEND OUR 
-//          VariableReference::resolve PROCESS TO MIMIC THIS BEHAVIOR. SPECIFICALLY, IT 
-//          NEEDS TO ACCEPT A (bool is_write_access = false) ARGUMENT AND WHEN THAT BOOL 
-//          IS (true), IT NEEDS TO HAVE A SPECIAL-CASE BUILT IN FOR READ-ONLY PROPERTIES.
-//
-//          Specifically, when a read-only property is accessed when we're resolving for 
-//          write-access, we check if there is a setter-accessor of the same name and if 
-//          so, we prefer that accessor. (If not, then we just resolve the property; 
-//          error-handling code upstream is already going to check for read-only values 
-//          in appropriate places and letting that fail "for" us will ensure consistent 
-//          error messaging.)
-//
 //        = THE CODE TO COMPILE ASSIGNMENTS AND CONDITIONS NEEDS TO ACTUALLY CHECK THE 
 //          arg_compile_result OF EACH OpcodeArgValue::compile CALL.
 //
@@ -179,10 +165,6 @@ int main(int argc, char *argv[]) {
 //          complex overload of all the variable types; we can code everything we need for 
 //          that, and then it should become apparent what bits of that will generalize to 
 //          other variable types and so can be moved to the base Variable class.
-//
-//        - THE arg_compile_result STRUCT NEEDS TO SEPARATE "needs another" AND "can take 
-//          another" INTO THEIR OWN ENUM, SO THAT WE CAN RETURN A RESOLVABLE FAILURE CODE 
-//          FROM A MULTI-PART ARGUMENT (E.G. VECTOR3).
 //
 //        - WE NEED TO PROVIDE SOME COMPILER-LEVEL FUNCTIONALITY TO FACILITATE COMPILING 
 //          STRING ARGUMENTS. We want script authors to be able to specify a string as an 

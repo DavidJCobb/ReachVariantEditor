@@ -212,6 +212,19 @@ namespace Megalo {
    };
 
    struct arg_compile_result {
+      //
+      // This class indicates information about the results of an attempt to compile an OpcodeArgValue. 
+      // It signals whether the OpcodeArgValue needs to (or simply can) consume another script argument, 
+      // along with information on whether the value failed to parse and whether this failure is recover-
+      // able. A recoverable failure is one that wouldn't prevent the parsing of any remaining arguments 
+      // in the function call.
+      //
+      // As an example: if an OpcodeArgValueShape receives an invalid shape type, that is an irresolvable 
+      // failure, because the shape type is needed in order to know how many more script arguments to 
+      // consume. However, if an OpcodeArgValueVector3 receives an invalid coordinate, we still know how 
+      // many more coordinates to consume and how to consume them, and so this invalid coordinate is a 
+      // resolvable failure.
+      //
       enum class code_t : uint8_t {
          failure,
          failure_irresolvable, // it is impossible to attempt to parse the remaining function call arguments. e.g. a bad shape type means we don't know what arguments come next
@@ -235,13 +248,13 @@ namespace Megalo {
       arg_compile_result() {}
       arg_compile_result(code_t c) : code(c) {}
       //
-      inline bool is_failure() const noexcept {
+      [[nodiscard]] inline bool is_failure() const noexcept {
          return this->code == code_t::failure || this->code == code_t::failure_irresolvable;
       }
-      inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
-      inline bool is_success() const noexcept { return this->code == code_t::success; }
-      inline bool needs_another() const noexcept { return this->more == more_t::needed; }
-      inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
+      [[nodiscard]] inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
+      [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success; }
+      [[nodiscard]] inline bool needs_another() const noexcept { return this->more == more_t::needed; }
+      [[nodiscard]] inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
       //
       inline arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
       inline arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }

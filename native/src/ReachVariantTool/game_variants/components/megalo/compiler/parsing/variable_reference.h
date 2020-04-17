@@ -91,7 +91,7 @@ namespace Megalo {
             [[nodiscard]] bool is_read_only() const noexcept;
             [[nodiscard]] bool is_statically_indexable_value() const noexcept;
             //
-            void resolve(Compiler&, bool is_alias_definition = false); // can throw compile_exception
+            void resolve(Compiler&, bool is_alias_definition = false, bool is_write_access = false); // can throw compile_exception
             //
             [[nodiscard]] QString to_string() const noexcept;
             [[nodiscard]] QString to_string_from_raw(int8_t start = 0, int8_t up_to = -1) const noexcept;

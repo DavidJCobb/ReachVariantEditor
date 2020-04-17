@@ -708,7 +708,7 @@ namespace Megalo {
             this->assignment->lhs = new Script::VariableReference(this->token.text);
             auto ref = this->assignment->lhs;
             ref->owner = this->assignment;
-            ref->resolve(*this);
+            ref->resolve(*this, false, true);
             if (ref->is_constant_integer())
                this->raise_error("Cannot assign to a constant integer.");
             else if (ref->is_read_only())

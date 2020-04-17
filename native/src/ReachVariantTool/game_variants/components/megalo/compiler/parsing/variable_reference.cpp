@@ -571,7 +571,7 @@ namespace Megalo::Script {
       }
       return false;
    }
-   void VariableReference::resolve(Compiler& compiler, bool is_alias_definition) {
+   void VariableReference::resolve(Compiler& compiler, bool is_alias_definition, bool is_write_access) {
       if (this->is_resolved)
          return;
       //
@@ -625,18 +625,45 @@ namespace Megalo::Script {
          }
       }
       if (this->_resolve_property(compiler, i)) {
-         auto prev = this->resolved.nested.type;
-         if (prev) {
+         auto prop = this->resolved.property.definition;
+         //
+         if (is_write_access && !prop->has_index()) {
+            //
+            // It's possible for a read-only property to have a setter-accessor.
+            //
+            if (auto scope = prop->scope) {
+               if (scope->is_readonly()) {
+                  //
+                  // Temporarily wipe the resolved property information, and try to resolve the current 
+                  // part as an accessor.
+                  //
+                  this->resolved.property.definition = nullptr;
+                  //
+                  if (this->_resolve_accessor(compiler, i)) {
+                     if (++i < this->raw.size())
+                        compiler.throw_error("Attempted to access a member of an accessor.");
+                     this->is_resolved = true;
+                     return;
+                  }
+                  //
+                  // If we've made it to here, then the current part did not resolve as an accessor. 
+                  // Let's continue handling the property as normal.
+                  //
+                  this->resolved.property.definition = prop;
+               }
+            }
+         }
+         //
+         if (auto prev = this->resolved.nested.type) {
             //
             // Not all properties can be accessed as (var.var.property). Enforce this.
             //
-            auto prop = this->resolved.property.definition;
             if (prop && !prop->allow_from_nested)
                compiler.throw_error(
                   QString("The %1 property can only be accessed from a top-level %2 variable. Copy the value (%3) into an intermediate %2 variable and then access the property through that.")
-                     .arg(prop->name.c_str())
-                     .arg(prev->internal_name.c_str())
-                     .arg(this->to_string_from_raw(0, i))
+                  .arg(prop->name.c_str())
+                  .arg(prev->internal_name.c_str())
+                  .arg(this->to_string_from_raw(0, i))
                );
          }
          if (++i >= this->raw.size()) {
