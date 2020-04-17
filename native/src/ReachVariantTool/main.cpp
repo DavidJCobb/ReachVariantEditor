@@ -130,6 +130,29 @@ int main(int argc, char *argv[]) {
 //             compiling non-function-arguments, so we don't have to test both failure 
 //             codes ourselves.)
 //
+//        = THE CODE TO COMPILE FUNCTION-CALL ASSIGNMENTS NEEDS TO HANDLE SECONDARY OPCODE 
+//          NAMES. OpcodeFuncToScriptMapping has a (secondary_property_zeroes_result) flag 
+//          which indicates that if an opcode is accessed via its secondary name, we should 
+//          compile two Opcodes: one to clear the "out" variable, and another to actually 
+//          invoke the opcode. This allows the following
+//
+//             global.number[0] = 0
+//             global.number[0] = current_player.get_death_damage_type()
+//
+//          to be expressed with the shorthand
+//
+//             global.number[0] = current_player.try_get_death_damage_type()
+//
+//          and we very much want to make sure that that works. We'll want to add this to 
+//          the end of the function-call parsing: the code which matches the opcode needs 
+//          to remember whether it was invoked by a secondary name (set a bool), and the 
+//          code at the end (which adds the Opcode to the current Block) needs to check 
+//          that bool and if it's set, generate the "assign none/zero to variable" opcode 
+//          and append that FIRST.
+//
+//           - We should also rename the flag to "secondary_name_zeroes_result" and revise 
+//             its documentation comments to note that it's for functions only.
+//
 //        = The code to compile function call arguments should fail if an argument appears 
 //          to have successfully parsed, but we are not at the effective end (i.e. there 
 //          is non-whitespace content at the end that wasn't parsed).
@@ -280,13 +303,25 @@ int main(int argc, char *argv[]) {
 //             which uses (resize) to reset the lists to those sizes and shear off any 
 //             errors/warnings that were logged since.
 //
+//             Better yet: use (_create_error_checkpoint) which returns a "checkpoint" 
+//             struct similar to (_backup_stream_state); that way, we don't have to 
+//             remember to clear any sort of Compiler-retained checkpoint state when we 
+//             either let the errors remain or move on without any errors having been 
+//             logged.
+//
+//             We'll also want (_checkpoint_has_errors), which takes a "checkpoint" 
+//             struct and sees if any errors have been logged since then. That'll be 
+//             easy to implement: if an error list's size is greater than the matching 
+//             size in the checkpoint struct, return true.
+//
 //        - VariableReference's constructor needs to take a Compiler& so that it can log 
 //          errors without throwing an exception.
 //
 //        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
 //
-//           - Bad function call names. (Not yet sure how to handle these, since we still 
-//             need to open the function block successfully for these to be non-fatal.)
+//           - Bad function call names. (Handle these by setting the new function block's 
+//             name to an empty string, and coding the Compiler to never match calls to 
+//             a function with an empty name.)
 //
 //           - Some VariableReference::VariableReference errors.
 //
