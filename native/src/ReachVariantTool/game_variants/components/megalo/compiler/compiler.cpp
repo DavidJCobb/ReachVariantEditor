@@ -497,19 +497,19 @@ namespace Megalo {
       return name_source::none;
    }
    //
-   Compiler::log_checkpoint Compiler::_create_log_checkpoint() {
+   Compiler::log_checkpoint Compiler::create_log_checkpoint() {
       log_checkpoint point;
       point.warnings = this->warnings.size();
       point.errors = this->errors.size();
       point.fatal_errors = this->fatal_errors.size();
       return point;
    }
-   void Compiler::_revert_to_log_checkpoint(Compiler::log_checkpoint point) {
+   void Compiler::revert_to_log_checkpoint(Compiler::log_checkpoint point) {
       this->warnings.resize(point.warnings);
       this->errors.resize(point.errors);
       this->fatal_errors.resize(point.fatal_errors);
    }
-   bool Compiler::_checkpoint_has_errors(Compiler::log_checkpoint point) const noexcept {
+   bool Compiler::checkpoint_has_errors(Compiler::log_checkpoint point) const noexcept {
       if (this->warnings.size() > point.warnings)
          return true;
       if (this->errors.size() > point.errors)
@@ -1440,7 +1440,7 @@ namespace Megalo {
          opcode.reset(new Action);
       }
       auto start = this->backup_stream_state();
-      auto check = this->_create_log_checkpoint();
+      auto check = this->create_log_checkpoint();
       for (auto* function : opcode_bases) {
          //
          // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
@@ -1448,18 +1448,18 @@ namespace Megalo {
          // author is invoking.
          //
          opcode->reset();
-         this->_revert_to_log_checkpoint(check);
+         this->revert_to_log_checkpoint(check);
          this->restore_stream_state(start);
          //
          this->__parseFunctionArgs(*function, *opcode.get());
-         if (!this->_checkpoint_has_errors(check)) {
+         if (!this->checkpoint_has_errors(check)) {
             match = function;
             break;
          }
       }
       if (!match) {
          if (opcode_bases.size() > 1) {
-            this->_revert_to_log_checkpoint(check);
+            this->revert_to_log_checkpoint(check);
             this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          }
          if (!this->skip_to(')'))
@@ -1626,10 +1626,15 @@ namespace Megalo {
       }
       //
       auto item = new Script::Alias(*this, name, target);
+      if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
+         delete item;
+         return;
+      }
       item->set_start(start);
       item->set_end(this->state);
       this->block->insert_item(item);
-      this->aliases_in_scope.push_back(item);
+      if (!item->invalid)
+         this->aliases_in_scope.push_back(item);
    }
    void Compiler::_handleKeyword_Declare() {
       auto start = this->token.pos;

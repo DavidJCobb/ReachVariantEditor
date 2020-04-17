@@ -248,9 +248,10 @@ int main(int argc, char *argv[]) {
 //
 //           - Some VariableReference::VariableReference errors.
 //
-//           - All VariableReference::resolve errors.
-//
-//           - Bad Alias names.
+//           - All errors in VariableReference::RawPart::resolve_index. To convert these 
+//             away from exceptions, the method needs to be passed the VariableReference*
+//             owner so that it can set VariableReference::is_invalid; alternatively, the 
+//             method needs to return a success bool.
 //
 //           - Multiple triggers using the same event type via "on" (currently not an 
 //             error at all).

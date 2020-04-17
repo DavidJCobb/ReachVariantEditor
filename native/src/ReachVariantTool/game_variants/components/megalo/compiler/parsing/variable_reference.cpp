@@ -193,7 +193,7 @@ namespace Megalo::Script {
       this->resolved.top_level.index       = v;
    }
    QString VariableReference::to_string() const noexcept {
-      if (!this->is_resolved)
+      if (!this->is_resolved || this->is_invalid)
          return this->to_string_from_raw();
       auto& resolved  = this->resolved;
       auto& top_level = resolved.top_level;
@@ -386,13 +386,19 @@ namespace Megalo::Script {
          alias = compiler.lookup_relative_alias(part->name, basis);
       else {
          alias = compiler.lookup_absolute_alias(part->name);
-         if (alias->is_imported_name())
-            throw compile_exception(QString("Alias \"%1\" refers to imported name \"%2\" and cannot appear where a variable can.").arg(alias->name).arg(alias->target_imported_name));
+         if (alias->is_imported_name()) {
+            compiler.raise_error(QString("Alias \"%1\" refers to imported name \"%2\" and cannot appear where a variable can.").arg(alias->name).arg(alias->target_imported_name));
+            this->is_invalid = true;
+            return false;
+         }
       }
       if (!alias)
          return false;
-      if (part->has_index())
-         throw compile_exception(QString("Aliases such as \"%1\" can refer to indexed data but cannot themselves be indexed.").arg(alias->name));
+      if (part->has_index()) {
+         compiler.raise_error(QString("Aliases such as \"%1\" can refer to indexed data but cannot themselves be indexed.").arg(alias->name));
+         this->is_invalid = true;
+         return false;
+      }
       if (!basis && alias->is_integer_constant()) {
          this->resolved.top_level.is_constant = true;
          this->resolved.top_level.index       = alias->get_integer_constant();
@@ -419,13 +425,22 @@ namespace Megalo::Script {
          //
          auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(part->name);
          if (type) {
-            if (!part->has_index())
-               throw compile_exception(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
+            if (!part->has_index()) {
+               compiler.raise_error(QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.").arg(type->internal_name.c_str()));
+               this->is_invalid = true;
+               return 0;
+            }
             part->resolve_index(compiler);
-            if (part->index < 0)
-               throw compile_exception(QString("Typename indices cannot be negative."));
-            if (part->index >= type->static_count)
-               throw compile_exception(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(type->static_count - 1));
+            if (part->index < 0) {
+               compiler.raise_error(QString("Typename indices cannot be negative."));
+               this->is_invalid = true;
+               return 0;
+            }
+            if (part->index >= type->static_count) {
+               compiler.raise_error(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(type->static_count - 1));
+               this->is_invalid = true;
+               return 0;
+            }
             //
             auto& res = this->resolved.top_level;
             res.type      = type;
@@ -442,8 +457,11 @@ namespace Megalo::Script {
          //
       }
       part = this->_get_raw_part(++i);
-      if (!part)
-         throw compile_exception(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
+      if (!part) {
+         compiler.raise_error(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
+         this->is_invalid = true;
+         return 0;
+      }
       if (ns->can_have_variables) {
          //
          // Let's check to see if we're looking at a global variable.
@@ -453,16 +471,25 @@ namespace Megalo::Script {
          #endif
          auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
          if (type) {
-            if (!part->has_index())
-               throw compile_exception(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
+            if (!part->has_index()) {
+               compiler.raise_error(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
+               this->is_invalid = true;
+               return 0;
+            }
             part->resolve_index(compiler);
-            if (part->index < 0)
-               throw compile_exception(QString("Typename indices cannot be negative."));
+            if (part->index < 0) {
+               compiler.raise_error(QString("Typename indices cannot be negative."));
+               this->is_invalid = true;
+               return 0;
+            }
             {
                Megalo::variable_type vt = _var_type_constant_for_type(*type);
                auto max = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
-               if (part->index >= max)
-                  throw compile_exception(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));
+               if (part->index >= max) {
+                  compiler.raise_error(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));
+                  this->is_invalid = true;
+                  return 0;
+               }
             }
             //
             auto& res = this->resolved.top_level;
@@ -479,8 +506,11 @@ namespace Megalo::Script {
       auto member = ns->get_member(part->name);
       if (!member) {
          if (ns == &namespaces::unnamed)
-            throw compile_exception(QString("There are no unscoped values named \"%1\".").arg(part->name));
-         throw compile_exception(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
+            compiler.raise_error(QString("There are no unscoped values named \"%1\".").arg(part->name));
+         else
+            compiler.raise_error(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
+         this->is_invalid = true;
+         return 0;
       }
       auto& res = this->resolved.top_level;
       res.type  = &member->type;
@@ -493,9 +523,11 @@ namespace Megalo::Script {
          bool should_have_index = member->has_index();
          if (part->has_index() != should_have_index) {
             if (should_have_index)
-               throw compile_exception(QString("The \"%1.%2\" value must be indexed.").arg(member->name.c_str()).arg(part->name));
+               compiler.raise_error(QString("The \"%1.%2\" value must be indexed.").arg(member->name.c_str()).arg(part->name));
             else
-               throw compile_exception(QString("The \"%1.%2\" value cannot be indexed.").arg(member->name.c_str()).arg(part->name));
+               compiler.raise_error(QString("The \"%1.%2\" value cannot be indexed.").arg(member->name.c_str()).arg(part->name));
+            this->is_invalid = true;
+            return 0;
          }
          if (should_have_index)
             res.index = part->index;
@@ -513,16 +545,25 @@ namespace Megalo::Script {
          auto prev_scope = _var_scope_for_type(*prev);
          assert(prev_scope && "If a variable type doesn't have a VariableScope object, then it shouldn't claim to be able to hold variables.");
          //
-         if (!part->has_index())
-            throw compile_exception(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
+         if (!part->has_index()) {
+            compiler.raise_error(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
+            this->is_invalid = true;
+            return false;
+         }
          part->resolve_index(compiler);
-         if (part->index < 0)
-            throw compile_exception(QString("Typename indices cannot be negative."));
+         if (part->index < 0) {
+            compiler.raise_error(QString("Typename indices cannot be negative."));
+            this->is_invalid = true;
+            return false;
+         }
          {
             Megalo::variable_type vt = _var_type_constant_for_type(*type);
             auto max = prev_scope->max_variables_of_type(vt);
-            if (part->index >= max)
-               throw compile_exception(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));
+            if (part->index >= max) {
+               compiler.raise_error(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));
+               this->is_invalid = true;
+               return false;
+            }
          }
          //
          this->resolved.nested.type  = type;
@@ -543,9 +584,11 @@ namespace Megalo::Script {
             const char* pn = prop->name.c_str();
             const char* tn = type->internal_name.c_str();
             if (should_have_index)
-               throw compile_exception(QString("The \"%1\" property on the %2 type must be indexed.").arg(pn).arg(tn));
+               compiler.raise_error(QString("The \"%1\" property on the %2 type must be indexed.").arg(pn).arg(tn));
             else
-               throw compile_exception(QString("The \"%1\" property on the %2 type cannot be indexed.").arg(pn).arg(tn));
+               compiler.raise_error(QString("The \"%1\" property on the %2 type cannot be indexed.").arg(pn).arg(tn));
+            this->is_invalid = true;
+            return false;
          }
          if (has_index)
             this->resolved.property.index = part->index;
@@ -604,6 +647,8 @@ namespace Megalo::Script {
          }
       }
       size_t i = this->_resolve_top_level(compiler, is_alias_definition);
+      if (this->is_invalid)
+         return;
       if (i >= this->raw.size()) {
          this->is_resolved = true;
          return;
@@ -624,6 +669,8 @@ namespace Megalo::Script {
             return;
          }
       }
+      if (this->is_invalid)
+         return;
       if (this->_resolve_property(compiler, i)) {
          auto prop = this->resolved.property.definition;
          //
@@ -679,6 +726,8 @@ namespace Megalo::Script {
          this->is_resolved = true;
          return;
       }
+      if (this->is_invalid)
+         return;
       //
       // If we reach this point, then the raw part that we're currently looking at is unrecognized. That's 
       // an error, but let's do some work and see if we can't display a good error message to the script 

@@ -110,6 +110,11 @@ namespace Megalo {
             LogEntry(const QString& t, Script::string_scanner::pos p) : text(t), pos(p) {}
          };
          using log_t = std::vector<LogEntry>;
+         struct log_checkpoint {
+            size_t warnings     = 0;
+            size_t errors       = 0;
+            size_t fatal_errors = 0;
+         };
          //
       protected:
          enum class c_joiner {
@@ -132,15 +137,6 @@ namespace Megalo {
          log_t warnings;
          log_t errors;
          log_t fatal_errors;
-         //
-         struct log_checkpoint {
-            size_t warnings     = 0;
-            size_t errors       = 0;
-            size_t fatal_errors = 0;
-         };
-         log_checkpoint _create_log_checkpoint();
-         void _revert_to_log_checkpoint(log_checkpoint);
-         bool _checkpoint_has_errors(log_checkpoint) const noexcept;
          //
          struct unresolved_str {
             OpcodeArgValue* value = nullptr;
@@ -179,6 +175,10 @@ namespace Megalo {
          [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
          [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name);
          [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name);
+         //
+         log_checkpoint create_log_checkpoint();
+         void revert_to_log_checkpoint(log_checkpoint);
+         bool checkpoint_has_errors(log_checkpoint) const noexcept;
          //
          enum class name_source {
             none,

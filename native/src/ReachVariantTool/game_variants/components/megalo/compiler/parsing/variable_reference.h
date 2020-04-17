@@ -49,6 +49,7 @@ namespace Megalo {
             #endif
             //
             bool is_resolved = false;
+            bool is_invalid  = false;
             //
             struct {
                //
