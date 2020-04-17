@@ -33,7 +33,7 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueVector3::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
       if (part > 2)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure();
       //
       int32_t coordinate = 0;
       if (!arg.extract_integer_literal(coordinate)) {
@@ -43,11 +43,11 @@ namespace Megalo {
          auto word  = arg.extract_word();
          auto alias = compiler.lookup_absolute_alias(word);
          if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure;
+            return arg_compile_result::failure().set_needs_more(part < 2);
          coordinate = alias->get_integer_constant();
       }
       if (!cobb::integral_type_can_hold<int8_t>(coordinate)) {
-         compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer and will overflow or underflow.").arg(coordinate));
+         compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(coordinate).arg((int8_t)coordinate));
       }
       switch (part) {
          case 0: this->value.x = coordinate; break;
@@ -55,8 +55,6 @@ namespace Megalo {
          case 2: this->value.z = coordinate; break;
       }
       //
-      if (part < 2)
-         return arg_compile_result::needs_another;
-      return arg_compile_result::success;
+      return arg_compile_result::success().set_needs_more(part < 2);
    }
 }

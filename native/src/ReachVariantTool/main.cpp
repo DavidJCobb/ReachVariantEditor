@@ -180,22 +180,9 @@ int main(int argc, char *argv[]) {
 //          that, and then it should become apparent what bits of that will generalize to 
 //          other variable types and so can be moved to the base Variable class.
 //
-//        - WE ALREADY NEED TO CHANGE HOW OpcodeArgValue::compile RETURNS RESULTS PER THE 
-//          NEXT BULLET POINT, SO WE MAY AS WELL ADD ANOTHER FEATURE: WE SHOULD SPLIT THE 
-//          "FAILURE" CODE INTO TWO DIFFERENT CODES: A "RESOLVABLE FAILURE" CODE AND AN 
-//          "IRRESOLVABLE FAILURE" CODE. An "irresolvable failure" is one that makes it 
-//          impossible to parse the remaining function call arguments; for example, if an 
-//          opcode took a "shape" argument and the script author specified an invalid shape 
-//          type, it would be impossible to know how many more arguments there should be, 
-//          and so that would be an irresolvable failure. A "resolvable failure" is one 
-//          that would allow us to still try to compile the other function call arguments 
-//          (which we want to do; we want to alert the script author to as many errors at 
-//          once as possible, rather than forcing them to fix one error at a time and retry 
-//          compiling after each one).
-//
-//          For an irresolvable failure, we'd append a message to the error text: "This 
-//          error has also prevented the compiler from checking the remaining function call 
-//          arguments for correctness."
+//        - THE arg_compile_result STRUCT NEEDS TO SEPARATE "needs another" AND "can take 
+//          another" INTO THEIR OWN ENUM, SO THAT WE CAN RETURN A RESOLVABLE FAILURE CODE 
+//          FROM A MULTI-PART ARGUMENT (E.G. VECTOR3).
 //
 //        - WE NEED TO PROVIDE SOME COMPILER-LEVEL FUNCTIONALITY TO FACILITATE COMPILING 
 //          STRING ARGUMENTS. We want script authors to be able to specify a string as an 
@@ -213,21 +200,9 @@ int main(int argc, char *argv[]) {
 //          we'd give the script author the opportunity to decide what to do with them 
 //          (including the opportunity to cancel compiling).
 //
-//          This presents an issue, of course: OpcodeArgValue::compile needs to be able to 
-//          signal that a string reference was unresolved, while also still sending back a 
-//          result code (success, needs another, or can take another).
-//
-//          For a little while now, I've also wanted OpcodeArgValue::compile to be able to 
-//          send back an error string if compiling fails. This would require returning a 
-//          struct... and so would alerting the Compiler to an unresolved string reference. 
-//          Accordingly, we should take the arg_compile_result enum and make it a struct 
-//          (so that we don't need to rename the return value on all the defined overrides) 
-//          that contains a result enum, a QString for error text, and a boolean indicating 
-//          the presence of an unresolved string reference.
-//
-//          Then, we'd modify everything in the Compiler that calls OpcodeArgValue::compile: 
-//          if we're alerted to an unresolved string reference, then we save the value, the 
-//          argument string that was passed, and the part number that was passed.
+//          If OpcodeArgValue::compile alerts us to an unresolved string reference, then we 
+//          save: a pointer to the value; the argument string that was passed; and the part 
+//          number that was passed.
 //
 //          Crucial thing to remember: the list of unresolved string references does NOT 
 //          have ownership of the target OpcodeArgValues; if an exception is thrown and 

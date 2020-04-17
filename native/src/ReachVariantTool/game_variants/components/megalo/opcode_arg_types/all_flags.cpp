@@ -76,15 +76,11 @@ namespace Megalo {
       for (; i < size; i++) {
          if (value & (1 << i)) {
             ++found;
-            if (found == 2)
-               out = '(' + out;
             if (found > 1)
-               out += ", ";
+               out += " | ";
             out += base[i].name;
          }
       }
-      if (found > 1)
-         out += ')';
       decompiler.write(out);
    }
    #pragma endregion

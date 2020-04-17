@@ -762,6 +762,9 @@ namespace Megalo {
          }
          if (string_scanner::is_quote_char(c)) {
             this->raise_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+            //
+            // TODO: Do we need to advance past the current character with ++this->state.pos first?
+            //
             if (!this->skip_to(c))
                this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
             else {
@@ -1135,6 +1138,9 @@ namespace Megalo {
          }
          if (string_scanner::is_quote_char(c)) {
             this->raise_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
+            //
+            // TODO: Do we need to advance past the current character with ++this->state.pos first?
+            //
             if (!this->skip_to(c))
                this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
             else {
@@ -1264,26 +1270,42 @@ namespace Megalo {
             // TODO: error
             //
          }
-         switch (result) {
-            case arg_compile_result::success:
-               opcode.arguments[opcode_arg_index] = current_argument.release();
-               ++opcode_arg_index;
-               opcode_arg_part = 0;
-               break;
-            case arg_compile_result::failure:
-               this->raise_error(QString("Failed to parse script argument %1.").arg(script_arg_index - 1));
+         bool failure = result.is_failure();
+         bool success = result.is_success();
+         if (failure) {
+            bool irresolvable = result.is_irresolvable_failure();
+            //
+            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index - 1);
+            if (!result.error.isEmpty()) {
+               error.reserve(error.size() + 1 + result.error.size());
+               error += ' ';
+               error += result.error;
+            }
+            if (irresolvable) {
+               error += ' ';
+               error += "This error has made it impossible to attempt to parse this function call's remaining arguments. They will be skipped.";
+            }
+            this->raise_error(error);
+            if (irresolvable)
                return;
-            case arg_compile_result::needs_another:
-               ++opcode_arg_part;
-               if (!comma) {
-                  this->raise_error("Not enough arguments passed to the function.");
-                  return;
-               }
-               break;
-            case arg_compile_result::can_take_another:
-               ++opcode_arg_part;
          }
-         this->state += argument.backup_stream_state();
+         if (result.needs_another()) {
+            ++opcode_arg_part;
+            if (!comma) {
+               this->raise_error("Not enough arguments passed to the function.");
+               return;
+            }
+            continue;
+         } else if (result.can_take_another())
+            ++opcode_arg_part;
+         //
+         if (success || failure) {
+            if (success)
+               opcode.arguments[opcode_arg_index] = current_argument.release();
+            ++opcode_arg_index;
+            opcode_arg_part = 0;
+            continue;
+         }
       } while (comma);
       if (opcode_arg_index < mapping.mapped_arg_count())
          this->raise_error("Not enough arguments passed to the function.");

@@ -37,7 +37,7 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure();
       //
       int32_t v = 0;
       if (!arg.extract_integer_literal(v)) {
@@ -49,23 +49,23 @@ namespace Megalo {
          if (alias) {
             if (alias->is_integer_constant()) {
                this->value = alias->get_integer_constant() != 0;
-               return arg_compile_result::success;
+               return arg_compile_result::success();
             }
             if (alias->is_imported_name())
                word = alias->target_imported_name;
          }
          if (word.compare("true", Qt::CaseInsensitive) == 0) {
             this->value = true;
-            return arg_compile_result::success;
+            return arg_compile_result::success();
          }
          if (word.compare("false", Qt::CaseInsensitive) == 0) {
             this->value = false;
-            return arg_compile_result::success;
+            return arg_compile_result::success();
          }
-         return arg_compile_result::failure;
+         return arg_compile_result::failure("The specified value is not an integer constant, the value \"true\", the value \"false\", or an alias of any of these.");
       }
       this->value = v;
-      return arg_compile_result::success;
+      return arg_compile_result::success();
    }
    #pragma endregion
    //
@@ -96,7 +96,7 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure();
       //
       int32_t v = 0;
       if (!arg.extract_integer_literal(v)) {
@@ -106,14 +106,14 @@ namespace Megalo {
          auto word  = arg.extract_word();
          auto alias = compiler.lookup_absolute_alias(word);
          if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure;
+            return arg_compile_result::failure();
          v = alias->get_integer_constant();
       }
       if (!cobb::integral_type_can_hold<int8_t>(v)) {
-         compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer and will overflow or underflow.").arg(v));
+         compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(v).arg((uint8_t)v));
       }
       this->value = v;
-      return arg_compile_result::success;
+      return arg_compile_result::success();
    }
    #pragma endregion
 }

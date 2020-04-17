@@ -142,6 +142,12 @@ namespace Megalo {
          void _revert_to_log_checkpoint(log_checkpoint);
          bool _checkpoint_has_errors(log_checkpoint) const noexcept;
          //
+         struct unresolved_str {
+            OpcodeArgValue* value = nullptr;
+            QString string;
+            uint8_t part = 0;
+         };
+         //
       public:
          struct {
             bool success = false;

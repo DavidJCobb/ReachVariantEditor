@@ -140,14 +140,14 @@ namespace Megalo {
       auto alias = compiler.lookup_absolute_alias(word);
       if (alias) {
          if (!alias->is_imported_name())
-            return arg_compile_result::failure;
+            return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here.").arg(alias->name));
          word = alias->target_imported_name;
       }
       auto index = this->base.lookup(word);
       if (index < 0)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure(QString("Value \"%1\" cannot be used here.").arg(word));
       this->value = index;
-      return arg_compile_result::success;
+      return arg_compile_result::success();
    }
    #pragma endregion
 

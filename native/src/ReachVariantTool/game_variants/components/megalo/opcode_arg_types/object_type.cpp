@@ -67,42 +67,42 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueObjectType::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure();
       //
       constexpr int max_value = Megalo::Limits::max_object_types - 1;
       //
       int32_t value = 0;
       if (arg.extract_integer_literal(value)) {
          if (value < 0 || value > max_value) // do not allow incident IDs to overflow
-            return arg_compile_result::failure;
+            return arg_compile_result::failure(QString("Integer literal %1 is out of bounds; valid integers range from 0 to %2.").arg(value).arg(max_value));
          this->value = value;
-         return arg_compile_result::success;
+         return arg_compile_result::success();
       }
       QString word = arg.extract_word();
       if (word.isEmpty())
-         return arg_compile_result::failure;
+         return arg_compile_result::failure();
       auto alias = compiler.lookup_absolute_alias(word);
       if (alias) {
          if (alias->is_integer_constant()) {
             value = alias->get_integer_constant();
             if (value < 0 || value > max_value) // do not allow incident IDs to overflow
-               return arg_compile_result::failure;
+               return arg_compile_result::failure(QString("Integer literal %1 (from the alias named \"%3\") is out of bounds; valid integers range from 0 to %2.").arg(value).arg(max_value).arg(alias->name));
             this->value = value;
-            return arg_compile_result::success;
+            return arg_compile_result::success();
          }
          if (alias->is_imported_name())
             word = alias->target_imported_name;
          else
-            return arg_compile_result::failure;
+            return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here. Only integer literals, object types, and aliases of either may appear here.").arg(alias->name));
       }
       if (word.compare("none", Qt::CaseInsensitive) == 0) {
          this->value = -1;
-         return arg_compile_result::success;
+         return arg_compile_result::success();
       }
       value = enums::object_type.lookup(word);
       if (value < 0)
-         return arg_compile_result::failure;
+         return arg_compile_result::failure(QString("Value \"%1\" is not a recognized object type.").arg(word));
       this->value = value;
-      return arg_compile_result::success;
+      return arg_compile_result::success();
    }
 }

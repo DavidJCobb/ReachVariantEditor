@@ -211,11 +211,40 @@ namespace Megalo {
          bool has_imported_name(const QString& name) const noexcept;
    };
 
-   enum class arg_compile_result {
-      failure,
-      success,
-      needs_another,
-      can_take_another,
+   struct arg_compile_result {
+      enum class code_t : uint8_t {
+         failure,
+         failure_irresolvable, // it is impossible to attempt to parse the remaining function call arguments. e.g. a bad shape type means we don't know what arguments come next
+         success,
+      };
+      enum class more_t : uint8_t {
+         no,       // we're good
+         needed,   // we require another script argument
+         optional, // we can take another script argument
+      };
+      //
+      QString error;
+      code_t  code = code_t::failure;
+      more_t  more = more_t::no;
+      bool    is_unresolved_string = false;
+      //
+      static arg_compile_result failure();
+      static arg_compile_result failure(QString);
+      static arg_compile_result success(bool is_unresolved_string = false);
+      //
+      arg_compile_result() {}
+      arg_compile_result(code_t c) : code(c) {}
+      //
+      inline bool is_failure() const noexcept {
+         return this->code == code_t::failure || this->code == code_t::failure_irresolvable;
+      }
+      inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
+      inline bool is_success() const noexcept { return this->code == code_t::success; }
+      inline bool needs_another() const noexcept { return this->more == more_t::needed; }
+      inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
+      //
+      inline arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
+      inline arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }
    };
    
    class OpcodeArgValue {
@@ -225,8 +254,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept { return arg_compile_result::failure; };
-         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure; };
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept { return arg_compile_result::failure(); };
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure(); };
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
