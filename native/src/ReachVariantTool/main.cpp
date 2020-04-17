@@ -291,37 +291,10 @@ int main(int argc, char *argv[]) {
 //       We need to build a system for logging non-fatal errors, and then begin converting 
 //       fatal errors over.
 //
-//        - Compiler::_parseFunctionCall uses a try-catch to detect a failure to parse a 
-//          call's arguments; this is needed for the trial-and-error approach to parsing 
-//          overloads e.g. (send_incident). We could have Compiler::__parseFunctionArgs 
-//          return a success bool, but we would still need to build a mechanism by which 
-//          all errors and warnings logged after a certain point could be discarded, in 
-//          order to fully replace the exception-based approach.
-//
-//           - We'd probably want something like (_set_error_checkpoint), which stores 
-//             the (size)s of the error/warning lists, and (_revert_to_error_checkpoint), 
-//             which uses (resize) to reset the lists to those sizes and shear off any 
-//             errors/warnings that were logged since.
-//
-//             Better yet: use (_create_error_checkpoint) which returns a "checkpoint" 
-//             struct similar to (_backup_stream_state); that way, we don't have to 
-//             remember to clear any sort of Compiler-retained checkpoint state when we 
-//             either let the errors remain or move on without any errors having been 
-//             logged.
-//
-//             We'll also want (_checkpoint_has_errors), which takes a "checkpoint" 
-//             struct and sees if any errors have been logged since then. That'll be 
-//             easy to implement: if an error list's size is greater than the matching 
-//             size in the checkpoint struct, return true.
-//
 //        - VariableReference's constructor needs to take a Compiler& so that it can log 
 //          errors without throwing an exception.
 //
 //        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
-//
-//           - Bad function call names. (Handle these by setting the new function block's 
-//             name to an empty string, and coding the Compiler to never match calls to 
-//             a function with an empty name.)
 //
 //           - Some VariableReference::VariableReference errors.
 //
@@ -333,12 +306,6 @@ int main(int argc, char *argv[]) {
 //
 //        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
 //          not even using (throw_error) and can remove it.
-//
-//        - Once we have a system for logging non-fatal errors, we should introduce a 
-//          similar system for warnings. Warnings should include:
-//
-//           - OpcodeArgValueConstSInt8::compile: number will overflow or underflow
-//           - OpcodeArgValueVector3::compile: number will overflow or underflow
 //
 //     = AUDITING
 //

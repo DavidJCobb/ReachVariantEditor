@@ -450,6 +450,8 @@ namespace Megalo {
          return nullptr;
       for (size_t i = 0; i < size; i++) {
          auto& func = list[i];
+         if (func.name.isEmpty()) // used for invalid function names, when the bad names are non-fatal rather than fatal errors
+            continue;
          if (func.name.compare(name, Qt::CaseInsensitive) == 0)
             return &func;
       }
@@ -505,6 +507,28 @@ namespace Megalo {
          return name_source::imported_name;
       //
       return name_source::none;
+   }
+   //
+   Compiler::log_checkpoint Compiler::_create_log_checkpoint() {
+      log_checkpoint point;
+      point.warnings = this->warnings.size();
+      point.errors = this->errors.size();
+      point.fatal_errors = this->fatal_errors.size();
+      return point;
+   }
+   void Compiler::_revert_to_log_checkpoint(Compiler::log_checkpoint point) {
+      this->warnings.resize(point.warnings);
+      this->errors.resize(point.errors);
+      this->fatal_errors.resize(point.fatal_errors);
+   }
+   bool Compiler::_checkpoint_has_errors(Compiler::log_checkpoint point) const noexcept {
+      if (this->warnings.size() > point.warnings)
+         return true;
+      if (this->errors.size() > point.errors)
+         return true;
+      if (this->fatal_errors.size() > point.fatal_errors)
+         return true;
+      return false;
    }
    //
    void Compiler::throw_error(const QString& text) {
@@ -737,7 +761,14 @@ namespace Megalo {
             return;
          }
          if (string_scanner::is_quote_char(c)) {
-            this->raise_fatal(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+            this->raise_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
+            if (!this->skip_to(c))
+               this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
+            else {
+               this->reset_token();
+               delete this->assignment;
+               this->assignment = nullptr;
+            }
             return;
          }
          if (this->token.text.isEmpty()) {
@@ -1104,7 +1135,13 @@ namespace Megalo {
          }
          if (string_scanner::is_quote_char(c)) {
             this->raise_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
-            this->skip_to(c); // TODO: double-check this; I'm not sure it'll work properly
+            if (!this->skip_to(c))
+               this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
+            else {
+               this->reset_token();
+               delete this->comparison;
+               this->comparison = nullptr;
+            }
             return;
          }
          if (this->token.text.isEmpty() && string_scanner::is_whitespace_char(c))
@@ -1183,7 +1220,8 @@ namespace Megalo {
       bool comma = false;
       do {
          if (opcode_arg_index >= mapping.mapped_arg_count()) {
-            this->throw_error("Too many arguments passed to the function.");
+            this->raise_error("Too many arguments passed to the function.");
+            return;
          }
          QString raw_argument;
          {
@@ -1214,12 +1252,18 @@ namespace Megalo {
          if (!current_argument) {
             current_argument.reset((base.typeinfo.factory)());
             if (!current_argument) {
-               this->throw_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
+               this->raise_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
+               return;
             }
          }
          //
          string_scanner argument(raw_argument);
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
+         if (!argument.is_at_effective_end()) {
+            //
+            // TODO: error
+            //
+         }
          switch (result) {
             case arg_compile_result::success:
                opcode.arguments[opcode_arg_index] = current_argument.release();
@@ -1227,11 +1271,13 @@ namespace Megalo {
                opcode_arg_part = 0;
                break;
             case arg_compile_result::failure:
-               this->throw_error(QString("Failed to parse script argument %1.").arg(script_arg_index - 1)); // TODO: this won't allow us to handle overloads
+               this->raise_error(QString("Failed to parse script argument %1.").arg(script_arg_index - 1));
+               return;
             case arg_compile_result::needs_another:
                ++opcode_arg_part;
                if (!comma) {
-                  this->throw_error("Not enough arguments passed to the function.");
+                  this->raise_error("Not enough arguments passed to the function.");
+                  return;
                }
                break;
             case arg_compile_result::can_take_another:
@@ -1240,7 +1286,7 @@ namespace Megalo {
          this->state += argument.backup_stream_state();
       } while (comma);
       if (opcode_arg_index < mapping.mapped_arg_count())
-         this->throw_error("Not enough arguments passed to the function.");
+         this->raise_error("Not enough arguments passed to the function.");
    }
    namespace {
       template<typename T, int I> void _find_opcode_bases(const std::array<T, I>& list, std::vector<const OpcodeBase*>& results, QString function_name, Script::VariableReference* context) {
@@ -1315,17 +1361,20 @@ namespace Megalo {
          if (func) {
             if (is_condition) {
                this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot be called from inside of a condition.").arg(function_name));
-               this->skip_to(')');
+               if (!this->skip_to(')'))
+                  this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
                return;
             }
             if (this->assignment) {
                this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
-               this->skip_to(')');
+               if (!this->skip_to(')'))
+                  this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
                return;
             }
             if (!this->extract_specific_char(')')) {
                this->raise_error(call_start, QString("Expected ')'. User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
-               this->skip_to(')');
+               if (!this->skip_to(')'))
+                  this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
                return;
             }
             //
@@ -1368,18 +1417,20 @@ namespace Megalo {
             this->raise_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
          else
             this->raise_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
-         this->skip_to(')');
+         if (!this->skip_to(')'))
+            this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
          return;
       }
       //
       const OpcodeBase* match = nullptr;
-      auto start = this->backup_stream_state();
       std::unique_ptr<Opcode> opcode;
       if (is_condition) {
          opcode.reset(new Condition);
       } else {
          opcode.reset(new Action);
       }
+      auto start = this->backup_stream_state();
+      auto check = this->_create_log_checkpoint();
       for (auto* function : opcode_bases) {
          //
          // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
@@ -1387,27 +1438,31 @@ namespace Megalo {
          // author is invoking.
          //
          opcode->reset();
+         this->_revert_to_log_checkpoint(check);
          this->restore_stream_state(start);
-         try {
-            this->__parseFunctionArgs(*function, *opcode.get());
+         //
+         this->__parseFunctionArgs(*function, *opcode.get());
+         if (!this->_checkpoint_has_errors(check)) {
             match = function;
             break;
-         } catch (compile_exception& e) {
-            if (opcode_bases.size() == 1)
-               //
-               // If we aren't dealing with function overloads, then just use the original parse error.
-               //
-               throw e;
          }
       }
-      if (!match)
-         //
-         // We'll get here if we're dealing with function overloads and none of the overloads matched.
-         //
-         this->throw_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+      if (!match) {
+         if (opcode_bases.size() > 1) {
+            this->_revert_to_log_checkpoint(check);
+            this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         }
+         if (!this->skip_to(')'))
+            this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
+         return;
+      }
       //
       // If we've reached this point without any errors, then we should be just before the terminating ')' for the function call.
       //
+      if (!this->extract_specific_char(')')) {
+         this->raise_fatal("Expected ')'.");
+         return;
+      }
       if (this->assignment) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
@@ -1448,10 +1503,6 @@ namespace Megalo {
             opcode->arguments[index] = (base.typeinfo.factory)();
             opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
          }
-      }
-      if (!this->extract_specific_char(')')) {
-         this->raise_fatal("Expected ')'.");
-         return;
       }
       this->reset_token();
       Script::Statement* statement = this->assignment;
@@ -1660,16 +1711,20 @@ namespace Megalo {
       if (!this->extract_word("each"))
          this->throw_error("The \"for\" keyword must be followed by \"each\".");
       auto word = this->extract_word();
-      if (word.isEmpty())
-         this->throw_error("Invalid for-loop.");
+      if (word.isEmpty()) {
+         this->raise_fatal("Invalid for-loop.");
+         return;
+      }
       auto    type = Script::Block::Type::basic;
       QString label;
       int32_t label_index = -1;
       bool    label_is_index = false;
       if (word == "team") {
          type = Script::Block::Type::for_each_team;
-         if (!this->extract_word("do"))
-            this->throw_error("Invalid for-each-team loop: expected the word \"do\".");
+         if (!this->extract_word("do")) {
+            this->raise_fatal("Invalid for-each-team loop: expected the word \"do\".");
+            return;
+         }
       } else if (word == "player") {
          type = Script::Block::Type::for_each_player;
          word = this->extract_word();
@@ -1679,8 +1734,9 @@ namespace Megalo {
          }
          if (word != "do") {
             if (type == Script::Block::Type::for_each_player_randomly)
-               this->throw_error("Invalid for-each-player-randomly loop: expected the word \"do\".");
-            this->throw_error("Invalid for-each-player loop: expected the word \"randomly\" or the word \"do\".");
+               this->raise_fatal("Invalid for-each-player-randomly loop: expected the word \"do\".");
+            this->raise_fatal("Invalid for-each-player loop: expected the word \"randomly\" or the word \"do\".");
+            return;
          }
       } else if (word == "object") {
          type = Script::Block::Type::for_each_object;
@@ -1697,13 +1753,17 @@ namespace Megalo {
                if (word != "label")
                   this->throw_error("Invalid for-each-object-with-label loop: expected the word \"label\".");
                if (!this->extract_string_literal(label)) {
-                  if (!this->extract_integer_literal(label_index))
-                     this->throw_error("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                  if (!this->extract_integer_literal(label_index)) {
+                     this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                     return;
+                  }
                   label_is_index = true;
                }
             }
-            if (!this->extract_word("do"))
-               this->throw_error("Invalid for-each-object-with-label loop: expected the word \"do\".");
+            if (!this->extract_word("do")) {
+               this->raise_fatal("Invalid for-each-object-with-label loop: expected the word \"do\".");
+               return;
+            }
          }
       } else {
          this->throw_error("Invalid for-loop.");
@@ -1733,18 +1793,23 @@ namespace Megalo {
          // alias names, which disallow numbers at their start so that it's easier for opcode argument 
          // compile functions to check for both integer literals and integer alias names.
          //
-         this->throw_error("A function's name cannot begin with a number.");
-         return;
-      }
-      for (QChar c : name) {
-         if (QString("[].").contains(c)) {
-            this->raise_fatal(QString("Unexpected %1 inside of a function name.").arg(c));
+         this->raise_error("A function's name cannot begin with a number.");
+         //
+         // This error shouldn't halt parsing. Set the function's name to empty to signal that the 
+         // Block represents a function with an invalid name.
+         //
+         name = "";
+      } else {
+         for (QChar c : name) {
+            if (QString("[].").contains(c)) {
+               this->raise_fatal(QString("Unexpected %1 inside of a function name.").arg(c));
+               return;
+            }
+         }
+         if (Compiler::is_keyword(name)) {
+            this->raise_fatal(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
             return;
          }
-      }
-      if (Compiler::is_keyword(name)) {
-         this->raise_fatal(QString("Keyword \"%1\" cannot be used as the name of a function.").arg(name));
-         return;
       }
       if (!this->extract_specific_char('(')) {
          this->raise_fatal("Expected \"(\".");
@@ -1754,29 +1819,38 @@ namespace Megalo {
          this->raise_fatal("Expected \")\". User-defined functions cannot have arguments.");
          return;
       }
-      {  // Run additional checks on the function name.
-         if (this->lookup_user_defined_function(name))
-            this->throw_error(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
-         //
-         // Do not allow user-defined functions to shadow built-ins:
-         //
-         OpcodeArgTypeRegistry::type_list_t sources;
-         auto built_in_type = Compiler::check_name_is_taken(name, sources);
-         switch (built_in_type) {
-            case name_source::none:
-               break;
-            case name_source::action:
-            case name_source::condition:
-               this->throw_error(QString("User-defined functions cannot shadow built-in functions such as %1.").arg(name));
-               break;
-            case name_source::static_typename:
-            case name_source::variable_typename:
-               this->throw_error(QString("User-defined functions cannot shadow built-in type names such as %1.").arg(name));
-               break;
-            case name_source::namespace_member:
-            case name_source::imported_name:
-               this->throw_error(QString("User-defined functions cannot shadow built-in values such as %1.").arg(name));
-               break;
+      if (!name.isEmpty()) { // Run additional checks on the function name.
+         if (this->lookup_user_defined_function(name)) {
+            this->raise_fatal(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
+            name = "";
+         } else {
+            //
+            // Do not allow user-defined functions to shadow built-ins:
+            //
+            OpcodeArgTypeRegistry::type_list_t sources;
+            auto built_in_type = Compiler::check_name_is_taken(name, sources);
+            //
+            bool fail = true;
+            switch (built_in_type) {
+               case name_source::action:
+               case name_source::condition:
+                  this->raise_error(QString("User-defined functions cannot shadow built-in functions such as %1.").arg(name));
+                  break;
+               case name_source::static_typename:
+               case name_source::variable_typename:
+                  this->raise_error(QString("User-defined functions cannot shadow built-in type names such as %1.").arg(name));
+                  break;
+               case name_source::namespace_member:
+               case name_source::imported_name:
+                  this->raise_error(QString("User-defined functions cannot shadow built-in values such as %1.").arg(name));
+                  break;
+               case name_source::none:
+               default:
+                  fail = false;
+                  break;
+            }
+            if (fail)
+               name = "";
          }
       }
       //
@@ -1801,7 +1875,8 @@ namespace Megalo {
    void Compiler::_handleKeyword_On() {
       if (this->block != this->root) {
          this->raise_error("Only top-level (non-nested) blocks can be event handlers.");
-         this->skip_to(':');
+         if (!this->skip_to(':'))
+            this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
          return;
       }
       QString words;
@@ -1809,16 +1884,20 @@ namespace Megalo {
       while (!this->extract_specific_char(':')) {
          auto w = this->extract_word();
          if (w.isEmpty()) {
-            this->restore_stream_state(prior);
-            this->throw_error("No valid event name specified.");
+            this->raise_error(prior, "No valid event name specified.");
+            if (!this->skip_to(':'))
+               this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
+            return;
          }
          if (!words.isEmpty())
             words += ' ';
          words += w;
       }
       if (words.isEmpty()) {
-         this->restore_stream_state(prior);
-         this->throw_error("No valid event name specified.");
+         this->raise_error(prior, "No valid event name specified.");
+         if (!this->skip_to(':'))
+            this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
+         return;
       }
       auto event = Script::Block::Event::none;
       if (words == "init") {

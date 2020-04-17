@@ -133,6 +133,15 @@ namespace Megalo {
          log_t errors;
          log_t fatal_errors;
          //
+         struct log_checkpoint {
+            size_t warnings     = 0;
+            size_t errors       = 0;
+            size_t fatal_errors = 0;
+         };
+         log_checkpoint _create_log_checkpoint();
+         void _revert_to_log_checkpoint(log_checkpoint);
+         bool _checkpoint_has_errors(log_checkpoint) const noexcept;
+         //
       public:
          struct {
             bool success = false;

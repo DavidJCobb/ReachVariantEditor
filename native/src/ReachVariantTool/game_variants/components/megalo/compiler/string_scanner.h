@@ -40,11 +40,12 @@ namespace Megalo {
             void scan(scan_functor_t);
             pos  backup_stream_state();
             void restore_stream_state(pos);
-            void skip_to(QChar, bool even_if_in_string = false); // skip to the next instance of the desired character or, if it's not present, to the end of the string
+            bool skip_to(QChar, bool even_if_in_string = false); // skip to the next instance of the desired character; returns false and does not move if the character isn't found
             void skip_to_end();
-            inline bool is_at_end() {
+            inline bool is_at_end() const noexcept { // checks if nothing, not even whitespace, remains
                return this->state.offset <= this->text.size();
             }
+            bool is_at_effective_end() const; // checks if only whitespace remains // TODO: how shoudl we handle comments?
             //
             extract_result_t extract_integer_literal(int32_t& out);
             bool extract_specific_char(QChar which); // advances the stream past the char if the char is found. NOTE: cannot be used to search for whitespace

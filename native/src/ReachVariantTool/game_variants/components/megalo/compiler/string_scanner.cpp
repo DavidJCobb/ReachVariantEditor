@@ -72,9 +72,11 @@ namespace Megalo {
       void string_scanner::restore_stream_state(pos s) {
          this->state = s;
       }
-      void string_scanner::skip_to(QChar desired, bool even_if_in_string) {
+      bool string_scanner::skip_to(QChar desired, bool even_if_in_string) {
          QChar delim = '\0';
-         this->scan([desired, &delim, even_if_in_string](QChar c) {
+         bool  found = false;
+         auto  prior = this->backup_stream_state();
+         this->scan([desired, &delim, &found, even_if_in_string](QChar c) {
             if (!even_if_in_string) {
                if (delim != '\0') {
                   if (c == delim)
@@ -87,14 +89,44 @@ namespace Megalo {
                }
             }
             //
-            if (c == desired)
+            if (c == desired) {
+               found = true;
                return true;
+            }
             return false;
          });
-         ++this->state.offset;
+         if (found) {
+            ++this->state.offset; // move position to after the char
+            return true;
+         }
+         this->restore_stream_state(prior);
+         return false;
       }
       void string_scanner::skip_to_end() {
          this->scan([](QChar c) { return false; });
+      }
+      bool string_scanner::is_at_effective_end() const {
+         size_t length  = this->text.size();
+         auto   pos     = this->state.offset;
+         bool   comment = false; // are we inside of a line comment?
+         for (; pos < length; ++pos) {
+            QChar c = text[pos];
+            if (c == '\n') {
+               if (comment) {
+                  comment = false;
+                  continue;
+               }
+            }
+            if (comment)
+               continue;
+            if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle line comments
+               comment = true;
+               continue;
+            }
+            if (!string_scanner::is_whitespace_char(c))
+               return false;
+         }
+         return true;
       }
       //
       string_scanner::extract_result_t string_scanner::extract_integer_literal(int32_t& out) {
