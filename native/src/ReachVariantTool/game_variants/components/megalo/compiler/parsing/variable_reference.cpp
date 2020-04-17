@@ -629,7 +629,9 @@ namespace Megalo::Script {
          //
          if (is_write_access && !prop->has_index()) {
             //
-            // It's possible for a read-only property to have a setter-accessor.
+            // It's possible for a read-only property to have a setter-accessor. The main example of this 
+            // is the "score" property on players and teams; Bungie and 343i never write to it, preferring 
+            // instead to use a setter-accessor to change player and team scores.
             //
             if (auto scope = prop->scope) {
                if (scope->is_readonly()) {

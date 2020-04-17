@@ -76,8 +76,20 @@ namespace Megalo {
             VariableScopeIndicatorValue::flags::is_readonly
          );
          extern VariableScopeIndicatorValue spawn_sequence = VariableScopeIndicatorValue("%w.spawn_sequence", "%w's Spawn Sequence", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::none);
-         extern VariableScopeIndicatorValue team_score     = VariableScopeIndicatorValue("%w.score",          "%w's Score", &MegaloVariableScopeTeam, VariableScopeIndicatorValue::index_type::none);
-         extern VariableScopeIndicatorValue player_score   = VariableScopeIndicatorValue("%w.score",          "%w's Score", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
+         extern VariableScopeIndicatorValue team_score     = VariableScopeIndicatorValue(
+            "%w.score",
+            "%w's Score",
+            &MegaloVariableScopeTeam,
+            VariableScopeIndicatorValue::index_type::none,
+            VariableScopeIndicatorValue::flags::is_readonly // KSoft doesn't list this scope as read-only, but Bungie and 343i need to write to it, and we need it read-only so we can disambiguate from the "score" setter
+         );
+         extern VariableScopeIndicatorValue player_score   = VariableScopeIndicatorValue(
+            "%w.score",
+            "%w's Score",
+            &MegaloVariableScopePlayer,
+            VariableScopeIndicatorValue::index_type::none,
+            VariableScopeIndicatorValue::flags::is_readonly // KSoft doesn't list this scope as read-only, but Bungie and 343i need to write to it, and we need it read-only so we can disambiguate from the "score" setter
+         );
          extern VariableScopeIndicatorValue player_unk09   = VariableScopeIndicatorValue("%w.unknown_09",     "%w's Unknown-09", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
          extern VariableScopeIndicatorValue player_rating  = VariableScopeIndicatorValue("%w.rating",         "%w's Rating", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::none);
          extern VariableScopeIndicatorValue player_stat    = VariableScopeIndicatorValue::make_indexed_data_indicator( // player stat
