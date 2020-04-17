@@ -52,8 +52,12 @@ namespace Megalo {
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 
             // serialize trigger data, writing all conditions followed by all actions and then headers 
             // for triggers, with each header identifying the start index and count of each opcode type. 
-            // This represents raw struct-of-arrays data; the (conditions) and (actions) vectors are 
-            // generated post-load by the (postprocess_opcodes) member function.
+            // This represents raw struct-of-arrays data; the (opcodes) vector is generated post-load by 
+            // the (postprocess_opcodes) member function.
+            //
+            // The "raw" data is generally only meaningful during the load and save processes, and should 
+            // not be checked at any other time. The compiler co-opts the (conditionCount) value here to 
+            // handle (Condition::or_group) when compiling new triggers.
             //
             condition_index conditionStart = -1;
             condition_count conditionCount =  0;

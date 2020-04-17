@@ -166,7 +166,7 @@ namespace Megalo {
          void raise_fatal(const pos& pos, const QString& text);
          void raise_warning(const QString& text);
          //
-         void parse(QString text); // can throw compile_exception
+         void parse(QString text); // parse and compile the text
          //
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
          inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }

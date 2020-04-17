@@ -128,9 +128,6 @@ namespace Megalo {
       }
       void Block::insert_condition(ParsedItem* item) {
          this->conditions.push_back(item);
-         //
-         // TODO: handling for joiners i.e. "and", "or"
-         //
          item->owner = this;
       }
       void Block::insert_item(ParsedItem* item) {
@@ -269,7 +266,7 @@ namespace Megalo {
          //
          this->_make_trigger(compiler);
          {
-            auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group
+            auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
             for (auto item : this->conditions) {
                #if _DEBUG
                   assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
@@ -277,16 +274,11 @@ namespace Megalo {
                auto cmp = dynamic_cast<Comparison*>(item);
                assert(cmp);
                auto cnd = dynamic_cast<Condition*>(cmp->opcode);
-               assert(cnd);
-               #if _DEBUG
-                  for (auto arg : cnd->arguments)
-                     assert(arg && "A compiled condition is missing an argument!");
-               #endif
-               this->trigger->opcodes.push_back(cnd);
+               if (cnd) {
+                  this->trigger->opcodes.push_back(cnd);
+                  cnd->or_group = count;
+               }
                //
-               // Handle or-groups:
-               //
-               cnd->or_group = count;
                if (!cmp->next_is_or)
                   count += 1;
             }
@@ -320,12 +312,8 @@ namespace Megalo {
             }
             auto statement = dynamic_cast<Statement*>(item);
             if (statement) {
-               assert(statement->opcode);
-               #if _DEBUG
-                  for (auto arg : statement->opcode->arguments)
-                     assert(arg && "A compiled opcode is missing an argument!");
-               #endif
-               this->trigger->opcodes.push_back(statement->opcode);
+               if (statement->opcode)
+                  this->trigger->opcodes.push_back(statement->opcode);
                continue;
             }
          }
@@ -1604,6 +1592,15 @@ namespace Megalo {
       if (!parent)
          return false;
       if (parent == this->root) {
+         //
+         // Only compile this block and its descendants if it was a top-level block.
+         //
+         // It's tempting to compile every block, including nested ones, as it closes, but that 
+         // would result in a trigger order inconsistent with Bungie and 343i's gametypes. Inner 
+         // blocks would close before their containing outer blocks, so their triggers would end 
+         // up being numbered before the outer blocks' triggers, whereas in official gametypes 
+         // the triggers are numbered from the outside in and from the top down.
+         //
          this->block->compile(*this);
       }
       this->block = parent;

@@ -143,13 +143,17 @@ int main(int argc, char *argv[]) {
 //          to have successfully parsed, but we are not at the effective end (i.e. there 
 //          is non-whitespace content at the end that wasn't parsed).
 //
+//        - The end of the compile process should run one final check: scan all Opcodes 
+//          in all compiled triggers, and throw a compiler error if any have any nullptr 
+//          arguments.
+//
 //     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
 //       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
 //       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
 //       VARIANT AND THEN RELEASES OWNERSHIP AND DISCARDS POINTERS.
 //
 //        - The "apply" function should assert if there are any unresolved string references 
-//          (see below).
+//          (see below) or if there are any compiler errors.
 //
 //     - OpcodeArgValue::compile overrides on subclasses
 //
@@ -208,12 +212,6 @@ int main(int argc, char *argv[]) {
 //             function (a bool getter) which checks if there are any unresolved string 
 //             references.
 //
-//     - The compiler needs code to compile a top-level Block that has just closed.
-//
-//        - We can't compile nested blocks when they close because we want a consistent 
-//          trigger order with Bungie's output; compiling nested blocks as they close will 
-//          result in their triggers preceding the triggers of their containing blocks.
-//
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
@@ -221,14 +219,9 @@ int main(int argc, char *argv[]) {
 //          it to the variant after successful compiling. That way, we don't trash the 
 //          loaded file if compiling hits an error.
 //
-//        - It'd probably be easiest to forego VariableReference for variable names in 
-//          favor of custom parsing. A variable declaration can only consist of: 
-//          
-//             global.typename[index]
-//             typename.typename[index]
-//          
-//          where both typenames are of variables; along with (where appropriate) a 
-//          VariableReference or team constant as the initial value.
+//        - It's tempting to forego the use of VariableReference to parse the variable 
+//          names being declared, but doing that would cost us alias-handling unless we 
+//          reinvent the wheel (and let's not do that).
 //
 //     - Compiling should fail if multiple triggers use the same event type (via the "on" 
 //       keyword; requires that the Compiler keep track of what events have been used so 
@@ -259,7 +252,8 @@ int main(int argc, char *argv[]) {
 //
 //           - Bad Alias names.
 //
-//           - Multiple triggers using the same event type via "on"
+//           - Multiple triggers using the same event type via "on" (currently not an 
+//             error at all).
 //
 //        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
 //          not even using (throw_error) and can remove it.
@@ -275,14 +269,18 @@ int main(int argc, char *argv[]) {
 //
 //             Wondering whether using Compiler::skip_to in that situation will cause 
 //             us to move one char too far, since we're using it from inside of a scan 
-//             functor.
+//             functor. Also wondering whether it'll just see the opening quotation mark 
+//             for the string literal again, i.e. whether we need to advance by a single 
+//             character before calling it.
 //
 //        - Ensure that the error handling for assigning a string literal to a variable 
 //          works properly.
 //
 //             Wondering whether using Compiler::skip_to in that situation will cause 
 //             us to move one char too far, since we're using it from inside of a scan 
-//             functor.
+//             functor. Also wondering whether it'll just see the opening quotation mark 
+//             for the string literal again, i.e. whether we need to advance by a single 
+//             character before calling it.
 //
 //        - More generally, test every non-fatal error and every fatal error. Once the 
 //          compiler's fully written, write a single test script containing every possible 
