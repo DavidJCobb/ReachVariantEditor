@@ -102,14 +102,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - SOME OPCODES ARE MAPPED AS MEMBERS OF THE "GAME" NAMESPACE, BUT BECAUSE A 
-//          VariableReference CAN'T RESOLVE TO A BARE NAMESPACE, IT IS IMPOSSIBLE FOR THE 
-//          COMPILER TO RECOGNIZE THESE OPCODES. OBVIOUSLY THIS NEEDS TO BE ADDRESSED.
-//
-//           - Only the "game" namespace can have members, so let's just have the function-
-//             parsing code special-case it and check whether the context is a case-insensitive 
-//             match for the string "game" BEFORE trying to match it as a VariableReference.
-//
 //        - The writeable "symmetry" property is only writeable in a "pregame" trigger. Can we 
 //          enforce this, or at least generate a compiler warning for inappropriate access?
 //
@@ -245,12 +237,15 @@ int main(int argc, char *argv[]) {
 //       declarations e.g. (declare player.number[0]).
 //
 //        = VARIABLE DECLARATIONS NEED TO BE ABLE TO SPECIFY THE NETWORKING MODE OF THE 
-//          VARIABLE IN QUESTION. We need to revise the syntax to:
+//          VARIABLE IN QUESTION. SOME TYPES (BUT NOT ALL) REQUIRE IT. We need to revise 
+//          the syntax to:
 //
 //             declare [mode] [variable]
 //             declare [mode] [variable] = [initial]
 //
-//          where the allowed modes are: local; low-priority; high-priority.
+//          where the allowed modes are: "local"; "low priority"; "high priority".
+//
+//           = THE DECOMPILER ALSO NEEDS TO OUTPUT NETWORK MODES.
 //
 //        = DO NOT write to the variant's declarations. Maintain our own set and commit 
 //          it to the variant after successful compiling. That way, we don't trash the 

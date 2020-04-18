@@ -74,15 +74,9 @@ namespace Megalo {
       result.error = error;
       return result;
    }
-   /*static*/ arg_compile_result arg_compile_result::success(bool is_unresolved_string = false) {
+   /*static*/ arg_compile_result arg_compile_result::success(bool is_unresolved_string) {
       auto result = arg_compile_result(code_t::success);
       result.is_unresolved_string = is_unresolved_string;
       return result;
-   }
-   /*static*/ arg_compile_result arg_compile_result::needs_another() {
-      return arg_compile_result(code_t::needs_another);
-   }
-   /*static*/ arg_compile_result arg_compile_result::can_take_another() {
-      return arg_compile_result(code_t::can_take_another);
    }
 }

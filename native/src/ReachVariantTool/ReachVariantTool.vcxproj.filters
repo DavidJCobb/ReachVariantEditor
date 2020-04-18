@@ -343,13 +343,16 @@
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\base.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\alias.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\compiler\types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\variable_declarations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

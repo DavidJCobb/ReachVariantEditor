@@ -248,7 +248,7 @@ namespace Megalo {
             continue;
          //
          arg.reset((type->factory)());
-         if (arg->compile(compiler, Script::string_scanner(name), 0) == arg_compile_result::success)
+         if (arg->compile(compiler, Script::string_scanner(name), 0).is_success())
             return &entry;
       }
       return nullptr;

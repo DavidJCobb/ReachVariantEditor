@@ -131,55 +131,6 @@ namespace Megalo {
             megalo_variable_declaration_set_write_type(object);
             #undef megalo_variable_declaration_set_write_type
          }
-         void decompile(Decompiler& out, uint32_t flags = 0) noexcept {
-            std::string temp;
-            std::string scope;
-            switch (this->type) {
-               case variable_scope::global: scope = "global"; break;
-               case variable_scope::object: scope = "object"; break;
-               case variable_scope::player: scope = "player"; break;
-               case variable_scope::team:   scope = "team";   break;
-            }
-            for (size_t i = 0; i < this->scalars.size(); ++i) {
-               auto& decl = this->scalars[i];
-               if (decl.initial->is_const_zero()) // treat zero as a default that can be omitted
-                  continue;
-               out.write_line("declare ");
-               out.write(scope);
-               cobb::sprintf(temp, ".number[%u] = ", i);
-               out.write(temp);
-               decl.initial->decompile(out, flags);
-            }
-            //
-            // Players and objects cannot have initial values.
-            //
-            for (size_t i = 0; i < this->teams.size(); ++i) {
-               auto& decl = this->teams[i];
-               if (decl.initial == const_team::none) // treat no_team as a default that can be omitted
-                  continue;
-               out.write_line("declare ");
-               out.write(scope);
-               cobb::sprintf(temp, ".team[%u] = ", i);
-               out.write(temp);
-               auto team = decl.initial;
-               if (team >= const_team::team_1 && team <= const_team::team_8)
-                  cobb::sprintf(temp, "team[%u]", (int)team - (int)const_team::team_1);
-               else if (team == const_team::neutral)
-                  temp = "neutral_team";
-               else if (team == const_team::none)
-                  temp = "no_team";
-               out.write(temp);
-            }
-            for (size_t i = 0; i < this->timers.size(); ++i) {
-               auto& decl = this->timers[i];
-               if (decl.initial->is_const_zero()) // treat zero as a default that can be omitted
-                  continue;
-               out.write_line("declare ");
-               out.write(scope);
-               cobb::sprintf(temp, ".timer[%u] = ", i);
-               out.write(temp);
-               decl.initial->decompile(out, flags);
-            }
-         }
+         void decompile(Decompiler& out, uint32_t flags = 0) noexcept;
    };
 }

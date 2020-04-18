@@ -33,12 +33,12 @@ class ReachPlayerRatingParams {
       cobb::bitbool showInScoreboard;
       //
       void read(cobb::ibitreader& stream) noexcept {
-         for (float& f : this->unknown)
+         for (float& f : this->values)
             stream.read(f);
          this->showInScoreboard.read(stream);
       }
       void write(cobb::bitwriter& stream) const noexcept {
-         for (float f : this->unknown)
+         for (float f : this->values)
             stream.write(f);
          this->showInScoreboard.write(stream);
       }
@@ -59,7 +59,7 @@ class ReachPlayerRatingParams {
       bool operator==(const ReachPlayerRatingParams& other) const noexcept {
          if (this->showInScoreboard != other.showInScoreboard)
             return false;
-         return this->unknown == other.unknown;
+         return this->values == other.values;
       }
       bool operator!=(const ReachPlayerRatingParams& other) const noexcept { return !(*this == other); }
       #else

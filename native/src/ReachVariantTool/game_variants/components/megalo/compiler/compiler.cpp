@@ -260,7 +260,8 @@ namespace Megalo {
       void Block::compile(Compiler& compiler) {
          std::vector<ParsedItem*> items;
          this->_get_effective_items(items);
-         if (!items.size()) {
+         size_t size = items.size();
+         if (!size) {
             return;
          }
          //
@@ -283,9 +284,6 @@ namespace Megalo {
                   count += 1;
             }
          }
-         std::vector<ParsedItem*> items;
-         this->_get_effective_items(items);
-         size_t size = items.size();
          for (size_t i = 0; i < size; i++) {
             bool is_last = (i == size - 1);
             auto item    = items[i];
@@ -964,19 +962,19 @@ namespace Megalo {
       if (this->token.text.isEmpty()) {
          if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
             this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
-            return;
+            return false;
          }
          if (string_scanner::is_syntax_char(c)) {
             this->raise_fatal(QString("Unexpected %1.").arg(c));
-            return;
+            return false;
          }
          if (string_scanner::is_quote_char(c)) {
             this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
-            return;
+            return false;
          }
          if (c == '(' || c == ')') {
             this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
-            return;
+            return false;
          }
          if (string_scanner::is_whitespace_char(c))
             return false;
@@ -1051,7 +1049,7 @@ namespace Megalo {
                // same function.
                //
                this->raise_fatal("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
-               return;
+               return false;
             }
             this->negate_next_condition = true;
             this->reset_token();
@@ -1060,7 +1058,7 @@ namespace Megalo {
       }
       if (string_scanner::is_quote_char(c)) {
          this->raise_fatal(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
-         return;
+         return false;
       }
       if (c == '(') {
          this->_parseFunctionCall(true);
@@ -1091,7 +1089,7 @@ namespace Megalo {
          // operator, not a numeric sign. Wait, that's illegal.
          //
          this->raise_fatal("Unexpected -. Statements cannot begin with an operator.");
-         return;
+         return false;
       }
       return false;
    }
@@ -1316,6 +1314,15 @@ namespace Megalo {
                results.push_back(&action);
          }
       }
+      template<typename T, int I> void _find_game_ns_opcode_bases(const std::array<T, I>& list, std::vector<const OpcodeBase*>& results, QString function_name) {
+         for (auto& action : list) {
+            auto& mapping = action.mapping;
+            if (mapping.arg_context != OpcodeFuncToScriptMapping::game_namespace)
+               continue;
+            if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
+               results.push_back(&action);
+         }
+      }
    }
    void Compiler::_parseFunctionCall(bool is_condition) {
       //
@@ -1336,6 +1343,7 @@ namespace Megalo {
       auto call_start = this->token.pos;
       QString function_name;
       std::unique_ptr<Script::VariableReference> context = nullptr;
+      bool context_is_game = false;
       {  // Identify the context and the function name, i.e. context.function_name(arg, arg, arg)
          auto& text = this->token.text;
          //
@@ -1353,20 +1361,51 @@ namespace Megalo {
             }
          }
          if (function_name.isEmpty()) { // there was no '.', or it was at the end
+            //
+            // There was no ".", or it was at the end of the string. The latter case is a syntax 
+            // error; the former case means this is a non-member functon and the entirety of (text) 
+            // is the function name.
+            //
             if (i == size - 1) { // "name.()"
                this->raise_fatal(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
                return;
             }
             function_name = text;
          } else {
-            context.reset(new Script::VariableReference(text.mid(0, i)));
-            context->resolve(*this);
+            //
+            // We're a member function.
+            //
+            text = text.mid(0, i);
+            if (text.compare("game", Qt::CaseInsensitive) == 0) {
+               //
+               // The "game" namespace is allowed to contain member functions. VariableReferences 
+               // cannot resolve to namespaces, so we have to handle this here in the compiler.
+               //
+               context_is_game = true;
+            } else {
+               context.reset(new Script::VariableReference(text));
+               if (this->has_fatal()) // the VariableReference may contain a syntax error
+                  return;
+               context->resolve(*this);
+               //
+               // Handle errors that may have occurred when resolving the variable.
+               //
+               if (context->is_invalid) {
+                  this->raise_error(call_start, QString("Unable to identify the context of the function call; cannot determine what type function \"%1\" is a member of.").arg(function_name));
+                  //
+                  // Try to skip to the end of the function call so that parsing can continue.
+                  //
+                  if (!this->skip_to(')'))
+                     this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
+                  return;
+               }
+            }
          }
       }
       this->reset_token();
       ++this->state.offset; // advance past the open-paren
       //
-      if (!context) {  // Handle user-defined function calls
+      if (!context && !context_is_game) {  // Handle user-defined function calls
          auto func = this->lookup_user_defined_function(function_name);
          if (func) {
             if (is_condition) {
@@ -1414,19 +1453,34 @@ namespace Megalo {
             this->block->insert_item(statement);
             return;
          }
+         //
+         // If we get here, then the non-member function was not a user-defined function. Fall 
+         // through to looking for built-in non-member functions.
+         //
       }
       //
       std::vector<const OpcodeBase*> opcode_bases;
-      if (is_condition) {
-         _find_opcode_bases(conditionFunctionList, opcode_bases, function_name, context.get());
+      if (context_is_game) {
+         if (is_condition)
+            _find_game_ns_opcode_bases(conditionFunctionList, opcode_bases, function_name);
+         else
+            _find_game_ns_opcode_bases(actionFunctionList, opcode_bases, function_name);
       } else {
-         _find_opcode_bases(actionFunctionList, opcode_bases, function_name, context.get());
+         if (is_condition)
+            _find_opcode_bases(conditionFunctionList, opcode_bases, function_name, context.get());
+         else
+            _find_opcode_bases(actionFunctionList, opcode_bases, function_name, context.get());
       }
       if (!opcode_bases.size()) {
          if (context)
             this->raise_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+         else if (context_is_game)
+            this->raise_error(call_start, QString("The game namespace does not have a member function named \"%1\".").arg(function_name));
          else
             this->raise_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
+         //
+         // Try to skip to the end of the function call so that parsing can continue.
+         //
          if (!this->skip_to(')'))
             this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
          return;
@@ -1473,6 +1527,9 @@ namespace Megalo {
          this->raise_fatal("Expected ')'.");
          return;
       }
+      //
+      // TODO: Compile the function call context, if there is one.
+      //
       if (this->assignment) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
@@ -1633,7 +1690,7 @@ namespace Megalo {
       item->set_start(start);
       item->set_end(this->state);
       this->block->insert_item(item);
-      if (!item->invalid)
+      if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
    }
    void Compiler::_handleKeyword_Declare() {

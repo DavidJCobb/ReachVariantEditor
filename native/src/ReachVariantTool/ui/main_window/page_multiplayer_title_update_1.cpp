@@ -62,7 +62,7 @@ PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {
    }
    reach_main_window_setup_spinbox_dbl(this->ui.fieldArmorLockDamageDrain, titleUpdateData.armorLockDamageDrain);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
-   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyCurveMax, titleUpdateData.activeCamoEnergCurveMax);
+   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyCurveMax, titleUpdateData.activeCamoEnergyCurveMax);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyCurveMin, titleUpdateData.activeCamoEnergyCurveMin);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldMagnumDamage, titleUpdateData.magnumDamage);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldMagnumFireDelay, titleUpdateData.magnumFireDelay);
