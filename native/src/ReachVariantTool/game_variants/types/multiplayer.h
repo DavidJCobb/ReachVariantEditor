@@ -49,10 +49,10 @@ class GameVariantDataMultiplayer : public GameVariantData {
       mutable uint32_t encodingVersion;
       mutable uint32_t engineVersion;
       GameVariantHeader variantHeader;
-      cobb::bitbool flags;
+      cobb::bitbool isBuiltIn;
       struct {
          struct {
-            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = unknown 0, reset players on new round, reset map on new round, teams
+            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = perfection enabled, reset players on new round, reset map on new round, teams
             cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
             cobb::bitnumber<5, uint8_t> roundLimit;
             cobb::bitnumber<4, uint8_t> roundsToWin;
@@ -73,7 +73,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } respawn;
          struct {
             cobb::bitbool observers = false;
-            cobb::bitnumber<2, uint8_t> teamChanges;
+            cobb::bitnumber<2, uint8_t> teamChanges; // enum: disabled; enabled; balancing only
             cobb::bitnumber<5, uint8_t> flags; // flags: friendly fire; betrayal booting; proximity voice; global voice; dead player voice
          } social;
          struct {
@@ -94,7 +94,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
             ReachTeamData teams[8];
          } team;
          struct {
-            cobb::bitnumber<2, uint8_t> flags;
+            cobb::bitnumber<2, uint8_t> flags; // flags: spartan loadouts; elite loadouts
             std::array<ReachLoadoutPalette, 6> palettes; // indices: reach::loadout_palette
          } loadouts;
       } options;
@@ -112,8 +112,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
       ReachMapPermissions mapPermissions;
       ReachPlayerRatingParams playerRatingParams;
       cobb::bytenumber<uint16_t> scoreToWin;
-      cobb::bitbool unkF7A6;
-      cobb::bitbool unkF7A7;
+      cobb::bitbool fireteamsEnabled;
+      cobb::bitbool symmetric;
       struct {
          struct {
             ReachGameVariantEngineOptionToggles disabled;

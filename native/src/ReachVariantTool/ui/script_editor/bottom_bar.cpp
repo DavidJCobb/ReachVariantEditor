@@ -150,7 +150,7 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += cobb::bits_in<decltype(mp->encodingVersion)>;
       bitcount += cobb::bits_in<decltype(mp->engineVersion)>;
       bitcount += MegaloStringIndexOptional::bitcount; // mp->genericName
-      bitcount += decltype(mp->flags)::bitcount;
+      bitcount += decltype(mp->isBuiltIn)::bitcount;
       bitcount += decltype(mp->engineIcon)::bitcount;
       bitcount += decltype(mp->engineCategory)::bitcount;
       bitcount += cobb::bitcount(Megalo::Limits::max_script_traits);
@@ -212,8 +212,8 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       bitcount += decltype(options.loadouts.flags)::bitcount;
       //
       bitcount += decltype(mp->scoreToWin)::bitcount;
-      bitcount += decltype(mp->unkF7A6)::bitcount;
-      bitcount += decltype(mp->unkF7A7)::bitcount;
+      bitcount += decltype(mp->fireteamsEnabled)::bitcount;
+      bitcount += decltype(mp->symmetric)::bitcount;
       //
       bitcount += ReachLoadoutPalette::bitcount() * options.loadouts.palettes.size();
       //

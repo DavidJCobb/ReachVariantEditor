@@ -72,8 +72,8 @@ namespace Megalo {
       namespace enums {
          auto widget_meter_parameters_type = DetailedEnum({ // currently only needed so we can import names via OpcodeArgTypeinfo
             DetailedEnumValue("none"),
-            DetailedEnumValue("timer"),
             DetailedEnumValue("number"),
+            DetailedEnumValue("timer"),
          });
       }
       OpcodeArgTypeinfo OpcodeArgValueMeterParameters::typeinfo = OpcodeArgTypeinfo(

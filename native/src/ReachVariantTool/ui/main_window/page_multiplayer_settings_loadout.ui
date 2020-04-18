@@ -35,14 +35,14 @@
    <item row="1" column="0">
     <widget class="QCheckBox" name="fieldFlag1">
      <property name="text">
-      <string>Unknown Flag 1</string>
+      <string>Elite Loadouts</string>
      </property>
     </widget>
    </item>
    <item row="0" column="0">
     <widget class="QCheckBox" name="fieldFlag0">
      <property name="text">
-      <string>Unknown Flag 0</string>
+      <string>Spartan Loadouts</string>
      </property>
     </widget>
    </item>

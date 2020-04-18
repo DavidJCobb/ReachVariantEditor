@@ -7,7 +7,7 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsGeneral::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_main_window_setup_flag_checkbox(this->ui.fieldFlag0,                 options.misc.flags, 1);
+   reach_main_window_setup_flag_checkbox(this->ui.fieldPerfectionEnabled,     options.misc.flags, 1);
    reach_main_window_setup_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, options.misc.flags, 2);
    reach_main_window_setup_flag_checkbox(this->ui.fieldNewRoundResetsMap,     options.misc.flags, 4);
    reach_main_window_setup_flag_checkbox(this->ui.fieldTeamsEnabled,          options.misc.flags, 8);
@@ -24,7 +24,7 @@ void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
    if (!mp)
       return;
    #include "widget_macros_update_start.h"
-   reach_main_window_update_flag_checkbox(this->ui.fieldFlag0,                 options.misc.flags, 1);
+   reach_main_window_update_flag_checkbox(this->ui.fieldPerfectionEnabled,     options.misc.flags, 1);
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, options.misc.flags, 2);
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsMap,     options.misc.flags, 4);
    reach_main_window_update_flag_checkbox(this->ui.fieldTeamsEnabled,          options.misc.flags, 8);

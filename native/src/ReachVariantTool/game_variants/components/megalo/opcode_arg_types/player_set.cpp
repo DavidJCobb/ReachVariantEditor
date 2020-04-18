@@ -5,11 +5,11 @@ namespace Megalo {
    namespace enums {
       auto player_set_group_name = DetailedEnum({ // currently only needed so we can import names via OpcodeArgTypeinfo
          DetailedEnumValue("no_one"),
-         DetailedEnumValue("anyone"),
+         DetailedEnumValue("everyone"),
          DetailedEnumValue("allies"),
          DetailedEnumValue("enemies"),
-         DetailedEnumValue("specific_player"),
-         DetailedEnumValue("no_one_2"),
+         DetailedEnumValue("mod_player"),
+         DetailedEnumValue("default"),
       });
    }
    OpcodeArgTypeinfo OpcodeArgValuePlayerSet::typeinfo = OpcodeArgTypeinfo(
@@ -48,8 +48,8 @@ namespace Megalo {
          case PlayerSetType::no_one:
             out = "no one";
             return;
-         case PlayerSetType::anyone:
-            out = "anyone";
+         case PlayerSetType::everyone:
+            out = "everyone";
             return;
          case PlayerSetType::allies:
             out = "allies";
@@ -57,8 +57,8 @@ namespace Megalo {
          case PlayerSetType::enemies:
             out = "enemies";
             return;
-         case PlayerSetType::no_one_2:
-            out = "no one (?)";
+         case PlayerSetType::default:
+            out = "default";
             return;
       }
       cobb::sprintf(out, "unknown:%u", (uint32_t)this->set_type);
@@ -68,8 +68,8 @@ namespace Megalo {
          case PlayerSetType::no_one:
             out.write("no_one");
             return;
-         case PlayerSetType::anyone:
-            out.write("anyone");
+         case PlayerSetType::everyone:
+            out.write("everyone");
             return;
          case PlayerSetType::allies:
             out.write("allies");
@@ -77,8 +77,8 @@ namespace Megalo {
          case PlayerSetType::enemies:
             out.write("enemies");
             return;
-         case PlayerSetType::no_one_2:
-            out.write("no_one_2");
+         case PlayerSetType::default:
+            out.write("default");
             return;
          case PlayerSetType::specific_player:
             out.write("mod_player, ");

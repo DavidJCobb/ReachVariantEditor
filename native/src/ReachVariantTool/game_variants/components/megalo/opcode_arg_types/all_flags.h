@@ -26,9 +26,9 @@ namespace Megalo {
          OpcodeArgValueKillerTypeFlags();
          static OpcodeArgTypeinfo typeinfo;
    };
-   class OpcodeArgValuePlayerUnusedModeFlags : public OpcodeArgValueFlagsSuperclass {
+   class OpcodeArgValuePlayerReqPurchaseModes : public OpcodeArgValueFlagsSuperclass {
       public:
-         OpcodeArgValuePlayerUnusedModeFlags();
+         OpcodeArgValuePlayerReqPurchaseModes();
          static OpcodeArgTypeinfo typeinfo;
    };
 }

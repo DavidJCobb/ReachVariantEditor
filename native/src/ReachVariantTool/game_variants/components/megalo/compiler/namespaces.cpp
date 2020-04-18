@@ -87,7 +87,7 @@ namespace Megalo {
             NamespaceMember::make_scope_member("symmetry_getter",         OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::symmetry_get),
             NamespaceMember::make_scope_member("team_lives_per_round",    OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::team_lives_per_round),
             NamespaceMember::make_scope_member("teams_enabled",           OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::teams_enabled),
-            NamespaceMember::make_scope_member("unkF7A6",                 OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::unkF7A6),
+            NamespaceMember::make_scope_member("fireteams_enabled",       OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::fireteams_enabled),
             //
             NamespaceMember::make_scope_member("round_timer",             OpcodeArgValueTimer::typeinfo,  Megalo::variable_scope_indicators::timer::round_timer),
             NamespaceMember::make_scope_member("sudden_death_timer",      OpcodeArgValueTimer::typeinfo,  Megalo::variable_scope_indicators::timer::sudden_death_timer),

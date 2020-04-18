@@ -54,15 +54,15 @@ namespace Megalo {
          "was", "was not"
       ),
       ConditionFunction( // 4
-         "Team Disposition",
+         "Team Alliance Status",
          "",
-         "%1 %v disposition %3 with %2.",
+         "%1 %v alliance status %3 with %2.",
          {
             OpcodeArgBase("a", OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueTeam::typeinfo),
-            OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::typeinfo),
+            OpcodeArgBase("status", OpcodeArgValueTeamAllianceStatus::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("has_disposition", "", {1, 2}, 0),
+         OpcodeFuncToScriptMapping::make_function("has_alliance_status", "", {1, 2}, 0),
          "has", "does not have"
       ),
       ConditionFunction( // 5
@@ -104,13 +104,13 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("is_out_of_bounds", "", {}, 0)
       ),
       ConditionFunction( // 9
-         "Deprecated-09",
-         "This condition always returns false.", // TODO: does inverting it change that?
-         "Never. (Unused argument: %1)",
+         "Player Is Fireteam Leader",
+         "This condition always returns false.",
+         "%1 %v the leader of their fireteam.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("deprecated_09", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("is_fireteam_leader", "", {}, 0)
       ),
       ConditionFunction( // 10
          "Player Assisted Kill Of",
@@ -181,11 +181,11 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("is_monitor", "", {}, 0)
       ),
       ConditionFunction( // 17
-         "In Matchmaking",
-         "This condition is believed to test whether the current match is taking place in Matchmaking.",
-         "This match %v taking place in Matchmaking.",
+         "In Forge",
+         "This condition is believed to test whether the current match is taking place in Forge.",
+         "This match %v taking place in Forge.",
          {},
-         OpcodeFuncToScriptMapping::make_function("is_in_matchmaking", "", {}, OpcodeFuncToScriptMapping::game_namespace)
+         OpcodeFuncToScriptMapping::make_function("is_in_forge", "", {}, OpcodeFuncToScriptMapping::game_namespace)
       ),
    }};
 

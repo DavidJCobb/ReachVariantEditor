@@ -78,7 +78,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Unknown Float 1</string>
+      <string>Rating Scale</string>
      </property>
      <property name="buddy">
       <cstring>float00</cstring>
@@ -157,7 +157,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Unknown Float 2</string>
+      <string>Kill Weight</string>
      </property>
      <property name="buddy">
       <cstring>float01</cstring>
@@ -167,7 +167,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Unknown Float 3</string>
+      <string>Assist Weight</string>
      </property>
      <property name="buddy">
       <cstring>float02</cstring>
@@ -177,7 +177,7 @@
    <item row="4" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Unknown Float 4</string>
+      <string>Betrayal Weight</string>
      </property>
      <property name="buddy">
       <cstring>float03</cstring>
@@ -187,7 +187,7 @@
    <item row="5" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>Unknown Float 5</string>
+      <string>Death Weight</string>
      </property>
      <property name="buddy">
       <cstring>float04</cstring>
@@ -197,7 +197,7 @@
    <item row="6" column="0">
     <widget class="QLabel" name="label_6">
      <property name="text">
-      <string>Unknown Float 6</string>
+      <string>Normalize by Max Kills</string>
      </property>
      <property name="buddy">
       <cstring>float05</cstring>
@@ -207,7 +207,7 @@
    <item row="7" column="0">
     <widget class="QLabel" name="label_7">
      <property name="text">
-      <string>Unknown Float 7</string>
+      <string>Base</string>
      </property>
      <property name="buddy">
       <cstring>float06</cstring>
@@ -217,7 +217,7 @@
    <item row="8" column="0">
     <widget class="QLabel" name="label_8">
      <property name="text">
-      <string>Unknown Float 8</string>
+      <string>Range</string>
      </property>
      <property name="buddy">
       <cstring>float07</cstring>
@@ -227,7 +227,7 @@
    <item row="9" column="0">
     <widget class="QLabel" name="label_9">
      <property name="text">
-      <string>Unknown Float 9</string>
+      <string>Loss Scalar</string>
      </property>
      <property name="buddy">
       <cstring>float08</cstring>
@@ -237,7 +237,7 @@
    <item row="10" column="0">
     <widget class="QLabel" name="label_10">
      <property name="text">
-      <string>Unknown Float 10</string>
+      <string>Custom Stat 0</string>
      </property>
      <property name="buddy">
       <cstring>float09</cstring>
@@ -247,7 +247,7 @@
    <item row="11" column="0">
     <widget class="QLabel" name="label_11">
      <property name="text">
-      <string>Unknown Float 11</string>
+      <string>Custom Stat 1</string>
      </property>
      <property name="buddy">
       <cstring>float10</cstring>
@@ -257,7 +257,7 @@
    <item row="12" column="0">
     <widget class="QLabel" name="label_12">
      <property name="text">
-      <string>Unknown Float 12</string>
+      <string>Custom Stat 2</string>
      </property>
      <property name="buddy">
       <cstring>float11</cstring>
@@ -267,7 +267,7 @@
    <item row="13" column="0">
     <widget class="QLabel" name="label_13">
      <property name="text">
-      <string>Unknown Float 13</string>
+      <string>Custom Stat 3</string>
      </property>
      <property name="buddy">
       <cstring>float12</cstring>
@@ -277,7 +277,7 @@
    <item row="14" column="0">
     <widget class="QLabel" name="label_14">
      <property name="text">
-      <string>Unknown Float 14</string>
+      <string>Expansion 0 (reserved for future use)</string>
      </property>
      <property name="buddy">
       <cstring>float13</cstring>
@@ -287,7 +287,7 @@
    <item row="15" column="0">
     <widget class="QLabel" name="label_15">
      <property name="text">
-      <string>Unknown Float 15</string>
+      <string>Expansion 1 (reserved for future use)</string>
      </property>
      <property name="buddy">
       <cstring>float14</cstring>
@@ -295,16 +295,16 @@
     </widget>
    </item>
    <item row="0" column="0" colspan="2">
-    <widget class="QCheckBox" name="flag">
+    <widget class="QCheckBox" name="showInScoreboard">
      <property name="text">
-      <string>Unknown Flag</string>
+      <string>Show Rating in Scoreboard</string>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>flag</tabstop>
+  <tabstop>showInScoreboard</tabstop>
   <tabstop>float00</tabstop>
   <tabstop>float01</tabstop>
   <tabstop>float02</tabstop>

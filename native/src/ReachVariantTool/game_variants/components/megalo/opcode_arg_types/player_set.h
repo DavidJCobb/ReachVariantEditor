@@ -6,11 +6,11 @@
 namespace Megalo {
    enum class PlayerSetType {
       no_one,
-      anyone,
-      allies,
-      enemies,
+      everyone,
+      allies,  // for teams
+      enemies, // for teams
       specific_player,
-      no_one_2,
+      default,
    };
    class OpcodeArgValuePlayerSet : public OpcodeArgValue {
       public:

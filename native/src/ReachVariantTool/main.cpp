@@ -102,6 +102,35 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
+//        - SOME OPCODES ARE MAPPED AS MEMBERS OF THE "GAME" NAMESPACE, BUT BECAUSE A 
+//          VariableReference CAN'T RESOLVE TO A BARE NAMESPACE, IT IS IMPOSSIBLE FOR THE 
+//          COMPILER TO RECOGNIZE THESE OPCODES. OBVIOUSLY THIS NEEDS TO BE ADDRESSED.
+//
+//           - Only the "game" namespace can have members, so let's just have the function-
+//             parsing code special-case it and check whether the context is a case-insensitive 
+//             match for the string "game" BEFORE trying to match it as a VariableReference.
+//
+//        - The writeable "symmetry" property is only writeable in a "pregame" trigger. Can we 
+//          enforce this, or at least generate a compiler warning for inappropriate access?
+//
+//        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
+//          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
+//
+//        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
+//          to the UI.
+//
+//        - Per Kornman00, IconIndex6 is a HUD Widget Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1322
+//
+//        - Per Kornman00, IconIndex7 is an Engine Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1361
+//
+//        - Per Kornman00, you can list no more than 32 map IDs in the map permissions.
+//
+//        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
+//          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
+//
+//        - Kornman00 and Assembly both identify the unknown movement option as "double jump," 
+//          but in my tests, it didn't seem to work. We should take another look at it.
+//
 //        = THE CODE TO COMPILE ASSIGNMENTS AND CONDITIONS NEEDS TO ACTUALLY CHECK THE 
 //          arg_compile_result OF EACH OpcodeArgValue::compile CALL.
 //
@@ -215,6 +244,14 @@ int main(int argc, char *argv[]) {
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
+//        = VARIABLE DECLARATIONS NEED TO BE ABLE TO SPECIFY THE NETWORKING MODE OF THE 
+//          VARIABLE IN QUESTION. We need to revise the syntax to:
+//
+//             declare [mode] [variable]
+//             declare [mode] [variable] = [initial]
+//
+//          where the allowed modes are: local; low-priority; high-priority.
+//
 //        = DO NOT write to the variant's declarations. Maintain our own set and commit 
 //          it to the variant after successful compiling. That way, we don't trash the 
 //          loaded file if compiling hits an error.
@@ -289,34 +326,22 @@ int main(int argc, char *argv[]) {
 //
 //     = RANDOM NOTES
 //
-//        - The const-bool OpcodeArgValue type should probably be converted to an enum 
-//          type, so that one can write "true" and "false" as values and so that aliases 
-//          can interact consistently with those (e.g. no shadowing them).
-//
-//        - The "object type" OpcodeArgValue type should accept an integer index in 
-//          addition to an enum value, so that we can account for future additions to 
-//          the type list (which may occur as part of "Thorage" or similar future MCC 
-//          updates). Ditto for the "variant string ID" type.
-//
-//        - Vector3 and friends need to be able to allow integer-aliases when compiling.
-//
 //        - It'd be cool if the "object player variable" type accepted either the index 
 //          of an object.player variable, or a relative alias of an object.player var.
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
-//
-//        - Someone has commented on Github that unkF7A6 is "Fireteams Enabled." We 
-//          should test this.
-//
-//           - Easiest way is to just real quick check variants that use fireteam spawn-
-//             ing and see which ones use it, e.g. Bro Slayer versus normal Slayer and 
-//             such.
 //
 //        - Round-trip decompiling/recompiling for all vanilla gametype scripts and for 
 //          SvE Mythic Slayer. Tests should include modified versions of the decompiled 
 //          scripts that use aliases where appropriate (both because I want to provide 
 //          such "source scripts" to script authors to learn from, and so we can test to 
 //          ensure that aliases work properly).
+//
+//        - KSoft.Tool seems to have switched around the "Teams Enabled" flag (misc 
+//          options bit 0) and the "Perfection Medal Enabled" flag (misc options bit 3). 
+//          We've got these set up properly for normal settings, but for scripts/Megalo, 
+//          we will need to test BOTH FLAGS (game.teams_enabled and game.misc_unk0_bit3) 
+//          to make sure we have them right (or fix them) there.
 //
 //        - Do user-defined functions actually work? Don't just test whether the game 
 //          can load a script that contains triggers called from multiple places; test 

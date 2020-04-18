@@ -51,8 +51,6 @@ PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {
    reach_main_window_setup_flag_checkbox(this->ui.fieldEnableActiveCamoModifiers, titleUpdateData.flags, 0x08);
    reach_main_window_setup_flag_checkbox(this->ui.fieldLimitSwordBlockToSword, titleUpdateData.flags, 0x10);
    reach_main_window_setup_flag_checkbox(this->ui.fieldAutomaticMagnum, titleUpdateData.flags, 0x20);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldFlag6, titleUpdateData.flags, 0x40);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldFlag7, titleUpdateData.flags, 0x80);
    {  // Precision Bloom
       QDoubleSpinBox* widget = this->ui.fieldPrecisionBloom;
       QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [](int value) {
@@ -64,8 +62,8 @@ PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {
    }
    reach_main_window_setup_spinbox_dbl(this->ui.fieldArmorLockDamageDrain, titleUpdateData.armorLockDamageDrain);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
-   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyBonus, titleUpdateData.activeCamoEnergyBonus);
-   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergy, titleUpdateData.activeCamoEnergy);
+   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyCurveMax, titleUpdateData.activeCamoEnergCurveMax);
+   reach_main_window_setup_spinbox_dbl(this->ui.fieldActiveCamoEnergyCurveMin, titleUpdateData.activeCamoEnergyCurveMin);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldMagnumDamage, titleUpdateData.magnumDamage);
    reach_main_window_setup_spinbox_dbl(this->ui.fieldMagnumFireDelay, titleUpdateData.magnumFireDelay);
    #include "widget_macros_setup_end.h"
@@ -81,8 +79,6 @@ void PageMPTU1Config::updateFromVariant(GameVariant* variant) {
    reach_main_window_update_flag_checkbox(this->ui.fieldEnableActiveCamoModifiers, titleUpdateData.flags, 0x08);
    reach_main_window_update_flag_checkbox(this->ui.fieldLimitSwordBlockToSword, titleUpdateData.flags, 0x10);
    reach_main_window_update_flag_checkbox(this->ui.fieldAutomaticMagnum, titleUpdateData.flags, 0x20);
-   reach_main_window_update_flag_checkbox(this->ui.fieldFlag6, titleUpdateData.flags, 0x40);
-   reach_main_window_update_flag_checkbox(this->ui.fieldFlag7, titleUpdateData.flags, 0x80);
    {  // Precision Bloom
       auto widget = this->ui.fieldPrecisionBloom;
       const QSignalBlocker blocker(widget);
@@ -90,8 +86,8 @@ void PageMPTU1Config::updateFromVariant(GameVariant* variant) {
    }
    reach_main_window_update_spinbox(this->ui.fieldArmorLockDamageDrain, titleUpdateData.armorLockDamageDrain);
    reach_main_window_update_spinbox(this->ui.fieldArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
-   reach_main_window_update_spinbox(this->ui.fieldActiveCamoEnergyBonus, titleUpdateData.activeCamoEnergyBonus);
-   reach_main_window_update_spinbox(this->ui.fieldActiveCamoEnergy, titleUpdateData.activeCamoEnergy);
+   reach_main_window_update_spinbox(this->ui.fieldActiveCamoEnergyCurveMax, titleUpdateData.activeCamoEnergyCurveMax);
+   reach_main_window_update_spinbox(this->ui.fieldActiveCamoEnergyCurveMin, titleUpdateData.activeCamoEnergyCurveMin);
    reach_main_window_update_spinbox(this->ui.fieldMagnumDamage, titleUpdateData.magnumDamage);
    reach_main_window_update_spinbox(this->ui.fieldMagnumFireDelay, titleUpdateData.magnumFireDelay);
    #include "widget_macros_update_end.h"

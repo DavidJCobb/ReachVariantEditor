@@ -21,10 +21,10 @@ class ReachGameVariantTU1Options {
       static constexpr float vanilla_precision_bloom = 5.01968479F; // 100%
       static constexpr float patched_precision_bloom = 4.23228359F; //  85%
       //
-      static constexpr float vanilla_active_camo_energy = 0.0669191317F; // TU doesn't change this
+      static constexpr float vanilla_active_camo_energy_curve_min = 0.0669191317F; // TU doesn't change this
       //
-      static constexpr float vanilla_active_camo_energy_bonus = 0.0196850393F;
-      static constexpr float patched_active_camo_energy_bonus = 0.0354330689F;
+      static constexpr float vanilla_active_camo_energy_curve_max = 0.0196850393F;
+      static constexpr float patched_active_camo_energy_curve_max = 0.0354330689F;
       //
       static constexpr float vanilla_armor_lock_damage_drain       = 0.0F;
       static constexpr float patched_armor_lock_damage_drain       = 0.3F;
@@ -36,8 +36,8 @@ class ReachGameVariantTU1Options {
 
       cobb::bitnumber<32, uint32_t> flags;
       float precisionBloom            = vanilla_precision_bloom;
-      float activeCamoEnergy          = vanilla_active_camo_energy;
-      float activeCamoEnergyBonus     = vanilla_active_camo_energy_bonus; // drain rate?
+      float activeCamoEnergyCurveMin  = vanilla_active_camo_energy_curve_min;
+      float activeCamoEnergyCurveMax  = vanilla_active_camo_energy_curve_max;
       float armorLockDamageDrain      = vanilla_armor_lock_damage_drain;
       float armorLockDamageDrainLimit = vanilla_armor_lock_damage_drain_limit;
       float magnumDamage              = vanilla_magnum_damage;

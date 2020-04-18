@@ -30,7 +30,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue symmetry_get;
          extern VariableScopeIndicatorValue symmetry;
          extern VariableScopeIndicatorValue score_to_win;
-         extern VariableScopeIndicatorValue unkF7A6;
+         extern VariableScopeIndicatorValue fireteams_enabled;
          extern VariableScopeIndicatorValue teams_enabled;
          extern VariableScopeIndicatorValue round_time_limit;
          extern VariableScopeIndicatorValue round_limit;

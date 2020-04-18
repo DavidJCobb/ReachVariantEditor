@@ -7,7 +7,7 @@
    bitcount += decltype(defense.healthRate)::bitcount;
    bitcount += decltype(defense.shieldMult)::bitcount;
    bitcount += decltype(defense.shieldRate)::bitcount;
-   bitcount += decltype(defense.shieldDelay)::bitcount;
+   bitcount += decltype(defense.overshieldRate)::bitcount;
    bitcount += decltype(defense.headshotImmune)::bitcount;
    bitcount += decltype(defense.vampirism)::bitcount;
    bitcount += decltype(defense.assassinImmune)::bitcount;
@@ -55,7 +55,7 @@ bool ReachPlayerTraits::operator==(const ReachPlayerTraits& o) const noexcept {
       this->defense.healthRate,
       this->defense.shieldMult,
       this->defense.shieldRate,
-      this->defense.shieldDelay,
+      this->defense.overshieldRate,
       this->defense.headshotImmune,
       this->defense.vampirism,
       this->defense.assassinImmune,
@@ -66,7 +66,7 @@ bool ReachPlayerTraits::operator==(const ReachPlayerTraits& o) const noexcept {
       o.defense.healthRate,
       o.defense.shieldMult,
       o.defense.shieldRate,
-      o.defense.shieldDelay,
+      o.defense.overshieldRate,
       o.defense.headshotImmune,
       o.defense.vampirism,
       o.defense.assassinImmune,
@@ -159,7 +159,7 @@ void ReachPlayerTraits::read(cobb::ibitreader& stream) noexcept {
    d.healthRate.read(stream);
    d.shieldMult.read(stream);
    d.shieldRate.read(stream);
-   d.shieldDelay.read(stream);
+   d.overshieldRate.read(stream);
    d.headshotImmune.read(stream);
    d.vampirism.read(stream);
    d.assassinImmune.read(stream);
@@ -206,7 +206,7 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    d.healthRate.write(stream);
    d.shieldMult.write(stream);
    d.shieldRate.write(stream);
-   d.shieldDelay.write(stream);
+   d.overshieldRate.write(stream);
    d.headshotImmune.write(stream);
    d.vampirism.write(stream);
    d.assassinImmune.write(stream);

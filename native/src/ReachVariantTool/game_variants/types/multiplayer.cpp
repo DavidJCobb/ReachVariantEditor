@@ -23,7 +23,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    stream.read(this->encodingVersion);
    stream.read(this->engineVersion);
    this->variantHeader.read(stream);
-   this->flags.read(stream);
+   this->isBuiltIn.read(stream);
    {
       auto& o = this->options;
       auto& m = o.misc;
@@ -114,8 +114,8 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    this->mapPermissions.read(stream);
    this->playerRatingParams.read(stream);
    this->scoreToWin.read(stream);
-   this->unkF7A6.read(stream);
-   this->unkF7A7.read(stream);
+   this->fireteamsEnabled.read(stream);
+   this->symmetric.read(stream);
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;
@@ -243,7 +243,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    bits.write(this->encodingVersion);
    bits.write(this->engineVersion);
    this->variantHeader.write(bits);
-   this->flags.write(bits);
+   this->isBuiltIn.write(bits);
    {
       auto& o = this->options;
       auto& m = o.misc;
@@ -320,8 +320,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    this->mapPermissions.write(bits);
    this->playerRatingParams.write(bits);
    this->scoreToWin.write(bits);
-   this->unkF7A6.write(bits);
-   this->unkF7A7.write(bits);
+   this->fireteamsEnabled.write(bits);
+   this->symmetric.write(bits);
    {
       auto& ot = this->optionToggles;
       auto& e = ot.engine;

@@ -22,7 +22,7 @@ namespace {
       &symmetry_get,
       &symmetry,
       &score_to_win,
-      &unkF7A6,
+      &fireteams_enabled,
       &teams_enabled,
       &round_time_limit,
       &round_limit,
@@ -120,9 +120,9 @@ namespace Megalo {
          );
          extern VariableScopeIndicatorValue current_round           = VariableScopeIndicatorValue::make_game_value("game.current_round",           "Current Round", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue symmetry_get            = VariableScopeIndicatorValue::make_game_value("game.symmetry_get",            "Symmetry", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue symmetry                = VariableScopeIndicatorValue::make_game_value("game.symmetry",                "Symmetry");
+         extern VariableScopeIndicatorValue symmetry                = VariableScopeIndicatorValue::make_game_value("game.symmetry",                "Symmetry"); // only accessible from a "pregame" trigger
          extern VariableScopeIndicatorValue score_to_win            = VariableScopeIndicatorValue::make_game_value("game.score_to_win",            "Score to Win", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue unkF7A6                 = VariableScopeIndicatorValue::make_game_value("game.unkF7A6",                 "Unknown-F7A6", VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue fireteams_enabled       = VariableScopeIndicatorValue::make_game_value("game.fireteams_enabled",       "Fireteams Enabled", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue teams_enabled           = VariableScopeIndicatorValue::make_game_value("game.teams_enabled",           "Teams Enabled", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_time_limit        = VariableScopeIndicatorValue::make_game_value("game.round_time_limit",        "Round Time Limit", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_limit             = VariableScopeIndicatorValue::make_game_value("game.round_limit",             "Round Limit", VariableScopeIndicatorValue::flags::is_readonly);

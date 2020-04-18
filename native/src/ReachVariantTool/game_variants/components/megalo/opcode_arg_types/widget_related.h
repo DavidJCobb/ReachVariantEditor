@@ -23,8 +23,8 @@ namespace Megalo {
 
    enum class MeterType {
       none,
-      timer,
       number,
+      timer,
    };
    class OpcodeArgValueMeterParameters : public OpcodeArgValue {
       public:

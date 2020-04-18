@@ -87,25 +87,25 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_waypoint_priority", "", {1}, 0)
       ),
       ActionFunction( // 7
-         "Set Object Displayed Timer",
+         "Set Waypoint Timer",
          "Set which timer an object displays, of the timer variables scoped to that object.",
          "Have %1 display %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_displayed_timer", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_timer", "", {1}, 0)
       ),
       ActionFunction( // 8
-         "Set Object Distance Range",
+         "Set Waypoint Distance",
          "",
-         "Set %1's distance range to minimum %2, maximum %3.",
+         "Set the visible range of %1's waypoint to minimum %2, maximum %3.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("min",    OpcodeArgValueScalar::typeinfo), // should be in the range of [-1, 100]
             OpcodeArgBase("max",    OpcodeArgValueScalar::typeinfo), // should be in the range of [-1, 100]
          },
-         OpcodeFuncToScriptMapping::make_function("set_distance_range", "", {1, 2}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_range", "", {1, 2}, 0)
       ),
       ActionFunction( // 9
          "Modify Variable",
@@ -139,14 +139,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
       ),
       ActionFunction( // 12
-         "Set Object Interact Permissions",
-         "Limit who can interact with an object.",
-         "Only allow %2 to interact with %1.",
+         "Set Object Pickup Permissions",
+         "Limit who can pick up a weapon.",
+         "Only allow %2 to pick up with %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_interact_permissions", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_pickup_permissions", "", {1}, 0)
       ),
       ActionFunction( // 13
          "Set Spawn Location Permissions",
@@ -201,23 +201,23 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_rate", "", {1}, 0)
       ),
       ActionFunction( // 18
-         "Deprecated-18",
-         "This trigger action does nothing.",
-         "Do nothing. (Unused message: %1)",
+         "Debug Print",
+         "Presumably, if this were run in a debug build of Halo: Reach, it'd write a message to some readout or log file.",
+         "Log a message if run in a debug build of Halo: Reach: %1.",
          {
             OpcodeArgBase("text", OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("deprecated_18", "", {0})
+         OpcodeFuncToScriptMapping::make_function("debug_print", "", {0})
       ),
       ActionFunction( // 19
-         "Get Item Owner",
+         "Get Item Carrier",
          "Set a player variable to the owner of an object.",
-         "Set %2 to the owner of %1.",
+         "Set %2 to the player who is carrying %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_owner", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("get_carrier", "", {}, 0)
       ),
       ActionFunction( // 20
          "Run Nested Trigger",
@@ -229,8 +229,8 @@ namespace Megalo {
          OpcodeFuncToScriptMapping()
       ),
       ActionFunction( // 21
-         "End Round With Winner",
-         "Ends the round with a winner.",
+         "End Round",
+         "Ends the round.",
          "End the current round, and declare the player or team with the highest score the winner of the round.",
          {},
          OpcodeFuncToScriptMapping::make_function("end_round", "", {}, OpcodeFuncToScriptMapping::game_namespace)
@@ -251,7 +251,7 @@ namespace Megalo {
          "Destroy %1 %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("silent", OpcodeArgValueConstBool::typeinfo, "silently", "loudly"),
+            OpcodeArgBase("silent", OpcodeArgValueConstBool::typeinfo, "without counting toward statistics", "and count its death toward any relevant statistics"),
          },
          OpcodeFuncToScriptMapping::make_function("kill", "", {1}, 0)
       ),
@@ -268,29 +268,29 @@ namespace Megalo {
       ActionFunction( // 25
          "Random Number",
          "Set a number variable to a random value.",
-         "Set %2 to a random number generated using seed %1.",
+         "Set %2 to a random number greater than or equal to 0 and less than %1.",
          {
-            OpcodeArgBase("seed",   OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("cap",    OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("rand", "", {0})
       ),
       ActionFunction( // 26
-         "Deprecated-26",
-         "Does nothing.",
-         "Do nothing.",
+         "Break into Debugger",
+         "Does nothing in Halo: Reach's release build.",
+         "If the game is running in a debug build of Halo: Reach, break into the debugger.",
          {},
-         OpcodeFuncToScriptMapping::make_function("deprecated_26", "", {})
+         OpcodeFuncToScriptMapping::make_function("debug_break", "", {})
       ),
       ActionFunction( // 27
-         "Unknown-27",
+         "Get Object Orientation",
          "Retrieve some unknown value from an object, always between 1 and 7 inclusive. This can fail, so you should consider resetting the number variable before calling this.",
-         "Set %2 to the Unknown-27 value on %1.",
+         "Set %2 to the \"orientation\" value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_27", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("get_orientation", "", {}, 0)
       ),
       ActionFunction( // 28
          "Get Speed",
@@ -341,13 +341,13 @@ namespace Megalo {
          //
       ),
       ActionFunction( // 32
-         "Unknown-32",
-         "",
-         "Carry out some unknown action (32) using boolean %1.",
+         "Debugging: Enable Tracing",
+         "Likely does nothing in Halo: Reach's release build.",
+         "If the game is running in a debug build, set whether tracing is enabled: %1.",
          {
             OpcodeArgBase("bool", OpcodeArgValueConstBool::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_32", "", {0})
+         OpcodeFuncToScriptMapping::make_function("debug_set_tracing_enabled", "", {0})
       ),
       ActionFunction( // 33
          "Attach Objects",
@@ -381,14 +381,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("get_scoreboard_pos", "", {}, 0)
       ),
       ActionFunction( // 36
-         "Get Team Index",
-         "Get the index of a team variable's value.",
-         "Set %2 to %1's index.",
+         "Get Team Scoreboard Position",
+         "Get a team's scoreboard position.",
+         "Set %2 to %1's position on the scoreboard.",
          {
             OpcodeArgBase("team",   OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_index", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("get_scoreboard_pos", "", {}, 0)
       ),
       ActionFunction( // 37
          "Get Player Killstreak",
@@ -401,24 +401,24 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("get_spree_count", "", {}, 0)
       ),
       ActionFunction( // 38
-         "Unknown-38",
-         "",
-         "Carry out some unknown action (38) involving %1 and %2.",
+         "Modify Player Requisition Money",
+         "Modifies the amount of money a player has available to spend on requisitions.",
+         "Increment %1's requisition money by %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_38", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("increment_req_money_by", "", {1}, 0)
       ),
       ActionFunction( // 39
-         "Unknown-39",
+         "Set Player Requisition Purchase Modes",
          "",
-         "Toggle unused flags %2 for %1.",
+         "Set the requisition purchase modes for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("flags",  OpcodeArgValuePlayerUnusedModeFlags::typeinfo),
+            OpcodeArgBase("flags",  OpcodeArgValuePlayerReqPurchaseModes::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_39", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_req_purchase_modes", "", {1}, 0)
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
@@ -489,14 +489,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_text", "", {1}, 0)
       ),
       ActionFunction( // 47
-         "Set Widget Text (Unknown)",
+         "Set Widget Value Text",
          "Modifies an unknown text field for a HUD widget. You can stitch values together dynamically.",
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_text_2", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_value_text", "", {1}, 0)
       ),
       ActionFunction( // 48
          "Set Meter Parameters",
@@ -532,11 +532,11 @@ namespace Megalo {
       ActionFunction( // 51
          "Play Sound",
          "",
-         "For %3, play sound %1. Unknown parameter: %2.",
+         "For %3, play sound %1. Immediate? %2.",
          {
-            OpcodeArgBase("sound",  OpcodeArgValueSound::typeinfo),
-            OpcodeArgBase("params", OpcodeArgValueCHUDDestinationEnum::typeinfo),
-            OpcodeArgBase("who",    OpcodeArgValuePlayerOrGroup::typeinfo),
+            OpcodeArgBase("sound",     OpcodeArgValueSound::typeinfo),
+            OpcodeArgBase("immediate", OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("who",       OpcodeArgValuePlayerOrGroup::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("play_sound_for", "", {2, 0, 1}, OpcodeFuncToScriptMapping::game_namespace)
       ),
@@ -551,14 +551,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_scale", "", {1}, 0)
       ),
       ActionFunction( // 53
-         "Set Object Display Text",
+         "Set Waypoint Text",
          "",
-         "Set %1's display text to message: %2.",
+         "Set %1's waypoint text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_display_text", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_waypoint_text", "", {1}, 0)
       ),
       ActionFunction( // 54
          "Get Object Shields",
@@ -611,34 +611,34 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
       ),
       ActionFunction( // 59
-         "Enable/Disable Fireteam Spawning",
-         "Fireteam Spawning is more commonly known as \"Bro Spawning,\" and is used in Invasion and in Bro Slayer.",
-         "%2 fireteam spawning for %1.",
+         "Enable/Disable Co-Op Spawning",
+         "Co-op Spawning is more commonly known as \"Bro Spawning,\" and is used in Invasion and in Bro Slayer.",
+         "%2 co-op spawning for %1.",
          {
             OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("bool", OpcodeArgValueConstBool::typeinfo, "Enable", "Disable"),
          },
-         OpcodeFuncToScriptMapping::make_function("set_fireteam_spawning_enabled", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_co_op_spawning", "", {1}, 0)
       ),
       ActionFunction( // 60
-         "Set Respawn Object for Team",
+         "Set Primary Respawn Object for Team",
          "",
-         "Set %1's respawn object: %2.",
+         "Set %1's primary respawn object: %2.",
          {
             OpcodeArgBase("team",    OpcodeArgValueTeam::typeinfo),
             OpcodeArgBase("respawn", OpcodeArgValueObject::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_primary_respawn_object", "", {1}, 0)
       ),
       ActionFunction( // 61
-         "Set Respawn Object for Player",
+         "Set Primary Respawn Object for Player",
          "",
-         "Set %1's respawn object: %2.",
+         "Set %1's primary respawn object: %2.",
          {
             OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("respawn", OpcodeArgValueObject::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_respawn_object", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_primary_respawn_object", "", {1}, 0)
       ),
       ActionFunction( // 62
          "Get Player Fireteam",
@@ -824,13 +824,13 @@ namespace Megalo {
       ActionFunction( // 79
          "Animate Device Position",
          "",
-         "Animate %1's position using these values: %2, %3, %4, %5.",
+         "Animate %1's position to target %2 over %3 seconds. Acceleration seconds: %4; deceleration seconds: %5.",
          {
             OpcodeArgBase("device", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("unknown number A", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("unknown number B", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("unknown number C", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("unknown number D", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("animation target", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("animation duration seconds", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("acceleration seconds", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("deceleration seconds", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("animate_device_position", "", {1, 2, 3, 4}, 0)
       ),
@@ -845,14 +845,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_device_actual_position", "", {1}, 0)
       ),
       ActionFunction( // 81
-         "Unknown-81",
+         "Insert Theater Film Marker",
          "",
-         "Carry out an unknown action (81) with number %1 and text: %2.",
+         "Insert a marker into the saved Film of this match, with number %1 and text: %2.",
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_81", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("insert_theater_film_marker", "", {0, 1})
       ),
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
@@ -896,81 +896,81 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
       ),
       ActionFunction( // 86
-         "Unknown-86",
+         "Get Player Target Object",
          "",
          "Carry out some unknown (86) action with %1 and %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo), // TODO: is this an out-variable?
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_86", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("get_player_target_object", "", {0, 1})
       ),
       ActionFunction( // 87
-         "Create Object Equidistant",
+         "Create Object Equidistant", // TODO: KSoft.Tool now calls this "create_tunnel"; what does that mean?
          "",
-         "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Unknown number: %4.",
+         "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Radius: %4.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {2, 1, 3, 4}, 0)
       ),
       ActionFunction( // 88
          "Deprecated-88",
-         "",
+         "A debug function that does nothing in Halo: Reach's release build.",
          "Do nothing. (Unused argument: %1)",
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("deprecated_88", "", {0})
+         OpcodeFuncToScriptMapping::make_function("debug_force_player_view_count", "", {0})
       ),
-      ActionFunction( // 86
-         "Unknown-89",
-         "",
-         "Carry out some unknown (89) action with %1 and %2.",
+      ActionFunction( // 89
+         "Add Weapon to Player",
+         "This function attempts to add a weapon to a player, without having to access their biped.",
+         "Give weapon %2 to %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("weapon", OpcodeArgValueObject::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_89", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("add_weapon", "", {0, 1})
       ),
       ActionFunction( // 90
-         "Unknown-90",
+         "Set Co-op Spawning for Player",
          "Used in Halo: Reach's standard Race variant?",
-         "Carry out some unknown (90) action with %1 and %2.",
+         "Set whether co-op spawning is enabled for %1: %2.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("bool",   OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("enabled", OpcodeArgValueConstBool::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_90", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_co_op_spawning", "", {1}, 0)
       ),
       ActionFunction( // 91
          "Copy Object Rotation",
          "",
-         "Have %1 copy %2's rotation on the %3 axis.",
+         "Have %1 copy %2's rotation. Use absolute rotations? %3.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("axis", OpcodeArgValueConstBool::typeinfo, "axis 1", "axis 0"),
+            OpcodeArgBase("absolute", OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
       ),
       ActionFunction( // 92
-         "Move Object Relative To", // needs verification
+         "Point Object Toward Object",
          "",
-         "Move %1 to point %3 relative to %2.",
+         "Make %1 point toward the location in space %3 away from %2.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("point", OpcodeArgValueVector3::typeinfo),
+            OpcodeArgBase("offset", OpcodeArgValueVector3::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("move_to", "", {1, 2}, 0)
+         OpcodeFuncToScriptMapping::make_function("face_toward", "", {1, 2}, 0)
       ),
       ActionFunction( // 93
-         "Add Weapon To",
+         "Add Weapon To Biped",
          "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
          "Add weapon of type %2 to %1 using mode %3.",
          {
@@ -1013,23 +1013,23 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("get_random_object", "", {2, 0})
       ),
       ActionFunction( // 97
-         "Unknown-97",
-         "",
-         "Carry out some unknown (97) action with %1 and %2.",
+         "Record Griefer Penalty",
+         "The specific function of this action is not known. Presumably it has something to do with keeping track of bad behavior in-game.",
+         "Record a griefer penalty for %1, using value %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("unknown_97", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("record_griefer_penalty", "", {1}, 0)
       ),
       ActionFunction( // 98
          "Set Shape Owner",
          "Used by KOTH FFA to set a Hill's shape color to the player that controls the Hill. Takes a single argument consisting of a globally-scoped object and a player member on that object.",
-         "Make an object's boundary visible to one of its player variables?: %1.",
+         "Change an object's boundary color to match one of its player variables: %1.",
          {
             OpcodeArgBase("object + player", OpcodeArgValueObjectPlayerVariable::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_color_from_player_member", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
+         OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_shape_color_from_player_member", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
       ),
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];

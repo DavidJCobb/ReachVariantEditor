@@ -5,8 +5,8 @@ namespace Megalo {
    namespace flags_masks {
       auto create_object = DetailedFlags({
          DetailedFlagsValue("never_garbage_collect", DetailedFlagsValueInfo::make_friendly_name("never garbage-collect")),
-         DetailedFlagsValue("unk_1"),
-         DetailedFlagsValue("unk_2"),
+         DetailedFlagsValue("suppress_effect"),
+         DetailedFlagsValue("absolute_orientation", DetailedFlagsValueInfo::make_friendly_name("use absolute orientation")),
       });
       auto killer_type = DetailedFlags({
          DetailedFlagsValue("guardians",
@@ -31,10 +31,11 @@ namespace Megalo {
          )
       });
       auto player_unused_mode = DetailedFlags({
-         DetailedFlagsValue("unk_0"),
-         DetailedFlagsValue("unk_1"),
-         DetailedFlagsValue("unk_2"),
-         DetailedFlagsValue("unk_3"),
+         DetailedFlagsValue("alive_weapons"),
+         DetailedFlagsValue("alive_equipment"),
+         DetailedFlagsValue("alive_vehicles"),
+         DetailedFlagsValue("dead_weapons"),
+         DetailedFlagsValue("dead_equipment") // TODO: previous versions of KSoft only listed four flags; we should double-check this
       });
    }
 
@@ -107,14 +108,14 @@ namespace Megalo {
       flags_masks::killer_type
    );
    //
-   OpcodeArgValuePlayerUnusedModeFlags::OpcodeArgValuePlayerUnusedModeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
-   OpcodeArgTypeinfo OpcodeArgValuePlayerUnusedModeFlags::typeinfo = OpcodeArgTypeinfo(
-      "_player_unused_mode",
-      "Player Unused Mode",
-      "Unknown.",
+   OpcodeArgValuePlayerReqPurchaseModes::OpcodeArgValuePlayerReqPurchaseModes() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
+   OpcodeArgTypeinfo OpcodeArgValuePlayerReqPurchaseModes::typeinfo = OpcodeArgTypeinfo(
+      "_player_req_purchase_modes",
+      "Player Requisition Purchase Modes",
+      "Unknown. Related to the scrapped requisition system.",
       //
       OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerUnusedModeFlags>,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerReqPurchaseModes>,
       flags_masks::player_unused_mode
    );
 }

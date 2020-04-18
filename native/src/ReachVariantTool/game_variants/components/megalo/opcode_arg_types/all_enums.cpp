@@ -4,9 +4,9 @@
 namespace Megalo {
    namespace enums {
       auto add_weapon_type = DetailedEnum({
-         DetailedEnumValue("add"),
-         DetailedEnumValue("unk_1"),
-         DetailedEnumValue("swap"),
+         DetailedEnumValue("primary"),
+         DetailedEnumValue("secondary"),
+         DetailedEnumValue("force"), // swaps current weapon?
       });
       auto c_hud_destination = DetailedEnum({
          DetailedEnumValue("unk_0"),
@@ -52,15 +52,14 @@ namespace Megalo {
          DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("arith? shift left by")),
       });
       auto pickup_priority = DetailedEnum({
-         DetailedEnumValue("unk_0"),
+         DetailedEnumValue("normal"),
          DetailedEnumValue("hold_action"),
          DetailedEnumValue("automatic"),
-         DetailedEnumValue("unk_3"),
       });
-      auto team_disposition = DetailedEnum({
-         DetailedEnumValue("unk_0"),
-         DetailedEnumValue("unk_1"),
-         DetailedEnumValue("unk_2"),
+      auto team_alliance_status = DetailedEnum({
+         DetailedEnumValue("neutral"),
+         DetailedEnumValue("friendly"),
+         DetailedEnumValue("enemy"),
       });
       auto timer_rate = DetailedEnum({
          DetailedEnumValue("0"),
@@ -92,10 +91,10 @@ namespace Megalo {
          DetailedEnumValue("1000"),
       });
       auto waypoint_priority = DetailedEnum({
-         DetailedEnumValue("none"),
          DetailedEnumValue("low"),
+         DetailedEnumValue("normal"),
          DetailedEnumValue("high"),
-         DetailedEnumValue("default"),
+         DetailedEnumValue("blink"),
       });
    }
 
@@ -228,15 +227,15 @@ namespace Megalo {
       enums::pickup_priority
    );
 
-   OpcodeArgValueTeamDispositionEnum::OpcodeArgValueTeamDispositionEnum() : OpcodeArgValueEnumSuperclass(enums::team_disposition) {}
-   OpcodeArgTypeinfo OpcodeArgValueTeamDispositionEnum::typeinfo = OpcodeArgTypeinfo(
-      "_team_disposition",
-      "Team Disposition",
-      "Unknown. It's possible that this is an \"alliance status.\"",
+   OpcodeArgValueTeamAllianceStatus::OpcodeArgValueTeamAllianceStatus() : OpcodeArgValueEnumSuperclass(enums::team_alliance_status) {}
+   OpcodeArgTypeinfo OpcodeArgValueTeamAllianceStatus::typeinfo = OpcodeArgTypeinfo(
+      "_team_alliance_status",
+      "Team Alliance Status",
+      "Indicates whether two teams are allied.",
       //
       OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamDispositionEnum>,
-      enums::team_disposition
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamAllianceStatus>,
+      enums::team_alliance_status
    );
 
    OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum() : OpcodeArgValueEnumSuperclass(enums::timer_rate) {}

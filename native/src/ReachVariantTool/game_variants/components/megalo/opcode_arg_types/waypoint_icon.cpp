@@ -6,17 +6,17 @@ namespace Megalo {
          //
          // "none", // -1
          //
-         DetailedEnumValue("microphone"),
-         DetailedEnumValue("death_marker"),
+         DetailedEnumValue("speaker"),
+         DetailedEnumValue("dead_teammate_marker"),
          DetailedEnumValue("lightning_bolt", DetailedEnumValueInfo::make_friendly_name("lightning bolt")),
          DetailedEnumValue("bullseye"),
-         DetailedEnumValue("diamond"),
+         DetailedEnumValue("destination"),
          DetailedEnumValue("bomb"),
          DetailedEnumValue("flag"),
          DetailedEnumValue("skull"),
-         DetailedEnumValue("crown"),
+         DetailedEnumValue("crown"), // KOTH
          DetailedEnumValue("vip"),
-         DetailedEnumValue("territory_lock", DetailedEnumValueInfo::make_friendly_name("territory lock")),
+         DetailedEnumValue("padlock"),
          DetailedEnumValue("territory_a",
             DetailedEnumValueInfo::make_friendly_name("territory A"),
             DetailedEnumValueInfo::make_description("Displays the value of a number variable.") // should we rename it, then?
