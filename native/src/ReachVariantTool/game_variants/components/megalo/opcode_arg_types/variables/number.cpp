@@ -172,4 +172,11 @@ namespace Megalo {
          return false;
       return true;
    }
+   Variable* OpcodeArgValueScalar::create_zero_or_none() const noexcept {
+      auto arg = new OpcodeArgValueScalar;
+      arg->scope = &variable_scope_indicators::number::constant;
+      arg->which = 0;
+      arg->index = 0;
+      return arg;
+   }
 }

@@ -46,4 +46,12 @@ namespace Megalo {
       's_00', // "player[0]"
       16 // static count
    );
+   //
+   Variable* OpcodeArgValuePlayer::create_zero_or_none() const noexcept {
+      auto arg = new OpcodeArgValuePlayer;
+      arg->scope = &variable_scope_indicators::player::global_player;
+      arg->which = variable_which_values::player::no_player.as_integer();
+      arg->index = 0;
+      return arg;
+   }
 }

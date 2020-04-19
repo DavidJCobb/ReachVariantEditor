@@ -168,5 +168,32 @@ namespace Megalo {
          virtual variable_type get_variable_type() const noexcept {
             return this->type.var_type;
          }
+         //
+         // The (create_zero_or_none) function exists to facilitate implementation of a specific feature 
+         // related to opcodes. There are several opcodes that will return a result only if there is a 
+         // result to return. The function to get a player's Armor Ability, for example, will only write 
+         // to the specified object variable if the player has an Armor Ability; if the player does not, 
+         // then the variable is not modified (as opposed to clearing it). The OpcodeFuncToScriptMapping 
+         // class allows opcodes to have two names, and offers a flag which indicates alternate behavior 
+         // for the second name. This allows us to do this:
+         //
+         //    some_object = current_player.get_armor_ability()
+         //
+         // as a shorthand for this:
+         //
+         //    some_object = no_object
+         //    some_object = current_player.try_get_armor_ability()
+         //
+         // We just compile an assignment to none/zero. Of course, we need to be able to generate and 
+         // compile the righthand side of that assignment statement. The naive approach would be to 
+         // create a variable of the same type as the target variable, and set the new variable's value 
+         // to zero/none... but if an opcode were to have a timer variable as its return type, that 
+         // approach would fail, because timer variables can't hold a zero or none value. If you want 
+         // to set a timer's value directly, you'd assign a number operand to it.
+         //
+         // As such: this function, when called on the lefthand side, will create a compiled variable 
+         // suitable for use as the righthand side.
+         //
+         virtual Variable* create_zero_or_none() const noexcept = 0;
    };
 }

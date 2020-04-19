@@ -23,7 +23,9 @@ namespace Megalo {
       not_a_variable = -1, // needed for "All Players" values in team-or-player vars
    };
 
+   class VariableScopeWhichValueList;
    class VariableScopeWhichValue {
+      friend VariableScopeWhichValueList;
       public:
          struct flag {
             flag() = delete;
@@ -33,6 +35,10 @@ namespace Megalo {
             };
          };
          using flags_t = std::underlying_type_t<flag::type>;
+         //
+      protected:
+         const VariableScopeWhichValueList* owner = nullptr;
+         //
       public:
          std::string name  = nullptr;
          flags_t     flags = 0;
@@ -41,12 +47,17 @@ namespace Megalo {
          //
          inline bool is_none() const noexcept { return this->flags & flag::is_none; }
          inline bool is_read_only() const noexcept { return this->flags & (flag::is_read_only | flag::is_none); }
+         //
+         int8_t as_integer() const noexcept;
    };
    class VariableScopeWhichValueList {
       public:
          std::vector<VariableScopeWhichValue*> values;
          //
-         VariableScopeWhichValueList(std::initializer_list<VariableScopeWhichValue*> e) : values(e) {}
+         VariableScopeWhichValueList(std::initializer_list<VariableScopeWhichValue*> e) : values(e) {
+            for (auto& v : this->values)
+               v->owner = this;
+         }
          //
          inline size_t size() const noexcept { return this->values.size(); }
          inline VariableScopeWhichValue& operator[](int i) noexcept { return *this->values[i]; }
@@ -59,6 +70,8 @@ namespace Megalo {
             auto s = this->size();
             return s ? cobb::bitcount(s - 1) : 0;
          }
+         //
+         int8_t index_of(const VariableScopeWhichValue& v) const noexcept;
    };
 
    namespace variable_which_values {

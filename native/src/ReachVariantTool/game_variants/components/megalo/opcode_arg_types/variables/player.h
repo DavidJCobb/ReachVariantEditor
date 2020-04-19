@@ -7,6 +7,8 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValuePlayer();
+         //
+         virtual Variable* create_zero_or_none() const noexcept override;
    };
    namespace variable_scope_indicators {
       namespace player {

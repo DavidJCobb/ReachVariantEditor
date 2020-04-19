@@ -2,6 +2,7 @@
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
+#include "../opcode_arg_types/variables/base.h"
 
 namespace {
    constexpr char* ce_assignment_operator = "=";
@@ -1321,6 +1322,8 @@ namespace Megalo {
                continue;
             if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
                results.push_back(&action);
+            if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
+               results.push_back(&action);
          }
       }
    }
@@ -1527,9 +1530,12 @@ namespace Megalo {
          this->raise_fatal("Expected ')'.");
          return;
       }
-      //
-      // TODO: Compile the function call context, if there is one.
-      //
+      if (context) {
+         auto index = match->mapping.arg_context;
+         const OpcodeArgBase& base = match->arguments[index];
+         opcode->arguments[index] = (base.typeinfo.factory)();
+         opcode->arguments[index]->compile(*this, *context, 0);
+      }
       if (this->assignment) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
@@ -1548,6 +1554,7 @@ namespace Megalo {
             this->raise_error("You cannot assign the return value of a function to an accessor.");
             fail = true;
          }
+         //
          const OpcodeArgBase& base = match->arguments[index];
          //
          // Verify that the variable we're assigning our return value to is of the right type:
@@ -1569,6 +1576,47 @@ namespace Megalo {
             //
             opcode->arguments[index] = (base.typeinfo.factory)();
             opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
+            //
+            if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result) {
+               //
+               // There are several opcodes that will return a result only if there is a result 
+               // to return. The function to get a player's Armor Ability, for example, will only 
+               // write to the specified object variable if the player has an Armor Ability; if 
+               // the player does not, then the variable is not modified (as opposed to clearing 
+               // it). The OpcodeFuncToScriptMapping class allows opcodes to have two names, and 
+               // offers a flag which indicates alternate behavior for the second name. This 
+               // allows us to do this:
+               //
+               //    some_object = current_player.get_armor_ability()
+               //
+               // as a shorthand for this:
+               //
+               //    some_object = no_object
+               //    some_object = current_player.try_get_armor_ability()
+               //
+               // We just compile an assignment to none/zero.
+               //
+               if (cobb::qt::stricmp(function_name, match->mapping.secondary_name) == 0) {
+                  auto base = &_get_assignment_opcode();
+                  auto blank = new Action;
+                  blank->function = base;
+                  blank->arguments.resize(3);
+                  blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
+                  blank->arguments[1] = (base->arguments[1].typeinfo.factory)(); // rhs
+                  blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
+                  blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
+                  auto lhs = dynamic_cast<Megalo::Variable*>(blank->arguments[0]);
+                  assert(lhs);
+                  blank->arguments[1] = lhs->create_zero_or_none();
+                  //
+                  auto op_string = string_scanner("=");
+                  blank->arguments[2]->compile(*this, op_string, 0);
+                  //
+                  auto statement = new Script::Statement;
+                  statement->opcode = blank;
+                  this->block->insert_item(statement);
+               }
+            }
          }
       }
       this->reset_token();

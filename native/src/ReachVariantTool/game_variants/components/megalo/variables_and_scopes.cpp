@@ -1,6 +1,19 @@
 #include "variables_and_scopes.h"
 
 namespace Megalo {
+   int8_t VariableScopeWhichValue::as_integer() const noexcept {
+      if (!this->owner)
+         return -1;
+      return this->owner->index_of(*this);
+   }
+   int8_t VariableScopeWhichValueList::index_of(const VariableScopeWhichValue& v) const noexcept {
+      size_t size = this->values.size();
+      for (size_t i = 0; i < size; ++i)
+         if (this->values[i] == &v)
+            return i;
+      return -1;
+   }
+   //
    namespace variable_which_values {
       using flags = VariableScopeWhichValue::flag;
       //

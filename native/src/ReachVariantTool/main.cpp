@@ -137,29 +137,6 @@ int main(int argc, char *argv[]) {
 //             compiling non-function-arguments, so we don't have to test both failure 
 //             codes ourselves.)
 //
-//        = THE CODE TO COMPILE FUNCTION-CALL ASSIGNMENTS NEEDS TO HANDLE SECONDARY OPCODE 
-//          NAMES. OpcodeFuncToScriptMapping has a (secondary_property_zeroes_result) flag 
-//          which indicates that if an opcode is accessed via its secondary name, we should 
-//          compile two Opcodes: one to clear the "out" variable, and another to actually 
-//          invoke the opcode. This allows the following
-//
-//             global.number[0] = 0
-//             global.number[0] = current_player.get_death_damage_type()
-//
-//          to be expressed with the shorthand
-//
-//             global.number[0] = current_player.try_get_death_damage_type()
-//
-//          and we very much want to make sure that that works. We'll want to add this to 
-//          the end of the function-call parsing: the code which matches the opcode needs 
-//          to remember whether it was invoked by a secondary name (set a bool), and the 
-//          code at the end (which adds the Opcode to the current Block) needs to check 
-//          that bool and if it's set, generate the "assign none/zero to variable" opcode 
-//          and append that FIRST.
-//
-//           - We should also rename the flag to "secondary_name_zeroes_result" and revise 
-//             its documentation comments to note that it's for functions only.
-//
 //        = The code to compile function call arguments should fail if an argument appears 
 //          to have successfully parsed, but we are not at the effective end (i.e. there 
 //          is non-whitespace content at the end that wasn't parsed).
@@ -243,9 +220,8 @@ int main(int argc, char *argv[]) {
 //             declare [mode] [variable]
 //             declare [mode] [variable] = [initial]
 //
-//          where the allowed modes are: "local"; "low priority"; "high priority".
-//
-//           = THE DECOMPILER ALSO NEEDS TO OUTPUT NETWORK MODES.
+//          where the allowed modes are: "local"; "low priority"; "high priority"; and 
+//          "default priority". If no priority is specified, use the default.
 //
 //        = DO NOT write to the variant's declarations. Maintain our own set and commit 
 //          it to the variant after successful compiling. That way, we don't trash the 

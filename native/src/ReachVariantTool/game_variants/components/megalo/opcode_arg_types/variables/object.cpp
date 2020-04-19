@@ -47,4 +47,12 @@ namespace Megalo {
       },
       'g_00' // global.object[0]
    );
+   //
+   Variable* OpcodeArgValueObject::create_zero_or_none() const noexcept {
+      auto arg = new OpcodeArgValueObject;
+      arg->scope = &variable_scope_indicators::object::global_object;
+      arg->which = variable_which_values::object::no_object.as_integer();
+      arg->index = 0;
+      return arg;
+   }
 }

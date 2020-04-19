@@ -7,6 +7,8 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
          OpcodeArgValueTimer();
+         //
+         virtual Variable* create_zero_or_none() const noexcept override;
    };
    namespace variable_scope_indicators {
       namespace timer {

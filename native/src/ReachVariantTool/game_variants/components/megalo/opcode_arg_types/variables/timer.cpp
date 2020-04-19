@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "number.h"
 
 namespace {
    using namespace Megalo;
@@ -38,4 +39,12 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTimer>
    );
+   //
+   Variable* OpcodeArgValueScalar::create_zero_or_none() const noexcept {
+      auto arg = new OpcodeArgValueScalar;
+      arg->scope = &variable_scope_indicators::number::constant;
+      arg->which = 0;
+      arg->index = 0;
+      return arg;
+   }
 }

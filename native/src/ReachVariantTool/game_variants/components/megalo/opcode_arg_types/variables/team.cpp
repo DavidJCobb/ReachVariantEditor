@@ -44,4 +44,12 @@ namespace Megalo {
       's_00', // "team[0]"
       8 // static count
    );
+   //
+   Variable* OpcodeArgValueTeam::create_zero_or_none() const noexcept {
+      auto arg = new OpcodeArgValueTeam;
+      arg->scope = &variable_scope_indicators::team::global_team;
+      arg->which = variable_which_values::team::no_team.as_integer();
+      arg->index = 0;
+      return arg;
+   }
 }
