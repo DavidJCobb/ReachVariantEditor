@@ -105,8 +105,22 @@ int main(int argc, char *argv[]) {
 //        - The writeable "symmetry" property is only writeable in a "pregame" trigger. Can we 
 //          enforce this, or at least generate a compiler warning for inappropriate access?
 //
+//           - We'd want to start by giving Block a function which checks its own event type 
+//             and the event types of its ancestor Blocks, looking for a "pregame" block. If 
+//             none is found, we'd want to signal the need for a warning. The warning text 
+//             should differ depending on whether we're inside of a user-defined function or 
+//             not.
+//
+//           - After that, we'd need to give VariableScopeIndicatorValue the ability to 
+//             specify that access is only recommended from a given Megalo::entry_type. (This 
+//             would also be good for the "death event damage type" number value.) We'd also 
+//             need to specify whether access limits apply to just writing or to any access.
+//
 //        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
 //          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
+//
+//           - If we make it possible to define a NamespaceMember that refers to a constant 
+//             integer, then we can create a namespace of named values for this enum.
 //
 //        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
 //          to the UI.
@@ -117,13 +131,6 @@ int main(int argc, char *argv[]) {
 //
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
-//
-//        = THE CODE TO COMPILE ASSIGNMENTS AND CONDITIONS NEEDS TO ACTUALLY CHECK THE 
-//          arg_compile_result OF EACH OpcodeArgValue::compile CALL.
-//
-//        = The code to compile function call arguments should fail if an argument appears 
-//          to have successfully parsed, but we are not at the effective end (i.e. there 
-//          is non-whitespace content at the end that wasn't parsed).
 //
 //        - The end of the compile process should run one final check: scan all Opcodes 
 //          in all compiled triggers, and throw a compiler error if any have any nullptr 
@@ -231,6 +238,17 @@ int main(int argc, char *argv[]) {
 //
 //        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
 //          not even using (throw_error) and can remove it.
+//
+//     = (DE)COMPILER UI
+//
+//        - Code editor with syntax highlighting
+//
+//        - UI for showing compiler warnings and errors; should include the ability to jump 
+//          to the error location in the code
+//
+//        - UI needed for letting the script author deal with unresolved string references. 
+//          We can start with something basic ("create all strings" or "cancel") and add 
+//          full functionality to it after we're sure the compiler itself works.
 //
 //     = AUDITING
 //
