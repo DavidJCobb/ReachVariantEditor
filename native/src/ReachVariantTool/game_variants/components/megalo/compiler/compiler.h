@@ -52,6 +52,7 @@ namespace Megalo {
             void insert_condition(ParsedItem*);
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
+            void remove_item(ParsedItem*);
             //
             void clear();
             void compile(Compiler&);

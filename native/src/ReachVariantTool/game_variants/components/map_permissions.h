@@ -14,6 +14,9 @@ namespace reach {
 
 class ReachMapPermissions {
    public:
+      static constexpr int max_count = 32;
+      //
+   public:
       std::vector<uint16_t> mapIDs;
       cobb::bitnumber<1, reach::map_permission_type> type;
       //

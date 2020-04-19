@@ -115,27 +115,11 @@ int main(int argc, char *argv[]) {
 //
 //        - Per Kornman00, IconIndex7 is an Engine Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1361
 //
-//        - Per Kornman00, you can list no more than 32 map IDs in the map permissions.
-//
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//        - Kornman00 and Assembly both identify the unknown movement option as "double jump," 
-//          but in my tests, it didn't seem to work. We should take another look at it.
-//
 //        = THE CODE TO COMPILE ASSIGNMENTS AND CONDITIONS NEEDS TO ACTUALLY CHECK THE 
 //          arg_compile_result OF EACH OpcodeArgValue::compile CALL.
-//
-//           - Probably best if we revamp the result type as described below: make it a 
-//             struct containing not just the status enum, but also an optional QString 
-//             for error text and a bool for signaling unresolved string references. We 
-//             could give the struct some shortcut messages e.g. (typename::failure) to 
-//             quickly construct a "failure" result with or without error text.
-//
-//             We could also give the struct some methods like (is_recoverable_failure), 
-//             (is_failure), and such. (A general "is_failure" getter would be wanted for 
-//             compiling non-function-arguments, so we don't have to test both failure 
-//             codes ourselves.)
 //
 //        = The code to compile function call arguments should fail if an argument appears 
 //          to have successfully parsed, but we are not at the effective end (i.e. there 
@@ -299,6 +283,10 @@ int main(int argc, char *argv[]) {
 //
 //        - It'd be cool if the "object player variable" type accepted either the index 
 //          of an object.player variable, or a relative alias of an object.player var.
+//
+//        - Kornman00 and Assembly both identify the unknown movement option as "double jump," 
+//          but in my tests, it didn't seem to work. I even tested with Jumper Jumper disabled 
+//          in case that was interfering, and nope. Nothin'.
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
 //

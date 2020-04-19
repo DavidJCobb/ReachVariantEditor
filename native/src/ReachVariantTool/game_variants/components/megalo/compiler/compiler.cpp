@@ -144,6 +144,16 @@ namespace Megalo {
             return nullptr;
          return this->items[i];
       }
+      void Block::remove_item(ParsedItem* item) {
+         int i;
+         int size = this->items.size();
+         for (i = size - 1; i >= 0; --i) {
+            if (this->items[i] == item) {
+               this->items.erase(this->items.begin() + i);
+               return;
+            }
+         }
+      }
       //
       void Block::clear() {
          for (auto item : this->items)
@@ -1606,7 +1616,7 @@ namespace Megalo {
                   blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
                   blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
                   auto lhs = dynamic_cast<Megalo::Variable*>(blank->arguments[0]);
-                  assert(lhs);
+                  assert(lhs && "The lefthand side should be a variable. Don't use the \"secondary name zeroes result\" flag on the opcode otherwise.");
                   blank->arguments[1] = lhs->create_zero_or_none();
                   //
                   auto op_string = string_scanner("=");
@@ -1707,6 +1717,11 @@ namespace Megalo {
          // the triggers are numbered from the outside in and from the top down.
          //
          this->block->compile(*this);
+         //
+         // And now that the block is compiled, discard it.
+         //
+         parent->remove_item(this->block);
+         delete this->block;
       }
       this->block = parent;
       return true;

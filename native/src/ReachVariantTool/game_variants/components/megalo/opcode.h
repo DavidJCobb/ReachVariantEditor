@@ -31,7 +31,7 @@ namespace Megalo {
          struct flags {
             flags() = delete;
             enum type : uint8_t {
-               secondary_property_zeroes_result = 0x01, // if set, invoking this opcode via its second name sets the result argument to no_object/no_player/no_team/etc. before calling; this is the difference between try_get_killer() and get_killer()
+               secondary_property_zeroes_result = 0x01, // if set, invoking this opcode via its second name sets the result argument to no_object/no_player/no_team/etc. before calling; this is the difference between try_get_killer() and get_killer(). only valid for function-type opcodes with variable-type out-arguments
             };
          };
          using flags_type = std::underlying_type_t<flags::type>;
