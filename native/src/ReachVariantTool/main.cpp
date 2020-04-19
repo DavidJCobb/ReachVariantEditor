@@ -152,48 +152,6 @@ int main(int argc, char *argv[]) {
 //          that, and then it should become apparent what bits of that will generalize to 
 //          other variable types and so can be moved to the base Variable class.
 //
-//        - WE NEED TO PROVIDE SOME COMPILER-LEVEL FUNCTIONALITY TO FACILITATE COMPILING 
-//          STRING ARGUMENTS. We want script authors to be able to specify a string as an 
-//          integer literal (denoting an index in the string table) or as a string literal 
-//          (denoting the English-language content of the string). If the integer literal 
-//          does not correspond to a string in the table, then we error; if the string 
-//          literal matches multiple strings, then we error; but if the string literal does 
-//          not match any string in the table, then we should give the script author an 
-//          opportunity to create it (or to pick an existing string).
-//
-//          To facilitate this, the Compiler needs to maintain a list of OpcodeArgValues 
-//          with unresolved string references. Each list entry would consist of an 
-//          OpcodeArgValue, a part number, and the original string literal. When we hit the 
-//          end of the script, we'd check if there are any entries in this table and if so, 
-//          we'd give the script author the opportunity to decide what to do with them 
-//          (including the opportunity to cancel compiling).
-//
-//          If OpcodeArgValue::compile alerts us to an unresolved string reference, then we 
-//          save: a pointer to the value; the argument string that was passed; and the part 
-//          number that was passed.
-//
-//          Crucial thing to remember: the list of unresolved string references does NOT 
-//          have ownership of the target OpcodeArgValues; if an exception is thrown and 
-//          their owning Opcode gets deleted, then they'll be deleted as well, leaving a 
-//          dangling pointer in the list of unresolved string references. We need to adjust 
-//          our code so that if an Opcode is nuked, its OpcodeArgValues are cleared from 
-//          the list of unresolved string references. This would require moving away from 
-//          throwing exceptions on all errors in favor of handling both fatal and non-fatal 
-//          errors in a more "manual" fashion (which we want to do anyway).
-//
-//           - Bear in mind: the same string content may be referred to in multiple places, 
-//             i.e. multiple unresolved string references may target the same unresolved 
-//             string. We need to ensure that we don't end up creating duplicates of these 
-//             strings in the string table.
-//
-//           - Each unresolved string reference should have a slot for a "pending action," 
-//             i.e. the choice that the script author has made to resolve the reference. 
-//             (The UI should allow the author to create the string, or to use an existing 
-//             string of their choice instead.) There should be a function which resolves 
-//             all unresolved string references that have a pending action set, and another 
-//             function (a bool getter) which checks if there are any unresolved string 
-//             references.
-//
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
@@ -218,6 +176,29 @@ int main(int argc, char *argv[]) {
 //     - Compiling should fail if multiple triggers use the same event type (via the "on" 
 //       keyword; requires that the Compiler keep track of what events have been used so 
 //       far).
+//
+//     - Compiler: Unresolved string references: each list entry needs an "action" field 
+//       which lists the action the script author decided to take. Available actions are: 
+//       create a new string in the table; or use an existing string with a given index. 
+//       Intended UI flow for when the compiler finds unresolved string references is:
+//
+//        - Alert the user to the unresolved string references.
+//
+//        - Allow the user to: cancel compiling; create all referenced strings en masse; 
+//          or choose how to handle each string individually.
+//
+//       The Compiler should have a function which will resolve all unresolved string 
+//       references that have an action set. The compiler's code to apply compiled content 
+//       to the game variant should assert if there are any unresolved string references.
+//
+//       There are a few considerations we'll need to make:
+//
+//        - The same string content may be referred to in multiple places, i.e. multiple 
+//          unresolved string references may target the same unresolved string. We need to 
+//          ensure that we don't end up creating duplicates of these strings in the string 
+//          table.
+//
+//        - The string table may not have room for the number of new strings needed.
 //
 //     - We're gonna have to take some time to work out how to negate if-statements that 
 //       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 

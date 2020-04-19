@@ -229,6 +229,7 @@ namespace Megalo {
          failure,
          failure_irresolvable, // it is impossible to attempt to parse the remaining function call arguments. e.g. a bad shape type means we don't know what arguments come next
          success,
+         unresolved_string, // implies success
       };
       enum class more_t : uint8_t {
          no,       // we're good
@@ -236,28 +237,33 @@ namespace Megalo {
          optional, // we can take another script argument
       };
       //
-      QString error;
+      QString error; // if the (code) indicates an unresolved string, then this is the string content, not an error
       code_t  code = code_t::failure;
       more_t  more = more_t::no;
-      bool    is_unresolved_string = false;
       //
       static arg_compile_result failure();
       static arg_compile_result failure(QString);
-      static arg_compile_result success(bool is_unresolved_string = false);
+      static arg_compile_result success();
+      static arg_compile_result unresolved_string(QString);
       //
       arg_compile_result() {}
       arg_compile_result(code_t c) : code(c) {}
       //
-      [[nodiscard]] inline bool is_failure() const noexcept {
-         return this->code == code_t::failure || this->code == code_t::failure_irresolvable;
-      }
+      [[nodiscard]] inline bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable; }
       [[nodiscard]] inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
-      [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success; }
+      [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success || this->code == code_t::unresolved_string; }
+      [[nodiscard]] inline bool is_unresolved_string() const noexcept { return this->code == code_t::unresolved_string; }
       [[nodiscard]] inline bool needs_another() const noexcept { return this->more == more_t::needed; }
       [[nodiscard]] inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
       //
       inline arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
       inline arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }
+      //
+      inline QString get_unresolved_string() const noexcept {
+         if (this->is_unresolved_string())
+            return this->error;
+         return "";
+      }
    };
    
    class OpcodeArgValue {

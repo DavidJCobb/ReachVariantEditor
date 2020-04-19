@@ -2,6 +2,7 @@
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
+#include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
 
 namespace {
@@ -402,6 +403,14 @@ namespace Megalo {
       return false;
    }
    //
+   void Compiler::_commit_unresolved_strings(Compiler::unresolved_str_list& add) {
+      auto& list = this->results.unresolved_strings;
+      list.reserve(list.size() + add.size());
+      for (auto& e : add)
+         list.push_back(e);
+      add.clear();
+   }
+   //
    Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
       auto& list = this->aliases_in_scope;
       size_t size = list.size();
@@ -596,6 +605,7 @@ namespace Megalo {
       }
       return;
    }
+
    void Compiler::_parseActionStart(QChar c) {
       if (this->token.text.isEmpty()) {
          if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
@@ -854,14 +864,28 @@ namespace Megalo {
                   auto ai  = mapping->arg_context;
                   auto arg = (accessor->arguments[ai].typeinfo.factory)();
                   opcode->arguments[ai] = arg;
-                  arg->compile(*this, *lhs, 0);
+                  auto result = arg->compile(*this, *lhs, 0);
+                  if (!result.is_success()) {
+                     QString error = "The lefthand side of this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
                   //
                   // Compile the right-hand side (the value to assign):
                   //
                   ai  = accessor->index_of_operand_argument();
                   arg = (accessor->arguments[ai].typeinfo.factory)();
                   opcode->arguments[ai] = arg;
-                  arg->compile(*this, *rhs, 0);
+                  result = arg->compile(*this, *rhs, 0);
+                  if (!result.is_success()) {
+                     QString error = "The righthand side of this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
                } else {
                   auto getter = r_accessor->getter;
                   if (!getter) {
@@ -878,14 +902,28 @@ namespace Megalo {
                   int  ai  = accessor->index_of_out_argument();
                   auto arg = (accessor->arguments[ai].typeinfo.factory)();
                   opcode->arguments[ai] = arg;
-                  arg->compile(*this, *lhs, 0);
+                  auto result = arg->compile(*this, *lhs, 0);
+                  if (!result.is_success()) {
+                     QString error = "The lefthand side of this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
                   //
                   // Compile the right-hand side (the value to assign):
                   //
                   ai  = mapping->arg_context;
                   arg = (accessor->arguments[ai].typeinfo.factory)();
                   opcode->arguments[ai] = arg;
-                  arg->compile(*this, *rhs, 0);
+                  result = arg->compile(*this, *rhs, 0);
+                  if (!result.is_success()) {
+                     QString error = "The righthand side of this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
                }
                assert(mapping);
                if (accessor->get_name_type()) {
@@ -896,7 +934,14 @@ namespace Megalo {
                   auto  ai   = mapping->arg_name;
                   auto& base = accessor->arguments[ai];
                   opcode->arguments[ai] = (base.typeinfo.factory)();
-                  opcode->arguments[ai]->compile(*this, op_string, 0);
+                  auto result = opcode->arguments[ai]->compile(*this, op_string, 0);
+                  if (!result.is_success()) {
+                     QString error = "The accessor name in this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The accessor name in an assignment statement thinks it's an unresolved string reference.");
                }
                if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
                   //
@@ -913,7 +958,14 @@ namespace Megalo {
                   auto op_string = string_scanner(this->assignment->op);
                   auto op_arg    = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
                   opcode->arguments[mapping->arg_operator] = op_arg;
-                  op_arg->compile(*this, op_string, 0);
+                  auto result = op_arg->compile(*this, op_string, 0);
+                  if (!result.is_success()) {
+                     QString error = "The operator in this assignment failed to compile. ";
+                     if (!result.error.isEmpty())
+                        error += result.error;
+                     this->raise_error(error);
+                  } else
+                     assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
                }
             } else {
                auto base = &_get_assignment_opcode();
@@ -922,11 +974,34 @@ namespace Megalo {
                opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
                opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
                opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
-               opcode->arguments[0]->compile(*this, *lhs, 0);
-               opcode->arguments[1]->compile(*this, *rhs, 0);
+               //
+               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The lefthand side of this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
+               //
+               result = opcode->arguments[1]->compile(*this, *rhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The righthand side of this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
                //
                auto op_string = string_scanner(this->assignment->op);
-               opcode->arguments[2]->compile(*this, op_string, 0);
+               result = opcode->arguments[2]->compile(*this, op_string, 0);
+               if (!result.is_success()) {
+                  QString error = "The operator in this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
             }
          }
          this->assignment->opcode = opcode.release();
@@ -1195,11 +1270,34 @@ namespace Megalo {
                opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
                opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
                opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
-               opcode->arguments[0]->compile(*this, *lhs, 0);
-               opcode->arguments[1]->compile(*this, *rhs, 0);
+               //
+               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The lefthand side of this comparison failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The lefthand side of a comparison statement thinks it's an unresolved string reference.");
+               //
+               result = opcode->arguments[1]->compile(*this, *rhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The righthand side of this comparison failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The righthand side of a comparison statement thinks it's an unresolved string reference.");
                //
                auto op_string = string_scanner(this->assignment->op);
-               opcode->arguments[2]->compile(*this, op_string, 0);
+               result = opcode->arguments[2]->compile(*this, op_string, 0);
+               if (!result.is_success()) {
+                  QString error = "The operator in this comparison failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The operator in a comparison statement thinks it's an unresolved string reference.");
                //
                this->comparison->opcode = opcode.release();
             }
@@ -1212,7 +1310,7 @@ namespace Megalo {
       #pragma endregion
    }
    //
-   void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode) {
+   void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, Compiler::unresolved_str_list& unresolved_strings) {
       auto& mapping = function.mapping;
       opcode.arguments.resize(function.arguments.size());
       //
@@ -1251,7 +1349,6 @@ namespace Megalo {
          }
          //
          auto& base = function.arguments[mapping.arg_index_mappings[script_arg_index]];
-         script_arg_index++;
          if (!current_argument) {
             current_argument.reset((base.typeinfo.factory)());
             if (!current_argument) {
@@ -1263,16 +1360,15 @@ namespace Megalo {
          string_scanner argument(raw_argument);
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
          if (!argument.is_at_effective_end()) {
-            //
-            // TODO: error
-            //
+            this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
+            return;
          }
          bool failure = result.is_failure();
          bool success = result.is_success();
          if (failure) {
             bool irresolvable = result.is_irresolvable_failure();
             //
-            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index - 1);
+            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index);
             if (!result.error.isEmpty()) {
                error.reserve(error.size() + 1 + result.error.size());
                error += ' ';
@@ -1286,22 +1382,23 @@ namespace Megalo {
             if (irresolvable)
                return;
          }
-         if (result.needs_another()) {
+         bool needs_more = result.needs_another();
+         bool another    = needs_more || result.can_take_another();
+         if (needs_more && !comma) {
+            this->raise_error("Not enough arguments passed to the function.");
+            return;
+         }
+         if (success) {
+            if (result.is_unresolved_string())
+               unresolved_strings.emplace_back(*current_argument.get(), result.get_unresolved_string(), opcode_arg_part);
+            opcode.arguments[opcode_arg_index] = current_argument.release();
+         }
+         script_arg_index++;
+         if (another)
             ++opcode_arg_part;
-            if (!comma) {
-               this->raise_error("Not enough arguments passed to the function.");
-               return;
-            }
-            continue;
-         } else if (result.can_take_another())
-            ++opcode_arg_part;
-         //
-         if (success || failure) {
-            if (success)
-               opcode.arguments[opcode_arg_index] = current_argument.release();
+         else {
             ++opcode_arg_index;
             opcode_arg_part = 0;
-            continue;
          }
       } while (comma);
       if (opcode_arg_index < mapping.mapped_arg_count())
@@ -1508,6 +1605,7 @@ namespace Megalo {
       }
       auto start = this->backup_stream_state();
       auto check = this->create_log_checkpoint();
+      unresolved_str_list unresolved_strings;
       for (auto* function : opcode_bases) {
          //
          // If two opcodes have the same name and context (or lack thereof), then they are overloads of 
@@ -1515,10 +1613,11 @@ namespace Megalo {
          // author is invoking.
          //
          opcode->reset();
+         unresolved_strings.clear();
          this->revert_to_log_checkpoint(check);
          this->restore_stream_state(start);
          //
-         this->__parseFunctionArgs(*function, *opcode.get());
+         this->__parseFunctionArgs(*function, *opcode.get(), unresolved_strings);
          if (!this->checkpoint_has_errors(check)) {
             match = function;
             break;
@@ -1607,19 +1706,18 @@ namespace Megalo {
                // We just compile an assignment to none/zero.
                //
                if (cobb::qt::stricmp(function_name, match->mapping.secondary_name) == 0) {
-                  auto base = &_get_assignment_opcode();
+                  auto base  = &_get_assignment_opcode();
                   auto blank = new Action;
                   blank->function = base;
                   blank->arguments.resize(3);
                   blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
-                  blank->arguments[1] = (base->arguments[1].typeinfo.factory)(); // rhs
-                  blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
                   blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
-                  auto lhs = dynamic_cast<Megalo::Variable*>(blank->arguments[0]);
-                  assert(lhs && "The lefthand side should be a variable. Don't use the \"secondary name zeroes result\" flag on the opcode otherwise.");
-                  blank->arguments[1] = lhs->create_zero_or_none();
+                  auto lhs = dynamic_cast<OpcodeArgValueAnyVariable*>(blank->arguments[0]);
+                  assert(lhs && "Each side of the assignment opcode should be an OpcodeArgValueAnyVariable. If for any reason this has changed, update the compiler code.");
+                  blank->arguments[1] = lhs->create_zero_or_none(); // rhs
                   //
                   auto op_string = string_scanner("=");
+                  blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
                   blank->arguments[2]->compile(*this, op_string, 0);
                   //
                   auto statement = new Script::Statement;
@@ -1645,6 +1743,7 @@ namespace Megalo {
       } else {
          this->block->insert_item(statement);
       }
+      this->_commit_unresolved_strings(unresolved_strings);
       this->assignment = nullptr;
    }
    //

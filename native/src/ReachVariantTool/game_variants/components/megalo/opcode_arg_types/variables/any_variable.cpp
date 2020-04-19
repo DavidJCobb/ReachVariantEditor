@@ -1,9 +1,5 @@
 #include "any_variable.h"
-#include "number.h"
-#include "object.h"
-#include "player.h"
-#include "team.h"
-#include "timer.h"
+#include "all_core.h"
 #include "../../../../errors.h"
 
 namespace Megalo {
@@ -55,5 +51,12 @@ namespace Megalo {
          return variable_type::not_a_variable;
       return this->variable->get_variable_type();
    }
-
+   OpcodeArgValueAnyVariable* OpcodeArgValueAnyVariable::create_zero_or_none() const noexcept {
+      if (!this->variable)
+         return nullptr;
+      auto wrapped = this->variable->create_zero_or_none();
+      auto wrapper = new OpcodeArgValueAnyVariable;
+      wrapper->variable = wrapped;
+      return wrapper;
+   }
 }

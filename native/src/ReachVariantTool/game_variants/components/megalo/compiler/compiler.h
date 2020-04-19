@@ -140,15 +140,46 @@ namespace Megalo {
          log_t fatal_errors;
          //
          struct unresolved_str {
+            //
+            // Some function arguments take a string. We want script authors to be able to specify strings as 
+            // string literals, as integer literals (referring to indices in the string table), or as aliases 
+            // of integer literals. However, what do we do if the script author specifies a non-existent 
+            // string? If they used a bad index, then we should just fail compiling with an error. However, 
+            // if they used a string literal that doesn't match any English-language strings in the variant, 
+            // or if they used a string literal that matches multiple identical English-language strings in 
+            // the variant, then we should treat it as an "unresolved string reference."
+            //
+            // Unresolved string references will be remembered throughout the compile process. When the script 
+            // is fully compiled, the UI will allow the script author to choose how to handle these -- whether 
+            // we should create the new string in the string table, or use an existing string. (The author can 
+            // also just abort compiling.) Once the user has chosen an action, we can properly compile the 
+            // affected OpcodeArgValue by stringifying the index of the chosen string, and repeating the 
+            // original OpcodeArgValue::compile call with that string as the "argument text."
+            //
+            // Crucially, (unresolved_str) does not own its pointer to the OpcodeArgValue. This means that we 
+            // can only add unresolved string references to the compiler's list when we're sure that their 
+            // containing Opcodes will be retained (i.e. no fatal errors or anything else that would lead to 
+            // the opcode being discarded). In practice, string values only make sense as function call args, 
+            // so we only need to handle this there: we create a temporary (unresolved_str_list) to hold any 
+            // unresolved string references encountered when parsing a function call's arguments, and when 
+            // we're sure that we're going to retain the Opcode for that function call, we commit this temp-
+            // orary list to the compiler's main list. (Conveniently, this also allows us to make this system 
+            // work with the way we resolve function overloads.)
+            //
             OpcodeArgValue* value = nullptr;
             QString string;
             uint8_t part = 0;
+            //
+            unresolved_str(OpcodeArgValue& v, QString s, uint8_t p) : value(&v), string(s), part(p) {}
          };
+         using unresolved_str_list = std::vector<unresolved_str>;
+         void _commit_unresolved_strings(unresolved_str_list&);
          //
       public:
          struct {
             bool success = false;
             std::vector<Trigger*> triggers; // owned by the Compiler UNLESS (results.success) is true
+            unresolved_str_list   unresolved_strings;
          } results;
          //
          ~Compiler();
@@ -206,7 +237,7 @@ namespace Megalo {
          //
          void _applyConditionModifiers(Script::Comparison*); // applies "not", "and", "or", and then resets the relevant state on the Compiler
          //
-         void __parseFunctionArgs(const OpcodeBase&, Opcode&);
+         void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
          void _parseFunctionCall(bool is_condition);
          //
          void _openBlock(Script::Block*);

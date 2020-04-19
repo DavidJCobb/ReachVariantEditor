@@ -158,6 +158,21 @@ namespace Megalo {
       return -1;
    }
 
+   arg_compile_result Opcode::compile_argument(Compiler& compiler, Script::string_scanner& arg, uint8_t arg_index, uint8_t part) noexcept {
+      if (!this->arguments[arg_index]) {
+         auto base = this->function->arguments[arg_index];
+         this->arguments[arg_index] = (base.typeinfo.factory)();
+      }
+      return this->arguments[arg_index]->compile(compiler, arg, part);
+   }
+   arg_compile_result Opcode::compile_argument(Compiler& compiler, Script::VariableReference& arg, uint8_t arg_index, uint8_t part) noexcept {
+      if (!this->arguments[arg_index]) {
+         auto base = this->function->arguments[arg_index];
+         this->arguments[arg_index] = (base.typeinfo.factory)();
+      }
+      return this->arguments[arg_index]->compile(compiler, arg, part);
+   }
+
    const OpcodeBase* AccessorRegistry::Definition::get_opcode_base() const noexcept {
       if (this->getter)
          return this->getter;
