@@ -116,6 +116,32 @@ int main(int argc, char *argv[]) {
 //             would also be good for the "death event damage type" number value.) We'd also 
 //             need to specify whether access limits apply to just writing or to any access.
 //
+//           - Finally, we'll need to check the event type for any VariableReference's 
+//             containing Block. Probably easiest to do this either in VariableReference 
+//             itself (at the end of the resolve process) or in Variable::compile. Wanna go 
+//             with the former.
+//
+//           = NOTE: We need to test whether the writeable "symmetry" value can be read from 
+//             outside of a pregame trigger. It's possible that the writeable "symmetry" value 
+//             is ONLY meant to be accessed (not just modified) from a pregame trigger, with 
+//             the other "symmetry_get" value used everywhere else.
+//
+//             If that's the case, then the "correct" approach would probably be to name both 
+//             values "symmetry" and always prefer the read-only one for resolution if we are 
+//             resolving anything outside of a pregame trigger. The problem with this is that 
+//             it would create complications for user-defined functions -- specifically, user-
+//             defined functions that use the "symmetry" value and that are invoked from both 
+//             the pregame trigger and a non-pregame trigger. It would be impossible for such 
+//             functions to actually indicate which "symmetry" value they should access, if 
+//             we gave both values the same name.
+//
+//             If testing indicates that the writeable "symmetry" value is only readable from 
+//             a pre-game trigger, then "symmetry" and "symmetry_get" should be renamed to 
+//             "symmetry_pregame" and "symmetry", respectively.
+//
+//             In any case, however it plays out, we should document it in comments near the 
+//             "symmetry" VariableScopeIndicatorValue definition and/or declaration.
+//
 //        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
 //          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
 //
@@ -145,6 +171,15 @@ int main(int argc, char *argv[]) {
 //          (see below) or if there are any compiler errors.
 //
 //     - OpcodeArgValue::compile overrides on subclasses
+//
+//        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
+//          string_scanner that can extract a string literal, we don't have a function to 
+//          deal with escape codes e.g. "\n". (The exception is escape codes for the string's 
+//          own delimiter, e.g. "That's a \"good\" idea..." and 'Hey, what\'s up?' Those are 
+//          handled because they need to be handled in order to extract the string properly.) 
+//          Similarly, an OpcodeArgValue will want to look up the index of a string literal 
+//          in the string table, and validate any string indices passed by way of integer 
+//          literals and alias names.
 //
 //        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
 //          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
@@ -179,10 +214,6 @@ int main(int argc, char *argv[]) {
 //        - It's tempting to forego the use of VariableReference to parse the variable 
 //          names being declared, but doing that would cost us alias-handling unless we 
 //          reinvent the wheel (and let's not do that).
-//
-//     - Compiling should fail if multiple triggers use the same event type (via the "on" 
-//       keyword; requires that the Compiler keep track of what events have been used so 
-//       far).
 //
 //     - Compiler: Unresolved string references: each list entry needs an "action" field 
 //       which lists the action the script author decided to take. Available actions are: 
@@ -233,9 +264,6 @@ int main(int argc, char *argv[]) {
 //             owner so that it can set VariableReference::is_invalid; alternatively, the 
 //             method needs to return a success bool.
 //
-//           - Multiple triggers using the same event type via "on" (currently not an 
-//             error at all).
-//
 //        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
 //          not even using (throw_error) and can remove it.
 //
@@ -249,6 +277,10 @@ int main(int argc, char *argv[]) {
 //        - UI needed for letting the script author deal with unresolved string references. 
 //          We can start with something basic ("create all strings" or "cancel") and add 
 //          full functionality to it after we're sure the compiler itself works.
+//
+//        - The string table needs a button to copy the content of a selected string as a 
+//          string literal (i.e. with escape codes), and a button to copy the index of a 
+//          selected string.
 //
 //     = AUDITING
 //

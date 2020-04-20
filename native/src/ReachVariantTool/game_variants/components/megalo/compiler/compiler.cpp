@@ -238,13 +238,15 @@ namespace Megalo {
             //
             return;
          //
-         auto t = this->trigger = new Trigger;
+         auto   t  = this->trigger = new Trigger;
+         size_t ti = compiler.results.triggers.size();
          compiler.results.triggers.push_back(t);
          if (this->parent)
             t->entryType = entry_type::subroutine;
          //
          if (this->event != Event::none) {
             t->entryType = _block_event_to_trigger_entry(this->event);
+            compiler.results.events.set_index_of_event(t->entryType, ti);
          }
          switch (this->type) {
             case Type::basic:
@@ -301,7 +303,7 @@ namespace Megalo {
             auto item    = items[i];
             auto block   = dynamic_cast<Block*>(item);
             if (block) {
-               if (is_last && block->_is_if_block())
+               if (is_last && !block->is_event_trigger() && block->_is_if_block())
                   block->trigger = this->trigger;
                block->compile(compiler);
                if (block->trigger != this->trigger) {
@@ -599,6 +601,20 @@ namespace Megalo {
          if (this->next_event != Script::Block::Event::none)
             this->raise_fatal("The file ended with an \"on\" keyword but no following block.");
          this->root->set_end(this->state);
+         //
+         {  // Ensure that we're under the count limits for triggers, conditions, and actions.
+            size_t tc = this->results.triggers.size();
+            size_t cc = 0;
+            size_t ac = 0;
+            for (auto trigger : this->results.triggers)
+               trigger->count_contents(cc, ac);
+            if (tc > Limits::max_triggers)
+               this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
+            if (cc > Limits::max_conditions)
+               this->raise_error(QString("The compiled script contains %1 conditions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_conditions));
+            if (ac > Limits::max_actions)
+               this->raise_error(QString("The compiled script contains %1 actions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_actions));
+         }
          //
          if (!this->has_errors())
             this->results.success = true;
@@ -1711,14 +1727,21 @@ namespace Megalo {
                   blank->function = base;
                   blank->arguments.resize(3);
                   blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
-                  blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
+                  auto result = blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
+                  if (result.is_failure())
+                     this->raise_error("Failed to compile the lefthand side of an implicit assignment (before a function call).");
+                  //
                   auto lhs = dynamic_cast<OpcodeArgValueAnyVariable*>(blank->arguments[0]);
                   assert(lhs && "Each side of the assignment opcode should be an OpcodeArgValueAnyVariable. If for any reason this has changed, update the compiler code.");
-                  blank->arguments[1] = lhs->create_zero_or_none(); // rhs
+                  auto rhs = blank->arguments[1] = lhs->create_zero_or_none(); // rhs
+                  if (!rhs)
+                     this->raise_error("Failed to compile the righthand side of an implicit assignment (before a function call).");
                   //
                   auto op_string = string_scanner("=");
                   blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
-                  blank->arguments[2]->compile(*this, op_string, 0);
+                  result = blank->arguments[2]->compile(*this, op_string, 0);
+                  if (result.is_failure())
+                     this->raise_error("Failed to compile the operator in an implicit assignment (before a function call).");
                   //
                   auto statement = new Script::Statement;
                   statement->opcode = blank;
@@ -2122,6 +2145,8 @@ namespace Megalo {
             this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
          return;
       }
+      if (this->next_event != Script::Block::Event::none)
+         this->raise_error("A single trigger cannot be the handler for multiple events.");
       QString words;
       auto    prior = this->backup_stream_state();
       while (!this->extract_specific_char(':')) {
@@ -2143,34 +2168,33 @@ namespace Megalo {
          return;
       }
       auto event = Script::Block::Event::none;
-      if (words == "init") {
+      if (words.compare("init", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::init;
-         return;
-      }
-      if (words == "local init") {
+      } else if (words.compare("local init", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::local_init;
-         return;
-      }
-      if (words == "host migration") {
+      } else if (words.compare("host migration", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::host_migration;
-         return;
-      }
-      if (words == "double host migration") {
+      } else if (words.compare("double host migration", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::double_host_migration;
-         return;
-      }
-      if (words == "object death") {
+      } else if (words.compare("object death", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::object_death;
-         return;
-      }
-      if (words == "local") {
+      } else if (words.compare("local", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::local;
-         return;
-      }
-      if (words == "pregame") {
+      } else if (words.compare("pregame", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::pregame;
-         return;
       }
-      this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
+      //
+      if (this->next_event != Script::Block::Event::none) {
+         auto et    = _block_event_to_trigger_entry(this->next_event);
+         auto index = this->results.events.get_index_of_event(et);
+         if (index != TriggerEntryPoints::none) {
+            this->raise_error(QString("Only one trigger can be assigned to handle each event type. Event type \"%1\" is already in use.").arg(words));
+            this->next_event = Script::Block::Event::__error;
+         } else {
+            this->results.events.set_index_of_event(et, TriggerEntryPoints::reserved);
+         }
+      } else {
+         this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
+      }
    }
 }

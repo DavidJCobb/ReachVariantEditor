@@ -11,6 +11,7 @@ namespace {
    static_assert(std::numeric_limits<_index_t>::max() >= ce_max_index, "Use a larger type.");
 }
 namespace Megalo {
+   #pragma region Trigger
    Trigger::~Trigger() {
       for (auto opcode : this->opcodes)
          delete opcode;
@@ -514,4 +515,68 @@ namespace Megalo {
          out.write_line(u8"end");
       }
    }
+   void Trigger::count_contents(size_t& conditions, size_t& actions) const noexcept {
+      for (auto& opcode : this->opcodes) {
+         if (dynamic_cast<const Condition*>(opcode))
+            ++conditions;
+         else if (dynamic_cast<const Action*>(opcode))
+            ++actions;
+      }
+   }
+   #pragma endregion
+   //
+   #pragma region TriggerEntryPoints
+   /*static*/ void TriggerEntryPoints::_stream(cobb::ibitreader& stream, int32_t& index) noexcept {
+      index = (int32_t)stream.read_bits(cobb::bitcount(Limits::max_triggers)) - 1;
+   }
+   /*static*/ void TriggerEntryPoints::_stream(cobb::bitwriter& stream, int32_t index) noexcept {
+      if (index < 0)
+         index = -1;
+      stream.write(index + 1, cobb::bitcount(Limits::max_triggers));
+   }
+   bool TriggerEntryPoints::read(cobb::ibitreader& stream) noexcept {
+      auto& i = this->indices;
+      _stream(stream, i.init);
+      _stream(stream, i.localInit);
+      _stream(stream, i.hostMigrate);
+      _stream(stream, i.doubleHostMigrate);
+      _stream(stream, i.objectDeath);
+      _stream(stream, i.local);
+      _stream(stream, i.pregame);
+      return true;
+   }
+   void TriggerEntryPoints::write(cobb::bitwriter& stream) const noexcept {
+      auto& i = this->indices;
+      _stream(stream, i.init);
+      _stream(stream, i.localInit);
+      _stream(stream, i.hostMigrate);
+      _stream(stream, i.doubleHostMigrate);
+      _stream(stream, i.objectDeath);
+      _stream(stream, i.local);
+      _stream(stream, i.pregame);
+   }
+   int32_t TriggerEntryPoints::get_index_of_event(entry_type et) const noexcept {
+      auto& i = this->indices;
+      switch (et) {
+         case entry_type::local: return i.local;
+         case entry_type::on_host_migration: return i.hostMigrate;
+         case entry_type::on_init: return i.init;
+         case entry_type::on_local_init: return i.localInit;
+         case entry_type::on_object_death: return i.objectDeath;
+         case entry_type::pregame: return i.pregame;
+      }
+      return TriggerEntryPoints::none;
+   }
+   void TriggerEntryPoints::set_index_of_event(entry_type et, int32_t index) noexcept {
+      auto& i = this->indices;
+      switch (et) {
+         case entry_type::local: i.local = index; return;
+         case entry_type::on_host_migration: i.hostMigrate = index; return;
+         case entry_type::on_init: i.init = index; return;
+         case entry_type::on_local_init: i.localInit = index; return;
+         case entry_type::on_object_death: i.objectDeath = index; return;
+         case entry_type::pregame: i.pregame = index; return;
+      }
+   }
+   #pragma endregion
 }

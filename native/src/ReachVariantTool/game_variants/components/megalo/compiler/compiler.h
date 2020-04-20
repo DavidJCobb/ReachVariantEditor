@@ -36,6 +36,7 @@ namespace Megalo {
                object_death,
                local,
                pregame,
+               __error, // used when an event name is already taken, so we can catch when a duplicate "on" declaration hits EOF without a block after it. e.g. "on foo: do end   on foo:"
             };
             //
          public:
@@ -43,8 +44,8 @@ namespace Megalo {
             QString  name; // only for functions
             QString  label_name;
             int32_t  label_index = -1;
-            Type     type;
-            Event    event;
+            Type     type  = Type::basic;
+            Event    event = Event::none;
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
             std::vector<ParsedItem*> conditions; // only for if/elseif blocks // contents are owned by this Block and deleted in the destructor
             //
@@ -56,6 +57,8 @@ namespace Megalo {
             //
             void clear();
             void compile(Compiler&);
+            //
+            inline bool is_event_trigger() const noexcept { return this->event == Event::none; }
             //
          protected:
             void _get_effective_items(std::vector<ParsedItem*>& out, bool include_functions = true); // returns the list of items with only Statements and Blocks, i.e. only things that generate compiled output
@@ -179,6 +182,7 @@ namespace Megalo {
          struct {
             bool success = false;
             std::vector<Trigger*> triggers; // owned by the Compiler UNLESS (results.success) is true
+            TriggerEntryPoints    events;
             unresolved_str_list   unresolved_strings;
          } results;
          //
