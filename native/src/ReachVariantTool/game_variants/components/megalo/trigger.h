@@ -111,6 +111,6 @@ namespace Megalo {
          void write(cobb::bitwriter& stream) const noexcept;
          //
          int32_t get_index_of_event(entry_type) const noexcept;
-         void set_index_of_event(entry_type, int32_t) noexcept;
+         void set_index_of_event(entry_type, int32_t trigger_index) noexcept; // does nothing if the (entry_type) does not correspond to an event
    };
 }

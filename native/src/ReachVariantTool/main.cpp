@@ -96,14 +96,160 @@ int main(int argc, char *argv[]) {
 //           - If an event Trigger is told to decompile as a function, it should place the 
 //             event name before the "function" keyword.
 //
-//           - Consider adding a compiler option to suffix every block-opening line with 
+//           - Consider adding a decompiler option to suffix every block-opening line with 
 //             a comment indicating the trigger's index; this would be useful for debugging 
 //             the (de)compiler and the loader.
 //
 //     - SHORT-TERM PLANS
 //
+//        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
+//          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
+//
+//           - If we make it possible to define a NamespaceMember that refers to a constant 
+//             integer, then we can create a namespace of named values for this enum.
+//
+//        - Possible pointer ownership problem for Statement::opcode: once the opcode has 
+//          been added to the Trigger, it belongs to the Trigger and will be destroyed by 
+//          the Trigger; however, the Statement still has the pointer. It's not guaranteed 
+//          that the Opcode will eventually be given to a Trigger, as a fatal error could 
+//          occur before we compile a containing Block. Block::compile should take the opcode 
+//          from the statement i.e. set the statement's opcode pointer to nullptr when giving 
+//          the opcode to the trigger being compiled. Then, Statement::~Statement should be 
+//          made to destroy whatever Opcode it may have.
+//
+//        - Possible issue with UserDefinedFunction::block and Compiler::_closeCurrentBlock: 
+//          if the user-defined function's Block exists inside of the root Block, then the 
+//          function Block is going to get nuked by Compiler::_closeCurrentBlock it's closed, 
+//          without being cleared from the UserDefinedFunction entry. What we need to do is 
+//          instead have UserDefinedFunction store the PARENT of the function block; we clear 
+//          the UserDefinedFunction entry when that parent block is closed (which will be 
+//          never, for user-defined functions that exist directly in the root).
+//
+//        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
+//          to the UI.
+//
+//        - Per Kornman00, IconIndex6 is a HUD Widget Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1322
+//
+//        - Per Kornman00, IconIndex7 is an Engine Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1361
+//
+//        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
+//          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
+//
+//        - The end of the compile process should run one final check: scan all Opcodes 
+//          in all compiled triggers, and throw a compiler error if any have any nullptr 
+//          arguments.
+//
+//     - The compiler needs code to parse variable declarations, including scope-relative 
+//       declarations e.g. (declare player.number[0]).
+//
+//        = VARIABLE DECLARATIONS NEED TO BE ABLE TO SPECIFY THE NETWORKING MODE OF THE 
+//          VARIABLE IN QUESTION. SOME TYPES (BUT NOT ALL) REQUIRE IT. We need to revise 
+//          the syntax to:
+//
+//             declare [mode] [variable]
+//             declare [mode] [variable] = [initial]
+//
+//          where the allowed modes are: "local"; "low priority"; "high priority"; and 
+//          "default priority". If no priority is specified, use the default.
+//
+//        = DO NOT write to the variant's declarations. Maintain our own set and commit 
+//          it to the variant after successful compiling. That way, we don't trash the 
+//          loaded file if compiling hits an error.
+//
+//        - It's tempting to forego the use of VariableReference to parse the variable 
+//          names being declared, but doing that would cost us alias-handling unless we 
+//          reinvent the wheel (and let's not do that).
+//
+//     - Convert thrown exceptions into Compiler-managed errors. Search for all references 
+//       to Compiler::throw_error and compile_exception and change ALL of them to go 
+//       through Compiler's error-logging functionality; then, delete (throw_error) and 
+//       the exception class.
+//
+//        - VariableReference's constructor needs to take a Compiler& so that it can log 
+//          errors without throwing an exception.
+//
+//        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
+//
+//           - Some VariableReference::VariableReference errors.
+//
+//           - All errors in VariableReference::RawPart::resolve_index. To convert these 
+//             away from exceptions, the method needs to be passed the VariableReference*
+//             owner so that it can set VariableReference::is_invalid; alternatively, the 
+//             method needs to return a success bool. The latter might be easier.
+//
+//     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
+//       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
+//       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
+//       VARIANT AND THEN RELEASES OWNERSHIP AND DISCARDS POINTERS.
+//
+//        - The "apply" function should assert if there are any unresolved string references 
+//          (see below) or if there are any compiler errors.
+//
+//     - OpcodeArgValue::compile overrides on subclasses
+//
+//        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
+//          string_scanner that can extract a string literal, we don't have a function to 
+//          deal with escape codes e.g. "\n". (The exception is escape codes for the string's 
+//          own delimiter, e.g. "That's a \"good\" idea..." and 'Hey, what\'s up?' Those are 
+//          handled because they need to be handled in order to extract the string properly.) 
+//          Similarly, an OpcodeArgValue will want to look up the index of a string literal 
+//          in the string table, and validate any string indices passed by way of integer 
+//          literals and alias names.
+//
+//        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
+//          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
+//          Currently, because it uses the same compile function as any basic enum, it just 
+//          matches as a string.
+//
+//        - WE NEED CODE TO COMPILE VARIABLES. We should start with the "object" type, 
+//          because there's only one property ("player.biped") that can resolve to multiple 
+//          possible scopes and that property is of the "object" type. That means that the 
+//          OpcodeArgValue::compile overload for object VariableReferences will be the most 
+//          complex overload of all the variable types; we can code everything we need for 
+//          that, and then it should become apparent what bits of that will generalize to 
+//          other variable types and so can be moved to the base Variable class.
+//
+//     - Compiler: Unresolved string references: each list entry needs an "action" field 
+//       which lists the action the script author decided to take. Available actions are: 
+//       create a new string in the table; or use an existing string with a given index. 
+//       Intended UI flow for when the compiler finds unresolved string references is:
+//
+//        - Alert the user to the unresolved string references.
+//
+//        - Allow the user to: cancel compiling; create all referenced strings en masse; 
+//          or choose how to handle each string individually.
+//
+//       The Compiler should have a function which will resolve all unresolved string 
+//       references that have an action set. The compiler's code to apply compiled content 
+//       to the game variant should assert if there are any unresolved string references.
+//
+//       There are a few considerations we'll need to make:
+//
+//        - The same string content may be referred to in multiple places, i.e. multiple 
+//          unresolved string references may target the same unresolved string. We need to 
+//          ensure that we don't end up creating duplicates of these strings in the string 
+//          table.
+//
+//        - The string table may not have room for the number of new strings needed.
+//
+//     - We're gonna have to take some time to work out how to negate if-statements that 
+//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
+//       to know that when it comes time to actually compile the blocks... assuming we 
+//       don't decide to just drop support for else(if)s at that point. (Think about it: 
+//       first of all, they abstract away conditions, so you can't see the full "cost" 
+//       of your code; and second, there's no code to detect equivalent ifs and decompile 
+//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
+//       any means essential; we've already decided that conciseness is not required.)
+//
+//        - Added a "TODO" comment to Block::compile where we'd need to do this.
+//
+//     = DEFERRED TASKS
+//
 //        - The writeable "symmetry" property is only writeable in a "pregame" trigger. Can we 
 //          enforce this, or at least generate a compiler warning for inappropriate access?
+//
+//           = DEFERRED UNTIL WE CAN TEST THE PROPERTY'S ACCESSIBILITY AS DESCRIBED A FEW 
+//             BULLET POINTS BELOW.
 //
 //           - We'd want to start by giving Block a function which checks its own event type 
 //             and the event types of its ancestor Blocks, looking for a "pregame" block. If 
@@ -141,131 +287,6 @@ int main(int argc, char *argv[]) {
 //
 //             In any case, however it plays out, we should document it in comments near the 
 //             "symmetry" VariableScopeIndicatorValue definition and/or declaration.
-//
-//        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
-//          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
-//
-//           - If we make it possible to define a NamespaceMember that refers to a constant 
-//             integer, then we can create a namespace of named values for this enum.
-//
-//        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
-//          to the UI.
-//
-//        - Per Kornman00, IconIndex6 is a HUD Widget Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1322
-//
-//        - Per Kornman00, IconIndex7 is an Engine Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1361
-//
-//        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
-//          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
-//
-//        - The end of the compile process should run one final check: scan all Opcodes 
-//          in all compiled triggers, and throw a compiler error if any have any nullptr 
-//          arguments.
-//
-//     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
-//       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
-//       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
-//       VARIANT AND THEN RELEASES OWNERSHIP AND DISCARDS POINTERS.
-//
-//        - The "apply" function should assert if there are any unresolved string references 
-//          (see below) or if there are any compiler errors.
-//
-//     - OpcodeArgValue::compile overrides on subclasses
-//
-//        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
-//          string_scanner that can extract a string literal, we don't have a function to 
-//          deal with escape codes e.g. "\n". (The exception is escape codes for the string's 
-//          own delimiter, e.g. "That's a \"good\" idea..." and 'Hey, what\'s up?' Those are 
-//          handled because they need to be handled in order to extract the string properly.) 
-//          Similarly, an OpcodeArgValue will want to look up the index of a string literal 
-//          in the string table, and validate any string indices passed by way of integer 
-//          literals and alias names.
-//
-//        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
-//          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
-//          Currently, because it uses the same compile function as any basic enum, it just 
-//          matches as a string.
-//
-//        - WE NEED CODE TO COMPILE VARIABLES. We should start with the "object" type, 
-//          because there's only one property ("player.biped") that can resolve to multiple 
-//          possible scopes and that property is of the "object" type. That means that the 
-//          OpcodeArgValue::compile overload for object VariableReferences will be the most 
-//          complex overload of all the variable types; we can code everything we need for 
-//          that, and then it should become apparent what bits of that will generalize to 
-//          other variable types and so can be moved to the base Variable class.
-//
-//     - The compiler needs code to parse variable declarations, including scope-relative 
-//       declarations e.g. (declare player.number[0]).
-//
-//        = VARIABLE DECLARATIONS NEED TO BE ABLE TO SPECIFY THE NETWORKING MODE OF THE 
-//          VARIABLE IN QUESTION. SOME TYPES (BUT NOT ALL) REQUIRE IT. We need to revise 
-//          the syntax to:
-//
-//             declare [mode] [variable]
-//             declare [mode] [variable] = [initial]
-//
-//          where the allowed modes are: "local"; "low priority"; "high priority"; and 
-//          "default priority". If no priority is specified, use the default.
-//
-//        = DO NOT write to the variant's declarations. Maintain our own set and commit 
-//          it to the variant after successful compiling. That way, we don't trash the 
-//          loaded file if compiling hits an error.
-//
-//        - It's tempting to forego the use of VariableReference to parse the variable 
-//          names being declared, but doing that would cost us alias-handling unless we 
-//          reinvent the wheel (and let's not do that).
-//
-//     - Compiler: Unresolved string references: each list entry needs an "action" field 
-//       which lists the action the script author decided to take. Available actions are: 
-//       create a new string in the table; or use an existing string with a given index. 
-//       Intended UI flow for when the compiler finds unresolved string references is:
-//
-//        - Alert the user to the unresolved string references.
-//
-//        - Allow the user to: cancel compiling; create all referenced strings en masse; 
-//          or choose how to handle each string individually.
-//
-//       The Compiler should have a function which will resolve all unresolved string 
-//       references that have an action set. The compiler's code to apply compiled content 
-//       to the game variant should assert if there are any unresolved string references.
-//
-//       There are a few considerations we'll need to make:
-//
-//        - The same string content may be referred to in multiple places, i.e. multiple 
-//          unresolved string references may target the same unresolved string. We need to 
-//          ensure that we don't end up creating duplicates of these strings in the string 
-//          table.
-//
-//        - The string table may not have room for the number of new strings needed.
-//
-//     - We're gonna have to take some time to work out how to negate if-statements that 
-//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
-//       to know that when it comes time to actually compile the blocks... assuming we 
-//       don't decide to just drop support for else(if)s at that point. (Think about it: 
-//       first of all, they abstract away conditions, so you can't see the full "cost" 
-//       of your code; and second, there's no code to detect equivalent ifs and decompile 
-//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
-//       any means essential; we've already decided that conciseness is not required.)
-//
-//     - Currently every parse error is a fatal error, throwing an exception and stopping 
-//       all further parsing. However, 90% of these should be non-fatal errors instead. 
-//       We need to build a system for logging non-fatal errors, and then begin converting 
-//       fatal errors over.
-//
-//        - VariableReference's constructor needs to take a Compiler& so that it can log 
-//          errors without throwing an exception.
-//
-//        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
-//
-//           - Some VariableReference::VariableReference errors.
-//
-//           - All errors in VariableReference::RawPart::resolve_index. To convert these 
-//             away from exceptions, the method needs to be passed the VariableReference*
-//             owner so that it can set VariableReference::is_invalid; alternatively, the 
-//             method needs to return a success bool.
-//
-//        = Ctrl+F for all (throw_error) calls. We want to get to the point where we're 
-//          not even using (throw_error) and can remove it.
 //
 //     = (DE)COMPILER UI
 //

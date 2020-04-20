@@ -214,6 +214,15 @@ namespace Megalo {
                //
                auto item = dynamic_cast<Block*>(this->items[0]);
                if (item) {
+                  //
+                  // TODO: Currently, we do not allow nested blocks to be event handlers. However, I want 
+                  // to be future-compatible and make sure that most parts of our code handle that sensibly 
+                  // anyway, in part because the file format would allow for it and I'm not 100% sure that 
+                  // the runtime wouldn't. Accordingly, we should make the following changes: we should 
+                  // bail out of this branch without making the nested block share a trigger with the 
+                  // containing function block, IF both blocks have an event type and these types differ 
+                  // from each other.
+                  //
                   item->trigger = this->trigger; // get the inner Block to write into the function's trigger
                   this->trigger->blockType = _block_type_to_trigger_type(item->type);
                }
@@ -239,7 +248,7 @@ namespace Megalo {
             return;
          //
          auto   t  = this->trigger = new Trigger;
-         size_t ti = compiler.results.triggers.size();
+         size_t ti = compiler.results.triggers.size(); // index of this trigger in the full trigger list
          compiler.results.triggers.push_back(t);
          if (this->parent)
             t->entryType = entry_type::subroutine;
@@ -282,6 +291,10 @@ namespace Megalo {
          this->_make_trigger(compiler);
          {
             auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
+            //
+            // TODO: If the current block is an else or elseif block, then we need to copy and negate the 
+            // conditions of the previous-sibling if or elseif block.
+            //
             for (auto item : this->conditions) {
                #if _DEBUG
                   assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
