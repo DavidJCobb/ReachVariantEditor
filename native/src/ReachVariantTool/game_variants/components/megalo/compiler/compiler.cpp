@@ -4,7 +4,6 @@
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
-#include "../variable_declarations.h"
 
 namespace {
    constexpr char* ce_assignment_operator = "=";
@@ -1956,6 +1955,19 @@ namespace Megalo {
             return nullptr;
          }
          return initial;
+      }
+      void _declare_variable(Compiler& compiler, Script::VariableReference& variable, Script::VariableReference* initial) {
+         auto type    = variable.get_type();
+         auto scope_v = variable.get_containing_scope();
+         if (scope_v == variable_scope::not_a_scope) {
+            compiler.raise_error("Encountered a problem when trying to interpret this variable declaration: bad scope.");
+            return;
+         }
+
+         //
+         // TODO: Timer variables cannot have a networking priority; if one was specified, ignore it and warn the script author
+         //
+
       }
    }
    void Compiler::_handleKeyword_Declare() {

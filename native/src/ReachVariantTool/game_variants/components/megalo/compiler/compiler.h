@@ -4,6 +4,7 @@
 #include <QString>
 #include "string_scanner.h"
 #include "../trigger.h"
+#include "../variable_declarations.h"
 #include "parsing/base.h"
 #include "parsing/alias.h"
 #include "parsing/variable_reference.h"
@@ -184,6 +185,12 @@ namespace Megalo {
             std::vector<Trigger*> triggers; // owned by the Compiler UNLESS (results.success) is true
             TriggerEntryPoints    events;
             unresolved_str_list   unresolved_strings;
+            struct {
+               VariableDeclarationSet global = VariableDeclarationSet(Megalo::variable_scope::global);
+               VariableDeclarationSet player = VariableDeclarationSet(Megalo::variable_scope::player);
+               VariableDeclarationSet object = VariableDeclarationSet(Megalo::variable_scope::object);
+               VariableDeclarationSet team   = VariableDeclarationSet(Megalo::variable_scope::team);
+            } variables;
          } results;
          //
          ~Compiler();

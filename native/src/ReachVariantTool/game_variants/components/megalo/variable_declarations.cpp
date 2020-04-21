@@ -95,4 +95,62 @@ namespace Megalo {
          decl.initial->decompile(out, flags);
       }
    }
+   namespace {
+      template<typename T> void _imply_impl(std::vector<T>& list, uint8_t index) {
+         ++index;
+         auto size = list.size();
+         if (size >= index)
+            return;
+         list.resize(index);
+         for (size_t i = size; i < index; ++i)
+            list[i].compiler_flags |= VariableDeclaration::compile_flags::implicit;
+      }
+   }
+   bool VariableDeclarationSet::imply(variable_type vt, uint8_t index) noexcept {
+      auto& scope = getScopeObjectForConstant(this->type);
+      auto  max   = scope.max_variables_of_type(vt);
+      if (index >= max)
+         return false;
+      switch (vt) {
+         case variable_type::scalar:
+            _imply_impl(this->scalars, index);
+            return true;
+         case variable_type::object:
+            _imply_impl(this->objects, index);
+            return true;
+         case variable_type::player:
+            _imply_impl(this->players, index);
+            return true;
+         case variable_type::team:
+            _imply_impl(this->teams, index);
+            return true;
+         case variable_type::timer:
+            _imply_impl(this->timers, index);
+            return true;
+      }
+      return true;
+   }
+   void VariableDeclarationSet::make_explicit(variable_type vt, uint8_t index) noexcept {
+      auto& scope = getScopeObjectForConstant(this->type);
+      auto  max   = scope.max_variables_of_type(vt);
+      if (index >= max)
+         return;
+      switch (vt) {
+         case variable_type::scalar:
+            this->scalars[index].make_explicit();
+            return;
+         case variable_type::object:
+            this->objects[index].make_explicit();
+            return;
+         case variable_type::player:
+            this->players[index].make_explicit();
+            return;
+         case variable_type::team:
+            this->teams[index].make_explicit();
+            return;
+         case variable_type::timer:
+            this->timers[index].make_explicit();
+            return;
+      }
+   }
 }

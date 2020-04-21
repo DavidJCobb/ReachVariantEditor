@@ -314,6 +314,55 @@ namespace Megalo::Script {
          return false;
       return this->resolved.top_level.is_static;
    }
+   bool VariableReference::is_variable() const noexcept {
+      if (this->is_accessor())
+         return false;
+      if (this->is_property())
+         return false;
+      if (this->is_constant_integer())
+         return false;
+      if (auto type = this->resolved.nested.type)
+         return type->is_variable();
+      if (auto type = this->resolved.top_level.type)
+         return type->is_variable();
+      return false;
+   }
+   //
+   variable_scope VariableReference::get_containing_scope() const noexcept {
+      auto& top  = this->resolved.top_level;
+      auto& nest = this->resolved.nested;
+      if (!top.type || !top.type->is_variable())
+         return variable_scope::not_a_scope;
+      if (!nest.type)
+         return variable_scope::global;
+      if (top.type == &OpcodeArgValueObject::typeinfo)
+         return variable_scope::object;
+      if (top.type == &OpcodeArgValuePlayer::typeinfo)
+         return variable_scope::player;
+      if (top.type == &OpcodeArgValueTeam::typeinfo)
+         return variable_scope::team;
+      return variable_scope::not_a_scope;
+   }
+   const_team VariableReference::to_const_team(bool* success) const noexcept {
+      if (success)
+         *success = false;
+      auto& top = this->resolved.top_level;
+      if (top.type != &OpcodeArgValueTeam::typeinfo)
+         return const_team::none;
+      //
+      if (success)
+         *success = true;
+      if (top.is_static)
+         return (const_team)((uint8_t)const_team::team_1 + top.index);
+      if (top.which == &variable_which_values::team::no_team)
+         return const_team::none;
+      if (top.which == &variable_which_values::team::neutral_team)
+         return const_team::neutral;
+      //
+      if (success)
+         *success = false;
+      return const_team::none;
+   }
    //
    void VariableReference::strip_accessor() noexcept {
       auto& res = this->resolved;

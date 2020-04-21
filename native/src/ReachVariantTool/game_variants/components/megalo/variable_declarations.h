@@ -16,7 +16,23 @@ namespace Megalo {
    };
    using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
    //
-   class ScalarVariableDeclaration {
+   class VariableDeclaration {
+      public:
+         struct compile_flags {
+            enum type : uint8_t {
+               none = 0,
+               implicit = 0x01,
+            };
+         };
+         using compile_flags_t = std::underlying_type_t<compile_flags::type>;
+         //
+      public:
+         compile_flags_t compiler_flags = compile_flags::none;
+         //
+         inline bool is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit; }
+         inline void make_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit; }
+   };
+   class ScalarVariableDeclaration : public VariableDeclaration {
       public:
          using network_enum = variable_network_priority;
          using network_type = variable_network_priority_t;
@@ -34,7 +50,7 @@ namespace Megalo {
             this->networking.write(stream);
          }
    };
-   class PlayerVariableDeclaration {
+   class PlayerVariableDeclaration : public VariableDeclaration {
       public:
          using network_enum = variable_network_priority;
          using network_type = variable_network_priority_t;
@@ -48,7 +64,7 @@ namespace Megalo {
             this->networking.write(stream);
          }
    };
-   class ObjectVariableDeclaration {
+   class ObjectVariableDeclaration : public VariableDeclaration {
       public:
          using network_enum = variable_network_priority;
          using network_type = variable_network_priority_t;
@@ -62,7 +78,7 @@ namespace Megalo {
             this->networking.write(stream);
          }
    };
-   class TeamVariableDeclaration {
+   class TeamVariableDeclaration : public VariableDeclaration {
       public:
          using network_enum   = variable_network_priority;
          using network_type   = variable_network_priority_t;
@@ -80,7 +96,7 @@ namespace Megalo {
             this->networking.write(stream);
          }
    };
-   class TimerVariableDeclaration {
+   class TimerVariableDeclaration : public VariableDeclaration {
       public:
          OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
          //
@@ -132,5 +148,8 @@ namespace Megalo {
             #undef megalo_variable_declaration_set_write_type
          }
          void decompile(Decompiler& out, uint32_t flags = 0) noexcept;
+         //
+         bool imply(variable_type vt, uint8_t index) noexcept;
+         void make_explicit(variable_type vt, uint8_t index) noexcept;
    };
 }

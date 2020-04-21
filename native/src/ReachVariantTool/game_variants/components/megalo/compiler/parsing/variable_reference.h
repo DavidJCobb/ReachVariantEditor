@@ -91,11 +91,15 @@ namespace Megalo {
             [[nodiscard]] bool is_none() const noexcept;
             [[nodiscard]] bool is_read_only() const noexcept;
             [[nodiscard]] bool is_statically_indexable_value() const noexcept;
+            [[nodiscard]] bool is_variable() const noexcept;
             //
             void resolve(Compiler&, bool is_alias_definition = false, bool is_write_access = false); // can throw compile_exception
             //
             [[nodiscard]] QString to_string() const noexcept;
             [[nodiscard]] QString to_string_from_raw(int8_t start = 0, int8_t up_to = -1) const noexcept;
+            //
+            [[nodiscard]] variable_scope get_containing_scope() const noexcept; // "containing scope," as opposed to "scope enum value"
+            [[nodiscard]] const_team to_const_team(bool* success) const noexcept; // only valid if the variable reference refers to a statically-indexable team, or neutral/none
             //
             void strip_accessor() noexcept;
             //
