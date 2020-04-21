@@ -274,20 +274,21 @@ namespace Megalo::Script {
 
    const OpcodeArgTypeinfo* VariableReference::get_type() const noexcept {
       auto& resolved = this->resolved;
+      if (resolved.top_level.is_constant)
+         return &OpcodeArgValueScalar::typeinfo;
       if (resolved.property.definition)
          return &resolved.property.definition->type;
       if (resolved.nested.type)
          return resolved.nested.type;
       if (resolved.top_level.type)
          return resolved.top_level.type;
-      if (resolved.top_level.is_constant)
-         return &OpcodeArgValueScalar::typeinfo;
       return nullptr;
    }
    bool VariableReference::is_none() const noexcept {
       auto which = this->resolved.top_level.which;
       return which ? which->is_none() : false;
    }
+   bool VariableReference::is_property() const noexcept { return this->resolved.property.definition && !this->is_accessor(); }
    bool VariableReference::is_read_only() const noexcept {
       auto& resolved = this->resolved;
       if (resolved.top_level.scope)
@@ -305,6 +306,12 @@ namespace Megalo::Script {
       return !resolved.top_level.type->is_variable(); // only variables can be assigned to
    }
    bool VariableReference::is_statically_indexable_value() const noexcept {
+      if (this->is_accessor())
+         return false;
+      if (this->is_property())
+         return false;
+      if (this->resolved.nested.type)
+         return false;
       return this->resolved.top_level.is_static;
    }
    //

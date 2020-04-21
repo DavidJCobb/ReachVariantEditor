@@ -4,6 +4,7 @@
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
+#include "../variable_declarations.h"
 
 namespace {
    constexpr char* ce_assignment_operator = "=";
@@ -305,6 +306,7 @@ namespace Megalo {
                if (cnd) {
                   this->trigger->opcodes.push_back(cnd);
                   cnd->or_group = count;
+                  cmp->opcode = nullptr;
                }
                //
                if (!cmp->next_is_or)
@@ -337,8 +339,10 @@ namespace Megalo {
             }
             auto statement = dynamic_cast<Statement*>(item);
             if (statement) {
-               if (statement->opcode)
-                  this->trigger->opcodes.push_back(statement->opcode);
+               if (auto opcode = statement->opcode) {
+                  this->trigger->opcodes.push_back(opcode);
+                  statement->opcode = nullptr;
+               }
                continue;
             }
          }
@@ -352,6 +356,10 @@ namespace Megalo {
          if (this->rhs) {
             delete this->rhs;
             this->rhs = nullptr;
+         }
+         if (this->opcode) {
+            delete this->opcode;
+            this->opcode = nullptr;
          }
       }
    }
@@ -1830,8 +1838,8 @@ namespace Megalo {
          auto& list = this->functions_in_scope;
          list.erase(std::remove_if(list.begin(), list.end(),
             [this](Script::UserDefinedFunction& entry) {
-               auto block = entry.block;
-               if (!block || block->parent == this->block)
+               auto func_parent = entry.parent;
+               if (!func_parent || func_parent == this->block)
                   return true;
                return false;
             }),
@@ -1891,28 +1899,192 @@ namespace Megalo {
       if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
    }
+   namespace {
+      Script::VariableReference* _handle_declared_name_as_alias(Compiler::pos start, Compiler& compiler, QString word) {
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (!alias) {
+            compiler.raise_error(start, QString("Invalid variable declaration. There is no absolute alias named \"%1\".").arg(word));
+         } else {
+            if (alias->is_imported_name() || alias->is_integer_constant() || !alias->target)
+               compiler.raise_error(start, QString("Invalid variable declaration. Alias \"%1\" does not refer to a variable.").arg(word));
+            else {
+               auto target = alias->target;
+               auto type = target->get_type();
+               if (!type->is_variable()) {
+                  compiler.raise_error(start, QString("Invalid variable declaration. Alias \"%1\" does not refer to a variable.").arg(word));
+               } else {
+                  return target;
+               }
+            }
+         }
+         return nullptr;
+      }
+      Script::VariableReference* _handle_declared_name_as_variable(Compiler::pos start, Compiler& compiler, QString word) {
+         auto variable = new Script::VariableReference(word);
+         variable->resolve(compiler);
+         if (variable->is_invalid) {
+            delete variable;
+            return nullptr;
+         }
+         auto type = variable->get_type();
+         if (!type->is_variable()) {
+            compiler.raise_error(start, QString("Invalid variable declaration. Value \"%1\" does not refer to a variable.").arg(variable->to_string()));
+            delete variable;
+            return nullptr;
+         }
+         if (variable->is_statically_indexable_value()) {
+            compiler.raise_error(start, QString("Invalid variable declaration. Value \"%1\" is a built-in value, always exists, and therefore cannot be declared.").arg(variable->to_string()));
+            delete variable;
+            return nullptr;
+         }
+         return variable;
+      }
+      Script::VariableReference* _extract_declared_initial_value(Compiler& compiler) {
+         auto rhs = compiler.extract_word();
+         if (Compiler::is_keyword(rhs)) {
+            compiler.raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(rhs));
+            return nullptr;
+         }
+         if (rhs.isEmpty()) {
+            compiler.raise_fatal("Expected an initial value for the variable declaration.");
+            return nullptr;
+         }
+         auto initial = new Script::VariableReference(rhs);
+         initial->resolve(compiler);
+         if (initial->is_invalid) {
+            delete initial;
+            return nullptr;
+         }
+         return initial;
+      }
+   }
    void Compiler::_handleKeyword_Declare() {
-      auto start = this->token.pos;
+      auto  start = this->token.pos;
+      using net_t = Megalo::variable_network_priority;
       //
-      auto name = this->extract_word();
-      if (name.isEmpty()) {
-         this->raise_fatal("The \"declare\" statement must be used to declare a variable.");
+      // The possible variable declaration statements are:
+      //
+      //    declare [word]
+      //    declare [word] = [value]
+      //    declare low priority [word] = value
+      //    declare default priority [word] = value]
+      //    declare high priority [word] = value
+      //    declare local [word] = value
+      //
+      // Notably, [word] can be "low", "default", "high", "local", or "priority":
+      //
+      //    declare local = value
+      //
+      net_t priority = net_t::default;
+      bool  has_pri  = false;
+      auto  word     = this->extract_word();
+      //
+      if (word.compare("default", Qt::CaseInsensitive) == 0) {
+         has_pri = true;
+      } else if (word.compare("low", Qt::CaseInsensitive) == 0) {
+         priority = net_t::low;
+         has_pri  = true;
+      } else if (word.compare("high", Qt::CaseInsensitive) == 0) {
+         priority = net_t::high;
+         has_pri  = true;
+      } else if (word.compare("local", Qt::CaseInsensitive) == 0) {
+         priority = net_t::none;
+         has_pri  = true;
+      }
+      //
+      auto after_first_word = this->backup_stream_state();
+      //
+      if (this->extract_specific_char('=')) {
+         //
+         // declare word = value
+         //
+         priority = net_t::default;
+         auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
+         if (variable) {
+            auto initial = _extract_declared_initial_value(*this);
+            if (!initial)
+               return;
+            //
+            // TODO: Create variable in the variable declaration set, with an initial value
+            //
+            return;
+         }
+         //
+         // If we reached this point, then the variable name that was specified was not valid. We need 
+         // to extract and discard the initial value that was specified for this variable.
+         //
+         int32_t throwaway;
+         if (!this->extract_integer_literal(throwaway)) {
+            auto discard = this->extract_word();
+            //
+            // There is no way to validate (discard) if we don't know the variable type that this 
+            // declaration was meant to be for. Don't bother trying.
+            //
+            this->raise_warning(QString("Because the variable declaration was invalid, we cannot verify whether \"%2\" was a valid initial value for \"%1\".").arg(word).arg(discard));
+         }
+         return;
+      }
+      if (has_pri) {
+         if (priority == net_t::none || this->extract_word("priority")) { // the word "local" isn't followed by "priority"
+            //
+            // declare [network] priority [name]...
+            //
+            auto name = this->extract_word();
+            if (name.isEmpty()) {
+               this->raise_fatal(QString("Expected a variable name (or alias) after \"declare %1 priority\".").arg(word));
+               return;
+            }
+            auto variable = _handle_declared_name_as_variable(start, *this, name); // logs any errors
+            if (this->extract_specific_char('=')) {
+               //
+               // declare [network] priority [name] = [value]
+               //
+               auto initial = _extract_declared_initial_value(*this);
+               if (!initial)
+                  return;
+               //
+               // TODO: Create variable in the variable declaration set, with an initial value
+               //
+               // TODO: Teams can have a constant team (team[n] or neutral_team or no_team) set as their initial value; 
+               // we need to extract a VariableReference for the righthand side and validate it.
+               //
+               // TODO: If something can be initialized to a number, then the file format allows the use of any number 
+               // value as the initial value; however, we should prevent the use of variables as initial values for 
+               // other variables (or for themselves).
+               //
+            } else {
+               //
+               // declare [network] priority [name]
+               //
+
+               //
+               // TODO: Create variable in the variable declaration set
+               //
+            }
+         } else {
+            //
+            // declare word
+            //
+            priority = net_t::default;
+            auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
+            if (variable) {
+               //
+               // TODO: Create variable in the variable declaration set
+               //
+            }
+         }
          return;
       }
       //
-      // TODO: process the name
+      // If we got here, then the first word after "declare" was not the first word of any 
+      // recognized networking priority, and there was no "=" after that word. Therefore, 
+      // that word must be a variable name in a declaration with no networking priority or 
+      // initial value specified (i.e. just "declare [word]").
       //
-      if (!this->extract_specific_char('='))
-         return;
-      int32_t initial = 0;
-      if (this->extract_integer_literal(initial)) {
+      auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
+      if (variable) {
          //
-         // TODO: process the initial value
-         //
-      } else {
-         auto word = this->extract_word();
-         //
-         // TODO: process the initial value
+         // TODO: Create variable in the variable declaration set
          //
       }
    }

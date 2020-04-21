@@ -83,10 +83,10 @@ namespace Megalo {
             VariableReference(int32_t);
             //
             void set_to_constant_integer(int32_t);
-            [[nodiscard]] const OpcodeArgTypeinfo* get_type() const noexcept;
+            [[nodiscard]] const OpcodeArgTypeinfo* get_type() const noexcept; // NOTE: accessors do not have types per se; calling this on an accessor returns the type of whatever the accessor is being invoked on
             [[nodiscard]] inline bool is_accessor() const noexcept { return this->resolved.accessor; }
             [[nodiscard]] inline bool is_constant_integer() const noexcept { return this->resolved.top_level.is_constant; }
-            [[nodiscard]] inline bool is_property() const noexcept { return this->resolved.property.definition; }
+            [[nodiscard]] bool is_property() const noexcept;
             [[nodiscard]] inline const AccessorRegistry::Definition* get_accessor_definition() const noexcept { return this->resolved.accessor; }
             [[nodiscard]] bool is_none() const noexcept;
             [[nodiscard]] bool is_read_only() const noexcept;

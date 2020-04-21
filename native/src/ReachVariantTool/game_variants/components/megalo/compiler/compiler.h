@@ -67,7 +67,7 @@ namespace Megalo {
       };
       class Statement : public ParsedItem {
          public:
-            Opcode* opcode = nullptr; // a fully-compiled opcode; can be any condition or action, including "run nested trigger" for calls to user-defined functions
+            Opcode* opcode = nullptr; // a fully-compiled opcode; can be any condition or action, including "run nested trigger" for calls to user-defined functions // owned by this Statement and deleted in the destructor
             VariableReference* lhs = nullptr; // owned by this Statement and deleted in the destructor
             VariableReference* rhs = nullptr; // owned by this Statement and deleted in the destructor
             QString op;
@@ -89,10 +89,10 @@ namespace Megalo {
          public:
             QString name;
             int32_t trigger_index = -1;
-            Block*  block = nullptr; // used so we can tell when the function goes out of scope
+            Block*  parent = nullptr; // used so we can tell when the function goes out of scope
             //
             UserDefinedFunction() {}
-            UserDefinedFunction(const QString& n, int32_t ti, Block* b) : name(n), trigger_index(ti), block(b) {}
+            UserDefinedFunction(const QString& n, int32_t ti, Block* b) : name(n), trigger_index(ti), parent(b ? dynamic_cast<Block*>(b->parent) : nullptr) {}
       };
    }
    //
