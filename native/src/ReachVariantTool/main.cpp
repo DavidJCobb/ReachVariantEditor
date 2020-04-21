@@ -125,6 +125,28 @@ int main(int argc, char *argv[]) {
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
+//        = LET'S REDESIGN THE SYNTAX. THERE'S AN EASIER WAY TO DO THIS:
+//
+//             declare [name]
+//             declare [name] with network priority [priority]
+//             declare [name] ... = [value]
+//
+//          We should fully parse the statement BEFORE we actually create VariableReferences 
+//          and otherwise try to interpret the declaration. There are two bonuses of this 
+//          syntax:
+//
+//           - It's simpler. We don't have to resolve ambiguities where the words in the 
+//             "declare" syntax itself can be aliases -- or rather, we don't have to go 
+//             as far out of our way to do it.
+//
+//           - If we want to allow other properties to be specified, we can make the "with" 
+//             portion a list with segments separated by "and".
+//
+//          And by parsing the statement fully first, we can do all of the VariableReference 
+//          checks (and deletions) in one place (no need for helper functions or unique_ptr).
+//
+//           = DO NOT FORGET TO UPDATE THE DECOMPILER AS WELL
+//
 //        = The compiler should reject initial number values that consist of run-time 
 //          data, i.e. number variables. Constant integers, game state values, and script 
 //          option values should all be allowed.
