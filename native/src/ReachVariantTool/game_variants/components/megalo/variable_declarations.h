@@ -18,6 +18,10 @@ namespace Megalo {
    //
    class VariableDeclaration {
       public:
+         using network_enum   = variable_network_priority;
+         using network_type   = variable_network_priority_t;
+         using team_bitnumber = cobb::bitnumber<cobb::bitcount(8), const_team, true>;
+         //
          struct compile_flags {
             enum type : uint8_t {
                none = 0,
@@ -26,86 +30,58 @@ namespace Megalo {
          };
          using compile_flags_t = std::underlying_type_t<compile_flags::type>;
          //
-      public:
-         compile_flags_t compiler_flags = compile_flags::none;
+      protected:
+         variable_type type = variable_type::not_a_variable;
          //
+      public:
+         VariableDeclaration(variable_type vt) : type(vt) {
+            if (this->has_initial_value()) {
+               if (this->type != variable_type::team)
+                  this->initial.number = new OpcodeArgValueScalar;
+            }
+         }
+         ~VariableDeclaration() {
+            if (this->initial.number) {
+               delete this->initial.number;
+               this->initial.number = nullptr;
+            }
+         }
+         //
+         compile_flags_t compiler_flags = compile_flags::none;
+         network_type    networking     = network_enum::default;
+         struct {
+            OpcodeArgValueScalar* number = nullptr;
+            team_bitnumber        team   = const_team::none;
+         } initial;
+         //
+         inline variable_type get_type() const noexcept { return this->type; }
          inline bool is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit; }
          inline void make_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit; }
+         //
+         bool has_initial_value() const noexcept;
+         bool has_network_type() const noexcept;
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
+         void write(cobb::bitwriter& stream) const noexcept;
    };
    class ScalarVariableDeclaration : public VariableDeclaration {
       public:
-         using network_enum = variable_network_priority;
-         using network_type = variable_network_priority_t;
-         //
-         network_type networking = network_enum::default;
-         OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
-         //
-         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-            if (!this->initial->read(stream, mp))
-               return;
-            this->networking.read(stream);
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->initial->write(stream);
-            this->networking.write(stream);
-         }
+         ScalarVariableDeclaration() : VariableDeclaration(variable_type::scalar) {}
    };
    class PlayerVariableDeclaration : public VariableDeclaration {
       public:
-         using network_enum = variable_network_priority;
-         using network_type = variable_network_priority_t;
-         //
-         network_type networking = network_enum::default;
-         //
-         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-            this->networking.read(stream);
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->networking.write(stream);
-         }
+         PlayerVariableDeclaration() : VariableDeclaration(variable_type::player) {}
    };
    class ObjectVariableDeclaration : public VariableDeclaration {
       public:
-         using network_enum = variable_network_priority;
-         using network_type = variable_network_priority_t;
-         //
-         network_type networking = network_enum::default;
-         //
-         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-            this->networking.read(stream);
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->networking.write(stream);
-         }
+         ObjectVariableDeclaration() : VariableDeclaration(variable_type::object) {}
    };
    class TeamVariableDeclaration : public VariableDeclaration {
       public:
-         using network_enum   = variable_network_priority;
-         using network_type   = variable_network_priority_t;
-         using team_bitnumber = cobb::bitnumber<cobb::bitcount(8), const_team, true>;
-         //
-         network_type   networking = network_enum::default;
-         team_bitnumber initial    = const_team::none;
-         //
-         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-            this->initial.read(stream);
-            this->networking.read(stream);
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->initial.write(stream);
-            this->networking.write(stream);
-         }
+         TeamVariableDeclaration() : VariableDeclaration(variable_type::team) {}
    };
    class TimerVariableDeclaration : public VariableDeclaration {
       public:
-         OpcodeArgValueScalar* initial = new OpcodeArgValueScalar;
-         //
-         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
-            this->initial->read(stream, mp);
-         }
-         void write(cobb::bitwriter& stream) const noexcept {
-            this->initial->write(stream);
-         }
+         TimerVariableDeclaration() : VariableDeclaration(variable_type::timer) {}
    };
 
    class VariableDeclarationSet {
@@ -151,5 +127,7 @@ namespace Megalo {
          //
          bool imply(variable_type vt, uint8_t index) noexcept;
          void make_explicit(variable_type vt, uint8_t index) noexcept;
+         //
+         VariableDeclaration* get_or_create_declaration(variable_type vt, uint8_t index) noexcept;
    };
 }

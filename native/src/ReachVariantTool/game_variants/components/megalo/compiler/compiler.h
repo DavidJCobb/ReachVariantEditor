@@ -239,6 +239,8 @@ namespace Megalo {
       protected:
          bool is_in_statement() const;
          //
+         VariableDeclarationSet* _get_variable_declaration_set(variable_scope) noexcept;
+         //
          void _parseActionStart(QChar);
          void _parseAssignment(QChar);
          //
@@ -260,6 +262,10 @@ namespace Megalo {
                this->throw_error("Unexpected decimal point. Floating-point numbers are not supported.");
             return result;
          }
+         //
+         #pragma region Variable declaration helpers
+            void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
+         #pragma endregion
          //
          void _handleKeyword_Alias();
          void _handleKeyword_Declare(); // INCOMPLETE

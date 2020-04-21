@@ -23,6 +23,8 @@ namespace Megalo {
       not_a_variable = -1, // needed for "All Players" values in team-or-player vars
    };
 
+   class OpcodeArgTypeinfo;
+
    class VariableScopeWhichValueList;
    class VariableScopeWhichValue {
       friend VariableScopeWhichValueList;
@@ -214,4 +216,7 @@ namespace Megalo {
 
    const VariableScope& getScopeObjectForConstant(variable_scope) noexcept;
    variable_scope getScopeConstantForObject(const VariableScope&) noexcept;
+   //
+   variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
+   variable_type  getVariableTypeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
 }

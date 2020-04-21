@@ -2,6 +2,7 @@
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
+#include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
 
@@ -1801,6 +1802,20 @@ namespace Megalo {
             return i;
       return -1;
    }
+   VariableDeclarationSet* Compiler::_get_variable_declaration_set(variable_scope vs) noexcept {
+      auto& sets = this->results.variables;
+      switch (vs) {
+         case variable_scope::global:
+            return &sets.global;
+         case variable_scope::object:
+            return &sets.object;
+         case variable_scope::player:
+            return &sets.player;
+         case variable_scope::team:
+            return &sets.team;
+      }
+      return nullptr;
+   }
    //
    void Compiler::_openBlock(Script::Block* block) {
       if (this->block == this->root) {
@@ -1899,32 +1914,19 @@ namespace Megalo {
          this->aliases_in_scope.push_back(item);
    }
    namespace {
-      Script::VariableReference* _handle_declared_name_as_alias(Compiler::pos start, Compiler& compiler, QString word) {
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias) {
-            compiler.raise_error(start, QString("Invalid variable declaration. There is no absolute alias named \"%1\".").arg(word));
-         } else {
-            if (alias->is_imported_name() || alias->is_integer_constant() || !alias->target)
-               compiler.raise_error(start, QString("Invalid variable declaration. Alias \"%1\" does not refer to a variable.").arg(word));
-            else {
-               auto target = alias->target;
-               auto type = target->get_type();
-               if (!type->is_variable()) {
-                  compiler.raise_error(start, QString("Invalid variable declaration. Alias \"%1\" does not refer to a variable.").arg(word));
-               } else {
-                  return target;
-               }
-            }
-         }
-         return nullptr;
-      }
       Script::VariableReference* _handle_declared_name_as_variable(Compiler::pos start, Compiler& compiler, QString word) {
          auto variable = new Script::VariableReference(word);
-         variable->resolve(compiler);
+         variable->resolve(compiler, true);
          if (variable->is_invalid) {
             delete variable;
             return nullptr;
          }
+         if (variable->is_property() || variable->is_accessor()) {
+            compiler.raise_error(start, QString("Invalid variable declaration. You cannot declare a property or accessor such as \"%1\".").arg(variable->to_string()));
+            delete variable;
+            return nullptr;
+         }
+         //
          auto type = variable->get_type();
          if (!type->is_variable()) {
             compiler.raise_error(start, QString("Invalid variable declaration. Value \"%1\" does not refer to a variable.").arg(variable->to_string()));
@@ -1954,20 +1956,74 @@ namespace Megalo {
             delete initial;
             return nullptr;
          }
+         if (initial->is_property() || initial->is_accessor()) {
+            compiler.raise_error(QString("Invalid variable declaration. Properties and accessors cannot be used as the initial values of variables."));
+            delete initial;
+            return nullptr;
+         }
+         if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
+            // 
+            // TODO: Raise an error if the initial value is a variable
+            //
+         }
          return initial;
       }
-      void _declare_variable(Compiler& compiler, Script::VariableReference& variable, Script::VariableReference* initial) {
-         auto type    = variable.get_type();
-         auto scope_v = variable.get_containing_scope();
-         if (scope_v == variable_scope::not_a_scope) {
-            compiler.raise_error("Encountered a problem when trying to interpret this variable declaration: bad scope.");
-            return;
+   }
+   void Compiler::_declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified) {
+      auto type  = variable.get_type();
+      auto basis = variable.get_alias_basis_type();
+      //
+      variable_scope scope_v = getVariableScopeForTypeinfo(basis);
+      variable_type  type_v  = getVariableTypeForTypeinfo(type);
+      if (scope_v == variable_scope::not_a_scope) {
+         this->raise_error("Encountered a problem when trying to interpret this variable declaration: bad scope.");
+         return;
+      }
+      if (type_v == variable_type::not_a_variable) {
+         this->raise_error("Encountered a problem when trying to interpret this variable declaration: bad variable type.");
+         return;
+      }
+      //
+      int32_t index = 0;
+      if (scope_v == variable_scope::global) {
+         index = variable.resolved.top_level.index;
+      } else {
+         index = variable.resolved.nested.index;
+      }
+      //
+      auto set  = this->_get_variable_declaration_set(scope_v);
+      auto decl = set->get_or_create_declaration(type_v, index);
+      assert(decl && "Failed to get-or-create variable declaration.");
+      decl->make_explicit();
+      //
+      if (decl->has_network_type()) {
+         decl->networking = networking;
+      } else {
+         if (network_specified)
+            this->raise_warning("Variables of this type cannot have a networking type set. The networking type that you specified will be ignored.");
+      }
+      //
+      if (decl->has_initial_value()) {
+         if (decl->get_type() == variable_type::team) {
+            bool success;
+            auto team = initial->to_const_team(&success);
+            if (!success) {
+               this->raise_error("Variables of this type can only use constant teams as their initial values (i.e. team[0], neutral_team, no_team, etc.).");
+               return;
+            }
+            decl->initial.team = team;
+         } else {
+            if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
+               auto result = decl->initial.number->compile(*this, *initial, 0);
+               if (result.is_failure())
+                  this->raise_error("Failed to compile this variable declaration's initial value.");
+            } else {
+               this->raise_error("Variables of this type can only use numeric values as their initial values.");
+            }
          }
-
-         //
-         // TODO: Timer variables cannot have a networking priority; if one was specified, ignore it and warn the script author
-         //
-
+      } else {
+         if (initial)
+            this->raise_warning("Variables of this type cannot have initial values provided. The initial value that you specified will be ignored.");
       }
    }
    void Compiler::_handleKeyword_Declare() {
@@ -2005,20 +2061,20 @@ namespace Megalo {
       }
       //
       auto after_first_word = this->backup_stream_state();
+      std::unique_ptr<Script::VariableReference> variable = nullptr;
+      std::unique_ptr<Script::VariableReference> initial  = nullptr;
       //
       if (this->extract_specific_char('=')) {
          //
          // declare word = value
          //
          priority = net_t::default;
-         auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
+         variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
          if (variable) {
-            auto initial = _extract_declared_initial_value(*this);
+            initial.reset(_extract_declared_initial_value(*this));
             if (!initial)
                return;
-            //
-            // TODO: Create variable in the variable declaration set, with an initial value
-            //
+            this->_declare_variable(*variable, initial.get(), priority, false);
             return;
          }
          //
@@ -2046,46 +2102,30 @@ namespace Megalo {
                this->raise_fatal(QString("Expected a variable name (or alias) after \"declare %1 priority\".").arg(word));
                return;
             }
-            auto variable = _handle_declared_name_as_variable(start, *this, name); // logs any errors
+            variable.reset(_handle_declared_name_as_variable(start, *this, name)); // logs any errors
             if (this->extract_specific_char('=')) {
                //
                // declare [network] priority [name] = [value]
                //
-               auto initial = _extract_declared_initial_value(*this);
+               initial.reset(_extract_declared_initial_value(*this)); // logs any errors
                if (!initial)
                   return;
-               //
-               // TODO: Create variable in the variable declaration set, with an initial value
-               //
-               // TODO: Teams can have a constant team (team[n] or neutral_team or no_team) set as their initial value; 
-               // we need to extract a VariableReference for the righthand side and validate it.
-               //
-               // TODO: If something can be initialized to a number, then the file format allows the use of any number 
-               // value as the initial value; however, we should prevent the use of variables as initial values for 
-               // other variables (or for themselves).
-               //
             } else {
                //
                // declare [network] priority [name]
                //
-
-               //
-               // TODO: Create variable in the variable declaration set
-               //
             }
+            if (variable)
+               this->_declare_variable(*variable, initial.get(), priority, true);
          } else {
             //
             // declare word
             //
             priority = net_t::default;
-            auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
-            if (variable) {
-               //
-               // TODO: Create variable in the variable declaration set
-               //
-            }
+            variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
+            if (variable)
+               this->_declare_variable(*variable, nullptr, priority, false);
          }
-         return;
       }
       //
       // If we got here, then the first word after "declare" was not the first word of any 
@@ -2093,13 +2133,11 @@ namespace Megalo {
       // that word must be a variable name in a declaration with no networking priority or 
       // initial value specified (i.e. just "declare [word]").
       //
-      auto variable = _handle_declared_name_as_variable(start, *this, word); // logs any errors
-      if (variable) {
-         //
-         // TODO: Create variable in the variable declaration set
-         //
-      }
+      variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
+      if (variable)
+         this->_declare_variable(*variable, nullptr, priority, false);
    }
+
    void Compiler::_handleKeyword_Do() {
       auto item = new Script::Block;
       item->type = Script::Block::Type::basic;

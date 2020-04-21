@@ -1,4 +1,5 @@
 #include "variables_and_scopes.h"
+#include "opcode_arg_types/variables/all_core.h"
 
 namespace Megalo {
    int8_t VariableScopeWhichValue::as_integer() const noexcept {
@@ -210,5 +211,29 @@ namespace Megalo {
       if (&s == &MegaloVariableScopeTeam)
          return variable_scope::team;
       return variable_scope::not_a_scope;
+   }
+   variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+      if (!t)
+         return variable_scope::global;
+      if (t == &OpcodeArgValueObject::typeinfo)
+         return variable_scope::object;
+      if (t == &OpcodeArgValuePlayer::typeinfo)
+         return variable_scope::player;
+      if (t == &OpcodeArgValueTeam::typeinfo)
+         return variable_scope::team;
+      return variable_scope::not_a_scope;
+   }
+   variable_type getVariableTypeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+      if (t == &OpcodeArgValueScalar::typeinfo)
+         return variable_type::scalar;
+      if (t == &OpcodeArgValueObject::typeinfo)
+         return variable_type::object;
+      if (t == &OpcodeArgValuePlayer::typeinfo)
+         return variable_type::player;
+      if (t == &OpcodeArgValueTeam::typeinfo)
+         return variable_type::team;
+      if (t == &OpcodeArgValueTimer::typeinfo)
+         return variable_type::timer;
+      return variable_type::not_a_variable;
    }
 }
