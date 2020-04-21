@@ -1963,7 +1963,8 @@ namespace Megalo {
          }
          if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
             // 
-            // TODO: Raise an error if the initial value is a variable
+            // TODO: Raise an error if the initial value is a variable; only allow integer constants, 
+            // game state values, and indexed list items.
             //
          }
          return initial;
@@ -1994,7 +1995,25 @@ namespace Megalo {
       auto set  = this->_get_variable_declaration_set(scope_v);
       auto decl = set->get_or_create_declaration(type_v, index);
       assert(decl && "Failed to get-or-create variable declaration.");
-      decl->make_explicit();
+      if (decl->is_implicit()) {
+         decl->make_explicit();
+      } else {
+         //
+         // TODO: This variable was already declared.
+         //
+         //  - If its network type is non-default and we are specifying a network type, raise an error.
+         //
+         //     - Requires a new compile flag on VariableDeclaration to indicate that the network type 
+         //       was explicitly specified.
+         //
+         //  - If it has an initial value different than the one we are passing in, raise an error.
+         //
+         //     - Requires a new compile flag on VariableDeclaration to indicate that the initial value 
+         //       was explicitly specified.
+         //
+         //  - Otherwise, raise a warning.
+         //
+      }
       //
       if (decl->has_network_type()) {
          decl->networking = networking;

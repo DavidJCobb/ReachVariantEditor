@@ -125,66 +125,13 @@ int main(int argc, char *argv[]) {
 //     - The compiler needs code to parse variable declarations, including scope-relative 
 //       declarations e.g. (declare player.number[0]).
 //
-//        = VARIABLE DECLARATIONS NEED TO BE ABLE TO SPECIFY THE NETWORKING MODE OF THE 
-//          VARIABLE IN QUESTION. SOME TYPES (BUT NOT ALL) REQUIRE IT. We need to revise 
-//          the syntax to:
-//
-//             declare [mode] [variable]
-//             declare [mode] [variable] = [initial]
-//
-//          where the allowed modes are: "local"; "low priority"; "high priority"; and 
-//          "default priority". If no priority is specified, use the default.
-//
-//           = PARSING:
-//
-//             Look for the words "local", "low", "high", or "default". If those words 
-//             are not found, then assume default networking priority and consume the 
-//             next word as a variable.
-//
-//             If "low", "high", or "default" were found, then look for the word 
-//             "priority". If that word is not found, then treat "low"/"high"/"default" 
-//             as an absolute alias pointing to the variable, and see if that alias 
-//             exists.
-//
-//             If for some reason the script author wants to alias a variable under 
-//             the name "local", then they'll have to declare it with a specific 
-//             priority, i.e.
-//
-//                alias local = global.number[0]
-//                declare local = 5                  -- syntax error
-//                declare local local = 5            -- valid
-//                declare default priority local = 5 -- valid
-//
-//                alias default = global.number[1]
-//                declare default = 5                  -- valid
-//                declare local default = 5            -- valid
-//                declare default priority default = 5 -- valid
-//                declare default default              -- invalid (second "default" is new statement)
-//
-//                alias priority = global.number[2]
-//                declare priority = 5                  -- valid
-//                declare local priority = 5            -- valid
-//                declare default priority priority = 5 -- valid
-//
-//             We'll need to back up the stream state in a few places, i.e. if we see 
-//             an unrecognized word (e.g. declare varname unrecognized) then that word 
-//             belongs to the next statement.
-//
-//        = DO NOT write to the variant's declarations. Maintain our own set and commit 
-//          it to the variant after successful compiling. That way, we don't trash the 
-//          loaded file if compiling hits an error.
-//
-//        - It's tempting to forego the use of VariableReference to parse the variable 
-//          names being declared, but doing that would cost us alias-handling unless we 
-//          reinvent the wheel (and let's not do that).
+//        = The compiler should reject initial number values that consist of run-time 
+//          data, i.e. number variables. Constant integers, game state values, and script 
+//          option values should all be allowed.
 //
 //        - Redefining a variable should be a warning. If the redefinition differs from 
 //          the earlier definition in any way (networking type or initial value), then 
 //          it should be an error.
-//
-//        - Variable declarations not at the root should be an error. We don't need to 
-//          care where a variable is defined, but for consistency and cleanliness' sakes 
-//          we should expect them at the top of the file.
 //
 //        - If we see a variable used anywhere and it has no declaration, we need to 
 //          generate an implicit declaration for it. However, we need to do this in a 
@@ -201,13 +148,6 @@ int main(int argc, char *argv[]) {
 //              - OpcodeArgValue already needs a function that can take a raw argument 
 //                string and produce a VariableReference, so that's just another reason 
 //                to have a helper function manage the creation of VariableReferences.
-//
-//           - The variable declaration objects (ScalarVariableDeclaration and friends) 
-//             need a "compiler_flags" value, with one of the flags being "implicit".
-//
-//           = VariableDeclarationSet needs a member function, "imply," which takes a 
-//             variable type and an index. The function will create declarations up to 
-//             and including the index, flagging all created definitions as implicit.
 //
 //     - Convert thrown exceptions into Compiler-managed errors. Search for all references 
 //       to Compiler::throw_error and compile_exception and change ALL of them to go 
