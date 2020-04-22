@@ -99,9 +99,10 @@ namespace Megalo {
       out.write(scope_name);
       cobb::sprintf(name, name.c_str(), var_index);
       out.write(name);
-      if (!n_default)
+      if (!n_default) {
          out.write(' ');
          out.write(_network_priority_to_string(this->networking));
+      }
       if (!i_default) {
          out.write(" = ");
          if (this->type == variable_type::team) {
@@ -144,25 +145,25 @@ namespace Megalo {
          case variable_scope::team:   scope = "team";   break;
       }
       for (size_t i = 0; i < this->scalars.size(); ++i)
-         this->scalars[i].decompile(scope, i, out, flags);
+         this->scalars[i]->decompile(scope, i, out, flags);
       for (size_t i = 0; i < this->objects.size(); ++i)
-         this->objects[i].decompile(scope, i, out, flags);
+         this->objects[i]->decompile(scope, i, out, flags);
       for (size_t i = 0; i < this->players.size(); ++i)
-         this->players[i].decompile(scope, i, out, flags);
+         this->players[i]->decompile(scope, i, out, flags);
       for (size_t i = 0; i < this->teams.size(); ++i)
-         this->teams[i].decompile(scope, i, out, flags);
+         this->teams[i]->decompile(scope, i, out, flags);
       for (size_t i = 0; i < this->timers.size(); ++i)
-         this->timers[i].decompile(scope, i, out, flags);
+         this->timers[i]->decompile(scope, i, out, flags);
    }
    namespace {
-      template<typename T> void _imply_impl(std::vector<T>& list, uint8_t index) {
+      void _imply_impl(VariableDeclarationList& list, uint8_t index) {
          ++index;
          auto size = list.size();
          if (size >= index)
             return;
          list.resize(index);
          for (size_t i = size; i < index; ++i)
-            list[i].compiler_flags |= VariableDeclaration::compile_flags::implicit;
+            list[i]->compiler_flags |= VariableDeclaration::compile_flags::implicit;
       }
    }
    bool VariableDeclarationSet::imply(variable_type vt, uint8_t index) noexcept {
@@ -196,31 +197,31 @@ namespace Megalo {
          return;
       switch (vt) {
          case variable_type::scalar:
-            this->scalars[index].make_explicit();
+            this->scalars[index]->make_explicit();
             return;
          case variable_type::object:
-            this->objects[index].make_explicit();
+            this->objects[index]->make_explicit();
             return;
          case variable_type::player:
-            this->players[index].make_explicit();
+            this->players[index]->make_explicit();
             return;
          case variable_type::team:
-            this->teams[index].make_explicit();
+            this->teams[index]->make_explicit();
             return;
          case variable_type::timer:
-            this->timers[index].make_explicit();
+            this->timers[index]->make_explicit();
             return;
       }
    }
    namespace {
-      template<typename T> VariableDeclaration* _get_or_create_impl(std::vector<T>& list, uint8_t index) {
+      VariableDeclaration* _get_or_create_impl(VariableDeclarationList& list, uint8_t index) {
          auto size = list.size();
          if (index >= size) {
             list.resize(index + 1);
             for (size_t i = size; i <= index; ++i)
-               list[i].compiler_flags |= VariableDeclaration::compile_flags::implicit;
+               list[i]->compiler_flags |= VariableDeclaration::compile_flags::implicit;
          }
-         return &list[index];
+         return list[index];
       }
    }
    VariableDeclaration* VariableDeclarationSet::get_or_create_declaration(variable_type vt, uint8_t index) noexcept {

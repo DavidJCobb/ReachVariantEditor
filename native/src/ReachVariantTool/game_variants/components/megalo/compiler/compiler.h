@@ -3,6 +3,7 @@
 #include <vector>
 #include <QString>
 #include "string_scanner.h"
+#include "../opcode_arg_type_registry.h"
 #include "../trigger.h"
 #include "../variable_declarations.h"
 #include "parsing/base.h"
@@ -195,7 +196,7 @@ namespace Megalo {
             } variables;
          } results;
          //
-         Compiler(GameVariantDataMultiplayer& mp, QString code) : string_scanner(code), variant(mp) {}
+         Compiler(GameVariantDataMultiplayer& mp) : string_scanner(""), variant(mp) {}
          ~Compiler();
          //
          inline const GameVariantDataMultiplayer& get_variant() const noexcept { return this->variant; }

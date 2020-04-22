@@ -3,6 +3,7 @@
 #include "../namespaces.h"
 #include "../../actions.h"
 #include "../../variables_and_scopes.h"
+#include "../../opcode_arg_type_registry.h"
 #include "../../opcode_arg_types/variables/all_core.h"
 #include "../../../../helpers/qt/string.h"
 
@@ -45,6 +46,8 @@ namespace Megalo::Script {
    }
    bool VariableReference::RawPart::resolve_index(Compiler& compiler) {
       if (this->index_is_numeric)
+         return true;
+      if (this->index_str.isEmpty()) // if the string is empty and the "numeric" bool is not true, then there is no index
          return true;
       auto abs = compiler.lookup_absolute_alias(this->index_str);
       if (!abs) {
@@ -324,6 +327,8 @@ namespace Megalo::Script {
    bool VariableReference::is_property() const noexcept { return this->resolved.property.definition && !this->is_accessor(); }
    bool VariableReference::is_read_only() const noexcept {
       auto& resolved = this->resolved;
+      if (!resolved.top_level.type)
+         return false;
       if (resolved.top_level.scope)
          return true;
       if (resolved.accessor)
@@ -475,7 +480,7 @@ namespace Megalo::Script {
          alias = compiler.lookup_relative_alias(part->name, basis);
       else {
          alias = compiler.lookup_absolute_alias(part->name);
-         if (alias->is_imported_name()) {
+         if (alias && alias->is_imported_name()) {
             compiler.raise_error(QString("Alias \"%1\" refers to imported name \"%2\" and cannot appear where a variable can.").arg(alias->name).arg(alias->target_imported_name));
             this->is_invalid = true;
             return false;
@@ -506,8 +511,20 @@ namespace Megalo::Script {
             return ++i;
          }
       }
-      Namespace* ns = namespaces::get_by_name(part->name);
-      if (!ns) {
+      Namespace* ns = nullptr;
+      if (!part->has_index())
+         ns = namespaces::get_by_name(part->name);
+      if (ns) {
+         //
+         // The part is the name of a namespace, so move onto the next part.
+         //
+         part = this->_get_raw_part(++i);
+         if (!part) {
+            compiler.raise_error(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
+            this->is_invalid = true;
+            return 0;
+         }
+      } else {
          ns = &namespaces::unnamed;
          //
          // Let's real quick check to handle "static indexable" references, e.g. "player[0]" or "script_widget[2]".
@@ -543,12 +560,6 @@ namespace Megalo::Script {
          //
          // If no static type was found, fall through to matching members.
          //
-      }
-      part = this->_get_raw_part(++i);
-      if (!part) {
-         compiler.raise_error(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
-         this->is_invalid = true;
-         return 0;
       }
       if (ns->can_have_variables) {
          //
@@ -623,6 +634,11 @@ namespace Megalo::Script {
    }
    bool VariableReference::_resolve_nested_variable(Compiler& compiler, size_t raw_index) {
       auto prev = this->resolved.top_level.type;
+      if (!prev) {
+         prev = this->resolved.alias_basis;
+         if (!prev) // should never happen
+            return false;
+      }
       if (!prev->can_have_variables())
          return false;
       this->_resolve_aliases_from(compiler, raw_index, prev); // handle relative aliases, if any are present

@@ -56,25 +56,6 @@ namespace Megalo {
       class VariableReference;
    }
 
-   class OpcodeArgTypeRegistry {
-      public:
-         using type_list_t = std::vector<const OpcodeArgTypeinfo*>;
-         //
-      public:
-         static OpcodeArgTypeRegistry& get() {
-            static OpcodeArgTypeRegistry instance;
-            return instance;
-         }
-         //
-         std::vector<const OpcodeArgTypeinfo*> types;
-         //
-         void register_type(const OpcodeArgTypeinfo& type);
-         const OpcodeArgTypeinfo* get_by_internal_name(const QString& name) const;
-         const OpcodeArgTypeinfo* get_static_indexable_type(const QString& name) const;
-         const OpcodeArgTypeinfo* get_variable_type(const QString& name) const;
-         void lookup_imported_name(const QString& name, type_list_t& out) const;
-   };
-
    class OpcodeArgTypeinfo {
       public:
          struct flags {
@@ -111,19 +92,13 @@ namespace Megalo {
          const VariableScopeWhichValue* first_static = nullptr;
          std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // used so that types like OpcodeArgValuePlayerOrGroup can declare themselves eligible for accessors on "team" and "player"
          //
-         OpcodeArgTypeinfo() {
-            OpcodeArgTypeRegistry::get().register_type(*this);
-         }
-         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
-            OpcodeArgTypeRegistry::get().register_type(*this);
-         }
+         OpcodeArgTypeinfo() {}
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {}
          OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedEnum&  names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
             this->imported_names.enum_values = &names_to_import;
-            OpcodeArgTypeRegistry::get().register_type(*this);
          }
          OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedFlags& names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
             this->imported_names.flag_values = &names_to_import;
-            OpcodeArgTypeRegistry::get().register_type(*this);
          }
          OpcodeArgTypeinfo(
             const char* in,
@@ -141,9 +116,7 @@ namespace Megalo {
             factory(fac),
             properties(pr),
             static_count(sc)
-         {
-            OpcodeArgTypeRegistry::get().register_type(*this);
-         }
+         {}
          //
          #pragma region Decorator methods
             //

@@ -7,11 +7,13 @@ namespace Megalo {
       class string_scanner {
          public:
             struct pos {
-               int32_t offset = -1; // position
-               int32_t line   = -1; // current line number
-               int32_t last_newline = -1; // index of last encountered newline
+               int32_t offset = 0; // position
+               int32_t line   = 0; // current line number
+               int32_t last_newline = 0; // index of last encountered newline
                //
                pos& operator+=(const pos&) noexcept;
+               //
+               [[nodiscard]] int32_t col() const noexcept { return this->offset - this->last_newline; }
             };
             using scan_functor_t = std::function<bool(QChar)>;
             //

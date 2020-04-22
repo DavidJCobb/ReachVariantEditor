@@ -152,6 +152,7 @@ namespace Megalo {
          for (i = size - 1; i >= 0; --i) {
             if (this->items[i] == item) {
                this->items.erase(this->items.begin() + i);
+               item->parent = nullptr;
                return;
             }
          }
@@ -286,6 +287,11 @@ namespace Megalo {
          this->_get_effective_items(items);
          size_t size = items.size();
          if (!size) {
+            //
+            // Don't compile the contents of an empty block. (This can happen both when the script author 
+            // writes an empty block, and when we run this function on the root to compile any loose 
+            // statements just before the start of a top-level block.)
+            //
             return;
          }
          //
@@ -321,6 +327,8 @@ namespace Megalo {
                if (is_last && !block->is_event_trigger() && block->_is_if_block())
                   block->trigger = this->trigger;
                block->compile(compiler);
+               if (!block->trigger) // empty blocks get skipped
+                  continue;
                if (block->trigger != this->trigger) {
                   //
                   // Create a "call nested trigger" opcode.
@@ -365,14 +373,13 @@ namespace Megalo {
    }
    //
    Compiler::~Compiler() {
-      if (!this->results.success) {
-         for (auto trigger : this->results.triggers)
-            delete trigger;
-      }
+      for (auto trigger : this->results.triggers)
+         delete trigger;
       this->results.triggers.clear();
       //
-      if (this->block && this->block != this->root) {
-         delete this->block;
+      if (this->block) {
+         if (this->block != this->root && !this->block->parent) // don't double-free the root; if the block has a parent, its parent is responsible for freeing it
+            delete this->block;
          this->block = nullptr;
       }
       if (this->root) {
@@ -593,6 +600,7 @@ namespace Megalo {
       this->text = text;
       if (!this->root) {
          this->root = new Script::Block;
+         this->root->type = Script::Block::Type::root;
          this->root->set_start(this->backup_stream_state());
       }
       this->block = this->root;
@@ -756,10 +764,12 @@ namespace Megalo {
             this->assignment->lhs = this->__parseVariable(this->token.text);
             auto ref = this->assignment->lhs;
             ref->owner = this->assignment;
-            if (ref->is_constant_integer())
-               this->raise_error("Cannot assign to a constant integer.");
-            else if (ref->is_read_only())
-               this->raise_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
+            if (!ref->is_invalid) {
+               if (ref->is_constant_integer())
+                  this->raise_error("Cannot assign to a constant integer.");
+               else if (ref->is_read_only())
+                  this->raise_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
+            }
          }
          this->reset_token();
          this->token.text = c;
@@ -1233,6 +1243,7 @@ namespace Megalo {
       }
       if (c == ')' || c == ',') {
          this->raise_fatal(QString("Unexpected %1.").arg(c));
+         return false;
       }
       if (string_scanner::is_operator_char(c)) {
          this->comparison = new Script::Comparison;
@@ -1246,6 +1257,7 @@ namespace Megalo {
       }
       if (this->token.ended) {
          this->raise_fatal("Statements of the form {word word} are not valid.");
+         return false;
       }
       this->token.text += c;
       if (this->token.text[0] == '-' && !c.isNumber()) {
@@ -1489,7 +1501,7 @@ namespace Megalo {
          for (auto& action : list) {
             auto& mapping = action.mapping;
             if (context) {
-               if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+               if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context || mapping.arg_context == OpcodeFuncToScriptMapping::game_namespace)
                   continue;
                auto& base = action.arguments[mapping.arg_context];
                if (&base.typeinfo != context->get_type())
@@ -1859,18 +1871,26 @@ namespace Megalo {
       return nullptr;
    }
    //
-   void Compiler::_openBlock(Script::Block* block) {
-      if (this->block == this->root) {
+   void Compiler::_openBlock(Script::Block* block) { // (block) should already have been appended to its parent
+      this->block = block;
+      auto root = this->root;
+      if (block->parent == root) {
          //
          // We're opening a top-level Block. Before we do that, let's see if the root block contains any 
          // statements; if so, let's put those in their own trigger.
          //
-         assert(this->root->trigger == nullptr);
-         this->root->compile(*this);
-         this->root->trigger = nullptr;
-         this->root->clear();
+         // Because (block) was already added to the root, we will need to remove it in order to avoid 
+         // accidentally compiling it early or (in Block::clear) deleting it early.
+         //
+         root->remove_item(block);
+         //
+         assert(root->trigger == nullptr);
+         root->compile(*this);
+         root->trigger = nullptr;
+         root->clear();
+         //
+         root->insert_item(block);
       }
-      this->block = block;
    }
    bool Compiler::_closeCurrentBlock() {
       if (this->block == this->root)
@@ -2083,7 +2103,7 @@ namespace Megalo {
                }
             }
          } else {
-            if (this->extract_word().compare("with", Qt::CaseInsensitive) == 0) {
+            if (word.compare("with", Qt::CaseInsensitive) == 0) {
                if (!this->extract_word("network")) {
                   this->raise_fatal("Expected the word \"network\".");
                   return;

@@ -149,6 +149,18 @@ int main(int argc, char *argv[]) {
 //          Currently, because it uses the same compile function as any basic enum, it just 
 //          matches as a string.
 //
+//     - COMPILER TESTS: We can test the compiler itself right now, on the understanding 
+//       that any argument types that haven't had their own compile code written yet will 
+//       yield non-fatal errors.
+//
+//        - The "script_option" member in the unnamed namespace doesn't parse properly.
+//
+//        - Statements don't parse and I can't be bothered to figure out why. Let's rewrite 
+//          condition and action parsing to use the "extract" functions instead of doing 
+//          absolutely everything through the "token" field. In fact, if we do that and 
+//          also write an "extract_operator" function, then we can get rid of the "token" 
+//          field entirely.
+//
 //     - Compiler: Unresolved string references: each list entry needs an "action" field 
 //       which lists the action the script author decided to take. Available actions are: 
 //       create a new string in the table; or use an existing string with a given index. 
