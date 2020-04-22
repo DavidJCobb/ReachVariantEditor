@@ -25,7 +25,9 @@ namespace Megalo {
          struct compile_flags {
             enum type : uint8_t {
                none = 0,
-               implicit = 0x01,
+               implicit         = 0x01,
+               implicit_network = 0x02,
+               implicit_initial = 0x04,
             };
          };
          using compile_flags_t = std::underlying_type_t<compile_flags::type>;
@@ -57,11 +59,19 @@ namespace Megalo {
          inline variable_type get_type() const noexcept { return this->type; }
          inline bool is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit; }
          inline void make_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit; }
+         inline bool networking_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_network; }
+         inline void make_networking_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit_network; }
+         inline bool initial_value_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_initial; }
+         inline void make_initial_value_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit_initial; }
          //
          bool has_initial_value() const noexcept;
          bool has_network_type() const noexcept;
          void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
+         void decompile(const char* scope_name, uint8_t var_index, Decompiler& out, uint32_t flags = 0) noexcept;
+         //
+         bool initial_value_is_default() const noexcept;
+         bool network_type_is_default() const noexcept;
    };
    class ScalarVariableDeclaration : public VariableDeclaration {
       public:

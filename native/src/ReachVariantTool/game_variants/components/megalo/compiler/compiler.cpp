@@ -1913,63 +1913,7 @@ namespace Megalo {
       if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
    }
-   namespace {
-      Script::VariableReference* _handle_declared_name_as_variable(Compiler::pos start, Compiler& compiler, QString word) {
-         auto variable = new Script::VariableReference(word);
-         variable->resolve(compiler, true);
-         if (variable->is_invalid) {
-            delete variable;
-            return nullptr;
-         }
-         if (variable->is_property() || variable->is_accessor()) {
-            compiler.raise_error(start, QString("Invalid variable declaration. You cannot declare a property or accessor such as \"%1\".").arg(variable->to_string()));
-            delete variable;
-            return nullptr;
-         }
-         //
-         auto type = variable->get_type();
-         if (!type->is_variable()) {
-            compiler.raise_error(start, QString("Invalid variable declaration. Value \"%1\" does not refer to a variable.").arg(variable->to_string()));
-            delete variable;
-            return nullptr;
-         }
-         if (variable->is_statically_indexable_value()) {
-            compiler.raise_error(start, QString("Invalid variable declaration. Value \"%1\" is a built-in value, always exists, and therefore cannot be declared.").arg(variable->to_string()));
-            delete variable;
-            return nullptr;
-         }
-         return variable;
-      }
-      Script::VariableReference* _extract_declared_initial_value(Compiler& compiler) {
-         auto rhs = compiler.extract_word();
-         if (Compiler::is_keyword(rhs)) {
-            compiler.raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(rhs));
-            return nullptr;
-         }
-         if (rhs.isEmpty()) {
-            compiler.raise_fatal("Expected an initial value for the variable declaration.");
-            return nullptr;
-         }
-         auto initial = new Script::VariableReference(rhs);
-         initial->resolve(compiler);
-         if (initial->is_invalid) {
-            delete initial;
-            return nullptr;
-         }
-         if (initial->is_property() || initial->is_accessor()) {
-            compiler.raise_error(QString("Invalid variable declaration. Properties and accessors cannot be used as the initial values of variables."));
-            delete initial;
-            return nullptr;
-         }
-         if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
-            // 
-            // TODO: Raise an error if the initial value is a variable; only allow integer constants, 
-            // game state values, and indexed list items.
-            //
-         }
-         return initial;
-      }
-   }
+   //
    void Compiler::_declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified) {
       auto type  = variable.get_type();
       auto basis = variable.get_alias_basis_type();
@@ -1999,162 +1943,228 @@ namespace Megalo {
          decl->make_explicit();
       } else {
          //
-         // TODO: This variable was already declared.
+         // This is a redeclaration of a previously declared variable. Raise an error if the redeclaration is 
+         // inconsistent with any prior declaration, or a warning otherwise.
          //
-         //  - If its network type is non-default and we are specifying a network type, raise an error.
-         //
-         //     - Requires a new compile flag on VariableDeclaration to indicate that the network type 
-         //       was explicitly specified.
-         //
-         //  - If it has an initial value different than the one we are passing in, raise an error.
-         //
-         //     - Requires a new compile flag on VariableDeclaration to indicate that the initial value 
-         //       was explicitly specified.
-         //
-         //  - Otherwise, raise a warning.
-         //
-      }
-      //
-      if (decl->has_network_type()) {
-         decl->networking = networking;
-      } else {
-         if (network_specified)
-            this->raise_warning("Variables of this type cannot have a networking type set. The networking type that you specified will be ignored.");
-      }
-      //
-      if (decl->has_initial_value()) {
-         if (decl->get_type() == variable_type::team) {
-            bool success;
-            auto team = initial->to_const_team(&success);
-            if (!success) {
-               this->raise_error("Variables of this type can only use constant teams as their initial values (i.e. team[0], neutral_team, no_team, etc.).");
-               return;
-            }
-            decl->initial.team = team;
+         auto str = variable.to_string();
+         bool bad = false;
+         if (initial && !decl->initial_value_is_implicit()) {
+            bad = true;
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species an initial value even though a previous declaration already provided one.").arg(str));
+         }
+         if (network_specified && !decl->networking_is_implicit()) {
+            bad = true;
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species a network type even though a previous declaration already provided one.").arg(str));
+         }
+         if (bad) {
+            return;
          } else {
-            if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
+            this->raise_warning(QString("This is a redeclaration of variable %1.").arg(str));
+         }
+      }
+      if (network_specified) {
+         decl->make_networking_explicit();
+         //
+         if (decl->has_network_type()) {
+            decl->networking = networking;
+         } else {
+            this->raise_error("Variables of this type cannot have a networking type set.");
+         }
+      }
+      if (initial) {
+         decl->make_initial_value_explicit();
+         if (decl->has_initial_value()) {
+            if (decl->get_type() == variable_type::team) {
+               bool success;
+               auto team = initial->to_const_team(&success);
+               if (!success) {
+                  this->raise_error("Variables of this type can only use constant teams as their initial values (i.e. team[0], neutral_team, no_team, etc.).");
+                  return;
+               }
+               decl->initial.team = team;
+            } else {
+               if (initial->get_type() != &OpcodeArgValueScalar::typeinfo) {
+                  this->raise_error("Variables of this type can only use numeric values as their initial values.");
+                  return;
+               }
                auto result = decl->initial.number->compile(*this, *initial, 0);
                if (result.is_failure())
                   this->raise_error("Failed to compile this variable declaration's initial value.");
-            } else {
-               this->raise_error("Variables of this type can only use numeric values as their initial values.");
             }
+         } else {
+            this->raise_error("Variables of this type cannot have initial values provided.");
          }
-      } else {
-         if (initial)
-            this->raise_warning("Variables of this type cannot have initial values provided. The initial value that you specified will be ignored.");
       }
    }
    void Compiler::_handleKeyword_Declare() {
       auto  start = this->token.pos;
       using net_t = Megalo::variable_network_priority;
       //
-      // The possible variable declaration statements are:
+      // declare [word]
+      // declare [word] = [value]
+      // declare [word] with network priority [word]
+      // declare [word] with network priority [word] = [value]
       //
-      //    declare [word]
-      //    declare [word] = [value]
-      //    declare low priority [word] = value
-      //    declare default priority [word] = value]
-      //    declare high priority [word] = value
-      //    declare local [word] = value
-      //
-      // Notably, [word] can be "low", "default", "high", "local", or "priority":
-      //
-      //    declare local = value
-      //
-      net_t priority = net_t::default;
-      bool  has_pri  = false;
-      auto  word     = this->extract_word();
-      //
-      if (word.compare("default", Qt::CaseInsensitive) == 0) {
-         has_pri = true;
-      } else if (word.compare("low", Qt::CaseInsensitive) == 0) {
-         priority = net_t::low;
-         has_pri  = true;
-      } else if (word.compare("high", Qt::CaseInsensitive) == 0) {
-         priority = net_t::high;
-         has_pri  = true;
-      } else if (word.compare("local", Qt::CaseInsensitive) == 0) {
-         priority = net_t::none;
-         has_pri  = true;
-      }
-      //
-      auto after_first_word = this->backup_stream_state();
-      std::unique_ptr<Script::VariableReference> variable = nullptr;
-      std::unique_ptr<Script::VariableReference> initial  = nullptr;
-      //
-      if (this->extract_specific_char('=')) {
-         //
-         // declare word = value
-         //
-         priority = net_t::default;
-         variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
-         if (variable) {
-            initial.reset(_extract_declared_initial_value(*this));
-            if (!initial)
-               return;
-            this->_declare_variable(*variable, initial.get(), priority, false);
-            return;
-         }
-         //
-         // If we reached this point, then the variable name that was specified was not valid. We need 
-         // to extract and discard the initial value that was specified for this variable.
-         //
-         int32_t throwaway;
-         if (!this->extract_integer_literal(throwaway)) {
-            auto discard = this->extract_word();
-            //
-            // There is no way to validate (discard) if we don't know the variable type that this 
-            // declaration was meant to be for. Don't bother trying.
-            //
-            this->raise_warning(QString("Because the variable declaration was invalid, we cannot verify whether \"%2\" was a valid initial value for \"%1\".").arg(word).arg(discard));
-         }
+      QString str_variable = this->extract_word();
+      QString str_initial;
+      if (str_variable.isEmpty()) {
+         this->raise_fatal("Expected a variable name.");
          return;
       }
-      if (has_pri) {
-         if (priority == net_t::none || this->extract_word("priority")) { // the word "local" isn't followed by "priority"
-            //
-            // declare [network] priority [name]...
-            //
-            auto name = this->extract_word();
-            if (name.isEmpty()) {
-               this->raise_fatal(QString("Expected a variable name (or alias) after \"declare %1 priority\".").arg(word));
-               return;
-            }
-            variable.reset(_handle_declared_name_as_variable(start, *this, name)); // logs any errors
-            if (this->extract_specific_char('=')) {
-               //
-               // declare [network] priority [name] = [value]
-               //
-               initial.reset(_extract_declared_initial_value(*this)); // logs any errors
-               if (!initial)
-                  return;
-            } else {
-               //
-               // declare [network] priority [name]
-               //
-            }
-            if (variable)
-               this->_declare_variable(*variable, initial.get(), priority, true);
-         } else {
-            //
-            // declare word
-            //
-            priority = net_t::default;
-            variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
-            if (variable)
-               this->_declare_variable(*variable, nullptr, priority, false);
-         }
+      if (Compiler::is_keyword(str_variable)) {
+         this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_variable));
+         return;
       }
       //
-      // If we got here, then the first word after "declare" was not the first word of any 
-      // recognized networking priority, and there was no "=" after that word. Therefore, 
-      // that word must be a variable name in a declaration with no networking priority or 
-      // initial value specified (i.e. just "declare [word]").
+      bool  has_network = false;
+      net_t network     = net_t::default;
+      #pragma region Parsing and extracting all relevant tokens
+         auto  after_name = this->backup_stream_state();
+         auto  word       = this->extract_word();
+         if (word.isEmpty()) {
+            //
+            // This is either (declare name) or (declare name = ...).
+            //
+            if (this->extract_specific_char('=')) {
+               int32_t int_initial;
+               auto    result = this->extract_integer_literal(int_initial);
+               if (result == extract_result::floating_point) {
+                  this->raise_error("You cannot initialize a variable to a floating-point value.");
+               } else if (result == extract_result::success) {
+                  str_initial = QString("%1").arg(int_initial);
+               } else if (result == extract_result::failure) {
+                  str_initial = this->extract_word();
+                  if (Compiler::is_keyword(str_initial)) {
+                     this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));
+                     return;
+                  }
+               }
+            }
+         } else {
+            if (this->extract_word().compare("with", Qt::CaseInsensitive) == 0) {
+               if (!this->extract_word("network")) {
+                  this->raise_fatal("Expected the word \"network\".");
+                  return;
+               }
+               if (!this->extract_word("priority")) {
+                  this->raise_fatal("Expected the word \"network\".");
+                  return;
+               }
+               //
+               has_network = true;
+               //
+               word = this->extract_word();
+               if (word.isEmpty()) {
+                  this->raise_fatal("Expected a network priority (\"default\", \"low\", \"high\", or \"local\").");
+                  return;
+               }
+               if (word.compare("default", Qt::CaseInsensitive) == 0) {
+                  network = net_t::default;
+               } else if (word.compare("low", Qt::CaseInsensitive) == 0) {
+                  network = net_t::low;
+               } else if (word.compare("high", Qt::CaseInsensitive) == 0) {
+                  network = net_t::high;
+               } else if (word.compare("local", Qt::CaseInsensitive) == 0) {
+                  network = net_t::none;
+               } else {
+                  this->raise_fatal(QString("Word \"%1\" is not a network priority.").arg(word));
+                  return;
+               }
+               //
+               // Next, grab an initial value if there is one:
+               //
+               if (this->extract_specific_char('=')) {
+                  int32_t int_initial;
+                  auto    result = this->extract_integer_literal(int_initial);
+                  if (result == extract_result::floating_point) {
+                     this->raise_error("You cannot initialize a variable to a floating-point value.");
+                  } else if (result == extract_result::success) {
+                     str_initial = QString("%1").arg(int_initial);
+                  } else if (result == extract_result::failure) {
+                     str_initial = this->extract_word();
+                     if (Compiler::is_keyword(str_initial)) {
+                        this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));
+                        return;
+                     }
+                  }
+               }
+            } else {
+               //
+               // The word was not what we expected. That means that this must be a (declare name) 
+               // statement with no initial value.
+               //
+               this->restore_stream_state(after_name);
+            }
+         }
+      #pragma endregion
       //
-      variable.reset(_handle_declared_name_as_variable(start, *this, word)); // logs any errors
-      if (variable)
-         this->_declare_variable(*variable, nullptr, priority, false);
+      Script::VariableReference* variable = nullptr;
+      Script::VariableReference* initial  = nullptr;
+      //
+      variable = new Script::VariableReference(str_variable);
+      variable->resolve(*this, true);
+      if (variable->is_invalid) {
+         delete variable;
+         if (!str_initial.isEmpty())
+            this->raise_error("Could not identify the variable being declared; this means that the initial value cannot be checked for errors.");
+         return;
+      }
+      {  // Validate (variable).
+         bool bad = true;
+         if (variable->is_property() || variable->is_accessor()) {
+            this->raise_error(start, QString("Invalid variable declaration. You cannot declare a property or accessor such as \"%1\".").arg(variable->to_string()));
+         } else if (variable->is_statically_indexable_value()) {
+            this->raise_error(start, QString("Invalid variable declaration. Value \"%1\" is a built-in value, always exists, and therefore cannot be declared.").arg(variable->to_string()));
+         } else if (!variable->get_type()->is_variable()) {
+            this->raise_error(start, QString("Invalid variable declaration. Value \"%1\" does not refer to a variable.").arg(variable->to_string()));
+         } else {
+            bad = false;
+         }
+         if (bad) {
+            delete variable;
+            return;
+         }
+         auto basis = variable->get_alias_basis_type();
+         if (!basis) {
+            auto top  = variable->resolved.top_level.type;
+            auto nest = variable->resolved.nested.type;
+            if (top && nest) {
+               this->raise_error(start, QString("Invalid variable declaration. You cannot declare a specific nested variable e.g. global.player[0].number[1]; you can only declare nested variables within a scope e.g. player.number[1]."));
+            }
+         }
+      }
+      if (!str_initial.isEmpty()) {
+         initial = new Script::VariableReference(str_initial);
+         initial->resolve(*this);
+         if (initial->is_invalid) {
+            delete variable;
+            delete initial;
+            return;
+         }
+         if (initial->is_property() || initial->is_accessor()) {
+            this->raise_error(QString("Invalid variable declaration. Properties and accessors cannot be used as the initial values of variables."));
+            delete variable;
+            delete initial;
+            return;
+         }
+         if (initial->get_type() == &OpcodeArgValueScalar::typeinfo) {
+            auto& res = initial->resolved;
+            auto& top = res.top_level;
+            if (top.type && top.type->is_variable() && !top.is_static && !top.is_constant) {
+               this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
+               return;
+            }
+            if (res.nested.type) {
+               this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
+               return;
+            }
+         }
+      }
+      this->_declare_variable(*variable, initial, network, has_network);
+      //
+      delete variable;
+      if (initial)
+         delete initial;
    }
 
    void Compiler::_handleKeyword_Do() {

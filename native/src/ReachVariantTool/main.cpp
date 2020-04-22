@@ -122,54 +122,18 @@ int main(int argc, char *argv[]) {
 //          in all compiled triggers, and throw a compiler error if any have any nullptr 
 //          arguments.
 //
-//     - The compiler needs code to parse variable declarations, including scope-relative 
-//       declarations e.g. (declare player.number[0]).
+//     - If we see a variable used anywhere and it has no declaration, we need to generate 
+//       an implicit declaration for it.
 //
-//        = LET'S REDESIGN THE SYNTAX. THERE'S AN EASIER WAY TO DO THIS:
+//        = Best way to do this is to give Compiler an internal function that generates 
+//          VariableReference instances, and only use that function -- never anything 
+//          else -- to create them. Then, we can have that function manage declarations 
+//          (and other things, like checking whether event variables are accessible 
+//          from the current trigger).
 //
-//             declare [name]
-//             declare [name] with network priority [priority]
-//             declare [name] ... = [value]
-//
-//          We should fully parse the statement BEFORE we actually create VariableReferences 
-//          and otherwise try to interpret the declaration. There are two bonuses of this 
-//          syntax:
-//
-//           - It's simpler. We don't have to resolve ambiguities where the words in the 
-//             "declare" syntax itself can be aliases -- or rather, we don't have to go 
-//             as far out of our way to do it.
-//
-//           - If we want to allow other properties to be specified, we can make the "with" 
-//             portion a list with segments separated by "and".
-//
-//          And by parsing the statement fully first, we can do all of the VariableReference 
-//          checks (and deletions) in one place (no need for helper functions or unique_ptr).
-//
-//           = DO NOT FORGET TO UPDATE THE DECOMPILER AS WELL
-//
-//        = The compiler should reject initial number values that consist of run-time 
-//          data, i.e. number variables. Constant integers, game state values, and script 
-//          option values should all be allowed.
-//
-//        - Redefining a variable should be a warning. If the redefinition differs from 
-//          the earlier definition in any way (networking type or initial value), then 
-//          it should be an error.
-//
-//        - If we see a variable used anywhere and it has no declaration, we need to 
-//          generate an implicit declaration for it. However, we need to do this in a 
-//          way that won't lead to us accidentally mistaking a later declaration for a 
-//          redeclaration. (Worst-case scenario: we can just maintain flags for each 
-//          variable in the compiler, along with the final variable declaration structs.)
-//
-//           = Best way to do this is to give Compiler an internal function that generates 
-//             VariableReference instances, and only use that function -- never anything 
-//             else -- to create them. Then, we can have that function manage declarations 
-//             (and other things, like checking whether event variables are accessible 
-//             from the current trigger).
-//
-//              - OpcodeArgValue already needs a function that can take a raw argument 
-//                string and produce a VariableReference, so that's just another reason 
-//                to have a helper function manage the creation of VariableReferences.
+//           - OpcodeArgValue already needs a function that can take a raw argument 
+//             string and produce a VariableReference, so that's just another reason 
+//             to have a helper function manage the creation of VariableReferences.
 //
 //     - Convert thrown exceptions into Compiler-managed errors. Search for all references 
 //       to Compiler::throw_error and compile_exception and change ALL of them to go 
@@ -253,6 +217,14 @@ int main(int argc, char *argv[]) {
 //       any means essential; we've already decided that conciseness is not required.)
 //
 //        - Added a "TODO" comment to Block::compile where we'd need to do this.
+//
+//        - HMM... I THINK IT WOULD ACTUALLY BE BEST TO HANDLE THIS BEFORE COMPILING BLOCKS. 
+//          SPECIFICALLY, WHEN WE OPEN AN ELSE(IF) BLOCK, WE SHOULD CLONE THE ALREADY-COMPILED 
+//          CONDITIONS OF THE PRECEDING (ELSE)IF BLOCK INTO THE NEW ELSE(IF) BLOCK. As for how 
+//          to invert them? I think it would be enough to just set the "inverted" flag on all 
+//          of the cloned conditions and swap all "and"/"or" relationships, but I'd need to 
+//          test that with pen and paper (or rather, Notepad) to see if it holds up. Or Google 
+//          it.
 //
 //     = DEFERRED TASKS
 //
