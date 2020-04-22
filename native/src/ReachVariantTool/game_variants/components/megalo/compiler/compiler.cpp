@@ -749,10 +749,9 @@ namespace Megalo {
          this->assignment = new Script::Statement;
          this->assignment->set_start(this->token.pos);
          {
-            this->assignment->lhs = new Script::VariableReference(this->token.text);
+            this->assignment->lhs = this->__parseVariable(this->token.text);
             auto ref = this->assignment->lhs;
             ref->owner = this->assignment;
-            ref->resolve(*this, false, true);
             if (ref->is_constant_integer())
                this->raise_error("Cannot assign to a constant integer.");
             else if (ref->is_read_only())
@@ -857,7 +856,7 @@ namespace Megalo {
       //
       #pragma region Code to compile an assignment
          this->assignment->set_end(this->state);
-         this->assignment->rhs = new Script::VariableReference(this->token.text);
+         this->assignment->rhs = this->__parseVariable(this->token.text);
          this->assignment->rhs->owner = this->assignment;
          //
          // TODO: Consider writing code for type checking non-accessor assignments in advance... but 
@@ -1060,6 +1059,43 @@ namespace Megalo {
       this->next_condition_joiner = c_joiner::none;
       this->negate_next_condition = false;
    }
+   Script::VariableReference* Compiler::__parseVariable(QString text, bool is_alias_definition, bool is_write_access) {
+      //
+      // A quick note: Alias::Alias doesn't need to use this. That just declares an alias to a 
+      // variable. If the alias is actually used, it'll be resolved through VariableReference 
+      // and we'll catch it here (or in the code for user-written variable declarations -- the 
+      // only part of the compiler that shouldn't create VariableReferences through this helper 
+      // function).
+      //
+      auto var = new Script::VariableReference(text);
+      if (this->has_fatal()) // fatal error occurred while parsing the text
+         return var;
+      var->resolve(*this, is_alias_definition, is_write_access);
+      if (!var->is_invalid) {
+         //
+         // Implicitly declare the variable:
+         //
+         auto type  = var->get_type();
+         auto basis = var->get_alias_basis_type();
+         //
+         variable_scope scope_v = getVariableScopeForTypeinfo(basis);
+         variable_type  type_v  = getVariableTypeForTypeinfo(type);
+         if (scope_v == variable_scope::not_a_scope || type_v == variable_type::not_a_variable) {
+            this->raise_error(QString("Unable to generate an implicit variable declaration for \"%1\".").arg(var->to_string()));
+            return var;
+         }
+         //
+         int32_t index = 0;
+         if (scope_v == variable_scope::global) {
+            index = var->resolved.top_level.index;
+         } else {
+            index = var->resolved.nested.index;
+         }
+         auto set  = this->_get_variable_declaration_set(scope_v);
+         auto decl = set->get_or_create_declaration(type_v, index);
+      }
+      return var;
+   }
    //
    void Compiler::_parseBlockConditions() {
       this->comparison = nullptr;
@@ -1194,7 +1230,7 @@ namespace Megalo {
       if (string_scanner::is_operator_char(c)) {
          this->comparison = new Script::Comparison;
          this->comparison->set_start(this->token.pos);
-         this->comparison->lhs = new Script::VariableReference(this->token.text);
+         this->comparison->lhs = this->__parseVariable(this->token.text);
          this->comparison->lhs->owner = this->assignment;
          this->reset_token();
          this->token.text = c;
@@ -1283,7 +1319,7 @@ namespace Megalo {
       //
       #pragma region Code to compile a comparison
          this->comparison->set_end(this->state);
-         this->comparison->rhs = new Script::VariableReference(this->token.text);
+         this->comparison->rhs = this->__parseVariable(this->token.text);
          this->comparison->rhs->owner = this->comparison;
          //
          {
@@ -1530,10 +1566,9 @@ namespace Megalo {
                //
                context_is_game = true;
             } else {
-               context.reset(new Script::VariableReference(text));
+               context.reset(this->__parseVariable(text));
                if (this->has_fatal()) // the VariableReference may contain a syntax error
                   return;
-               context->resolve(*this);
                //
                // Handle errors that may have occurred when resolving the variable.
                //

@@ -164,13 +164,16 @@ namespace Megalo {
    bool OpcodeArgValueScalar::is_const_zero() const noexcept { // bit hacky, but eh
       if (!this->scope)
          return false;
-      if (this->scope->index_type != VariableScopeIndicatorValue::index_type::generic)
-         return false;
-      if (this->scope->index_bitcount != 16)
+      if (this->scope != &variable_scope_indicators::number::constant)
          return false;
       if (this->index != 0)
          return false;
       return true;
+   }
+   void OpcodeArgValueScalar::set_to_const_zero() noexcept {
+      this->scope = &variable_scope_indicators::number::constant;
+      this->which = 0;
+      this->index = 0;
    }
    Variable* OpcodeArgValueScalar::create_zero_or_none() const noexcept {
       auto arg = new OpcodeArgValueScalar;

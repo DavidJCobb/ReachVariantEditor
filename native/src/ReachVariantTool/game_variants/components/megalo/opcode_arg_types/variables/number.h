@@ -8,6 +8,7 @@ namespace Megalo {
          OpcodeArgValueScalar();
          //
          bool is_const_zero() const noexcept;
+         void set_to_const_zero() noexcept;
          virtual Variable* create_zero_or_none() const noexcept override;
    };
    namespace variable_scope_indicators {

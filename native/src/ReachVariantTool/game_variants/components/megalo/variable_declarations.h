@@ -36,18 +36,8 @@ namespace Megalo {
          variable_type type = variable_type::not_a_variable;
          //
       public:
-         VariableDeclaration(variable_type vt) : type(vt) {
-            if (this->has_initial_value()) {
-               if (this->type != variable_type::team)
-                  this->initial.number = new OpcodeArgValueScalar;
-            }
-         }
-         ~VariableDeclaration() {
-            if (this->initial.number) {
-               delete this->initial.number;
-               this->initial.number = nullptr;
-            }
-         }
+         VariableDeclaration(variable_type vt);
+         ~VariableDeclaration();
          //
          compile_flags_t compiler_flags = compile_flags::none;
          network_type    networking     = network_enum::default;
@@ -56,16 +46,16 @@ namespace Megalo {
             team_bitnumber        team   = const_team::none;
          } initial;
          //
-         inline variable_type get_type() const noexcept { return this->type; }
-         inline bool is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit; }
+         [[nodiscard]] inline variable_type get_type() const noexcept { return this->type; }
+         [[nodiscard]] inline bool is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit; }
          inline void make_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit; }
-         inline bool networking_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_network; }
+         [[nodiscard]] inline bool networking_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_network; }
          inline void make_networking_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit_network; }
-         inline bool initial_value_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_initial; }
+         [[nodiscard]] inline bool initial_value_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_initial; }
          inline void make_initial_value_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit_initial; }
          //
-         bool has_initial_value() const noexcept;
-         bool has_network_type() const noexcept;
+         [[nodiscard]] bool has_initial_value() const noexcept;
+         [[nodiscard]] bool has_network_type() const noexcept;
          void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          void decompile(const char* scope_name, uint8_t var_index, Decompiler& out, uint32_t flags = 0) noexcept;

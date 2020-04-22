@@ -122,19 +122,6 @@ int main(int argc, char *argv[]) {
 //          in all compiled triggers, and throw a compiler error if any have any nullptr 
 //          arguments.
 //
-//     - If we see a variable used anywhere and it has no declaration, we need to generate 
-//       an implicit declaration for it.
-//
-//        = Best way to do this is to give Compiler an internal function that generates 
-//          VariableReference instances, and only use that function -- never anything 
-//          else -- to create them. Then, we can have that function manage declarations 
-//          (and other things, like checking whether event variables are accessible 
-//          from the current trigger).
-//
-//           - OpcodeArgValue already needs a function that can take a raw argument 
-//             string and produce a VariableReference, so that's just another reason 
-//             to have a helper function manage the creation of VariableReferences.
-//
 //     - Convert thrown exceptions into Compiler-managed errors. Search for all references 
 //       to Compiler::throw_error and compile_exception and change ALL of them to go 
 //       through Compiler's error-logging functionality; then, delete (throw_error) and 

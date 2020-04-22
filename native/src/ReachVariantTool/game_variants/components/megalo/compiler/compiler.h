@@ -249,6 +249,7 @@ namespace Megalo {
          void _parseComparison(QChar);
          //
          void _applyConditionModifiers(Script::Comparison*); // applies "not", "and", "or", and then resets the relevant state on the Compiler
+         Script::VariableReference* __parseVariable(QString, bool is_alias_definition = false, bool is_write_access = false); // adds the variable to the appropriate VariableDeclarationSet as appropriate
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
          void _parseFunctionCall(bool is_condition);

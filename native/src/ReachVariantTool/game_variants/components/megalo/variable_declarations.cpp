@@ -17,6 +17,20 @@ namespace {
    }
 }
 namespace Megalo {
+   VariableDeclaration::VariableDeclaration(variable_type vt) : type(vt) {
+      if (this->has_initial_value()) {
+         if (this->type != variable_type::team) {
+            this->initial.number = new OpcodeArgValueScalar;
+            this->initial.number->set_to_const_zero();
+         }
+      }
+   }
+   VariableDeclaration::~VariableDeclaration() {
+      if (this->initial.number) {
+         delete this->initial.number;
+         this->initial.number = nullptr;
+      }
+   }
    bool VariableDeclaration::has_initial_value() const noexcept {
       switch (this->type) {
          case variable_type::scalar:
