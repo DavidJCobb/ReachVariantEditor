@@ -8,6 +8,7 @@
 #include "parsing/base.h"
 #include "parsing/alias.h"
 #include "parsing/variable_reference.h"
+#include "../../../types/multiplayer.h"
 
 namespace Megalo {
    class Compiler;
@@ -138,6 +139,7 @@ namespace Megalo {
          c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
+         GameVariantDataMultiplayer& variant = nullptr;
          //
          log_t warnings;
          log_t errors;
@@ -193,7 +195,10 @@ namespace Megalo {
             } variables;
          } results;
          //
+         Compiler(GameVariantDataMultiplayer& mp) : variant(mp) {}
          ~Compiler();
+         //
+         inline const GameVariantDataMultiplayer& get_variant() const noexcept { return this->variant; }
          //
          void reset_token();
          //

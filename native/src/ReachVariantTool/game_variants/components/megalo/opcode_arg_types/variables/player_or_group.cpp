@@ -1,7 +1,7 @@
 #include "player_or_group.h"
-#include "player.h"
-#include "team.h"
+#include "all_core.h"
 #include "../../../../errors.h"
+#include "../../compiler/compiler.h"
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValuePlayerOrGroup::typeinfo = OpcodeArgTypeinfo(
@@ -61,6 +61,38 @@ namespace Megalo {
          this->variable->decompile(out, flags);
       else
          out.write("all_players");
+   }
+   arg_compile_result OpcodeArgValuePlayerOrGroup::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      auto arg = compiler.arg_to_variable(arg_text);
+      if (!arg)
+         return arg_compile_result::failure("This argument is not a variable.");
+      auto result = this->compile(compiler, *arg, part);
+      delete arg;
+      return result;
+   }
+   arg_compile_result OpcodeArgValuePlayerOrGroup::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      if (this->variable) {
+         delete this->variable;
+         this->variable = nullptr;
+      }
+      //
+      auto type = arg.get_type();
+      if (type == &OpcodeArgValuePlayer::typeinfo) {
+         this->variable = new OpcodeArgValuePlayer;
+      } else if (type == &OpcodeArgValueTeam::typeinfo) {
+         this->variable = new OpcodeArgValueTeam;
+      } else if (type == &OpcodeArgValueScalar::typeinfo || type == &OpcodeArgValueObject::typeinfo || type == &OpcodeArgValueTimer::typeinfo) {
+         return arg_compile_result::failure("This variable is of the wrong type.");
+      } else if (type == &OpcodeArgValuePlayerOrGroup::typeinfo) {
+         //
+         // This will happen if we're compiling the NamespaceMember specifically intended for 
+         // the "all_players" value.
+         //
+         return arg_compile_result::success();
+      } else {
+         return arg_compile_result::failure("This argument is not a variable.");
+      }
+      return this->variable->compile(compiler, arg, part);
    }
    //
    variable_type OpcodeArgValuePlayerOrGroup::get_variable_type() const noexcept {

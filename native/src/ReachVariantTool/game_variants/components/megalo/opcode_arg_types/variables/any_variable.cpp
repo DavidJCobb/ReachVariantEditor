@@ -1,6 +1,7 @@
 #include "any_variable.h"
 #include "all_core.h"
 #include "../../../../errors.h"
+#include "../../compiler/compiler.h"
 
 namespace Megalo {
    OpcodeArgTypeinfo OpcodeArgValueAnyVariable::typeinfo = OpcodeArgTypeinfo(
@@ -44,6 +45,31 @@ namespace Megalo {
    void OpcodeArgValueAnyVariable::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->variable)
          this->variable->decompile(out, flags);
+   }
+   arg_compile_result OpcodeArgValueAnyVariable::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      auto arg = compiler.arg_to_variable(arg_text);
+      if (!arg)
+         return arg_compile_result::failure("This argument is not a variable.");
+      auto result = this->compile(compiler, *arg, part);
+      delete arg;
+      return result;
+   }
+   arg_compile_result OpcodeArgValueAnyVariable::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      auto type = arg.get_type();
+      if (type == &OpcodeArgValueScalar::typeinfo) {
+         this->variable = new OpcodeArgValueScalar;
+      } else if (type == &OpcodeArgValueObject::typeinfo) {
+         this->variable = new OpcodeArgValueObject;
+      } else if (type == &OpcodeArgValuePlayer::typeinfo) {
+         this->variable = new OpcodeArgValuePlayer;
+      } else if (type == &OpcodeArgValueTeam::typeinfo) {
+         this->variable = new OpcodeArgValueTeam;
+      } else if (type == &OpcodeArgValueTimer::typeinfo) {
+         this->variable = new OpcodeArgValueTimer;
+      } else {
+         return arg_compile_result::failure("This argument is not a variable.");
+      }
+      return this->variable->compile(compiler, arg, part);
    }
    //
    variable_type OpcodeArgValueAnyVariable::get_variable_type() const noexcept {

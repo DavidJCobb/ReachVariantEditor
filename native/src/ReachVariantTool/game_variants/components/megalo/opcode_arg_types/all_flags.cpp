@@ -1,5 +1,6 @@
 #include "all_flags.h"
 #include "../enums.h"
+#include "../../../helpers/qt/string.h"
 
 namespace Megalo {
    namespace flags_masks {
@@ -66,6 +67,8 @@ namespace Megalo {
       }
       if (found > 1)
          out += ')';
+      else if (!found)
+         out = "no flags";
    }
    void OpcodeArgValueFlagsSuperclass::decompile(Decompiler& decompiler, uint64_t flags) noexcept {
       auto& base = this->base;
@@ -82,7 +85,35 @@ namespace Megalo {
             out += base[i].name;
          }
       }
+      if (!found)
+         out = "none";
       decompiler.write(out);
+   }
+   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      this->value = 0;
+      //
+      auto prior = arg.backup_stream_state();
+      auto word  = arg.extract_word();
+      if (word.isEmpty())
+         return arg_compile_result::failure("Expected a flag name or the word \"none\".");
+      if (word.compare("none", Qt::CaseInsensitive) == 0) {
+         //
+         // We've already set our value to 0.
+         //
+         return arg_compile_result::success();
+      }
+      arg.restore_stream_state(prior);
+      //
+      auto& base = this->base;
+      do {
+         word = arg.extract_word();
+         auto i = base.lookup(word);
+         if (i < 0)
+            return arg_compile_result::failure(QString("Word \"%1\" was not recognized as a flag name.").arg(word));
+         this->value |= i;
+      } while (arg.extract_specific_char('|'));
+      //
+      return arg_compile_result::success();
    }
    #pragma endregion
 
@@ -95,7 +126,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueCreateObjectFlags>,
       flags_masks::create_object
-   );
+   ).import_names({ "none" });
    //
    OpcodeArgValueKillerTypeFlags::OpcodeArgValueKillerTypeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::killer_type) {}
    OpcodeArgTypeinfo OpcodeArgValueKillerTypeFlags::typeinfo = OpcodeArgTypeinfo(
@@ -106,7 +137,7 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueKillerTypeFlags>,
       flags_masks::killer_type
-   );
+   ).import_names({ "none" });
    //
    OpcodeArgValuePlayerReqPurchaseModes::OpcodeArgValuePlayerReqPurchaseModes() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayerReqPurchaseModes::typeinfo = OpcodeArgTypeinfo(
@@ -117,5 +148,5 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerReqPurchaseModes>,
       flags_masks::player_unused_mode
-   );
+   ).import_names({ "none" });
 }

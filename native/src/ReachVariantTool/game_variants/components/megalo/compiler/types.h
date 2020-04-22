@@ -23,7 +23,7 @@ namespace Megalo {
             std::string name;
             const OpcodeArgTypeinfo& type;
             bool    allow_from_nested  = false; // allow (namespace.var.var.property)? only for biped accessors
-            VariableScopeIndicatorValue* scope = nullptr;
+            VariableScopeIndicatorValue* scope = nullptr; // if this is nullptr, then the base Variable class cannot handle this property in a generic fashion, and the Variable subclass will be required to deal with this
             //
             Property(const char* n, const OpcodeArgTypeinfo& t, VariableScopeIndicatorValue* scope = no_scope, bool afn = false) : name(n), type(t), scope(scope), allow_from_nested(afn) {}
             //

@@ -1,6 +1,7 @@
 #include "widget_related.h"
 #include "../../../errors.h"
 #include "../../../types/multiplayer.h"
+#include "../compiler/compiler.h"
 
 namespace {
    constexpr int ce_max_index      = Megalo::Limits::max_script_widgets;
@@ -65,6 +66,34 @@ namespace Megalo {
          std::string temp;
          cobb::sprintf(temp, "script_widget[%u]", this->value->index);
          out.write(temp);
+      }
+      arg_compile_result OpcodeArgValueWidget::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+         auto arg = compiler.arg_to_variable(arg_text);
+         if (!arg)
+            return arg_compile_result::failure();
+         auto result = this->compile(compiler, *arg, part);
+         delete arg;
+         return result;
+      }
+      arg_compile_result OpcodeArgValueWidget::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+         auto type = arg.get_type();
+         if (type != &OpcodeArgValueWidget::typeinfo)
+            return arg_compile_result::failure();
+         if (!arg.is_statically_indexable_value()) {
+            //
+            // This should only be possible if we accessed the bare "no_widget" NamespaceMember.
+            //
+            this->value = nullptr;
+            return arg_compile_result::success();
+         }
+         auto  index = arg.resolved.top_level.index;
+         auto  mp    = compiler.get_variant();
+         auto& list  = mp.scriptContent.widgets;
+         auto  size  = list.size();
+         if (index >= size)
+            return arg_compile_result::failure(QString("You specified widget index %1, but only indices up to %2 are defined.").arg(index).arg(size - 1));
+         this->value = &list[index];
+         return arg_compile_result::success();
       }
    #pragma endregion
    //
@@ -158,6 +187,73 @@ namespace Megalo {
                this->denominator.decompile(out, flags);
                return;
          }
+      }
+      arg_compile_result OpcodeArgValueMeterParameters::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+         if (part > 0) {
+            auto arg = compiler.arg_to_variable(arg_text);
+            if (!arg)
+               return arg_compile_result::failure("This argument is not a variable.");
+            auto result = this->compile(compiler, *arg, part);
+            delete arg;
+            return result;
+         }
+         //
+         // Get the meter type.
+         //
+         QString word = arg_text.extract_word();
+         if (word.isEmpty())
+            return arg_compile_result::failure(true);
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (alias) {
+            if (alias->is_imported_name())
+               word = alias->target_imported_name;
+            else
+               return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here. Only a meter type (or an alias of one) may appear here.").arg(alias->name), true);
+         }
+         auto value = enums::widget_meter_parameters_type.lookup(word);
+         if (value < 0)
+            return arg_compile_result::failure(QString("Value \"%1\" is not a recognized shape type.").arg(word), true);
+         this->type = (MeterType)value;
+         //
+         return arg_compile_result::success().set_needs_more(part < this->sub_variable_count());
+      }
+      arg_compile_result OpcodeArgValueMeterParameters::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+         if (part < 1)
+            return arg_compile_result::failure();
+         auto count = this->sub_variable_count();
+         --part;
+         if (part > count)
+            return arg_compile_result::failure();
+         auto result = this->sub_variable(part).compile(compiler, arg, 0);
+         result.set_needs_more(part < count);
+         return result;
+      }
+
+      Variable& OpcodeArgValueMeterParameters::sub_variable(uint8_t i) noexcept {
+         switch (this->type) {
+            case MeterType::none:
+               break;
+            case MeterType::timer:
+               if (i == 0)
+                  return this->timer;
+               break;
+            case MeterType::number:
+               switch (i) {
+                  case 0: return this->numerator;
+                  case 1: return this->denominator;
+               }
+               break;
+         }
+         return this->numerator;
+      }
+      uint8_t OpcodeArgValueMeterParameters::sub_variable_count() const noexcept {
+         switch (this->type) {
+            case MeterType::none:   return 0;
+            case MeterType::timer:  return 1;
+            case MeterType::number: return 2;
+         }
+         assert(false && "Bad meter type specified!");
+         __assume(0); // tell MSVC that this is unreachable
       }
    #pragma endregion
 }

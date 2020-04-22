@@ -1,4 +1,5 @@
 #include "shape.h"
+#include "../compiler/compiler.h"
 
 namespace Megalo {
    namespace enums {
@@ -126,5 +127,83 @@ namespace Megalo {
          case ShapeType::none:
             out.write("none");
       }
+   }
+   arg_compile_result OpcodeArgValueShape::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      if (part > 0) {
+         auto arg = compiler.arg_to_variable(arg_text);
+         if (!arg)
+            return arg_compile_result::failure("This argument is not a variable.");
+         auto result = this->compile(compiler, *arg, part);
+         delete arg;
+         return result;
+      }
+      //
+      // Get the shape type.
+      //
+      QString word = arg_text.extract_word();
+      if (word.isEmpty())
+         return arg_compile_result::failure(true);
+      int  value;
+      auto alias = compiler.lookup_absolute_alias(word);
+      if (alias) {
+         if (alias->is_imported_name())
+            word = alias->target_imported_name;
+         else
+            return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here. Only a shape type (or an alias of one) may appear here.").arg(alias->name), true);
+      }
+      value = enums::shape_type.lookup(word);
+      if (value < 0)
+         return arg_compile_result::failure(QString("Value \"%1\" is not a recognized shape type.").arg(word), true);
+      this->shapeType = (ShapeType)value;
+      //
+      return arg_compile_result::success().set_needs_more(part < this->axis_count());
+   }
+   arg_compile_result OpcodeArgValueShape::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      if (part < 1)
+         return arg_compile_result::failure();
+      auto count = this->axis_count();
+      --part;
+      if (part > count)
+         return arg_compile_result::failure();
+      auto result = this->axis(part).compile(compiler, arg, 0);
+      result.set_needs_more(part < count);
+      return result;
+   }
+
+   OpcodeArgValueScalar& OpcodeArgValueShape::axis(uint8_t i) noexcept {
+      switch (this->shapeType) {
+         case ShapeType::none:
+            break;
+         case ShapeType::sphere:
+            if (i == 0)
+               return this->radius;
+            break;
+         case ShapeType::cylinder:
+            switch (i) {
+               case 0: return this->radius;
+               case 1: return this->top;
+               case 2: return this->bottom;
+            }
+            break;
+         case ShapeType::box:
+            switch (i) {
+               case 0: return this->radius;
+               case 1: return this->length;
+               case 2: return this->top;
+               case 3: return this->bottom;
+            }
+            break;
+      }
+      return this->radius;
+   }
+   uint8_t OpcodeArgValueShape::axis_count() const noexcept {
+      switch (this->shapeType) {
+         case ShapeType::none:     return 0;
+         case ShapeType::sphere:   return 1;
+         case ShapeType::cylinder: return 3;
+         case ShapeType::box:      return 4;
+      }
+      assert(false && "Bad shape type specified!");
+      __assume(0); // tell MSVC that this is unreachable
    }
 }

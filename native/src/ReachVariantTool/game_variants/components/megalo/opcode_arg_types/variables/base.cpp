@@ -210,8 +210,18 @@ namespace Megalo {
       const VariableScopeWhichValue* base = nullptr;
       if (is_static) {
          base = typeinfo.first_static;
+         //
+         // We could bounds-check (index) here if we wanted to by accessing the (static_count) field 
+         // on the typeinfo, but VariableReference should already have run that check.
+         //
       } else {
          base = typeinfo.first_global;
+         //
+         // We could bounds-check (index) here if we wanted to by grabbing MegaloVariableScopeGlobal, 
+         // converting (typeinfo) to a (variable_type), and checking the maximum index allowed for 
+         // global variables of this type; however, VariableReference should already have run a check 
+         // like that.
+         //
       }
       assert(base);
       return base->as_integer() + index;

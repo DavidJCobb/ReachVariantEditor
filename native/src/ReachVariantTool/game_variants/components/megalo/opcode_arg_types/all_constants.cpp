@@ -67,6 +67,13 @@ namespace Megalo {
       this->value = v;
       return arg_compile_result::success();
    }
+   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      if (arg.is_constant_integer()) {
+         this->value = arg.get_constant_integer() != 0;
+         return arg_compile_result::success();
+      }
+      return arg_compile_result::failure();
+   }
    #pragma endregion
    //
    #pragma region int8
@@ -114,6 +121,17 @@ namespace Megalo {
       }
       this->value = v;
       return arg_compile_result::success();
+   }
+   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      if (arg.is_constant_integer()) {
+         int32_t v = arg.get_constant_integer();
+         if (!cobb::integral_type_can_hold<int8_t>(v)) {
+            compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(v).arg((uint8_t)v));
+         }
+         this->value = v;
+         return arg_compile_result::success();
+      }
+      return arg_compile_result::failure();
    }
    #pragma endregion
 }

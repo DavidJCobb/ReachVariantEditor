@@ -1,6 +1,7 @@
 #include "namespaces.h"
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/player_or_group.h"
+#include "../opcode_arg_types/widget_related.h"
 #include "../../../helpers/qt/string.h"
 
 namespace Megalo {
@@ -54,6 +55,8 @@ namespace Megalo {
             NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_15),
             //
             NamespaceMember::make_bare_member("all_players", OpcodeArgValuePlayerOrGroup::typeinfo),
+            //
+            NamespaceMember::make_bare_member("no_widget", OpcodeArgValueWidget::typeinfo),
          });
          Namespace global = Namespace("global", false, true);
          Namespace game = Namespace("game", false, false, {

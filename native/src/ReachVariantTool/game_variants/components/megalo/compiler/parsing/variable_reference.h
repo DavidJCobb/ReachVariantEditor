@@ -86,6 +86,7 @@ namespace Megalo {
             [[nodiscard]] const OpcodeArgTypeinfo* get_type() const noexcept; // NOTE: accessors do not have types per se; calling this on an accessor returns the type of whatever the accessor is being invoked on
             //
             [[nodiscard]] inline const OpcodeArgTypeinfo* get_alias_basis_type() const noexcept { return this->resolved.alias_basis; }
+            [[nodiscard]] inline int32_t get_constant_integer() const noexcept { return this->resolved.top_level.index; }
             [[nodiscard]] inline bool is_accessor() const noexcept { return this->resolved.accessor; }
             [[nodiscard]] inline bool is_constant_integer() const noexcept { return this->resolved.top_level.is_constant; }
             [[nodiscard]] bool is_property() const noexcept;

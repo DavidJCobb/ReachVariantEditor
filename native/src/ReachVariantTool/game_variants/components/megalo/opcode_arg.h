@@ -243,8 +243,8 @@ namespace Megalo {
       code_t  code = code_t::failure;
       more_t  more = more_t::no;
       //
-      static arg_compile_result failure();
-      static arg_compile_result failure(QString);
+      static arg_compile_result failure(bool irresolvable = false);
+      static arg_compile_result failure(QString, bool irresolvable = false);
       static arg_compile_result success();
       static arg_compile_result unresolved_string(QString);
       //
@@ -275,8 +275,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept { return arg_compile_result::failure(); };
-         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure(); };
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure(); }; // used if the OpcodeArgValue was received as a script argument
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure(); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;

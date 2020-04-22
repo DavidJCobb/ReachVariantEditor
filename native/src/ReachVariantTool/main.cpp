@@ -149,14 +149,6 @@ int main(int argc, char *argv[]) {
 //          Currently, because it uses the same compile function as any basic enum, it just 
 //          matches as a string.
 //
-//        - WE NEED CODE TO COMPILE VARIABLES. We should start with the "object" type, 
-//          because there's only one property ("player.biped") that can resolve to multiple 
-//          possible scopes and that property is of the "object" type. That means that the 
-//          OpcodeArgValue::compile overload for object VariableReferences will be the most 
-//          complex overload of all the variable types; we can code everything we need for 
-//          that, and then it should become apparent what bits of that will generalize to 
-//          other variable types and so can be moved to the base Variable class.
-//
 //     - Compiler: Unresolved string references: each list entry needs an "action" field 
 //       which lists the action the script author decided to take. Available actions are: 
 //       create a new string in the table; or use an existing string with a given index. 
