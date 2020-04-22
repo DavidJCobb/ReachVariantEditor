@@ -229,6 +229,19 @@ namespace Megalo {
    uint32_t Variable::_global_index_to_which(uint32_t index, bool is_static) const noexcept {
       return _global_index_to_which(this->type.typeinfo, index, is_static);
    }
+   void Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
+      this->object = nullptr;
+      auto scope = this->scope;
+      if (!>scope)
+         return;
+      //
+      auto& mp = compiler.get_variant();
+      if (scope->is_indexed_data()) {
+         auto accessor = scope->indexed_list_accessor;
+         assert(accessor && "If a VariableScopeIndicatorValue is flagged as an indexed list item, then it must have an accessor for the list.");
+         this->object = (accessor)(mp, this->index);
+      }
+   }
    arg_compile_result Variable::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
       if (arg.is_accessor())
          return arg_compile_result::failure("An accessor cannot appear here.");
@@ -268,8 +281,10 @@ namespace Megalo {
          } else {
             this->which = this->_global_index_to_which(top.index, top.is_static); // if we're accessing a property on a static or global variable
          }
-         if (prop->has_index())
+         if (prop->has_index()) {
             this->index = arg.resolved.property.index;
+            this->_update_object_pointer_from_index(compiler);
+         }
          return arg_compile_result::success();
       }
       if (top.is_constant) {
@@ -306,6 +321,7 @@ namespace Megalo {
                this->which = this->_global_index_to_which(top.index, top.is_static);
             }
             this->index = res.nested.index;
+            this->_update_object_pointer_from_index(compiler);
             return arg_compile_result::success();
          }
          //
@@ -315,8 +331,10 @@ namespace Megalo {
          this->scope = this->type.get_variable_scope(variable_scope::global);
          if (this_type_is_a_scope)
             this->which = this->_global_index_to_which(top.index, top.is_static);
-         else
+         else {
             this->index = top.index;
+            this->_update_object_pointer_from_index(compiler);
+         }
          return arg_compile_result::success();
       }
       return arg_compile_result::failure("Unable to recognize the variable.");

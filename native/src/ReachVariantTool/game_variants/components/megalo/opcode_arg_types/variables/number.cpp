@@ -68,7 +68,7 @@ namespace Megalo {
             "script_option[%i]",
             "Script Option #%i",
             cobb::bitcount(Megalo::Limits::max_script_options - 1),
-            [](GameVariantDataMultiplayer& mp, uint32_t index) {
+            [](const GameVariantDataMultiplayer& mp, uint32_t index) {
                auto& list = mp.scriptData.options;
                if (index < list.size())
                   return (indexed_list_item*) &list[index];
@@ -98,7 +98,7 @@ namespace Megalo {
             "%w's Script Stat #%i",
             &MegaloVariableScopePlayer,
             cobb::bitcount(Megalo::Limits::max_script_stats - 1),
-            [](GameVariantDataMultiplayer& mp, uint32_t index) {
+            [](const GameVariantDataMultiplayer& mp, uint32_t index) {
                auto& list = mp.scriptContent.stats;
                if (index < list.size())
                   return (indexed_list_item*) &list[index];
@@ -111,7 +111,7 @@ namespace Megalo {
             "%w's Script Stat #%i",
             &MegaloVariableScopeTeam,
             cobb::bitcount(Megalo::Limits::max_script_stats - 1),
-            [](GameVariantDataMultiplayer& mp, uint32_t index) {
+            [](const GameVariantDataMultiplayer& mp, uint32_t index) {
                auto& list = mp.scriptContent.stats;
                if (index < list.size())
                   return (indexed_list_item*) &list[index];

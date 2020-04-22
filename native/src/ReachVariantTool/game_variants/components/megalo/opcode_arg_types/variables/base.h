@@ -70,7 +70,7 @@ namespace Megalo {
          };
          using flags_t = std::underlying_type_t<flags::type>;
          //
-         using indexed_access_functor_t = std::function<indexed_list_item* (GameVariantDataMultiplayer& mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
+         using indexed_access_functor_t = std::function<indexed_list_item* (const GameVariantDataMultiplayer& mp, uint32_t index)>; // for indexed data, access the indexed list and return a bare pointer; caller will jam that into a refcounted pointer
          //
          enum class index_type : uint8_t {
             none, // there is no "index" value
@@ -167,6 +167,8 @@ namespace Megalo {
       protected:
          uint32_t _global_index_to_which(uint32_t index, bool is_static) const noexcept;
          static uint32_t _global_index_to_which(const OpcodeArgTypeinfo&, uint32_t index, bool is_static) noexcept;
+         //
+         void _update_object_pointer_from_index(Compiler& compiler) noexcept; // used by the compile process
          //
       public:
          const VariableScopeIndicatorValueList& type;
