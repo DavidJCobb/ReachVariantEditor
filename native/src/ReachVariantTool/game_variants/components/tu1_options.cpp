@@ -5,8 +5,8 @@ void ReachGameVariantTU1Options::read(cobb::ibitreader& stream) noexcept {
    this->precisionBloom            = stream.read_compressed_float(8, 0.0F, 10.0F, false, true); // decoded value - 0.01968503937007874 is a multiple of 0.039370078740157 (which is 100 / 254) ?
    this->armorLockDamageDrain      = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
    this->armorLockDamageDrainLimit = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
-   this->activeCamoEnergyCurveMin  = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
    this->activeCamoEnergyCurveMax  = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
+   this->activeCamoEnergyCurveMin  = stream.read_compressed_float(8, 0.0F,  2.0F, false, true);
    this->magnumDamage              = stream.read_compressed_float(8, 0.0F, 10.0F, false, true); // decoded value - 0.01968503937007874 is a multiple of 0.039370078740157 (which is 100 / 254) ?
    this->magnumFireDelay           = stream.read_compressed_float(8, 0.0F, 10.0F, false, true); // decoded value - 0.01968503937007874 is a multiple of 0.039370078740157 (which is 100 / 254) ?
 }
@@ -15,8 +15,8 @@ void ReachGameVariantTU1Options::write(cobb::bitwriter& stream) const noexcept {
    stream.write_compressed_float(this->precisionBloom,            8, 0.0F, 10.0F, false, true);
    stream.write_compressed_float(this->armorLockDamageDrain,      8, 0.0F,  2.0F, false, true);
    stream.write_compressed_float(this->armorLockDamageDrainLimit, 8, 0.0F,  2.0F, false, true);
-   stream.write_compressed_float(this->activeCamoEnergyCurveMin,  8, 0.0F,  2.0F, false, true);
    stream.write_compressed_float(this->activeCamoEnergyCurveMax,  8, 0.0F,  2.0F, false, true);
+   stream.write_compressed_float(this->activeCamoEnergyCurveMin,  8, 0.0F,  2.0F, false, true);
    stream.write_compressed_float(this->magnumDamage,              8, 0.0F, 10.0F, false, true);
    stream.write_compressed_float(this->magnumFireDelay,           8, 0.0F, 10.0F, false, true);
 }

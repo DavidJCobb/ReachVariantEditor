@@ -139,7 +139,7 @@ namespace Megalo {
          c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
-         GameVariantDataMultiplayer& variant = nullptr;
+         GameVariantDataMultiplayer& variant;
          //
          log_t warnings;
          log_t errors;
@@ -195,7 +195,7 @@ namespace Megalo {
             } variables;
          } results;
          //
-         Compiler(GameVariantDataMultiplayer& mp) : variant(mp) {}
+         Compiler(GameVariantDataMultiplayer& mp, QString code) : string_scanner(code), variant(mp) {}
          ~Compiler();
          //
          inline const GameVariantDataMultiplayer& get_variant() const noexcept { return this->variant; }

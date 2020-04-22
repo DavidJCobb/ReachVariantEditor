@@ -232,7 +232,7 @@ namespace Megalo {
    void Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
       this->object = nullptr;
       auto scope = this->scope;
-      if (!>scope)
+      if (!scope)
          return;
       //
       auto& mp = compiler.get_variant();

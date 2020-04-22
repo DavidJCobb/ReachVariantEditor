@@ -45,7 +45,7 @@ namespace Megalo::Script {
    }
    bool VariableReference::RawPart::resolve_index(Compiler& compiler) {
       if (this->index_is_numeric)
-         return;
+         return true;
       auto abs = compiler.lookup_absolute_alias(this->index_str);
       if (!abs) {
          compiler.raise_error(QString("\"%1\" is not a valid index. Only integer constants and aliases of integer constants can be indices.").arg(this->index_str));

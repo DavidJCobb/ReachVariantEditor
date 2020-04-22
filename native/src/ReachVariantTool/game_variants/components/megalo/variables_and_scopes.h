@@ -214,13 +214,11 @@ namespace Megalo {
    extern const VariableScope MegaloVariableScopeObject;
    extern const VariableScope MegaloVariableScopeTeam;
 
-   const VariableScope& getScopeObjectForConstant(variable_scope) noexcept;
-   const VariableScope* getScopeObjectForConstant(variable_type) noexcept;
-   variable_scope getScopeConstantForObject(const VariableScope&) noexcept;
+   extern const VariableScope& getScopeObjectForConstant(variable_scope) noexcept;
+   extern const VariableScope* getScopeObjectForConstant(variable_type) noexcept;
+   extern variable_scope getScopeConstantForObject(const VariableScope&) noexcept;
    //
-   variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
-   variable_type  getVariableTypeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
-   const VariableScope* getScopeObjectForTypeinfo(const OpcodeArgTypeinfo* ti) noexcept {
-      return getScopeObjectForConstant(getVariableTypeForTypeinfo(ti));
-   }
+   extern variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
+   extern variable_type  getVariableTypeForTypeinfo(const OpcodeArgTypeinfo*) noexcept;
+   extern const VariableScope* getScopeObjectForTypeinfo(const OpcodeArgTypeinfo* ti) noexcept;
 }

@@ -278,6 +278,9 @@ Each namespace member can have:
    (game.round_timer) in the "game" namespace. This value is mutually exclusive with the 
    "which" value.
 
+If a namespace member has only a name and a type, then it is a "bare" namespace member. 
+This is currently only used for the "all_players" and "no_widget" values.
+
 
 
 == How do we parse a statement (not including conditions)? ==

@@ -187,7 +187,7 @@ namespace Megalo {
    extern const VariableScope MegaloVariableScopeObject = VariableScope(variable_which_values::object::list, 8, 4, 2, 4, 4);
    extern const VariableScope MegaloVariableScopeTeam   = VariableScope(variable_which_values::team::list,   8, 4, 4, 4, 6);
 
-   const VariableScope& getScopeObjectForConstant(variable_scope s) noexcept {
+   extern const VariableScope& getScopeObjectForConstant(variable_scope s) noexcept {
       switch (s) {
          case variable_scope::global:
             return MegaloVariableScopeGlobal;
@@ -201,7 +201,7 @@ namespace Megalo {
       assert(false && "Unknown variable scope!");
       __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
    }
-   const VariableScope* getScopeObjectForConstant(variable_type s) noexcept {
+   extern const VariableScope* getScopeObjectForConstant(variable_type s) noexcept {
       switch (s) {
          case variable_type::player:
             return &MegaloVariableScopePlayer;
@@ -212,7 +212,7 @@ namespace Megalo {
       }
       return nullptr;
    }
-   variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
+   extern variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
       if (&s == &MegaloVariableScopeGlobal)
          return variable_scope::global;
       if (&s == &MegaloVariableScopePlayer)
@@ -223,7 +223,7 @@ namespace Megalo {
          return variable_scope::team;
       return variable_scope::not_a_scope;
    }
-   variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+   extern variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
       if (!t)
          return variable_scope::global;
       if (t == &OpcodeArgValueObject::typeinfo)
@@ -234,7 +234,7 @@ namespace Megalo {
          return variable_scope::team;
       return variable_scope::not_a_scope;
    }
-   variable_type getVariableTypeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+   extern variable_type getVariableTypeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
       if (t == &OpcodeArgValueScalar::typeinfo)
          return variable_type::scalar;
       if (t == &OpcodeArgValueObject::typeinfo)
@@ -246,5 +246,16 @@ namespace Megalo {
       if (t == &OpcodeArgValueTimer::typeinfo)
          return variable_type::timer;
       return variable_type::not_a_variable;
+   }
+   extern const VariableScope* getScopeObjectForTypeinfo(const OpcodeArgTypeinfo* ti) noexcept {
+      if (!ti)
+         return &MegaloVariableScopeGlobal;
+      if (ti == &OpcodeArgValueObject::typeinfo)
+         return &MegaloVariableScopeObject;
+      if (ti == &OpcodeArgValuePlayer::typeinfo)
+         return &MegaloVariableScopePlayer;
+      if (ti == &OpcodeArgValueTeam::typeinfo)
+         return &MegaloVariableScopeTeam;
+      return nullptr;
    }
 }

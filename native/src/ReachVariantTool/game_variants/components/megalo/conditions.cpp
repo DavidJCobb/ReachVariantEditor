@@ -298,7 +298,8 @@ namespace Megalo {
             continue;
          }
          if (c == 'v') {
-            out += (this->inverted) ? this->function->verb_invert : this->function->verb_normal;
+            auto cnd = (const ConditionFunction*)this->function;
+            out += (this->inverted) ? cnd->verb_invert : cnd->verb_normal;
             continue;
          }
          if (c >= '1' && c <= '9') {
