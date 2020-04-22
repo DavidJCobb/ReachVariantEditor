@@ -122,23 +122,6 @@ int main(int argc, char *argv[]) {
 //          in all compiled triggers, and throw a compiler error if any have any nullptr 
 //          arguments.
 //
-//     - Convert thrown exceptions into Compiler-managed errors. Search for all references 
-//       to Compiler::throw_error and compile_exception and change ALL of them to go 
-//       through Compiler's error-logging functionality; then, delete (throw_error) and 
-//       the exception class.
-//
-//        - VariableReference's constructor needs to take a Compiler& so that it can log 
-//          errors without throwing an exception.
-//
-//        = OTHER ERRORS THAT NEED TO BE MADE NON-FATAL:
-//
-//           - Some VariableReference::VariableReference errors.
-//
-//           - All errors in VariableReference::RawPart::resolve_index. To convert these 
-//             away from exceptions, the method needs to be passed the VariableReference*
-//             owner so that it can set VariableReference::is_invalid; alternatively, the 
-//             method needs to return a success bool. The latter might be easier.
-//
 //     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
 //       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
 //       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 

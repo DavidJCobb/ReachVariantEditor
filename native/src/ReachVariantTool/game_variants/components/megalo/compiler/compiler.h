@@ -195,8 +195,6 @@ namespace Megalo {
          //
          ~Compiler();
          //
-         void throw_error(const QString& text);
-         void throw_error(const pos& pos, const QString& text);
          void reset_token();
          //
          void raise_error(const QString& text);
@@ -260,7 +258,7 @@ namespace Megalo {
          extract_result_t extract_integer_literal(int32_t& out) {
             auto result = string_scanner::extract_integer_literal(out);
             if (result == string_scanner::extract_result::floating_point)
-               this->throw_error("Unexpected decimal point. Floating-point numbers are not supported.");
+               this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
             return result;
          }
          //

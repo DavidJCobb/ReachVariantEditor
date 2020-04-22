@@ -1,23 +1,10 @@
 #pragma once
 #include <cstdint>
-#include <stdexcept>
 #include <QString>
 #include "../string_scanner.h"
 
 namespace Megalo {
    class Compiler;
-   class compile_exception : public std::exception {
-      private:
-         QString reason;
-      public:
-         compile_exception(const QString& reason) : std::exception(""), reason(reason) {} // TODO: try using a QString instead so we can support Unicode and so our code is cleaner
-         //
-         [[nodiscard]] virtual char const* what() const {
-            return "this is a QString";
-         }
-         const QChar* why() const noexcept { return reason.constData(); }
-         const QString& why_ref() const noexcept { return reason; }
-   };
    //
    namespace Script {
       class ParsedItem {

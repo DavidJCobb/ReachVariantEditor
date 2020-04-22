@@ -38,7 +38,7 @@ namespace Megalo {
                RawPart& operator=(const RawPart& other) noexcept;
                //
                [[nodiscard]] inline bool has_index() const noexcept { return this->index_is_numeric || !this->index_str.isEmpty(); }
-               void resolve_index(Compiler&);
+               bool resolve_index(Compiler&);
             };
             std::vector<RawPart> raw;
             //
@@ -79,7 +79,7 @@ namespace Megalo {
                QString accessor_name; // needed for VariableReference::to_string, for accessor-arguments e.g. player.frag_grenades
             } resolved;
             //
-            VariableReference(QString); // can throw compile_exception
+            VariableReference(Compiler&, QString); // can throw compile_exception
             VariableReference(int32_t);
             //
             void set_to_constant_integer(int32_t);

@@ -560,12 +560,6 @@ namespace Megalo {
       return false;
    }
    //
-   void Compiler::throw_error(const QString& text) {
-      this->throw_error(this->state, text);
-   }
-   void Compiler::throw_error(const Script::string_scanner::pos& pos, const QString& text) {
-      throw compile_exception(QString("Error on or near line %1 col %2: %e").arg(pos.line + 1).arg(pos.offset - pos.last_newline + 1).arg(text));
-   }
    void Compiler::raise_error(const QString& text) {
       this->errors.emplace_back(text, this->state);
    }
@@ -855,9 +849,14 @@ namespace Megalo {
       // If we get here, then we've encountered the end of the statement's righthand side.
       //
       #pragma region Code to compile an assignment
-         this->assignment->set_end(this->state);
-         this->assignment->rhs = this->__parseVariable(this->token.text);
-         this->assignment->rhs->owner = this->assignment;
+         auto statement = this->assignment;
+         statement->set_end(this->state);
+         this->block->insert_item(statement);
+         this->assignment = nullptr;
+         //
+         statement->rhs = this->__parseVariable(this->token.text);
+         statement->rhs->owner = statement;
+         this->reset_token();
          //
          // TODO: Consider writing code for type checking non-accessor assignments in advance... but 
          // maybe leave it turned off: I want to check the results of type-mismatched assignments in-
@@ -871,16 +870,18 @@ namespace Megalo {
          //
          auto opcode = std::make_unique<Action>();
          {
-            auto lhs = this->assignment->lhs;
-            auto rhs = this->assignment->rhs;
+            auto lhs = statement->lhs;
+            auto rhs = statement->rhs;
             auto l_accessor = lhs->get_accessor_definition();
             auto r_accessor = rhs->get_accessor_definition();
             if (l_accessor || r_accessor) {
                //
                // This is an accessor assignment, not a standard assignment.
                //
-               if (l_accessor && r_accessor)
-                  this->throw_error("Cannot assign one accessor to another accessor.");
+               if (l_accessor && r_accessor) {
+                  this->raise_error("Cannot assign one accessor to another accessor.");
+                  return;
+               }
                const OpcodeFuncToScriptMapping* mapping = nullptr;
                const OpcodeBase* accessor = nullptr;
                QString acc_name;
@@ -985,13 +986,13 @@ namespace Megalo {
                   // wrong argument. (We should only be using accessors in the first place if there *is* an 
                   // opcode argument, but it's possible that only one of the getter and setter may have it.)
                   //
-                  if (this->assignment->op != "=")
+                  if (statement->op != "=")
                      this->raise_error("This accessor can only be invoked using the = operator.");
                } else {
                   //
                   // Compile the assignment operator.
                   //
-                  auto op_string = string_scanner(this->assignment->op);
+                  auto op_string = string_scanner(statement->op);
                   auto op_arg    = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
                   opcode->arguments[mapping->arg_operator] = op_arg;
                   auto result = op_arg->compile(*this, op_string, 0);
@@ -1029,7 +1030,7 @@ namespace Megalo {
                } else
                   assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
                //
-               auto op_string = string_scanner(this->assignment->op);
+               auto op_string = string_scanner(statement->op);
                result = opcode->arguments[2]->compile(*this, op_string, 0);
                if (!result.is_success()) {
                   QString error = "The operator in this assignment failed to compile. ";
@@ -1040,11 +1041,7 @@ namespace Megalo {
                   assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
             }
          }
-         this->assignment->opcode = opcode.release();
-         //
-         this->block->insert_item(this->assignment);
-         this->assignment = nullptr;
-         this->reset_token();
+         statement->opcode = opcode.release();
       #pragma endregion
    }
    //
@@ -1067,7 +1064,7 @@ namespace Megalo {
       // only part of the compiler that shouldn't create VariableReferences through this helper 
       // function).
       //
-      auto var = new Script::VariableReference(text);
+      auto var = new Script::VariableReference(*this, text);
       if (this->has_fatal()) // fatal error occurred while parsing the text
          return var;
       var->resolve(*this, is_alias_definition, is_write_access);
@@ -2136,7 +2133,7 @@ namespace Megalo {
       Script::VariableReference* variable = nullptr;
       Script::VariableReference* initial  = nullptr;
       //
-      variable = new Script::VariableReference(str_variable);
+      variable = new Script::VariableReference(*this, str_variable);
       variable->resolve(*this, true);
       if (variable->is_invalid) {
          delete variable;
@@ -2169,7 +2166,7 @@ namespace Megalo {
          }
       }
       if (!str_initial.isEmpty()) {
-         initial = new Script::VariableReference(str_initial);
+         initial = new Script::VariableReference(*this, str_initial);
          initial->resolve(*this);
          if (initial->is_invalid) {
             delete variable;
@@ -2273,8 +2270,10 @@ namespace Megalo {
    void Compiler::_handleKeyword_For() {
       auto start = this->token.pos;
       //
-      if (!this->extract_word("each"))
-         this->throw_error("The \"for\" keyword must be followed by \"each\".");
+      if (!this->extract_word("each")) {
+         this->raise_fatal("The \"for\" keyword must be followed by \"each\".");
+         return;
+      }
       auto word = this->extract_word();
       if (word.isEmpty()) {
          this->raise_fatal("Invalid for-loop.");
@@ -2307,16 +2306,22 @@ namespace Megalo {
          type = Script::Block::Type::for_each_object;
          word = this->extract_word();
          if (word != "do") {
-            if (word != "with")
-               this->throw_error("Invalid for-each-object loop: expected the word \"with\" or the word \"do\".");
+            if (word != "with") {
+               this->raise_fatal("Invalid for-each-object loop: expected the word \"with\" or the word \"do\".");
+               return;
+            }
             type = Script::Block::Type::for_each_object_with_label;
             word = this->extract_word();
             if (word == "no") {
-               if (!this->extract_word("label"))
-                  this->throw_error("Invalid for-each-object-with-label loop: must use the phrase \"no label\" or specify a label.");
+               if (!this->extract_word("label")) {
+                  this->raise_fatal("Invalid for-each-object-with-label loop: must use the phrase \"no label\" or specify a label.");
+                  return;
+               }
             } else {
-               if (word != "label")
-                  this->throw_error("Invalid for-each-object-with-label loop: expected the word \"label\".");
+               if (word != "label") {
+                  this->raise_fatal("Invalid for-each-object-with-label loop: expected the word \"label\".");
+                  return;
+               }
                if (!this->extract_string_literal(label)) {
                   if (!this->extract_integer_literal(label_index)) {
                      this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
@@ -2331,7 +2336,8 @@ namespace Megalo {
             }
          }
       } else {
-         this->throw_error("Invalid for-loop.");
+         this->raise_fatal("Invalid for-loop.");
+         return;
       }
       //
       auto item = new Script::Block;

@@ -43,17 +43,22 @@ namespace Megalo::Script {
       this->index_is_numeric = other.index_is_numeric;
       return *this;
    }
-   void VariableReference::RawPart::resolve_index(Compiler& compiler) {
+   bool VariableReference::RawPart::resolve_index(Compiler& compiler) {
       if (this->index_is_numeric)
          return;
       auto abs = compiler.lookup_absolute_alias(this->index_str);
-      if (!abs)
-         throw compile_exception(QString("\"%1\" is not a valid index. Only integer constants and aliases of integer constants can be indices.").arg(this->index_str));
-      if (!abs->is_integer_constant())
-         throw compile_exception(QString("Alias \"%1\" is not an integer constant and therefore cannot be used as an index.").arg(abs->name));
+      if (!abs) {
+         compiler.raise_error(QString("\"%1\" is not a valid index. Only integer constants and aliases of integer constants can be indices.").arg(this->index_str));
+         return false;
+      }
+      if (!abs->is_integer_constant()) {
+         compiler.raise_error(QString("Alias \"%1\" is not an integer constant and therefore cannot be used as an index.").arg(abs->name));
+         return false;
+      }
       this->index = abs->get_integer_constant();
       this->index_is_numeric = true;
       this->index_str.clear();
+      return true;
    }
 
    VariableReference::VariableReference(int32_t i) {
@@ -62,7 +67,7 @@ namespace Megalo::Script {
          this->content = QString("%1").arg(i);
       #endif
    }
-   VariableReference::VariableReference(QString text) {
+   VariableReference::VariableReference(Compiler& compiler, QString text) {
       #if _DEBUG
          this->content = text;
       #endif
@@ -93,41 +98,54 @@ namespace Megalo::Script {
                   index += c;
                   continue;
                }
-               throw compile_exception(QString("Character %1 is not valid inside of an index.").arg(c));
+               compiler.raise_fatal(QString("Character %1 is not valid inside of an index.").arg(c));
+               return;
             }
             if (c == ']') {
                is_index = false;
-               if (index.isEmpty()) // "name[]" is a syntax error
-                  throw compile_exception("Variables of the form \"name[]\" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.");
+               if (index.isEmpty()) { // "name[]" is a syntax error
+                  compiler.raise_fatal("Variables of the form \"name[]\" are not valid. Specify an index if appropriate, or no square brackets at all otherwise.");
+                  return;
+               }
                continue;
             }
             if (index.isEmpty() && string_scanner::is_whitespace_char(c))
                continue;
             index += c;
          } else {
-            if (c == ']')
-               throw compile_exception("Unexpected \"]\".");
+            if (c == ']') {
+               compiler.raise_fatal("Unexpected \"]\".");
+               return;
+            }
             if (c == '[') {
                if (cobb::qt::string_is_integer(name)) { // "123[4]" is a syntax error
                   if (this->raw.empty())
-                     throw compile_exception("An integer literal cannot be indexed.");
-                  throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.123" is also a syntax error and should take priority
+                     compiler.raise_fatal("An integer literal cannot be indexed.");
+                  else
+                     compiler.raise_fatal("An integer literal cannot be a property or nested variable."); // "name.123" is also a syntax error and should take priority
+                  return;
                }
-               if (!index.isEmpty())
-                  throw compile_exception("Variables of the form \"name[1][2]\" are not valid. Only specify one index.");
+               if (!index.isEmpty()) {
+                  compiler.raise_fatal("Variables of the form \"name[1][2]\" are not valid. Only specify one index.");
+                  return;
+               }
                is_index = true;
                continue;
             }
             if (c == '.') {
                if (cobb::qt::string_is_integer(name)) { // "1234.name" and "name.1234.name" are syntax errors
                   if (this->raw.empty())
-                     throw compile_exception("An integer literal cannot have properties or nested variables."); // 1234.name"
-                  throw compile_exception("An integer literal cannot be a property or nested variable."); // "name.1234.name"
+                     compiler.raise_fatal("An integer literal cannot have properties or nested variables."); // 1234.name"
+                  else
+                     compiler.raise_fatal("An integer literal cannot be a property or nested variable."); // "name.1234.name"
+                  return;
                }
                index = index.trimmed();
                for (auto c : index) {
-                  if (c.isSpace()) // "name[1 2]", "name[word word]", etc.
-                     throw compile_exception("An index cannot consist of multiple space-separated terms.");
+                  if (c.isSpace()) { // "name[1 2]", "name[word word]", etc.
+                     compiler.raise_fatal("An index cannot consist of multiple space-separated terms.");
+                     return;
+                  }
                }
                auto part = RawPart(name, index);
                this->raw.push_back(part);
@@ -135,8 +153,10 @@ namespace Megalo::Script {
                index = "";
                continue;
             }
-            if (!index.isEmpty()) // "name[1]name" is a syntax error
-               throw compile_exception("Expected a period. Variables of the form \"name[1]name\" are not valid.");
+            if (!index.isEmpty()) { // "name[1]name" is a syntax error
+               compiler.raise_fatal("Expected a period. Variables of the form \"name[1]name\" are not valid.");
+               return;
+            }
             name += c;
          }
       }
@@ -145,10 +165,14 @@ namespace Megalo::Script {
       // last part in the string still needs to be validated and added.
       //
       {
-         if (name.isEmpty()) // text ended in '.' or was empty string
-            throw compile_exception("Variables cannot end in '.', and cannot be nameless.");
-         if (is_index)
-            throw compile_exception("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
+         if (name.isEmpty()) { // text ended in '.' or was empty string
+            compiler.raise_fatal("Variables cannot end in '.', and cannot be nameless.");
+            return;
+         }
+         if (is_index) {
+            compiler.raise_fatal("Expected a closing square bracket."); // "name[1].name[2" is a syntax error
+            return;
+         }
          if (cobb::qt::string_is_integer(name)) {
             if (this->raw.empty())
                //
@@ -156,13 +180,17 @@ namespace Megalo::Script {
                // weren't an index, then the entire string would just be the integer and we would've treated 
                // it accordingly at the very start of this function.
                //
-               throw compile_exception("An integer literal cannot be indexed.");
-            throw compile_exception("An integer literal cannot be a property or nested variable.");
+               compiler.raise_fatal("An integer literal cannot be indexed.");
+            else
+               compiler.raise_fatal("An integer literal cannot be a property or nested variable.");
+            return;
          }
          index = index.trimmed();
          for (auto c : index) {
-            if (c.isSpace()) // "name[1 2]", "name[word word]", etc.
-               throw compile_exception("An index cannot consist of multiple space-separated terms.");
+            if (c.isSpace()) { // "name[1 2]", "name[word word]", etc.
+               compiler.raise_fatal("An index cannot consist of multiple space-separated terms.");
+               return;
+            }
          }
          auto part = RawPart(name, index);
          this->raw.push_back(part);
@@ -172,14 +200,19 @@ namespace Megalo::Script {
       // names and indices, disallow empty part names, and store integer indices as integers.
       //
       for (auto& part : this->raw) {
-         if (part.name.isEmpty())
-            throw compile_exception("Invalid variable name. Did you accidentally type two periods instead of one?");
-         if (Compiler::is_keyword(part.name))
-            throw compile_exception(QString("Keywords, including \"%1\", cannot be used as variable names.").arg(part.name));
-         if (Compiler::is_keyword(part.index_str))
-            throw compile_exception(QString("Keywords, including \"%1\", cannot be used as indices in a collection.").arg(part.index_str));
-         //
          bool ok = false;
+         if (part.name.isEmpty())
+            compiler.raise_fatal("Invalid variable name. Did you accidentally type two periods instead of one?");
+         else if (Compiler::is_keyword(part.name))
+            compiler.raise_fatal(QString("Keywords, including \"%1\", cannot be used as variable names.").arg(part.name));
+         else if (Compiler::is_keyword(part.index_str))
+            compiler.raise_fatal(QString("Keywords, including \"%1\", cannot be used as indices in a collection.").arg(part.index_str));
+         else
+            ok = true;
+         if (!ok)
+            return;
+         //
+         ok = false;
          part.index = part.index_str.toInt(&ok);
          part.index_is_numeric = ok;
          if (ok)
@@ -486,7 +519,6 @@ namespace Megalo::Script {
                this->is_invalid = true;
                return 0;
             }
-            part->resolve_index(compiler);
             if (part->index < 0) {
                compiler.raise_error(QString("Typename indices cannot be negative."));
                this->is_invalid = true;
@@ -532,7 +564,6 @@ namespace Megalo::Script {
                this->is_invalid = true;
                return 0;
             }
-            part->resolve_index(compiler);
             if (part->index < 0) {
                compiler.raise_error(QString("Typename indices cannot be negative."));
                this->is_invalid = true;
@@ -606,7 +637,6 @@ namespace Megalo::Script {
             this->is_invalid = true;
             return false;
          }
-         part->resolve_index(compiler);
          if (part->index < 0) {
             compiler.raise_error(QString("Typename indices cannot be negative."));
             this->is_invalid = true;
@@ -686,18 +716,25 @@ namespace Megalo::Script {
       //
       auto& res = this->resolved;
       //
-      for (auto& part : this->raw)
+      for (auto& part : this->raw) {
          //
          // Let's resolve raw part indices first: if any of them are still strings, then we 
          // need to either resolve them (if they are absolute integer aliases) or error.
          //
-         part.resolve_index(compiler);
+         if (!part.resolve_index(compiler))
+            this->is_invalid = true;
+      }
+      if (this->is_invalid)
+         return;
       //
       if (this->_resolve_aliases_from(compiler, 0)) { // absolute aliases need to be handled here so we can handle the case of them resolving to an integer, etc..
          bool has_more = this->raw.size() > 1;
          if (this->is_constant_integer()) {
-            if (has_more)
-               compiler.throw_error(QString("Alias \"%1\" resolved to a constant integer. You cannot access members on an integer.").arg(this->raw[0].name));
+            if (has_more) {
+               compiler.raise_error(QString("Alias \"%1\" resolved to a constant integer. You cannot access members on an integer.").arg(this->raw[0].name));
+               this->is_invalid = true;
+               return;
+            }
             this->is_resolved = true;
             return;
          }
@@ -709,15 +746,20 @@ namespace Megalo::Script {
          this->is_resolved = true;
          return;
       }
-      if (this->is_none())
-         compiler.throw_error("You cannot access the members of a none value.");
+      if (this->is_none()) {
+         compiler.raise_error("You cannot access the members of a none value.");
+         this->is_invalid = true;
+         return;
+      }
       if (res.top_level.scope) {
          //
          // If the top-level value has a scope listed, then that means we found a namespace member that is, 
          // itself, a fully-resolved reference to a value consisting of a scope, no which, and no index, 
          // such as (game.round_timer). Member access past that point is not possible.
          //
-         compiler.throw_error(QString("You cannot access the %1 member on %2.").arg(this->_get_raw_part(i)->name).arg(this->to_string_from_raw(0, i)));
+         compiler.raise_error(QString("You cannot access the %1 member on %2.").arg(this->_get_raw_part(i)->name).arg(this->to_string_from_raw(0, i)));
+         this->is_invalid = true;
+         return;
       }
       if (this->_resolve_nested_variable(compiler, i)) {
          if (++i >= this->raw.size()) {
@@ -745,8 +787,11 @@ namespace Megalo::Script {
                   this->resolved.property.definition = nullptr;
                   //
                   if (this->_resolve_accessor(compiler, i)) {
-                     if (++i < this->raw.size())
-                        compiler.throw_error("Attempted to access a member of an accessor.");
+                     if (++i < this->raw.size()) {
+                        compiler.raise_error("Attempted to access a member of an accessor.");
+                        this->is_invalid = true;
+                        return;
+                     }
                      this->is_resolved = true;
                      return;
                   }
@@ -763,13 +808,16 @@ namespace Megalo::Script {
             //
             // Not all properties can be accessed as (var.var.property). Enforce this.
             //
-            if (prop && !prop->allow_from_nested)
-               compiler.throw_error(
+            if (prop && !prop->allow_from_nested) {
+               compiler.raise_error(
                   QString("The %1 property can only be accessed from a top-level %2 variable. Copy the value (%3) into an intermediate %2 variable and then access the property through that.")
                   .arg(prop->name.c_str())
                   .arg(prev->internal_name.c_str())
                   .arg(this->to_string_from_raw(0, i))
                );
+               this->is_invalid = true;
+               return;
+            }
          }
          if (++i >= this->raw.size()) {
             this->is_resolved = true;
@@ -777,8 +825,11 @@ namespace Megalo::Script {
          }
       }
       if (this->_resolve_accessor(compiler, i)) {
-         if (++i < this->raw.size())
-            compiler.throw_error("Attempted to access a member of an accessor.");
+         if (++i < this->raw.size()) {
+            compiler.raise_error("Attempted to access a member of an accessor.");
+            this->is_invalid = true;
+            return;
+         }
          this->is_resolved = true;
          return;
       }
@@ -788,6 +839,8 @@ namespace Megalo::Script {
       // If we reach this point, then the raw part that we're currently looking at is unrecognized. That's 
       // an error, but let's do some work and see if we can't display a good error message to the script 
       // author.
+      //
+      this->is_invalid = true;
       //
       auto part = this->_get_raw_part(i);
       if (this->resolved.nested.type && !this->resolved.property.definition && !this->resolved.accessor) {
@@ -799,14 +852,16 @@ namespace Megalo::Script {
          if (prev->can_have_variables()) {
             auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
             if (type) {
-               compiler.throw_error(
+               compiler.raise_error(
                   QString("Variable access can only go two levels deep; references of the form (var.var.var) are not possible. Copy the target variable (%1) into an intermediate %2 variable first.")
                      .arg(this->to_string_from_raw(0, i))
                      .arg(prev->internal_name.c_str())
                );
+               return;
             }
          }
-         compiler.throw_error(QString("The %1 type does not have a member named \"%2\".").arg(prev->internal_name.c_str()).arg(part->name));
+         compiler.raise_error(QString("The %1 type does not have a member named \"%2\".").arg(prev->internal_name.c_str()).arg(part->name));
+         return;
       }
       if (this->raw.size() == 1) {
          auto& first = this->raw[0];
@@ -816,14 +871,18 @@ namespace Megalo::Script {
             //
             OpcodeArgTypeRegistry::type_list_t types;
             OpcodeArgTypeRegistry::get().lookup_imported_name(first.name, types);
-            if (types.size())
-               compiler.throw_error(QString("The \"%1\" value cannot appear here.").arg(first.name));
+            if (types.size()) {
+               compiler.raise_error(QString("The \"%1\" value cannot appear here.").arg(first.name));
+               return;
+            }
          }
       }
       auto type = this->get_type();
       if (type)
-         compiler.throw_error(QString("The %1 type does not have a member named \"%2\".").arg(type->internal_name.c_str()).arg(part->name));
-      compiler.throw_error(QString("Unable to identify the member \"%1\".").arg(part->name));
+         compiler.raise_error(QString("The %1 type does not have a member named \"%2\".").arg(type->internal_name.c_str()).arg(part->name));
+      else
+         compiler.raise_error(QString("Unable to identify the member \"%1\".").arg(part->name));
+      return;
    }
    #pragma endregion
 }

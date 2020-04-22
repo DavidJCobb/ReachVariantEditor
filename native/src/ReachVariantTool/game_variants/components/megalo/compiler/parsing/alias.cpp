@@ -79,7 +79,7 @@ namespace Megalo::Script {
          }
       }
       auto& type_registry = OpcodeArgTypeRegistry::get();
-      this->target = new VariableReference(target);
+      this->target = new VariableReference(compiler, target);
       this->target->owner = this;
       //
       auto check = compiler.create_log_checkpoint();
