@@ -560,6 +560,16 @@ namespace Megalo {
       return false;
    }
    //
+   Script::VariableReference* Compiler::arg_to_variable(QString arg) noexcept {
+      return this->__parseVariable(arg);
+   }
+   Script::VariableReference* Compiler::arg_to_variable(string_scanner& arg) noexcept {
+      auto text = arg.extract_word();
+      if (text.isEmpty())
+         return nullptr;
+      return this->__parseVariable(text);
+   }
+   //
    void Compiler::raise_error(const QString& text) {
       this->errors.emplace_back(text, this->state);
    }

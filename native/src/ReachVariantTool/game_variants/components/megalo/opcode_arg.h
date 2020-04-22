@@ -106,9 +106,9 @@ namespace Megalo {
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          factory_t                factory = nullptr;
          std::vector<Script::Property> properties; // for the compiler; do not list abstract properties here
-         uint8_t static_count      = 0; // e.g. 8 for player[7]
-         uint32_t which_sig_static = 0; // e.g. for the (player) type, this would be the signature corresponding to "player[0]" in megalo_players (TODO: move this to the generic Variable class)
-         uint32_t which_sig_global = 0; // e.g. for the (player) type, this would be the signature corresponding to "global.player[0]" in megalo_players (TODO: move this to the generic Variable class)
+         uint8_t static_count = 0; // e.g. 8 for player[7]
+         const VariableScopeWhichValue* first_global = nullptr;
+         const VariableScopeWhichValue* first_static = nullptr;
          std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // used so that types like OpcodeArgValuePlayerOrGroup can declare themselves eligible for accessors on "team" and "player"
          //
          OpcodeArgTypeinfo() {
@@ -132,8 +132,6 @@ namespace Megalo {
             flags_type f,
             factory_t fac,
             std::initializer_list<Script::Property> pr,
-            uint32_t wsg = 0,
-            uint32_t wss = 0,
             uint8_t sc = 0
          ) :
             internal_name(in),
@@ -142,9 +140,7 @@ namespace Megalo {
             flags(f),
             factory(fac),
             properties(pr),
-            static_count(sc),
-            which_sig_static(wss),
-            which_sig_global(wsg)
+            static_count(sc)
          {
             OpcodeArgTypeRegistry::get().register_type(*this);
          }
@@ -195,6 +191,11 @@ namespace Megalo {
                this->accessor_proxy_types = types;
                return *this;
             }
+            OpcodeArgTypeinfo& set_variable_which_values(const VariableScopeWhichValue* first_global, const VariableScopeWhichValue* first_static = nullptr) {
+               this->first_global = first_global;
+               this->first_static = first_static;
+               return *this;
+            }
          #pragma endregion
          //
          inline bool can_be_static() const noexcept {
@@ -230,6 +231,7 @@ namespace Megalo {
          failure_irresolvable, // it is impossible to attempt to parse the remaining function call arguments. e.g. a bad shape type means we don't know what arguments come next
          success,
          unresolved_string, // implies success
+         base_class_is_expecting_override_behavior, // used by Variable to signal to subclasses that they should run their own logic
       };
       enum class more_t : uint8_t {
          no,       // we're good
@@ -249,7 +251,7 @@ namespace Megalo {
       arg_compile_result() {}
       arg_compile_result(code_t c) : code(c) {}
       //
-      [[nodiscard]] inline bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable; }
+      [[nodiscard]] inline bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable || this->code == code_t::base_class_is_expecting_override_behavior; }
       [[nodiscard]] inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
       [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success || this->code == code_t::unresolved_string; }
       [[nodiscard]] inline bool is_unresolved_string() const noexcept { return this->code == code_t::unresolved_string; }

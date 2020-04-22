@@ -64,7 +64,8 @@ namespace Megalo {
             flags() = delete;
             enum type : uint8_t {
                none = 0,
-               is_readonly = 0x01, // for the compiler; indicates that values in this scope-indicator cannot be written to at run-time
+               is_readonly  = 0x01, // for the compiler; indicates that values in this scope-indicator cannot be written to at run-time
+               is_var_scope = 0x02,
             };
          };
          using flags_t = std::underlying_type_t<flags::type>;
@@ -81,6 +82,7 @@ namespace Megalo {
             indexed_data, // e.g. script options, script stats; specify bitcount in (index_bitcount)
             generic, // not a variable or an indexed object
          };
+         using index_t = index_type;
          //
          flags_t        flags          = flags::none;
          index_type     index_type     = index_type::none;
@@ -91,12 +93,14 @@ namespace Megalo {
          //
          indexed_access_functor_t indexed_list_accessor = nullptr;
          //
-         inline bool has_index() const noexcept { return this->index_type != index_type::none; }
-         inline bool has_which() const noexcept { return this->base != nullptr; }
-         inline bool is_readonly() const noexcept { return this->flags & flags::is_readonly; }
+         [[nodiscard]] inline bool has_index() const noexcept { return this->index_type != index_type::none; }
+         [[nodiscard]] inline bool has_which() const noexcept { return this->base != nullptr; }
+         [[nodiscard]] inline bool is_indexed_data() const noexcept { return this->index_type == index_type::indexed_data; }
+         [[nodiscard]] inline bool is_readonly() const noexcept { return this->flags & flags::is_readonly; }
+         [[nodiscard]] inline bool is_variable_scope() const noexcept { return this->flags & flags::is_var_scope; }
          //
-         int which_bits() const noexcept;
-         int index_bits() const noexcept;
+         [[nodiscard]] int which_bits() const noexcept;
+         [[nodiscard]] int index_bits() const noexcept;
          //
          VariableScopeIndicatorValue() {}
          VariableScopeIndicatorValue(const char* fd, const char* fe, enum index_type it, uint8_t bc, flags_t flg = 0) : format(fd), format_english(fe), index_type(it), index_bitcount(bc), flags(flg) {}
@@ -123,10 +127,18 @@ namespace Megalo {
             result.base = which;
             return result;
          }
+         //
+         static VariableScopeIndicatorValue make_variable_scope(const char* fd, const char* fe, enum index_type it, uint8_t bc, flags_t flg = 0) {
+            return VariableScopeIndicatorValue(fd, fe, it, bc, flg | flags::is_var_scope);
+         }
+         static VariableScopeIndicatorValue make_variable_scope(const char* fd, const char* fe, const VariableScope* which, enum index_type it, flags_t flg = 0) {
+            return VariableScopeIndicatorValue(fd, fe, which, it, flg | flags::is_var_scope);
+         }
    };
    class VariableScopeIndicatorValueList {
       public:
          std::vector<VariableScopeIndicatorValue*> scopes;
+         const OpcodeArgTypeinfo& typeinfo;
          variable_type var_type = Megalo::variable_type::not_a_variable;
          //
          inline int scope_bits() const noexcept {
@@ -140,8 +152,11 @@ namespace Megalo {
             return -1;
          }
          //
-         VariableScopeIndicatorValueList(Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue*> sl);
+         VariableScopeIndicatorValueList(const OpcodeArgTypeinfo& type, Megalo::variable_type vt, std::initializer_list<VariableScopeIndicatorValue*> sl);
          const VariableScopeIndicatorValue& operator[](int i) const noexcept { return *this->scopes[i]; }
+         //
+         VariableScopeIndicatorValue::index_t get_index_type_for_variable_type() const noexcept;
+         const VariableScopeIndicatorValue* get_variable_scope(variable_scope) const noexcept;
    };
 
    class Variable : public OpcodeArgValue {
@@ -149,6 +164,10 @@ namespace Megalo {
       // Base class for variable types. Subclasses basically only need to specify what scope-indicator-value-list 
       // to use, as a constructor argument.
       //
+      protected:
+         uint32_t _global_index_to_which(uint32_t index, bool is_static) const noexcept;
+         static uint32_t _global_index_to_which(const OpcodeArgTypeinfo&, uint32_t index, bool is_static) noexcept;
+         //
       public:
          const VariableScopeIndicatorValueList& type;
          //
@@ -164,6 +183,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept override {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          //
          virtual variable_type get_variable_type() const noexcept {
             return this->type.var_type;

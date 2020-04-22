@@ -141,6 +141,9 @@ int main(int argc, char *argv[]) {
 //          in the string table, and validate any string indices passed by way of integer 
 //          literals and alias names.
 //
+//           - Compiler::arg_to_variable has been provided as a means of converting an 
+//             argument received as text to a VariableReference.
+//
 //        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
 //          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
 //          Currently, because it uses the same compile function as any basic enum, it just 

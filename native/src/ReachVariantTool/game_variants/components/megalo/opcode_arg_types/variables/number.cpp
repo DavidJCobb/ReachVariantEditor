@@ -1,10 +1,11 @@
 #include "number.h"
 #include "../../../../types/multiplayer.h" // game variant class
+#include "../../compiler/compiler.h"
 
 namespace {
    using namespace Megalo;
    using namespace Megalo::variable_scope_indicators::number;
-   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(Megalo::variable_type::scalar, {
+   VariableScopeIndicatorValueList scopes = VariableScopeIndicatorValueList(OpcodeArgValueScalar::typeinfo, Megalo::variable_type::scalar, {
       &constant,
       &player_number,
       &object_number,
@@ -59,10 +60,10 @@ namespace Megalo {
          }
          //
          extern VariableScopeIndicatorValue constant      = VariableScopeIndicatorValue("%i",            "%i", VariableScopeIndicatorValue::index_type::generic, 16);
-         extern VariableScopeIndicatorValue player_number = VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::number);
-         extern VariableScopeIndicatorValue object_number = VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::number);
-         extern VariableScopeIndicatorValue team_number   = VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeTeam, VariableScopeIndicatorValue::index_type::number);
-         extern VariableScopeIndicatorValue global_number = VariableScopeIndicatorValue("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeGlobal, VariableScopeIndicatorValue::index_type::number);
+         extern VariableScopeIndicatorValue player_number = VariableScopeIndicatorValue::make_variable_scope("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopePlayer, VariableScopeIndicatorValue::index_type::number);
+         extern VariableScopeIndicatorValue object_number = VariableScopeIndicatorValue::make_variable_scope("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeObject, VariableScopeIndicatorValue::index_type::number);
+         extern VariableScopeIndicatorValue team_number   = VariableScopeIndicatorValue::make_variable_scope("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeTeam, VariableScopeIndicatorValue::index_type::number);
+         extern VariableScopeIndicatorValue global_number = VariableScopeIndicatorValue::make_variable_scope("%w.number[%i]", "%w's number[%i]", &MegaloVariableScopeGlobal, VariableScopeIndicatorValue::index_type::number);
          extern VariableScopeIndicatorValue option        = VariableScopeIndicatorValue::make_indexed_data_indicator(
             "script_option[%i]",
             "Script Option #%i",
@@ -160,6 +161,20 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::is_variable,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueScalar>
    );
+   //
+   arg_compile_result OpcodeArgValueScalar::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      auto result = Variable::compile(compiler, arg, part);
+      //
+      if (result.code == arg_compile_result::code_t::base_class_is_expecting_override_behavior) {
+         if (arg.resolved.top_level.is_constant) {
+            this->set_to_const_zero();
+            this->index = arg.resolved.top_level.index;
+            return arg_compile_result::success();
+         }
+         return arg_compile_result::failure();
+      }
+      return result;
+   }
    //
    bool OpcodeArgValueScalar::is_const_zero() const noexcept { // bit hacky, but eh
       if (!this->scope)

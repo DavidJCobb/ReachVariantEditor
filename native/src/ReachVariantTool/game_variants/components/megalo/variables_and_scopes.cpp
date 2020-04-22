@@ -201,6 +201,17 @@ namespace Megalo {
       assert(false && "Unknown variable scope!");
       __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
    }
+   const VariableScope* getScopeObjectForConstant(variable_type s) noexcept {
+      switch (s) {
+         case variable_type::player:
+            return &MegaloVariableScopePlayer;
+         case variable_type::object:
+            return &MegaloVariableScopeObject;
+         case variable_type::team:
+            return &MegaloVariableScopeTeam;
+      }
+      return nullptr;
+   }
    variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
       if (&s == &MegaloVariableScopeGlobal)
          return variable_scope::global;

@@ -7,6 +7,8 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          OpcodeArgValueScalar();
          //
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         //
          bool is_const_zero() const noexcept;
          void set_to_const_zero() noexcept;
          virtual Variable* create_zero_or_none() const noexcept override;

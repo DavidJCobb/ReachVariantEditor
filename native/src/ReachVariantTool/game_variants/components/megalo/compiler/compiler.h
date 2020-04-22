@@ -221,6 +221,9 @@ namespace Megalo {
          void revert_to_log_checkpoint(log_checkpoint);
          bool checkpoint_has_errors(log_checkpoint) const noexcept;
          //
+         Script::VariableReference* arg_to_variable(QString) noexcept; // caller is responsible for freeing the returned variable
+         Script::VariableReference* arg_to_variable(string_scanner& arg) noexcept; // caller is responsible for freeing the returned variable // runs (arg.extract_word)
+         //
          enum class name_source {
             none,
             action,
