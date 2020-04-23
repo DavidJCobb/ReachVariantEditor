@@ -626,6 +626,7 @@ namespace Megalo {
    }
 
    QString Compiler::extract_operator() {
+      auto prior = this->backup_stream_state();
       QString word;
       this->scan([this, &word](QChar c) {
          if (string_scanner::is_whitespace_char(c))
@@ -635,6 +636,8 @@ namespace Megalo {
          word += c;
          return false;
       });
+      if (word.isEmpty())
+         this->restore_stream_state(prior);
       return word;
    }
 
@@ -1166,21 +1169,26 @@ namespace Megalo {
          auto type  = var->get_type();
          auto basis = var->get_alias_basis_type();
          //
-         variable_scope scope_v = getVariableScopeForTypeinfo(basis);
-         variable_type  type_v  = getVariableTypeForTypeinfo(type);
-         if (scope_v == variable_scope::not_a_scope || type_v == variable_type::not_a_variable) {
-            this->raise_error(QString("Unable to generate an implicit variable declaration for \"%1\".").arg(var->to_string()));
-            return var;
+         if (type->is_variable()) { // VariableReference can also refer to things like script widgets
+            if (!basis && var->resolved.nested.type)
+               basis = var->resolved.top_level.type;
+            //
+            variable_scope scope_v = getVariableScopeForTypeinfo(basis);
+            variable_type  type_v  = getVariableTypeForTypeinfo(type);
+            if (scope_v == variable_scope::not_a_scope || type_v == variable_type::not_a_variable) {
+               this->raise_error(QString("Unable to generate an implicit variable declaration for \"%1\".").arg(var->to_string()));
+               return var;
+            }
+            //
+            int32_t index = 0;
+            if (scope_v == variable_scope::global) {
+               index = var->resolved.top_level.index;
+            } else {
+               index = var->resolved.nested.index;
+            }
+            auto set  = this->_get_variable_declaration_set(scope_v);
+            auto decl = set->get_or_create_declaration(type_v, index);
          }
-         //
-         int32_t index = 0;
-         if (scope_v == variable_scope::global) {
-            index = var->resolved.top_level.index;
-         } else {
-            index = var->resolved.nested.index;
-         }
-         auto set  = this->_get_variable_declaration_set(scope_v);
-         auto decl = set->get_or_create_declaration(type_v, index);
       }
       return var;
    }
@@ -1205,8 +1213,22 @@ namespace Megalo {
       int8_t opcode_arg_index = 0;
       int8_t opcode_arg_part  = 0;
       int8_t script_arg_index = 0;
+      int8_t mapped_arg_count = mapping.mapped_arg_count();
       std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
       bool comma = false;
+      //
+      if (mapped_arg_count == 0) {
+         QChar   terminator = '\0';
+         QString all_args   = this->extract_up_to_any_of(")", terminator).trimmed();
+         if (terminator == '\0') {
+            this->raise_fatal("Expected a , or a ).");
+            return;
+         }
+         if (!all_args.isEmpty())
+            this->raise_error("Too many arguments passed to the function.");
+         return;
+      }
+      //
       do {
          QString raw_argument;
          {
@@ -1218,9 +1240,7 @@ namespace Megalo {
             }
             comma = (terminator == ',');
          }
-         if (opcode_arg_index >= mapping.mapped_arg_count()) {
-            if (opcode_arg_index == 0 && !comma && raw_argument.isEmpty()) // if these conditions are met, then there are no arguments, and none were expected
-               return;
+         if (opcode_arg_index >= mapped_arg_count) {
             this->raise_error("Too many arguments passed to the function.");
             return;
          }
@@ -1276,6 +1296,7 @@ namespace Megalo {
          else {
             ++opcode_arg_index;
             opcode_arg_part = 0;
+            current_argument.reset(nullptr);
          }
       } while (comma);
       if (opcode_arg_index < mapping.mapped_arg_count())
@@ -1485,7 +1506,7 @@ namespace Megalo {
          this->revert_to_log_checkpoint(check);
          this->restore_stream_state(start);
          //
-         this->__parseFunctionArgs(*function, *opcode.get(), unresolved_strings);
+         this->__parseFunctionArgs(*function, *opcode.get(), unresolved_strings); // advances us past the closing ")" EVEN IF IT FAILS FOR ANY REASON
          if (!this->checkpoint_has_errors(check)) {
             match = function;
             break;
@@ -1503,17 +1524,12 @@ namespace Megalo {
                   this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
             }
          }
-         if (!this->skip_to(')'))
-            this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
          return;
       }
       //
-      // If we've reached this point without any errors, then we should be just before the terminating ')' for the function call.
+      // If we've reached this point without any errors, then we should be just after the terminating ')' for the function call, 
+      // and the Opcode should have had its (arguments) array sized appropriately.
       //
-      if (!this->extract_specific_char(')')) {
-         this->raise_fatal("Expected ')'.");
-         return;
-      }
       if (context) {
          auto index = match->mapping.arg_context;
          const OpcodeArgBase& base = match->arguments[index];

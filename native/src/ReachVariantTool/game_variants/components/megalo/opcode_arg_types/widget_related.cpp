@@ -87,7 +87,7 @@ namespace Megalo {
             return arg_compile_result::success();
          }
          auto  index = arg.resolved.top_level.index;
-         auto  mp    = compiler.get_variant();
+         auto& mp    = compiler.get_variant();
          auto& list  = mp.scriptContent.widgets;
          auto  size  = list.size();
          if (index >= size)

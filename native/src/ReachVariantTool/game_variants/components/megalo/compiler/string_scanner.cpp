@@ -306,6 +306,7 @@ namespace Megalo {
             result += c;
             return false;
          });
+         ++this->state.offset; // move position to after the char
          if (out == '\0') {
             //
             // We hit EOF without finding any of the terminating characters.

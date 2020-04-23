@@ -44,7 +44,10 @@ namespace Megalo {
          //
          // Try to resolve the argument as an alias.
          //
-         auto word  = arg.extract_word();
+         auto word = arg.extract_word();
+         if (word.isEmpty()) {
+            return arg_compile_result::failure("The specified value is not an integer constant, the value \"true\", the value \"false\", or an alias of any of these.");
+         }
          auto alias = compiler.lookup_absolute_alias(word);
          if (alias) {
             if (alias->is_integer_constant()) {

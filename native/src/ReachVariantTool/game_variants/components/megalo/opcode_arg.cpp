@@ -41,6 +41,9 @@ namespace Megalo {
    /*static*/ arg_compile_result arg_compile_result::failure(bool irresolvable) {
       return arg_compile_result(irresolvable ? code_t::failure_irresolvable : code_t::failure);
    }
+   /*static*/ arg_compile_result arg_compile_result::failure(const char* error, bool irresolvable) {
+      return arg_compile_result::failure(QString(error), irresolvable);
+   }
    /*static*/ arg_compile_result arg_compile_result::failure(QString error, bool irresolvable) {
       auto result = arg_compile_result(irresolvable ? code_t::failure_irresolvable : code_t::failure);
       result.error = error;

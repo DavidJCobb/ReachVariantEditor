@@ -103,8 +103,7 @@ namespace Megalo {
                if (index < list.size())
                   return (indexed_list_item*) &list[index];
                return (indexed_list_item*) nullptr;
-            },
-            VariableScopeIndicatorValue::flags::is_readonly
+            }
          );
          extern VariableScopeIndicatorValue team_stat = VariableScopeIndicatorValue::make_indexed_data_indicator( // team stat
             "%w.script_stat[%i]",
@@ -116,8 +115,7 @@ namespace Megalo {
                if (index < list.size())
                   return (indexed_list_item*) &list[index];
                return (indexed_list_item*) nullptr;
-            },
-            VariableScopeIndicatorValue::flags::is_readonly
+            }
          );
          extern VariableScopeIndicatorValue current_round           = VariableScopeIndicatorValue::make_game_value("game.current_round",           "Current Round", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue symmetry_get            = VariableScopeIndicatorValue::make_game_value("game.symmetry_get",            "Symmetry", VariableScopeIndicatorValue::flags::is_readonly);

@@ -171,6 +171,13 @@ namespace Megalo {
       }
       return this->arguments[arg_index]->compile(compiler, arg, part);
    }
+   void Opcode::reset() noexcept {
+      for (auto arg : this->arguments)
+         if (arg)
+            delete arg;
+      this->arguments.clear();
+      this->function = nullptr;
+   }
 
    const OpcodeBase* AccessorRegistry::Definition::get_opcode_base() const noexcept {
       if (this->getter)

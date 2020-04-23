@@ -321,10 +321,7 @@ namespace Megalo {
       this->function->decompile(out, this->arguments);
    }
    void Condition::reset() noexcept {
-      for (auto arg : this->arguments)
-         delete arg;
-      this->arguments.clear();
-      this->function = nullptr;
+      Opcode::reset(); // call super
       #if _DEBUG
          this->debug_str.clear();
       #endif

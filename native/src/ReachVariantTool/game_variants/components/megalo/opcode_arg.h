@@ -217,6 +217,7 @@ namespace Megalo {
       more_t  more = more_t::no;
       //
       static arg_compile_result failure(bool irresolvable = false);
+      static arg_compile_result failure(const char*, bool irresolvable = false);
       static arg_compile_result failure(QString, bool irresolvable = false);
       static arg_compile_result success();
       static arg_compile_result unresolved_string(QString);

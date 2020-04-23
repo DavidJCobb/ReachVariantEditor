@@ -44,7 +44,7 @@ namespace Megalo {
             void scan(scan_functor_t);
             pos  backup_stream_state();
             void restore_stream_state(pos);
-            bool skip_to(QChar, bool even_if_in_string = false); // skip to the next instance of the desired character; returns false and does not move if the character isn't found
+            bool skip_to(QChar, bool even_if_in_string = false); // skip to and past the next instance of the desired character; returns false and does not move if the character isn't found
             void skip_to_end();
             inline bool is_at_end() const noexcept { // checks if nothing, not even whitespace, remains
                return this->state.offset <= this->text.size();
@@ -56,7 +56,7 @@ namespace Megalo {
             bool extract_string_literal(QString& out); // advances the stream past the end-quote if a string literal is found
             QString extract_word(); // advances the stream to the end of the found word, or to the next non-word and non-whitespace character
             bool    extract_word(QString desired); // advances the stream to the end of the desired word only if it is found; no advancement otherwise
-            QString extract_up_to_any_of(QString charset, QChar& out);
+            QString extract_up_to_any_of(QString charset, QChar& out); // extracts up to any character in (charset), and then moves the stream position after that character; does not move if no character is found
 
       };
    }
