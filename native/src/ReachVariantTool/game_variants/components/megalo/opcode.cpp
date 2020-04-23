@@ -223,7 +223,7 @@ namespace Megalo {
    }
    AccessorRegistry::Definition* AccessorRegistry::get_by_name(const char* name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
       for (auto& entry : this->definitions) {
-         if (entry.get_opcode_base()->context_is(property_is_on))
+         if (!entry.get_opcode_base()->context_is(property_is_on))
             continue;
          if (entry.name == name)
             return (Definition*)&entry; // cast needed to strip const
@@ -238,7 +238,7 @@ namespace Megalo {
          #if _DEBUG
             assert(function && "An entry for a variably-named accessor should not exist unless we've identified at least one of its opcodes.");
          #endif
-         if (function->context_is(base))
+         if (!function->context_is(base))
             continue;
          if (function->get_name_type() == &property_name_type)
             return (Definition*)&entry; // cast needed to strip const

@@ -305,3 +305,18 @@ uint32_t ReachStringTable::total_bytecount() noexcept {
    }
    return combined.size();
 }
+ReachString* ReachStringTable::lookup(const QString& english, bool& matched_multiple) const noexcept {
+   matched_multiple = false;
+   ReachString* match = nullptr;
+   for (auto& string : this->strings) {
+      QString current = QString::fromUtf8(string.english().c_str());
+      if (current == english) {
+         if (match) {
+            matched_multiple = true;
+            break;
+         }
+         match = const_cast<ReachString*>(&string);
+      }
+   }
+   return match;
+}

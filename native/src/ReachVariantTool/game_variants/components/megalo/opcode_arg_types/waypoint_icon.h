@@ -3,12 +3,13 @@
 #include "../../../formats/detailed_enum.h"
 
 namespace Megalo {
-   class OpcodeArgValueWaypointIcon : public OpcodeArgValueScalar {
+   class OpcodeArgValueWaypointIcon : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
          //
       public:
          int8_t icon = 0;
+         OpcodeArgValueScalar number;
          //
          virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;

@@ -883,7 +883,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("try_get_armor_ability", "get_armor_ability", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
+         OpcodeFuncToScriptMapping::make_function("try_get_armor_ability", "get_armor_ability", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",

@@ -8,6 +8,7 @@
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
 #include "indexed_lists.h"
+#include <QString>
 
 namespace reach {
    enum class language {
@@ -113,11 +114,12 @@ class ReachStringTable {
       bool read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) noexcept;
       //
-      ReachString* get_entry(size_t index) noexcept {
+      ReachString* get_entry(size_t index) const noexcept {
          if (index < this->strings.size())
-            return &this->strings[index];
+            return const_cast<ReachString*>(&this->strings[index]); // this function does not, itself, modify the table, but the string returned can be modified
          return nullptr;
       }
+      ReachString* lookup(const QString& english, bool& matched_multiple) const noexcept;
       //
       inline size_t capacity() const noexcept { return this->max_count; }
       inline size_t is_at_count_limit() const noexcept { return this->size() >= this->capacity(); }

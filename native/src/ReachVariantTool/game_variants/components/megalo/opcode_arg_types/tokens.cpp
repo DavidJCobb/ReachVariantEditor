@@ -1,10 +1,7 @@
 #include "tokens.h"
 #include "../../../types/multiplayer.h"
-#include "variables/object.h"
-#include "variables/player.h"
-#include "variables/number.h"
-#include "variables/team.h"
-#include "variables/timer.h"
+#include "variables/all_core.h"
+#include "../compiler/compiler.h"
 
 namespace Megalo {
    bool OpcodeStringToken::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
@@ -22,7 +19,6 @@ namespace Megalo {
             this->value = new OpcodeArgValueObject();
             break;
          case OpcodeStringTokenType::number:
-         //case OpcodeStringTokenType::number_with_sign:
             this->value = new OpcodeArgValueScalar();
             break;
          case OpcodeStringTokenType::timer:
@@ -48,6 +44,28 @@ namespace Megalo {
    void OpcodeStringToken::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (this->value)
          this->value->decompile(out, flags);
+   }
+   arg_compile_result OpcodeStringToken::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      this->type = OpcodeStringTokenType::none;
+      auto type = arg.get_type();
+      if (type == &OpcodeArgValuePlayer::typeinfo) {
+         this->type  = OpcodeStringTokenType::player;
+         this->value = new OpcodeArgValuePlayer;
+      } else if (type == &OpcodeArgValueTeam::typeinfo) {
+         this->type  = OpcodeStringTokenType::team;
+         this->value = new OpcodeArgValueTeam;
+      } else if (type == &OpcodeArgValueObject::typeinfo) {
+         this->type  = OpcodeStringTokenType::object;
+         this->value = new OpcodeArgValueObject;
+      } else if (type == &OpcodeArgValueScalar::typeinfo) {
+         this->type  = OpcodeStringTokenType::number;
+         this->value = new OpcodeArgValueScalar;
+      } else if (type == &OpcodeArgValueTimer::typeinfo) {
+         this->type  = OpcodeStringTokenType::timer;
+         this->value = new OpcodeArgValueTimer;
+      } else
+         return arg_compile_result::failure();
+      return this->value->compile(compiler, arg, 0);
    }
    //
    //
@@ -149,5 +167,51 @@ namespace Megalo {
          out.write(", ");
          this->tokens[i].decompile(out, flags);
       }
+   }
+   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      if (part == 0) {
+         //
+         // Get the format string.
+         //
+         QString temp;
+         if (arg_text.extract_string_literal(temp)) {
+            bool multiple = false;
+            this->string = compiler.get_variant().scriptData.strings.lookup(temp, multiple);
+            if (multiple)
+               return arg_compile_result::failure(QString("The format string provided is an exact match to multiple strings in the table. Unable to figure out which one you want."));
+            if (!this->string)
+               return arg_compile_result::unresolved_string(temp).set_more(arg_compile_result::more_t::optional);
+            return arg_compile_result::success().set_more(arg_compile_result::more_t::optional);
+         }
+         int32_t index;
+         if (!arg_text.extract_integer_literal(index)) {
+            auto word = arg_text.extract_word();
+            if (word.isEmpty())
+               return arg_compile_result::failure();
+            auto alias = compiler.lookup_absolute_alias(word);
+            if (!alias || !alias->is_integer_constant())
+               return arg_compile_result::failure();
+            index = alias->get_integer_constant();
+         }
+         this->string = compiler.get_variant().scriptData.strings.get_entry(index);
+         if (!this->string)
+            return arg_compile_result::failure(QString("String index %1 does not exist.").arg(index));
+         return arg_compile_result::success().set_more(arg_compile_result::more_t::optional);
+      }
+      //
+      // All subsequent arguments are format string parameters, which must be variables.
+      //
+      auto arg = compiler.arg_to_variable(arg_text);
+      if (!arg)
+         return arg_compile_result::failure("This argument is not a variable.");
+      auto result = this->compile(compiler, *arg, part);
+      delete arg;
+      return result;
+   }
+   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      if (part == 0 || part > max_token_count)
+         return arg_compile_result::failure();
+      auto& token = this->tokens[part - 1];
+      return token.compile(compiler, arg, part).set_more(part < max_token_count ? arg_compile_result::more_t::optional : arg_compile_result::more_t::no);
    }
 }

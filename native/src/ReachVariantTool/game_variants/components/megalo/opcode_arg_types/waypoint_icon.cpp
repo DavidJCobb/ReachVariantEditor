@@ -53,13 +53,13 @@ namespace Megalo {
    bool OpcodeArgValueWaypointIcon::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       this->icon = stream.read_bits(enums::waypoint_icon.index_bits()) - 1; // 5 bits
       if (this->icon == enums::waypoint_icon.lookup("territory_a"))
-         return OpcodeArgValueScalar::read(stream, mp); // call super
+         return this->number.read(stream, mp); // call super
       return true;
    }
    void OpcodeArgValueWaypointIcon::write(cobb::bitwriter& stream) const noexcept {
       stream.write(this->icon + 1, enums::waypoint_icon.index_bits());
       if (this->icon == enums::waypoint_icon.lookup("territory_a"))
-         OpcodeArgValueScalar::write(stream); // call super
+         this->number.write(stream); // call super
    }
    void OpcodeArgValueWaypointIcon::to_string(std::string& out) const noexcept {
       if (this->icon < 0) {
@@ -82,7 +82,7 @@ namespace Megalo {
       //
       if (this->icon == enums::waypoint_icon.lookup("territory_a")) {
          std::string temp;
-         OpcodeArgValueScalar::to_string(temp);
+         this->number.to_string(temp);
          cobb::sprintf(out, "%s with number %s", out.c_str(), temp.c_str());
       }
    }
@@ -104,7 +104,7 @@ namespace Megalo {
       out.write(temp);
       if (this->icon == enums::waypoint_icon.lookup("territory_a")) {
          out.write(", ");
-         OpcodeArgValueScalar::decompile(out, flags);
+         this->number.decompile(out, flags);
       }
    }
 }

@@ -141,6 +141,9 @@ int main(int argc, char *argv[]) {
 //          in the string table, and validate any string indices passed by way of integer 
 //          literals and alias names.
 //
+//           = ACTUALLY, string_scanner::extract_string_literal SHOULD HANDLE ALL ESCAPE 
+//             CODES AND SIMILAR WHEN RETURNING THE CONTENTS OF THE STRING.
+//
 //           - Compiler::arg_to_variable has been provided as a means of converting an 
 //             argument received as text to a VariableReference.
 //
@@ -156,23 +159,20 @@ int main(int argc, char *argv[]) {
 //       that any argument types that haven't had their own compile code written yet will 
 //       yield non-fatal errors.
 //
-//        - References to "script_option[n]" aren't recognized. We probably need to define 
-//          a scope NamespaceMember for this -- and make sure that VariableReference honors 
-//          whether a scope can have an index when resolving a NamespaceMember.
-//
-//        - Format string arguments currently yield "too many arguments" as an error, and will 
-//          until we write the code to resolve them. It's not a compiler problem.
-//
-//        - It seems like accessing any member of a NamespaceMember, e.g. (current_player.team), 
-//          yields compiler errors regarding the first part (e.g. current_player) not having an 
-//          index.
+//        - The compiler should probably throw an error when parsing a function argument, if 
+//          the argument is blank or whitespace-only (i.e. func(1, , 3)).
 //
 //        - Line numbers seem to be subtly off on several error messages and I'm not sure why.
 //
-//        - For some reason, write access to "score" still resolves to the read-only property 
-//          despite the property being properly flagged, write-access being specified when 
-//          resolving the VariableReference, and VariableReference::resolve having code to 
-//          react to write access being specified. That code must be wrong somehow.
+//        - string_scanner::extract_word: Consider stopping extraction after a "]" if the next 
+//          character is not a "."; it would allow "declare global.number[0]with ..." and such.
+//
+//           - This is good if we want to be forgiving, but if we want to teach good habits to 
+//             the coder, then we'd need to emit a warning... which we can't consistently do, 
+//             since extract_word is inside of string_scanner and warnings are in the Compiler. 
+//             I'd lean toward being strict, honestly. We should maybe write a comment somewhere 
+//             so that we don't forget that we *can* do this, but I guess I'm deciding against 
+//             actually doing it.
 //
 //     - Compiler: Unresolved string references: each list entry needs an "action" field 
 //       which lists the action the script author decided to take. Available actions are: 

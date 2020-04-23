@@ -318,7 +318,7 @@ namespace Megalo::Script {
          return resolved.nested.type;
       if (resolved.top_level.type)
          return resolved.top_level.type;
-      return nullptr;
+      return resolved.alias_basis;
    }
    bool VariableReference::is_none() const noexcept {
       auto which = this->resolved.top_level.which;
@@ -332,7 +332,7 @@ namespace Megalo::Script {
       if (resolved.top_level.scope)
          return true;
       if (resolved.accessor)
-         return resolved.accessor->setter != nullptr;
+         return resolved.accessor->setter == nullptr;
       if (resolved.property.definition)
          return resolved.property.definition->scope->is_readonly();
       if (resolved.nested.type)
@@ -777,15 +777,44 @@ namespace Megalo::Script {
          this->is_invalid = true;
          return;
       }
-      if (this->_resolve_nested_variable(compiler, i)) {
-         if (++i >= this->raw.size()) {
-            this->is_resolved = true;
-            return;
-         }
-      }
+      //
+      // The basic plan was to resolve variable parts in the order they can appear: first, the top-level 
+      // part; then, the nested variable; then, the property; and then, the accessor. However, edge-cases 
+      // have a way of making things messy. There are two edge cases we need to account for:
+      //
+      //  - A property with the same name as a variable typename
+      //
+      //  - A write-only accessor with the same name as a read-only property
+      //
+      // The former encompasses (player.team) and (object.team), which obtain the entity's owner team; 
+      // those properties have the same name as the "team" type. If we try to resolve nested variables 
+      // first and then properties, then we will mistake them for an invalid access to a nested variable 
+      // (i.e. forgetting the index as in the case of "current_player.object") and throw an error. What 
+      // we must do instead is test for the following cases in order:
+      //
+      //    top.property
+      //    top.nested
+      //    top.nested.property
+      //
+      // The latter case encompasses the (team.score) and (player.score) accessor and properties.
+      //
+      bool has_property = this->_resolve_property(compiler, i);
       if (this->is_invalid)
          return;
-      if (this->_resolve_property(compiler, i)) {
+      if (!has_property) {
+         if (this->_resolve_nested_variable(compiler, i)) {
+            if (this->is_invalid)
+               return;
+            if (++i >= this->raw.size()) {
+               this->is_resolved = true;
+               return;
+            }
+            has_property = this->_resolve_property(compiler, i);
+            if (this->is_invalid)
+               return;
+         }
+      }
+      if (has_property) {
          auto prop = this->resolved.property.definition;
          //
          if (is_write_access && !prop->has_index()) {

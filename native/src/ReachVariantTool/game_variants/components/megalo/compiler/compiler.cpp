@@ -811,6 +811,8 @@ namespace Megalo {
                mapping = &setter->mapping;
                lhs->strip_accessor();
                //
+               opcode->arguments.resize(accessor->arguments.size());
+               //
                // Compile the left-hand side (the context-argument):
                //
                auto ai  = mapping->arg_context;
@@ -851,6 +853,9 @@ namespace Megalo {
                acc_name = rhs->resolved.accessor_name;
                mapping = &getter->mapping;
                rhs->strip_accessor();
+               //
+               opcode->arguments.resize(accessor->arguments.size());
+               //
                if (!lhs->is_invalid) {
                   //
                   // Compile the left-hand side (the out-argument):
@@ -1210,12 +1215,7 @@ namespace Megalo {
       auto& mapping = function.mapping;
       opcode.arguments.resize(function.arguments.size());
       //
-      int8_t opcode_arg_index = 0;
-      int8_t opcode_arg_part  = 0;
-      int8_t script_arg_index = 0;
       int8_t mapped_arg_count = mapping.mapped_arg_count();
-      std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
-      bool comma = false;
       //
       if (mapped_arg_count == 0) {
          QChar   terminator = '\0';
@@ -1228,33 +1228,37 @@ namespace Megalo {
             this->raise_error("Too many arguments passed to the function.");
          return;
       }
-      //
-      do {
-         QString raw_argument;
-         {
-            QChar terminator = '\0';
-            raw_argument = this->extract_up_to_any_of(",)", terminator).trimmed();
+      std::vector<QString> raw_args;
+      {
+         QChar terminator = '\0';
+         do {
+            auto arg = this->extract_up_to_any_of(",)", terminator).trimmed();
             if (terminator == '\0') {
                this->raise_fatal("Expected a , or a ).");
                return;
             }
-            comma = (terminator == ',');
-         }
+            raw_args.push_back(arg);
+         } while (terminator == ',');
+      }
+      //
+      int8_t opcode_arg_index = 0;
+      int8_t opcode_arg_part = 0;
+      int8_t script_arg_index = 0;
+      std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
+      for (; script_arg_index < raw_args.size(); ++script_arg_index) {
          if (opcode_arg_index >= mapped_arg_count) {
             this->raise_error("Too many arguments passed to the function.");
             return;
          }
-         //
-         auto& base = function.arguments[mapping.arg_index_mappings[script_arg_index]];
          if (!current_argument) {
+            auto& base = function.arguments[mapping.arg_index_mappings[opcode_arg_index]];
             current_argument.reset((base.typeinfo.factory)());
             if (!current_argument) {
                this->raise_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
                return;
             }
          }
-         //
-         string_scanner argument(raw_argument);
+         string_scanner argument(raw_args[script_arg_index]);
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
          bool failure = result.is_failure();
          bool success = result.is_success();
@@ -1276,8 +1280,9 @@ namespace Megalo {
                return;
          }
          bool needs_more = result.needs_another();
+         bool has_more   = script_arg_index + 1 < raw_args.size();
          bool another    = needs_more || result.can_take_another();
-         if (needs_more && !comma) {
+         if (needs_more && !has_more) {
             this->raise_error("Not enough arguments passed to the function.");
             return;
          }
@@ -1290,16 +1295,19 @@ namespace Megalo {
                opcode.arguments[opcode_arg_index] = current_argument.release();
             }
          }
-         script_arg_index++;
-         if (another)
+         if (another && has_more) {
             ++opcode_arg_part;
-         else {
-            ++opcode_arg_index;
-            opcode_arg_part = 0;
-            current_argument.reset(nullptr);
+            continue;
+            //
+            // Only skip the below if there actually are more arguments to consume; otherwise, the last-minute check to 
+            // ensure that all arguments were parsed will fail when it shouldn't.
+            //
          }
-      } while (comma);
-      if (opcode_arg_index < mapping.mapped_arg_count())
+         ++opcode_arg_index;
+         opcode_arg_part = 0;
+         current_argument.reset(nullptr);
+      }
+      if (opcode_arg_index < mapped_arg_count)
          this->raise_error("Not enough arguments passed to the function.");
    }
    namespace {
@@ -2010,8 +2018,11 @@ namespace Megalo {
             auto& res = initial->resolved;
             auto& top = res.top_level;
             if (top.type && top.type->is_variable() && !top.is_static && !top.is_constant) {
-               this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
-               return;
+               auto scope = top.scope;
+               if (!scope || scope->is_variable_scope()) {
+                  this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
+                  return;
+               }
             }
             if (res.nested.type) {
                this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
