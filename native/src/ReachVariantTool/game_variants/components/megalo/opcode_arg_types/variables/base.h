@@ -165,7 +165,6 @@ namespace Megalo {
       // to use, as a constructor argument.
       //
       protected:
-         uint32_t _global_index_to_which(uint32_t index, bool is_static) const noexcept;
          static uint32_t _global_index_to_which(const OpcodeArgTypeinfo&, uint32_t index, bool is_static) noexcept;
          //
          void _update_object_pointer_from_index(Compiler& compiler) noexcept; // used by the compile process

@@ -39,6 +39,8 @@ namespace Megalo {
             static bool is_syntax_char(QChar);
             static bool is_whitespace_char(QChar);
             //
+            inline QString trimmed() const noexcept { return this->text.trimmed(); }
+            //
             void scan(scan_functor_t);
             pos  backup_stream_state();
             void restore_stream_state(pos);
@@ -54,6 +56,7 @@ namespace Megalo {
             bool extract_string_literal(QString& out); // advances the stream past the end-quote if a string literal is found
             QString extract_word(); // advances the stream to the end of the found word, or to the next non-word and non-whitespace character
             bool    extract_word(QString desired); // advances the stream to the end of the desired word only if it is found; no advancement otherwise
+            QString extract_up_to_any_of(QString charset, QChar& out);
 
       };
    }

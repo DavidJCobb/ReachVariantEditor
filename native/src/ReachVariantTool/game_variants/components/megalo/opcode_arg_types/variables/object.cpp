@@ -96,7 +96,7 @@ namespace Megalo {
                if (top.type != &OpcodeArgValuePlayer::typeinfo)
                   return arg_compile_result::failure();
                this->scope = &variable_scope_indicators::object::player_biped;
-               this->which = this->_global_index_to_which(top.index, top.is_static);
+               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
                return arg_compile_result::success();
             }
          }

@@ -5,13 +5,12 @@
 
 namespace Megalo {
    bool OpcodeBase::context_is(const OpcodeArgTypeinfo& type) const noexcept {
-      auto& mapping = this->mapping;
-      if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
-         return nullptr;
-      auto& base = this->arguments[mapping.arg_context];
-      if (&base.typeinfo == &type)
+      auto context_type = this->get_context_type();
+      if (!context_type)
+         return false;
+      if (context_type == &type)
          return true;
-      if (type.has_accessor_proxy_type(base.typeinfo))
+      if (context_type->has_accessor_proxy_type(type))
          return true;
       return false;
    }
@@ -126,13 +125,13 @@ namespace Megalo {
    }
    const OpcodeArgTypeinfo* OpcodeBase::get_context_type() const noexcept {
       auto& mapping = this->mapping;
-      if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+      if (mapping.arg_context < 0) // no_context, game_namespace
          return nullptr;
       return &this->arguments[mapping.arg_context].typeinfo;
    }
    const OpcodeArgTypeinfo* OpcodeBase::get_name_type() const noexcept {
       auto& mapping = this->mapping;
-      if (mapping.arg_name == OpcodeFuncToScriptMapping::no_context)
+      if (mapping.arg_name == OpcodeFuncToScriptMapping::no_argument)
          return nullptr;
       return &this->arguments[mapping.arg_name].typeinfo;
    }

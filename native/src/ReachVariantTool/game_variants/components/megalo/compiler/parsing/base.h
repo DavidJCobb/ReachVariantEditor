@@ -20,8 +20,8 @@ namespace Megalo {
                int32_t end   = -1;
             } range;
             //
-            void set_start(string_scanner::pos&);
-            void set_end(string_scanner::pos&);
+            void set_start(const string_scanner::pos&);
+            void set_end(const string_scanner::pos&);
       };
    }
 }

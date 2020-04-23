@@ -90,7 +90,7 @@ namespace Megalo {
          uint8_t static_count = 0; // e.g. 8 for player[7]
          const VariableScopeWhichValue* first_global = nullptr;
          const VariableScopeWhichValue* first_static = nullptr;
-         std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // used so that types like OpcodeArgValuePlayerOrGroup can declare themselves eligible for accessors on "team" and "player"
+         std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // the listed types can use this type's accessors and member functions; needed for OpcodeArgValuePlayerOrGroup, etc.
          //
          OpcodeArgTypeinfo() {}
          OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {}
@@ -248,8 +248,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure(); }; // used if the OpcodeArgValue was received as a script argument
-         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure(); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as a script argument
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;

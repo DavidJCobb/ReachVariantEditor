@@ -249,7 +249,7 @@ namespace Megalo {
             //
             return;
          //
-         auto   t  = this->trigger = new Trigger;
+         auto   t = this->trigger = new Trigger;
          size_t ti = compiler.results.triggers.size(); // index of this trigger in the full trigger list
          compiler.results.triggers.push_back(t);
          if (this->parent)
@@ -304,7 +304,7 @@ namespace Megalo {
             //
             for (auto item : this->conditions) {
                #if _DEBUG
-                  assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
+               assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
                #endif
                auto cmp = dynamic_cast<Comparison*>(item);
                assert(cmp);
@@ -321,8 +321,8 @@ namespace Megalo {
          }
          for (size_t i = 0; i < size; i++) {
             bool is_last = (i == size - 1);
-            auto item    = items[i];
-            auto block   = dynamic_cast<Block*>(item);
+            auto item = items[i];
+            auto block = dynamic_cast<Block*>(item);
             if (block) {
                if (is_last && !block->is_event_trigger() && block->_is_if_block())
                   block->trigger = this->trigger;
@@ -333,10 +333,10 @@ namespace Megalo {
                   //
                   // Create a "call nested trigger" opcode.
                   //
-                  auto call  = new Action;
+                  auto call = new Action;
                   this->trigger->opcodes.push_back(call);
                   call->function = &actionFunction_runNestedTrigger;
-                  auto arg   = (call->function->arguments[0].typeinfo.factory)();
+                  auto arg = (call->function->arguments[0].typeinfo.factory)();
                   call->arguments.push_back(arg);
                   auto arg_c = dynamic_cast<OpcodeArgValueTrigger*>(arg);
                   assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
@@ -385,16 +385,6 @@ namespace Megalo {
       if (this->root) {
          delete this->root;
          this->root = nullptr;
-      }
-      if (auto statement = this->assignment) {
-         if (!statement->owner && !statement->parent) // only free the memory if it wasn't appended to a Block; otherwise, the memory should already be freed
-            delete statement;
-         this->assignment = nullptr;
-      }
-      if (auto statement = this->comparison) {
-         if (!statement->owner && !statement->parent) // only free the memory if it wasn't appended to a Block; otherwise, the memory should already be freed
-            delete statement;
-         this->comparison = nullptr;
       }
       this->aliases_in_scope.clear(); // don't free contents; every Alias should have been inside of a Block and freed by that Block
       this->functions_in_scope.clear();
@@ -462,7 +452,7 @@ namespace Megalo {
       return nullptr;
    }
    Script::Alias* Compiler::lookup_absolute_alias(QString name) {
-      auto&  list = this->aliases_in_scope;
+      auto& list = this->aliases_in_scope;
       size_t size = list.size();
       if (!size)
          return nullptr;
@@ -480,7 +470,7 @@ namespace Megalo {
       return nullptr;
    }
    Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) {
-      auto&  list = this->functions_in_scope;
+      auto& list = this->functions_in_scope;
       size_t size = list.size();
       if (!size)
          return nullptr;
@@ -592,9 +582,6 @@ namespace Megalo {
    void Compiler::raise_warning(const QString& text) {
       this->warnings.emplace_back(text, this->state);
    }
-   void Compiler::reset_token() {
-      this->token = Token();
-   }
    //
    void Compiler::parse(QString text) {
       this->text = text;
@@ -605,30 +592,13 @@ namespace Megalo {
       }
       this->block = this->root;
       //
-      this->assignment = nullptr;
-      this->comparison = nullptr;
-      this->reset_token();
-      this->scan([this](QChar c) {
-         if (!this->is_in_statement())
-            //
-            // If we're not in a statement, then the next token must be a word. If that word is a 
-            // keyword, then we handle it accordingly. If it is not a keyword, then it must be 
-            // followed either by an operator (in which case we're in an assign statement) or by 
-            // an opening parentheses (in which case the statement is a function call).
-            //
-            this->_parseActionStart(c);
-         else if (this->assignment)
-            this->_parseAssignment(c);
-         //
+      do {
+         this->_parseAction();
          if (this->has_fatal())
-            return true;
-         return false;
-      });
+            break;
+      } while (!this->is_at_effective_end());
+      //
       if (!this->has_fatal()) {
-         if (this->assignment)
-            this->raise_fatal("An assignment statement is missing its righthand side.");
-         if (this->comparison)
-            this->raise_fatal("The file ended before a statement could be fully processed.");
          if (this->block != this->root)
             this->raise_fatal("Unclosed block.");
          if (this->next_event != Script::Block::Event::none)
@@ -655,280 +625,204 @@ namespace Megalo {
       return;
    }
 
-   void Compiler::_parseActionStart(QChar c) {
-      if (this->token.text.isEmpty()) {
-         if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
-            this->raise_fatal(QString("Unexpected %1. Statements cannot begin with an operator.").arg(c));
-            return;
-         }
-         if (string_scanner::is_syntax_char(c)) {
-            this->raise_fatal(QString("Unexpected %1.").arg(c));
-            return;
-         }
-         if (string_scanner::is_quote_char(c)) {
-            this->raise_fatal(QString("Unexpected %1. Statements cannot begin with a string literal.").arg(c));
-            return;
-         }
-         if (c == '(' || c == ')') {
-            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
-            return;
-         }
+   QString Compiler::extract_operator() {
+      QString word;
+      this->scan([this, &word](QChar c) {
          if (string_scanner::is_whitespace_char(c))
-            return;
-         this->token.text += c;
-         this->token.pos = this->backup_stream_state();
-         return;
-      }
-      if (c == '[') {
-         this->token.brace = true;
-         this->token.text += c;
-         return;
-      }
-      if (this->token.brace) {
-         if (c == ']')
-            this->token.brace = false;
-         this->token.text += c;
-         return;
-      }
-      if (string_scanner::is_whitespace_char(c)) {
-         this->token.ended = true;
-         //
-         // Handle keywords here, if appropriate.
-         //
-         using _handler_t = decltype(&Compiler::_handleKeyword_Alias);
-         _handler_t handler = nullptr;
-         //
-         auto& word = this->token.text;
-         if (word == "and" || word == "or" || word == "not" || word == "then") {
-            this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
-            return;
-         }
-         if (word == "alias")
-            handler = &Compiler::_handleKeyword_Alias;
-         else if (word == "declare")
-            handler = &Compiler::_handleKeyword_Declare;
-         else if (word == "do")
-            handler = &Compiler::_handleKeyword_Do;
-         else if (word == "else")
-            handler = &Compiler::_handleKeyword_Else;
-         else if (word == "elseif")
-            handler = &Compiler::_handleKeyword_ElseIf;
-         else if (word == "end")
-            handler = &Compiler::_handleKeyword_End;
-         else if (word == "for")
-            handler = &Compiler::_handleKeyword_For;
-         else if (word == "function")
-            handler = &Compiler::_handleKeyword_Function;
-         else if (word == "if")
-            handler = &Compiler::_handleKeyword_If;
-         else if (word == "on")
-            handler = &Compiler::_handleKeyword_On;
-         //
-         if (handler) {
-            auto prior = this->state;
-            ((*this).*(handler))();
-            this->reset_token();
-            if (prior.offset < this->state.offset) {
-               //
-               // The handler code advanced the position to the end of the keyword's relevant 
-               // content (e.g. the end of a block declaration). However, our containing loop 
-               // (or rather, Compiler::scan call) will increment the position one more time, 
-               // so we need to rewind by one.
-               //
-               --this->state.offset;
-            }
-         }
-         //
-         // If (handler) is null, then the word wasn't a keyword. Move to the next iteration 
-         // of the parsing loop; we'll eventually feed the word to a new statement.
-         //
-         return;
-      }
-      if (string_scanner::is_quote_char(c)) {
-         this->raise_fatal(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
-         return;
-      }
-      if (c == '(') {
-         this->_parseFunctionCall(false);
-         --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
-         return;
-      }
-      if (c == ')' || c == ',') {
-         this->raise_fatal(QString("Unexpected %1.").arg(c));
-         return;
-      }
-      if (string_scanner::is_operator_char(c)) {
-         this->assignment = new Script::Statement;
-         this->assignment->set_start(this->token.pos);
-         {
-            this->assignment->lhs = this->__parseVariable(this->token.text);
-            auto ref = this->assignment->lhs;
-            ref->owner = this->assignment;
-            if (!ref->is_invalid) {
-               if (ref->is_constant_integer())
-                  this->raise_error("Cannot assign to a constant integer.");
-               else if (ref->is_read_only())
-                  this->raise_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(ref->to_string()));
-            }
-         }
-         this->reset_token();
-         this->token.text = c;
-         this->token.pos  = this->backup_stream_state();
-         return;
-      }
-      if (this->token.ended) {
-         this->raise_fatal("Statements of the form {word word} are not valid.");
-         return;
-      }
-      this->token.text += c;
-      if (this->token.text[0] == '-' && !c.isNumber()) {
-         //
-         // We allowed the word to start with "-" in case it was a number, but it 
-         // has turned out not to be a number. That means that the "-" was an 
-         // operator, not a numeric sign. Wait, that's illegal.
-         //
-         this->raise_fatal("Unexpected -. Statements cannot begin with an operator.");
-         return;
-      }
+            return word.size() > 0;
+         if (!string_scanner::is_operator_char(c))
+            return true;
+         word += c;
+         return false;
+      });
+      return word;
    }
-   void Compiler::_parseAssignment(QChar c) {
-      assert(this->assignment && "This should not have been called!");
-      #pragma region Code to finish parsing an assignment (i.e. the operator and righthand side)
-         if (this->assignment->op.isEmpty()) {
-            //
-            // If the statement doesn't have an operator stored, then the operator is currently 
-            // being parsed and exists in (token).
-            //
-            if (string_scanner::is_operator_char(c)) {
-               this->token.text += c;
-               return;
-            }
-            auto a = this->assignment;
-            a->op = this->token.text;
-            if (!_is_assignment_operator(this->token.text))
-               this->raise_error(QString("Operator %1 is not a valid assignment operator.").arg(this->token.text));
-            this->reset_token();
-            //
-            // Fall through to righthand-side handling so we don't miss the first character 
-            // after the operator in cases like {a=b} where there's no whitespace.
-            //
-         }
-         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c)) {
-            this->raise_fatal(QString("Unexpected %1 on the righthand side of an assignment statement.").arg(c));
-            return;
-         }
-         if (string_scanner::is_quote_char(c)) {
-            this->raise_error(QString("Unexpected %1. You cannot assign strings to variables.").arg(c));
-            //
-            // TODO: Do we need to advance past the current character with ++this->state.pos first?
-            //
-            if (!this->skip_to(c))
-               this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
-            else {
-               this->reset_token();
-               delete this->assignment;
-               this->assignment = nullptr;
-            }
-            return;
-         }
-         if (this->token.text.isEmpty()) {
-            if (string_scanner::is_whitespace_char(c))
-               return;
-            if (c == '(') {
-               this->raise_fatal("Unexpected (. Parentheses are only allowed as delimiters for function arguments.");
-               return;
-            }
-         } else {
-            if (c == '(') {
-               if (this->assignment->op != ce_assignment_operator) {
-                  this->raise_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator =.").arg(this->assignment->op));
-               }
-               this->_parseFunctionCall(false);
-               --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
-               return;
-               //
-               // From here on out, the code for parsing function calls will handle what 
-               // remains. The end of the function call is also the end of this statement, 
-               // so the code for parsing function calls will "close" this statement just 
-               // fine.
-               //
-            }
-         }
-         if (c == ')' || c == ',') {
-            this->raise_fatal(QString("Unexpected %1.").arg(c));
-            return;
-         }
-         if (!string_scanner::is_whitespace_char(c)) {
-            if (this->token.text.isEmpty())
-               this->token.pos = this->backup_stream_state();
-            this->token.text += c;
-            return;
-         }
-      #pragma endregion
-      //
-      // If we get here, then we've encountered the end of the statement's righthand side.
-      //
-      #pragma region Code to compile an assignment
-         auto statement = this->assignment;
-         statement->set_end(this->state);
-         this->block->insert_item(statement);
-         this->assignment = nullptr;
-         //
-         statement->rhs = this->__parseVariable(this->token.text);
-         statement->rhs->owner = statement;
-         this->reset_token();
-         //
-         // TODO: Consider writing code for type checking non-accessor assignments in advance... but 
-         // maybe leave it turned off: I want to check the results of type-mismatched assignments in-
-         // game. I'm pretty sure that numbers and timers can be assigned to each other, but I want to 
-         // know if other types do anything sensible, do nothing at all, clear the target variable, or 
-         // crash, so that I can program in a compiler warning or compiler error as appropriate.
-         //
 
-         //
-         // Compile the assignment opcode:
-         //
-         auto opcode = std::make_unique<Action>();
-         {
-            auto lhs = statement->lhs;
-            auto rhs = statement->rhs;
-            auto l_accessor = lhs->get_accessor_definition();
-            auto r_accessor = rhs->get_accessor_definition();
-            if (l_accessor || r_accessor) {
-               //
-               // This is an accessor assignment, not a standard assignment.
-               //
-               if (l_accessor && r_accessor) {
-                  this->raise_error("Cannot assign one accessor to another accessor.");
+   Compiler::statement_side_t Compiler::_extract_statement_side(QString& out_str, int32_t& out_int) {
+      out_str.clear();
+      if (this->extract_integer_literal(out_int))
+         return statement_side::integer;
+      QString temp;
+      if (this->extract_string_literal(temp))
+         return statement_side::string;
+      out_str = this->extract_word();
+      if (!out_str.isEmpty())
+         return statement_side::word;
+      return statement_side::none;
+   }
+   /*static*/ Compiler::keyword_handler_t Compiler::__get_handler_for_keyword(QString word) noexcept {
+      if (word == "alias")
+         return &Compiler::_handleKeyword_Alias;
+      else if (word == "declare")
+         return &Compiler::_handleKeyword_Declare;
+      else if (word == "do")
+         return &Compiler::_handleKeyword_Do;
+      else if (word == "else")
+         return &Compiler::_handleKeyword_Else;
+      else if (word == "elseif")
+         return &Compiler::_handleKeyword_ElseIf;
+      else if (word == "end")
+         return &Compiler::_handleKeyword_End;
+      else if (word == "for")
+         return &Compiler::_handleKeyword_For;
+      else if (word == "function")
+         return &Compiler::_handleKeyword_Function;
+      else if (word == "if")
+         return &Compiler::_handleKeyword_If;
+      else if (word == "on")
+         return &Compiler::_handleKeyword_On;
+      return nullptr;
+   }
+   void Compiler::_parseAction() {
+      Script::VariableReference* lhs = nullptr;
+      Script::VariableReference* rhs = nullptr;
+      //
+      auto prior = this->backup_stream_state();
+      //
+      #pragma region Parsing
+         QString word;
+         int32_t integer;
+         #pragma region Lefthand side
+            statement_side_t lhs_type = this->_extract_statement_side(word, integer);
+            if (lhs_type == statement_side::string) {
+               this->raise_error("You cannot assign to a string literal.");
+            } else if (lhs_type == statement_side::integer) {
+               lhs = new Script::VariableReference(integer);
+            } else if (lhs_type == statement_side::word) {
+               if (auto handler = Compiler::__get_handler_for_keyword(word)) {
+                  ((*this).*(handler))();
                   return;
                }
-               const OpcodeFuncToScriptMapping* mapping = nullptr;
-               const OpcodeBase* accessor = nullptr;
-               QString acc_name;
-               if (l_accessor) {
-                  auto setter = l_accessor->setter;
-                  if (!setter) {
-                     this->raise_error("This accessor cannot be assigned to.");
-                     return;
+               if (word == "and" || word == "or" || word == "not" || word == "then") {
+                  this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+                  return;
+               }
+               if (this->extract_specific_char('(')) {
+                  this->_parseFunctionCall(prior, word, false);
+                  //
+                  // Assigning something to the result of a function call is an error. Let's check for that 
+                  // so we can give an intuitive error message.
+                  //
+                  auto    prior = this->backup_stream_state();
+                  QString op    = this->extract_operator();
+                  if (!op.isEmpty()) {
+                     this->restore_stream_state(prior);
+                     this->raise_fatal(QString("An operator such as %1 cannot appear after a function call; you cannot assign to or compare the return value of a function.").arg(op));
                   }
-                  accessor = setter;
-                  acc_name = lhs->resolved.accessor_name;
-                  mapping  = &setter->mapping;
-                  lhs->strip_accessor();
-                  //
-                  // Compile the left-hand side (the context-argument):
-                  //
-                  auto ai  = mapping->arg_context;
-                  auto arg = (accessor->arguments[ai].typeinfo.factory)();
-                  opcode->arguments[ai] = arg;
-                  auto result = arg->compile(*this, *lhs, 0);
-                  if (!result.is_success()) {
-                     QString error = "The lefthand side of this assignment failed to compile. ";
-                     if (!result.error.isEmpty())
-                        error += result.error;
-                     this->raise_error(error);
-                  } else
-                     assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
+                  return;
+               }
+               //
+               // If we got here, then the parsed word must be the lefthand side of an assignment statement.
+               //
+               lhs = this->__parseVariable(word, false, true);
+            } else {
+               this->raise_fatal("Expected the start of a new statement.");
+               return;
+            }
+         #pragma endregion
+         #pragma region Operator
+            auto op = this->extract_operator();
+            if (op.isEmpty()) {
+               this->raise_fatal("Expected an operator.");
+               return;
+            }
+            if (!::_is_assignment_operator(op))
+               this->raise_error(QString("Operator %1 is not an assignment operator.").arg(op));
+            //
+         #pragma endregion
+         #pragma region Righthand side
+            statement_side_t rhs_type = this->_extract_statement_side(word, integer);
+            if (rhs_type == statement_side::string) {
+               this->raise_error("You cannot assign a string literal to a variable.");
+            } else if (rhs_type == statement_side::integer) {
+               rhs = new Script::VariableReference(integer);
+            } else if (rhs_type == statement_side::word) {
+               if (Compiler::is_keyword(word)) {
+                  this->raise_fatal(QString("Keyword \"%1\" cannot appear here.").arg(word));
+                  return;
+               }
+               if (this->extract_specific_char('(')) {
+                  if (op != ce_assignment_operator) {
+                     this->raise_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator %2.").arg(op).arg(ce_assignment_operator));
+                  }
+                  this->_parseFunctionCall(prior, word, false, lhs);
+                  return;
+               }
+               rhs = this->__parseVariable(word);
+            } else {
+               this->raise_fatal("Expected the righthand side of an assignment statement.");
+               return;
+            }
+         #pragma endregion
+      #pragma endregion
+      //
+      auto statement = new Script::Statement;
+      statement->set_start(prior);
+      statement->set_end(this->state);
+      this->block->insert_item(statement);
+      //
+      statement->lhs = lhs;
+      statement->rhs = rhs;
+      lhs->owner = statement;
+      rhs->owner = statement;
+      //
+      if (lhs && !lhs->is_invalid) {
+         bool bad = true;
+         //
+         if (lhs->is_constant_integer())
+            this->raise_error("Cannot assign to a constant integer.");
+         else if (lhs->is_read_only())
+            this->raise_error(QString("Cannot assign to \"%1\". The referenced value is read-only.").arg(lhs->to_string()));
+         else
+            bad = false;
+         //
+         if (bad)
+            return;
+      }
+      //
+      // Compile the assignment opcode:
+      //
+      auto opcode = std::make_unique<Action>();
+      {
+         auto l_accessor = !lhs || lhs->is_invalid ? nullptr : lhs->get_accessor_definition();
+         auto r_accessor = !rhs || rhs->is_invalid ? nullptr : rhs->get_accessor_definition();
+         if (l_accessor || r_accessor) {
+            //
+            // This is an accessor assignment, not a standard assignment.
+            //
+            if (l_accessor && r_accessor) {
+               this->raise_error("Cannot assign one accessor to another accessor.");
+               return;
+            }
+            const OpcodeFuncToScriptMapping* mapping = nullptr;
+            const OpcodeBase* accessor = nullptr;
+            QString acc_name;
+            if (l_accessor) {
+               auto setter = l_accessor->setter;
+               if (!setter) {
+                  this->raise_error("This accessor cannot be assigned to.");
+                  return;
+               }
+               accessor = setter;
+               acc_name = lhs->resolved.accessor_name;
+               mapping = &setter->mapping;
+               lhs->strip_accessor();
+               //
+               // Compile the left-hand side (the context-argument):
+               //
+               auto ai  = mapping->arg_context;
+               auto arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               auto result = arg->compile(*this, *lhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The lefthand side of this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
+               //
+               if (!rhs->is_invalid) {
                   //
                   // Compile the right-hand side (the value to assign):
                   //
@@ -943,16 +837,18 @@ namespace Megalo {
                      this->raise_error(error);
                   } else
                      assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
-               } else {
-                  auto getter = r_accessor->getter;
-                  if (!getter) {
-                     this->raise_error("This accessor cannot be read.");
-                     return;
-                  }
-                  accessor = getter;
-                  acc_name = rhs->resolved.accessor_name;
-                  mapping  = &getter->mapping;
-                  rhs->strip_accessor();
+               }
+            } else {
+               auto getter = r_accessor->getter;
+               if (!getter) {
+                  this->raise_error("This accessor cannot be read.");
+                  return;
+               }
+               accessor = getter;
+               acc_name = rhs->resolved.accessor_name;
+               mapping = &getter->mapping;
+               rhs->strip_accessor();
+               if (!lhs->is_invalid) {
                   //
                   // Compile the left-hand side (the out-argument):
                   //
@@ -967,81 +863,14 @@ namespace Megalo {
                      this->raise_error(error);
                   } else
                      assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
-                  //
-                  // Compile the right-hand side (the value to assign):
-                  //
-                  ai  = mapping->arg_context;
-                  arg = (accessor->arguments[ai].typeinfo.factory)();
-                  opcode->arguments[ai] = arg;
-                  result = arg->compile(*this, *rhs, 0);
-                  if (!result.is_success()) {
-                     QString error = "The righthand side of this assignment failed to compile. ";
-                     if (!result.error.isEmpty())
-                        error += result.error;
-                     this->raise_error(error);
-                  } else
-                     assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
                }
-               assert(mapping);
-               if (accessor->get_name_type()) {
-                  //
-                  // The accessor is variably named. We need to compile the name.
-                  //
-                  auto  op_string = string_scanner(acc_name);
-                  auto  ai   = mapping->arg_name;
-                  auto& base = accessor->arguments[ai];
-                  opcode->arguments[ai] = (base.typeinfo.factory)();
-                  auto result = opcode->arguments[ai]->compile(*this, op_string, 0);
-                  if (!result.is_success()) {
-                     QString error = "The accessor name in this assignment failed to compile. ";
-                     if (!result.error.isEmpty())
-                        error += result.error;
-                     this->raise_error(error);
-                  } else
-                     assert(!result.is_unresolved_string() && "The accessor name in an assignment statement thinks it's an unresolved string reference.");
-               }
-               if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
-                  //
-                  // This accessor doesn't have an "operator" argument, so throw an error if we're using the 
-                  // wrong argument. (We should only be using accessors in the first place if there *is* an 
-                  // opcode argument, but it's possible that only one of the getter and setter may have it.)
-                  //
-                  if (statement->op != "=")
-                     this->raise_error("This accessor can only be invoked using the = operator.");
-               } else {
-                  //
-                  // Compile the assignment operator.
-                  //
-                  auto op_string = string_scanner(statement->op);
-                  auto op_arg    = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
-                  opcode->arguments[mapping->arg_operator] = op_arg;
-                  auto result = op_arg->compile(*this, op_string, 0);
-                  if (!result.is_success()) {
-                     QString error = "The operator in this assignment failed to compile. ";
-                     if (!result.error.isEmpty())
-                        error += result.error;
-                     this->raise_error(error);
-                  } else
-                     assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
-               }
-            } else {
-               auto base = &_get_assignment_opcode();
-               opcode->function = base;
-               opcode->arguments.resize(3);
-               opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
-               opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
-               opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
                //
-               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
-               if (!result.is_success()) {
-                  QString error = "The lefthand side of this assignment failed to compile. ";
-                  if (!result.error.isEmpty())
-                     error += result.error;
-                  this->raise_error(error);
-               } else
-                  assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
+               // Compile the right-hand side (the value to assign):
                //
-               result = opcode->arguments[1]->compile(*this, *rhs, 0);
+               int  ai  = mapping->arg_context;
+               auto arg = (accessor->arguments[ai].typeinfo.factory)();
+               opcode->arguments[ai] = arg;
+               auto result = arg->compile(*this, *rhs, 0);
                if (!result.is_success()) {
                   QString error = "The righthand side of this assignment failed to compile. ";
                   if (!result.error.isEmpty())
@@ -1049,9 +878,41 @@ namespace Megalo {
                   this->raise_error(error);
                } else
                   assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
+            }
+            assert(mapping);
+            if (accessor->get_name_type()) {
                //
-               auto op_string = string_scanner(statement->op);
-               result = opcode->arguments[2]->compile(*this, op_string, 0);
+               // The accessor is variably named. We need to compile the name.
+               //
+               auto  op_string = string_scanner(acc_name);
+               auto  ai   = mapping->arg_name;
+               auto& base = accessor->arguments[ai];
+               opcode->arguments[ai] = (base.typeinfo.factory)();
+               auto result = opcode->arguments[ai]->compile(*this, op_string, 0);
+               if (!result.is_success()) {
+                  QString error = "The accessor name in this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The accessor name in an assignment statement thinks it's an unresolved string reference.");
+            }
+            if (mapping->arg_operator == OpcodeFuncToScriptMapping::no_argument) {
+               //
+               // This accessor doesn't have an "operator" argument, so throw an error if we're using the 
+               // wrong argument. (We should only be using accessors in the first place if there *is* an 
+               // opcode argument, but it's possible that only one of the getter and setter may have it.)
+               //
+               if (op != ce_assignment_operator)
+                  this->raise_error("This accessor can only be invoked using the = operator.");
+            } else {
+               //
+               // Compile the assignment operator.
+               //
+               auto op_string = string_scanner(op);
+               auto op_arg = (accessor->arguments[mapping->arg_operator].typeinfo.factory)();
+               opcode->arguments[mapping->arg_operator] = op_arg;
+               auto result = op_arg->compile(*this, op_string, 0);
                if (!result.is_success()) {
                   QString error = "The operator in this assignment failed to compile. ";
                   if (!result.error.isEmpty())
@@ -1060,11 +921,221 @@ namespace Megalo {
                } else
                   assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
             }
+         } else {
+            auto base = &_get_assignment_opcode();
+            opcode->function = base;
+            opcode->arguments.resize(3);
+            opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
+            opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
+            opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
+            //
+            if (!lhs->is_invalid) {
+               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The lefthand side of this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The lefthand side of an assignment statement thinks it's an unresolved string reference.");
+            }
+            if (!rhs->is_invalid) {
+               auto result = opcode->arguments[1]->compile(*this, *rhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The righthand side of this assignment failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
+            }
+            //
+            auto op_string = string_scanner(op);
+            auto result = opcode->arguments[2]->compile(*this, op_string, 0);
+            if (!result.is_success()) {
+               QString error = "The operator in this assignment failed to compile. ";
+               if (!result.error.isEmpty())
+                  error += result.error;
+               this->raise_error(error);
+            } else
+               assert(!result.is_unresolved_string() && "The operator in an assignment statement thinks it's an unresolved string reference.");
          }
-         statement->opcode = opcode.release();
-      #pragma endregion
+      }
+      statement->opcode = opcode.release();
    }
-   //
+   bool Compiler::_parseCondition() {
+      Script::VariableReference* lhs = nullptr;
+      Script::VariableReference* rhs = nullptr;
+      //
+      auto prior = this->backup_stream_state();
+      //
+      #pragma region Parsing
+         QString word;
+         int32_t integer;
+         #pragma region Lefthand side
+            if (this->extract_word("not")) {
+               if (this->negate_next_condition) {
+                  this->raise_fatal("Constructions of the form \"not not\" are not valid.");
+                  return true;
+               }
+               this->negate_next_condition = true;
+            }
+            statement_side_t lhs_type = this->_extract_statement_side(word, integer);
+            if (lhs_type == statement_side::string) {
+               this->raise_error("You cannot compare a string literal.");
+            } else if (lhs_type == statement_side::integer) {
+               lhs = new Script::VariableReference(integer);
+            } else if (lhs_type == statement_side::word) {
+               if (word.compare("not", Qt::CaseInsensitive) == 0) {
+                  this->raise_fatal("Constructions of the form \"not not\" are not valid.");
+                  return true;
+               }
+               if (Compiler::is_keyword(word)) {
+                  this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+                  return true;
+               }
+               if (this->extract_specific_char('(')) {
+                  this->_parseFunctionCall(prior, word, true);
+                  //
+                  // Comparing something to the result of a function call is an error. Let's check for that 
+                  // so we can give an intuitive error message.
+                  //
+                  auto    prior = this->backup_stream_state();
+                  QString op    = this->extract_operator();
+                  if (!op.isEmpty()) {
+                     this->restore_stream_state(prior);
+                     this->raise_fatal("You cannot compare the result of a function call.");
+                     return true;
+                  }
+                  return this->__parseConditionEnding();
+               }
+               //
+               // If we got here, then the parsed word must be the lefthand side of a comparison statement.
+               //
+               lhs = this->__parseVariable(word, false, true);
+            } else {
+               this->raise_fatal("Expected the start of a new condition.");
+               return true;
+            }
+         #pragma endregion
+         #pragma region Operator
+            auto op = this->extract_operator();
+            if (op.isEmpty()) {
+               this->raise_fatal("Expected an operator.");
+               return true;
+            }
+            if (!::_is_comparison_operator(op))
+               this->raise_error(QString("Operator %1 is not a comparison operator.").arg(op));
+            //
+         #pragma endregion
+         #pragma region Righthand side
+            statement_side_t rhs_type = this->_extract_statement_side(word, integer);
+            if (rhs_type == statement_side::string) {
+               this->raise_error("You cannot assign a string literal to a variable.");
+            } else if (rhs_type == statement_side::integer) {
+               rhs = new Script::VariableReference(integer);
+            } else if (rhs_type == statement_side::word) {
+               if (Compiler::is_keyword(word)) {
+                  this->raise_fatal(QString("Keyword \"%1\" cannot appear here.").arg(word));
+                  return true;
+               }
+               if (this->extract_specific_char('(')) {
+                  this->raise_fatal("You cannot compare the result of a function call.");
+                  return true;
+               }
+               rhs = this->__parseVariable(word);
+            } else {
+               this->raise_fatal("Expected the righthand side of a comparison statement.");
+               return true;
+            }
+         #pragma endregion
+      #pragma endregion
+      //
+      auto statement = new Script::Comparison;
+      statement->set_start(prior);
+      statement->set_end(this->state);
+      this->block->insert_condition(statement);
+      //
+      statement->lhs = lhs;
+      statement->rhs = rhs;
+      lhs->owner = statement;
+      rhs->owner = statement;
+      //
+      {
+         bool fail = !(lhs && rhs);
+         if (lhs && !lhs->is_invalid && lhs->get_accessor_definition()) {
+            this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(lhs->to_string()));
+            fail = true;
+         }
+         if (rhs && !rhs->is_invalid && rhs->get_accessor_definition()) {
+            this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(rhs->to_string()));
+            fail = true;
+         }
+         if (!fail) {
+            auto opcode = std::make_unique<Condition>();
+            //
+            auto base = &_get_comparison_opcode();
+            opcode->function = base;
+            opcode->arguments.resize(3);
+            opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
+            opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
+            opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
+            //
+            if (!lhs->is_invalid) {
+               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The lefthand side of this comparison failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The lefthand side of a comparison statement thinks it's an unresolved string reference.");
+            }
+            if (!rhs->is_invalid) {
+               auto result = opcode->arguments[1]->compile(*this, *rhs, 0);
+               if (!result.is_success()) {
+                  QString error = "The righthand side of this comparison failed to compile. ";
+                  if (!result.error.isEmpty())
+                     error += result.error;
+                  this->raise_error(error);
+               } else
+                  assert(!result.is_unresolved_string() && "The righthand side of a comparison statement thinks it's an unresolved string reference.");
+            }
+            auto op_string = string_scanner(op);
+            auto result    = opcode->arguments[2]->compile(*this, op_string, 0);
+            if (!result.is_success()) {
+               QString error = "The operator in this comparison failed to compile. ";
+               if (!result.error.isEmpty())
+                  error += result.error;
+               this->raise_error(error);
+            } else
+               assert(!result.is_unresolved_string() && "The operator in a comparison statement thinks it's an unresolved string reference.");
+            //
+            statement->opcode = opcode.release();
+         }
+      }
+      this->_applyConditionModifiers(statement);
+      //
+      return this->__parseConditionEnding();
+   }
+   bool Compiler::__parseConditionEnding() {
+      auto word = this->extract_word();
+      if (word.compare("and", Qt::CaseInsensitive) == 0) {
+         this->next_condition_joiner = c_joiner::and;
+      } else if (word.compare("or", Qt::CaseInsensitive) == 0) {
+         this->next_condition_joiner = c_joiner:: or ;
+      } else if (word.compare("then", Qt::CaseInsensitive) == 0) {
+         return true;
+      } else {
+         if (Compiler::is_keyword(word))
+            this->raise_fatal(QString("Expected one of the following keywords: and; or; then. Saw keyword \"%1\" instead; that keyword cannot appear here.").arg(word));
+         else
+            this->raise_fatal(QString("Expected one of the following keywords: and; or; then. Saw \"%1\" instead.").arg(word));
+         return true;
+      }
+      return false;
+   }
+
    void Compiler::_applyConditionModifiers(Script::Comparison* condition) {
       if (!condition)
          return;
@@ -1115,291 +1186,16 @@ namespace Megalo {
    }
    //
    void Compiler::_parseBlockConditions() {
-      this->comparison = nullptr;
-      this->reset_token();
-      this->scan([this](QChar c) {
-         if (!this->comparison) {
-            if (this->_parseConditionStart(c))
-               return true; // stop the loop; we found the "then" keyword
-            if (this->has_fatal())
-               return true;
-            return false;
-         }
-         //
-         // If, on the other hand, we're in a statement, then we need to finish that up.
-         //
-         this->_parseComparison(c);
+      bool stop = false;
+      do {
+         stop = this->_parseCondition();
+         if (stop)
+            return;
          if (this->has_fatal())
-            return true;
-         return false;
-      });
-   }
-   bool Compiler::_parseConditionStart(QChar c) {
-      if (this->token.text.isEmpty()) {
-         if (c != '-' && string_scanner::is_operator_char(c)) { // minus-as-numeric-sign must be special-cased
-            this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with an operator.").arg(c));
-            return false;
-         }
-         if (string_scanner::is_syntax_char(c)) {
-            this->raise_fatal(QString("Unexpected %1.").arg(c));
-            return false;
-         }
-         if (string_scanner::is_quote_char(c)) {
-            this->raise_fatal(QString("Unexpected %1. Conditions cannot begin with a string literal.").arg(c));
-            return false;
-         }
-         if (c == '(' || c == ')') {
-            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
-            return false;
-         }
-         if (string_scanner::is_whitespace_char(c))
-            return false;
-         this->token.text += c;
-         this->token.pos = this->backup_stream_state();
-         return false;
-      }
-      if (c == '[') {
-         this->token.brace = true;
-         this->token.text += c;
-         return false;
-      }
-      if (this->token.brace) {
-         if (c == ']')
-            this->token.brace = false;
-         this->token.text += c;
-         return false;
-      }
-      if (string_scanner::is_whitespace_char(c)) {
-         this->token.ended = true;
-         //
-         // Handle keywords here, if appropriate.
-         //
-         auto& word = this->token.text;
-         if (word == "then") {
-            if (this->negate_next_condition)
-               this->raise_fatal("Expected a condition after \"not\".");
-            switch (this->next_condition_joiner) {
-               case c_joiner::and:
-                  this->raise_fatal("Expected a condition after \"and\".");
-                  break;
-               case c_joiner::or:
-                  this->raise_fatal("Expected a condition after \"or\".");
-                  break;
-            }
-            return true;
-         }
-         if (word == "alias")
-            this->raise_fatal(QString("You cannot place %1 declarations inside of conditions.").arg(word));
-         else if (word == "do")
-            this->raise_fatal("You cannot open or close blocks inside of conditions. (If the \"do\" was meant to mark the end of conditions, use \"then\" instead.)");
-         else if (word == "else" || word == "elseif")
-            this->raise_fatal(QString("Unexpected \"%1\". A list of conditions must end with \"then\".").arg(word));
-         else if (word == "for" || word == "function" || word == "if")
-            this->raise_fatal("You cannot open or close blocks inside of conditions. End the list of conditions using the \"then\" keyword.");
-         else if (word == "on")
-            this->raise_fatal("You cannot mark event handlers inside of conditions.");
-         else if (word == "and") {
-            if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
-               this->raise_fatal("Constructions of the form {not and} and {not or} are not valid.");
-            else if (this->next_condition_joiner != c_joiner::none)
-               this->raise_fatal("Constructions of the form {or and} and {and and} are not valid.");
-            else
-               this->next_condition_joiner = c_joiner::and;
-            //
-            this->reset_token();
-         } else if (word == "or") {
-            if (this->negate_next_condition) // this check only works because we do not allow (not not condition)
-               this->raise_fatal("Constructions of the form {not and} and {not or} are not valid.");
-            else if (this->next_condition_joiner != c_joiner::none)
-               this->raise_fatal("Constructions of the form {and or} and {or or} are not valid.");
-            else
-               this->next_condition_joiner = c_joiner::or;
-            //
-            this->reset_token();
-         } else if (word == "not") {
-            if (this->negate_next_condition) {
-               //
-               // NOTE: If we decide to allow (not not condition) and just have each "not" toggle the negate-next-condition flag, 
-               // then we also need to modify the code that checks for (not and condition) and (not or condition) in order to make 
-               // sure that (not not and condition) and (not not or condition) are still considered invalid. That code is in this 
-               // same function.
-               //
-               this->raise_fatal("Constructions of the form {not not condition} are not valid. Use a single \"not\" or no \"not\" at all.");
-               return false;
-            }
-            this->negate_next_condition = true;
-            this->reset_token();
-         }
-         return false;
-      }
-      if (string_scanner::is_quote_char(c)) {
-         this->raise_fatal(QString("Unexpected %1. Statements of the form {word \"string\"} are not valid.").arg(c));
-         return false;
-      }
-      if (c == '(') {
-         this->_parseFunctionCall(true);
-         --this->state.offset; // _parseFunctionCall moved us to the end of the call, but we're being run from inside of a scan-functor -- effectively a loop -- so we're going to advance one more
-         return false;
-      }
-      if (c == ')' || c == ',') {
-         this->raise_fatal(QString("Unexpected %1.").arg(c));
-         return false;
-      }
-      if (string_scanner::is_operator_char(c)) {
-         this->comparison = new Script::Comparison;
-         this->comparison->set_start(this->token.pos);
-         this->comparison->lhs = this->__parseVariable(this->token.text);
-         this->comparison->lhs->owner = this->assignment;
-         this->reset_token();
-         this->token.text = c;
-         this->token.pos = this->backup_stream_state();
-         return false;
-      }
-      if (this->token.ended) {
-         this->raise_fatal("Statements of the form {word word} are not valid.");
-         return false;
-      }
-      this->token.text += c;
-      if (this->token.text[0] == '-' && !c.isNumber()) {
-         //
-         // We allowed the word to start with "-" in case it was a number, but it 
-         // has turned out not to be a number. That means that the "-" was an 
-         // operator, not a numeric sign. Wait, that's illegal.
-         //
-         this->raise_fatal("Unexpected -. Statements cannot begin with an operator.");
-         return false;
-      }
-      return false;
-   }
-   void Compiler::_parseComparison(QChar c) {
-      assert(this->comparison && "This should not have been called!");
-      #pragma region Code to finish parsing a comparison (i.e. the operator and righthand side)
-         if (this->comparison->op.isEmpty()) {
-            //
-            // If the statement doesn't have an operator stored, then the operator is currently 
-            // being parsed and exists in (token).
-            //
-            if (string_scanner::is_operator_char(c)) {
-               this->token.text += c;
-               return;
-            }
-            auto c = this->comparison;
-            c->op = this->token.text;
-            if (!_is_comparison_operator(this->token.text))
-               this->raise_error(QString("Operator %1 is not a valid comparison operator.").arg(this->token.text));
-            this->reset_token();
-            //
-            // Fall through to righthand-side handling so we don't miss the first character 
-            // after the operator in cases like {a==b} where there's no whitespace.
-            //
-         }
-         //
-         // Handle the righthand side.
-         //
-         if ((!this->token.text.isEmpty() || c != '-') && string_scanner::is_operator_char(c)) {
-            this->raise_fatal(QString("Unexpected %1 on the righthand side of a comparison statement.").arg(c));
             return;
-         }
-         if (string_scanner::is_quote_char(c)) {
-            this->raise_error(QString("Unexpected %1. You cannot compare variables to strings.").arg(c));
-            //
-            // TODO: Do we need to advance past the current character with ++this->state.pos first?
-            //
-            if (!this->skip_to(c))
-               this->raise_fatal("Unable to find the closing quote for the string literal. Parsing cannot continue.");
-            else {
-               this->reset_token();
-               delete this->comparison;
-               this->comparison = nullptr;
-            }
-            return;
-         }
-         if (this->token.text.isEmpty() && string_scanner::is_whitespace_char(c))
-            return;
-         if (c == "(") {
-            if (!this->token.text.isEmpty())
-               this->raise_fatal(QString("Unexpected %1. You cannot compare variables to the result of a function call.").arg(c));
-            this->raise_fatal(QString("Unexpected %1. Parentheses are only allowed as delimiters for function arguments.").arg(c));
-            return;
-         }
-         if (c == ')' || c == ',') {
-            this->raise_fatal(QString("Unexpected %1.").arg(c));
-            return;
-         }
-         if (!string_scanner::is_whitespace_char(c)) {
-            if (this->token.text.isEmpty())
-               this->token.pos = this->backup_stream_state();
-            this->token.text += c;
-            return;
-         }
-      #pragma endregion
-      //
-      // If we get here, then we've encountered the end of the statement's righthand side.
-      //
-      #pragma region Code to compile a comparison
-         this->comparison->set_end(this->state);
-         this->comparison->rhs = this->__parseVariable(this->token.text);
-         this->comparison->rhs->owner = this->comparison;
-         //
-         {
-            auto lhs  = this->assignment->lhs;
-            auto rhs  = this->assignment->rhs;
-            bool fail = false;
-            if (lhs->get_accessor_definition()) {
-               this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(lhs->to_string()));
-               fail = true;
-            }
-            if (rhs->get_accessor_definition()) {
-               this->raise_error(QString("Cannot use accessors such as \"%1\" in comparisons.").arg(rhs->to_string()));
-               fail = true;
-            }
-            if (!fail) {
-               auto opcode = std::make_unique<Condition>();
-               //
-               auto base = &_get_comparison_opcode();
-               opcode->function = base;
-               opcode->arguments.resize(3);
-               opcode->arguments[0] = (base->arguments[0].typeinfo.factory)();
-               opcode->arguments[1] = (base->arguments[1].typeinfo.factory)();
-               opcode->arguments[2] = (base->arguments[2].typeinfo.factory)();
-               //
-               auto result = opcode->arguments[0]->compile(*this, *lhs, 0);
-               if (!result.is_success()) {
-                  QString error = "The lefthand side of this comparison failed to compile. ";
-                  if (!result.error.isEmpty())
-                     error += result.error;
-                  this->raise_error(error);
-               } else
-                  assert(!result.is_unresolved_string() && "The lefthand side of a comparison statement thinks it's an unresolved string reference.");
-               //
-               result = opcode->arguments[1]->compile(*this, *rhs, 0);
-               if (!result.is_success()) {
-                  QString error = "The righthand side of this comparison failed to compile. ";
-                  if (!result.error.isEmpty())
-                     error += result.error;
-                  this->raise_error(error);
-               } else
-                  assert(!result.is_unresolved_string() && "The righthand side of a comparison statement thinks it's an unresolved string reference.");
-               //
-               auto op_string = string_scanner(this->assignment->op);
-               result = opcode->arguments[2]->compile(*this, op_string, 0);
-               if (!result.is_success()) {
-                  QString error = "The operator in this comparison failed to compile. ";
-                  if (!result.error.isEmpty())
-                     error += result.error;
-                  this->raise_error(error);
-               } else
-                  assert(!result.is_unresolved_string() && "The operator in a comparison statement thinks it's an unresolved string reference.");
-               //
-               this->comparison->opcode = opcode.release();
-            }
-         }
-         this->_applyConditionModifiers(this->comparison);
-         //
-         this->block->insert_condition(this->comparison);
-         this->comparison = nullptr;
-         this->reset_token();
-      #pragma endregion
+      } while (!this->is_at_effective_end());
+      if (!stop)
+         this->raise_fatal("Unexpected end-of-file while parsing a block's conditions.");
    }
    //
    void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, Compiler::unresolved_str_list& unresolved_strings) {
@@ -1412,32 +1208,21 @@ namespace Megalo {
       std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
       bool comma = false;
       do {
-         if (opcode_arg_index >= mapping.mapped_arg_count()) {
-            this->raise_error("Too many arguments passed to the function.");
-            return;
-         }
          QString raw_argument;
          {
-            comma = false;
-            //
-            QChar delim = '\0';
-            this->scan([this, &comma, &delim, &raw_argument](QChar c) {
-               if (delim == '\0') { // can't use a constexpr for the "none" value because lambdas don't like that, and can't use !delim because a null QChar doesn't test as false, UGH
-                  if (c == ',' || c == ')') {
-                     comma = (c == ',');
-                     return true; // stop
-                  }
-                  if (c == '[')
-                     delim = ']';
-                  else if (string_scanner::is_quote_char(c))
-                     delim = c;
-               } else {
-                  if (c == delim)
-                     delim = '\0';
-               }
-               raw_argument += c;
-               return false;
-            });
+            QChar terminator = '\0';
+            raw_argument = this->extract_up_to_any_of(",)", terminator).trimmed();
+            if (terminator == '\0') {
+               this->raise_fatal("Expected a , or a ).");
+               return;
+            }
+            comma = (terminator == ',');
+         }
+         if (opcode_arg_index >= mapping.mapped_arg_count()) {
+            if (opcode_arg_index == 0 && !comma && raw_argument.isEmpty()) // if these conditions are met, then there are no arguments, and none were expected
+               return;
+            this->raise_error("Too many arguments passed to the function.");
+            return;
          }
          //
          auto& base = function.arguments[mapping.arg_index_mappings[script_arg_index]];
@@ -1451,10 +1236,6 @@ namespace Megalo {
          //
          string_scanner argument(raw_argument);
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
-         if (!argument.is_at_effective_end()) {
-            this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
-            return;
-         }
          bool failure = result.is_failure();
          bool success = result.is_success();
          if (failure) {
@@ -1481,9 +1262,13 @@ namespace Megalo {
             return;
          }
          if (success) {
-            if (result.is_unresolved_string())
-               unresolved_strings.emplace_back(*current_argument.get(), result.get_unresolved_string(), opcode_arg_part);
-            opcode.arguments[opcode_arg_index] = current_argument.release();
+            if (!argument.is_at_effective_end()) {
+               this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
+            } else {
+               if (result.is_unresolved_string())
+                  unresolved_strings.emplace_back(*current_argument.get(), result.get_unresolved_string(), opcode_arg_part);
+               opcode.arguments[opcode_arg_index] = current_argument.release();
+            }
          }
          script_arg_index++;
          if (another)
@@ -1501,10 +1286,7 @@ namespace Megalo {
          for (auto& action : list) {
             auto& mapping = action.mapping;
             if (context) {
-               if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context || mapping.arg_context == OpcodeFuncToScriptMapping::game_namespace)
-                  continue;
-               auto& base = action.arguments[mapping.arg_context];
-               if (&base.typeinfo != context->get_type())
+               if (!action.context_is(*context->get_type()))
                   continue;
             } else {
                if (mapping.arg_context != OpcodeFuncToScriptMapping::no_context)
@@ -1526,7 +1308,7 @@ namespace Megalo {
          }
       }
    }
-   void Compiler::_parseFunctionCall(bool is_condition) {
+   void Compiler::_parseFunctionCall(const pos& call_start, QString stem, bool is_condition, Script::VariableReference* assign_to) {
       //
       // When this function is called, the stream position should be just after the 
       // opening parentheses for the call arguments. Assuming no syntax errors are 
@@ -1542,23 +1324,20 @@ namespace Megalo {
       //
       // Called from _parseActionStart, _parseConditionStart, and _parseAssignment.
       //
-      auto call_start = this->token.pos;
       QString function_name;
       std::unique_ptr<Script::VariableReference> context = nullptr;
       bool context_is_game = false;
       {  // Identify the context and the function name, i.e. context.function_name(arg, arg, arg)
-         auto& text = this->token.text;
-         //
-         int size = text.size();
+         int size = stem.size();
          int i    = size - 1;
          for (; i >= 0; --i) {
-            auto c = text[i];
+            auto c = stem[i];
             if (QString("[]").indexOf(c) >= 0) {
                this->raise_fatal(call_start, "Function names cannot contain square brackets.");
                return;
             }
             if (c == '.') {
-               function_name = text.chopped(i + 1); // oh, but be sure not to confuse this with (QString::chop), which does the literal exact opposite!
+               function_name = stem.right(size - 1 - i);
                break;
             }
          }
@@ -1572,20 +1351,20 @@ namespace Megalo {
                this->raise_fatal(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
                return;
             }
-            function_name = text;
+            function_name = stem;
          } else {
             //
             // We're a member function.
             //
-            text = text.mid(0, i);
-            if (text.compare("game", Qt::CaseInsensitive) == 0) {
+            stem = stem.left(i);
+            if (stem.compare("game", Qt::CaseInsensitive) == 0) {
                //
                // The "game" namespace is allowed to contain member functions. VariableReferences 
                // cannot resolve to namespaces, so we have to handle this here in the compiler.
                //
                context_is_game = true;
             } else {
-               context.reset(this->__parseVariable(text));
+               context.reset(this->__parseVariable(stem));
                if (this->has_fatal()) // the VariableReference may contain a syntax error
                   return;
                //
@@ -1603,8 +1382,6 @@ namespace Megalo {
             }
          }
       }
-      this->reset_token();
-      ++this->state.offset; // advance past the open-paren
       //
       if (!context && !context_is_game) {  // Handle user-defined function calls
          auto func = this->lookup_user_defined_function(function_name);
@@ -1615,7 +1392,7 @@ namespace Megalo {
                   this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
                return;
             }
-            if (this->assignment) {
+            if (assign_to) {
                this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
                if (!this->skip_to(')'))
                   this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
@@ -1717,7 +1494,14 @@ namespace Megalo {
       if (!match) {
          if (opcode_bases.size() > 1) {
             this->revert_to_log_checkpoint(check);
-            this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            if (context)
+               this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            else {
+               if (context_is_game)
+                  this->raise_error(call_start, QString("The arguments you passed to game.%1 did not match any of its function signatures.").arg(function_name));
+               else
+                  this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
+            }
          }
          if (!this->skip_to(')'))
             this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
@@ -1736,22 +1520,24 @@ namespace Megalo {
          opcode->arguments[index] = (base.typeinfo.factory)();
          opcode->arguments[index]->compile(*this, *context, 0);
       }
-      if (this->assignment) {
+      if (assign_to) {
          //
          // We're assigning the return value of this function call to something, so let's first make 
          // sure that the function actually returns a value.
          //
          auto index = match->index_of_out_argument();
-         bool fail  = false;
+         bool fail  = assign_to->is_invalid;
+         if (!fail) {
+            if (assign_to->is_read_only()) {
+               this->raise_error("You cannot assign to this value.");
+               fail = true;
+            } else if (assign_to->is_accessor()) {
+               this->raise_error("You cannot assign the return value of a function to an accessor.");
+               fail = true;
+            }
+         }
          if (index < 0) {
             this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-            fail = true;
-         }
-         if (this->assignment->lhs->is_read_only()) {
-            this->raise_error("You cannot assign to this value.");
-            fail = true;
-         } else if (this->assignment->lhs->is_accessor()) {
-            this->raise_error("You cannot assign the return value of a function to an accessor.");
             fail = true;
          }
          //
@@ -1759,7 +1545,7 @@ namespace Megalo {
          //
          // Verify that the variable we're assigning our return value to is of the right type:
          //
-         auto target_type = this->assignment->lhs->get_type();
+         auto target_type = assign_to->get_type();
          if (&base.typeinfo != target_type) {
             this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
                .arg(context->get_type()->internal_name.c_str())
@@ -1775,7 +1561,7 @@ namespace Megalo {
             // The type is correct, so set the out-argument.
             //
             opcode->arguments[index] = (base.typeinfo.factory)();
-            opcode->arguments[index]->compile(*this, *this->assignment->lhs, 0);
+            opcode->arguments[index]->compile(*this, *assign_to, 0);
             //
             if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result) {
                //
@@ -1802,7 +1588,7 @@ namespace Megalo {
                   blank->function = base;
                   blank->arguments.resize(3);
                   blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
-                  auto result = blank->arguments[0]->compile(*this, *this->assignment->lhs, 0);
+                  auto result = blank->arguments[0]->compile(*this, *assign_to, 0);
                   if (result.is_failure())
                      this->raise_error("Failed to compile the lefthand side of an implicit assignment (before a function call).");
                   //
@@ -1819,20 +1605,19 @@ namespace Megalo {
                      this->raise_error("Failed to compile the operator in an implicit assignment (before a function call).");
                   //
                   auto statement = new Script::Statement;
+                  statement->set_start(this->state);
+                  statement->set_end(this->state);
                   statement->opcode = blank;
                   this->block->insert_item(statement);
                }
             }
          }
       }
-      this->reset_token();
-      Script::Statement* statement = this->assignment;
-      if (!statement) {
-         if (is_condition)
-            statement = new Script::Comparison;
-         else
-            statement = new Script::Statement;
-      }
+      Script::Statement* statement;
+      if (is_condition)
+         statement = new Script::Comparison;
+      else
+         statement = new Script::Statement;
       statement->opcode = opcode.release();
       statement->set_end(this->state);
       if (is_condition) {
@@ -1842,12 +1627,8 @@ namespace Megalo {
          this->block->insert_item(statement);
       }
       this->_commit_unresolved_strings(unresolved_strings);
-      this->assignment = nullptr;
    }
    //
-   bool Compiler::is_in_statement() const {
-      return this->assignment || this->comparison;
-   }
    int32_t Compiler::_index_of_trigger(Trigger* t) const noexcept {
       auto&  list = this->results.triggers;
       size_t size = list.size();
@@ -1947,7 +1728,7 @@ namespace Megalo {
    }
    //
    void Compiler::_handleKeyword_Alias() {
-      auto start = this->token.pos;
+      auto start = this->backup_stream_state();
       //
       auto name = this->extract_word();
       if (name.isEmpty()) {
@@ -2059,7 +1840,7 @@ namespace Megalo {
       }
    }
    void Compiler::_handleKeyword_Declare() {
-      auto  start = this->token.pos;
+      auto  start = this->backup_stream_state();
       using net_t = Megalo::variable_network_priority;
       //
       // declare [word]
@@ -2232,7 +2013,7 @@ namespace Megalo {
    void Compiler::_handleKeyword_Do() {
       auto item = new Script::Block;
       item->type = Script::Block::Type::basic;
-      item->set_start(this->token.pos);
+      item->set_start(this->state);
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
@@ -2255,7 +2036,7 @@ namespace Megalo {
       }
       auto item = new Script::Block;
       item->type = Script::Block::Type::else_block;
-      item->set_start(this->token.pos);
+      item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
    }
@@ -2276,11 +2057,10 @@ namespace Megalo {
       }
       auto item = new Script::Block;
       item->type = Script::Block::Type::elseif_block;
-      item->set_start(this->token.pos);
+      item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
       this->_parseBlockConditions();
-      this->reset_token();
    }
    void Compiler::_handleKeyword_End() {
       if (!this->_closeCurrentBlock())
@@ -2289,16 +2069,15 @@ namespace Megalo {
    void Compiler::_handleKeyword_If() {
       auto item = new Script::Block;
       item->type = Script::Block::Type::if_block;
-      item->set_start(this->token.pos);
+      item->set_start(this->state);
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
       this->_openBlock(item);
       this->_parseBlockConditions();
-      this->reset_token();
    }
    void Compiler::_handleKeyword_For() {
-      auto start = this->token.pos;
+      auto start = this->backup_stream_state();
       //
       if (!this->extract_word("each")) {
          this->raise_fatal("The \"for\" keyword must be followed by \"each\".");
@@ -2381,7 +2160,7 @@ namespace Megalo {
       this->_openBlock(item);
    }
    void Compiler::_handleKeyword_Function() {
-      auto start = this->token.pos;
+      auto start = this->backup_stream_state();
       //
       auto name = this->extract_word();
       if (name.isEmpty()) {

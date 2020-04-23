@@ -136,11 +136,21 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
       auto word  = arg.extract_word();
-      auto alias = compiler.lookup_absolute_alias(word);
-      if (alias) {
-         if (!alias->is_imported_name())
-            return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here.").arg(alias->name));
-         word = alias->target_imported_name;
+      if (word.isEmpty()) {
+         //
+         // The argument value isn't a word. We treat assignment and comparison operators as 
+         // enums, and those aren't words.
+         //
+         word = arg.trimmed();
+         if (word.isEmpty())
+            return arg_compile_result::failure("The argument is missing.");
+      } else {
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (alias) {
+            if (!alias->is_imported_name())
+               return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here.").arg(alias->name));
+            word = alias->target_imported_name;
+         }
       }
       auto index = this->base.lookup(word);
       if (index < 0)

@@ -73,7 +73,6 @@ namespace Megalo {
             Opcode* opcode = nullptr; // a fully-compiled opcode; can be any condition or action, including "run nested trigger" for calls to user-defined functions // owned by this Statement and deleted in the destructor
             VariableReference* lhs = nullptr; // owned by this Statement and deleted in the destructor
             VariableReference* rhs = nullptr; // owned by this Statement and deleted in the destructor
-            QString op;
             //
             ~Statement();
       };
@@ -124,17 +123,17 @@ namespace Megalo {
          };
          //
       protected:
+         using keyword_handler_t = void (Compiler::*)();
+         //
+      protected:
          enum class c_joiner {
             none,
             and,
             or,
          };
          //
-         Script::Block*      root       = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
-         Script::Block*      block      = nullptr; // current block being parsed
-         Script::Statement*  assignment = nullptr; // current assignment being parsed, if any
-         Script::Comparison* comparison = nullptr; // current comparison being parsed, if any
-         Token token;
+         Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
+         Script::Block* block = nullptr; // current block being parsed
          Script::Block::Event next_event = Script::Block::Event::none;
          bool     negate_next_condition = false;
          c_joiner next_condition_joiner = c_joiner::none;
@@ -201,8 +200,6 @@ namespace Megalo {
          //
          inline const GameVariantDataMultiplayer& get_variant() const noexcept { return this->variant; }
          //
-         void reset_token();
-         //
          void raise_error(const QString& text);
          void raise_error(const pos& pos, const QString& text);
          void raise_fatal(const QString& text);
@@ -244,22 +241,33 @@ namespace Megalo {
          int32_t _index_of_trigger(Trigger*) const noexcept; // is public for Block
          //
       protected:
-         bool is_in_statement() const;
-         //
          VariableDeclarationSet* _get_variable_declaration_set(variable_scope) noexcept;
          //
-         void _parseActionStart(QChar);
-         void _parseAssignment(QChar);
+         struct statement_side {
+            statement_side() = delete;
+            enum type : int {
+               none,
+               integer,
+               string,
+               word,
+            };
+         };
+         using statement_side_t = statement_side::type;
+         statement_side_t _extract_statement_side(QString& out_str, int32_t& out_int);
+         //
+         static keyword_handler_t __get_handler_for_keyword(QString) noexcept;
+         //
+         void _parseAction();
+         bool _parseCondition(); // return value = stop looking for more conditions
+         bool __parseConditionEnding();
          //
          void _parseBlockConditions();
-         bool _parseConditionStart(QChar); // returns "true" at the end of the condition list, i.e. upon reaching the keywrod "then"
-         void _parseComparison(QChar);
          //
          void _applyConditionModifiers(Script::Comparison*); // applies "not", "and", "or", and then resets the relevant state on the Compiler
          Script::VariableReference* __parseVariable(QString, bool is_alias_definition = false, bool is_write_access = false); // adds the variable to the appropriate VariableDeclarationSet as appropriate
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
-         void _parseFunctionCall(bool is_condition);
+         void _parseFunctionCall(const pos& pos, QString stem, bool is_condition, Script::VariableReference* assign_to = nullptr);
          //
          void _openBlock(Script::Block*);
          bool _closeCurrentBlock();
@@ -270,6 +278,7 @@ namespace Megalo {
                this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
             return result;
          }
+         QString extract_operator();
          //
          #pragma region Variable declaration helpers
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);

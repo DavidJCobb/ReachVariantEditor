@@ -284,5 +284,36 @@ namespace Megalo {
          }
          return true;
       }
+      QString string_scanner::extract_up_to_any_of(QString charset, QChar& out) {
+         auto    prior = this->backup_stream_state();
+         QString result;
+         QChar   delim = '\0';
+         out = '\0';
+         this->scan([this, &charset, &out, &delim, &result](QChar c) {
+            if (delim == '\0') { // can't use a constexpr for the "none" value because lambdas don't like that, and can't use !delim because a null QChar doesn't test as false, UGH
+               if (charset.indexOf(c) >= 0) {
+                  out = c;
+                  return true; // stop
+               }
+               if (c == '[')
+                  delim = ']';
+               else if (string_scanner::is_quote_char(c))
+                  delim = c;
+            } else {
+               if (c == delim)
+                  delim = '\0';
+            }
+            result += c;
+            return false;
+         });
+         if (out == '\0') {
+            //
+            // We hit EOF without finding any of the terminating characters.
+            //
+            this->restore_stream_state(prior);
+            result.clear();
+         }
+         return result;
+      }
    }
 }

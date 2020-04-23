@@ -226,9 +226,6 @@ namespace Megalo {
       assert(base);
       return base->as_integer() + index;
    }
-   uint32_t Variable::_global_index_to_which(uint32_t index, bool is_static) const noexcept {
-      return _global_index_to_which(this->type.typeinfo, index, is_static);
-   }
    void Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
       this->object = nullptr;
       auto scope = this->scope;
@@ -279,7 +276,7 @@ namespace Megalo {
          if (top.which) {
             this->which = top.which->as_integer(); // if we're accessing a property on a NamespaceMember
          } else {
-            this->which = this->_global_index_to_which(top.index, top.is_static); // if we're accessing a property on a static or global variable
+            this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static); // if we're accessing a property on a static or global variable
          }
          if (prop->has_index()) {
             this->index = arg.resolved.property.index;
@@ -313,12 +310,12 @@ namespace Megalo {
             // This is a nested variable. We need to identify the scope by way of (which), and identify 
             // the index;
             //
-            auto vs = getVariableScopeForTypeinfo(res.nested.type);
+            auto vs = getVariableScopeForTypeinfo(top.type);
             this->scope = this->type.get_variable_scope(vs);
             if (top.which) {
                this->which = top.which->as_integer(); // if we're accessing a variable nested under a NamespaceMember
             } else {
-               this->which = this->_global_index_to_which(top.index, top.is_static);
+               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
             }
             this->index = res.nested.index;
             this->_update_object_pointer_from_index(compiler);
@@ -330,7 +327,7 @@ namespace Megalo {
          //
          this->scope = this->type.get_variable_scope(variable_scope::global);
          if (this_type_is_a_scope)
-            this->which = this->_global_index_to_which(top.index, top.is_static);
+            this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
          else {
             this->index = top.index;
             this->_update_object_pointer_from_index(compiler);
