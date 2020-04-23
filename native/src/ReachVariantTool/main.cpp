@@ -155,11 +155,37 @@ int main(int argc, char *argv[]) {
 //
 //        - The "script_option" member in the unnamed namespace doesn't parse properly.
 //
-//        - Statements don't parse and I can't be bothered to figure out why. Let's rewrite 
-//          condition and action parsing to use the "extract" functions instead of doing 
-//          absolutely everything through the "token" field. In fact, if we do that and 
-//          also write an "extract_operator" function, then we can get rid of the "token" 
-//          field entirely.
+//        - Statements don't parse and the code isn't especially intuitive, so it's hard 
+//          to find out why. Let's rewrite condition and action parsing to use the "extract" 
+//          functions instead of doing absolutely everything through the "token" field. In 
+//          fact, if we do that and also write an "extract_operator" function, then we can 
+//          get rid of the "token" field entirely.
+//
+//           - For the left-hand and right-hand sides of a statement: try to extract as an 
+//             integer literal first; then, as a word; then, as a string literal. The 
+//             reason we want to do that is because "1234" is both an integer literal and 
+//             a word, but "-1234" is only an integer literal. You can't compare or assign 
+//             string literals, but we should extract them for specific error reporting and 
+//             because it'd be unreasonable for attempts to compare or assign them to be 
+//             fatal errors.
+//
+//           - For conditions: if the statement is not a function call, then parse all 
+//             parts before trying to compile any of it.
+//
+//           = WHILE WE'RE AT IT: Right now, our current code consists of nested scan 
+//             functors -- essentially, nested loops, sharing an index but incrementing 
+//             it individually. Messy! If we use the (extract_whatever) functions as the 
+//             basis of our parsing, then we could probably read actions like this:
+//
+//                while (!this->has_fatal() && !this->at_effective_end()) {
+//                   //
+//                   // ...
+//                   //
+//                }
+//             
+//             Conditions could be read similarly, looking for "and", "or", or "then" 
+//             after each read statement (and yielding an error if they're missing or if 
+//             they appear in the wrong places, e.g. "if then" or "if or").
 //
 //     - Compiler: Unresolved string references: each list entry needs an "action" field 
 //       which lists the action the script author decided to take. Available actions are: 
