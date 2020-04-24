@@ -136,6 +136,25 @@ namespace Megalo {
       return false;
    }
 
+   void VariableDeclarationList::clear() noexcept {
+      for (auto* decl : this->list)
+         delete decl;
+      this->list.clear();
+   }
+   void VariableDeclarationList::adopt(VariableDeclarationList& other) noexcept {
+      this->clear();
+      this->list.reserve(other.size());
+      for (auto* decl : other.list)
+         this->list.push_back(decl);
+      other.list.clear(); // NOT other.clear, which would delete the list items
+   }
+
+   void VariableDeclarationSet::adopt(VariableDeclarationSet& other) noexcept {
+      this->scalars.adopt(other.scalars);
+      this->objects.adopt(other.objects);
+      this->players.adopt(other.players);
+      this->teams.adopt(other.teams);
+   }
    void VariableDeclarationSet::decompile(Decompiler& out, uint32_t flags) noexcept {
       const char* scope = "SCOPE?";
       switch (this->type) {

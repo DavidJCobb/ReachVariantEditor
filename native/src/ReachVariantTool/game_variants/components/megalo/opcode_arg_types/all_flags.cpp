@@ -110,7 +110,7 @@ namespace Megalo {
          auto i = base.lookup(word);
          if (i < 0)
             return arg_compile_result::failure(QString("Word \"%1\" was not recognized as a flag name.").arg(word));
-         this->value |= i;
+         this->value |= (1 << i);
       } while (arg.extract_specific_char('|'));
       //
       return arg_compile_result::success();

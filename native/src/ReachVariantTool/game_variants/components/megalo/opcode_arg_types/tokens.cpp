@@ -212,6 +212,7 @@ namespace Megalo {
       if (part == 0 || part > max_token_count)
          return arg_compile_result::failure();
       auto& token = this->tokens[part - 1];
+      this->tokenCount = part;
       return token.compile(compiler, arg, part).set_more(part < max_token_count ? arg_compile_result::more_t::optional : arg_compile_result::more_t::no);
    }
 }

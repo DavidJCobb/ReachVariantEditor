@@ -120,6 +120,18 @@ namespace Megalo {
       return it::none;
    }
    const VariableScopeIndicatorValue* VariableScopeIndicatorValueList::get_variable_scope(variable_scope vs) const noexcept {
+      auto this_type_as_scope = getScopeObjectForConstant(this->var_type);
+      //
+      if (vs == variable_scope::global && this_type_as_scope) {
+         for (auto entry : this->scopes) {
+            if (!entry->is_variable_scope())
+               continue;
+            if (entry->base == this_type_as_scope)
+               return entry;
+         }
+         return nullptr;
+      }
+      //
       auto scope = &getScopeObjectForConstant(vs);
       for (auto entry : this->scopes) {
          if (!entry->is_variable_scope())
@@ -302,6 +314,8 @@ namespace Megalo {
       }
       if (top.scope) { // namespace scope-member
          this->scope = top.scope;
+         if (this->scope->has_index())
+            this->index = top.index;
          return arg_compile_result::success();
       }
       if (top.type) {
@@ -312,6 +326,7 @@ namespace Megalo {
             //
             auto vs = getVariableScopeForTypeinfo(top.type);
             this->scope = this->type.get_variable_scope(vs);
+            assert(this->scope);
             if (top.which) {
                this->which = top.which->as_integer(); // if we're accessing a variable nested under a NamespaceMember
             } else {
@@ -326,9 +341,13 @@ namespace Megalo {
          // then we need to set (scope) and (which); otherwise, we need to set (scope) and (index).
          //
          this->scope = this->type.get_variable_scope(variable_scope::global);
-         if (this_type_is_a_scope)
-            this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
-         else {
+         assert(this->scope);
+         if (this_type_is_a_scope) {
+            if (top.which)
+               this->which = top.which->as_integer();
+            else
+               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+         } else {
             this->index = top.index;
             this->_update_object_pointer_from_index(compiler);
          }

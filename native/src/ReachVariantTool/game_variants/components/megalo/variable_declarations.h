@@ -94,6 +94,9 @@ namespace Megalo {
          //
       public:
          VariableDeclarationList(variable_type vt) : type(vt) {}
+         ~VariableDeclarationList() {
+            this->clear();
+         }
          //
          inline VariableDeclaration* operator[](int i) const noexcept { return this->list[i]; }
          //
@@ -113,6 +116,9 @@ namespace Megalo {
             for (; prior < size; ++prior)
                this->list[prior] = new VariableDeclaration(this->type);
          }
+         //
+         void clear() noexcept;
+         void adopt(VariableDeclarationList& other) noexcept;
    };
 
    class VariableDeclarationSet {
@@ -156,6 +162,7 @@ namespace Megalo {
          }
          void decompile(Decompiler& out, uint32_t flags = 0) noexcept;
          //
+         void adopt(VariableDeclarationSet& other) noexcept;
          bool imply(variable_type vt, uint8_t index) noexcept;
          void make_explicit(variable_type vt, uint8_t index) noexcept;
          //

@@ -122,39 +122,82 @@ int main(int argc, char *argv[]) {
 //        - The "apply" function should assert if there are any unresolved string references 
 //          (see below) or if there are any compiler errors.
 //
-//     - OpcodeArgValue::compile overrides on subclasses
+//     - MODIFY string_scanner::extract_string_literal TO HANDLE ALL ESCAPE CODES WHEN 
+//       INTERPRETING THE CONTENT OF THE STRING.
 //
-//        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
-//          string_scanner that can extract a string literal, we don't have a function to 
-//          deal with escape codes e.g. "\n". (The exception is escape codes for the string's 
-//          own delimiter, e.g. "That's a \"good\" idea..." and 'Hey, what\'s up?' Those are 
-//          handled because they need to be handled in order to extract the string properly.) 
-//          Similarly, an OpcodeArgValue will want to look up the index of a string literal 
-//          in the string table, and validate any string indices passed by way of integer 
-//          literals and alias names.
+//     - EXAMINE string_scanner::scan AND ENSURE THAT A "--" INSIDE OF A STRING WOULD NOT BE 
+//       MISINTERPRETED AS A COMMENT.
 //
-//           = ACTUALLY, string_scanner::extract_string_literal SHOULD HANDLE ALL ESCAPE 
-//             CODES AND SIMILAR WHEN RETURNING THE CONTENTS OF THE STRING.
+//     - ADD A STATIC METHOD TO string_scanner TO ADD SUPPORTED ESCAPE CODES TO A STRING WHERE 
+//       APPROPRIATE. HAVE ALL DECOMPILE CODE USE THIS FOR ALL STRING LITERALS.
 //
-//        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
-//          able to accept any integer literal, e.g. -000100, and treat it as an integer. 
-//          Currently, because it uses the same compile function as any basic enum, it just 
-//          matches as a string.
+//     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
+//       a dropdown). The arrow should allow you to select what to copy: the full English 
+//       content of the string; the English content as a string literal, with delimiters and 
+//       escape codes; and the string's index in the table.
 //
-//           - Currently, this yields a non-fatal error about there being unexpected content 
-//             at the end of the argument. That's just due to how enum parsing works, I think.
+//     - FIX LINE NUMBERS FOR string_scanner. THEY SEEM TO BE ONE TOO LOW.
 //
-//           - I'd like users to be able to specify the same values as KSoft, OR a value with 
-//             a "%" suffix where the "one timer second per one game second" value is 100%.
+//     - The compiler should probably throw an error when parsing a function argument, if the 
+//       argument is blank or whitespace-only (i.e. func(1, , 3)).
+//
+//     = COMPILER TESTS
+//
+//        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
+//          decompile produces identical output to the first. However, the resulting file is 
+//          not binary-identical to the "resaved in Release build" version. The reason for 
+//          this is:
+//
+//             for each player do
+//                if current_player.number[0] != 1 then 
+//                   if current_player.is_elite() then 
+//                      current_player.set_loadout_palette(elite_tier_1)
+//                   end
+//                   if not current_player.is_elite() then 
+//                      current_player.set_loadout_palette(spartan_tier_1)
+//                   end
+//                end
+//                ...
+//
+//          Recall that when we compile a trigger, if the last block is an if-block, then 
+//          the if-block can and should share a trigger with its parent. Well, that last 
+//          if-block shown above -- "if the player is not an Elite" -- actually doesn't share 
+//          a trigger with its parent! Some if-blocks in the vanilla gametypes do it, but some 
+//          don't. Failing to reproduce this behavior causes us to generate triggers differently, 
+//          but the binary-inconsistency between the two files is order: we have to flatten 
+//          opcodes into flat lists, and the order of opcodes in the list will depend on the 
+//          depth of their parent triggers (see documentation comments in the flatten function), 
+//          so collapsing that if-not-block differently from Bungie causes the opcode order to 
+//          differ: both "is_elite" calls should be ordered before the number variable comparison, 
+//          but the inverted "is_elite" check comes after it instead, because it's technically in 
+//          the same trigger.
+//
+//          I think it's because Bungie's original language had else-blocks (and possibly 
+//          elseif-blocks), and else-blocks probably don't collapse into their parent triggers 
+//          like an if-block would! This means two things:
+//
+//           - Accurate decompiling MUST generate else-blocks at a minimum. We may be able to 
+//             accomplish this by checking if the conditions are identical to the previous 
+//             if-block but with the "negated" flag set (we'll also need to reason about the 
+//             or-groups and such).
+//
+//           - When compiling an else-block, we can't merge it into its parent trigger.
+//
+//           - We need to add support for elseif- and else-blocks. Currently we would compile 
+//             them incorrectly, because there's no logic to copy and invert the conditions of 
+//             the previous (else)if-block(s).
+//
+//           - Until all three tests above are complete, we cannot rely on file resaving to 
+//             test the compiler unless the gametype being tested is so simple that it doesn't 
+//             ever use else-blocks.
+//
+//           - We may have to make similar fixes for elseif-blocks; it won't be possible to 
+//             know until else-blocks are dealt with, since the first binary inconsistency 
+//             will make further comparisons impossible.
 //
 //     - COMPILER TESTS: We can test the compiler itself right now, on the understanding 
 //       that any argument types that haven't had their own compile code written yet will 
 //       yield non-fatal errors.
-//
-//        - The compiler should probably throw an error when parsing a function argument, if 
-//          the argument is blank or whitespace-only (i.e. func(1, , 3)).
-//
-//        - Line numbers seem to be subtly off on several error messages and I'm not sure why.
 //
 //        - string_scanner::extract_word: Consider stopping extraction after a "]" if the next 
 //          character is not a "."; it would allow "declare global.number[0]with ..." and such.

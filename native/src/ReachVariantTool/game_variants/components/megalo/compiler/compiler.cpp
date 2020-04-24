@@ -252,8 +252,13 @@ namespace Megalo {
          auto   t = this->trigger = new Trigger;
          size_t ti = compiler.results.triggers.size(); // index of this trigger in the full trigger list
          compiler.results.triggers.push_back(t);
-         if (this->parent)
-            t->entryType = entry_type::subroutine;
+         if (this->parent) {
+            t->entryType = entry_type::normal;
+            //
+            auto block = dynamic_cast<const Block*>(this->parent);
+            if (block && block->type != Type::root)
+               t->entryType = entry_type::subroutine;
+         }
          //
          if (this->event != Event::none) {
             t->entryType = _block_event_to_trigger_entry(this->event);
@@ -433,6 +438,68 @@ namespace Megalo {
       for (auto& e : add)
          list.push_back(e);
       add.clear();
+   }
+   bool Compiler::handle_unresolved_string_references() {
+      struct _Created {
+         QString content;
+         int32_t index = -1;
+         //
+         _Created(const QString& s, int32_t i) : content(s), index(i) {}
+      };
+      std::vector<_Created> created;
+      //
+      auto& string_table = this->variant.scriptData.strings;
+      auto& list         = this->results.unresolved_strings;
+      bool  any_unresolved = false;
+      for (auto& ref : list) {
+         if (ref.pending.action == unresolved_string_pending_action::none) {
+            any_unresolved = true;
+            continue;
+         }
+         int32_t index = ref.pending.index;
+         if (ref.pending.action == unresolved_string_pending_action::create) {
+            index = -1;
+            for (auto& c : created) {
+               if (c.content == ref.string) {
+                  index = c.index;
+                  break;
+               }
+            }
+            if (index == -1) {
+               auto str = string_table.add_new();
+               if (!str) {
+                  any_unresolved = true;
+                  continue;
+               }
+               str->english() = ref.string.toStdString();
+               //
+               index = str->index;
+               created.emplace_back(ref.string, index);
+            }
+         }
+         if (index < 0) {
+            any_unresolved = true;
+            continue;
+         }
+         auto arg    = string_scanner(QString("%1").arg(index));
+         auto result = ref.value->compile(*this, arg, ref.part);
+         if (result.is_unresolved_string() || result.is_failure()) {
+            any_unresolved = true;
+            continue;
+         }
+         ref.handled = true;
+      }
+      list.erase(
+         std::remove_if(
+            list.begin(),
+            list.end(),
+            [](unresolved_str& item) {
+               return item.handled;
+            }
+         ),
+         list.end()
+      );
+      return any_unresolved;
    }
    //
    Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
@@ -623,6 +690,10 @@ namespace Megalo {
                trigger->count_contents(cc, ac);
                if (!incomplete) {
                   for (auto opcode : trigger->opcodes) {
+                     if (!opcode->function) {
+                        incomplete = opcode;
+                        break;
+                     }
                      auto&  list = opcode->arguments;
                      size_t size = list.size();
                      for (size_t i = 0; i < size; ++i) {
@@ -632,7 +703,7 @@ namespace Megalo {
                            break;
                         }
                      }
-                     if (incomplete) // tempted to use a (goto) to break from the nested loop instead so I don't have to count on the compiler to optimize this...
+                     if (incomplete)
                         break;
                   }
                }
@@ -661,6 +732,29 @@ namespace Megalo {
             this->results.success = true;
       }
       return;
+   }
+   void Compiler::apply() {
+      if (!this->results.success)
+         return;
+      assert(!this->has_errors() && !this->has_fatal() && "Do not attempt to apply compiled content when there were compiler errors. Do something with the logged errors!");
+      assert(!this->get_unresolved_string_references().size() && "Do not attempt to apply compiled content when unresolved string references exist.");
+      //
+      auto& mp       = this->variant;
+      //
+      auto& triggers = mp.scriptContent.triggers;
+      triggers.clear(); // this isn't a vector; the list type owns its contents
+      for (auto* trigger : this->results.triggers)
+         triggers.push_back(trigger);
+      this->results.triggers.clear();
+      //
+      mp.scriptContent.entryPoints = this->results.events;
+      //
+      auto& mp_vars  = mp.scriptContent.variables;
+      auto& new_vars = this->results.variables;
+      mp_vars.global.adopt(new_vars.global);
+      mp_vars.object.adopt(new_vars.object);
+      mp_vars.player.adopt(new_vars.player);
+      mp_vars.team.adopt(new_vars.team);
    }
 
    QString Compiler::extract_operator() {
@@ -846,7 +940,7 @@ namespace Megalo {
                }
                accessor = setter;
                acc_name = lhs->resolved.accessor_name;
-               mapping = &setter->mapping;
+               mapping  = &setter->mapping;
                lhs->strip_accessor();
                //
                opcode->arguments.resize(accessor->arguments.size());
@@ -889,7 +983,7 @@ namespace Megalo {
                }
                accessor = getter;
                acc_name = rhs->resolved.accessor_name;
-               mapping = &getter->mapping;
+               mapping  = &getter->mapping;
                rhs->strip_accessor();
                //
                opcode->arguments.resize(accessor->arguments.size());
@@ -925,6 +1019,9 @@ namespace Megalo {
                } else
                   assert(!result.is_unresolved_string() && "The righthand side of an assignment statement thinks it's an unresolved string reference.");
             }
+            //
+            opcode->function = accessor;
+            //
             assert(mapping);
             if (accessor->get_name_type()) {
                //

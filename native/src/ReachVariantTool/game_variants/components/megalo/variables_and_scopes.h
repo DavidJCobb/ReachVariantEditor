@@ -53,10 +53,18 @@ namespace Megalo {
          int8_t as_integer() const noexcept;
    };
    class VariableScopeWhichValueList {
+      private:
+         bool _initialized = false;
+         //
       public:
          std::vector<VariableScopeWhichValue*> values;
          //
          VariableScopeWhichValueList(std::initializer_list<VariableScopeWhichValue*> e) : values(e) {
+            //
+            // NOTE: The object must be defined AFTER its contents, or the contents' (owner) 
+            // pointer will get wiped due to static variable initialization order! Note my 
+            // choice of wording: the DEFINITION, not the DECLARATION, must come after.
+            //
             for (auto& v : this->values)
                v->owner = this;
          }

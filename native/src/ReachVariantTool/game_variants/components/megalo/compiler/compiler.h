@@ -100,14 +100,6 @@ namespace Megalo {
    //
    class Compiler : public Script::string_scanner {
       public:
-         struct Token {
-            QString text;
-            pos     pos;
-            bool ended = false; // whether we hit whitspace, meaning that the current word is "over"
-            bool brace = false; // whether we're in square brackets; needed to properly handle constructs like "abc[ d]" or "abc[-1]" at the starts of statements
-         };
-         using scan_functor_t = std::function<bool(QChar)>;
-         //
          struct LogEntry {
             QString text;
             pos     pos;
@@ -122,30 +114,13 @@ namespace Megalo {
             size_t fatal_errors = 0;
          };
          //
-      protected:
-         using keyword_handler_t = void (Compiler::*)();
-         //
-      protected:
-         enum class c_joiner {
+         enum class unresolved_string_pending_action {
             none,
-            and,
-            or,
+            create,
+            use_existing,
          };
-         //
-         Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
-         Script::Block* block = nullptr; // current block being parsed
-         Script::Block::Event next_event = Script::Block::Event::none;
-         bool     negate_next_condition = false;
-         c_joiner next_condition_joiner = c_joiner::none;
-         std::vector<Script::Alias*> aliases_in_scope;
-         std::vector<Script::UserDefinedFunction> functions_in_scope;
-         GameVariantDataMultiplayer& variant;
-         //
-         log_t warnings;
-         log_t errors;
-         log_t fatal_errors;
-         //
-         struct unresolved_str {
+         class unresolved_str {
+            friend Compiler;
             //
             // Some function arguments take a string. We want script authors to be able to specify strings as 
             // string literals, as integer literals (referring to indices in the string table), or as aliases 
@@ -172,13 +147,45 @@ namespace Megalo {
             // orary list to the compiler's main list. (Conveniently, this also allows us to make this system 
             // work with the way we resolve function overloads.)
             //
-            OpcodeArgValue* value = nullptr;
-            QString string;
-            uint8_t part = 0;
-            //
-            unresolved_str(OpcodeArgValue& v, QString s, uint8_t p) : value(&v), string(s), part(p) {}
+            protected:
+               OpcodeArgValue* value = nullptr;
+               QString string;
+               uint8_t part = 0;
+               bool    handled = false;
+               //
+            public:
+               struct {
+                  unresolved_string_pending_action action = unresolved_string_pending_action::none;
+                  int32_t index = -1;
+               } pending;
+               //
+               unresolved_str(OpcodeArgValue& v, QString s, uint8_t p) : value(&v), string(s), part(p) {}
          };
          using unresolved_str_list = std::vector<unresolved_str>;
+         //
+      protected:
+         using keyword_handler_t = void (Compiler::*)();
+         //
+      protected:
+         enum class c_joiner {
+            none,
+            and,
+            or,
+         };
+         //
+         Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
+         Script::Block* block = nullptr; // current block being parsed
+         Script::Block::Event next_event = Script::Block::Event::none;
+         bool     negate_next_condition = false;
+         c_joiner next_condition_joiner = c_joiner::none;
+         std::vector<Script::Alias*> aliases_in_scope;
+         std::vector<Script::UserDefinedFunction> functions_in_scope;
+         GameVariantDataMultiplayer& variant;
+         //
+         log_t warnings;
+         log_t errors;
+         log_t fatal_errors;
+         //
          void _commit_unresolved_strings(unresolved_str_list&);
          //
       public:
@@ -207,6 +214,9 @@ namespace Megalo {
          void raise_warning(const QString& text);
          //
          void parse(QString text); // parse and compile the text
+         void apply(); // applies compiled content to the game variant, and relinquishes ownership of it
+         bool handle_unresolved_string_references(); // handles any strings with an action set; returns true if any unresolved strings remain
+         inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
          inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }

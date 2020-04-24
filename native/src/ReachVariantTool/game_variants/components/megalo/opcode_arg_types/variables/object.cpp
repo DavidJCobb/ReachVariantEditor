@@ -74,7 +74,10 @@ namespace Megalo {
                      return arg_compile_result::failure();
                   //
                   auto type = top.type;
-                  this->which = Variable::_global_index_to_which(*type, top.index, top.is_static);
+                  if (top.which)
+                     this->which = top.which->as_integer();
+                  else
+                     this->which = Variable::_global_index_to_which(*type, top.index, top.is_static);
                   this->index = res.property.index;
                   //
                   if (type == &OpcodeArgValueObject::typeinfo)
@@ -96,7 +99,10 @@ namespace Megalo {
                if (top.type != &OpcodeArgValuePlayer::typeinfo)
                   return arg_compile_result::failure();
                this->scope = &variable_scope_indicators::object::player_biped;
-               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+               if (top.which)
+                  this->which = top.which->as_integer();
+               else
+                  this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
                return arg_compile_result::success();
             }
          }
