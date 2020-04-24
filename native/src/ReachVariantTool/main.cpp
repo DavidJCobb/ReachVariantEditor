@@ -130,15 +130,6 @@ int main(int argc, char *argv[]) {
 //        - The "apply" function should assert if there are any unresolved string references 
 //          (see below) or if there are any compiler errors.
 //
-//     = HOST MIGRATION EVENT TRIGGERS DO NOT DECOMPILE PROPERLY. There are two events for 
-//       host migration: "on host migration" and "on double host migration". The problem is 
-//       that the Triggers themselves don't know which they are. Both triggers have the same 
-//       entry_type value and will decompile to the same event type; without access to the 
-//       variant's TriggerEntryPoints, the Trigger cannot decompile its event type properly 
-//       in this case.
-//
-//        - This affects decompiling and recompiling Halo Chess and probably some others.
-//
 //     - OpcodeArgValue::compile overrides on subclasses
 //
 //        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
@@ -163,6 +154,9 @@ int main(int argc, char *argv[]) {
 //
 //           - Currently, this yields a non-fatal error about there being unexpected content 
 //             at the end of the argument. That's just due to how enum parsing works, I think.
+//
+//           - I'd like users to be able to specify the same values as KSoft, OR a value with 
+//             a "%" suffix where the "one timer second per one game second" value is 100%.
 //
 //     - COMPILER TESTS: We can test the compiler itself right now, on the understanding 
 //       that any argument types that haven't had their own compile code written yet will 

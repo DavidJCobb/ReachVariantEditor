@@ -1,6 +1,7 @@
 #include "forge_label.h"
-#include "../../../errors.h"
 #include <limits>
+#include "../../../errors.h"
+#include "../compiler/compiler.h"
 
 namespace {
    constexpr int ce_max_index      = Megalo::Limits::max_script_labels;
@@ -80,5 +81,56 @@ namespace Megalo {
       }
       cobb::sprintf(temp, "%u", f->index);
       out.write(temp);
+   }
+   arg_compile_result OpcodeArgValueForgeLabel::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      QString str;
+      int32_t index = -1;
+      //
+      auto& mp   = compiler.get_variant();
+      auto& list = mp.scriptContent.forgeLabels;
+      //
+      if (arg.extract_string_literal(str)) {
+         for (size_t i = 0; i < list.size(); ++i) {
+            auto& label = list[i];
+            ReachString* name = label.name;
+            if (!name)
+               continue;
+            QString english = QString::fromUtf8(name->english().c_str());
+            if (english == str) {
+               if (index != -1)
+                  return arg_compile_result::failure("The specified string literal matches multiple defined Forge labels. Use an index instead.");
+               index = i;
+            }
+         }
+         if (index == -1)
+            return arg_compile_result::failure("The specified string literal does not match any defined Forge label.");
+         this->value = &list[index];
+         return arg_compile_result::success();
+      }
+      //
+      // No string literal was specified. We also allow an integer alias, an alias of an integer index, 
+      // the word "none", or an alias of the word "none".
+      //
+      if (!arg.extract_integer_literal(index)) {
+         auto word  = arg.extract_word();
+         auto alias = compiler.lookup_absolute_alias(word);
+         if (alias && alias->is_imported_name())
+             word = alias->target_imported_name;
+         if (alias && alias->is_integer_constant()) {
+            index = alias->get_integer_constant();
+         } else {
+            if (word.compare("none", Qt::CaseInsensitive) == 0) {
+               this->value = nullptr;
+               return arg_compile_result::success();
+            }
+            return arg_compile_result::failure();
+         }
+      }
+      if (index < 0)
+         return arg_compile_result::failure("A Forge label cannot have a negative index.");
+      if (index >= list.size())
+         return arg_compile_result::failure(QString("You specified the Forge label with index %1, but the maximum defined index is %2.").arg(index).arg(list.size()));
+      this->value = &list[index];
+      return arg_compile_result::success();
    }
 }

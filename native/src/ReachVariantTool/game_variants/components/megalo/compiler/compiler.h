@@ -226,6 +226,7 @@ namespace Megalo {
          //
          Script::VariableReference* arg_to_variable(QString) noexcept; // caller is responsible for freeing the returned variable
          Script::VariableReference* arg_to_variable(string_scanner& arg) noexcept; // caller is responsible for freeing the returned variable // runs (arg.extract_word)
+         void imply_variable(variable_scope, variable_type, uint8_t index) noexcept; // for OpcodeArgValueObjectPlayerVariable
          //
          enum class name_source {
             none,

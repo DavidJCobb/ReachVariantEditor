@@ -1,4 +1,5 @@
 #include "waypoint_icon.h"
+#include "../compiler/compiler.h"
 
 namespace Megalo {
    namespace enums {
@@ -106,5 +107,27 @@ namespace Megalo {
          out.write(", ");
          this->number.decompile(out, flags);
       }
+   }
+   arg_compile_result OpcodeArgValueWaypointIcon::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      if (part == 1)
+         return ((OpcodeArgValue*)&this->number)->compile(compiler, arg, part); // need to access it this way because the overloads and overrides together are confusing MSVC
+      if (part > 1)
+         return arg_compile_result::failure();
+      //
+      // Handle icon enum.
+      //
+      auto word = arg.extract_word();
+      if (word.isEmpty())
+         return arg_compile_result::failure();
+      if (word.compare("none", Qt::CaseInsensitive) == 0) {
+         this->icon = -1;
+         return arg_compile_result::success();
+      }
+      auto index = enums::waypoint_icon.lookup(word);
+      if (index < 0)
+         return arg_compile_result::failure(QString("The value \"%1\" is not a valid waypoint icon.").arg(word));
+      this->icon = index;
+      //
+      return arg_compile_result::success().set_needs_more(this->icon == enums::waypoint_icon.lookup("territory_a"));
    }
 }

@@ -44,6 +44,19 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
 
-         // TODO: COMPILE OVERLOADS: variable.function_name(string) i.e. variable overload is the object, string overload is the player variable index
+         //
+         // This argument is used in only one place: the opcode to set an object's shape color to match the 
+         // armor color of the player referred to by one of the object's nested player variables. That opcode 
+         // uses this type as its sole argument, but specifies the argument as both the context and a mapped 
+         // argument, i.e.
+         //
+         //    same_arg.opcode(same_arg)
+         //
+         // This means that "the same" argument will be parsed twice, and will be passed to this class's 
+         // (compile) function twice. The trick is that a different overload wil be used in each case: the 
+         // context will be passed as a VariableReference, and the argument as a string.
+         //
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
    };
 }

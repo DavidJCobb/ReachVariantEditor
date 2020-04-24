@@ -347,6 +347,7 @@ namespace Megalo {
       if (!mp)
          return;
       auto& triggers = mp->scriptContent.triggers;
+      auto& entry    = mp->scriptContent.entryPoints;
       //
       uint16_t indent_count          = 0;     // needed because if-blocks aren't "real;" we "open" one every time we encounter one or more conditions in a row, so we need to remember how many "end"s to write
       bool     is_first_opcode       = true;  // see comment for (trigger_is_if_block)
@@ -365,7 +366,23 @@ namespace Megalo {
             out.write_line(u8"on local: "); // TODO: don't put this on its own line
             break;
          case entry_type::on_host_migration:
-            out.write_line(u8"on host migration: ");
+            {
+               bool is_double_host_migration = false;
+               {
+                  size_t size = triggers.size();
+                  for (size_t i = 0; i < size; ++i) {
+                     if (&triggers[i] == this) {
+                        if (entry.indices.doubleHostMigrate == i)
+                           is_double_host_migration = true;
+                        break;
+                     }
+                  }
+               }
+               if (is_double_host_migration)
+                  out.write_line(u8"on double host migration: ");
+               else
+                  out.write_line(u8"on host migration: ");
+            }
             break;
          case entry_type::on_init:
             out.write_line(u8"on init: ");

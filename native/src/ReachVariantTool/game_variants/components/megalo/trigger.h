@@ -40,6 +40,8 @@ namespace Megalo {
       // Halo 4: incident
    };
 
+   class TriggerEntryPoints;
+
    class Trigger {
       public:
          ~Trigger();

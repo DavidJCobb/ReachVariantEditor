@@ -257,7 +257,11 @@ namespace Megalo {
          //
          if (this->event != Event::none) {
             t->entryType = _block_event_to_trigger_entry(this->event);
-            compiler.results.events.set_index_of_event(t->entryType, ti);
+            //
+            if (this->event == Event::double_host_migration) // double host migration uses the same entry_type as host migration, so we need to special-case it
+               compiler.results.events.indices.doubleHostMigrate = ti;
+            else
+               compiler.results.events.set_index_of_event(t->entryType, ti);
          }
          switch (this->type) {
             case Type::basic:
@@ -1677,6 +1681,12 @@ namespace Megalo {
       }
       return nullptr;
    }
+   void Compiler::imply_variable(variable_scope vs, variable_type vt, uint8_t index) noexcept {
+      auto set = this->_get_variable_declaration_set(vs);
+      if (!set)
+         return;
+      set->imply(vt, index);
+   }
    //
    void Compiler::_openBlock(Script::Block* block) { // (block) should already have been appended to its parent
       this->block = block;
@@ -2310,7 +2320,7 @@ namespace Megalo {
             this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
          return;
       }
-      auto event = Script::Block::Event::none;
+      this->next_event = Script::Block::Event::none;
       if (words.compare("init", Qt::CaseInsensitive) == 0) {
          this->next_event = Script::Block::Event::init;
       } else if (words.compare("local init", Qt::CaseInsensitive) == 0) {
@@ -2328,13 +2338,23 @@ namespace Megalo {
       }
       //
       if (this->next_event != Script::Block::Event::none) {
-         auto et    = _block_event_to_trigger_entry(this->next_event);
-         auto index = this->results.events.get_index_of_event(et);
+         //
+         // Host migrations and double host migrations use the same trigger entry type, so we need to 
+         // handle double host migrations as a special-case here.
+         //
+         auto    et    = _block_event_to_trigger_entry(this->next_event);
+         int32_t index = this->results.events.get_index_of_event(et);
+         if (this->next_event == Script::Block::Event::double_host_migration)
+            index = this->results.events.indices.doubleHostMigrate;
+         //
          if (index != TriggerEntryPoints::none) {
             this->raise_error(QString("Only one trigger can be assigned to handle each event type. Event type \"%1\" is already in use.").arg(words));
             this->next_event = Script::Block::Event::__error;
          } else {
-            this->results.events.set_index_of_event(et, TriggerEntryPoints::reserved);
+            if (this->next_event == Script::Block::Event::double_host_migration)
+               this->results.events.indices.doubleHostMigrate = TriggerEntryPoints::reserved;
+            else
+               this->results.events.set_index_of_event(et, TriggerEntryPoints::reserved);
          }
       } else {
          this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
