@@ -111,16 +111,8 @@ int main(int argc, char *argv[]) {
 //        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
 //          to the UI.
 //
-//        - Per Kornman00, IconIndex6 is a HUD Widget Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1322
-//
-//        - Per Kornman00, IconIndex7 is an Engine Icon; the list is here: https://github.com/KornnerStudios/KSoft.Blam/blob/master/KSoft.Blam/Games/HaloReach/Megalo/Proto/HaloReach_MegaloStaticDb_Xbox.xml#L1361
-//
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
-//
-//        - The end of the compile process should run one final check: scan all Opcodes 
-//          in all compiled triggers, and throw a compiler error if any have any nullptr 
-//          arguments.
 //
 //     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
 //       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
@@ -143,9 +135,6 @@ int main(int argc, char *argv[]) {
 //
 //           = ACTUALLY, string_scanner::extract_string_literal SHOULD HANDLE ALL ESCAPE 
 //             CODES AND SIMILAR WHEN RETURNING THE CONTENTS OF THE STRING.
-//
-//           - Compiler::arg_to_variable has been provided as a means of converting an 
-//             argument received as text to a VariableReference.
 //
 //        - TIMER RATE IS IMPLEMENTED AS A BASIC ENUM, BUT THIS WON'T WORK. We want it to be 
 //          able to accept any integer literal, e.g. -000100, and treat it as an integer. 

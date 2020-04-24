@@ -325,8 +325,8 @@ namespace Megalo {
          }
          for (size_t i = 0; i < size; i++) {
             bool is_last = (i == size - 1);
-            auto item = items[i];
-            auto block = dynamic_cast<Block*>(item);
+            auto item    = items[i];
+            auto block   = dynamic_cast<Block*>(item);
             if (block) {
                if (is_last && !block->is_event_trigger() && block->_is_if_block())
                   block->trigger = this->trigger;
@@ -617,8 +617,38 @@ namespace Megalo {
             size_t tc = this->results.triggers.size();
             size_t cc = 0;
             size_t ac = 0;
-            for (auto trigger : this->results.triggers)
+            Opcode* incomplete    = nullptr;
+            size_t  incomplete_ai = 0;
+            for (auto trigger : this->results.triggers) {
                trigger->count_contents(cc, ac);
+               if (!incomplete) {
+                  for (auto opcode : trigger->opcodes) {
+                     auto&  list = opcode->arguments;
+                     size_t size = list.size();
+                     for (size_t i = 0; i < size; ++i) {
+                        if (!list[i]) {
+                           incomplete    = opcode;
+                           incomplete_ai = i;
+                           break;
+                        }
+                     }
+                     if (incomplete) // tempted to use a (goto) to break from the nested loop instead so I don't have to count on the compiler to optimize this...
+                        break;
+                  }
+               }
+            }
+            if (incomplete) {
+               QString error = "One or more of the instructions in your script failed to compile fully. If no other errors were logged, then this may be the result of a bug in the compiler itself; consider reporting this issue and sending your script to this program's developer to test with. ";
+               if (auto func = incomplete->function) {
+                  auto& base = func->arguments[incomplete_ai];
+                  QString detail = QString("The first such opcode in question was \"%1\". Argument index %2 (type %3) is the first missing argument found.")
+                     .arg(func->name)
+                     .arg(incomplete_ai)
+                     .arg(base.typeinfo.friendly_name);
+                  error += detail;
+               }
+               this->raise_error(error);
+            }
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
@@ -1221,6 +1251,7 @@ namespace Megalo {
    //
    void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, Compiler::unresolved_str_list& unresolved_strings) {
       auto& mapping = function.mapping;
+      opcode.function = &function;
       opcode.arguments.resize(function.arguments.size());
       //
       int8_t mapped_arg_count = mapping.mapped_arg_count();
@@ -1250,22 +1281,24 @@ namespace Megalo {
       }
       //
       int8_t opcode_arg_index = 0;
-      int8_t opcode_arg_part = 0;
+      int8_t opcode_arg_part  = 0;
       int8_t script_arg_index = 0;
       for (; script_arg_index < raw_args.size(); ++script_arg_index) {
          if (opcode_arg_index >= mapped_arg_count) {
             this->raise_error("Too many arguments passed to the function.");
             return;
          }
-         auto& current_argument = opcode.arguments[opcode_arg_index];
-         if (!current_argument) {
-            auto& base = function.arguments[mapping.arg_index_mappings[opcode_arg_index]];
-            current_argument = (base.typeinfo.factory)();
+         //
+         auto  mapped_index     = mapping.arg_index_mappings[opcode_arg_index];
+         auto& current_argument = opcode.arguments[mapped_index];
+         if (!current_argument) { // if we're handling multiple (opcode_arg_part)s on the same opcode, then this will already exist
+            current_argument = (function.arguments[mapped_index].typeinfo.factory)();
             if (!current_argument) {
                this->raise_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
                return;
             }
          }
+         //
          string_scanner argument(raw_args[script_arg_index]);
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
          bool failure = result.is_failure();

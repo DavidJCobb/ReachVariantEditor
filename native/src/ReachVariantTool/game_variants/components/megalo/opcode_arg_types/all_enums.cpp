@@ -62,35 +62,6 @@ namespace Megalo {
          DetailedEnumValue("friendly"),
          DetailedEnumValue("enemy"),
       });
-      auto timer_rate = DetailedEnum({
-         DetailedEnumValue("0"),
-         DetailedEnumValue("-10"),
-         DetailedEnumValue("-25"),
-         DetailedEnumValue("-50"),
-         DetailedEnumValue("-75"),
-         DetailedEnumValue("-100"),
-         DetailedEnumValue("-125"),
-         DetailedEnumValue("-150"),
-         DetailedEnumValue("-175"),
-         DetailedEnumValue("-200"),
-         DetailedEnumValue("-300"),
-         DetailedEnumValue("-400"),
-         DetailedEnumValue("-500"),
-         DetailedEnumValue("-1000"),
-         DetailedEnumValue("10"),
-         DetailedEnumValue("25"),
-         DetailedEnumValue("50"),
-         DetailedEnumValue("75"),
-         DetailedEnumValue("100"),
-         DetailedEnumValue("125"),
-         DetailedEnumValue("150"),
-         DetailedEnumValue("175"),
-         DetailedEnumValue("200"),
-         DetailedEnumValue("300"),
-         DetailedEnumValue("400"),
-         DetailedEnumValue("500"),
-         DetailedEnumValue("1000"),
-      });
       auto waypoint_priority = DetailedEnum({
          DetailedEnumValue("low"),
          DetailedEnumValue("normal"),
@@ -247,17 +218,6 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTeamAllianceStatus>,
       enums::team_alliance_status
-   );
-
-   OpcodeArgValueTimerRateEnum::OpcodeArgValueTimerRateEnum() : OpcodeArgValueEnumSuperclass(enums::timer_rate) {}
-   OpcodeArgTypeinfo OpcodeArgValueTimerRateEnum::typeinfo = OpcodeArgTypeinfo(
-      "_timer_rate",
-      "Timer Rate",
-      "The direction and rate at which a timer's value changes.",
-      //
-      OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueTimerRateEnum>
-      // DO NOT import any names, because all of the enum values are just integer constants
    );
 
    OpcodeArgValueWaypointPriorityEnum::OpcodeArgValueWaypointPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::waypoint_priority) {}

@@ -20,6 +20,7 @@
 #include "shape.h"
 #include "sound.h"
 #include "specific_variable.h"
+#include "timer_rate.h"
 #include "tokens.h"
 #include "variant_string_id.h"
 #include "vector3.h"

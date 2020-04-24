@@ -196,7 +196,7 @@ namespace Megalo {
          "Have %1 tick at rate %2.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
-            OpcodeArgBase("rate",  OpcodeArgValueTimerRateEnum::typeinfo),
+            OpcodeArgBase("rate",  OpcodeArgValueTimerRate::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_rate", "", {1}, 0)
       ),

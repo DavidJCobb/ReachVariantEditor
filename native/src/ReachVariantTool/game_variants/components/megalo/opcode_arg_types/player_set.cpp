@@ -109,10 +109,13 @@ namespace Megalo {
       return result;
    }
    arg_compile_result OpcodeArgValuePlayerSet::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      Variable* variable = nullptr;
       switch (part) {
-         case 1: return this->player.compile(compiler, arg, part);
-         case 2: return this->addOrRemove.compile(compiler, arg, part);
+         case 1: variable = &this->player; break;
+         case 2: variable = &this->addOrRemove; break;
       }
-      return arg_compile_result::failure();
+      if (!variable)
+         return arg_compile_result::failure();
+      return variable->compile(compiler, arg, part).set_needs_more(part < 2);
    }
 }

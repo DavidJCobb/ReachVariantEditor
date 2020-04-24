@@ -361,6 +361,9 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\icons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer_rate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -901,6 +904,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\icons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\timer_rate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

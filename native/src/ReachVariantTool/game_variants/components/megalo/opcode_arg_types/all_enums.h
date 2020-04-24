@@ -32,7 +32,6 @@ namespace Megalo {
    megalo_opcode_arg_value_enum(OpcodeArgValueMathOperatorEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValuePickupPriorityEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueTeamAllianceStatus); // KSoft calls this "team disposition"
-   megalo_opcode_arg_value_enum(OpcodeArgValueTimerRateEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueWaypointPriorityEnum);
 
    megalo_opcode_arg_value_enum(OpcodeArgValueLoadoutPalette);
