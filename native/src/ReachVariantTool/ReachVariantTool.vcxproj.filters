@@ -262,9 +262,6 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\player_set.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\specific_variable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\tokens.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -356,6 +353,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_type_registry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\specific_variable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\icons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -895,6 +898,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_type_registry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\icons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

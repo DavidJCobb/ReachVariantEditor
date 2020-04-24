@@ -1,5 +1,6 @@
 #include "player_set.h"
 #include "../../../../helpers/strings.h"
+#include "../compiler/compiler.h"
 
 namespace Megalo {
    namespace enums {
@@ -87,6 +88,31 @@ namespace Megalo {
             this->addOrRemove.decompile(out, flags);
             return;
       }
-
+   }
+   arg_compile_result OpcodeArgValuePlayerSet::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      if (part == 0) {
+         auto word = arg_text.extract_word();
+         if (word.isEmpty())
+            return arg_compile_result::failure("Expected a player set type.");
+         auto index = enums::player_set_group_name.lookup(word);
+         if (index < 0)
+            return arg_compile_result::failure("This argument is not a valid player set type.");
+         this->set_type = (PlayerSetType)index;
+         return arg_compile_result::success().set_needs_more(this->set_type == PlayerSetType::specific_player);
+      }
+      //
+      auto arg = compiler.arg_to_variable(arg_text);
+      if (!arg)
+         return arg_compile_result::failure("This argument is not a variable.");
+      auto result = this->compile(compiler, *arg, part);
+      delete arg;
+      return result;
+   }
+   arg_compile_result OpcodeArgValuePlayerSet::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
+      switch (part) {
+         case 1: return this->player.compile(compiler, arg, part);
+         case 2: return this->addOrRemove.compile(compiler, arg, part);
+      }
+      return arg_compile_result::failure();
    }
 }

@@ -1,6 +1,7 @@
 #include "specific_variable.h"
 #include "variables/object.h"
 #include "variables/player.h"
+#include "variables/timer.h"
 #include "../compiler/compiler.h"
 
 namespace Megalo {
@@ -48,6 +49,55 @@ namespace Megalo {
          std::string temp;
          cobb::sprintf(temp, "%u", this->index);
          out.write(temp);
+      }
+      arg_compile_result OpcodeArgValueObjectTimerVariable::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+         int32_t index;
+         if (!arg.extract_integer_literal(index)) {
+            auto word = arg.extract_word();
+            if (word.compare("none", Qt::CaseInsensitive) == 0) {
+               this->index = -1;
+               return arg_compile_result::success();
+            }
+            if (word.startsWith("object.", Qt::CaseInsensitive)) {
+               //
+               // Allow the use of a relative object.timer alias here.
+               //
+               word = word.right(word.size() - strlen("object."));
+               if (word.isEmpty())
+                  return arg_compile_result::failure();
+               auto alias = compiler.lookup_relative_alias(word, &OpcodeArgValueObject::typeinfo);
+               if (!alias)
+                  return arg_compile_result::failure();
+               auto target = alias->target;
+               if (!target)
+                  return arg_compile_result::failure();
+               if (target->is_accessor() || target->is_property())
+                  return arg_compile_result::failure();
+               auto& nested = target->resolved.nested;
+               if (nested.type != &OpcodeArgValueTimer::typeinfo)
+                  return arg_compile_result::failure();
+               index = nested.index;
+            } else {
+               //
+               // Look for an absolute alias of an integer.
+               //
+               auto alias = compiler.lookup_absolute_alias(word);
+               if (!alias || !alias->is_integer_constant())
+                  return arg_compile_result::failure();
+               index = alias->get_integer_constant();
+            }
+         }
+         //
+         // Validate the index:
+         //
+         auto max = MegaloVariableScopeObject.max_timers;
+         if (index >= max)
+            return arg_compile_result::failure(QString("You specified object.timer variable %1, but only %2 such variables can exist.").arg(index).arg(max - 1));
+         //
+         compiler.imply_variable(variable_scope::object, variable_type::timer, index);
+         //
+         this->index = index;
+         return arg_compile_result::success();
       }
    #pragma endregion
    //

@@ -18,22 +18,4 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueTrigger>
    );
-
-   OpcodeArgTypeinfo OpcodeArgValueIconIndex6Bits::typeinfo = OpcodeArgTypeinfo(
-      "_icon_index_6",
-      "Icon Index, 6-Bit",
-      "An icon.",
-      //
-      OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueIconIndex6Bits>
-   );
-
-   OpcodeArgTypeinfo OpcodeArgValueIconIndex7Bits::typeinfo = OpcodeArgTypeinfo(
-      "_icon_index_7",
-      "Icon Index, 7-Bit",
-      "An icon.",
-      //
-      OpcodeArgTypeinfo::flags::none,
-      OpcodeArgTypeinfo::default_factory<OpcodeArgValueIconIndex7Bits>
-   );
 }

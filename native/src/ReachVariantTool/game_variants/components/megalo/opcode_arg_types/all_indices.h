@@ -15,17 +15,4 @@ namespace Megalo {
          //
          OpcodeArgValueTrigger() : OpcodeArgValueBaseIndex("Trigger", Limits::max_triggers, index_quirk::reference) {}
    };
-   
-   class OpcodeArgValueIconIndex6Bits : public OpcodeArgValueBaseIndex {
-      public:
-         static OpcodeArgTypeinfo typeinfo;
-         //
-         OpcodeArgValueIconIndex6Bits() : OpcodeArgValueBaseIndex("Icon", cobb::bitmax(6), index_quirk::presence) {}
-   };
-   class OpcodeArgValueIconIndex7Bits : public OpcodeArgValueBaseIndex {
-      public:
-         static OpcodeArgTypeinfo typeinfo;
-         //
-         OpcodeArgValueIconIndex7Bits() : OpcodeArgValueBaseIndex("Icon", cobb::bitmax(7), index_quirk::presence) {}
-   };
 }

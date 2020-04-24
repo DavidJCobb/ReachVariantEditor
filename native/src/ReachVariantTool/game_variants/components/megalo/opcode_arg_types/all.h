@@ -12,6 +12,7 @@
 #include "variables/player_or_group.h"
 //
 #include "forge_label.h"
+#include "icons.h"
 #include "incident.h"
 #include "object_type.h"
 #include "player_set.h"

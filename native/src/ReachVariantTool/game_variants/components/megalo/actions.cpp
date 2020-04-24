@@ -514,7 +514,7 @@ namespace Megalo {
          "Set %1's icon to %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
-            OpcodeArgBase("icon",   OpcodeArgValueIconIndex6Bits::typeinfo),
+            OpcodeArgBase("icon",   OpcodeArgValueHUDWidgetIcon::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_icon", "", {1}, 0)
       ),
@@ -606,7 +606,7 @@ namespace Megalo {
          "Set the objective icon for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("icon",   OpcodeArgValueIconIndex7Bits::typeinfo),
+            OpcodeArgBase("icon",   OpcodeArgValueEngineIcon::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
       ),
