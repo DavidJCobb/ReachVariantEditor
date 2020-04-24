@@ -29,6 +29,7 @@ namespace Megalo {
          DetailedEnumValue("plasma_grenades", DetailedEnumValueInfo::make_friendly_name("plasma grenades")),
       });
       auto loadout_palette = DetailedEnum({
+         DetailedEnumValue("none", DetailedEnumValueInfo::make_friendly_name("no loadout palette")),
          DetailedEnumValue("spartan_tier_1", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 1")),
          DetailedEnumValue("elite_tier_1",   DetailedEnumValueInfo::make_friendly_name("Elite Tier 1")),
          DetailedEnumValue("spartan_tier_2", DetailedEnumValueInfo::make_friendly_name("Spartan Tier 2")),

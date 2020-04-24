@@ -43,5 +43,7 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
+
+         // TODO: COMPILE OVERLOADS: variable.function_name(string) i.e. variable overload is the object, string overload is the player variable index
    };
 }

@@ -57,7 +57,9 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueObjectPlayerVariable>
-   );
+   ).set_accessor_proxy_types({
+      &OpcodeArgValueObject::typeinfo
+   });
    //
    bool OpcodeArgValueObjectPlayerVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       if (!this->object.read(stream, mp))

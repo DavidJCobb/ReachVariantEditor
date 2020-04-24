@@ -561,6 +561,10 @@ namespace Megalo {
       return this->__parseVariable(arg);
    }
    Script::VariableReference* Compiler::arg_to_variable(string_scanner& arg) noexcept {
+      int32_t index;
+      if (arg.extract_integer_literal(index))
+         return new Script::VariableReference(index);
+      //
       auto text = arg.extract_word();
       if (text.isEmpty())
          return nullptr;
@@ -1020,7 +1024,7 @@ namespace Megalo {
                //
                // If we got here, then the parsed word must be the lefthand side of a comparison statement.
                //
-               lhs = this->__parseVariable(word, false, true);
+               lhs = this->__parseVariable(word, false, false);
             } else {
                this->raise_fatal("Expected the start of a new condition.");
                return true;
@@ -1244,15 +1248,15 @@ namespace Megalo {
       int8_t opcode_arg_index = 0;
       int8_t opcode_arg_part = 0;
       int8_t script_arg_index = 0;
-      std::unique_ptr<OpcodeArgValue> current_argument = nullptr;
       for (; script_arg_index < raw_args.size(); ++script_arg_index) {
          if (opcode_arg_index >= mapped_arg_count) {
             this->raise_error("Too many arguments passed to the function.");
             return;
          }
+         auto& current_argument = opcode.arguments[opcode_arg_index];
          if (!current_argument) {
             auto& base = function.arguments[mapping.arg_index_mappings[opcode_arg_index]];
-            current_argument.reset((base.typeinfo.factory)());
+            current_argument = (base.typeinfo.factory)();
             if (!current_argument) {
                this->raise_error("Unknown error: failed to instantiate an OpcodeArgValue while parsing arguments to the function call.");
                return;
@@ -1291,8 +1295,7 @@ namespace Megalo {
                this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
             } else {
                if (result.is_unresolved_string())
-                  unresolved_strings.emplace_back(*current_argument.get(), result.get_unresolved_string(), opcode_arg_part);
-               opcode.arguments[opcode_arg_index] = current_argument.release();
+                  unresolved_strings.emplace_back(*current_argument, result.get_unresolved_string(), opcode_arg_part);
             }
          }
          if (another && has_more) {
@@ -1305,7 +1308,6 @@ namespace Megalo {
          }
          ++opcode_arg_index;
          opcode_arg_part = 0;
-         current_argument.reset(nullptr);
       }
       if (opcode_arg_index < mapped_arg_count)
          this->raise_error("Not enough arguments passed to the function.");

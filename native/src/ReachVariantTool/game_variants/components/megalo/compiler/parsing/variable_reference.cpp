@@ -329,8 +329,8 @@ namespace Megalo::Script {
       auto& resolved = this->resolved;
       if (!resolved.top_level.type)
          return false;
-      if (resolved.top_level.scope)
-         return true;
+      if (auto scope = resolved.top_level.scope)
+         return scope->flags & VariableScopeIndicatorValue::flags::is_readonly;
       if (resolved.accessor)
          return resolved.accessor->setter == nullptr;
       if (resolved.property.definition)
@@ -649,6 +649,13 @@ namespace Megalo::Script {
          assert(prev_scope && "If a variable type doesn't have a VariableScope object, then it shouldn't claim to be able to hold variables.");
          //
          if (!part->has_index()) {
+            if (prev->get_property_by_name(part->name)) {
+               //
+               // There is a property with this name, so if we're not using an index here, then assume 
+               // we're referring to the property.
+               //
+               return false;
+            }
             compiler.raise_error(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
             this->is_invalid = true;
             return false;
@@ -778,43 +785,18 @@ namespace Megalo::Script {
          return;
       }
       //
-      // The basic plan was to resolve variable parts in the order they can appear: first, the top-level 
-      // part; then, the nested variable; then, the property; and then, the accessor. However, edge-cases 
-      // have a way of making things messy. There are two edge cases we need to account for:
+      // The basic plan is to resolve variable parts in the order they can appear: first, the top-level 
+      // part; then, the nested variable; then, the property; and then, the accessor.
       //
-      //  - A property with the same name as a variable typename
-      //
-      //  - A write-only accessor with the same name as a read-only property
-      //
-      // The former encompasses (player.team) and (object.team), which obtain the entity's owner team; 
-      // those properties have the same name as the "team" type. If we try to resolve nested variables 
-      // first and then properties, then we will mistake them for an invalid access to a nested variable 
-      // (i.e. forgetting the index as in the case of "current_player.object") and throw an error. What 
-      // we must do instead is test for the following cases in order:
-      //
-      //    top.property
-      //    top.nested
-      //    top.nested.property
-      //
-      // The latter case encompasses the (team.score) and (player.score) accessor and properties.
-      //
-      bool has_property = this->_resolve_property(compiler, i);
-      if (this->is_invalid)
-         return;
-      if (!has_property) {
-         if (this->_resolve_nested_variable(compiler, i)) {
-            if (this->is_invalid)
-               return;
-            if (++i >= this->raw.size()) {
-               this->is_resolved = true;
-               return;
-            }
-            has_property = this->_resolve_property(compiler, i);
-            if (this->is_invalid)
-               return;
+      if (this->_resolve_nested_variable(compiler, i)) {
+         if (++i >= this->raw.size()) {
+            this->is_resolved = true;
+            return;
          }
       }
-      if (has_property) {
+      if (this->is_invalid)
+         return;
+      if (this->_resolve_property(compiler, i)) {
          auto prop = this->resolved.property.definition;
          //
          if (is_write_access && !prop->has_index()) {
@@ -869,6 +851,8 @@ namespace Megalo::Script {
             return;
          }
       }
+      if (this->is_invalid)
+         return;
       if (this->_resolve_accessor(compiler, i)) {
          if (++i < this->raw.size()) {
             compiler.raise_error("Attempted to access a member of an accessor.");

@@ -11,7 +11,7 @@ namespace Megalo {
       //
       _count
    };
-   class OpcodeArgValueShape : public OpcodeArgValueScalar {
+   class OpcodeArgValueShape : public OpcodeArgValue {
       public:
          static OpcodeArgTypeinfo typeinfo;
          //

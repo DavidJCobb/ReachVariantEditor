@@ -505,6 +505,11 @@ namespace Megalo {
          }
          out.write_line(u8"-- invalid opcode type");
       }
+      if (writing_if_conditions) { // can be true if the last opcode was a condition
+         out.write(u8"then ");
+         writing_if_conditions = false;
+         is_first_condition = true;
+      }
       //
       // Close all open blocks. Remember: conditions encountered in the middle of the trigger count 
       // as new if-blocks that we have to open, so we have to de-indent and write an "end" keyword 

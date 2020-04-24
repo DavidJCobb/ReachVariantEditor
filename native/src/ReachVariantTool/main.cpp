@@ -130,6 +130,15 @@ int main(int argc, char *argv[]) {
 //        - The "apply" function should assert if there are any unresolved string references 
 //          (see below) or if there are any compiler errors.
 //
+//     = HOST MIGRATION EVENT TRIGGERS DO NOT DECOMPILE PROPERLY. There are two events for 
+//       host migration: "on host migration" and "on double host migration". The problem is 
+//       that the Triggers themselves don't know which they are. Both triggers have the same 
+//       entry_type value and will decompile to the same event type; without access to the 
+//       variant's TriggerEntryPoints, the Trigger cannot decompile its event type properly 
+//       in this case.
+//
+//        - This affects decompiling and recompiling Halo Chess and probably some others.
+//
 //     - OpcodeArgValue::compile overrides on subclasses
 //
 //        - COMPILER NEEDS TO PROVIDE HELPERS. Specifically, while we have a function on 
@@ -217,6 +226,11 @@ int main(int argc, char *argv[]) {
 //          it.
 //
 //     = DEFERRED TASKS
+//
+//        - If a string literal matches multiple existing strings, we throw a hard error; 
+//          when we implement picking existing strings for unresolved string references, make 
+//          an ambiguous string reference count as an unresolved one with no option to create 
+//          the referenced string (because it already exists in multiple places).
 //
 //        - The writeable "symmetry" property is only writeable in a "pregame" trigger. Can we 
 //          enforce this, or at least generate a compiler warning for inappropriate access?
