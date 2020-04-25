@@ -2208,6 +2208,9 @@ namespace Megalo {
       item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
+      #if !_DEBUG
+         static_assert(false, "COBB, YOU NEED TO HANDLE COPYING AND NEGATING THE PREVIOUS BLOCK'S CONDITIONS!");
+      #endif
    }
    void Compiler::_handleKeyword_ElseIf() {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
@@ -2229,6 +2232,9 @@ namespace Megalo {
       item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
+      #if !_DEBUG
+         static_assert(false, "COBB, YOU NEED TO HANDLE COPYING AND NEGATING THE PREVIOUS BLOCK'S CONDITIONS!");
+      #endif
       this->_parseBlockConditions();
    }
    void Compiler::_handleKeyword_End() {

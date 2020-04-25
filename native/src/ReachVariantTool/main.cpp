@@ -136,10 +136,15 @@ int main(int argc, char *argv[]) {
 //       content of the string; the English content as a string literal, with delimiters and 
 //       escape codes; and the string's index in the table.
 //
-//     - FIX LINE NUMBERS FOR string_scanner. THEY SEEM TO BE ONE TOO LOW.
-//
 //     - The compiler should probably throw an error when parsing a function argument, if the 
 //       argument is blank or whitespace-only (i.e. func(1, , 3)).
+//
+//     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
+//       to ...::secondary_name_zeroes_return_value.
+//
+//     - Consider adding a new OpcodeFuncToScriptMapping flag for conditions: "secondary name 
+//       inverts condition." Then, we could give "is_not_respawning" the more intuitive 
+//       secondary name "is_respawning" with the negate flag set.
 //
 //     = COMPILER TESTS
 //
@@ -195,6 +200,81 @@ int main(int argc, char *argv[]) {
 //             know until else-blocks are dealt with, since the first binary inconsistency 
 //             will make further comparisons impossible.
 //
+//          The code above would need to be decompiled as:
+//
+//             for each player do
+//                if current_player.number[0] != 1 then 
+//                   if current_player.is_elite() then 
+//                      current_player.set_loadout_palette(elite_tier_1)
+//                   else
+//                      current_player.set_loadout_palette(spartan_tier_1)
+//                   end
+//                end
+//                ...
+//
+//          Until we do that, we won't be able to save binary-identical files to vanilla. 
+//          Notably, *not* collapsing else-blocks into their parent blocks' triggers like 
+//          this is a waste of a trigger (given that we can only generate so many); we should 
+//          make it possible for the user to control whether to collapse them (optimal) or 
+//          not collapse them (consistent with official content).
+//
+//           = NOTE: We don't have to fix BOTH the compiler AND the decompiler. We can fix the 
+//             compiler, and then just manually adjust decompiled output to have else-blocks 
+//             (I think it's safe to assume that Bungie always and only uses the "negated" 
+//             flag i.e. "not" for those).
+//
+//             Really, we just have to handle else(if)-block conditions and modify the 
+//             Block::_is_if_block getter to only return true for if-blocks, and not else(if)-
+//             blocks.
+//
+//     - We're gonna have to take some time to work out how to negate if-statements that 
+//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
+//       to know that when it comes time to actually compile the blocks... assuming we 
+//       don't decide to just drop support for else(if)s at that point. (Think about it: 
+//       first of all, they abstract away conditions, so you can't see the full "cost" 
+//       of your code; and second, there's no code to detect equivalent ifs and decompile 
+//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
+//       any means essential; we've already decided that conciseness is not required.)
+//
+//        - Added a "TODO" comment to Block::compile where we'd need to do this.
+//
+//        - THE SPECIFIC PLANS WE HAVE (JUST BELOW) WON'T BE POSSIBLE UNTIL WE IMPLEMENT THE 
+//          FOLLOWING FUNCTIONS:
+//
+//             virtual OpcodeArgValue* OpcodeArgValue::copy() const noexcept = 0;
+//             virtual Opcode* Opcode::copy() const noexcept;
+//             protected virtual Opcode* Opcode::create_of_same_type() const noexcept = 0;
+//
+//          Opcode::copy should call this->create_of_same_type() to create a new Opcode of the 
+//          appropriate type (Action or Condition); it should then set the new opcode's function 
+//          and use OpcodeArgValue::copy to copy the arguments. The Action and Condition classes 
+//          should override Opcode::create_of_same_type, and Condition should override the base 
+//          Opcode::copy with a function that calls super and then sets Condition-specific values.
+//
+//        - HMM... I THINK IT WOULD ACTUALLY BE BEST TO HANDLE THIS BEFORE COMPILING BLOCKS. 
+//          SPECIFICALLY, WHEN WE OPEN AN ELSE(IF) BLOCK, WE SHOULD CLONE THE ALREADY-COMPILED 
+//          CONDITIONS OF THE PRECEDING (ELSE)IF BLOCK INTO THE NEW ELSE(IF) BLOCK.
+//
+//          SPECIFIC PLANS:
+//
+//           - Split Block::conditions into two lists: one for "else" conditions, and another 
+//             for normal conditions.
+//
+//              - Block::compile should compile both lists verbatim. The "else" conditions 
+//                should be compiled first, followed by the normal conditions.
+//
+//              - Block::clear should handle the "else" condition list as necessary.
+//
+//           - When we open an elseif- or else-block,...
+//
+//              - Copy all "else" conditions from the previous-sibling block verbatim.
+//
+//              - Copy all normal conditions from the previous-sibling block, flip the 
+//                "negated" flag on each Condition, and swap the Comparisons' joiners (i.e. 
+//                "and" should become "or" and "or" should become "and").
+//
+//              = THIS SHOULD BE A MEMBER FUNCTION: Block::generate_else_conditions(Block&).
+//
 //     - COMPILER TESTS: We can test the compiler itself right now, on the understanding 
 //       that any argument types that haven't had their own compile code written yet will 
 //       yield non-fatal errors.
@@ -231,25 +311,6 @@ int main(int argc, char *argv[]) {
 //          table.
 //
 //        - The string table may not have room for the number of new strings needed.
-//
-//     - We're gonna have to take some time to work out how to negate if-statements that 
-//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
-//       to know that when it comes time to actually compile the blocks... assuming we 
-//       don't decide to just drop support for else(if)s at that point. (Think about it: 
-//       first of all, they abstract away conditions, so you can't see the full "cost" 
-//       of your code; and second, there's no code to detect equivalent ifs and decompile 
-//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
-//       any means essential; we've already decided that conciseness is not required.)
-//
-//        - Added a "TODO" comment to Block::compile where we'd need to do this.
-//
-//        - HMM... I THINK IT WOULD ACTUALLY BE BEST TO HANDLE THIS BEFORE COMPILING BLOCKS. 
-//          SPECIFICALLY, WHEN WE OPEN AN ELSE(IF) BLOCK, WE SHOULD CLONE THE ALREADY-COMPILED 
-//          CONDITIONS OF THE PRECEDING (ELSE)IF BLOCK INTO THE NEW ELSE(IF) BLOCK. As for how 
-//          to invert them? I think it would be enough to just set the "inverted" flag on all 
-//          of the cloned conditions and swap all "and"/"or" relationships, but I'd need to 
-//          test that with pen and paper (or rather, Notepad) to see if it holds up. Or Google 
-//          it.
 //
 //     = DEFERRED TASKS
 //
@@ -458,42 +519,10 @@ int main(int argc, char *argv[]) {
 //
 
 //
-//  - PARSER
-//
-//     - Port it from JavaScript. The validate/analyze step basically IS compiling and 
-//       should be named as such, though we'll get to the "actually generating triggers 
-//       and opcodes in-memory" step later.
-//
-//     - Test round-trip operation.
-//
-//     - Finish the code for compiling function calls.
-//
-//     - Generate triggers and opcodes.
-//
 //  - IN-GAME TESTS
 //
 //     - Some game-namespace numbers that refer to social options are unknown; identify 
 //       them.
-//
-//  - POTENTIAL COMPILER IMPROVEMENTS
-//
-//     - We could potentially build a compiler that compiles as it parses, holding only 
-//       the current blocks and the current statement in memory, and generating an opcode 
-//       as appropriate when it finishes parsing a statement. (Trigger objects, on the 
-//       other hand, would be created as non-if-blocks open; we'd also create block 
-//       objects that hold pointers to their owned triggers; and we'd insert the opcodes 
-//       into the triggers as we parse.)
-//
-//       If we hit an invalid opcode that isn't a fatal parse error, then we just stuff 
-//       a "none" opcode into the trigger-under-construction, remember the error, and 
-//       print it at the end before discarding all constructed trigger data.
-//
-//       This would significantly reduce the amount of memory we end up using, since we 
-//       wouldn't need to have two different representations of the script ("parsed" and 
-//       "compiled") existing together in memory; we also wouldn't need to remember pos-
-//       itional data (line numbers, column numbers, and such) for absolutely everything 
-//       from the moment we see it to the moment we're done compiling. It may also be 
-//       simpler, conceptually.
 //
 //  - POTENTIAL EDITOR IMPROVEMENTS:
 //

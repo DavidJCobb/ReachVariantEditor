@@ -9,7 +9,7 @@ namespace Megalo {
             struct pos {
                int32_t offset = 0; // position
                int32_t line   = 0; // current line number
-               int32_t last_newline = 0; // index of last encountered newline
+               int32_t last_newline = -1; // index of last encountered newline
                //
                pos& operator+=(const pos&) noexcept;
                //
