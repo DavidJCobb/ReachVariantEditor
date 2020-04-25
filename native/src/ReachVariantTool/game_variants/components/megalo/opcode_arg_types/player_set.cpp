@@ -118,4 +118,11 @@ namespace Megalo {
          return arg_compile_result::failure();
       return variable->compile(compiler, arg, part).set_needs_more(part < 2);
    }
+   void OpcodeArgValuePlayerSet::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValuePlayerSet*>(other);
+      assert(cast);
+      this->set_type = cast->set_type;
+      this->player.copy(&cast->player);
+      this->addOrRemove.copy(&cast->addOrRemove);
+   }
 }

@@ -13,6 +13,7 @@ namespace Megalo {
       default,
    };
    class OpcodeArgValuePlayerSet : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
          //
@@ -27,5 +28,6 @@ namespace Megalo {
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 }

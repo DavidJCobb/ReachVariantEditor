@@ -57,4 +57,9 @@ namespace Megalo {
       //
       return arg_compile_result::success().set_needs_more(part < 2);
    }
+   void OpcodeArgValueVector3::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueVector3*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

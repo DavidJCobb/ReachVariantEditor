@@ -25,9 +25,11 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 
    class OpcodeArgValueEngineIcon : public OpcodeArgValueIconBase {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
          //
@@ -35,6 +37,7 @@ namespace Megalo {
          OpcodeArgValueEngineIcon() : OpcodeArgValueIconBase(enums::engine_icon, 7) {}
    };
    class OpcodeArgValueHUDWidgetIcon : public OpcodeArgValueIconBase {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
          //

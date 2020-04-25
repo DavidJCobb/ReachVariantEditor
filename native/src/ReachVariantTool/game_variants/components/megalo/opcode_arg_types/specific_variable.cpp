@@ -99,6 +99,11 @@ namespace Megalo {
          this->index = index;
          return arg_compile_result::success();
       }
+      void OpcodeArgValueObjectTimerVariable::copy(const OpcodeArgValue* other) noexcept {
+         auto cast = dynamic_cast<const OpcodeArgValueObjectTimerVariable*>(other);
+         assert(cast);
+         this->index = cast->index;
+      }
    #pragma endregion
    //
    #pragma region OpcodeArgValueObjectPlayerVariable
@@ -199,6 +204,12 @@ namespace Megalo {
       }
       arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
          return this->object.compile(compiler, arg, 0);
+      }
+      void OpcodeArgValueObjectPlayerVariable::copy(const OpcodeArgValue* other) noexcept {
+         auto cast = dynamic_cast<const OpcodeArgValueObjectPlayerVariable*>(other);
+         assert(cast);
+         this->object.copy(&cast->object);
+         this->playerIndex = cast->playerIndex;
       }
    #pragma endregion
 }

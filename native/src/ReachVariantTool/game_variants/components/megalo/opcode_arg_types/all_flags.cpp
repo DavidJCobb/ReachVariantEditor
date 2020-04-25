@@ -115,6 +115,12 @@ namespace Megalo {
       //
       return arg_compile_result::success();
    }
+   void OpcodeArgValueFlagsSuperclass::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueFlagsSuperclass*>(other);
+      assert(cast);
+      assert(&cast->base == &this->base && "These two flags-masks are of different types.");
+      this->value = cast->value;
+   }
    #pragma endregion
 
    OpcodeArgValueCreateObjectFlags::OpcodeArgValueCreateObjectFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::create_object) {}

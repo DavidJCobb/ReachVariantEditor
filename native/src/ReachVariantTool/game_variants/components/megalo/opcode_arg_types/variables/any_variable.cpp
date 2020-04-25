@@ -13,6 +13,12 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueAnyVariable>
    );
    //
+   OpcodeArgValueAnyVariable::~OpcodeArgValueAnyVariable() {
+      if (this->variable) {
+         delete this->variable;
+         this->variable = nullptr;
+      }
+   }
    bool OpcodeArgValueAnyVariable::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       uint8_t type = stream.read_bits(3);
       switch ((variable_type)type) {
@@ -70,6 +76,16 @@ namespace Megalo {
          return arg_compile_result::failure("This argument is not a variable.");
       }
       return this->variable->compile(compiler, arg, part);
+   }
+   void OpcodeArgValueAnyVariable::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueAnyVariable*>(other);
+      assert(cast);
+      if (this->variable)
+         delete this->variable;
+      if (cast->variable)
+         this->variable = (Variable*)cast->variable->clone();
+      else
+         this->variable = nullptr;
    }
    //
    variable_type OpcodeArgValueAnyVariable::get_variable_type() const noexcept {

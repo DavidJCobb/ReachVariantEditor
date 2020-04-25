@@ -133,4 +133,9 @@ namespace Megalo {
       this->value = &list[index];
       return arg_compile_result::success();
    }
+   void OpcodeArgValueForgeLabel::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueForgeLabel*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

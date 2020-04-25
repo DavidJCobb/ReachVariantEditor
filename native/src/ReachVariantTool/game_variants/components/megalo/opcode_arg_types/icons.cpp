@@ -194,6 +194,13 @@ namespace Megalo {
          this->value = value;
          return arg_compile_result::success();
       }
+      void OpcodeArgValueIconBase::copy(const OpcodeArgValue* other) noexcept {
+         auto cast = dynamic_cast<const OpcodeArgValueIconBase*>(other);
+         assert(cast);
+         assert(&this->icons == &cast->icons && "These are different icon types.");
+         assert(this->bitcount == cast->bitcount && "These are different icon types.");
+         this->value = cast->value;
+      }
    #pragma endregion
    //
    OpcodeArgTypeinfo OpcodeArgValueEngineIcon::typeinfo = OpcodeArgTypeinfo(

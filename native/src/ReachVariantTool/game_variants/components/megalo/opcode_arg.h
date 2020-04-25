@@ -244,6 +244,7 @@ namespace Megalo {
    
    class OpcodeArgValue {
       public:
+         virtual ~OpcodeArgValue() {}
          virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer& mp) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
@@ -251,11 +252,15 @@ namespace Megalo {
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as a script argument
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
+         virtual OpcodeArgValue* create_of_this_type() const noexcept = 0;
+         virtual void copy(const OpcodeArgValue*) noexcept = 0;
+         virtual OpcodeArgValue* clone() const noexcept;
          //
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
          }
    };
+   #define megalo_opcode_arg_value_make_create_override virtual OpcodeArgValue* create_of_this_type() const noexcept override { return (typeinfo.factory)(); }
    //
    class OpcodeArgBase {
       public:
@@ -270,67 +275,4 @@ namespace Megalo {
          OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, bool io = false) : name(n), typeinfo(f), is_out_variable(io) {};
    };
 
-   enum class index_quirk {
-      none,
-      presence, // index value is preceded by an "is none" bit
-      reference,
-      offset,
-      word,
-   };
-   class OpcodeArgValueBaseIndex : public OpcodeArgValue {
-      public:
-         static constexpr int32_t none = -1;
-      public:
-         OpcodeArgValueBaseIndex(const char* name, uint32_t max, index_quirk quirk = index_quirk::none) : 
-            name(name), max(max), quirk(quirk)
-         {};
-
-         const char* name;
-         uint32_t    max;
-         index_quirk quirk;
-         int32_t     value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override {
-            if (this->quirk == index_quirk::presence) {
-               bool absence = stream.read_bits(1) != 0;
-               if (absence) {
-                  this->value = OpcodeArgValueBaseIndex::none;
-                  return true;
-               }
-            }
-            this->value = stream.read_bits(cobb::bitcount(this->max - 1));
-            if (this->quirk == index_quirk::offset)
-               --this->value;
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            if (this->quirk == index_quirk::presence) {
-               if (this->value == OpcodeArgValueBaseIndex::none) {
-                  stream.write(1, 1);
-                  return;
-               }
-               stream.write(0, 1);
-            }
-            auto value = this->value;
-            if (this->quirk == index_quirk::offset)
-               ++value;
-            stream.write(value, cobb::bitcount(this->max - 1));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            cobb::sprintf(out, "%s #%d", this->name, this->value);
-         }
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none || this->value < 0) {
-               out.write(u8"none");
-               return;
-            }
-            std::string temp;
-            cobb::sprintf(temp, "%u", this->value);
-            out.write(temp);
-         }
-   };
 };

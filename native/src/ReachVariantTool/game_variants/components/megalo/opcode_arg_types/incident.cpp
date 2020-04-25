@@ -1081,4 +1081,9 @@ namespace Megalo {
       this->value = value;
       return arg_compile_result::success();
    }
+   void OpcodeArgValueIncident::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueIncident*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

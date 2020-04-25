@@ -95,6 +95,11 @@ namespace Megalo {
          this->value = &list[index];
          return arg_compile_result::success();
       }
+      void OpcodeArgValueWidget::copy(const OpcodeArgValue* other) noexcept {
+         auto cast = dynamic_cast<const OpcodeArgValueWidget*>(other);
+         assert(cast);
+         this->value = cast->value;
+      }
    #pragma endregion
    //
    #pragma region OpcodeArgValueMeterParameters
@@ -227,6 +232,14 @@ namespace Megalo {
          auto result = this->sub_variable(part).compile(compiler, arg, 0);
          result.set_needs_more(part < count);
          return result;
+      }
+      void OpcodeArgValueMeterParameters::copy(const OpcodeArgValue* other) noexcept {
+         auto cast = dynamic_cast<const OpcodeArgValueMeterParameters*>(other);
+         assert(cast);
+         this->type = cast->type;
+         this->timer.copy(&cast->timer);
+         this->numerator.copy(&cast->numerator);
+         this->denominator.copy(&cast->denominator);
       }
 
       Variable& OpcodeArgValueMeterParameters::sub_variable(uint8_t i) noexcept {

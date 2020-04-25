@@ -94,6 +94,16 @@ namespace Megalo {
       }
       return this->variable->compile(compiler, arg, part);
    }
+   void OpcodeArgValuePlayerOrGroup::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValuePlayerOrGroup*>(other);
+      assert(cast);
+      if (this->variable)
+         delete this->variable;
+      if (cast->variable)
+         this->variable = (Variable*)cast->variable->clone();
+      else
+         this->variable = nullptr;
+   }
    //
    variable_type OpcodeArgValuePlayerOrGroup::get_variable_type() const noexcept {
       if (!this->variable)

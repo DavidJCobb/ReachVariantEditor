@@ -130,4 +130,10 @@ namespace Megalo {
       //
       return arg_compile_result::success().set_needs_more(this->icon == enums::waypoint_icon.lookup("territory_a"));
    }
+   void OpcodeArgValueWaypointIcon::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueWaypointIcon*>(other);
+      assert(cast);
+      this->icon = cast->icon;
+      this->number.copy(&cast->number);
+   }
 }

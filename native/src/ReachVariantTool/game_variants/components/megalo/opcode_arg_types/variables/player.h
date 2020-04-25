@@ -3,6 +3,7 @@
 
 namespace Megalo {
    class OpcodeArgValuePlayer : public Variable {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
          //

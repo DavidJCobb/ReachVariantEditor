@@ -57,4 +57,10 @@ namespace Megalo {
       result.error = content;
       return result;
    }
+
+   OpcodeArgValue* OpcodeArgValue::clone() const noexcept {
+      auto arg = this->create_of_this_type();
+      arg->copy(this);
+      return arg;
+   }
 }

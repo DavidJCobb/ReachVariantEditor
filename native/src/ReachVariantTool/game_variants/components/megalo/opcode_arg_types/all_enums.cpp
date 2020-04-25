@@ -130,6 +130,12 @@ namespace Megalo {
       this->value = index;
       return arg_compile_result::success();
    }
+   void OpcodeArgValueEnumSuperclass::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueEnumSuperclass*>(other);
+      assert(cast);
+      assert(&cast->base == &this->base && "These two enums are of different types.");
+      this->value = cast->value;
+   }
    #pragma endregion
 
    OpcodeArgValueAddWeaponEnum::OpcodeArgValueAddWeaponEnum() : OpcodeArgValueEnumSuperclass(enums::add_weapon_type) {}

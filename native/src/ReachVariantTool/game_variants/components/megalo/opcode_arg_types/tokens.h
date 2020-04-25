@@ -33,9 +33,12 @@ namespace Megalo {
          void to_string(std::string& out) const noexcept;
          void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept;
          arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept;
+         void copy(const OpcodeStringToken&) noexcept;
+         void clear();
    };
 
    class OpcodeArgValueStringTokens2 : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       //
       // An opcode argument which consists of a format string and zero or more tokens to 
       // insert into it. The format string is specified as an index into the string 
@@ -65,5 +68,6 @@ namespace Megalo {
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 }

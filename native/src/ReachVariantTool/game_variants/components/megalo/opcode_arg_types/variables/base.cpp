@@ -355,4 +355,13 @@ namespace Megalo {
       }
       return arg_compile_result::failure("Unable to recognize the variable.");
    }
+   void Variable::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const Variable*>(other);
+      assert(cast);
+      assert(&this->type == &cast->type && "A variable cannot copy the contents of a variable of a different type.");
+      this->scope  = cast->scope;
+      this->which  = cast->which;
+      this->index  = cast->index;
+      this->object = cast->object;
+   }
 }

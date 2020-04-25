@@ -9,6 +9,7 @@
 
 namespace Megalo {
    class OpcodeArgValueObjectTimerVariable : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       //
       // The index of a timer variable scoped to any object. Typically, the object in question is 
       // determined contextually, such as by another argument to the opcode containing this argument.
@@ -27,9 +28,11 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 
    class OpcodeArgValueObjectPlayerVariable : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       //
       // An object variable and the index of a player variable scoped to that object.
       //
@@ -44,7 +47,6 @@ namespace Megalo {
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
-
          //
          // This argument is used in only one place: the opcode to set an object's shape color to match the 
          // armor color of the player referred to by one of the object's nested player variables. That opcode 
@@ -59,5 +61,7 @@ namespace Megalo {
          //
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         //
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 }

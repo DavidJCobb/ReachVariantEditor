@@ -95,4 +95,9 @@ namespace Megalo {
       }
       return arg_compile_result::failure(QString("Percentage %1 is not one of the supported timer rates.").arg(value));
    }
+   void OpcodeArgValueTimerRate::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueTimerRate*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

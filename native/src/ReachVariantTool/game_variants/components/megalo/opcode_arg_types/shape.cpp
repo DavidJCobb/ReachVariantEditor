@@ -169,6 +169,15 @@ namespace Megalo {
       result.set_needs_more(part < count - 1);
       return result;
    }
+   void OpcodeArgValueShape::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueShape*>(other);
+      assert(cast);
+      this->shapeType = cast->shapeType;
+      this->radius.copy(&cast->radius);
+      this->length.copy(&cast->length);
+      this->top.copy(&cast->top);
+      this->bottom.copy(&cast->bottom);
+   }
 
    OpcodeArgValueScalar& OpcodeArgValueShape::axis(uint8_t i) noexcept {
       switch (this->shapeType) {

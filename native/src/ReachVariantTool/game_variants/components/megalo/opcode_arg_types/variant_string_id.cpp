@@ -141,4 +141,9 @@ namespace Megalo {
       this->value = value;
       return arg_compile_result::success();
    }
+   void OpcodeArgValueVariantStringID::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueVariantStringID*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

@@ -533,4 +533,9 @@ namespace Megalo {
       this->value = value;
       return arg_compile_result::success();
    }
+   void OpcodeArgValueSound::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueSound*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

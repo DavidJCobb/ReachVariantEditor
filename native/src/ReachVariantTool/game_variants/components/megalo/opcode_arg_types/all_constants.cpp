@@ -77,6 +77,11 @@ namespace Megalo {
       }
       return arg_compile_result::failure();
    }
+   void OpcodeArgValueConstBool::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueConstBool*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
    #pragma endregion
    //
    #pragma region int8
@@ -135,6 +140,11 @@ namespace Megalo {
          return arg_compile_result::success();
       }
       return arg_compile_result::failure();
+   }
+   void OpcodeArgValueConstSInt8::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueConstSInt8*>(other);
+      assert(cast);
+      this->value = cast->value;
    }
    #pragma endregion
 }

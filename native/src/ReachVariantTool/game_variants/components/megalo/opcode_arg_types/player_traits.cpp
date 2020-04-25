@@ -96,4 +96,9 @@ namespace Megalo {
       this->value = &list[index];
       return arg_compile_result::success();
    }
+   void OpcodeArgValuePlayerTraits::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValuePlayerTraits*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

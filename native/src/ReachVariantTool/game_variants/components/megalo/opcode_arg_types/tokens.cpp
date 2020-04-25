@@ -67,6 +67,20 @@ namespace Megalo {
          return arg_compile_result::failure();
       return this->value->compile(compiler, arg, 0);
    }
+   void OpcodeStringToken::copy(const OpcodeStringToken& other) noexcept {
+      this->type = other.type;
+      if (this->value)
+         delete this->value;
+      if (other.value)
+         this->value = other.value->clone();
+      else
+         this->value = nullptr;
+   }
+   void OpcodeStringToken::clear() {
+      delete this->value;
+      this->value = nullptr;
+      this->type = OpcodeStringTokenType::none;
+   }
    //
    //
    //
@@ -214,5 +228,17 @@ namespace Megalo {
       auto& token = this->tokens[part - 1];
       this->tokenCount = part;
       return token.compile(compiler, arg, part).set_more(part < max_token_count ? arg_compile_result::more_t::optional : arg_compile_result::more_t::no);
+   }
+   void OpcodeArgValueStringTokens2::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueStringTokens2*>(other);
+      assert(cast);
+      this->string = cast->string;
+      this->tokenCount = cast->tokenCount;
+      //
+      size_t i = 0;
+      for (; i < this->tokenCount; i++)
+         this->tokens[i].copy(cast->tokens[i]);
+      for (; i < max_token_count; i++)
+         this->tokens[i].clear();
    }
 }

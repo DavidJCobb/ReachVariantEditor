@@ -15,19 +15,23 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 
    class OpcodeArgValueCreateObjectFlags : public OpcodeArgValueFlagsSuperclass {
+      megalo_opcode_arg_value_make_create_override;
       public:
          OpcodeArgValueCreateObjectFlags();
          static OpcodeArgTypeinfo typeinfo;
    };
    class OpcodeArgValueKillerTypeFlags : public OpcodeArgValueFlagsSuperclass {
+      megalo_opcode_arg_value_make_create_override;
       public:
          OpcodeArgValueKillerTypeFlags();
          static OpcodeArgTypeinfo typeinfo;
    };
    class OpcodeArgValuePlayerReqPurchaseModes : public OpcodeArgValueFlagsSuperclass {
+      megalo_opcode_arg_value_make_create_override;
       public:
          OpcodeArgValuePlayerReqPurchaseModes();
          static OpcodeArgTypeinfo typeinfo;

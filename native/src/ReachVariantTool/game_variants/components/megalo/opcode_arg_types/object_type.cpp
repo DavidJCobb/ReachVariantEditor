@@ -105,4 +105,9 @@ namespace Megalo {
       this->value = value;
       return arg_compile_result::success();
    }
+   void OpcodeArgValueObjectType::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueObjectType*>(other);
+      assert(cast);
+      this->value = cast->value;
+   }
 }

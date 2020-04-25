@@ -241,9 +241,34 @@ int main(int argc, char *argv[]) {
 //        - THE SPECIFIC PLANS WE HAVE (JUST BELOW) WON'T BE POSSIBLE UNTIL WE IMPLEMENT THE 
 //          FOLLOWING FUNCTIONS:
 //
-//             virtual OpcodeArgValue* OpcodeArgValue::copy() const noexcept = 0;
+//             virtual OpcodeArgValue* OpcodeArgValue::create_of_this_type() const noexcept = 0;
+//             virtual OpcodeArgValue* OpcodeArgValue::copy() const noexcept;
+//             virtual void OpcodeArgValue::copy(const OpcodeArgValue*) const noexcept = 0;
 //             virtual Opcode* Opcode::copy() const noexcept;
 //             protected virtual Opcode* Opcode::create_of_same_type() const noexcept = 0;
+//
+//          We need two OpcodeArgValue::copy methods because some argument types include variables 
+//          as members -- not, like, pointers to variables, but variables as actual members. One 
+//          of the "copy" methods creates and returns a new value; the other simply modifies the 
+//          current value to match the target; the former should be implemented in terms of the 
+//          latter and the latter should assert if the value is being told to copy something of 
+//          the wrong type.
+//
+//          We can simplify things a bit if we do this:
+//
+//             #define megalo_opcode_arg_value_make_create_override public virtual OpcodeArgValue* create_of_this_type() const noexcept override { return (typeinfo.factory)(); }
+//
+//             class OpcodeArgValueWhatever : public OpcodeArgValue {
+//                megalo_opcode_arg_value_make_create_override;
+//                ...
+//
+//          And then:
+//
+//             virtual OpcodeArgValue* OpcodeArgValue::copy() const noexcept { // on base class
+//                auto val = this->create_of_this_type();
+//                val->copy(this);
+//                return val;
+//             }
 //
 //          Opcode::copy should call this->create_of_same_type() to create a new Opcode of the 
 //          appropriate type (Action or Condition); it should then set the new opcode's function 
