@@ -161,6 +161,32 @@ namespace Megalo {
    );
 
    OpcodeArgValueCompareOperatorEnum::OpcodeArgValueCompareOperatorEnum() : OpcodeArgValueEnumSuperclass(enums::compare_operator) {}
+   void OpcodeArgValueCompareOperatorEnum::invert() {
+      if (this->value == this->base.lookup(">")) {
+         this->value = this->base.lookup("<=");
+         return;
+      }
+      if (this->value == this->base.lookup("<")) {
+         this->value = this->base.lookup(">=");
+         return;
+      }
+      if (this->value == this->base.lookup(">=")) {
+         this->value = this->base.lookup("<");
+         return;
+      }
+      if (this->value == this->base.lookup("<=")) {
+         this->value = this->base.lookup(">");
+         return;
+      }
+      if (this->value == this->base.lookup("==")) {
+         this->value = this->base.lookup("!=");
+         return;
+      }
+      if (this->value == this->base.lookup("!=")) {
+         this->value = this->base.lookup("==");
+         return;
+      }
+   }
    OpcodeArgTypeinfo OpcodeArgValueCompareOperatorEnum::typeinfo = OpcodeArgTypeinfo(
       "_compare_operator",
       "Comparison Operator",

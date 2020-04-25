@@ -73,5 +73,7 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void decompile(Decompiler& out) noexcept override;
          virtual void reset() noexcept override;
+         virtual Opcode* create_of_this_type() const noexcept override { return new Condition; }
+         virtual Opcode* clone() const noexcept override;
    };
 }

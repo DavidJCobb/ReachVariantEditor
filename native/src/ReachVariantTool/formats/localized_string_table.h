@@ -72,6 +72,9 @@ class ReachString : public indexed_list_item {
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) noexcept;
       //
+      std::string& english() noexcept {
+         return this->strings[(int)reach::language::english];
+      }
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
       }

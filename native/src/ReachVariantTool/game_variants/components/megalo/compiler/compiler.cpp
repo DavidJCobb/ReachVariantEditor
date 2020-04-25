@@ -6,6 +6,18 @@
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
 
+//
+// Attempt to emulate quirks in Bungie's compiler:
+//
+//  - Else(if) blocks don't merge into the parent trigger even if they are the last 
+//    block in their containing block, even though they can, and even though if-blocks 
+//    do (confirmed)
+//
+//  - Comparisons that are reproduced and negated in else(if) blocks are negated by 
+//    changing the operator rather than using the "negated" flag (speculated)
+//
+#define MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS 1
+
 namespace {
    constexpr char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
@@ -127,9 +139,9 @@ namespace {
 namespace Megalo {
    namespace Script {
       Block::~Block() {
-         this->clear();
+         this->clear(true);
       }
-      void Block::insert_condition(ParsedItem* item) {
+      void Block::insert_condition(Comparison* item) {
          this->conditions.push_back(item);
          item->owner = this;
       }
@@ -157,11 +169,85 @@ namespace Megalo {
             }
          }
       }
+      int32_t Block::index_of_item(const ParsedItem* target) const noexcept {
+         auto size = this->items.size();
+         for (size_t i = 0; i < size; ++i)
+            if (this->items[i] == target)
+               return i;
+         return -1;
+      }
+      void Block::get_ifs_for_else(std::vector<Block*>& out) {
+         out.clear();
+         auto parent = dynamic_cast<Block*>(this->parent);
+         if (!parent)
+            return;
+         auto i = parent->index_of_item(this);
+         if (--i < 0)
+            return;
+         std::vector<Block*> temp;
+         for (; i >= 0; i--) {
+            auto sibling = parent->items[i];
+            auto block   = dynamic_cast<Block*>(sibling);
+            if (!block)
+               break;
+            switch (block->type) {
+               case Type::if_block:
+               case Type::elseif_block:
+               case Type::else_block:
+                  temp.push_back(block);
+            }
+            if (block->type != Type::elseif_block)
+               break;
+         }
+         out.reserve(temp.size());
+         for (auto it = temp.rbegin(); it != temp.rend(); ++it)
+            out.push_back(*it);
+      }
+      void Block::make_else_of(const Block& other) {
+         size_t size_e = other.conditions_else.size();
+         size_t size_c = other.conditions.size();
+         this->conditions_else.reserve(this->conditions_else.size() + size_e + size_c);
+         for (size_t i = 0; i < size_e; ++i) {
+            auto cnd   = other.conditions_else[i];
+            auto clone = cnd->clone();
+            this->conditions_else.push_back(clone);
+            if (i == size_e - 1)
+               clone->next_is_or = false;
+         }
+         for (size_t i = 0; i < size_c; ++i) {
+            auto cnd   = other.conditions[i];
+            auto clone = cnd->clone();
+            clone->negate();
+            this->conditions_else.push_back(clone);
+         }
+      }
       //
-      void Block::clear() {
-         for (auto item : this->items)
-            delete item;
-         this->items.clear();
+      void Block::clear(bool deleting) {
+         //
+         // We don't want to delete aliases unless we're deleting the entire Block, or we'll get 
+         // memory access errors.
+         //
+         if (deleting) {
+            for (auto item : this->items)
+               delete item;
+            this->items.clear();
+         } else {
+            std::vector<ParsedItem*> keep;
+            //
+            for (auto item : this->items) {
+               if (auto alias = dynamic_cast<Alias*>(item)) {
+                  keep.push_back(alias);
+                  continue;
+               }
+               delete item;
+            }
+            this->items.clear();
+            std::swap(this->items, keep);
+         }
+         //
+         for (auto condition : this->conditions_else)
+            delete condition;
+         this->conditions_else.clear();
          for (auto condition : this->conditions)
             delete condition;
          this->conditions.clear();
@@ -187,8 +273,10 @@ namespace Megalo {
       bool Block::_is_if_block() const noexcept {
          switch (this->type) {
             case Type::if_block:
-            case Type::elseif_block:
+            #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS != 1
+            case Type::elseif_block: // Bungie/343i don't collapse terminating else(if) blocks into their parent trigger
             case Type::else_block:
+            #endif
                return true;
          }
          return false;
@@ -307,24 +395,24 @@ namespace Megalo {
          this->_make_trigger(compiler);
          {
             auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
-            //
-            // TODO: If the current block is an else or elseif block, then we need to copy and negate the 
-            // conditions of the previous-sibling if or elseif block.
-            //
-            for (auto item : this->conditions) {
-               #if _DEBUG
-               assert(this->type != Type::root && "The root block shouldn't contain any conditions!");
-               #endif
-               auto cmp = dynamic_cast<Comparison*>(item);
-               assert(cmp);
-               auto cnd = dynamic_cast<Condition*>(cmp->opcode);
+            for (auto item : this->conditions_else) {
+               auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
                   this->trigger->opcodes.push_back(cnd);
                   cnd->or_group = count;
-                  cmp->opcode = nullptr;
+                  item->opcode = nullptr;
                }
-               //
-               if (!cmp->next_is_or)
+               if (!item->next_is_or)
+                  count += 1;
+            }
+            for (auto item : this->conditions) {
+               auto cnd = dynamic_cast<Condition*>(item->opcode);
+               if (cnd) {
+                  this->trigger->opcodes.push_back(cnd);
+                  cnd->or_group = count;
+                  item->opcode = nullptr;
+               }
+               if (!item->next_is_or)
                   count += 1;
             }
          }
@@ -377,6 +465,35 @@ namespace Megalo {
          if (this->opcode) {
             delete this->opcode;
             this->opcode = nullptr;
+         }
+      }
+      //
+      Comparison* Comparison::clone() const noexcept {
+         auto out = new Comparison;
+         out->next_is_or = this->next_is_or;
+         if (this->opcode)
+            out->opcode = this->opcode->clone();
+         return out;
+      }
+      void Comparison::negate() noexcept {
+         this->next_is_or = !this->next_is_or;
+         if (auto opcode = this->opcode) {
+            auto cnd = dynamic_cast<Condition*>(opcode);
+            if (cnd) {
+               #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS
+               if (cnd->function == &_get_comparison_opcode()) {
+                  //
+                  // TODO: I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
+                  //
+                  auto arg = dynamic_cast<OpcodeArgValueCompareOperatorEnum*>(cnd->arguments[2]);
+                  if (arg) {
+                     arg->invert();
+                     return;
+                  }
+               }
+               #endif
+               cnd->inverted = !cnd->inverted;
+            }
          }
       }
    }
@@ -1781,8 +1898,9 @@ namespace Megalo {
       statement->opcode = opcode.release();
       statement->set_end(this->state);
       if (is_condition) {
-         this->_applyConditionModifiers(dynamic_cast<Script::Comparison*>(statement));
-         this->block->insert_condition(statement);
+         auto cnd = dynamic_cast<Script::Comparison*>(statement);
+         this->_applyConditionModifiers(cnd);
+         this->block->insert_condition(cnd);
       } else {
          this->block->insert_item(statement);
       }
@@ -2208,9 +2326,12 @@ namespace Megalo {
       item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
-      #if !_DEBUG
-         static_assert(false, "COBB, YOU NEED TO HANDLE COPYING AND NEGATING THE PREVIOUS BLOCK'S CONDITIONS!");
-      #endif
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_else(blocks);
+         for (auto block : blocks)
+            item->make_else_of(*block);
+      }
    }
    void Compiler::_handleKeyword_ElseIf() {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
@@ -2232,9 +2353,12 @@ namespace Megalo {
       item->set_start(this->state);
       this->block->insert_item(item);
       this->_openBlock(item);
-      #if !_DEBUG
-         static_assert(false, "COBB, YOU NEED TO HANDLE COPYING AND NEGATING THE PREVIOUS BLOCK'S CONDITIONS!");
-      #endif
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_else(blocks);
+         for (auto block : blocks)
+            item->make_else_of(*block);
+      }
       this->_parseBlockConditions();
    }
    void Compiler::_handleKeyword_End() {

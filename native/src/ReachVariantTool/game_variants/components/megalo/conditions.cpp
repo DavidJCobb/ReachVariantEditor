@@ -326,4 +326,11 @@ namespace Megalo {
          this->debug_str.clear();
       #endif
    }
+   Opcode* Condition::clone() const noexcept {
+      auto cnd = (Condition*)Opcode::clone(); // call super
+      cnd->inverted = this->inverted;
+      cnd->action   = this->action;
+      cnd->or_group = this->or_group;
+      return cnd;
+   }
 }

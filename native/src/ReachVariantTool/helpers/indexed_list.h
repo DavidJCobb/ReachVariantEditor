@@ -172,8 +172,11 @@ namespace cobb {
             if (size) {
                memcpy(this->_list + i, this->_list + i + 1, size);
                this->data()[this->_size - 1] = nullptr;
+               //
             }
             --this->_size;
+            for (size_t i = 0; i < this->_size; ++i)
+               _set_element_index(*this->data()[i], i);
             return item;
          }
          //

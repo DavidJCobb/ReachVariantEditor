@@ -429,8 +429,17 @@ namespace Megalo::Script {
          bool    has_index = false;
          //
          if (auto scope = top_level.scope) {
-            name = scope->format;
+            name      = scope->format;
             has_index = scope->has_index();
+            if (has_index) {
+               //
+               // The scope format may be something like "script_option[%i]" so we gotta shear that spot for 
+               // the index off.
+               //
+               auto i = name.lastIndexOf('[');
+               if (i >= 0)
+                  name = name.left(i);
+            }
          } else if (auto which = top_level.which) {
             name = top_level.which->name.c_str();
          } else {

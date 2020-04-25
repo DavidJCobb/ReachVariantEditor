@@ -52,6 +52,8 @@ namespace cobb {
          static constexpr bool is_integer_type = std::is_same_v<underlying_type, underlying_int>;
          static constexpr int  bitcount        = bitcount;
          static constexpr bool uses_offset     = offset;
+         static constexpr bool has_presence    = !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
+         static constexpr int  max_bitcount    = bitcount + (has_presence) ? 1 : 0;
          //
          underlying_type value = underlying_type();
          //
@@ -171,8 +173,9 @@ namespace cobb {
    class bitbool {
       public:
          using underlying_type = bool;
-         static constexpr int  bitcount    = 1;
-         static constexpr bool uses_offset = false;
+         static constexpr int  bitcount     = 1;
+         static constexpr int  max_bitcount = bitcount;
+         static constexpr bool uses_offset  = false;
          //
          using presence_bit = bitnumber_no_presence_bit;
          static constexpr underlying_type if_absent = false;

@@ -26,9 +26,17 @@ namespace Megalo {
             megalo_opcode_arg_value_make_create_override; \
       };
 
+   class OpcodeArgValueCompareOperatorEnum : public OpcodeArgValueEnumSuperclass {
+      public:
+         OpcodeArgValueCompareOperatorEnum();
+         static OpcodeArgTypeinfo typeinfo;
+         megalo_opcode_arg_value_make_create_override; 
+         //
+         void invert();
+   };
    megalo_opcode_arg_value_enum(OpcodeArgValueAddWeaponEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueCHUDDestinationEnum);
-   megalo_opcode_arg_value_enum(OpcodeArgValueCompareOperatorEnum);
+   //megalo_opcode_arg_value_enum(OpcodeArgValueCompareOperatorEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueDropWeaponEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueGrenadeTypeEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueMathOperatorEnum);

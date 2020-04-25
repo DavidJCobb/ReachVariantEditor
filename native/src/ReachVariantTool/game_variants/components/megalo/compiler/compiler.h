@@ -15,6 +15,7 @@ namespace Megalo {
    class Compiler;
    //
    namespace Script {
+      class Comparison;
       class Block : public ParsedItem {
          public:
             enum class Type : uint8_t {
@@ -28,7 +29,7 @@ namespace Megalo {
                for_each_player,
                for_each_player_randomly,
                for_each_team,
-               function,
+               function
             };
             enum class Event : uint8_t {
                none,
@@ -50,15 +51,20 @@ namespace Megalo {
             Type     type  = Type::basic;
             Event    event = Event::none;
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
-            std::vector<ParsedItem*> conditions; // only for if/elseif blocks // contents are owned by this Block and deleted in the destructor
+            std::vector<Comparison*> conditions_else; // only for else(if) blocks // contents are owned by this Block and deleted in the destructor
+            std::vector<Comparison*> conditions; // only for if blocks // contents are owned by this Block and deleted in the destructor
             //
             ~Block();
-            void insert_condition(ParsedItem*);
+            void insert_condition(Comparison*);
             void insert_item(ParsedItem*);
             ParsedItem* item(int32_t); // negative indices wrap around, i.e. -1 is the last element
             void remove_item(ParsedItem*);
+            int32_t index_of_item(const ParsedItem*) const noexcept;
             //
-            void clear();
+            void get_ifs_for_else(std::vector<Block*>& out);
+            void make_else_of(const Block& other);
+            //
+            void clear(bool deleting = false);
             void compile(Compiler&);
             //
             inline bool is_event_trigger() const noexcept { return this->event != Event::none; }
@@ -79,6 +85,9 @@ namespace Megalo {
       class Comparison : public Statement {
          public:
             bool next_is_or = false;
+            //
+            Comparison* clone() const noexcept; // doesn't clone (lhs) or (rhs)
+            void negate() noexcept;
       };
       class UserDefinedFunction {
          //

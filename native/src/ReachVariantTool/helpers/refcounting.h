@@ -45,6 +45,9 @@ namespace cobb {
             this->_inc();
             return *this;
          }
+         refcount_ptr& operator=(const T* v) noexcept {
+            return this->operator=(const_cast<T*>(v));
+         }
          refcount_ptr& operator=(const refcount_ptr& other) noexcept {
             this->_dec();
             this->target = other.target;
@@ -61,7 +64,7 @@ namespace cobb {
    class refcountable {
       template<typename T> friend class refcount_ptr;
       protected:
-         uint32_t refcount = 0;
+         mutable uint32_t refcount = 0;
          //
       public:
          inline uint32_t get_refcount() const noexcept { return this->refcount; }

@@ -149,6 +149,8 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void decompile(Decompiler& out) noexcept = 0;
          virtual void reset() noexcept;
+         virtual Opcode* create_of_this_type() const noexcept = 0;
+         virtual Opcode* clone() const noexcept;
          //
          std::vector<OpcodeArgValue*> arguments;
          const OpcodeBase* function = nullptr;

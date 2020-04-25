@@ -11,7 +11,7 @@ namespace {
    template<typename T, int I> const OpcodeFuncToScriptMapping* _check_rel_alias_name_against_opcodes(const std::array<T, I>& list, const QString& name, const OpcodeArgTypeinfo* type) {
       for (auto& function : list) {
          auto& mapping = function.mapping;
-         if (mapping.arg_context == OpcodeFuncToScriptMapping::no_context)
+         if (mapping.arg_context < 0) // game namespace or no context
             continue;
          auto& base = function.arguments[mapping.arg_context];
          if (&base.typeinfo == type) {

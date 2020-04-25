@@ -161,9 +161,9 @@ namespace cobb {
             public:
                ptr_ref_const_iterator() {}
                ptr_ref_const_iterator(std::nullptr_t) : item(nullptr) {}
-               ptr_ref_const_iterator(value_type*& v) : item(&v) {}
-               ptr_ref_const_iterator(value_type** v) : item(v) {}
-               ptr_ref_const_iterator(void* v) : item((value_type*)v) {}
+               ptr_ref_const_iterator(const value_type*& v) : item(&v) {}
+               ptr_ref_const_iterator(const value_type** v) : item(v) {}
+               ptr_ref_const_iterator(const void* v) : item((const value_type**)v) {}
                const value_type* operator->() const noexcept { return *item; }
                reference operator*() const noexcept { return **item; }
                reference operator[](size_t i) const noexcept { return **(item + i); }

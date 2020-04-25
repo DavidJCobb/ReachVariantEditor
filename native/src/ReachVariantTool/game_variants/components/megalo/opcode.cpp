@@ -178,6 +178,15 @@ namespace Megalo {
       this->arguments.clear();
       this->function = nullptr;
    }
+   Opcode* Opcode::clone() const noexcept {
+      auto op = this->create_of_this_type();
+      op->function = this->function;
+      auto size = this->arguments.size();
+      op->arguments.resize(size);
+      for (size_t i = 0; i < size; ++i)
+         op->arguments[i] = this->arguments[i]->clone();
+      return op;
+   }
 
    const OpcodeBase* AccessorRegistry::Definition::get_opcode_base() const noexcept {
       if (this->getter)
