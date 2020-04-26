@@ -127,10 +127,12 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       table.remove(index);
       --count;
       ReachEditorState::get().stringTableModified();
-      if (index >= count)
-         list->setCurrentRow(count - 1);
-      else if (count)
-         list->setCurrentRow(index);
+      if (count) {
+         if (index >= count)
+            list->setCurrentRow(count - 1);
+         else
+            list->setCurrentRow(index);
+      }
    });
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageStringTable::updateFromVariant);
    this->updateFromVariant(nullptr);

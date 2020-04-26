@@ -24,6 +24,7 @@ struct DetailedEnumValueInfo {
          none = 0,
          is_unused  = 0x00000001,
          is_unknown = 0x00000002,
+         is_thorage = 0x00000004,
       };
    };
    //
@@ -53,6 +54,9 @@ struct DetailedEnumValueInfo {
       return DetailedEnumValueInfo(info_type::signature, v);
    }
    //
+   static DetailedEnumValueInfo make_flags(uint32_t f) {
+      return DetailedEnumValueInfo(info_type::sentinel_flags, f);
+   }
    static DetailedEnumValueInfo make_unused_sentinel() {
       return DetailedEnumValueInfo(info_type::sentinel_flags, flags::is_unused);
    }

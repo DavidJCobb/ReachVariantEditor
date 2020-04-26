@@ -112,10 +112,13 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
             return;
          list.erase(index);
          size_t size = list.size();
-         if (index >= size)
-            this->target = &list[size - 1];
-         else
-            this->target = size ? &list[index] : nullptr;
+         if (size) {
+            if (index >= size)
+               this->target = &list[size - 1];
+            else
+               this->target = &list[index];
+         } else
+            this->target = nullptr;
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();
       });

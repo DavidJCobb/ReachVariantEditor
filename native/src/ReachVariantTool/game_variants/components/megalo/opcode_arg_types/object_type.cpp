@@ -100,8 +100,12 @@ namespace Megalo {
          return arg_compile_result::success();
       }
       value = enums::object_type.lookup(word);
-      if (value < 0)
+      if (value < 0) {
+         //
+         // Using an object type that the game doesn't recognize will result in a crash.
+         //
          return arg_compile_result::failure(QString("Value \"%1\" is not a recognized object type.").arg(word));
+      }
       this->value = value;
       return arg_compile_result::success();
    }

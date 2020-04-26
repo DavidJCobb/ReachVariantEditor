@@ -442,7 +442,7 @@ namespace Megalo {
       ),
       ActionFunction( // 42
          "Set Player Biped", // Used for Halo Chess's bump-possession?
-         "Forces a player to use a specific object as their biped, leaving their original biped behind. This action does nothing if the chosen object is not a valid biped (i.e. the BIPD tag).",
+         "Forces a player to use a specific object as their biped, leaving their original biped behind. This action does nothing if the chosen object is not a valid biped (i.e. the BIPD tag). Once a Megalo-spawned Spartan biped is assigned to a player, it will have a feminine voice regardless of body type.",
          "Set %1's biped to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),

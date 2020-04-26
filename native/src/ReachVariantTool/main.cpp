@@ -123,6 +123,18 @@ int main(int argc, char *argv[]) {
 //     - ADD A STATIC METHOD TO string_scanner TO ADD SUPPORTED ESCAPE CODES TO A STRING WHERE 
 //       APPROPRIATE. HAVE ALL DECOMPILE CODE USE THIS FOR ALL STRING LITERALS.
 //
+//     - Audit the "format string" argument type. I think we're saving it incorrectly: my MOTL 
+//       brute-force gametype displays constant integers (consistent, but consistently wrong) 
+//       in places where it should show the value of a variable despite my using the same token 
+//       (%n) as Bungie.
+//
+//        - Decompile and recompile Race, and test it in-game. If the non-timer readouts are 
+//          busted, then we are indeed mishandling this type (yet somehow without changing its 
+//          bitcount and corrupting the file outright).
+//
+//     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
+//       MCC's menus don't enforce this. Investigate.
+//
 //     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
 //       a dropdown). The arrow should allow you to select what to copy: the full English 
 //       content of the string; the English content as a string literal, with delimiters and 
@@ -219,24 +231,6 @@ int main(int argc, char *argv[]) {
 //        - Exception safety for anything that gets heap-allocated.
 //
 //        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
-//
-//        - Ensure that the error handling for comparing string literals to variables 
-//          (or to each other) works properly.
-//
-//             Wondering whether using Compiler::skip_to in that situation will cause 
-//             us to move one char too far, since we're using it from inside of a scan 
-//             functor. Also wondering whether it'll just see the opening quotation mark 
-//             for the string literal again, i.e. whether we need to advance by a single 
-//             character before calling it.
-//
-//        - Ensure that the error handling for assigning a string literal to a variable 
-//          works properly.
-//
-//             Wondering whether using Compiler::skip_to in that situation will cause 
-//             us to move one char too far, since we're using it from inside of a scan 
-//             functor. Also wondering whether it'll just see the opening quotation mark 
-//             for the string literal again, i.e. whether we need to advance by a single 
-//             character before calling it.
 //
 //        - More generally, test every non-fatal error and every fatal error. Once the 
 //          compiler's fully written, write a single test script containing every possible 

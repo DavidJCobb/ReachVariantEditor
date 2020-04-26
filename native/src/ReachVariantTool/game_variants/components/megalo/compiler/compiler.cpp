@@ -2464,8 +2464,13 @@ namespace Megalo {
             }
             if (!this->extract_string_literal(label)) {
                if (!this->extract_integer_literal(label_index)) {
-                  this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
-                  return;
+                  auto word  = this->extract_word();
+                  auto alias = this->lookup_absolute_alias(word);
+                  if (!alias || !alias->is_integer_constant()) {
+                     this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                     return;
+                  }
+                  label_index = alias->get_integer_constant();
                }
                label_is_index = true;
             }
