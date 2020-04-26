@@ -1,0 +1,77 @@
+
+-- REQUIRES:
+-- Script widget #0 (set to lower-left in my gametype)
+-- Script option #0: Kill Points
+-- Script option #1: Death Points
+-- Script option #2: Suicide Points
+-- Script option #3: Betrayal Points
+-- Script option #4: Armor Lock Penalty Duration
+-- Script traits #0: Armor Lock Penalty Traits
+
+alias opt_kill_points             = script_option[0]
+alias opt_death_points            = script_option[1]
+alias opt_suicide_points          = script_option[2]
+alias opt_betrayal_points         = script_option[3]
+alias armor_lock_penalty_duration = script_option[4]
+
+alias armor_lock_nope_timer = player.timer[0]
+declare player.armor_lock_nope_timer = 0
+
+alias armor_locker_traits = script_traits[0]
+
+for each player do
+   script_widget[0].set_text("nope lmao")
+   script_widget[0].set_visibility(current_player, false)
+   if current_player.is_elite() then 
+      current_player.set_loadout_palette(elite_tier_1)
+   else
+      current_player.set_loadout_palette(spartan_tier_1)
+   end
+end
+
+for each player do
+   --
+   -- If any player attempts to use Armor Lock, remove the ability, display a 
+   -- UI message, and give them a set of player traits.
+   --
+   alias aa = global.object[0]
+   --
+   aa = current_player.get_armor_ability()
+   if aa != no_object and aa.is_of_type(armor_lock) and aa.is_in_use() then
+      aa.delete()
+      current_player.armor_lock_nope_timer = armor_lock_penalty_duration
+      current_player.armor_lock_nope_timer.set_rate(-100%)
+   end
+   if current_player.armor_lock_nope_timer.is_zero() then
+      current_player.armor_lock_nope_timer.set_rate(0%)
+      script_widget[0].set_visibility(current_player, false)
+   else
+      script_widget[0].set_visibility(current_player, true)
+      current_player.apply_traits(armor_locker_traits)
+   end
+end
+
+for each player do
+   --
+   -- Basic scoring trigger.
+   --
+   if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then
+      current_player.score += opt_death_points
+      if current_player.killer_type_is(kill | betrayal) then
+         alias victim = global.player[0]
+         alias killer = global.player[1]
+         --
+         victim = current_player
+         killer = current_player.get_killer()
+         if current_player.killer_type_is(kill) then
+            killer.score += opt_kill_points
+         end
+         if current_player.killer_type_is(betrayal) then
+            killer.score += opt_betrayal_points
+         end
+      end
+      if current_player.killer_type_is(suicide) then
+         current_player.score += opt_suicide_points
+      end
+   end
+end

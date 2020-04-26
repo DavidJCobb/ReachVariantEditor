@@ -154,6 +154,7 @@ namespace Megalo {
       this->objects.adopt(other.objects);
       this->players.adopt(other.players);
       this->teams.adopt(other.teams);
+      this->timers.adopt(other.timers);
    }
    void VariableDeclarationSet::decompile(Decompiler& out, uint32_t flags) noexcept {
       const char* scope = "SCOPE?";
