@@ -367,6 +367,38 @@ namespace Megalo {
                break;
             case Type::for_each_object_with_label:
                t->blockType = block_type::for_each_object_with_label;
+               //
+               // TODO: MAKE THIS AND OpcodeArgValueForgeLabel::compile SHARE SOME HELPER FUNCTION, IDEALLY 
+               // ON Compiler.
+               //
+               if (this->label_name.isEmpty()) {
+                  auto  index = this->label_index;
+                  auto& list  = compiler.get_variant().scriptContent.forgeLabels;
+                  if (index < 0 || index >= list.size()) {
+                     compiler.raise_error(QString("Label index %1 does not exist.").arg(index));
+                  } else {
+                     t->forgeLabel = &list[index];
+                  }
+               } else {
+                  int32_t index = -1;
+                  auto&   list  = compiler.get_variant().scriptContent.forgeLabels;
+                  for (size_t i = 0; i < list.size(); ++i) {
+                     auto& label = list[i];
+                     ReachString* name = label.name;
+                     if (!name)
+                        continue;
+                     QString english = QString::fromUtf8(name->english().c_str());
+                     if (english == this->label_name) {
+                        if (index != -1)
+                           compiler.raise_error("The specified string literal matches multiple defined Forge labels. Use an index instead.");
+                        index = i;
+                     }
+                  }
+                  if (index == -1)
+                     compiler.raise_error("The specified string literal does not match any defined Forge label.");
+                  else
+                     t->forgeLabel = &list[index];
+               }
                break;
             case Type::for_each_player:
                t->blockType = block_type::for_each_player;
@@ -784,11 +816,11 @@ namespace Megalo {
       }
       this->block = this->root;
       //
-      do {
+      while (!this->is_at_effective_end()) {
          this->_parseAction();
          if (this->has_fatal())
             break;
-      } while (!this->is_at_effective_end());
+      };
       //
       if (!this->has_fatal()) {
          if (this->block != this->root)

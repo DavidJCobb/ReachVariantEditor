@@ -230,7 +230,7 @@ namespace Megalo {
          if (part > count)
             return arg_compile_result::failure();
          auto result = this->sub_variable(part).compile(compiler, arg, 0);
-         result.set_needs_more(part < count);
+         result.set_needs_more(part < count - 1);
          return result;
       }
       void OpcodeArgValueMeterParameters::copy(const OpcodeArgValue* other) noexcept {

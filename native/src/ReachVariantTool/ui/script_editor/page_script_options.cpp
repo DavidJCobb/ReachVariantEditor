@@ -347,6 +347,8 @@ void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* va
    }
    if (this->targetOption)
       _selectByPointerData(this->ui.listOptions, this->targetOption);
+   else
+      this->updateOptionFromVariant();
 }
 void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    const QSignalBlocker blocker0(this->ui.rangeDefault);
@@ -359,9 +361,7 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    if (!this->targetOption) {
       this->ui.optionName->clearTarget();
       this->ui.optionDesc->clearTarget();
-      //
-      // TOOD: reset controls to a blank state
-      //
+      this->updateValuesListFromVariant();
       return;
    }
    auto& o = *this->targetOption;
@@ -385,8 +385,10 @@ void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
    const QSignalBlocker blocker(this->ui.listValues);
    //
    this->ui.listValues->clear();
-   if (!this->targetOption)
+   if (!this->targetOption) {
+      this->ui.buttonValuesDelete->setDisabled(true);
       return;
+   }
    auto& list = this->targetOption->values;
    for (size_t i = 0; i < list.size(); i++) {
       auto& value = *list[i];
@@ -407,9 +409,9 @@ void ScriptEditorPageScriptOptions::updateValueFromVariant() {
    const QSignalBlocker blocker1(this->ui.valueDesc);
    const QSignalBlocker blocker2(this->ui.valueValue);
    if (!this->targetValue) {
-      //
-      // TOOD: reset controls to a blank state
-      //
+      this->ui.valueName->clearTarget();
+      this->ui.valueDesc->clearTarget();
+      this->ui.valueValue->setValue(0);
       return;
    }
    this->ui.valueName->setTarget(this->targetValue->name);

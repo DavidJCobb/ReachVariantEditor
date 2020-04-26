@@ -166,13 +166,12 @@ namespace cobb {
                free(old);
          }
          //
-         void* take(size_type i) noexcept {
+         entry_type take(size_type i) noexcept {
             auto item = this->data()[i];
             std::intptr_t size = (this->_size - i - 1) * sizeof(void*);
             if (size) {
                memcpy(this->_list + i, this->_list + i + 1, size);
                this->data()[this->_size - 1] = nullptr;
-               //
             }
             --this->_size;
             for (size_t i = 0; i < this->_size; ++i)

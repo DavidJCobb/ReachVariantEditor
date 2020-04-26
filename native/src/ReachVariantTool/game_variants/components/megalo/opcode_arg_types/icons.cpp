@@ -106,7 +106,7 @@ namespace Megalo {
             this->value = none;
             return true;
          }
-         this->value = stream.read_bits(bitcount) - 1;
+         this->value = stream.read_bits(bitcount);
          return true;
       }
       void OpcodeArgValueIconBase::write(cobb::bitwriter& stream) const noexcept {

@@ -114,14 +114,6 @@ int main(int argc, char *argv[]) {
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//     - COMPILER OWNERSHIP OF COMPILED CONTENT: Compiler SHOULD NOT RELINQUISH OWNERSHIP 
-//       OF COMPILED TriggerS, ETC., WHEN COMPILING SUCCEEDS. RATHER, THE Compiler SHOULD 
-//       HAVE A MEMBER FUNCTION WHICH "APPLIES" THE COMPILED CONTENT TO THE TARGET GAME 
-//       VARIANT AND THEN RELEASES OWNERSHIP AND DISCARDS POINTERS.
-//
-//        - The "apply" function should assert if there are any unresolved string references 
-//          (see below) or if there are any compiler errors.
-//
 //     - MODIFY string_scanner::extract_string_literal TO HANDLE ALL ESCAPE CODES WHEN 
 //       INTERPRETING THE CONTENT OF THE STRING.
 //
@@ -146,158 +138,20 @@ int main(int argc, char *argv[]) {
 //       inverts condition." Then, we could give "is_not_respawning" the more intuitive 
 //       secondary name "is_respawning" with the negate flag set.
 //
+//     = THE GAME DOES NOT CONSIDER "for each object with no label" LOOPS VALID. WE SHOULD 
+//       REMOVE THAT SYNTAX, AND THE COMPILER'S FINAL VALIDATION CHECKS SHOULD BE AMENDED TO 
+//       INCLUDE FAILING IF ANY FOR-EACH-OBJECT-WITH-LABEL LOOP HAS A nullptr FORGE LABEL.
+//
 //     = COMPILER TESTS
 //
 //        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
 //          decompile produces identical output to the first. However, the resulting file is 
-//          not binary-identical to the "resaved in Release build" version. The reason for 
-//          this is:
+//          not binary-identical to the "resaved in Release build" version. I've addressed the 
+//          else(if) Bungie behavior and am not sure where the new discrepancy lies.
 //
-//             for each player do
-//                if current_player.number[0] != 1 then 
-//                   if current_player.is_elite() then 
-//                      current_player.set_loadout_palette(elite_tier_1)
-//                   end
-//                   if not current_player.is_elite() then 
-//                      current_player.set_loadout_palette(spartan_tier_1)
-//                   end
-//                end
-//                ...
-//
-//          Recall that when we compile a trigger, if the last block is an if-block, then 
-//          the if-block can and should share a trigger with its parent. Well, that last 
-//          if-block shown above -- "if the player is not an Elite" -- actually doesn't share 
-//          a trigger with its parent! Some if-blocks in the vanilla gametypes do it, but some 
-//          don't. Failing to reproduce this behavior causes us to generate triggers differently, 
-//          but the binary-inconsistency between the two files is order: we have to flatten 
-//          opcodes into flat lists, and the order of opcodes in the list will depend on the 
-//          depth of their parent triggers (see documentation comments in the flatten function), 
-//          so collapsing that if-not-block differently from Bungie causes the opcode order to 
-//          differ: both "is_elite" calls should be ordered before the number variable comparison, 
-//          but the inverted "is_elite" check comes after it instead, because it's technically in 
-//          the same trigger.
-//
-//          I think it's because Bungie's original language had else-blocks (and possibly 
-//          elseif-blocks), and else-blocks probably don't collapse into their parent triggers 
-//          like an if-block would! This means two things:
-//
-//           - Accurate decompiling MUST generate else-blocks at a minimum. We may be able to 
-//             accomplish this by checking if the conditions are identical to the previous 
-//             if-block but with the "negated" flag set (we'll also need to reason about the 
-//             or-groups and such).
-//
-//           - When compiling an else-block, we can't merge it into its parent trigger.
-//
-//           - We need to add support for elseif- and else-blocks. Currently we would compile 
-//             them incorrectly, because there's no logic to copy and invert the conditions of 
-//             the previous (else)if-block(s).
-//
-//           - Until all three tests above are complete, we cannot rely on file resaving to 
-//             test the compiler unless the gametype being tested is so simple that it doesn't 
-//             ever use else-blocks.
-//
-//           - We may have to make similar fixes for elseif-blocks; it won't be possible to 
-//             know until else-blocks are dealt with, since the first binary inconsistency 
-//             will make further comparisons impossible.
-//
-//          The code above would need to be decompiled as:
-//
-//             for each player do
-//                if current_player.number[0] != 1 then 
-//                   if current_player.is_elite() then 
-//                      current_player.set_loadout_palette(elite_tier_1)
-//                   else
-//                      current_player.set_loadout_palette(spartan_tier_1)
-//                   end
-//                end
-//                ...
-//
-//          Until we do that, we won't be able to save binary-identical files to vanilla. 
-//          Notably, *not* collapsing else-blocks into their parent blocks' triggers like 
-//          this is a waste of a trigger (given that we can only generate so many); we should 
-//          make it possible for the user to control whether to collapse them (optimal) or 
-//          not collapse them (consistent with official content).
-//
-//           = NOTE: We don't have to fix BOTH the compiler AND the decompiler. We can fix the 
-//             compiler, and then just manually adjust decompiled output to have else-blocks 
-//             (I think it's safe to assume that Bungie always and only uses the "negated" 
-//             flag i.e. "not" for those).
-//
-//             Really, we just have to handle else(if)-block conditions and modify the 
-//             Block::_is_if_block getter to only return true for if-blocks, and not else(if)-
-//             blocks.
-//
-//     - We're gonna have to take some time to work out how to negate if-statements that 
-//       mix OR and AND, in order to make elseif and else work. Fortunately, we only need 
-//       to know that when it comes time to actually compile the blocks... assuming we 
-//       don't decide to just drop support for else(if)s at that point. (Think about it: 
-//       first of all, they abstract away conditions, so you can't see the full "cost" 
-//       of your code; and second, there's no code to detect equivalent ifs and decompile 
-//       them to else(if)s yet. We should support else(if)s if we can but they aren't by 
-//       any means essential; we've already decided that conciseness is not required.)
-//
-//        - Added a "TODO" comment to Block::compile where we'd need to do this.
-//
-//        - HMM... I THINK IT WOULD ACTUALLY BE BEST TO HANDLE THIS BEFORE COMPILING BLOCKS. 
-//          SPECIFICALLY, WHEN WE OPEN AN ELSE(IF) BLOCK, WE SHOULD CLONE THE ALREADY-COMPILED 
-//          CONDITIONS OF THE PRECEDING (ELSE)IF BLOCK INTO THE NEW ELSE(IF) BLOCK.
-//
-//          SPECIFIC PLANS:
-//
-//           - Split Block::conditions into two lists: one for "else" conditions, and another 
-//             for normal conditions.
-//
-//              - Block::compile should compile both lists verbatim. The "else" conditions 
-//                should be compiled first, followed by the normal conditions.
-//
-//              - Block::clear should handle the "else" condition list as necessary.
-//
-//           - When we open an elseif- or else-block,...
-//
-//              - Copy all "else" conditions from the previous-sibling block verbatim.
-//
-//              - Copy all normal conditions from the previous-sibling block, flip the 
-//                "negated" flag on each Condition, and swap the Comparisons' joiners (i.e. 
-//                "and" should become "or" and "or" should become "and").
-//
-//              = THIS SHOULD BE A MEMBER FUNCTION: Block::generate_else_conditions(Block&).
-//
-//     - COMPILER TESTS: We can test the compiler itself right now, on the understanding 
-//       that any argument types that haven't had their own compile code written yet will 
-//       yield non-fatal errors.
-//
-//        - string_scanner::extract_word: Consider stopping extraction after a "]" if the next 
-//          character is not a "."; it would allow "declare global.number[0]with ..." and such.
-//
-//           - This is good if we want to be forgiving, but if we want to teach good habits to 
-//             the coder, then we'd need to emit a warning... which we can't consistently do, 
-//             since extract_word is inside of string_scanner and warnings are in the Compiler. 
-//             I'd lean toward being strict, honestly. We should maybe write a comment somewhere 
-//             so that we don't forget that we *can* do this, but I guess I'm deciding against 
-//             actually doing it.
-//
-//     - Compiler: Unresolved string references: each list entry needs an "action" field 
-//       which lists the action the script author decided to take. Available actions are: 
-//       create a new string in the table; or use an existing string with a given index. 
-//       Intended UI flow for when the compiler finds unresolved string references is:
-//
-//        - Alert the user to the unresolved string references.
-//
-//        - Allow the user to: cancel compiling; create all referenced strings en masse; 
-//          or choose how to handle each string individually.
-//
-//       The Compiler should have a function which will resolve all unresolved string 
-//       references that have an action set. The compiler's code to apply compiled content 
-//       to the game variant should assert if there are any unresolved string references.
-//
-//       There are a few considerations we'll need to make:
-//
-//        - The same string content may be referred to in multiple places, i.e. multiple 
-//          unresolved string references may target the same unresolved string. We need to 
-//          ensure that we don't end up creating duplicates of these strings in the string 
-//          table.
-//
-//        - The string table may not have room for the number of new strings needed.
+//     - Compiler::handle_unresolved_string_references will fail to resolve "create string" 
+//       references if the string table is full, but it has no way to signal that it has run 
+//       into that problem i.e. the caller would have to run that check itself.
 //
 //     = DEFERRED TASKS
 //
@@ -403,11 +257,12 @@ int main(int argc, char *argv[]) {
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
 //
-//        - Round-trip decompiling/recompiling for all vanilla gametype scripts and for 
-//          SvE Mythic Slayer. Tests should include modified versions of the decompiled 
-//          scripts that use aliases where appropriate (both because I want to provide 
-//          such "source scripts" to script authors to learn from, and so we can test to 
-//          ensure that aliases work properly).
+//        - Round-trip decompiling/recompiling/decompiling for all vanilla gametype scripts 
+//          and for SvE Mythic Slayer. A successful test is one where both decompile actions 
+//          produce identical (or semantically identical) output. Tests should include 
+//          modified versions of the decompiled scripts that use aliases where appropriate 
+//          (both because I want to provide such "source scripts" to script authors to learn 
+//          from, and so we can test to ensure that aliases work properly).
 //
 //        - KSoft.Tool seems to have switched around the "Teams Enabled" flag (misc 
 //          options bit 0) and the "Perfection Medal Enabled" flag (misc options bit 3). 
@@ -415,12 +270,20 @@ int main(int argc, char *argv[]) {
 //          we will need to test BOTH FLAGS (game.teams_enabled and game.misc_unk0_bit3) 
 //          to make sure we have them right (or fix them) there.
 //
+//        - If multiple widgets occupy the same on-screen position and are displayed at the 
+//          same time, do the overlap or do they align intelligently? We'll want to know 
+//          this for if we attempt to implement Generator Defense.
+//
 //        - Do user-defined functions actually work? Don't just test whether the game 
 //          can load a script that contains triggers called from multiple places; test 
 //          to ensure that if a trigger is called multiple times from multiple places in 
 //          the same tick, it will actually run each time. The file format as designed 
 //          allows for user-defined functions to exist, but it's unknown how the runtime 
 //          will actually handle them.
+//
+//           - We should also see if user-defined functions can be event handlers and 
+//             still work. If so, that would also indicate that nested blocks can be 
+//             event handlers (something we don't currently allow).
 //
 //        - What happens when we perform an invalid assignment, such as the assignment 
 //          of a number to an object? Be sure to check the resulting value of the target 
@@ -432,12 +295,6 @@ int main(int argc, char *argv[]) {
 //           - While we're at it, verify the exact result of assigning a number to a 
 //             timer (which we know from vanilla scripts is valid) and of assigning a 
 //             timer to a number (which I don't remember seeing in vanilla content).
-//
-//        - We need to test whether our subroutine (user-defined function) approach is 
-//          actually supported by the game. It entails defining a trigger that is 
-//          flagged as nested but actually called from multiple places, rather than 
-//          being a block "inside" of another block. It would also be worthwhile to see 
-//          if this is compatible with the subroutine being an event handler.
 //
 //        - Does the "Create Object" opcode use an absolute position offset or a relative 
 //          one (i.e. using the "basis" object's rotation axes)? Are the units the same 
@@ -463,6 +320,30 @@ int main(int argc, char *argv[]) {
 //
 //        - What happens if the script tries to use a variable that is not declared? We 
 //          would need to tamper with the variant data manually to check this.
+//
+//     = GAMETYPE PLANS
+//
+//        - Minesweeper
+//
+//           - Horizontal board. A flag and a bomb spawn on an elevated platform that 
+//             overlooks the entire board. Drop the flag on a square to mark it with a 
+//             flag. Drop a bomb on a square to "click" it.
+//
+//           - A teleporter provides access between the overlook and the board. Maybe 
+//             we can label each teleporter (e.g. "UP" and "DOWN") with a gametype 
+//             label e.g. "MINESWEEP_TEXT_LABEL" where the spawn sequence controls the 
+//             text.
+//
+//           - FFA: One person solves the board. Team: One team solves the board, with 
+//             team members taking turns. In both cases there should be an option to 
+//             let people who aren't working the board see where the mines are, to 
+//             potentially add a party game aspect to things.
+//
+//              - Another good option: control the round end condition. By default, FFA 
+//                should end the round on the first failure, and Team when all team 
+//                members are killed; an alternate mode could allow other players/teams 
+//                to continue from where a failing player/team left off, with the round 
+//                ending on victory or when all players are dead.
 //
 //  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
 //    numbers, syntax highlighting, code folding, etc..

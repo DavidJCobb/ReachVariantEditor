@@ -1,5 +1,6 @@
 #include "page_script_code.h"
 #include "../../game_variants/components/megalo/compiler/compiler.h"
+#include <QMessageBox>
 
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
@@ -48,6 +49,14 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
          this->ui.compileLog->setPlainText(text);
       } else {
          this->ui.compileLog->setPlainText("No errors!");
+         //
+         auto& unresolved_str = compiler.get_unresolved_string_references();
+         if (unresolved_str.size()) {
+            QMessageBox::information(this, tr("Unable to commit the compiled data"), tr("There are unresolved string references and the UI to deal with that hasn't been built yet"));
+         } else {
+            compiler.apply();
+            QMessageBox::information(this, tr("Compiled contents applied!"), tr("The compiled content has been applied."));
+         }
       }
    });
 }
