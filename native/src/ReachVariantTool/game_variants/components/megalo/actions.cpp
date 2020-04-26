@@ -139,9 +139,9 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
       ),
       ActionFunction( // 12
-         "Set Object Pickup Permissions",
-         "Limit who can pick up a weapon.",
-         "Only allow %2 to pick up with %1.",
+         "Set Weapon Pickup Permissions",
+         "Limit who can pick up a weapon. This action does not affect grenades, armor abilities, or vehicles.",
+         "Only allow %2 to pick up %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
@@ -442,11 +442,11 @@ namespace Megalo {
       ),
       ActionFunction( // 42
          "Set Player Biped", // Used for Halo Chess's bump-possession?
-         "",
+         "Forces a player to use a specific object as their biped, leaving their original biped behind. This action does nothing if the chosen object is not a valid biped (i.e. the BIPD tag).",
          "Set %1's biped to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_biped", "", {1}, 0)
       ),
@@ -461,7 +461,7 @@ namespace Megalo {
       ),
       ActionFunction( // 44
          "Set Weapon Pickup Priority",
-         "Modify whether a weapon is picked up automatically or as a hold action.",
+         "Modify whether a weapon is picked up automatically or as a hold action. This only works on weapons, not grenades.",
          "Set %1's weapon pickup priority to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -542,7 +542,7 @@ namespace Megalo {
       ),
       ActionFunction( // 52
          "Modify Object Scale",
-         "Resizes an object.",
+         "Resizes an object. An enlarged object will correctly register hits from bullets and impacts with grenades (including being stuck), but splash damage will not take scaling into account and will apply (or not) based on the object's original size.",
          "Set %1's scale to %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -935,7 +935,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("weapon", OpcodeArgValueObject::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("add_weapon", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("add_weapon", "", {1}, 0)
       ),
       ActionFunction( // 90
          "Set Co-op Spawning for Player",

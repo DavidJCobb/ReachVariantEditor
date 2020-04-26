@@ -138,10 +138,6 @@ int main(int argc, char *argv[]) {
 //       inverts condition." Then, we could give "is_not_respawning" the more intuitive 
 //       secondary name "is_respawning" with the negate flag set.
 //
-//     = THE GAME DOES NOT CONSIDER "for each object with no label" LOOPS VALID. WE SHOULD 
-//       REMOVE THAT SYNTAX, AND THE COMPILER'S FINAL VALIDATION CHECKS SHOULD BE AMENDED TO 
-//       INCLUDE FAILING IF ANY FOR-EACH-OBJECT-WITH-LABEL LOOP HAS A nullptr FORGE LABEL.
-//
 //     = COMPILER TESTS
 //
 //        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
@@ -270,10 +266,6 @@ int main(int argc, char *argv[]) {
 //          we will need to test BOTH FLAGS (game.teams_enabled and game.misc_unk0_bit3) 
 //          to make sure we have them right (or fix them) there.
 //
-//        - If multiple widgets occupy the same on-screen position and are displayed at the 
-//          same time, do the overlap or do they align intelligently? We'll want to know 
-//          this for if we attempt to implement Generator Defense.
-//
 //        - Do user-defined functions actually work? Don't just test whether the game 
 //          can load a script that contains triggers called from multiple places; test 
 //          to ensure that if a trigger is called multiple times from multiple places in 
@@ -295,31 +287,6 @@ int main(int argc, char *argv[]) {
 //           - While we're at it, verify the exact result of assigning a number to a 
 //             timer (which we know from vanilla scripts is valid) and of assigning a 
 //             timer to a number (which I don't remember seeing in vanilla content).
-//
-//        - Does the "Create Object" opcode use an absolute position offset or a relative 
-//          one (i.e. using the "basis" object's rotation axes)? Are the units the same 
-//          as in Forge, or are they scaled (i.e. script 1 = Forge 0.1)?
-//
-//        - Why did Bungie use Condition::or_group instead of a simple bool to indicate 
-//          an OR-relationship with the next condition? The only reason I can think of 
-//          is if they supported parenthetical conditions, but I haven't seen any 
-//          obvious uses of this in gametype scripts. We should devise a test such as 
-//          
-//             (A and B) or (C and D)
-//
-//          Then, we should write the code without parentheses:
-//
-//             A and B or C and D
-//
-//          And then we should manually tamper with the Condition::or_group values in 
-//          the compiled script, and test different setups in-game to see if any give 
-//          us results comparable to what we'd see with parenthetical expressions. For 
-//          our actual tests, each individual condition can just be a test to see if 
-//          the player is inside of a given shape, and we can place overlapping shapes 
-//          on the map.
-//
-//        - What happens if the script tries to use a variable that is not declared? We 
-//          would need to tamper with the variant data manually to check this.
 //
 //     = GAMETYPE PLANS
 //

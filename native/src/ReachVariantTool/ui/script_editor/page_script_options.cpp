@@ -180,12 +180,11 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (index < 0)
             return;
          list.erase(index);
-         if (index > 0)
-            this->targetOption = &list[index - 1];
-         else if (list.size())
-            this->targetOption = &list[0];
+         size_t size = list.size();
+         if (index >= size)
+            this->targetOption = &list[size - 1];
          else
-            this->targetOption = nullptr;
+            this->targetOption = size ? &list[index] : nullptr;
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();

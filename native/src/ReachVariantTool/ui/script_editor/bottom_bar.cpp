@@ -9,6 +9,7 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
    auto& editor = ReachEditorState::get();
    //
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorBottomPane::updateFromVariant);
+   QObject::connect(&editor, &ReachEditorState::variantRecompiled, this, &ScriptEditorBottomPane::updateFromVariant);
    //
    auto  widget  = this->ui.meter;
    auto& indices = this->indices;

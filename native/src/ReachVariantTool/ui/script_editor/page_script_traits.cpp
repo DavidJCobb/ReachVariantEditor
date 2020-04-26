@@ -106,12 +106,11 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
       if (index < 0)
          return;
       list.erase(index);
-      if (index > 0)
-         this->target = &list[index - 1];
-      else if (list.size())
-         this->target = &list[0];
+      size_t size = list.size();
+      if (index >= size)
+         this->target = &list[size - 1];
       else
-         this->target = nullptr;
+         this->target = size ? &list[index] : nullptr;
       this->updateTraitsFromVariant();
       this->updateTraitsListFromVariant();
       ReachEditorState::get().scriptTraitsModified(nullptr);

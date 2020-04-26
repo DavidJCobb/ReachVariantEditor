@@ -55,6 +55,7 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
             QMessageBox::information(this, tr("Unable to commit the compiled data"), tr("There are unresolved string references and the UI to deal with that hasn't been built yet"));
          } else {
             compiler.apply();
+            ReachEditorState::get().variantRecompiled(variant);
             QMessageBox::information(this, tr("Compiled contents applied!"), tr("The compiled content has been applied."));
          }
       }

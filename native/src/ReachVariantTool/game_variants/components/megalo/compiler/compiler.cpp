@@ -835,8 +835,13 @@ namespace Megalo {
             size_t ac = 0;
             Opcode* incomplete    = nullptr;
             size_t  incomplete_ai = 0;
+            bool    for_missing_label = false;
             for (auto trigger : this->results.triggers) {
                trigger->count_contents(cc, ac);
+               if (!for_missing_label) {
+                  if (trigger->blockType == block_type::for_each_object_with_label && !trigger->forgeLabel)
+                     for_missing_label = true;
+               }
                if (!incomplete) {
                   for (auto opcode : trigger->opcodes) {
                      if (!opcode->function) {
@@ -869,6 +874,8 @@ namespace Megalo {
                }
                this->raise_error(error);
             }
+            if (for_missing_label)
+               this->raise_error("At least one for-each-object-with-label loop failed to compile because its Forge label was unspecified. If no other errors relating to Forge labels were logged, then this may be the result of a bug in the compiler itself; consider reporting this issue and sending your script to this program's developer to test with.");
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
@@ -2451,24 +2458,16 @@ namespace Megalo {
                return;
             }
             type = Script::Block::Type::for_each_object_with_label;
-            word = this->extract_word();
-            if (word == "no") {
-               if (!this->extract_word("label")) {
-                  this->raise_fatal("Invalid for-each-object-with-label loop: must use the phrase \"no label\" or specify a label.");
+            if (!this->extract_word("label")) {
+               this->raise_fatal("Invalid for-each-object-with-label loop: expected the word \"label\".");
+               return;
+            }
+            if (!this->extract_string_literal(label)) {
+               if (!this->extract_integer_literal(label_index)) {
+                  this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
                   return;
                }
-            } else {
-               if (word != "label") {
-                  this->raise_fatal("Invalid for-each-object-with-label loop: expected the word \"label\".");
-                  return;
-               }
-               if (!this->extract_string_literal(label)) {
-                  if (!this->extract_integer_literal(label_index)) {
-                     this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
-                     return;
-                  }
-                  label_is_index = true;
-               }
+               label_is_index = true;
             }
             if (!this->extract_word("do")) {
                this->raise_fatal("Invalid for-each-object-with-label loop: expected the word \"do\".");

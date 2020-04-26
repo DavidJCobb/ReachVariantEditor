@@ -1,0 +1,18 @@
+If a player is forced into a Monitor biped and then given a weapon, they will be able 
+to fire that weapon if it is a ranged weapon, and they will be able to swap it out 
+with any other weapon. Ranged weapons can do damage and kill, though this may only be 
+true on host.
+
+If a player is forced into a Monitor biped, they will automatically pick up any grenades 
+or armor abilities they fly over, but they will be unable to use them. The armor ability 
+will be visible on the Monitor's body as if it were attached rather than picked up (i.e. 
+the little holographic image is still visible).
+
+A Monitor-player can pick up a detached machine gun turret, but not use an attached one.
+
+If one biped is attached to the other, the attached biped will stop simulating physics, 
+and it will rotate with its "parent." Looking up or down pitches whatever bone the biped 
+is attached to.
+
+If two widgets have the same screen position, they will align intelligently rather than 
+overlapping.
