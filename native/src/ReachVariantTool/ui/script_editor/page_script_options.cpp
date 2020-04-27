@@ -194,6 +194,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       });
    }
    {  // Value properties
+      QObject::connect(this->ui.defaultEnumValue, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+         if (!this->targetOption)
+            return;
+         if (index < 0 || index >= this->targetOption->values.size())
+            return;
+         this->targetOption->defaultValueIndex = index;
+      });
+      //
       QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
@@ -244,6 +252,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             else if (c == index - 1)
                c = index;
          }
+         if (index == this->targetOption->defaultValueIndex)
+            this->targetOption->defaultValueIndex -= 1;
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -265,6 +275,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             else if (c == index + 1)
                c = index;
          }
+         if (index == this->targetOption->defaultValueIndex)
+            this->targetOption->defaultValueIndex += 1;
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -286,6 +298,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             this->targetValue = list[0];
          else
             this->targetValue = nullptr;
+         if (index == this->targetOption->defaultValueIndex) {
+            int diff = (list.size() - 1) - index;
+            this->targetOption->defaultValueIndex -= diff;
+         }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
@@ -384,26 +400,33 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    }
 }
 void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
-   const QSignalBlocker blocker(this->ui.listValues);
+   const QSignalBlocker blocker0(this->ui.listValues);
+   const QSignalBlocker blocker1(this->ui.defaultEnumValue);
    //
    this->ui.listValues->clear();
+   this->ui.defaultEnumValue->clear();
    if (!this->targetOption) {
       this->ui.buttonValuesDelete->setDisabled(true);
       return;
    }
    auto& list = this->targetOption->values;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& value = *list[i];
-      auto  item  = new QListWidgetItem;
+      auto&   value = *list[i];
+      auto    item  = new QListWidgetItem;
+      QString name;
       if (value.name)
-         item->setText(QString::fromUtf8(value.name->english().c_str()));
+         name = QString::fromUtf8(value.name->english().c_str());
       else
-         item->setText(tr("<unnamed value %1>", "scripted option editor").arg(i));
+         name = tr("<unnamed value %1>", "scripted option editor").arg(i);
+      item->setText(name);
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&value));
       this->ui.listValues->addItem(item);
+      //
+      this->ui.defaultEnumValue->addItem(name);
    }
    if (this->targetValue)
       _selectByPointerData(this->ui.listValues, this->targetValue);
+   this->ui.defaultEnumValue->setCurrentIndex(this->targetOption->defaultValueIndex);
    this->ui.buttonValuesDelete->setDisabled(list.size() <= 1);
 }
 void ScriptEditorPageScriptOptions::updateValueFromVariant() {
