@@ -781,9 +781,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_friendly_name("Cargo Truck"),
             DetailedEnumValueInfo::make_map_tag('vehi', "")
          ),
-         DetailedEnumValue("cart_electric",
+         DetailedEnumValue("electric_cart",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
-            DetailedEnumValueInfo::make_friendly_name("cart_electric"),
+            DetailedEnumValueInfo::make_friendly_name("Electric Cart"),
             DetailedEnumValueInfo::make_map_tag('vehi', "")
          ),
          DetailedEnumValue("forklift",

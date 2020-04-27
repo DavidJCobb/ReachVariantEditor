@@ -39,7 +39,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue teams_enabled;
          extern VariableScopeIndicatorValue round_time_limit;
          extern VariableScopeIndicatorValue round_limit;
-         extern VariableScopeIndicatorValue misc_0_bit_3;
+         extern VariableScopeIndicatorValue perfection_enabled;
          extern VariableScopeIndicatorValue rounds_to_win;
          extern VariableScopeIndicatorValue sudden_death_time;
          extern VariableScopeIndicatorValue grace_period;
@@ -53,7 +53,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue respawn_traits_time;
          extern VariableScopeIndicatorValue friendly_fire;
          extern VariableScopeIndicatorValue betrayal_booting;
-         extern VariableScopeIndicatorValue social_flag_2;
+         extern VariableScopeIndicatorValue proximity_voice;
          extern VariableScopeIndicatorValue social_flag_3;
          extern VariableScopeIndicatorValue social_flag_4;
          extern VariableScopeIndicatorValue grenades_on_map;

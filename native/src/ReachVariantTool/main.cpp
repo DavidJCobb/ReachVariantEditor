@@ -114,17 +114,13 @@ int main(int argc, char *argv[]) {
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//     - Audit the "format string" argument type. I think we're saving it incorrectly: my MOTL 
-//       brute-force gametype displays constant integers (consistent, but consistently wrong) 
-//       in places where it should show the value of a variable despite my using the same token 
-//       (%n) as Bungie.
-//
-//        - Race's UI readouts work properly after being decompiled and recompiled.
-//
 //     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
 //       MCC's menus don't enforce this. Investigate.
 //
 //     - Identify unknown values in the "number" scope list.
+//
+//     - We need UI for letting the user set the default value of an enum option in the script 
+//       editor.
 //
 //     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
 //       a dropdown). The arrow should allow you to select what to copy: the full English 

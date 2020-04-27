@@ -27,7 +27,7 @@ namespace {
       &teams_enabled,
       &round_time_limit,
       &round_limit,
-      &misc_0_bit_3,
+      &perfection_enabled,
       &rounds_to_win,
       &sudden_death_time,
       &grace_period,
@@ -41,7 +41,7 @@ namespace {
       &respawn_traits_time,
       &friendly_fire,
       &betrayal_booting,
-      &social_flag_2,
+      &proximity_voice,
       &social_flag_3,
       &social_flag_4,
       &grenades_on_map,
@@ -125,7 +125,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue teams_enabled           = VariableScopeIndicatorValue::make_game_value("game.teams_enabled",           "Teams Enabled", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_time_limit        = VariableScopeIndicatorValue::make_game_value("game.round_time_limit",        "Round Time Limit", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_limit             = VariableScopeIndicatorValue::make_game_value("game.round_limit",             "Round Limit", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue misc_0_bit_3            = VariableScopeIndicatorValue::make_game_value("game.misc_unk0_bit3",          "Misc-Bit-3", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue perfection_enabled      = VariableScopeIndicatorValue::make_game_value("game.perfection_enabled",      "Perfection Enabled", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
          extern VariableScopeIndicatorValue rounds_to_win           = VariableScopeIndicatorValue::make_game_value("game.rounds_to_win",           "Rounds to Win", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue sudden_death_time       = VariableScopeIndicatorValue::make_game_value("game.sudden_death_time",       "Sudden Death Time", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue grace_period            = VariableScopeIndicatorValue::make_game_value("game.grace_period",            "Grace Period", VariableScopeIndicatorValue::flags::is_readonly);
@@ -139,7 +139,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue respawn_traits_time     = VariableScopeIndicatorValue::make_game_value("game.respawn_traits_duration", "Respawn Traits Duration", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue friendly_fire           = VariableScopeIndicatorValue::make_game_value("game.friendly_fire",           "Friendly Fire", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue betrayal_booting        = VariableScopeIndicatorValue::make_game_value("game.betrayal_booting",        "Betrayal Booting", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue social_flag_2           = VariableScopeIndicatorValue::make_game_value("game.social_flags_bit_2",      "Social-Bit-2", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue proximity_voice         = VariableScopeIndicatorValue::make_game_value("game.proximity_voice",         "Proximity Voice", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
          extern VariableScopeIndicatorValue social_flag_3           = VariableScopeIndicatorValue::make_game_value("game.social_flags_bit_3",      "Social-Bit-3", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
          extern VariableScopeIndicatorValue social_flag_4           = VariableScopeIndicatorValue::make_game_value("game.social_flags_bit_4",      "Social-Bit-4", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
          extern VariableScopeIndicatorValue grenades_on_map         = VariableScopeIndicatorValue::make_game_value("game.grenades_on_map",         "Grenades on Map", VariableScopeIndicatorValue::flags::is_readonly);

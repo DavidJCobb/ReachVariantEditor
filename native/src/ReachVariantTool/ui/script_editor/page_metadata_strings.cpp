@@ -62,7 +62,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
-         this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
+         this->ui.labelDesc->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
             // I suspect the game would actually support zero-length text, but don't allow that. If the 
@@ -94,7 +94,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
-         this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
+         this->ui.labelCategory->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
             // I suspect the game would actually support zero-length text, but don't allow that. If the 
