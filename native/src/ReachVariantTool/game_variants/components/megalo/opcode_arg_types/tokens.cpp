@@ -143,36 +143,7 @@ namespace Megalo {
       ReachString* format = this->string;
       if (format) {
          std::string english = format->english();
-         //
-         // Escape ", \r, \n, etc.:
-         //
-         size_t size = english.size();
-         for (size_t i = 0; i < size; ++i) {
-            const char* replace = nullptr;
-            char c = english[i];
-            switch (c) {
-               case '\r': replace = "\\r"; break;
-               case '\n': replace = "\\n"; break;
-               case '"': replace = "\\\""; break;
-               case '\\': replace = "\\\\"; break;
-            }
-            if (replace) {
-               english.replace(i, 1, replace);
-               i += strlen(replace) - 1;
-               continue;
-            }
-            if (c < '!' && c != ' ') { // TODO: UTF-8 printable char check instead of this
-               std::string temp;
-               cobb::sprintf(temp, "\\X%02X", (uint32_t)c);
-               english.replace(i, 1, temp);
-               i += temp.size() - 1;
-               continue;
-            }
-         }
-         //
-         out.write('"');
-         out.write(english);
-         out.write('"');
+         out.write_string_literal(english);
       } else {
          out.write("none");
       }

@@ -46,6 +46,8 @@ namespace Megalo {
          void write_line(string_type& content); // writes `\n${current_indent}${content}`
          void write_line(std::string& content); // writes `\n${current_indent}${content}`
          void write_line(const char*  content); // writes `\n${current_indent}${content}`
+         void write_string_literal(const char*  content); // content is taken as UTF-8
+         void write_string_literal(std::string& content); // content is taken as UTF-8
          //
          inline GameVariant& get_variant() { return this->variant; }
    };

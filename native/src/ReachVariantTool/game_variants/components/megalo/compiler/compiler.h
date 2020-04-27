@@ -287,7 +287,7 @@ namespace Megalo {
          Script::VariableReference* __parseVariable(QString, bool is_alias_definition = false, bool is_write_access = false); // adds the variable to the appropriate VariableDeclarationSet as appropriate
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
-         void _parseFunctionCall(const pos& pos, QString stem, bool is_condition, Script::VariableReference* assign_to = nullptr);
+         Script::Statement* _parseFunctionCall(const pos& pos, QString stem, bool is_condition, Script::VariableReference* assign_to = nullptr);
          //
          void _openBlock(Script::Block*);
          bool _closeCurrentBlock();

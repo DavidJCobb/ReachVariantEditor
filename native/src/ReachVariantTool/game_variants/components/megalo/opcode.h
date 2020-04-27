@@ -6,7 +6,6 @@
 #include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
-#include "enums.h"
 #include "opcode_arg.h"
 #include "variables_and_scopes.h"
 #include "decompiler/decompiler.h"

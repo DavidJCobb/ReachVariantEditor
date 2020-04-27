@@ -136,6 +136,8 @@ namespace Megalo {
       for (auto entry : this->scopes) {
          if (!entry->is_variable_scope())
             continue;
+         if (entry->index_type == VariableScopeIndicatorValue::index_type::none) // needed for things like player.player where the which and the index are both of a type that has "which"es
+            continue;
          if (entry->base == scope)
             return entry;
       }

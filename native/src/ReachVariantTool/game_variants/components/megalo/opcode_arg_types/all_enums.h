@@ -35,6 +35,7 @@ namespace Megalo {
          void invert();
    };
    megalo_opcode_arg_value_enum(OpcodeArgValueAddWeaponEnum);
+   megalo_opcode_arg_value_enum(OpcodeArgValueAttachPositionEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueCHUDDestinationEnum);
    //megalo_opcode_arg_value_enum(OpcodeArgValueCompareOperatorEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueDropWeaponEnum);
@@ -43,6 +44,7 @@ namespace Megalo {
    megalo_opcode_arg_value_enum(OpcodeArgValuePickupPriorityEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueTeamAllianceStatus); // KSoft calls this "team disposition"
    megalo_opcode_arg_value_enum(OpcodeArgValueWaypointPriorityEnum);
+   megalo_opcode_arg_value_enum(OpcodeArgValueWeaponSlotEnum);
 
    megalo_opcode_arg_value_enum(OpcodeArgValueLoadoutPalette);
 }

@@ -294,7 +294,7 @@ namespace Megalo {
       ),
       ActionFunction( // 28
          "Get Speed",
-         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero.",
+         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero. The unit of measurement seems to be feet per second; Race multiplies by 100 and then divides by 109 to convert to kilometers per hour.",
          "Set integer %2 to the current speed of %1 multiplied by 10.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -352,12 +352,12 @@ namespace Megalo {
       ActionFunction( // 33
          "Attach Objects",
          "Attach one object to another.",
-         "Attach %1 to %2 at offset %3. Unknown bool: %4.",
+         "Attach %1 to %2 at %4 offset %3.",
          {
-            OpcodeArgBase("subject", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("target",  OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("offset",  OpcodeArgValueVector3::typeinfo),
-            OpcodeArgBase("bool",    OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("subject",  OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("target",   OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("offset",   OpcodeArgValueVector3::typeinfo),
+            OpcodeArgBase("relative", OpcodeArgValueAttachPositionEnum::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("attach_to", "", {1, 2, 3}, 0)
       ),
@@ -442,7 +442,7 @@ namespace Megalo {
       ),
       ActionFunction( // 42
          "Set Player Biped", // Used for Halo Chess's bump-possession?
-         "Forces a player to use a specific object as their biped, leaving their original biped behind. This action does nothing if the chosen object is not a valid biped (i.e. the BIPD tag). Once a Megalo-spawned Spartan biped is assigned to a player, it will have a feminine voice regardless of body type.",
+         "Forces a player to use a specific object as their biped, leaving their original biped behind. This action does nothing if the chosen object is not a valid biped (i.e. the BIPD tag). Once a Megalo-spawned Spartan biped is assigned to a player, its voice will match the player's chosen Spartan gender regardless of the biped's own gender presentation.",
          "Set %1's biped to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -480,7 +480,7 @@ namespace Megalo {
       ),
       ActionFunction( // 46
          "Set Widget Text",
-         "Modifies the text for a HUD widget. You can stitch values together dynamically.",
+         "Modifies the text for a HUD widget. You can stitch values together dynamically. Note that if you display a player's name by way of a player variable, the variable must have \"high\" network priority for the name to display properly off-host.",
          "Set text for %1 to: %2.",
          {
             OpcodeArgBase("widget", OpcodeArgValueWidget::typeinfo),
@@ -500,7 +500,7 @@ namespace Megalo {
       ),
       ActionFunction( // 48
          "Set Meter Parameters",
-         "Modify meter options for a HUD widget.",
+         "Modify meter options for a HUD widget. Any variables specified as part of the meter parameters will be passed by reference: the meter will update as their values change, even if this action isn't run again.", // TODO: VERIFY THIS BEHAVIOR
          "Set meter parameters for %1 to %2.",
          {
             OpcodeArgBase("widget",     OpcodeArgValueWidget::typeinfo),
@@ -684,7 +684,7 @@ namespace Megalo {
       ),
       ActionFunction( // 66
          "Get Distance",
-         "Returns the distance between two objects.",
+         "Returns the distance between two objects. Returned distances are measured in feet; for a decent conversion to meters, multiply by 7 and divide by 23.",
          "Set %3 to the distance between %1 and %2.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
@@ -870,7 +870,7 @@ namespace Megalo {
          "Set %3 to %1's %2 weapon.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("which",  OpcodeArgValueConstBool::typeinfo, "primary", "secondary"),
+            OpcodeArgBase("which",  OpcodeArgValueWeaponSlotEnum::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_weapon", "get_weapon", {1}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
@@ -897,13 +897,13 @@ namespace Megalo {
       ),
       ActionFunction( // 86
          "Get Player Target Object",
-         "",
-         "Carry out some unknown (86) action with %1 and %2.",
+         "Reportedly only works on objects that trigger a red reticle, and reportedly only on host.",
+         "Set %2 to the object that %1 has in their crosshairs.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo), // TODO: is this an out-variable?
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_player_target_object", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("get_crosshair_target", "", {}, 0)
       ),
       ActionFunction( // 87
          "Create Object Equidistant", // TODO: KSoft.Tool now calls this "create_tunnel"; what does that mean?

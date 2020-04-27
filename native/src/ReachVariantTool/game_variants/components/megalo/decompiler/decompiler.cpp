@@ -1,4 +1,5 @@
 #include "decompiler.h"
+#include "../compiler/string_scanner.h"
 #include "../../../types/multiplayer.h"
 
 namespace Megalo {
@@ -65,5 +66,17 @@ namespace Megalo {
       this->current_content += "\r\n";
       this->current_content += this->current_indent;
       this->write(content);
+   }
+   void Decompiler::write_string_literal(const char* content) {
+      QString t = Script::string_scanner::escape(QString::fromUtf8(content), '"');
+      this->write('"');
+      this->write(t);
+      this->write('"');
+   }
+   void Decompiler::write_string_literal(std::string& content) {
+      QString t = Script::string_scanner::escape(QString::fromStdString(content), '"');
+      this->write('"');
+      this->write(t);
+      this->write('"');
    }
 }

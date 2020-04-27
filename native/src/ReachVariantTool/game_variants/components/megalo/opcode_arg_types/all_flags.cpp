@@ -1,5 +1,4 @@
 #include "all_flags.h"
-#include "../enums.h"
 #include "../../../helpers/qt/string.h"
 
 namespace Megalo {

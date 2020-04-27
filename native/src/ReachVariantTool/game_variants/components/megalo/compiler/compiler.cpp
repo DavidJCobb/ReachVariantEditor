@@ -1294,7 +1294,9 @@ namespace Megalo {
                   return true;
                }
                if (this->extract_specific_char('(')) {
-                  this->_parseFunctionCall(prior, word, true);
+                  auto statement = this->_parseFunctionCall(prior, word, true);
+                  if (this->has_fatal())
+                     return true;
                   //
                   // Comparing something to the result of a function call is an error. Let's check for that 
                   // so we can give an intuitive error message.
@@ -1306,7 +1308,13 @@ namespace Megalo {
                      this->raise_fatal("You cannot compare the result of a function call.");
                      return true;
                   }
-                  return this->__parseConditionEnding();
+                  auto result = this->__parseConditionEnding();
+                  if (statement) {
+                     auto comparison = dynamic_cast<Script::Comparison*>(statement);
+                     assert(comparison);
+                     this->_applyConditionModifiers(comparison);
+                  }
+                  return result;
                }
                //
                // If we got here, then the parsed word must be the lefthand side of a comparison statement.
@@ -1413,16 +1421,16 @@ namespace Megalo {
             statement->opcode = opcode.release();
          }
       }
+      auto result = this->__parseConditionEnding();
       this->_applyConditionModifiers(statement);
-      //
-      return this->__parseConditionEnding();
+      return result;
    }
    bool Compiler::__parseConditionEnding() {
       auto word = this->extract_word();
       if (word.compare("and", Qt::CaseInsensitive) == 0) {
          this->next_condition_joiner = c_joiner::and;
       } else if (word.compare("or", Qt::CaseInsensitive) == 0) {
-         this->next_condition_joiner = c_joiner:: or ;
+         this->next_condition_joiner = c_joiner::or;
       } else if (word.compare("then", Qt::CaseInsensitive) == 0) {
          return true;
       } else {
@@ -1553,6 +1561,13 @@ namespace Megalo {
          }
          //
          string_scanner argument(raw_args[script_arg_index]);
+         //
+         // It would probably make sense, at this point, to check whether the argument is empty and issue 
+         // a compile error from here if so, right? The problem is that we can't know whether that would 
+         // constitute an irresolvable failure (impossible to parse further arguments) or a resolvable 
+         // failure (can attempt to error-check further arguments). We have to try to compile the argument 
+         // text, even if it's literally empty, in order to discover that information.
+         //
          arg_compile_result result = current_argument->compile(*this, argument, opcode_arg_part);
          bool failure = result.is_failure();
          bool success = result.is_success();
@@ -1629,7 +1644,7 @@ namespace Megalo {
          }
       }
    }
-   void Compiler::_parseFunctionCall(const pos& call_start, QString stem, bool is_condition, Script::VariableReference* assign_to) {
+   Script::Statement* Compiler::_parseFunctionCall(const pos& call_start, QString stem, bool is_condition, Script::VariableReference* assign_to) {
       //
       // When this function is called, the stream position should be just after the 
       // opening parentheses for the call arguments. Assuming no syntax errors are 
@@ -1655,7 +1670,7 @@ namespace Megalo {
             auto c = stem[i];
             if (QString("[]").indexOf(c) >= 0) {
                this->raise_fatal(call_start, "Function names cannot contain square brackets.");
-               return;
+               return nullptr;
             }
             if (c == '.') {
                function_name = stem.right(size - 1 - i);
@@ -1670,7 +1685,7 @@ namespace Megalo {
             //
             if (i == size - 1) { // "name.()"
                this->raise_fatal(call_start, "Constructions of the form {name.()} are syntax errors. A function name is required.");
-               return;
+               return nullptr;
             }
             function_name = stem;
          } else {
@@ -1687,7 +1702,7 @@ namespace Megalo {
             } else {
                context.reset(this->__parseVariable(stem));
                if (this->has_fatal()) // the VariableReference may contain a syntax error
-                  return;
+                  return nullptr;
                //
                // Handle errors that may have occurred when resolving the variable.
                //
@@ -1698,7 +1713,7 @@ namespace Megalo {
                   //
                   if (!this->skip_to(')'))
                      this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
-                  return;
+                  return nullptr;
                }
             }
          }
@@ -1711,19 +1726,19 @@ namespace Megalo {
                this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot be called from inside of a condition.").arg(function_name));
                if (!this->skip_to(')'))
                   this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
-               return;
+               return nullptr;
             }
             if (assign_to) {
                this->raise_error(call_start, QString("User-defined functions such as \"%1\" cannot return values.").arg(function_name));
                if (!this->skip_to(')'))
                   this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
-               return;
+               return nullptr;
             }
             if (!this->extract_specific_char(')')) {
                this->raise_error(call_start, QString("Expected ')'. User-defined functions such as \"%1\" cannot have arguments passed to them.").arg(function_name));
                if (!this->skip_to(')'))
                   this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
-               return;
+               return nullptr;
             }
             //
             // Now, we need to compile a call to the user-defined function.
@@ -1750,7 +1765,7 @@ namespace Megalo {
             statement->set_start(call_start);
             statement->set_end(this->state);
             this->block->insert_item(statement);
-            return;
+            return nullptr;
          }
          //
          // If we get here, then the non-member function was not a user-defined function. Fall 
@@ -1782,7 +1797,7 @@ namespace Megalo {
          //
          if (!this->skip_to(')'))
             this->raise_fatal("Unable to locate the nearest ')' glyph; possible unterminated function call. Parsing cannot continue.");
-         return;
+         return nullptr;
       }
       //
       const OpcodeBase* match = nullptr;
@@ -1824,7 +1839,7 @@ namespace Megalo {
                   this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
             }
          }
-         return;
+         return nullptr;
       }
       //
       // If we've reached this point without any errors, then we should be just after the terminating ')' for the function call, 
@@ -1938,12 +1953,12 @@ namespace Megalo {
       statement->set_end(this->state);
       if (is_condition) {
          auto cnd = dynamic_cast<Script::Comparison*>(statement);
-         this->_applyConditionModifiers(cnd);
          this->block->insert_condition(cnd);
       } else {
          this->block->insert_item(statement);
       }
       this->_commit_unresolved_strings(unresolved_strings);
+      return statement;
    }
    //
    int32_t Compiler::_index_of_trigger(Trigger* t) const noexcept {

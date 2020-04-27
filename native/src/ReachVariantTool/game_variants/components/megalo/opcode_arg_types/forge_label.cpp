@@ -69,13 +69,12 @@ namespace Megalo {
          ReachString* name = f->name;
          auto english = name->english();
          auto data    = english.c_str();
-         if (!english.empty() && !strpbrk(data, "\"\r\n")) { // TODO: a more robust check; this will fail if a forge label string contains non-printables
+         if (!english.empty()) {
             //
             // TODO: Warn on decompile if the variant contains multiple Forge labels with identical 
             // non-blank strings, OR find some way to mark those as "only decompile to index."
             //
-            cobb::sprintf(temp, "\"%s\"", english.c_str());
-            out.write(temp);
+            out.write_string_literal(english);
             return;
          }
       }

@@ -114,34 +114,22 @@ int main(int argc, char *argv[]) {
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//     - MODIFY string_scanner::extract_string_literal TO HANDLE ALL ESCAPE CODES WHEN 
-//       INTERPRETING THE CONTENT OF THE STRING.
-//
-//     - EXAMINE string_scanner::scan AND ENSURE THAT A "--" INSIDE OF A STRING WOULD NOT BE 
-//       MISINTERPRETED AS A COMMENT.
-//
-//     - ADD A STATIC METHOD TO string_scanner TO ADD SUPPORTED ESCAPE CODES TO A STRING WHERE 
-//       APPROPRIATE. HAVE ALL DECOMPILE CODE USE THIS FOR ALL STRING LITERALS.
-//
 //     - Audit the "format string" argument type. I think we're saving it incorrectly: my MOTL 
 //       brute-force gametype displays constant integers (consistent, but consistently wrong) 
 //       in places where it should show the value of a variable despite my using the same token 
 //       (%n) as Bungie.
 //
-//        - Decompile and recompile Race, and test it in-game. If the non-timer readouts are 
-//          busted, then we are indeed mishandling this type (yet somehow without changing its 
-//          bitcount and corrupting the file outright).
+//        - Race's UI readouts work properly after being decompiled and recompiled.
 //
 //     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
 //       MCC's menus don't enforce this. Investigate.
+//
+//     - Identify unknown values in the "number" scope list.
 //
 //     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
 //       a dropdown). The arrow should allow you to select what to copy: the full English 
 //       content of the string; the English content as a string literal, with delimiters and 
 //       escape codes; and the string's index in the table.
-//
-//     - The compiler should probably throw an error when parsing a function argument, if the 
-//       argument is blank or whitespace-only (i.e. func(1, , 3)).
 //
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.

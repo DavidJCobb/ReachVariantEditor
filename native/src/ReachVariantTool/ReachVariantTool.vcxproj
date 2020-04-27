@@ -107,7 +107,6 @@
     <ClCompile Include="game_variants\components\megalo\compiler\types.cpp" />
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
-    <ClCompile Include="game_variants\components\megalo\enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\forge_label.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg.cpp" />
@@ -339,7 +338,6 @@
     <ClInclude Include="game_variants\components\map_permissions.h" />
     <ClInclude Include="game_variants\components\megalo\actions.h" />
     <ClInclude Include="game_variants\components\megalo\conditions.h" />
-    <ClInclude Include="game_variants\components\megalo\enums.h" />
     <ClInclude Include="game_variants\components\megalo\forge_label.h" />
     <ClInclude Include="game_variants\components\megalo\limits.h" />
     <ClInclude Include="game_variants\components\megalo\limits_bitnumbers.h" />

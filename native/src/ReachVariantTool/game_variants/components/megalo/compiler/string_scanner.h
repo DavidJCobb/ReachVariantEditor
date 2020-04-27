@@ -39,6 +39,9 @@ namespace Megalo {
             static bool is_syntax_char(QChar);
             static bool is_whitespace_char(QChar);
             //
+            static QString unescape(const QString&);
+            static QString escape(const QString&, QChar delim);
+            //
             inline QString trimmed() const noexcept { return this->text.trimmed(); }
             //
             void scan(scan_functor_t);

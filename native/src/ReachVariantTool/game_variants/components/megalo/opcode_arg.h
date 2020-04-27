@@ -7,7 +7,6 @@
 #include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
-#include "enums.h"
 #include "variables_and_scopes.h"
 #include "compiler/string_scanner.h"
 #include "decompiler/decompiler.h"

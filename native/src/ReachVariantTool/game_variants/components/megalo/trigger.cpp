@@ -428,18 +428,21 @@ namespace Megalo {
             break;
          case block_type::for_each_object_with_label:
             {
-               std::string line;
-               if (!this->forgeLabel) {
-                  line = "label none";
+               out.write("for each object with label ");
+               if (ReachForgeLabel* f = this->forgeLabel) {
+                  if (!f->name) {
+                     std::string temp;
+                     cobb::sprintf(temp, "%u", f->index);
+                     out.write(temp);
+                  } else {
+                     auto english = f->name->english().c_str();
+                     out.write_string_literal(english);
+                  }
+
                } else {
-                  ReachForgeLabel* f = this->forgeLabel;
-                  if (!f->name)
-                     cobb::sprintf(line, "label %u", f->index);
-                  else
-                     cobb::sprintf(line, "label \"%s\"", f->name->english().c_str()); // TODO: this will break if a label actually contains a double-quote
+                  out.write("!ERROR:NULL!");
                }
-               cobb::sprintf(line, "for each object with %s do", line.c_str());
-               out.write(line);
+               out.write(" do");
                out.modify_indent_count(1);
                ++indent_count;
             }
@@ -496,8 +499,9 @@ namespace Megalo {
          }
          if (writing_if_conditions) {
             out.write(u8"then ");
-            writing_if_conditions = false;
-            is_first_condition    = true;
+            last_condition_or_group = -1;
+            writing_if_conditions   = false;
+            is_first_condition      = true;
          }
          auto action = dynamic_cast<const Action*>(opcode);
          if (action) {

@@ -8,6 +8,10 @@ namespace Megalo {
          DetailedEnumValue("secondary"),
          DetailedEnumValue("force"), // swaps current weapon?
       });
+      auto attach_position = DetailedEnum({
+         DetailedEnumValue("absolute"),
+         DetailedEnumValue("relative"),
+      });
       auto c_hud_destination = DetailedEnum({
          DetailedEnumValue("unk_0"),
          DetailedEnumValue("unk_1"),
@@ -67,6 +71,10 @@ namespace Megalo {
          DetailedEnumValue("normal"),
          DetailedEnumValue("high"),
          DetailedEnumValue("blink"),
+      });
+      auto weapon_slot = DetailedEnum({
+         DetailedEnumValue("primary"),
+         DetailedEnumValue("secondary"),
       });
    }
 
@@ -147,6 +155,17 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueAddWeaponEnum>,
       enums::add_weapon_type
+   );
+
+   OpcodeArgValueAttachPositionEnum::OpcodeArgValueAttachPositionEnum() : OpcodeArgValueEnumSuperclass(enums::attach_position) {}
+   OpcodeArgTypeinfo OpcodeArgValueAttachPositionEnum::typeinfo = OpcodeArgTypeinfo(
+      "_attach_position",
+      "Attach Position Mode",
+      "Indicates whether the position offset specified is relative to the orientation of the object we're being attached to.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueAttachPositionEnum>,
+      enums::attach_position
    );
 
    OpcodeArgValueCHUDDestinationEnum::OpcodeArgValueCHUDDestinationEnum() : OpcodeArgValueEnumSuperclass(enums::c_hud_destination) {}
@@ -261,6 +280,17 @@ namespace Megalo {
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueWaypointPriorityEnum>,
       enums::waypoint_priority
+   );
+
+   OpcodeArgValueWeaponSlotEnum::OpcodeArgValueWeaponSlotEnum() : OpcodeArgValueEnumSuperclass(enums::weapon_slot) {}
+   OpcodeArgTypeinfo OpcodeArgValueWeaponSlotEnum::typeinfo = OpcodeArgTypeinfo(
+      "_weapon_slot",
+      "Weapon Slot",
+      "One of a player's two weapon slots: primary or secondary.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueWeaponSlotEnum>,
+      enums::weapon_slot
    );
 
    OpcodeArgValueLoadoutPalette::OpcodeArgValueLoadoutPalette() : OpcodeArgValueEnumSuperclass(enums::loadout_palette) {}

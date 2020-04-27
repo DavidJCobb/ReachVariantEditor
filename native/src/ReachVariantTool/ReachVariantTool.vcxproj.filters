@@ -79,9 +79,6 @@
     <ClCompile Include="game_variants\components\megalo\conditions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\enums.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game_variants\components\megalo\forge_label.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -691,9 +688,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\conditions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\enums.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\forge_label.h">

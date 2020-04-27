@@ -1,7 +1,6 @@
 #pragma once
 #include <cassert>
 #include <vector>
-#include "enums.h"
 #include "../../../formats/detailed_enum.h"
 
 namespace Megalo {
