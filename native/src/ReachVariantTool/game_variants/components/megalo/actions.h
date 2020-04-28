@@ -26,20 +26,20 @@ namespace Megalo {
 
    class Action : public Opcode {
       public:
+         virtual ~Action() {
+            this->reset();
+         }
+         //
          #if _DEBUG
             std::string debug_str;
             uint32_t    bit_offset = 0;
          #endif
-         const ActionFunction* function = nullptr;
-         std::vector<OpcodeArgValue*> arguments;
          //
-         virtual bool read(cobb::ibitreader&) noexcept override;
+         virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override {
-            for (auto& arg : this->arguments)
-               arg->postprocess(newlyLoaded);
-         }
          virtual void decompile(Decompiler& out) noexcept override;
+         virtual void reset() noexcept override;
+         virtual Opcode* create_of_this_type() const noexcept override { return new Action; }
    };
 }

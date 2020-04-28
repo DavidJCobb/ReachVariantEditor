@@ -36,7 +36,7 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
       auto& table = mp->scriptData.strings;
       if (index >= table.strings.size())
          return;
-      ref = table.strings[index];
+      ref = &table.strings[index];
       //
       emit selectedStringChanged();
    });
@@ -101,7 +101,7 @@ void ReachStringPicker::refreshList() {
    }
    auto& table = mp->scriptData.strings;
    for (size_t i = 0; i < table.strings.size(); i++) {
-      auto& string  = *table.strings[i];
+      auto& string  = table.strings[i];
       bool  allSame = string.can_be_forge_label();
       //
       if (this->_limitToSingleLanguageStrings)
@@ -144,7 +144,7 @@ void ReachStringPicker::refreshSelection() {
    auto& ptr = *this->_targetRef;
    int32_t i = -1;
    if (ptr) {
-      i = ptr->index();
+      i = ptr->index;
       if (i < 0) {
          if (!this->_allowNoString)
             return;
@@ -167,7 +167,7 @@ void ReachStringPicker::refreshListItem(uint32_t index) {
    auto& table = mp->scriptData.strings;
    if (index >= table.strings.size())
       return;
-   auto text      = QString::fromUtf8(table.strings[index]->english().c_str());
+   auto text      = QString::fromUtf8(table.strings[index].english().c_str());
    auto itemIndex = this->_combobox->findData(index);
    if (itemIndex >= 0)
       this->_combobox->setItemText(itemIndex, text);

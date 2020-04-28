@@ -16,11 +16,11 @@ class ReachTeamData {
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
       void read(cobb::ibitreader&) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) noexcept;
       //
       ReachString* get_name() noexcept {
          if (this->name.strings.size())
-            return this->name.strings[0];
+            return &this->name.strings[0];
          return nullptr;
       }
 };

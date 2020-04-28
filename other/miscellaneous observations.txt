@@ -1,0 +1,39 @@
+If a player is forced into a Monitor biped and then given a weapon, they will be able 
+to fire that weapon if it is a ranged weapon, and they will be able to swap it out 
+with any other weapon. Ranged weapons can do damage and kill, though this may only be 
+true on host.
+
+If a player is forced into a Monitor biped, they will automatically pick up any grenades 
+or armor abilities they fly over, but they will be unable to use them. The armor ability 
+will be visible on the Monitor's body as if it were attached rather than picked up (i.e. 
+the little holographic image is still visible).
+
+A Monitor-player can pick up a detached machine gun turret, but not use an attached one.
+
+If one biped is attached to the other, the attached biped will stop simulating physics, 
+and it will rotate with its "parent." Looking up or down pitches whatever bone the biped 
+is attached to. If the attached biped is killed, it will ragdoll (sometimes improperly); 
+my tests are not sufficient to indicate whether it remains attached to its parent object 
+past that point.
+
+If something is attached to a Monitor biped, it will be attached to whatever bone has 
+the hovering animation: the attached object will bob up and down with the Monitor's body.
+
+If two widgets have the same screen position, they will align intelligently rather than 
+overlapping.
+
+The "set_round_card_whatever" functions produce an effect whenever the parameters passed 
+vary from the last parameters that were passed: the round card is displayed again. As 
+such, you can call them every frame via a (for each player) loop, as Bungie does, so 
+long as you don't vary the text. (Alternatively, you can vary the text at specific times 
+to re-show the round card, as Bungie does with Invasion's phases.)
+
+Announcer voiceovers relating to the round timer (e.g. "thirty seconds remaining") will 
+play automatically, but the round itself will not end automatically; the script must end 
+the round. This is probably to faciliate things like Invasion writing directly to the 
+round timer to display the current phase's remaining time.
+
+The object.shape_contains condition only checks the pivot point for the target object. 
+For example, if you try to check whether a shape contains a Warthog, the check will only 
+pass if the Warthog's centerpoint is inside of the shape.
+

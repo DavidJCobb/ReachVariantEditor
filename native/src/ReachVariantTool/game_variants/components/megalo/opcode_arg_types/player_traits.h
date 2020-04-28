@@ -6,22 +6,19 @@
 
 namespace Megalo {
    class OpcodeArgValuePlayerTraits : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValuePlayerTraits;
-         }
          //
       public:
-         static constexpr int16_t max_index = Limits::max_script_traits;
+         cobb::refcount_ptr<ReachMegaloPlayerTraits> value;
          //
-         int16_t                      index = 0;
-         ref<ReachMegaloPlayerTraits> value = decltype(value)::make(*this);
-         bool postprocessed = false;
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept; // uses VariableReference because we want you to be able to alias traits
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 }

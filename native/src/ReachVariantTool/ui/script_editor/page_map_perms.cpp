@@ -60,6 +60,7 @@ namespace {
       _MapID(10080, QObject::tr("Firefight: Installation 04", disambig)),
       //*/
    };
+   static_assert(std::extent<decltype(_mapIDList)>::value <= ReachMapPermissions::max_count, "There's a limit on how many map IDs the game variant's map permissions can list.");
 }
 ScriptEditorPageMapPerms::ScriptEditorPageMapPerms(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

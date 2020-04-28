@@ -31,7 +31,7 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
          if (!string)
             return;
       }
-      auto index = string->index(); // should always be zero
+      auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::SingleLanguageString | ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->english();
          this->ui.fieldName->setText(QString::fromUtf8(english.c_str()));

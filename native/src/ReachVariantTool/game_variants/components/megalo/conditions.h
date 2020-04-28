@@ -35,24 +35,45 @@ namespace Megalo {
    extern std::array<ConditionFunction, 18> conditionFunctionList;
 
    class Condition : public Opcode {
+      //
+      // NOTES:
+      //
+      // Bungie implemented "or"-linked conditions using the (or_group) field. The (or_group) 
+      // field is set as follows: when compiling a Trigger, start a counter at 0. Every time 
+      // you compile a condition, copy the counter into its (or_group) and then, if the 
+      // condition is "and"-linked, increment the counter. Here's an example from Freeze Tag:
+      //
+      //    if  a -- 0
+      //    and b -- 1
+      //    then
+      //       if  c -- 2
+      //       or  d -- 2
+      //       and e -- 3
+      //       and f -- 4
+      //       then
+      //          ...
+      //       end
+      //    end
+      //
       public:
+         virtual ~Condition() {
+            this->reset();
+         }
+         //
          #if _DEBUG
             std::string debug_str;
             uint32_t    bit_offset = 0;
          #endif
-         const ConditionFunction* function = nullptr;
          bool     inverted =  false;
          condition_index or_group = 0;
          action_index    action   = 0; // execute before this action (cannot be none, which implies that a condition can't be the last opcode in a trigger)
-         std::vector<OpcodeArgValue*> arguments;
          //
-         virtual bool read(cobb::ibitreader&) noexcept override;
+         virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override {
-            for (auto& arg : this->arguments)
-               arg->postprocess(newlyLoaded);
-         }
          virtual void decompile(Decompiler& out) noexcept override;
+         virtual void reset() noexcept override;
+         virtual Opcode* create_of_this_type() const noexcept override { return new Condition; }
+         virtual Opcode* clone() const noexcept override;
    };
 }

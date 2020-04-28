@@ -30,15 +30,8 @@ namespace reach {
    }
 };
 
-int32_t ReachString::index() const noexcept {
-   auto& list = this->owner.strings;
-   auto  size = list.size();
-   for (size_t i = 0; i < size; i++)
-      if (this == list[i])
-         return i;
-   return -1;
-}
 void ReachString::read_offsets(cobb::ibitreader& stream, ReachStringTable& table) noexcept {
+   this->is_defined = true;
    for (size_t i = 0; i < this->offsets.size(); i++) {
       bool has = stream.read_bits(1) != 0;
       if (has)
@@ -169,6 +162,13 @@ bool ReachString::can_be_forge_label() const noexcept {
    }
    return true;
 }
+bool ReachString::empty() const noexcept {
+   for (size_t i = 1; i < reach::language_count; i++) {
+      if (!this->strings[i].empty())
+         return false;
+   }
+   return true;
+}
 
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
@@ -218,34 +218,39 @@ void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
 }
 bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
+   if (count > this->max_count) {
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      count = this->max_count; // TODO: WARN
+   }
    this->strings.reserve(count);
    for (size_t i = 0; i < count; i++) {
-      auto& string = *this->strings.emplace_back(new ReachString(*this));
+      auto& string = *this->strings.push_back(new ReachString(*this));
       string.read_offsets(stream, *this);
    }
    if (count) {
       auto buffer = this->_make_buffer(stream);
       if (buffer) {
          for (size_t i = 0; i < count; i++)
-            this->strings[i]->read_strings(buffer);
+            this->strings[i].read_strings(buffer);
          free(buffer);
       } else
          return false;
    }
    return true;
 }
-void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
+void ReachStringTable::write(cobb::bitwriter& stream) noexcept {
    stream.write(this->strings.size(), this->count_bitlength);
    if (this->strings.size()) {
       std::string combined; // UTF-8 buffer holding all string data including null terminators
-      for (auto& ptr : this->strings) {
-         auto& string = *ptr;
+      for (auto& string : this->strings) {
          string.write_strings(combined);
          string.write_offsets(stream, *this);
       }
       uint32_t uncompressed_size = combined.size();
       if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
-         printf("WARNING: TOTAL STRING DATA IS TOO LARGE");
+         printf("WARNING: TOTAL STRING DATA IS TOO LARGE\n");
          #if _DEBUG
             __debugbreak();
          #endif
@@ -290,21 +295,42 @@ void ReachStringTable::write(cobb::bitwriter& stream) const noexcept {
 ReachString* ReachStringTable::add_new() noexcept {
    if (this->is_at_count_limit())
       return nullptr;
-   auto& string = *this->strings.emplace_back(new ReachString(*this));
+   auto& string = *this->strings.push_back(new ReachString(*this));
    return &string;
 }
 void ReachStringTable::remove(size_t index) noexcept {
    if (index >= this->size())
       return;
-   if (this->strings[index]->get_inbound_references().size())
+   if (this->strings[index].get_refcount())
       return;
-   this->strings.erase(this->strings.begin() + index);
+   this->strings.erase(index);
 }
 uint32_t ReachStringTable::total_bytecount() noexcept {
    std::string combined; // UTF-8 buffer holding all string data including null terminators
-   for (auto& ptr : this->strings) {
-      auto& string = *ptr;
+   for (auto& string : this->strings) {
       string.write_strings(combined);
    }
    return combined.size();
+}
+ReachString* ReachStringTable::get_empty_entry() const noexcept {
+   for (auto& string : this->strings) {
+      if (string.empty())
+         return const_cast<ReachString*>(&string);
+   }
+   return nullptr;
+}
+ReachString* ReachStringTable::lookup(const QString& english, bool& matched_multiple) const noexcept {
+   matched_multiple = false;
+   ReachString* match = nullptr;
+   for (auto& string : this->strings) {
+      QString current = QString::fromUtf8(string.english().c_str());
+      if (current == english) {
+         if (match) {
+            matched_multiple = true;
+            break;
+         }
+         match = const_cast<ReachString*>(&string);
+      }
+   }
+   return match;
 }

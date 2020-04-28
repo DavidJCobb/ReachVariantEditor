@@ -1,97 +1,193 @@
 #include "variables_and_scopes.h"
+#include "opcode_arg_types/variables/all_core.h"
 
 namespace Megalo {
-   extern const SmartEnum megalo_scope_does_not_have_specifier = SmartEnum(nullptr, 0);
+   int8_t VariableScopeWhichValue::as_integer() const noexcept {
+      if (!this->owner)
+         return -1;
+      return this->owner->index_of(*this);
+   }
+   int8_t VariableScopeWhichValueList::index_of(const VariableScopeWhichValue& v) const noexcept {
+      size_t size = this->values.size();
+      for (size_t i = 0; i < size; ++i)
+         if (this->values[i] == &v)
+            return i;
+      return -1;
+   }
    //
-   #define megalo_define_scope(name, ...) namespace { namespace __scope_members { const char* _##name##[] = { __VA_ARGS__ }; } }; extern const SmartEnum name = SmartEnum(__scope_members::_##name##, std::extent<decltype(__scope_members::_##name##)>::value);
-   #define megalo_define_scope_with_offset(name, ...) namespace { namespace __scope_members { const char* _##name##[] = { __VA_ARGS__ }; } }; extern const SmartEnum name = SmartEnum(__scope_members::_##name##, std::extent<decltype(__scope_members::_##name##)>::value, true);
-   //
-   megalo_define_scope(megalo_objects,
-      "no object",
-      "Global.Object[0]",
-      "Global.Object[1]",
-      "Global.Object[2]",
-      "Global.Object[3]",
-      "Global.Object[4]",
-      "Global.Object[5]",
-      "Global.Object[6]",
-      "Global.Object[7]",
-      "Global.Object[8]",
-      "Global.Object[9]",
-      "Global.Object[10]",
-      "Global.Object[11]",
-      "Global.Object[12]",
-      "Global.Object[13]",
-      "Global.Object[14]",
-      "Global.Object[15]",
-      "current object",
-      "HUD target object",
-      "killed object",
-      "killer object",
-   );
-   megalo_define_scope(megalo_players,
-      "no player",
-      "Player 1",
-      "Player 2",
-      "Player 3",
-      "Player 4",
-      "Player 5",
-      "Player 6",
-      "Player 7",
-      "Player 8",
-      "Player 9",
-      "Player 10",
-      "Player 11",
-      "Player 12",
-      "Player 13",
-      "Player 14",
-      "Player 15",
-      "Player 16",
-      "Global.Player[0]",
-      "Global.Player[1]",
-      "Global.Player[2]",
-      "Global.Player[3]",
-      "Global.Player[4]",
-      "Global.Player[5]",
-      "Global.Player[6]",
-      "Global.Player[7]",
-      "current player",
-      "HUD player",
-      "HUD target",
-      "killer player",
-   );
-   megalo_define_scope_with_offset(megalo_teams,
-      "no team",
-      "Team 1",
-      "Team 2",
-      "Team 3",
-      "Team 4",
-      "Team 5",
-      "Team 6",
-      "Team 7",
-      "Team 8",
-      "Neutral",
-      "Global.Team[0]",
-      "Global.Team[1]",
-      "Global.Team[2]",
-      "Global.Team[3]",
-      "Global.Team[4]",
-      "Global.Team[5]",
-      "Global.Team[6]",
-      "Global.Team[7]",
-      "current team",
-      "HUD player's team",
-      "HUD target's team",
-      "unk_14 team",
-      "unk_15 team",
-   );
+   namespace variable_which_values {
+      using flags = VariableScopeWhichValue::flag;
+      //
+      namespace object {
+         extern VariableScopeWhichValue no_object  = VariableScopeWhichValue("no_object", flags::is_none);
+         extern VariableScopeWhichValue global_0   = VariableScopeWhichValue("global.object[0]");
+         extern VariableScopeWhichValue global_1   = VariableScopeWhichValue("global.object[1]");
+         extern VariableScopeWhichValue global_2   = VariableScopeWhichValue("global.object[2]");
+         extern VariableScopeWhichValue global_3   = VariableScopeWhichValue("global.object[3]");
+         extern VariableScopeWhichValue global_4   = VariableScopeWhichValue("global.object[4]");
+         extern VariableScopeWhichValue global_5   = VariableScopeWhichValue("global.object[5]");
+         extern VariableScopeWhichValue global_6   = VariableScopeWhichValue("global.object[6]");
+         extern VariableScopeWhichValue global_7   = VariableScopeWhichValue("global.object[7]");
+         extern VariableScopeWhichValue global_8   = VariableScopeWhichValue("global.object[8]");
+         extern VariableScopeWhichValue global_9   = VariableScopeWhichValue("global.object[9]");
+         extern VariableScopeWhichValue global_10  = VariableScopeWhichValue("global.object[10]");
+         extern VariableScopeWhichValue global_11  = VariableScopeWhichValue("global.object[11]");
+         extern VariableScopeWhichValue global_12  = VariableScopeWhichValue("global.object[12]");
+         extern VariableScopeWhichValue global_13  = VariableScopeWhichValue("global.object[13]");
+         extern VariableScopeWhichValue global_14  = VariableScopeWhichValue("global.object[14]");
+         extern VariableScopeWhichValue global_15  = VariableScopeWhichValue("global.object[15]");
+         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_object", flags::is_read_only);
+         extern VariableScopeWhichValue hud_target = VariableScopeWhichValue("hud_target_object", flags::is_read_only);
+         extern VariableScopeWhichValue killed     = VariableScopeWhichValue("killed_object", flags::is_read_only);
+         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_object", flags::is_read_only);
+         //
+         extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
+            &no_object,
+            &global_0,
+            &global_1,
+            &global_2,
+            &global_3,
+            &global_4,
+            &global_5,
+            &global_6,
+            &global_7,
+            &global_8,
+            &global_9,
+            &global_10,
+            &global_11,
+            &global_12,
+            &global_13,
+            &global_14,
+            &global_15,
+            &current,
+            &hud_target,
+            &killed,
+            &killer,
+         });
+      }
+      namespace player {
+         extern VariableScopeWhichValue no_player  = VariableScopeWhichValue("no_player", flags::is_none);
+         extern VariableScopeWhichValue player_0   = VariableScopeWhichValue("player[0]", flags::is_read_only);
+         extern VariableScopeWhichValue player_1   = VariableScopeWhichValue("player[1]", flags::is_read_only);
+         extern VariableScopeWhichValue player_2   = VariableScopeWhichValue("player[2]", flags::is_read_only);
+         extern VariableScopeWhichValue player_3   = VariableScopeWhichValue("player[3]", flags::is_read_only);
+         extern VariableScopeWhichValue player_4   = VariableScopeWhichValue("player[4]", flags::is_read_only);
+         extern VariableScopeWhichValue player_5   = VariableScopeWhichValue("player[5]", flags::is_read_only);
+         extern VariableScopeWhichValue player_6   = VariableScopeWhichValue("player[6]", flags::is_read_only);
+         extern VariableScopeWhichValue player_7   = VariableScopeWhichValue("player[7]", flags::is_read_only);
+         extern VariableScopeWhichValue player_8   = VariableScopeWhichValue("player[8]", flags::is_read_only);
+         extern VariableScopeWhichValue player_9   = VariableScopeWhichValue("player[9]", flags::is_read_only);
+         extern VariableScopeWhichValue player_10  = VariableScopeWhichValue("player[10]", flags::is_read_only);
+         extern VariableScopeWhichValue player_11  = VariableScopeWhichValue("player[11]", flags::is_read_only);
+         extern VariableScopeWhichValue player_12  = VariableScopeWhichValue("player[12]", flags::is_read_only);
+         extern VariableScopeWhichValue player_13  = VariableScopeWhichValue("player[13]", flags::is_read_only);
+         extern VariableScopeWhichValue player_14  = VariableScopeWhichValue("player[14]", flags::is_read_only);
+         extern VariableScopeWhichValue player_15  = VariableScopeWhichValue("player[15]", flags::is_read_only);
+         extern VariableScopeWhichValue global_0   = VariableScopeWhichValue("global.player[0]");
+         extern VariableScopeWhichValue global_1   = VariableScopeWhichValue("global.player[1]");
+         extern VariableScopeWhichValue global_2   = VariableScopeWhichValue("global.player[2]");
+         extern VariableScopeWhichValue global_3   = VariableScopeWhichValue("global.player[3]");
+         extern VariableScopeWhichValue global_4   = VariableScopeWhichValue("global.player[4]");
+         extern VariableScopeWhichValue global_5   = VariableScopeWhichValue("global.player[5]");
+         extern VariableScopeWhichValue global_6   = VariableScopeWhichValue("global.player[6]");
+         extern VariableScopeWhichValue global_7   = VariableScopeWhichValue("global.player[7]");
+         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_player", flags::is_read_only);
+         extern VariableScopeWhichValue hud        = VariableScopeWhichValue("hud_player", flags::is_read_only);
+         extern VariableScopeWhichValue hud_target = VariableScopeWhichValue("hud_target_player", flags::is_read_only);
+         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_player", flags::is_read_only);
+         //
+         extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
+            &no_player,
+            &player_0,
+            &player_1,
+            &player_2,
+            &player_3,
+            &player_4,
+            &player_5,
+            &player_6,
+            &player_7,
+            &player_8,
+            &player_9,
+            &player_10,
+            &player_11,
+            &player_12,
+            &player_13,
+            &player_14,
+            &player_15,
+            &global_0,
+            &global_1,
+            &global_2,
+            &global_3,
+            &global_4,
+            &global_5,
+            &global_6,
+            &global_7,
+            &current,
+            &hud,
+            &hud_target,
+            &killer,
+         });
+      }
+      namespace team {
+         extern VariableScopeWhichValue no_team  = VariableScopeWhichValue("no_team", flags::is_none);
+         extern VariableScopeWhichValue team_0   = VariableScopeWhichValue("team[0]", flags::is_read_only);
+         extern VariableScopeWhichValue team_1   = VariableScopeWhichValue("team[1]", flags::is_read_only);
+         extern VariableScopeWhichValue team_2   = VariableScopeWhichValue("team[2]", flags::is_read_only);
+         extern VariableScopeWhichValue team_3   = VariableScopeWhichValue("team[3]", flags::is_read_only);
+         extern VariableScopeWhichValue team_4   = VariableScopeWhichValue("team[4]", flags::is_read_only);
+         extern VariableScopeWhichValue team_5   = VariableScopeWhichValue("team[5]", flags::is_read_only);
+         extern VariableScopeWhichValue team_6   = VariableScopeWhichValue("team[6]", flags::is_read_only);
+         extern VariableScopeWhichValue team_7   = VariableScopeWhichValue("team[7]", flags::is_read_only);
+         extern VariableScopeWhichValue neutral_team = VariableScopeWhichValue("neutral_team", flags::is_read_only);
+         extern VariableScopeWhichValue global_0 = VariableScopeWhichValue("global.team[0]");
+         extern VariableScopeWhichValue global_1 = VariableScopeWhichValue("global.team[1]");
+         extern VariableScopeWhichValue global_2 = VariableScopeWhichValue("global.team[2]");
+         extern VariableScopeWhichValue global_3 = VariableScopeWhichValue("global.team[3]");
+         extern VariableScopeWhichValue global_4 = VariableScopeWhichValue("global.team[4]");
+         extern VariableScopeWhichValue global_5 = VariableScopeWhichValue("global.team[5]");
+         extern VariableScopeWhichValue global_6 = VariableScopeWhichValue("global.team[6]");
+         extern VariableScopeWhichValue global_7 = VariableScopeWhichValue("global.team[7]");
+         extern VariableScopeWhichValue current  = VariableScopeWhichValue("current_team", flags::is_read_only);
+         extern VariableScopeWhichValue hud_player_owner_team        = VariableScopeWhichValue("hud_player.team", flags::is_read_only);
+         extern VariableScopeWhichValue hud_target_player_owner_team = VariableScopeWhichValue("hud_target_player.team", flags::is_read_only);
+         extern VariableScopeWhichValue unk_14   = VariableScopeWhichValue("unk_14_team");
+         extern VariableScopeWhichValue unk_15   = VariableScopeWhichValue("unk_15_team");
+         //
+         extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
+            &no_team,
+            &team_0,
+            &team_1,
+            &team_2,
+            &team_3,
+            &team_4,
+            &team_5,
+            &team_6,
+            &team_7,
+            &neutral_team,
+            &global_0,
+            &global_1,
+            &global_2,
+            &global_3,
+            &global_4,
+            &global_5,
+            &global_6,
+            &global_7,
+            &current,
+            &hud_player_owner_team,
+            &hud_target_player_owner_team,
+            &unk_14,
+            &unk_15,
+         });
+      }
+   }
+   extern const VariableScopeWhichValueList megalo_scope_does_not_have_specifier = VariableScopeWhichValueList({});
 
    extern const VariableScope MegaloVariableScopeGlobal = VariableScope(megalo_scope_does_not_have_specifier, 12, 8, 8, 8, 16);
-   extern const VariableScope MegaloVariableScopePlayer = VariableScope(megalo_players, 8, 4, 4, 4, 4);
-   extern const VariableScope MegaloVariableScopeObject = VariableScope(megalo_objects, 8, 4, 2, 4, 4);
-   extern const VariableScope MegaloVariableScopeTeam   = VariableScope(megalo_teams,   8, 4, 4, 4, 6);
+   extern const VariableScope MegaloVariableScopePlayer = VariableScope(variable_which_values::player::list, 8, 4, 4, 4, 4);
+   extern const VariableScope MegaloVariableScopeObject = VariableScope(variable_which_values::object::list, 8, 4, 2, 4, 4);
+   extern const VariableScope MegaloVariableScopeTeam   = VariableScope(variable_which_values::team::list,   8, 4, 4, 4, 6);
 
-   const VariableScope& getScopeObjectForConstant(variable_scope s) noexcept {
+   extern const VariableScope& getScopeObjectForConstant(variable_scope s) noexcept {
       switch (s) {
          case variable_scope::global:
             return MegaloVariableScopeGlobal;
@@ -105,7 +201,18 @@ namespace Megalo {
       assert(false && "Unknown variable scope!");
       __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
    }
-   variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
+   extern const VariableScope* getScopeObjectForConstant(variable_type s) noexcept {
+      switch (s) {
+         case variable_type::player:
+            return &MegaloVariableScopePlayer;
+         case variable_type::object:
+            return &MegaloVariableScopeObject;
+         case variable_type::team:
+            return &MegaloVariableScopeTeam;
+      }
+      return nullptr;
+   }
+   extern variable_scope getScopeConstantForObject(const VariableScope& s) noexcept {
       if (&s == &MegaloVariableScopeGlobal)
          return variable_scope::global;
       if (&s == &MegaloVariableScopePlayer)
@@ -115,5 +222,40 @@ namespace Megalo {
       if (&s == &MegaloVariableScopeTeam)
          return variable_scope::team;
       return variable_scope::not_a_scope;
+   }
+   extern variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+      if (!t)
+         return variable_scope::global;
+      if (t == &OpcodeArgValueObject::typeinfo)
+         return variable_scope::object;
+      if (t == &OpcodeArgValuePlayer::typeinfo)
+         return variable_scope::player;
+      if (t == &OpcodeArgValueTeam::typeinfo)
+         return variable_scope::team;
+      return variable_scope::not_a_scope;
+   }
+   extern variable_type getVariableTypeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {
+      if (t == &OpcodeArgValueScalar::typeinfo)
+         return variable_type::scalar;
+      if (t == &OpcodeArgValueObject::typeinfo)
+         return variable_type::object;
+      if (t == &OpcodeArgValuePlayer::typeinfo)
+         return variable_type::player;
+      if (t == &OpcodeArgValueTeam::typeinfo)
+         return variable_type::team;
+      if (t == &OpcodeArgValueTimer::typeinfo)
+         return variable_type::timer;
+      return variable_type::not_a_variable;
+   }
+   extern const VariableScope* getScopeObjectForTypeinfo(const OpcodeArgTypeinfo* ti) noexcept {
+      if (!ti)
+         return &MegaloVariableScopeGlobal;
+      if (ti == &OpcodeArgValueObject::typeinfo)
+         return &MegaloVariableScopeObject;
+      if (ti == &OpcodeArgValuePlayer::typeinfo)
+         return &MegaloVariableScopePlayer;
+      if (ti == &OpcodeArgValueTeam::typeinfo)
+         return &MegaloVariableScopeTeam;
+      return nullptr;
    }
 }

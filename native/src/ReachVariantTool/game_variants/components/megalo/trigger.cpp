@@ -3,21 +3,35 @@
 #include "opcode_arg_types/all_indices.h"
 #include "../../types/multiplayer.h"
 
+namespace {
+   constexpr int ce_max_index      = Megalo::Limits::max_script_labels;
+   constexpr int ce_index_bitcount = cobb::bitcount(ce_max_index); // DON'T subtract 1; you can do "for each with no label" and that encodes as -1, i.e. we need an extra bit for the sign
+   //
+   using _index_t = int8_t;
+   static_assert(std::numeric_limits<_index_t>::max() >= ce_max_index, "Use a larger type.");
+}
 namespace Megalo {
+   #pragma region Trigger
    Trigger::~Trigger() {
       for (auto opcode : this->opcodes)
          delete opcode;
       this->opcodes.clear();
    }
    //
-   bool Trigger::read(cobb::ibitreader& stream) noexcept {
+   bool Trigger::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
          this->bit_offset = stream.get_bitpos();
       #endif
       this->blockType.read(stream);
       this->entryType.read(stream);
-      if (this->blockType == block_type::for_each_object_with_label)
-         this->forgeLabelIndex.read(stream);
+      if (this->blockType == block_type::for_each_object_with_label) {
+         _index_t index = stream.read_bits(ce_index_bitcount);
+         if (index != -1) {
+            auto& list = mp.scriptContent.forgeLabels;
+            if (index < list.size())
+               this->forgeLabel = &list[index];
+         }
+      }
       this->raw.conditionStart.read(stream);
       this->raw.conditionCount.read(stream);
       this->raw.actionStart.read(stream);
@@ -25,6 +39,12 @@ namespace Megalo {
       return true;
    }
    void Trigger::postprocess_opcodes(const std::vector<Condition>& conditions, const std::vector<Action>& actions) noexcept {
+      //
+      // Opcodes are written to the file as flat lists: all conditions in the entire script, consecutively; then 
+      // all actions in the entire script, consecutively; and then all triggers. Indices and counts in the triggers 
+      // and conditions make it possible to reconstruct the triggers (and properly interleave conditions and actions) 
+      // once all data is loaded.
+      //
       auto& raw = this->raw;
       std::vector<Action*> temp;
       //
@@ -62,30 +82,144 @@ namespace Megalo {
          }
       }
    }
-   void Trigger::postprocess(GameVariantDataMultiplayer* mp) noexcept {
-      if (this->blockType == block_type::for_each_object_with_label) {
-         if (this->forgeLabelIndex != -1) {
-            auto& list = mp->scriptContent.forgeLabels;
-            if (this->forgeLabelIndex < list.size())
-               this->forgeLabel = &list[this->forgeLabelIndex];
-         }
-      }
-   }
    void Trigger::write(cobb::bitwriter& stream) const noexcept {
       this->blockType.write(stream);
       this->entryType.write(stream);
       if (this->blockType == block_type::for_each_object_with_label) {
-         if (!this->forgeLabel)
-            this->forgeLabelIndex = -1;
-         else
-            this->forgeLabelIndex = this->forgeLabel->index;
-         this->forgeLabelIndex.write(stream);
+         _index_t index = -1;
+         if (this->forgeLabel)
+            index = this->forgeLabel->index;
+         stream.write(index, ce_index_bitcount);
       }
       this->raw.conditionStart.write(stream);
       this->raw.conditionCount.write(stream);
       this->raw.actionStart.write(stream);
       this->raw.actionCount.write(stream);
    }
+   //
+   void Trigger::prep_for_flat_opcode_lists() {
+      this->raw.serialized = false;
+   }
+   void Trigger::generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions) {
+      //
+      // Opcodes are written to the file as flat lists: all conditions in the entire script, consecutively; then 
+      // all actions in the entire script, consecutively; and then all triggers. Indices and counts in the triggers 
+      // and conditions make it possible to reconstruct the triggers (and properly interleave conditions and actions) 
+      // once all data is loaded.
+      //
+      // But... how is the data written?
+      //
+      // I examined some of Bungie's scripts by hand. It looks like for any given trigger:
+      //
+      //  - The opcodes of all nested triggers are written first.
+      //  - Then, the trigger's own opcodes are written.
+      //  - If a trigger doesn't contain any of a given kind of opcode, it'll still have a non-zero start index.
+      //
+      // As an example:
+      //
+      //    do              | Trigger 0 |           | Trigger indices are in order from outermost to innermost...
+      //       condition    |           | Cond.n  2 | ...but opcodes are ordered from innermost to outermost.
+      //       action       |           | Action  3 | 
+      //       action       |           | Action  4 | 
+      //       condition    |           | Cond.n  5 | 
+      //       do           | Trigger 1 |           | 
+      //          action    | Action  0 |           | 
+      //          condition | Cond.n  0 |           | 
+      //          action    | Action  1 |           | All content is sequential otherwise.
+      //       end          |           |           | 
+      //       do           | Trigger 2 |           | 
+      //          action    | Action  2 |           | 
+      //       end          |           |           | 
+      //       action       |           | Action  5 | 
+      //    end
+      //
+      // Below is Trigger 2 from Alpha Zombies, but we'll start our numbering off from 0 for simplicity. This time, 
+      // we'll also note that nested triggers are "execute" actions.
+      /*
+            CODE               | TRIGGERS  | OPS    | BY SEQUENCE            |
+            -------------------+-----------+--------+------------------------+
+            do                 | Trigger 0 |        |    :    :    :    :    |
+               do              | Trigger 1 | A |  9 |    |    |    |    |  9 |
+                  condition    |           | C |  2 |    |  2 |    |    |    |
+                  do           | Trigger 2 | A |  2 |    |  2 |    |    |    |
+                     condition |           | C |  0 |  0 |    |    |    |    |
+                     action    |           | A |  0 |  0 |    |    |    |    |
+                  end          |           |        |    :    :    :    :    |
+                  do           | Trigger 3 | A |  3 |    |  3 |    |    |    |
+                     condition |           | C |  1 |  1 |    |    |    |    |
+                     action    |           | A |  1 |  1 |    |    |    |    |
+                  end          |           |        |    :    :    :    :    |
+               end             |           |        |    :    :    :    :    |
+               do              | Trigger 4 | A | 10 |    |    |    |    | 10 |
+                  condition    |           | C |  5 |    |    |    |  5 |    |
+                  action       |           | A |  6 |    |    |    |  6 |    |
+                  do           | Trigger 5 | A |  7 |    |    |    |  7 |    |
+                     condition |           | C |  3 |    |    |  3 |    |    |
+                     action    |           | A |  4 |    |    |  4 |    |    |
+                  end          |           |        |    :    :    :    :    |
+                  do           | Trigger 6 | A |  8 |    |    |    |  8 |    |
+                     condition |           | C |  4 |    |    |  4 |    |    |
+                     action    |           | A |  5 |    |    |  5 |    |    |
+                  end          |           |        |    :    :    :    :    |
+               end             |           |        |    :    :    :    :    |
+            end                |           |        |    :    :    :    :    |
+      */
+      // As you can see, triggers are numbered in sequence with the outermost first, while opcodes are numbered 
+      // in sequence with the innermost first. However, this doesn't "cross boundaries." Triggers 2, 3, 5, and 6 
+      // are all nested to the same depth, but Triggers 2 and 3 share a parent (Trigger 1) while Triggers 5 and 
+      // 6 share a different parent (Trigger 4); therefore, Bungie's code serializes the opcodes for the triggers 
+      // in this order: 2, 3, 1, 5, 6, 4; before then writing the opcodes for the root trigger 0.
+      //
+      if (this->raw.serialized) { // guard needed since we're doing nested triggers out of flat order
+         return;
+      }
+      this->raw.serialized = true;
+      //
+      auto& triggers = mp.scriptContent.triggers;
+      size_t size = this->opcodes.size();
+      //
+      // Recurse over nested triggers first, so that opcodes are serialized inner-first.
+      //
+      for (size_t i = 0; i < size; i++) {
+         auto* opcode = this->opcodes[i];
+         auto  action = dynamic_cast<const Action*>(opcode);
+         if (action) {
+            if (action->function == &actionFunction_runNestedTrigger) {
+               auto arg = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
+               assert(arg && "Found a Run Nested Trigger action with no argument specifying the trigger?!");
+               auto i   = arg->value;
+               assert(i >= 0 && i < triggers.size() && "Found a Run Nested Trigger action with an out-of-bounds index.");
+               triggers[i].generate_flat_opcode_lists(mp, allConditions, allActions);
+            }
+         }
+      }
+      //
+      // Now run over our own opcodes.
+      //
+      this->raw.conditionStart = allConditions.size();
+      this->raw.conditionCount = 0;
+      this->raw.actionStart    = allActions.size();
+      this->raw.actionCount    = 0;
+      for (size_t i = 0; i < size; ++i) {
+         auto* opcode    = this->opcodes[i];
+         auto  condition = dynamic_cast<Condition*>(opcode);
+         if (condition) {
+            this->raw.conditionCount += 1;
+            allConditions.push_back(condition);
+            //
+            condition->action = this->raw.actionCount;
+            //
+            continue;
+         }
+         auto action = dynamic_cast<Action*>(opcode);
+         if (action) {
+            this->raw.actionCount += 1;
+            allActions.push_back(action);
+            continue;
+         }
+      }
+   }
+   //
    void Trigger::to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept {
       std::string line;
       //
@@ -100,15 +234,11 @@ namespace Megalo {
             break;
          case block_type::for_each_object_with_label:
             if (!this->forgeLabel) {
-               if (this->forgeLabelIndex == -1) {
-                  line = "for each object with no label";
-               } else {
-                  cobb::sprintf(line, "for each object with label #%d", this->forgeLabelIndex);
-               }
+               line = "for each object with label none";
             } else {
                ReachForgeLabel* f = this->forgeLabel;
                if (!f->name) {
-                  cobb::sprintf(line, "label index %u", this->forgeLabelIndex);
+                  cobb::sprintf(line, "label index %u", f->index);
                   break;
                }
                cobb::sprintf(line, "for each object with label %s", f->name->english().c_str());
@@ -118,8 +248,8 @@ namespace Megalo {
          case block_type::for_each_player:
             out += "for each player";
             break;
-         case block_type::for_each_player_random:
-            out += "for each player random?";
+         case block_type::for_each_player_randomly:
+            out += "for each player randomly";
             break;
          case block_type::for_each_team:
             out += "for each team";
@@ -217,6 +347,7 @@ namespace Megalo {
       if (!mp)
          return;
       auto& triggers = mp->scriptContent.triggers;
+      auto& entry    = mp->scriptContent.entryPoints;
       //
       uint16_t indent_count          = 0;     // needed because if-blocks aren't "real;" we "open" one every time we encounter one or more conditions in a row, so we need to remember how many "end"s to write
       bool     is_first_opcode       = true;  // see comment for (trigger_is_if_block)
@@ -235,7 +366,23 @@ namespace Megalo {
             out.write_line(u8"on local: "); // TODO: don't put this on its own line
             break;
          case entry_type::on_host_migration:
-            out.write_line(u8"on host migration: ");
+            {
+               bool is_double_host_migration = false;
+               {
+                  size_t size = triggers.size();
+                  for (size_t i = 0; i < size; ++i) {
+                     if (&triggers[i] == this) {
+                        if (entry.indices.doubleHostMigrate == i)
+                           is_double_host_migration = true;
+                        break;
+                     }
+                  }
+               }
+               if (is_double_host_migration)
+                  out.write_line(u8"on double host migration: ");
+               else
+                  out.write_line(u8"on host migration: ");
+            }
             break;
          case entry_type::on_init:
             out.write_line(u8"on init: ");
@@ -281,21 +428,21 @@ namespace Megalo {
             break;
          case block_type::for_each_object_with_label:
             {
-               std::string line;
-               if (!this->forgeLabel) {
-                  if (this->forgeLabelIndex == -1)
-                     line = "no label";
-                  else
-                     cobb::sprintf(line, "label %d", this->forgeLabelIndex);
+               out.write("for each object with label ");
+               if (ReachForgeLabel* f = this->forgeLabel) {
+                  if (!f->name) {
+                     std::string temp;
+                     cobb::sprintf(temp, "%u", f->index);
+                     out.write(temp);
+                  } else {
+                     auto english = f->name->english().c_str();
+                     out.write_string_literal(english);
+                  }
+
                } else {
-                  ReachForgeLabel* f = this->forgeLabel;
-                  if (!f->name)
-                     cobb::sprintf(line, "label %u", this->forgeLabelIndex);
-                  else
-                     cobb::sprintf(line, "label \"%s\"", f->name->english().c_str()); // TODO: this will break if a label actually contains a double-quote
+                  out.write("!ERROR:NULL!");
                }
-               cobb::sprintf(line, "for each object with %s do", line.c_str());
-               out.write(line);
+               out.write(" do");
                out.modify_indent_count(1);
                ++indent_count;
             }
@@ -305,7 +452,7 @@ namespace Megalo {
             out.modify_indent_count(1);
             ++indent_count;
             break;
-         case block_type::for_each_player_random:
+         case block_type::for_each_player_randomly:
             out.write(u8"for each player randomly do");
             out.modify_indent_count(1);
             ++indent_count;
@@ -352,8 +499,9 @@ namespace Megalo {
          }
          if (writing_if_conditions) {
             out.write(u8"then ");
-            writing_if_conditions = false;
-            is_first_condition    = true;
+            last_condition_or_group = -1;
+            writing_if_conditions   = false;
+            is_first_condition      = true;
          }
          auto action = dynamic_cast<const Action*>(opcode);
          if (action) {
@@ -378,6 +526,11 @@ namespace Megalo {
          }
          out.write_line(u8"-- invalid opcode type");
       }
+      if (writing_if_conditions) { // can be true if the last opcode was a condition
+         out.write(u8"then ");
+         writing_if_conditions = false;
+         is_first_condition = true;
+      }
       //
       // Close all open blocks. Remember: conditions encountered in the middle of the trigger count 
       // as new if-blocks that we have to open, so we have to de-indent and write an "end" keyword 
@@ -388,4 +541,68 @@ namespace Megalo {
          out.write_line(u8"end");
       }
    }
+   void Trigger::count_contents(size_t& conditions, size_t& actions) const noexcept {
+      for (auto& opcode : this->opcodes) {
+         if (dynamic_cast<const Condition*>(opcode))
+            ++conditions;
+         else if (dynamic_cast<const Action*>(opcode))
+            ++actions;
+      }
+   }
+   #pragma endregion
+   //
+   #pragma region TriggerEntryPoints
+   /*static*/ void TriggerEntryPoints::_stream(cobb::ibitreader& stream, int32_t& index) noexcept {
+      index = (int32_t)stream.read_bits(cobb::bitcount(Limits::max_triggers)) - 1;
+   }
+   /*static*/ void TriggerEntryPoints::_stream(cobb::bitwriter& stream, int32_t index) noexcept {
+      if (index < 0)
+         index = -1;
+      stream.write(index + 1, cobb::bitcount(Limits::max_triggers));
+   }
+   bool TriggerEntryPoints::read(cobb::ibitreader& stream) noexcept {
+      auto& i = this->indices;
+      _stream(stream, i.init);
+      _stream(stream, i.localInit);
+      _stream(stream, i.hostMigrate);
+      _stream(stream, i.doubleHostMigrate);
+      _stream(stream, i.objectDeath);
+      _stream(stream, i.local);
+      _stream(stream, i.pregame);
+      return true;
+   }
+   void TriggerEntryPoints::write(cobb::bitwriter& stream) const noexcept {
+      auto& i = this->indices;
+      _stream(stream, i.init);
+      _stream(stream, i.localInit);
+      _stream(stream, i.hostMigrate);
+      _stream(stream, i.doubleHostMigrate);
+      _stream(stream, i.objectDeath);
+      _stream(stream, i.local);
+      _stream(stream, i.pregame);
+   }
+   int32_t TriggerEntryPoints::get_index_of_event(entry_type et) const noexcept {
+      auto& i = this->indices;
+      switch (et) {
+         case entry_type::local: return i.local;
+         case entry_type::on_host_migration: return i.hostMigrate;
+         case entry_type::on_init: return i.init;
+         case entry_type::on_local_init: return i.localInit;
+         case entry_type::on_object_death: return i.objectDeath;
+         case entry_type::pregame: return i.pregame;
+      }
+      return TriggerEntryPoints::none;
+   }
+   void TriggerEntryPoints::set_index_of_event(entry_type et, int32_t index) noexcept {
+      auto& i = this->indices;
+      switch (et) {
+         case entry_type::local: i.local = index; return;
+         case entry_type::on_host_migration: i.hostMigrate = index; return;
+         case entry_type::on_init: i.init = index; return;
+         case entry_type::on_local_init: i.localInit = index; return;
+         case entry_type::on_object_death: i.objectDeath = index; return;
+         case entry_type::pregame: i.pregame = index; return;
+      }
+   }
+   #pragma endregion
 }

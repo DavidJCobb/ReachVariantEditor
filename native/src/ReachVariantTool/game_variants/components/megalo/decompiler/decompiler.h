@@ -10,6 +10,16 @@ namespace Megalo {
          using string_type = QString;
          using char_type   = QChar;
          //
+         struct flags {
+            flags() = delete;
+            enum type : uint64_t {
+               none = 0,
+               //
+               is_call_context = 0x000000000000001,
+            };
+         };
+         using flags_t = std::underlying_type_t<flags::type>;
+         //
       protected:
          string_type  current_indent;
          uint8_t      indent_size = 3;
@@ -23,6 +33,10 @@ namespace Megalo {
          inline uint8_t get_indent_size() const noexcept { return this->indent_size; }
          inline void set_indent_size(uint8_t spaces) noexcept { this->indent_size = spaces; } // TOOD: fail if decompiling is in progress
          //
+         void decompile();
+         //
+         // Code below is provided to the objects being decompiled:
+         //
          void modify_indent_count(int16_t nesting) noexcept;
          //
          void write(string_type& content);
@@ -32,6 +46,8 @@ namespace Megalo {
          void write_line(string_type& content); // writes `\n${current_indent}${content}`
          void write_line(std::string& content); // writes `\n${current_indent}${content}`
          void write_line(const char*  content); // writes `\n${current_indent}${content}`
+         void write_string_literal(const char*  content); // content is taken as UTF-8
+         void write_string_literal(std::string& content); // content is taken as UTF-8
          //
          inline GameVariant& get_variant() { return this->variant; }
    };

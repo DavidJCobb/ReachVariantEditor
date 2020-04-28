@@ -4,6 +4,7 @@
 #include "../../helpers/stream.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
+#include "../../formats/indexed_lists.h"
 #include <QObject>
 
 namespace reach {
@@ -278,7 +279,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<4, reach::health_rate> healthRate = reach::health_rate::unchanged;
          cobb::bitnumber<3, reach::shield_multiplier> shieldMult = reach::shield_multiplier::unchanged;
          cobb::bitnumber<4, reach::shield_rate> shieldRate = reach::shield_rate::unchanged;
-         cobb::bitnumber<4, uint8_t> shieldDelay; // not actually regen delay; current meaning unknown
+         cobb::bitnumber<4, uint8_t> overshieldRate; // recharge rate for overshield powerup? or for overshields in general?
          cobb::bitnumber<2, reach::bool_trait> headshotImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<3, uint8_t> vampirism;
          cobb::bitnumber<2, reach::bool_trait> assassinImmune = reach::bool_trait::unchanged;
@@ -302,7 +303,7 @@ class ReachPlayerTraits {
          cobb::bitnumber<5, reach::movement_speed> speed = reach::movement_speed::unchanged;
          cobb::bitnumber<4, reach::player_gravity> gravity = reach::player_gravity::unchanged;
          cobb::bitnumber<4, reach::vehicle_usage> vehicleUsage = reach::vehicle_usage::unchanged;
-         cobb::bitnumber<2, uint8_t> unknown;
+         cobb::bitnumber<2, uint8_t> unknown; // Assembly and KSoft both call this "double jump," but I couldn't replicate that in testing
          cobb::bitnumber<9, int16_t, false, std::true_type, -1> jumpHeight = -1;
       } movement;
       struct {
@@ -321,24 +322,27 @@ class ReachPlayerTraits {
       void read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
+      static uint32_t bitcount() noexcept;
+      //
       #if __cplusplus <= 201703L
-      bool operator==(const ReachPlayerTraits&) const noexcept;
-      bool operator!=(const ReachPlayerTraits& other) const noexcept { return !(*this == other); }
+         bool operator==(const ReachPlayerTraits&) const noexcept;
+         bool operator!=(const ReachPlayerTraits& other) const noexcept { return !(*this == other); }
       #else
-      bool operator==(const ReachPlayerTraits&) const noexcept = default;
-      bool operator!=(const ReachPlayerTraits&) const noexcept = default;
+         bool operator==(const ReachPlayerTraits&) const noexcept = default;
+         bool operator!=(const ReachPlayerTraits&) const noexcept = default;
       #endif
 };
 
-class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::reference_tracked_object {
+class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_item {
    public:
-      MegaloStringRef name = MegaloStringRef::make(*this);
-      MegaloStringRef desc = MegaloStringRef::make(*this);
+      MegaloStringRef name;
+      MegaloStringRef desc;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
-      uint32_t index = 0; // used for write; should be fixed up before saving any data
       //
       void read(cobb::ibitreader& stream) noexcept {
+         this->is_defined = true;
+         //
          this->nameIndex.read(stream);
          this->descIndex.read(stream);
          ReachPlayerTraits::read(stream);
@@ -346,12 +350,12 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::reference
       void write(cobb::bitwriter& stream) noexcept {
          {  // Correct indices
             if (this->name) {
-               this->nameIndex = this->name->index();
+               this->nameIndex = this->name->index;
             } else
                this->nameIndex = 0;
             //
             if (this->desc) {
-               this->descIndex = this->desc->index();
+               this->descIndex = this->desc->index;
             } else
                this->descIndex = 0;
          }
@@ -362,5 +366,11 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public cobb::reference
       void postprocess_string_indices(ReachStringTable& table) noexcept {
          this->name = table.get_entry(this->nameIndex);
          this->desc = table.get_entry(this->descIndex);
+      }
+      //
+      inline static uint32_t bitcount() noexcept {
+         uint32_t bitcount = ReachPlayerTraits::bitcount();
+         bitcount += MegaloStringIndex::bitcount * 2;
+         return bitcount;
       }
 };

@@ -15,6 +15,7 @@
 #include "../editor_state.h"
 #include "../game_variants/base.h"
 #include "../game_variants/errors.h"
+#include "../game_variants/warnings.h"
 #include "../helpers/ini.h"
 #include "../helpers/steam.h"
 #include "../helpers/stream.h"
@@ -111,21 +112,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          return;
       }
       int32_t index = traits->index;
-      /*int32_t index = -1;
-      {
-         auto& list = mp->scriptData.traits;
-         auto  size = list.size();
-         for (size_t i = 0; i < size; i++) {
-            if (list[i] == traits) {
-               index = i;
-               break;
-            }
-         }
-         if (index == -1) {
-            this->regenerateNavigation();
-            return;
-         }
-      }*/
       QTreeWidgetItem* target = this->getNavItemForScriptTraits(traits, index);
       if (!target) {
          this->regenerateNavigation();
@@ -145,6 +131,12 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          target->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
       else
          target->setToolTip(0, "");
+   });
+   QObject::connect(&editor, &ReachEditorState::scriptOptionModified, [this](ReachMegaloOption*) {
+      this->ui.optionTogglesScripted->updateModelFromGameVariant();
+   });
+   QObject::connect(&editor, &ReachEditorState::scriptOptionsModified, [this]() {
+      this->ui.optionTogglesScripted->updateModelFromGameVariant();
    });
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
@@ -275,7 +267,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          out << "\r\n\r\n";
          auto& table = mp->scriptData.strings;
          for (size_t i = 0; i < table.strings.size(); i++) {
-            auto& string = *table.strings[i];
+            auto& string = table.strings[i];
             out << "STRING #" << i << ":\r\n";
             for (size_t j = 0; j < string.offsets.size(); j++) {
                out << "   ";
@@ -445,6 +437,22 @@ void ReachVariantTool::openFile(QString fileName) {
          QMessageBox::information(this, tr("Unable to open file"), tr("Failed to read the game variant data. The code that failed didn't signal a reason; that would be a programming mistake on my part, so let me know."));
       }
       return;
+   }
+   {
+      auto& log   = GameEngineVariantLoadWarningLog::get();
+      auto  count = log.size();
+      if (count) {
+         if (count > 1) {
+            //
+            // TODO: There were %n warnings. View them?
+            //
+            for (size_t i = 0; i < count; i++) {
+               QMessageBox::information(this, tr("Warning"), log.warnings[i]);
+            }
+         } else {
+            QMessageBox::information(this, tr("Warning"), log.warnings[0]);
+         }
+      }
    }
    editor.takeVariant(variant, s.c_str());
    {
@@ -827,22 +835,6 @@ QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTr
       if (!traits)
          return nullptr;
       index = traits->index;
-      /*
-      auto& editor = ReachEditorState::get();
-      auto  mp     = editor.multiplayerData();
-      if (!mp)
-         return nullptr;
-      auto& list = mp->scriptData.traits;
-      auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         if (list[i] == traits) {
-            index = i;
-            break;
-         }
-      }
-      if (index == -1)
-         return nullptr;
-      //*/
    }
    //
    auto widget = this->ui.MainTreeview;

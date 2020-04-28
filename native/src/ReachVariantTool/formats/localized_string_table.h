@@ -3,9 +3,12 @@
 #include <vector>
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
-#include "../helpers/reference_tracked_object.h"
+#include "../helpers/indexed_list.h"
+#include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
+#include "indexed_lists.h"
+#include <QString>
 
 namespace reach {
    enum class language {
@@ -41,9 +44,9 @@ class ReachStringTable;
 
 using MegaloStringIndex         = cobb::bitnumber<cobb::bitcount(112 - 1), uint8_t>;
 using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, true>;
-using MegaloStringRef           = cobb::reference_tracked_object::ref<ReachString>;
+using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
-class ReachString : public cobb::reference_tracked_object {
+class ReachString : public indexed_list_item {
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 
@@ -64,13 +67,14 @@ class ReachString : public cobb::reference_tracked_object {
       std::array<int, reach::language_count>         offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
       //
-      int32_t index() const noexcept;
-      //
       void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) noexcept;
       //
+      std::string& english() noexcept {
+         return this->strings[(int)reach::language::english];
+      }
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
       }
@@ -80,6 +84,7 @@ class ReachString : public cobb::reference_tracked_object {
       bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
       //
       bool can_be_forge_label() const noexcept;
+      bool empty() const noexcept;
 };
 
 class ReachStringTable {
@@ -105,19 +110,21 @@ class ReachStringTable {
          count_bitlength(cobb::bitcount(max_count))
       {}
       //
-      std::vector<cobb::unique_pointer<ReachString>> strings;
+      cobb::indexed_list<ReachString> strings;
       //
    protected:
       void* _make_buffer(cobb::ibitreader&) const noexcept;
    public:
       bool read(cobb::ibitreader&) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      void write(cobb::bitwriter& stream) noexcept;
       //
-      ReachString* get_entry(size_t index) noexcept {
+      ReachString* get_empty_entry() const noexcept;
+      ReachString* get_entry(size_t index) const noexcept {
          if (index < this->strings.size())
-            return this->strings[index];
+            return const_cast<ReachString*>(&this->strings[index]); // this function does not, itself, modify the table, but the string returned can be modified
          return nullptr;
       }
+      ReachString* lookup(const QString& english, bool& matched_multiple) const noexcept;
       //
       inline size_t capacity() const noexcept { return this->max_count; }
       inline size_t is_at_count_limit() const noexcept { return this->size() >= this->capacity(); }

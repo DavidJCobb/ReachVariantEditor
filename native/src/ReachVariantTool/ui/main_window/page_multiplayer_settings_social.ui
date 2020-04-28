@@ -36,22 +36,17 @@
     <widget class="QComboBox" name="fieldTeamChanging">
      <item>
       <property name="text">
-       <string>unknown mode 0</string>
+       <string>Disabled</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>unknown mode 1</string>
+       <string>Enabled</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>unknown mode 2</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>unknown mode 3</string>
+       <string>Balancing Only</string>
       </property>
      </item>
     </widget>

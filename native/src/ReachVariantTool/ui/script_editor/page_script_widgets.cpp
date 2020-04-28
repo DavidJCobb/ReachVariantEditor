@@ -98,7 +98,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
       QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
          if (!this->target)
             return;
-         if (this->target->get_inbound_references().size()) {
+         if (this->target->get_refcount()) {
             QMessageBox::information(this, tr("Cannot remove HUD widget"), tr("This HUD widget is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }
@@ -107,16 +107,17 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
          if (!mp)
             return;
          auto& list  = mp->scriptContent.widgets;
-         auto  it    = std::find(list.begin(), list.end(), this->target);
          auto  index = list.index_of(this->target);
          if (index < 0)
             return;
          list.erase(index);
-         if (index > 0)
-            this->target = &list[index - 1];
-         else if (list.size())
-            this->target = &list[0];
-         else
+         size_t size = list.size();
+         if (size) {
+            if (index >= size)
+               this->target = &list[size - 1];
+            else
+               this->target = &list[index];
+         } else
             this->target = nullptr;
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();

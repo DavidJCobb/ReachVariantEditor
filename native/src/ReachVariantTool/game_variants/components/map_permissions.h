@@ -14,6 +14,9 @@ namespace reach {
 
 class ReachMapPermissions {
    public:
+      static constexpr int max_count = 32;
+      //
+   public:
       std::vector<uint16_t> mapIDs;
       cobb::bitnumber<1, reach::map_permission_type> type;
       //
@@ -42,4 +45,8 @@ class ReachMapPermissions {
       bool operator==(const ReachMapPermissions&) const noexcept = default;
       bool operator!=(const ReachMapPermissions&) const noexcept = default;
       #endif
+      //
+      inline uint32_t bitcount() const noexcept {
+         return 6 + (cobb::bits_in<uint16_t> * this->mapIDs.size()) + decltype(type)::bitcount; // list count; list contents; type
+      }
 };

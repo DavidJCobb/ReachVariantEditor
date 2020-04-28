@@ -14,13 +14,16 @@ namespace cobb {
          bool _owner = false;
          //
       public:
+         using iterator       = typename std::vector<T*>::iterator;
+         using const_iterator = typename std::vector<T*>::const_iterator;
+         //
          pointer_list() {}
          pointer_list(const pointer_list& o) {  this->operator=(o); }
          pointer_list(pointer_list&& o) { this->operator=(o); }
          pointer_list(bool isOwner) : _owner(isOwner) {}
          ~pointer_list() {
             if (this->is_owner())
-               for (auto& ptr : *this)
+               for (T* ptr : *this)
                   delete ptr;
          }
          //
@@ -53,6 +56,12 @@ namespace cobb {
             std::vector::swap(other);
             this->_owner = other._owner;
             return *this;
+         }
+         iterator erase(const_iterator target) noexcept {
+            T* item = *target;
+            if (item)
+               delete item;
+            return std::vector<T*>::erase(target); // call super
          }
    };
 }

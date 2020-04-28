@@ -16,6 +16,16 @@ void ReachLoadout::write(cobb::bitwriter& stream) const noexcept {
    this->ability.write(stream);
    this->grenadeCount.write(stream);
 }
+/*static*/ uint32_t ReachLoadout::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(visible)::max_bitcount;
+   bitcount += decltype(nameIndex)::max_bitcount;
+   bitcount += decltype(weaponPrimary)::max_bitcount;
+   bitcount += decltype(weaponSecondary)::max_bitcount;
+   bitcount += decltype(ability)::max_bitcount;
+   bitcount += decltype(grenadeCount)::max_bitcount;
+   return bitcount;
+}
 
 #if __cplusplus <= 201703L
 #include <tuple>

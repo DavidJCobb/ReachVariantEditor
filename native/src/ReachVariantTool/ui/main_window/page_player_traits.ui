@@ -35,7 +35,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="PagePlayerTraitsTabview">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="PagePlayerTraitsTabDefense">
       <attribute name="title">
@@ -103,12 +103,12 @@
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="labelShieldRegenDelay">
+        <widget class="QLabel" name="labelShieldRegenRateOver">
          <property name="text">
-          <string>Unknown</string>
+          <string>Overshield Regen Rate</string>
          </property>
          <property name="buddy">
-          <cstring>fieldShieldRegenDelay</cstring>
+          <cstring>fieldShieldRegenRateOver</cstring>
          </property>
         </widget>
        </item>
@@ -439,7 +439,7 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QComboBox" name="fieldShieldRegenDelay">
+        <widget class="QComboBox" name="fieldShieldRegenRateOver">
          <item>
           <property name="text">
            <string>Unchanged</string>
@@ -1619,7 +1619,7 @@
   <tabstop>fieldHealthRegenRate</tabstop>
   <tabstop>fieldShieldMult</tabstop>
   <tabstop>fieldShieldRegenRate</tabstop>
-  <tabstop>fieldShieldRegenDelay</tabstop>
+  <tabstop>fieldShieldRegenRateOver</tabstop>
   <tabstop>fieldHeadshotImmunity</tabstop>
   <tabstop>fieldAssassinationImmunity</tabstop>
   <tabstop>fieldShieldVampirism</tabstop>

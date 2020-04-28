@@ -40,9 +40,12 @@
     </widget>
    </item>
    <item row="0" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldFlag0">
+    <widget class="QCheckBox" name="fieldPerfectionEnabled">
+     <property name="toolTip">
+      <string>Controls whether the player can earn the Perfection medal in this gametype.</string>
+     </property>
      <property name="text">
-      <string>Unknown Flag 0 (checked for Slayer only?)</string>
+      <string>Perfection Medal Enabled</string>
      </property>
     </widget>
    </item>

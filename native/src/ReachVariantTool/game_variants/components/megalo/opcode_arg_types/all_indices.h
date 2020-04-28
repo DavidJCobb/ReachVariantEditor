@@ -1,109 +1,49 @@
 #pragma once
 #include "../opcode_arg.h"
 #include "../limits.h"
-#include "../../../data/mp_incidents.h"
-#include "../../../data/mp_object_types.h"
-#include "../../../data/mp_object_names.h"
 
 namespace Megalo {
-   class OpcodeArgValueIncidentID : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
+   class OpcodeArgValueBaseIndex : public OpcodeArgValue {
       public:
-         OpcodeArgValueIncidentID() : OpcodeArgValueBaseIndex("Incident ID", Limits::max_incident_types, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueIncidentID();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPIncidentList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
-   class OpcodeArgValueLoadoutPalette : public OpcodeArgValueBaseIndex {
+         static constexpr int32_t none = -1;
+         enum class index_quirk {
+            none,
+            presence, // index value is preceded by an "is none" bit
+            reference,
+            offset,
+            word,
+         };
+         //
       public:
-         OpcodeArgValueLoadoutPalette() : OpcodeArgValueBaseIndex("Loadout Palette", 6, index_quirk::reference) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueLoadoutPalette();
-         }
+         OpcodeArgValueBaseIndex(const char* name, uint32_t max, index_quirk quirk = index_quirk::none) : 
+            name(name), max(max), quirk(quirk)
+         {};
+
+         const char* name;
+         uint32_t    max;
+         index_quirk quirk;
+         int32_t     value = 0; // loaded value
+         //
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
+         virtual void write(cobb::bitwriter& stream) const noexcept override;
+         virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
-   class OpcodeArgValueMPObjectTypeIndex : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueMPObjectTypeIndex() : OpcodeArgValueBaseIndex("MP Object Type", 2048, index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueMPObjectTypeIndex();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPObjectTypeList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
-   class OpcodeArgValueNameIndex : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueNameIndex() : OpcodeArgValueBaseIndex("Name", Limits::max_string_ids, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueNameIndex();
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            auto& list = MPObjectNameList::get();
-            if (this->value < 0 || this->value >= list.size()) {
-               cobb::sprintf(out, "%s #%d", this->name, this->value);
-               return;
-            }
-            out = list[this->value].name;
-         }
-   };
+
    class OpcodeArgValueRequisitionPalette : public OpcodeArgValueBaseIndex { // development leftover; later used in Halo 4?
+      megalo_opcode_arg_value_make_create_override;
       public:
-         OpcodeArgValueRequisitionPalette() : OpcodeArgValueBaseIndex("Requisition Palette", cobb::bitmax(4), index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueRequisitionPalette();
-         }
-   };
-   class OpcodeArgValueSound : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueSound() : OpcodeArgValueBaseIndex("Sound", Limits::max_engine_sounds, index_quirk::offset) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueSound();
-         }
+         static OpcodeArgTypeinfo typeinfo;
+         //
+         OpcodeArgValueRequisitionPalette() : OpcodeArgValueBaseIndex("Requisition Palette", cobb::bitmax(4), index_quirk::presence) {}
    };
    class OpcodeArgValueTrigger : public OpcodeArgValueBaseIndex {
+      megalo_opcode_arg_value_make_create_override;
       public:
-         OpcodeArgValueTrigger() : OpcodeArgValueBaseIndex("Trigger", Limits::max_triggers, index_quirk::reference) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueTrigger();
-         }
-   };
-   
-   class OpcodeArgValueIconIndex6Bits : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueIconIndex6Bits() : OpcodeArgValueBaseIndex("Icon", cobb::bitmax(6), index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueIconIndex6Bits();
-         }
-   };
-   class OpcodeArgValueIconIndex7Bits : public OpcodeArgValueBaseIndex {
-      public:
-         OpcodeArgValueIconIndex7Bits() : OpcodeArgValueBaseIndex("Icon", cobb::bitmax(7), index_quirk::presence) {};
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueIconIndex7Bits();
-         }
+         static OpcodeArgTypeinfo typeinfo;
+         //
+         OpcodeArgValueTrigger() : OpcodeArgValueBaseIndex("Trigger", Limits::max_triggers, index_quirk::reference) {}
    };
 }

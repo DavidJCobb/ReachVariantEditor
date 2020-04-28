@@ -1,0 +1,456 @@
+
+== Concepts ==
+
+A VARIABLE is any number, object, player, team, or timer value in the script. This includes:
+
+   global.number[0]
+   global.object[0]
+   current_object
+   current_object.number[0]
+
+Variables can be referred to by no more than two levels of depth:
+
+   global.player[0]                     -- valid
+   global.player[0].player[1]           -- valid
+   global.player[0].player[1].player[2] -- invalid
+
+
+
+A PROPERTY is a member of a variable. Properties can appear in any place where a variable 
+of the same type can be used. Internally, these exist as "scope" values for variables (see 
+below section on how variables work). You cannot access variables or other properties 
+through a property.
+
+   current_player.team           -- valid
+   current_player.team.score     -- invalid
+   current_player.team.number[0] -- invalid
+
+Most properties do not have indices. There is one exception: the (script_stat) property on 
+players and teams. There, you must use an index to specify the target stat:
+
+   current_player.script_stat[0]
+
+When I write the user-facing documentation, I might just lie about that being implemented 
+as a property and tell people that it's the same as nested variables, just to keep things 
+conceptually simple for script authors -- hide the messy implementation needs from them. 
+We'll see.
+
+
+
+An ACCESSOR uses similar syntax to a property, but can only appear in assignment statements. 
+Internally, these exist as "getter" and "setter" functions. As such, you can use accessors 
+on variables and properties.
+
+   current_object.shields       += 50 -- valid; access through variable
+   current_player.biped.shields += 50 -- valid; access through property
+
+Most accessors have both getters and setters. Some do not, which means that they can only 
+appear on the appropriate side of an assignment statement.
+
+   current_object.max_shields += 50              -- valid; there is a setter for this
+   global.number[0] = current_object.max_shields -- invalid; there is no getter for this
+
+From a language design standpoint, accessors were preferred over getter/setter functions 
+in cases where the internal getter or setter takes the same range of assignment operators 
+as an assignment statement. Although the parser as currently designed could accept an 
+assignment operator as an argument (e.g. foo.set_bar(+=, 5)), it seems best to instead 
+use assignment statements.
+
+
+
+An OPCODE is any condition or action that can exist in a script. This includes ordinary 
+assignments to variables and comparisons of variables, as well as every function call that 
+one can write in a script. Some opcodes are getters and setters for specific data fields on 
+some type (e.g. an object's current shields); these use property syntax in script.
+
+Notably, opcodes are also used as the means to nest triggers: all triggers are held in a 
+flat list, with nested triggers flagged to be skipped during normal execution, and there 
+exists an opcode that executes the trigger with a given index. For the sake of parsing and 
+compiling we can mostly pretend that this opcode doesn't exist; our syntax allows for nested 
+blocks and we just generate these opcodes as part of the compile process.
+
+
+
+An OPCODE ARGUMENT is a parameter passed to an opcode. For assignments, this includes the 
+destination, the operator, and the operand; for comparisons, this includes the left- and 
+righthand sides and the operator; for function calls, this includes the context and all 
+call arguments. In rare cases, a single "setter" opcode may use the property to set as 
+another argument; this is the case with the Modify Grenades action, where the argument to 
+specify the grenade type to modify is represented as a property name in script i.e. the 
+following two statements use the same opcode with different arguments:
+
+   global.player[0].frag_grenades   += 3
+   global.player[0].plasma_grenades += 3
+
+As you might expect, every opcode argument has a value (held in memory by an OpcodeArgValue 
+instance) and a type (managed by OpcodeArgValue subclasses, and described by instances of 
+OpcodeArgTypeinfo).
+
+
+
+An ALIAS is a user-defined name for any variable, constant integer, or enumeration value. 
+Examples of aliases include:
+
+   alias current_hill = global.object[0]
+   alias is_zombie    = player.number[0] -- e.g. global.player[0].is_zombie
+   alias is_zombie    = global.number[0] -- does not conflict with player.is_zombie
+   alias vehicle_type = warthog          -- value from the "object type" enum
+   alias max_phases   = 3
+   alias derivative   = player.is_zombie -- aliases can be defined in terms of older aliases
+
+Aliases are block-scoped, so they do not affect any references outside of their containing 
+block. Aliases are allowed to shadow each other, with aliases of inner blocks temporarily 
+shadowing aliases of outer blocks, and later-defined aliases permanently shadowing earlier-
+defined aliases in the same block. Aliases allow script authors to name variables in the 
+limited pool of variables that Megalo offers, and their being block-scoped allows authors 
+to give intelligible names to temporary/scratch variables based on what those temporary 
+variables are being used for at the moment.
+
+An alias that is not scoped to a type is an "absolute alias," while an alias that is scoped 
+to a type is a "relative alias:"
+
+   alias current_hill = global.object[0] -- absolute
+   alias vehicle_type = warthog          -- absolute
+   alias max_phases   = 3                -- absolute
+   alias is_zombie    = player.number[0] -- relative
+
+Absolute aliases will not conflict with, shadow, or be shadowed by relative aliases with 
+the same name. Additionally, two relative aliases with the same name will not conflict with 
+or shadow each other if they are relative to different types.
+
+
+
+An IMPORTED NAME is any value imported into the global scope by an opcode argument type. 
+These include:
+
+   box     -- from the "shape" type
+   warthog -- from the "object type" type
+
+Imported names are single values that can only appear when the appropriate opcode argument 
+type calls for them to appear (which, by implication, means that they can only appear as 
+an argument to a function call). Imported names can be the target of an alias, as shown 
+above in the description for aliases.
+
+Imported names do not have to be unique to a given type; two types can import the same 
+name. As an example, the name "kill" is imported by both the "incident" type and the 
+"killer type flags" type.
+
+
+
+== How do variables work in Megalo? ==
+
+There are five variable types: number, object, player, team, and timer. Numbers and timers 
+are simple values; they can't have members. Objects, players, and teams, however, are more 
+complex: they have a full complement of variables as members, and they can also have 
+properties.
+
+Internally, the same types are used for "variables" and "properties," and these types 
+consist of four parts:
+
+   SCOPE
+      An enum indicating the scope of the variable. For example, given a reference to the 
+      variable (global.player[0].number[1]), the "scope" would indicate that the number 
+      variable exists on a player variable. Each variable type has its own scope enum 
+      because...
+
+      Variables can also represent access to game state values, such as the current round 
+      time, and properties on classes, such as a player's score. Both of these things are 
+      mutually exclusive with conventional variable scopes, and they're type-specific, so 
+      they are also encoded into the scope enum.
+
+   WHICH
+      If the scope-indicator specifies that the scope is an object, player, or team, then 
+      the "which" value indicates which object, player, or team it is. This is also an 
+      enumeration.
+
+   INDEX
+      In most cases, this indicates which variable of the current type is being referred 
+      to. For example, given (global.player[0].number[1]), this would be 1. There is one 
+      special case: for integer constants, we use a number variable whose scope indicator 
+      specifies that it is an integer constant, and the signed 16-bit value of the number 
+      is stored in the index.
+
+A few examples:
+
+                                 | SCOPE             | WHICH            | INDEX  | NOTES
+---------------------------------+-------------------+------------------+--------+----------------------------------------------------------------------------------------
+global.number[3]                 | global            | <none>           | 3      | 
+global.timer[3]                  | global            | <none>           | 3      | 
+global.object[3]                 | global            | global.object[3] | <none> | If a variable type supports nesting, then its globals use (which) rather than (index). 
+global.player[1].number[2]       | player            | global.player[1] | 2      | In practice, that would be object, player, and team variables.
+current_player                   | global            | current_player   | <none> | 
+current_player.number[2]         | player            | current_player   | 2      | 
+game.betrayal_booting            | betrayal_booting  | <none>           | <none> | 
+global.player[1].team            | player_owner_team | global.player[1] | <none> | Note that here, "team"  is a property, not a nested variable.
+global.player[1].object[0].biped | player_biped      | global.player[1] | 0      | Note that here, "biped" is a property, not a nested variable.
+55                               | constant          | <none>           | 55     | 
+
+
+
+== What information do typeinfos provide? ==
+
+The compiler only needs a very detailed understanding of the following types:
+
+ - All variables
+ - Script widgets
+
+All of the other types only appear as script arguments inside of function calls, and the 
+compiler doesn't need to know how to parse them: by the time we get to reading the arguments 
+of a function call, we've already seen enough to identify the function being called: we can 
+instantiate an Opcode with the appropriate function, instantiate its OpcodeArgValue objects, 
+and then simply pass the text of each script argument to those objects to interpret as appro-
+priate. The above listed types, however, can appear in the following contexts, which the 
+compiler must handle itself:
+
+ - Variables can appear on either side of an assignment or comparison statement; variables 
+   can also be the context of a property being get or set.
+
+ - Variables and widgets can be the context of a function call (i.e. context.func())
+
+As such, the above two types need reasonably detailed typeinfos describing precisely what 
+can be accessed and how; variable types, for example, need to indicate whether they can be 
+accessed as static collections (e.g. player[0] to refer to the first player in the match) 
+and if so, what the maximum index is.
+
+(Script traits use the same index as variables and script widgets, but they only appear as 
+arguments; we can't rely solely on argument parsing to deal with them, because we want it 
+to be possible to alias them, so we should handle them the same way as widgets (see below). 
+Argument parsing will have a few other hiccups; for example, Vector3s need to parse care-
+fully so that you can use aliases of constant integers as coordinate values.)
+
+Most other types only need to define basic information on their typeinfos:
+
+ - The name of the type, for error reporting during argument parsing
+
+ - Optionally a description of the type, in preparation for code editor tooltips and any 
+   other "friendly" stuff we may want to offer
+
+ - The factory function, so that the appropriate OpcodeArgValue class can be instantiated 
+   generically.
+
+ - For any types that contain enums, a list of the enum values; this is needed so that 
+   the compiler can accept aliases of those values (e.g. alias vehicle_type = warthog).
+
+So what information needs to exist for detailed typeinfos?
+
+ - Is the type statically accessible by its typename? (Yes for players and teams; yes for 
+   script widgets and script traits; no for everything else.) If so, what is the maximum          <-------- LOOK HERE FOR HOW TO IMPLEMENT SCRIPT WIDGETS AND TRAITS FOR THE COMPILER
+   allowed index?
+
+ - Is the type a variable? If so, can it contain nested variables?
+
+ - What properties can the type have? For players, these are things like the owner team 
+   or the score, to give a few examples.
+
+    - Only variables can have properties.
+
+    - Typeinfos should not specify accessors here.
+
+    - Each property has a name and a type. Some properties specify a scope indicator ID 
+      for their parent variable, which is enough information to fully resolve a reference         <------- IN ADDITION TO THINGS LIKE object.spawn_sequence, THIS IS ALSO HOW WE'LL IMPLEMENT SCRIPT STATS
+      (the scope indicator will specify whether the property is read-only, and whether it 
+      can be indexed). The "biped" property on players is a notable exception: there are 
+      four possible scope indicators that it can use, so its scope can only be determined 
+      at compile-time by OpcodeArgValueObject::compile.
+
+
+
+== Are there any other things that the compiler needs defined for it? ==
+
+Namespaces need to be defined -- specifically, the "global" and "game" namespaces, as 
+well as an internal "unnamed" namespace used to hold values that are not in any namespace. 
+Each namespace has a list of members as well as two flags: one to indicate whether the 
+namespace can hold static collections (i.e. player[0]; the flag is set only for the 
+unnamed namespace); and another to indicate whether the namespace can hold variables (set 
+for the "global" namespace only).
+
+Each namespace member can have:
+
+ - The name of the member.
+
+ - The type of the member.
+
+ - A "which" value, for unnamed-namespace members like (no_team) or (current_object). 
+   This value indicates which object, player, or team is being defined as a member. This 
+   value is mutually exclusive with the scope.
+
+ - A scope indicator, for things like (script_option[0]) in the unnamed namespace or 
+   (game.round_timer) in the "game" namespace. This value is mutually exclusive with the 
+   "which" value.
+
+If a namespace member has only a name and a type, then it is a "bare" namespace member. 
+This is currently only used for the "all_players" and "no_widget" values.
+
+
+
+== How do we parse a statement (not including conditions)? ==
+
+We parse a word and verify that it's not a keyword (if it's a keyword, we handle it). Then, 
+we look for either an operator or an opening parentheses. If an opening parentheses is 
+found, then the word must be the context (if any) and name of a function being called; at 
+that point, we skip ahead to function call logic. If on the other hand an operator is found, 
+then we must be inside of an assignment statement, and the previously found word must be a 
+variable reference. We ensure that it's valid, and that it isn't a read-only value, and then 
+we get the next word after the operator. We then look for an opening parentheses; if none is 
+found, then we take the newly-found word and interpret it as a variable reference, and at that 
+point, we're done: we can compile an ordinary assignment operator or an accessor opcode as 
+appropriate.
+
+If an opening parentheses is found, then we double-check that the operator found was "=", a 
+vanilla assignment, because modify-and-assign operators like "+=" cannot be used on functions. 
+
+Having found a function call, we separate out the context from the function name. If there 
+isn't a context, then we search the opcode list for all non-member functions; if one is found, 
+we skip ahead to the opcode-parsing logic. If no matches are found, we search for any user-
+defined functions and check for a match. If a match is found, then we're done parsing the 
+statement: user-defined functions cannot return values or have arguments, so if this function 
+call is inside of an assignment or if any arguments are specified, then we emit an error. (If 
+no match was found for the non-member function call, we emit an error.)
+
+If there *was* a context to the call, then we parse that context as a variable reference both 
+because it will be an argument to the compiled opcode and because we need to know its type in 
+order to identify the opcode being invoked. Once the type is known, we search the opcode list 
+for all member functions of that type; if one is found, we go to opcode-parsing logic. (If no 
+match is found, then we emit an error.)
+
+At this point, the parser is sitting at the "(" glyph, having identified the function being 
+called, its context (if any), and the variable being assigned to (if any). We can now parse 
+the function call arguments. We instantiate an Opcode and its OpcodeArgValues, and then for 
+each script argument, we extract everything up to the next "," or ")" and pass it to the 
+OpcodeArgValue::compile member function.
+
+...Well, that's a simplification. See, there are cases where what is considered an "argument" 
+internally does not line up with what is considered an "argument" in script, i.e. differences 
+between "opcode arguments" and "script" arguments. Consider this call:
+
+   global.object[0].set_shape(box, 1, 2, 3, 4)
+
+That is a script function with a context and five arguments, but it's also an opcode with 
+only two arguments: the object to modify, and a single "shape" argument consisting of a type 
+and a number of dimensions that varies with the type. So how do we handle this?
+
+Well, OpcodeArgValue::compile receives an index indicating how many times it's been called 
+for the same opcode argument, and it can return any of theese four status codes: success; 
+failure; I need another argument; I can receive another argument, but do not require one. So 
+in our example above, the OpcodeArgValueShape instance would end up having its compile method 
+called four times, with increasing indices starting at 0; each call would return the "I need 
+another argument" value except for the last call, which would return "success." (The reason 
+for the "I can receive another argument, but do not require one" status code is formatted 
+string arguments, which consist of a format string followed by zero, one, or two tokens to 
+insert.)
+
+The function will fail to parse if:
+
+ - Any OpcodeArgValue::compile call returns a failure code.
+
+ - Any OpcodeArgValue::compile call demands another argument, but there are no script arguments.
+
+ - We run out of script arguments before we've handled all opcode arguments.
+
+ - An OpcodeArgValue::compile call returns a success code, but there are non-whitespace chars 
+   remaining in the argument string.
+
+ - There are still unhandled script arguments remaining after all opcode arguments have 
+   successfully compiled.
+
+There's another wrinkle: multiple opcode functions can share a context type and a name, such 
+that they serve as overloads of each other. This is seen with the (send_incident) opcode, 
+which can be invoked thusly:
+
+   send_incident(incident_name, player, player)
+   send_incident(incident_name, player, player, number)
+
+The best way to handle these is simple trial-and-error: we attempt to parse all arguments 
+using the first definition, and if that fails, then we rewind back to the opening "(" and 
+try again using the second definition.
+
+
+
+== How do we parse a variable reference? ==
+
+We begin by splitting the variable reference into its constituent parts, at each "." glyph. 
+Each part must have a name and can optionally have an index. Consider:
+
+   global.player[0].number[1]
+
+The first part has name "global" and no index. The second part has name "player" and index 
+0. The third part has name "number" and index 1.
+
+This procedure allows us to weed out the following syntax errors:
+
+ - Any disallowed characters in the square brackets, such as "-" or ".".
+
+ - Unterminated square brackets on the last part e.g. "name[0"
+
+ - An empty set of brackets, e.g. "name[]"
+
+ - Any glyph other than "." after the square brackets, e.g. "name[]name"
+
+ - Multiple sets of square brackets, e.g. "name[1][2]"
+
+ - Any name that is an integer, e.g. "123[4]" or "name[1].123[4]". Normal integer constants 
+   e.g. "123" are checked for and handled before we begin splitting the reference into parts.
+
+  - A mismatched closing bracket e.g. "name]"
+
+  - Multiple space-separated terms in an index, e.g. "name[1 2]"
+
+Once we've split the variable reference into parts, we need to validate each raw part's 
+indices. For any part: if the index consists of non-numeric text, then we need to check 
+whether it matches an absolute alias. If so: if that absolute alias is not a constant integer, 
+then throw a syntax error; otherwise, substitute in the value of the constant integer.
+
+After that, the variable reference can consist of two possible forms:
+
+   dead_end_value
+   var.var.property.accessor
+
+where in the second form, any part except for the first variable is optional, e.g.:
+
+   var.property.accessor
+   var.accessor
+   var.property
+   var.var
+   var.var.accessor
+
+The first part (the top-level value) can be a namespace member, or a typename with an 
+index (e.g. "player[0]"), or an absolute alias; as such, it needs to be resolved differently 
+from the nested variable (if one is present). The process for resolving an entire variable 
+reference, then, would look somewhat like this:
+
+   size_t i = resolve_top_level_part(); // returns the number of parts consumed
+   if (resolve_nested_variable(i)) {
+      if (++i < part_count)
+         return true; // done
+      // And fall through.
+   }
+   if (resolve_property(i)) {
+      if (++i < part_count)
+         return true; // done
+      // And fall through.
+   }
+   if (resolve_accessor(i)) {
+      if (++i < part_count)
+         return true; // done
+      throw error("Tried to access a member on an accessor.");
+   }
+   throw error("Unidentified member.");
+
+Each step would want to check whether the part it's looking at is an alias. If so, it 
+would want to replace that part with the contents of the alias, and then continue to 
+resolve that content.
+
+
+
+== How do we resolve an alias definition? ==
+
+We first try to resolve the alias's target as a variable reference. If this succeeds, then the 
+alias is an absolute alias, and we retain the resolved variable data. Otherwise, we try to 
+resolve the alias as one of the following:
+
+   typename.property        -- aliased property
+   typename.typename[index] -- aliased nested variable
+
+We apply the appropriate constraints: the first typename must be a variable type; a property 
+name must exist on the typename (or as a getter or setter); a second typename must be a 
+variable type and the preceding typename must allow nested variables.

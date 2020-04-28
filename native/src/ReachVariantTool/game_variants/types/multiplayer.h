@@ -8,7 +8,7 @@
 #include "../../helpers/bitwriter.h"
 #include "../../helpers/bytewriter.h"
 #include "../../helpers/files.h"
-#include "../../helpers/managed_pointer_list.h"
+#include "../../helpers/indexed_list.h"
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 #include "../../helpers/standalones/unique_pointer.h"
@@ -28,8 +28,13 @@
 #include "../components/tu1_options.h"
 
 class GameVariantDataMultiplayer : public GameVariantData {
+   protected:
+      void _set_up_indexed_dummies();
+      void _tear_down_indexed_dummies();
+      //
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
+      //
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
       virtual bool read(cobb::reader&) noexcept override;
       virtual void write(cobb::bit_or_byte_writer&) noexcept override;
@@ -44,10 +49,10 @@ class GameVariantDataMultiplayer : public GameVariantData {
       mutable uint32_t encodingVersion;
       mutable uint32_t engineVersion;
       GameVariantHeader variantHeader;
-      cobb::bitbool flags;
+      cobb::bitbool isBuiltIn;
       struct {
          struct {
-            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = unknown 0, reset players on new round, reset map on new round, teams
+            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = perfection enabled, reset players on new round, reset map on new round, teams
             cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
             cobb::bitnumber<5, uint8_t> roundLimit;
             cobb::bitnumber<4, uint8_t> roundsToWin;
@@ -68,7 +73,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
          } respawn;
          struct {
             cobb::bitbool observers = false;
-            cobb::bitnumber<2, uint8_t> teamChanges;
+            cobb::bitnumber<2, uint8_t> teamChanges; // enum: disabled; enabled; balancing only
             cobb::bitnumber<5, uint8_t> flags; // flags: friendly fire; betrayal booting; proximity voice; global voice; dead player voice
          } social;
          struct {
@@ -89,16 +94,16 @@ class GameVariantDataMultiplayer : public GameVariantData {
             ReachTeamData teams[8];
          } team;
          struct {
-            cobb::bitnumber<2, uint8_t> flags;
+            cobb::bitnumber<2, uint8_t> flags; // flags: spartan loadouts; elite loadouts
             std::array<ReachLoadoutPalette, 6> palettes; // indices: reach::loadout_palette
          } loadouts;
       } options;
       struct {
-         cobb::managed_list<ReachMegaloPlayerTraits, Megalo::Limits::max_script_traits>  traits;
-         cobb::managed_list<ReachMegaloOption,       Megalo::Limits::max_script_options> options;
+         cobb::indexed_list<ReachMegaloPlayerTraits, Megalo::Limits::max_script_traits>  traits;
+         cobb::indexed_list<ReachMegaloOption,       Megalo::Limits::max_script_options> options;
          ReachStringTable strings = ReachStringTable(112, 0x4C00);
       } scriptData;
-      MegaloStringIndex stringTableIndexPointer; // index of the base gametype name's string in the string table (i.e. "Assault", "Infection", etc.)
+      MegaloStringRef  genericName; // more specific than the category name but less specific than the name; could possibly also be a "fallback name"
       ReachStringTable localizedName = ReachStringTable(1, 0x180);
       ReachStringTable localizedDesc = ReachStringTable(1, 0xC00);
       ReachStringTable localizedCategory = ReachStringTable(1, 0x180);
@@ -107,8 +112,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
       ReachMapPermissions mapPermissions;
       ReachPlayerRatingParams playerRatingParams;
       cobb::bytenumber<uint16_t> scoreToWin;
-      cobb::bitbool unkF7A6;
-      cobb::bitbool unkF7A7;
+      cobb::bitbool fireteamsEnabled;
+      cobb::bitbool symmetric;
       struct {
          struct {
             ReachGameVariantEngineOptionToggles disabled;
@@ -124,18 +129,18 @@ class GameVariantDataMultiplayer : public GameVariantData {
             std::vector<Megalo::Condition> conditions;
             std::vector<Megalo::Action>    actions;
          } raw;
-         cobb::managed_list<Megalo::Trigger, Megalo::Limits::max_triggers> triggers;
+         cobb::indexed_list<Megalo::Trigger, Megalo::Limits::max_triggers> triggers;
          Megalo::TriggerEntryPoints entryPoints;
-         cobb::managed_list<ReachMegaloGameStat, Megalo::Limits::max_script_stats> stats;
+         cobb::indexed_list<ReachMegaloGameStat, Megalo::Limits::max_script_stats> stats;
          struct {
             Megalo::VariableDeclarationSet global = Megalo::VariableDeclarationSet(Megalo::variable_scope::global);
             Megalo::VariableDeclarationSet player = Megalo::VariableDeclarationSet(Megalo::variable_scope::player);
             Megalo::VariableDeclarationSet object = Megalo::VariableDeclarationSet(Megalo::variable_scope::object);
             Megalo::VariableDeclarationSet team   = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
          } variables;
-         cobb::managed_list<Megalo::HUDWidgetDeclaration, Megalo::Limits::max_script_widgets> widgets;
+         cobb::indexed_list<Megalo::HUDWidgetDeclaration, Megalo::Limits::max_script_widgets> widgets;
          ReachGameVariantUsedMPObjectTypeList usedMPObjectTypes;
-         cobb::managed_list<Megalo::ReachForgeLabel, Megalo::Limits::max_script_labels> forgeLabels;
+         cobb::indexed_list<Megalo::ReachForgeLabel, Megalo::Limits::max_script_labels> forgeLabels;
       } scriptContent;
       ReachGameVariantTU1Options titleUpdateData;
       struct {

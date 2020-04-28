@@ -80,6 +80,8 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             return;
          }
          this->target = list.emplace_back();
+         if (auto str = mp->scriptData.strings.get_empty_entry()) // If possible, default the new stat's name to an empty string
+            this->target->name = str;
          this->updateStatFromVariant();
          this->updateStatsListFromVariant();
       });
@@ -118,7 +120,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
       QObject::connect(this->ui.buttonDelete, &QPushButton::clicked, [this]() {
          if (!this->target)
             return;
-         if (this->target->get_inbound_references().size()) {
+         if (this->target->get_refcount()) {
             QMessageBox::information(this, tr("Cannot remove stat"), tr("This stat is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }
@@ -131,11 +133,13 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          if (index < 0)
             return;
          list.erase(index);
-         if (index > 0)
-            this->target = &list[index - 1];
-         else if (list.size())
-            this->target = &list[0];
-         else
+         size_t size = list.size();
+         if (size) {
+            if (index >= size)
+               this->target = &list[size - 1];
+            else
+               this->target = &list[index];
+         } else
             this->target = nullptr;
          this->updateStatFromVariant();
          this->updateStatsListFromVariant();

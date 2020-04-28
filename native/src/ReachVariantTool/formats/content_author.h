@@ -19,4 +19,13 @@ class ReachContentAuthor {
       bool has_xuid() const noexcept;
       void erase_xuid() noexcept;
       void set_datetime(uint64_t seconds_since_jan_1_1970) noexcept;
+      //
+      static constexpr uint32_t bitcount() noexcept {
+         uint32_t bitcount = 0;
+         bitcount += decltype(timestamp)::max_bitcount;
+         bitcount += decltype(xuid)::max_bitcount;
+         bitcount += cobb::bits_in<char> * 16;
+         bitcount += decltype(isOnlineID)::max_bitcount;
+         return bitcount;
+      }
 };

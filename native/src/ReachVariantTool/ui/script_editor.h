@@ -8,17 +8,6 @@ class MegaloScriptEditorWindow : public QDialog {
    public:
       MegaloScriptEditorWindow(QWidget* parent = nullptr);
       //
-      int exec() Q_DECL_OVERRIDE {
-         this->updateFromVariant();
-         return QDialog::exec();
-      }
-      void open() Q_DECL_OVERRIDE {
-         this->updateFromVariant();
-         QDialog::open();
-      }
-      //
    protected:
       Ui::MegaloScriptEditorWindow ui;
-      //
-      void updateFromVariant(GameVariant* variant = nullptr);
 };

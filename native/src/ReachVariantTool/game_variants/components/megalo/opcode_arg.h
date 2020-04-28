@@ -1,13 +1,17 @@
 #pragma once
 #include <cassert>
+#include <functional>
 #include <string>
+#include <vector>
 #include "../../../helpers/bitwriter.h"
-#include "../../../helpers/reference_tracked_object.h"
+#include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
 #include "../../../helpers/strings.h"
-#include "enums.h"
 #include "variables_and_scopes.h"
+#include "compiler/string_scanner.h"
 #include "decompiler/decompiler.h"
+#include "compiler/types.h"
+#include <QString>
 
 //
 // Here, an "opcode" is an instruction that can appear in a Megalo trigger, i.e. a 
@@ -38,235 +42,236 @@
 // allowed, e.g. a trigger action cannot modify the value of a constant integer).
 //
 
+class DetailedEnum;
+class DetailedFlags;
 class GameVariantDataMultiplayer;
 
 namespace Megalo {
+   class Compiler;
    class OpcodeArgBase;
    class OpcodeArgValue;
-
-   using  OpcodeArgValueFactory = OpcodeArgValue*(*)(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgAnyVariableFactory(cobb::ibitreader& stream);
-   extern OpcodeArgValue* OpcodeArgTeamOrPlayerVariableFactory(cobb::ibitreader& stream);
+   class OpcodeArgTypeinfo;
+   namespace Script {
+      class VariableReference;
+   }
 
    class OpcodeArgTypeinfo {
       public:
-         enum class typeinfo_type {
-            default,
-            enumeration,
-            flags_mask,
-         };
          struct flags {
             flags() = delete;
             enum type : uint32_t {
+               none = 0,
+               //
                is_variable        = 0x00000001, // number, object, player, team, timer
                can_hold_variables = 0x00000002, // object, player, team
-               always_read_only   = 0x00000004, // only relevant for (is_variable); only variables and properties can appear in assign statements, and properties have their own "is read only" attribute
-               can_be_multiple    = 0x00000008, // this type represents one argument internally but multiple arguments in script code
             };
          };
          using flags_type = std::underlying_type_t<flags::type>;
-      //
-      // TODO: This virtual class should hold metadata about each OpcodeArgValue subclass, including whether the 
-      // subclass represents an enum or flags mask; this class should also provide the factory function. Each 
-      // OpcodeArgValue subclass should have a static member that is an instance of this class.
-      //
-      // We need this because...
-      //
-      //  - The parser and compiler need to be able to get a list of all values that are valid for a given enum 
-      //    or flags-mask type, in order to know what values a script author is actually referencing.
-      //
-      //     - We need this in order to be able to alias enum and flag values. If we handle things as mentioned 
-      //       below (a "compile" member function on OpcodeArgValue), then that's all we need this for.
-      //
-      //  - The "modify grenade count" opcode will be implemented as a (property_set) mapping with no name, set 
-      //    so that the grenade type provides the property name (i.e. current_player.plasma_grenades += 3). In 
-      //    order to decompile to that output, we need to be able to access the names of the values in the 
-      //    "grenade type" enum.
-      //
-      //     - I am increasingly coming to believe that we should just compile opcodes by creating all of the 
-      //       the arguments and giving them a "compile" member function, though I'm not sure what that member 
-      //       function should take (e.g. raw string, etc.).
-      //
-      //        - I mean, we kinda need that for any multi-part function arguments, which first-pass parsing 
-      //          needs to load as a string; but enums, variables, and numbers can be handled by the compiler 
-      //          without help from typeinfos.
-      //
-      // Once this is ready, we'll have opcode bases refer to it instead of having them refer directly to each 
-      // factory function, in their argument lists.
-      //
-      // I anticipate that this will also be where we end up storing the functions to parse undifferentiated 
-      // multi-part function arguments (which we will use for flags masks, printfs, vector3s, shapes, and so 
-      // on).
-      //
+         using factory_t  = OpcodeArgValue*(*)();
+         //
+         template<typename T> static OpcodeArgValue* default_factory() { return new T; }
+         //
+         static constexpr std::initializer_list<Script::Property> no_properties = {};
+         //
       public:
-         typeinfo_type            type    = typeinfo_type::default;
-         flags_type               flags   = 0;
+         std::string internal_name;
+         QString     friendly_name;
+         QString     description;
+         flags_type  flags = 0;
+         struct {
+            const DetailedEnum*  enum_values = nullptr;
+            const DetailedFlags* flag_values = nullptr;
+            std::vector<const char*> bare_values;
+         } imported_names;
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
-         OpcodeArgValueFactory    factory = nullptr;
-         // TODO: other fields from the JavaScript parser implementation's MScriptTypename
+         factory_t                factory = nullptr;
+         std::vector<Script::Property> properties; // for the compiler; do not list abstract properties here
+         uint8_t static_count = 0; // e.g. 8 for player[7]
+         const VariableScopeWhichValue* first_global = nullptr;
+         const VariableScopeWhichValue* first_static = nullptr;
+         std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // the listed types can use this type's accessors and member functions; needed for OpcodeArgValuePlayerOrGroup, etc.
          //
          OpcodeArgTypeinfo() {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, OpcodeArgValueFactory fac) : type(t), flags(f), factory(fac) {}
-         OpcodeArgTypeinfo(typeinfo_type t, flags_type f, std::initializer_list<const char*> e, OpcodeArgValueFactory fac) : type(t), flags(f), elements(e), factory(fac) {}
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {}
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedEnum&  names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
+            this->imported_names.enum_values = &names_to_import;
+         }
+         OpcodeArgTypeinfo(const char* in, QString fn, QString desc, flags_type f, factory_t fac, const DetailedFlags& names_to_import) : internal_name(in), friendly_name(fn), description(desc), flags(f), factory(fac) {
+            this->imported_names.flag_values = &names_to_import;
+         }
+         OpcodeArgTypeinfo(
+            const char* in,
+            QString fn,
+            QString desc,
+            flags_type f,
+            factory_t fac,
+            std::initializer_list<Script::Property> pr,
+            uint8_t sc = 0
+         ) :
+            internal_name(in),
+            friendly_name(fn),
+            description(desc),
+            flags(f),
+            factory(fac),
+            properties(pr),
+            static_count(sc)
+         {}
+         //
+         #pragma region Decorator methods
+            //
+            // These methods should only be called immediately after constructing an instance; they should not be 
+            // called at any later point. They exist in an attempt to alleviate the problems that result from C++ 
+            // not supporting named arguments.
+            //
+            // These methods return the instance they're called on, allowing you to write variable definitions 
+            // such as:
+            //
+            //    OpcodeArgTypeinfo some_type = OpcodeArgTypeinfo(
+            //       config_arguments
+            //    ).decorator(
+            //       more_config_arguments
+            //    );
+            //
+            OpcodeArgTypeinfo& import_names(const DetailedEnum& e) {
+               auto& p = this->imported_names.enum_values;
+               if (p != &e) {
+                  assert(!p && "Cannot import names from multiple enums.");
+                  p = &e;
+               }
+               return *this;
+            }
+            OpcodeArgTypeinfo& import_names(const DetailedFlags& e) {
+               auto& p = this->imported_names.flag_values;
+               if (p != &e) {
+                  assert(!p && "Cannot import names from multiple flags lists.");
+                  p = &e;
+               }
+               return *this;
+            }
+            OpcodeArgTypeinfo& import_names(std::initializer_list<const char*> types) {
+               auto& list = this->imported_names.bare_values;
+               if (list.empty())
+                  list = types;
+               else {
+                  list.reserve(list.size() + types.size());
+                  for (auto p : types)
+                     list.push_back(p);
+               }
+               return *this;
+            }
+            OpcodeArgTypeinfo& set_accessor_proxy_types(std::initializer_list<const OpcodeArgTypeinfo*> types) {
+               this->accessor_proxy_types = types;
+               return *this;
+            }
+            OpcodeArgTypeinfo& set_variable_which_values(const VariableScopeWhichValue* first_global, const VariableScopeWhichValue* first_static = nullptr) {
+               this->first_global = first_global;
+               this->first_static = first_static;
+               return *this;
+            }
+         #pragma endregion
+         //
+         inline bool can_be_static() const noexcept {
+            return this->static_count > 0;
+         }
+         inline bool is_variable() const noexcept {
+            return (this->flags) & flags::is_variable;
+         }
+         inline bool can_have_variables() const noexcept {
+            return this->flags & flags::can_hold_variables;
+         }
+         const Script::Property* get_property_by_name(QString) const;
+         bool has_accessor_proxy_type(const OpcodeArgTypeinfo& type) const noexcept;
+         bool has_imported_name(const QString& name) const noexcept;
+   };
+
+   struct arg_compile_result {
+      //
+      // This class indicates information about the results of an attempt to compile an OpcodeArgValue. 
+      // It signals whether the OpcodeArgValue needs to (or simply can) consume another script argument, 
+      // along with information on whether the value failed to parse and whether this failure is recover-
+      // able. A recoverable failure is one that wouldn't prevent the parsing of any remaining arguments 
+      // in the function call.
+      //
+      // As an example: if an OpcodeArgValueShape receives an invalid shape type, that is an irresolvable 
+      // failure, because the shape type is needed in order to know how many more script arguments to 
+      // consume. However, if an OpcodeArgValueVector3 receives an invalid coordinate, we still know how 
+      // many more coordinates to consume and how to consume them, and so this invalid coordinate is a 
+      // resolvable failure.
+      //
+      enum class code_t : uint8_t {
+         failure,
+         failure_irresolvable, // it is impossible to attempt to parse the remaining function call arguments. e.g. a bad shape type means we don't know what arguments come next
+         success,
+         unresolved_string, // implies success
+         base_class_is_expecting_override_behavior, // used by Variable to signal to subclasses that they should run their own logic
+      };
+      enum class more_t : uint8_t {
+         no,       // we're good
+         needed,   // we require another script argument
+         optional, // we can take another script argument
+      };
+      //
+      QString error; // if the (code) indicates an unresolved string, then this is the string content, not an error
+      code_t  code = code_t::failure;
+      more_t  more = more_t::no;
+      //
+      static arg_compile_result failure(bool irresolvable = false);
+      static arg_compile_result failure(const char*, bool irresolvable = false); // overload needed because const char* implicitly casts to bool, not QString
+      static arg_compile_result failure(QString, bool irresolvable = false);
+      static arg_compile_result success();
+      static arg_compile_result unresolved_string(QString);
+      //
+      arg_compile_result() {}
+      arg_compile_result(code_t c) : code(c) {}
+      //
+      [[nodiscard]] inline bool is_failure() const noexcept { return this->code == code_t::failure || this->code == code_t::failure_irresolvable || this->code == code_t::base_class_is_expecting_override_behavior; }
+      [[nodiscard]] inline bool is_irresolvable_failure() const noexcept { return this->code == code_t::failure_irresolvable; }
+      [[nodiscard]] inline bool is_success() const noexcept { return this->code == code_t::success || this->code == code_t::unresolved_string; }
+      [[nodiscard]] inline bool is_unresolved_string() const noexcept { return this->code == code_t::unresolved_string; }
+      [[nodiscard]] inline bool needs_another() const noexcept { return this->more == more_t::needed; }
+      [[nodiscard]] inline bool can_take_another() const noexcept { return this->more == more_t::optional; }
+      //
+      inline arg_compile_result& set_more(more_t more) noexcept { this->more = more; return *this; }
+      inline arg_compile_result& set_needs_more(bool yes) noexcept { this->more = yes ? more_t::needed : more_t::no; return *this; }
+      //
+      inline QString get_unresolved_string() const noexcept {
+         if (this->is_unresolved_string())
+            return this->error;
+         return "";
+      }
    };
    
-   class OpcodeArgValue : public cobb::reference_tracked_object {
+   class OpcodeArgValue {
       public:
-         virtual bool read(cobb::ibitreader&) noexcept = 0;
+         virtual ~OpcodeArgValue() {}
+         virtual bool read(cobb::ibitreader&, GameVariantDataMultiplayer& mp) noexcept = 0;
          virtual void write(cobb::bitwriter& stream) const noexcept = 0;
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
-         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept { // override me!
-            out.write(u8"ARG");
-         };
+         virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as a script argument
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
+         virtual OpcodeArgValue* create_of_this_type() const noexcept = 0;
+         virtual void copy(const OpcodeArgValue*) noexcept = 0;
+         virtual OpcodeArgValue* clone() const noexcept;
          //
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            assert(false && "OpcodeArgValue::factory should never be called; any subclasses that can actually appear in a file should override it.");
-            return nullptr;
-         }
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
          }
-         //
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept {
-            //
-            // OpcodeArgValue subclasses should override this as necessary in order to 
-            // access data that is only reliably available after the full variant has 
-            // loaded. For example, the OpcodeArgValue subclass for a Forge label may 
-            // use this to exchange its numeric label index for a pointer to the Forge 
-            // label data.
-            //
-         }
    };
+   #define megalo_opcode_arg_value_make_create_override virtual OpcodeArgValue* create_of_this_type() const noexcept override { return (typeinfo.factory)(); }
    //
    class OpcodeArgBase {
       public:
          const char* name = "";
-         OpcodeArgValueFactory factory = nullptr;
          bool is_out_variable = false;
+         const OpcodeArgTypeinfo& typeinfo;
          //
          const char* text_true  = "true";
          const char* text_false = "false";
          //
-         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, bool io = false) : name(n), factory(f), is_out_variable(io) {};
-         OpcodeArgBase(const char* n, OpcodeArgValueFactory f, const char* tt, const char* tf) : name(n), factory(f), text_true(tt), text_false(tf) {}
-   };
-   //
-   class OpcodeArgValueBaseEnum : public OpcodeArgValue {
-      public:
-         OpcodeArgValueBaseEnum(const SmartEnum& base, uint32_t offset = 0) : 
-            baseEnum(base),
-            baseOffset(offset)
-         {}
-         //
-         const SmartEnum& baseEnum;
-         uint32_t baseOffset = 0; // not currently applied
-         //
-         uint32_t value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->value = stream.read_bits(this->baseEnum.index_bits_with_offset(this->baseOffset)) - this->baseOffset;
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value + this->baseOffset, this->baseEnum.index_bits_with_offset(this->baseOffset));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            this->baseEnum.to_string(out, this->value + this->baseOffset);
-         }
-   };
-   class OpcodeArgValueBaseFlags : public OpcodeArgValue {
-      public:
-         OpcodeArgValueBaseFlags(const SmartFlags& base) : base(base) {}
-         //
-         const SmartFlags& base;
-         uint32_t value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            this->value = stream.read_bits(this->base.bits());
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            stream.write(this->value, this->base.bits());
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            this->base.to_string(out, this->value);
-         }
+         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, const char* tt, const char* tf) : name(n), typeinfo(f), text_true(tt), text_false(tf) {}
+         OpcodeArgBase(const char* n, OpcodeArgTypeinfo& f, bool io = false) : name(n), typeinfo(f), is_out_variable(io) {};
    };
 
-   enum class index_quirk {
-      none,
-      presence, // index value is preceded by an "is none" bit
-      reference,
-      offset,
-      word,
-   };
-   class OpcodeArgValueBaseIndex : public OpcodeArgValue {
-      public:
-         static constexpr int32_t none = -1;
-      public:
-         OpcodeArgValueBaseIndex(const char* name, uint32_t max, index_quirk quirk = index_quirk::none) : 
-            name(name), max(max), quirk(quirk)
-         {};
-
-         const char* name;
-         uint32_t    max;
-         index_quirk quirk;
-         int32_t     value = 0; // loaded value
-         //
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            if (this->quirk == index_quirk::presence) {
-               bool absence = stream.read_bits(1) != 0;
-               if (absence) {
-                  this->value = OpcodeArgValueBaseIndex::none;
-                  return true;
-               }
-            }
-            this->value = stream.read_bits(cobb::bitcount(this->max - 1));
-            if (this->quirk == index_quirk::offset)
-               --this->value;
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            if (this->quirk == index_quirk::presence) {
-               if (this->value == OpcodeArgValueBaseIndex::none) {
-                  stream.write(1, 1);
-                  return;
-               }
-               stream.write(0, 1);
-            }
-            auto value = this->value;
-            if (this->quirk == index_quirk::offset)
-               ++value;
-            stream.write(value, cobb::bitcount(this->max - 1));
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            if (this->value == OpcodeArgValueBaseIndex::none) {
-               cobb::sprintf(out, "No %s", this->name);
-               return;
-            }
-            cobb::sprintf(out, "%s #%d", this->name, this->value);
-         }
-   };
-
-   class OpcodeArgValueAllPlayers : public OpcodeArgValue { // one of the possibilities for team-or-player-vars.
-      public:
-         OpcodeArgValueAllPlayers() {};
-         //
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueAllPlayers();
-         }
-         virtual bool read(cobb::ibitreader& stream) noexcept override {
-            return true;
-         }
-         virtual void write(cobb::bitwriter& stream) const noexcept override {
-            return;
-         }
-         virtual void to_string(std::string& out) const noexcept override {
-            out = "all players";
-         }
-         virtual variable_type get_variable_type() const noexcept {
-            return variable_type::not_a_variable;
-         }
-   };
 };

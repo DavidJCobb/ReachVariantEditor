@@ -15,7 +15,7 @@ PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
       reach_traits_pane_setup_combobox(this->ui.fieldHealthRegenRate, defense.healthRate);
       reach_traits_pane_setup_combobox(this->ui.fieldShieldMult, defense.shieldMult);
       reach_traits_pane_setup_combobox(this->ui.fieldShieldRegenRate, defense.shieldRate);
-      reach_traits_pane_setup_combobox(this->ui.fieldShieldRegenDelay, defense.shieldDelay);
+      reach_traits_pane_setup_combobox(this->ui.fieldShieldRegenRateOver, defense.overshieldRate);
       reach_traits_pane_setup_combobox(this->ui.fieldHeadshotImmunity, defense.headshotImmune);
       reach_traits_pane_setup_combobox(this->ui.fieldAssassinationImmunity, defense.assassinImmune);
       reach_traits_pane_setup_combobox(this->ui.fieldShieldVampirism, defense.vampirism);
@@ -90,7 +90,7 @@ void PagePlayerTraits::updateFromVariant(ReachPlayerTraits* traits) {
       reach_traits_pane_update_combobox(this->ui.fieldHealthRegenRate,  defense.healthRate);
       reach_traits_pane_update_combobox(this->ui.fieldShieldMult,       defense.shieldMult);
       reach_traits_pane_update_combobox(this->ui.fieldShieldRegenRate,  defense.shieldRate);
-      reach_traits_pane_update_combobox(this->ui.fieldShieldRegenDelay, defense.shieldDelay);
+      reach_traits_pane_update_combobox(this->ui.fieldShieldRegenRateOver, defense.overshieldRate);
       reach_traits_pane_update_combobox(this->ui.fieldHeadshotImmunity, defense.headshotImmune);
       reach_traits_pane_update_combobox(this->ui.fieldAssassinationImmunity, defense.assassinImmune);
       reach_traits_pane_update_combobox(this->ui.fieldShieldVampirism,       defense.vampirism);

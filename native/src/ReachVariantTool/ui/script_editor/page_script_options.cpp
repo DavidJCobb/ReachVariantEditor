@@ -125,7 +125,16 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          }
          this->targetOption = list.emplace_back();
-         this->targetOption->add_value(); // enum-options must have at least one value
+         auto value = this->targetOption->add_value(); // enum-options must have at least one value
+         {  // If possible, default the new option's name and description to an empty string; ditto for its value
+            auto str = mp->scriptData.strings.get_empty_entry();
+            if (str) {
+               this->targetOption->name = str;
+               this->targetOption->desc = str;
+               value->name = str;
+               value->desc = str;
+            }
+         }
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
@@ -167,7 +176,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       QObject::connect(this->ui.buttonOptionsDelete, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
             return;
-         if (this->targetOption->get_inbound_references().size()) {
+         if (this->targetOption->get_refcount()) {
             QMessageBox::information(this, tr("Cannot remove option"), tr("This option is still in use by the gametype's script. It cannot be removed at this time."));
             return;
          }
@@ -180,11 +189,13 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (index < 0)
             return;
          list.erase(index);
-         if (index > 0)
-            this->targetOption = &list[index - 1];
-         else if (list.size())
-            this->targetOption = &list[0];
-         else
+         size_t size = list.size();
+         if (size) {
+            if (index >= size)
+               this->targetOption = &list[size - 1];
+            else
+               this->targetOption = &list[index];
+         } else
             this->targetOption = nullptr;
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
@@ -192,6 +203,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       });
    }
    {  // Value properties
+      QObject::connect(this->ui.defaultEnumValue, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+         if (!this->targetOption)
+            return;
+         if (index < 0 || index >= this->targetOption->values.size())
+            return;
+         this->targetOption->defaultValueIndex = index;
+      });
+      //
       QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
@@ -220,6 +239,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (!value)
             return;
          this->targetValue = value;
+         {  // If possible, default the new value's name and description to an empty string
+            auto& editor = ReachEditorState::get();
+            auto  mp     = editor.multiplayerData();
+            if (mp) {
+               auto str = mp->scriptData.strings.get_empty_entry();
+               if (str) {
+                  value->name = str;
+                  value->desc = str;
+               }
+            }
+         }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
@@ -242,6 +272,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             else if (c == index - 1)
                c = index;
          }
+         if (index == this->targetOption->defaultValueIndex)
+            this->targetOption->defaultValueIndex -= 1;
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -263,6 +295,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             else if (c == index + 1)
                c = index;
          }
+         if (index == this->targetOption->defaultValueIndex)
+            this->targetOption->defaultValueIndex += 1;
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -284,6 +318,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             this->targetValue = list[0];
          else
             this->targetValue = nullptr;
+         if (index == this->targetOption->defaultValueIndex) {
+            int diff = (list.size() - 1) - index;
+            this->targetOption->defaultValueIndex -= diff;
+         }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
@@ -347,6 +385,8 @@ void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* va
    }
    if (this->targetOption)
       _selectByPointerData(this->ui.listOptions, this->targetOption);
+   else
+      this->updateOptionFromVariant();
 }
 void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    const QSignalBlocker blocker0(this->ui.rangeDefault);
@@ -359,9 +399,7 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    if (!this->targetOption) {
       this->ui.optionName->clearTarget();
       this->ui.optionDesc->clearTarget();
-      //
-      // TOOD: reset controls to a blank state
-      //
+      this->updateValuesListFromVariant();
       return;
    }
    auto& o = *this->targetOption;
@@ -382,24 +420,33 @@ void ScriptEditorPageScriptOptions::updateOptionFromVariant() {
    }
 }
 void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
-   const QSignalBlocker blocker(this->ui.listValues);
+   const QSignalBlocker blocker0(this->ui.listValues);
+   const QSignalBlocker blocker1(this->ui.defaultEnumValue);
    //
    this->ui.listValues->clear();
-   if (!this->targetOption)
+   this->ui.defaultEnumValue->clear();
+   if (!this->targetOption) {
+      this->ui.buttonValuesDelete->setDisabled(true);
       return;
+   }
    auto& list = this->targetOption->values;
    for (size_t i = 0; i < list.size(); i++) {
-      auto& value = *list[i];
-      auto  item  = new QListWidgetItem;
+      auto&   value = *list[i];
+      auto    item  = new QListWidgetItem;
+      QString name;
       if (value.name)
-         item->setText(QString::fromUtf8(value.name->english().c_str()));
+         name = QString::fromUtf8(value.name->english().c_str());
       else
-         item->setText(tr("<unnamed value %1>", "scripted option editor").arg(i));
+         name = tr("<unnamed value %1>", "scripted option editor").arg(i);
+      item->setText(name);
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&value));
       this->ui.listValues->addItem(item);
+      //
+      this->ui.defaultEnumValue->addItem(name);
    }
    if (this->targetValue)
       _selectByPointerData(this->ui.listValues, this->targetValue);
+   this->ui.defaultEnumValue->setCurrentIndex(this->targetOption->defaultValueIndex);
    this->ui.buttonValuesDelete->setDisabled(list.size() <= 1);
 }
 void ScriptEditorPageScriptOptions::updateValueFromVariant() {
@@ -407,9 +454,9 @@ void ScriptEditorPageScriptOptions::updateValueFromVariant() {
    const QSignalBlocker blocker1(this->ui.valueDesc);
    const QSignalBlocker blocker2(this->ui.valueValue);
    if (!this->targetValue) {
-      //
-      // TOOD: reset controls to a blank state
-      //
+      this->ui.valueName->clearTarget();
+      this->ui.valueDesc->clearTarget();
+      this->ui.valueValue->setValue(0);
       return;
    }
    this->ui.valueName->setTarget(this->targetValue->name);

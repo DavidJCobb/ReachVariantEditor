@@ -146,6 +146,23 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Default Value</string>
+             </property>
+             <property name="buddy">
+              <cstring>defaultEnumValue</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="defaultEnumValue"/>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QListWidget" name="listValues"/>
@@ -378,6 +395,7 @@
   <tabstop>buttonOptionsMoveDown</tabstop>
   <tabstop>buttonOptionsDelete</tabstop>
   <tabstop>optionType</tabstop>
+  <tabstop>defaultEnumValue</tabstop>
   <tabstop>listValues</tabstop>
   <tabstop>buttonValuesNew</tabstop>
   <tabstop>buttonValuesMoveUp</tabstop>

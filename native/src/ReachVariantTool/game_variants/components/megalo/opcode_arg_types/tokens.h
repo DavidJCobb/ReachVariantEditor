@@ -28,12 +28,17 @@ namespace Megalo {
             }
          }
          //
-         bool read(cobb::ibitreader& stream) noexcept;
+         bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          void to_string(std::string& out) const noexcept;
+         void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept;
+         arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept;
+         void copy(const OpcodeStringToken&) noexcept;
+         void clear();
    };
 
-   class OpcodeArgValueStringTokens2 : OpcodeArgValue {
+   class OpcodeArgValueStringTokens2 : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       //
       // An opcode argument which consists of a format string and zero or more tokens to 
       // insert into it. The format string is specified as an index into the string 
@@ -50,21 +55,19 @@ namespace Megalo {
       //
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader&) {
-            return new OpcodeArgValueStringTokens2;
-         }
+         static constexpr int max_token_count = 2;
          //
       public:
-         static constexpr int max_token_count = 2;
-      public:
-         MegaloStringIndexOptional stringIndex = -1; // format string - index in scriptData::strings
-         MegaloStringRef           string      = MegaloStringRef::make(*this);
+         MegaloStringRef string;
          cobb::bitnumber<cobb::bitcount(max_token_count), uint8_t> tokenCount = 0;
          OpcodeStringToken tokens[max_token_count];
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
-         virtual void postprocess(GameVariantDataMultiplayer* newlyLoaded) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
    };
 }

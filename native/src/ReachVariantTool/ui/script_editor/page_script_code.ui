@@ -26,8 +26,14 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0">
+   <item row="0" column="0" colspan="2">
     <widget class="QPlainTextEdit" name="output">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>2</verstretch>
+      </sizepolicy>
+     </property>
      <property name="font">
       <font>
        <family>Courier New</family>
@@ -40,6 +46,26 @@
     <widget class="QPushButton" name="testButton">
      <property name="text">
       <string>TEST DECOMPILE</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="testCompile">
+     <property name="text">
+      <string>TEST COMPILE</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QPlainTextEdit" name="compileLog">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="placeholderText">
+      <string>Compiler warnings and errors</string>
      </property>
     </widget>
    </item>

@@ -2,10 +2,13 @@
 #include "../../helpers/bitnumber.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
-#include "../../helpers/reference_tracked_object.h"
+#include "../../formats/indexed_lists.h"
+#include "../../helpers/refcounting.h"
 #include "../../helpers/stream.h"
 
-class ReachMegaloGameStat : public cobb::reference_tracked_object {
+class GameVariantDataMultiplayer;
+
+class ReachMegaloGameStat : public indexed_list_item {
    public:
       enum class Format : uint8_t {
          number,
@@ -19,14 +22,15 @@ class ReachMegaloGameStat : public cobb::reference_tracked_object {
          descending,
          obsolete_2,
       };
-      int8_t index = -1;
-      MegaloStringRef   name = MegaloStringRef::make(*this);
-      MegaloStringIndex nameIndex;
+      MegaloStringRef name;
       Format format      = Format::number;
       Sort   sortOrder   = Sort::ascending;
       bool   groupByTeam = false;
       //
-      void read(cobb::ibitreader&) noexcept;
-      void postprocess_string_indices(ReachStringTable& table) noexcept;
-      void write(cobb::bitwriter& stream) noexcept;
+      void read(cobb::ibitreader&, GameVariantDataMultiplayer&) noexcept;
+      void write(cobb::bitwriter& stream) const noexcept;
+      //
+      inline static constexpr uint32_t bitcount() noexcept { // constexpr implies inline but let's be explicit
+         return MegaloStringIndex::bitcount + 2 + 2 + 1;
+      }
 };

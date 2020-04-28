@@ -17,12 +17,12 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
    if (!owner.isRange) {
       {  // Correct indices
          if (this->name) {
-            this->nameIndex = this->name->index();
+            this->nameIndex = this->name->index;
          } else
             this->nameIndex = 0;
          //
          if (this->desc) {
-            this->descIndex = this->desc->index();
+            this->descIndex = this->desc->index;
          } else
             this->descIndex = 0;
       }
@@ -32,6 +32,8 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
 }
 
 void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
+   this->is_defined = true;
+   //
    this->nameIndex.read(stream);
    this->descIndex.read(stream);
    this->isRange.read(stream);
@@ -71,12 +73,12 @@ void ReachMegaloOption::postprocess_string_indices(ReachStringTable& table) noex
 void ReachMegaloOption::write(cobb::bitwriter& stream) noexcept {
    {  // Correct indices
       if (this->name) {
-         this->nameIndex = this->name->index();
+         this->nameIndex = this->name->index;
       } else
          this->nameIndex = 0;
       //
       if (this->desc) {
-         this->descIndex = this->desc->index();
+         this->descIndex = this->desc->index;
       } else
          this->descIndex = 0;
    }
@@ -111,8 +113,6 @@ ReachMegaloOptionValueEntry* ReachMegaloOption::add_value() noexcept {
 }
 void ReachMegaloOption::delete_value(ReachMegaloOptionValueEntry* target) noexcept {
    if (!target)
-      return;
-   if (target->get_inbound_references().size()) // shouldn't be possible; nothing external can refer to an option's enum values
       return;
    auto& list = this->values;
    auto  it   = std::find(list.begin(), list.end(), target);

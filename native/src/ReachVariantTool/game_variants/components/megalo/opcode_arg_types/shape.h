@@ -1,6 +1,6 @@
 #pragma once
 #include "../opcode_arg.h"
-#include "scalar.h"
+#include "variables/number.h"
 
 namespace Megalo {
    enum class ShapeType {
@@ -11,12 +11,10 @@ namespace Megalo {
       //
       _count
    };
-   class OpcodeArgValueShape : public OpcodeArgValueScalar {
+   class OpcodeArgValueShape : public OpcodeArgValue {
+      megalo_opcode_arg_value_make_create_override;
       public:
          static OpcodeArgTypeinfo typeinfo;
-         static OpcodeArgValue* factory(cobb::ibitreader& stream) {
-            return new OpcodeArgValueShape;
-         }
          //
       public:
          cobb::bitnumber<cobb::bitcount((int)ShapeType::_count - 1), ShapeType> shapeType = ShapeType::none; // 2 bits
@@ -25,8 +23,15 @@ namespace Megalo {
          OpcodeArgValueScalar top;
          OpcodeArgValueScalar bottom;
          //
-         virtual bool read(cobb::ibitreader& stream) noexcept override;
+         virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;
          virtual void to_string(std::string& out) const noexcept override;
+         virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
+         virtual void copy(const OpcodeArgValue*) noexcept override;
+         //
+         OpcodeArgValueScalar& axis(uint8_t) noexcept;
+         uint8_t axis_count() const noexcept;
    };
 }

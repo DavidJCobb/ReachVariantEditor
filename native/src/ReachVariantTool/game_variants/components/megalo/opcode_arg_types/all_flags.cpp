@@ -1,111 +1,157 @@
 #include "all_flags.h"
-#include "../enums.h"
+#include "../../../helpers/qt/string.h"
 
-namespace {
-   namespace _MegaloArgValueFlagsBase {
-      megalo_define_smart_flags(CreateObject,
-         "never garbage-collect",
-         "unk_1",
-         "unk_2"
-      );
-      megalo_define_smart_flags(KillerType,
-         "guardians",
-         "suicide",
-         "kill",
-         "betrayal",
-         "quit"
-      );
-      megalo_define_smart_flags(PlayerUnusedMode,
-         "unk_0",
-         "unk_1",
-         "unk_2",
-         "unk_3",
-      );
-   }
-}
 namespace Megalo {
-   OpcodeArgValueCreateObjectFlags::OpcodeArgValueCreateObjectFlags()
-      : OpcodeArgValueBaseFlags(_MegaloArgValueFlagsBase::CreateObject)
-   {}
-   //
-   OpcodeArgValueKillerTypeFlags::OpcodeArgValueKillerTypeFlags()
-      : OpcodeArgValueBaseFlags(_MegaloArgValueFlagsBase::KillerType)
-   {}
-   //
-   OpcodeArgValuePlayerUnusedModeFlags::OpcodeArgValuePlayerUnusedModeFlags()
-      : OpcodeArgValueBaseFlags(_MegaloArgValueFlagsBase::PlayerUnusedMode)
-   {}
-   //
-   bool OpcodeArgValueGenericFlagsMask::read(cobb::ibitreader & stream) noexcept {
-      auto& list = this->typeinfo.elements;
-      this->value = stream.read_bits(cobb::bitcount(list.size()));
+   namespace flags_masks {
+      auto create_object = DetailedFlags({
+         DetailedFlagsValue("never_garbage_collect", DetailedFlagsValueInfo::make_friendly_name("never garbage-collect")),
+         DetailedFlagsValue("suppress_effect"),
+         DetailedFlagsValue("absolute_orientation", DetailedFlagsValueInfo::make_friendly_name("use absolute orientation")),
+      });
+      auto killer_type = DetailedFlags({
+         DetailedFlagsValue("guardians",
+            DetailedFlagsValueInfo::make_friendly_name("guardians"),
+            DetailedFlagsValueInfo::make_description("Used when a player is killed by non-fall-damage physics, by a Kill Ball, or by any inexplicable cause.")
+         ),
+         DetailedFlagsValue("suicide",
+            DetailedFlagsValueInfo::make_friendly_name("suicide"),
+            DetailedFlagsValueInfo::make_description("Used when a player dies by their own hand (unless an enemy contributed significantly to their death), or is killed by a level boundary.")
+         ),
+         DetailedFlagsValue("kill",
+            DetailedFlagsValueInfo::make_friendly_name("kill"),
+            DetailedFlagsValueInfo::make_description("Used when a player is killed primarily by an enemy.")
+         ),
+         DetailedFlagsValue("betrayal",
+            DetailedFlagsValueInfo::make_friendly_name("betrayal"),
+            DetailedFlagsValueInfo::make_description("Used when a player is killed primarily by a teammate.")
+         ),
+         DetailedFlagsValue("quit",
+            DetailedFlagsValueInfo::make_friendly_name("quit"),
+            DetailedFlagsValueInfo::make_description("Used when a player's biped dies as a result of the player quitting the match.")
+         )
+      });
+      auto player_unused_mode = DetailedFlags({
+         DetailedFlagsValue("alive_weapons"),
+         DetailedFlagsValue("alive_equipment"),
+         DetailedFlagsValue("alive_vehicles"),
+         DetailedFlagsValue("dead_weapons"),
+         DetailedFlagsValue("dead_equipment") // TODO: previous versions of KSoft only listed four flags; we should double-check this
+      });
+   }
+
+   #pragma region OpcodeArgValueFlagsSuperclass member functions
+   bool OpcodeArgValueFlagsSuperclass::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+      this->value = stream.read_bits(this->base.bitcount());
       return true;
    }
-   void OpcodeArgValueGenericFlagsMask::write(cobb::bitwriter & stream) const noexcept {
-      auto& list = this->typeinfo.elements;
-      stream.write(this->value, cobb::bitcount(list.size()));
+   void OpcodeArgValueFlagsSuperclass::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->value, this->base.bitcount());
    }
-   void OpcodeArgValueGenericFlagsMask::to_string(std::string & out) const noexcept {
-      auto& list = this->typeinfo.elements;
-      auto  size = list.size();
+   void OpcodeArgValueFlagsSuperclass::to_string(std::string& out) const noexcept {
+      auto& base = this->base;
+      auto  size = base.size();
       //
       out.clear();
       size_t i     = 0;
       size_t found = 0;
       for (; i < size; i++) {
          if (value & (1 << i)) {
-            if (++found == 1)
+            ++found;
+            if (found == 2)
                out = '(' + out;
-            else if (found > 1)
+            if (found > 1)
                out += ", ";
-            out += list[i];
+            out += base[i].name; // friendly names are QStrings; can't use that unless and until we retool OpcodeArgValue around them
          }
       }
       if (found > 1)
          out += ')';
+      else if (!found)
+         out = "no flags";
    }
-   void OpcodeArgValueGenericFlagsMask::decompile(Decompiler& out, uint64_t flags) noexcept {
-      std::string s;
-      this->to_string(s);
-      out.write(s);
-   }
-   //
-   namespace { // factories
-      template<OpcodeArgTypeinfo& ti> OpcodeArgValue* _flagsMaskFactory(cobb::ibitreader& stream) {
-         return new OpcodeArgValueGenericFlagsMask(ti);
+   void OpcodeArgValueFlagsSuperclass::decompile(Decompiler& decompiler, uint64_t flags) noexcept {
+      auto& base = this->base;
+      auto  size = base.size();
+      //
+      std::string out;
+      size_t i     = 0;
+      size_t found = 0;
+      for (; i < size; i++) {
+         if (value & (1 << i)) {
+            ++found;
+            if (found > 1)
+               out += " | ";
+            out += base[i].name;
+         }
       }
+      if (!found)
+         out = "none";
+      decompiler.write(out);
    }
-   OpcodeArgTypeinfo OpcodeArgValueFlagsMaskTypeinfoCreateObject = OpcodeArgTypeinfo(
-      OpcodeArgTypeinfo::typeinfo_type::flags_mask,
-      0,
-      {
-         "never_garbage_collect",
-         "unk_1",
-         "unk_2"
-      },
-      &_flagsMaskFactory<OpcodeArgValueFlagsMaskTypeinfoCreateObject>
-   );
-   OpcodeArgTypeinfo OpcodeArgValueFlagsMaskTypeinfoKillerType = OpcodeArgTypeinfo(
-      OpcodeArgTypeinfo::typeinfo_type::flags_mask,
-      0,
-      {
-         "guardians",
-         "suicide",
-         "kill",
-         "betrayal",
-         "quit"
-      },
-      &_flagsMaskFactory<OpcodeArgValueFlagsMaskTypeinfoKillerType>
-   );
-   OpcodeArgTypeinfo OpcodeArgValueFlagsMaskTypeinfoPlayerUnusedMode = OpcodeArgTypeinfo(
-      OpcodeArgTypeinfo::typeinfo_type::flags_mask,
-      0,
-      {
-         "unk_0",
-         "unk_1",
-         "unk_2",
-         "unk_3",
-      },
-      &_flagsMaskFactory<OpcodeArgValueFlagsMaskTypeinfoPlayerUnusedMode>
-   );
+   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      this->value = 0;
+      //
+      auto prior = arg.backup_stream_state();
+      auto word  = arg.extract_word();
+      if (word.isEmpty())
+         return arg_compile_result::failure("Expected a flag name or the word \"none\".");
+      if (word.compare("none", Qt::CaseInsensitive) == 0) {
+         //
+         // We've already set our value to 0.
+         //
+         return arg_compile_result::success();
+      }
+      arg.restore_stream_state(prior);
+      //
+      auto& base = this->base;
+      do {
+         word = arg.extract_word();
+         auto i = base.lookup(word);
+         if (i < 0)
+            return arg_compile_result::failure(QString("Word \"%1\" was not recognized as a flag name.").arg(word));
+         this->value |= (1 << i);
+      } while (arg.extract_specific_char('|'));
+      //
+      return arg_compile_result::success();
+   }
+   void OpcodeArgValueFlagsSuperclass::copy(const OpcodeArgValue* other) noexcept {
+      auto cast = dynamic_cast<const OpcodeArgValueFlagsSuperclass*>(other);
+      assert(cast);
+      assert(&cast->base == &this->base && "These two flags-masks are of different types.");
+      this->value = cast->value;
+   }
+   #pragma endregion
+
+   OpcodeArgValueCreateObjectFlags::OpcodeArgValueCreateObjectFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::create_object) {}
+   OpcodeArgTypeinfo OpcodeArgValueCreateObjectFlags::typeinfo = OpcodeArgTypeinfo(
+      "_create_object_flags",
+      "Create Object Flags",
+      "Options for creating objects.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueCreateObjectFlags>,
+      flags_masks::create_object
+   ).import_names({ "none" });
+   //
+   OpcodeArgValueKillerTypeFlags::OpcodeArgValueKillerTypeFlags() : OpcodeArgValueFlagsSuperclass(flags_masks::killer_type) {}
+   OpcodeArgTypeinfo OpcodeArgValueKillerTypeFlags::typeinfo = OpcodeArgTypeinfo(
+      "_killer_type_flags",
+      "Killer Type Flags",
+      "Overall causes of death for players.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueKillerTypeFlags>,
+      flags_masks::killer_type
+   ).import_names({ "none" });
+   //
+   OpcodeArgValuePlayerReqPurchaseModes::OpcodeArgValuePlayerReqPurchaseModes() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
+   OpcodeArgTypeinfo OpcodeArgValuePlayerReqPurchaseModes::typeinfo = OpcodeArgTypeinfo(
+      "_player_req_purchase_modes",
+      "Player Requisition Purchase Modes",
+      "Unknown. Related to the scrapped requisition system.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerReqPurchaseModes>,
+      flags_masks::player_unused_mode
+   ).import_names({ "none" });
 }

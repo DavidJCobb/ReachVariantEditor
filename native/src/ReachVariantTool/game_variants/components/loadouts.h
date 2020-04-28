@@ -25,6 +25,8 @@ class ReachLoadout {
       void read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) const noexcept;
       //
+      static uint32_t bitcount() noexcept;
+      //
       #if __cplusplus <= 201703L
       bool operator==(const ReachLoadout&) const noexcept;
       bool operator!=(const ReachLoadout& other) const noexcept { return !(*this == other); }
@@ -44,6 +46,10 @@ class ReachLoadoutPalette {
       void write(cobb::bitwriter& stream) const noexcept {
          for (auto& loadout : this->loadouts)
             loadout.write(stream);
+      }
+      //
+      static uint32_t bitcount() noexcept {
+         return ReachLoadout::bitcount() * 5;
       }
       //
       #if __cplusplus <= 201703L

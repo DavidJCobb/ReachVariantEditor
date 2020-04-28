@@ -26,19 +26,19 @@ namespace Megalo {
          "Compares any two values.",
          "%1 %v %3 %2.",
          {
-            OpcodeArgBase("a", OpcodeArgAnyVariableFactory),
-            OpcodeArgBase("b", OpcodeArgAnyVariableFactory),
-            OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::factory)
+            OpcodeArgBase("a", OpcodeArgValueAnyVariable::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueAnyVariable::typeinfo),
+            OpcodeArgBase("operator", OpcodeArgValueCompareOperatorEnum::typeinfo)
          },
          OpcodeFuncToScriptMapping::make_intrinsic_comparison({0, 1}, 2)
       ),
       ConditionFunction( // 2
          "Object In Boundary",
-         "Checks whether one object is inside of another object's Shape.",
+         "Checks whether one object is inside of another object's Shape. Note that this is a centerpoint check. If, for example, you check whether a shape contains a Warthog, the check will pass only when the Warthog's centerpoint is inside of the shape.",
          "%1 %v inside of %2's shape.",
          {
-            OpcodeArgBase("a", OpcodeArgValueObject::factory),
-            OpcodeArgBase("b", OpcodeArgValueObject::factory),
+            OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("shape_contains", "", {0}, 1)
       ),
@@ -47,22 +47,22 @@ namespace Megalo {
          "Checks what killed a player.",
          "%1 %v killed by any of: %2.",
          {
-            OpcodeArgBase("victim", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::factory),
+            OpcodeArgBase("victim", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("killer types", OpcodeArgValueKillerTypeFlags::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("killer_type_is", "", {1}, 0),
          "was", "was not"
       ),
       ConditionFunction( // 4
-         "Team Disposition",
+         "Team Alliance Status",
          "",
-         "%1 %v disposition %3 with %2.",
+         "%1 %v alliance status %3 with %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueTeam::factory),
-            OpcodeArgBase("b", OpcodeArgValueTeam::factory),
-            OpcodeArgBase("disposition", OpcodeArgValueTeamDispositionEnum::factory),
+            OpcodeArgBase("a", OpcodeArgValueTeam::typeinfo),
+            OpcodeArgBase("b", OpcodeArgValueTeam::typeinfo),
+            OpcodeArgBase("status", OpcodeArgValueTeamAllianceStatus::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("has_disposition", "", {1, 2}, 0),
+         OpcodeFuncToScriptMapping::make_function("has_alliance_status", "", {1, 2}, 0),
          "has", "does not have"
       ),
       ConditionFunction( // 5
@@ -70,7 +70,7 @@ namespace Megalo {
          "Checks whether a timer is at zero.",
          "%1 %v at zero.",
          {
-            OpcodeArgBase("timer", OpcodeArgValueTimer::factory),
+            OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_zero", "", {}, 0)
       ),
@@ -79,8 +79,8 @@ namespace Megalo {
          "Checks an object's type.",
          "%1 %v of type %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("type",   OpcodeArgValueMPObjectTypeIndex::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_of_type", "", {1}, 0)
       ),
@@ -89,7 +89,7 @@ namespace Megalo {
          "Checks whether a team has one or more players on it.",
          "%1 %v one or more players on it.",
          {
-            OpcodeArgBase("team", OpcodeArgValueTeam::factory),
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("has_any_players", "", {}, 0),
          "has", "does not have"
@@ -99,26 +99,26 @@ namespace Megalo {
          "Checks whether an object is out of bounds.",
          "%1 %v out of bounds.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_out_of_bounds", "", {}, 0)
       ),
       ConditionFunction( // 9
-         "Deprecated-09",
-         "This condition always returns false.", // TODO: does inverting it change that?
-         "Never. (Unused argument: %1)",
+         "Player Is Fireteam Leader",
+         "This condition always returns false.",
+         "%1 %v the leader of their fireteam.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("deprecated_09", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("is_fireteam_leader", "", {}, 0)
       ),
       ConditionFunction( // 10
          "Player Assisted Kill Of",
          "Checks whether one player assisted in the slaying of another player. Note that players don't count as \"assisting\" themselves.",
          "%1 %v in the killing of %2.",
          {
-            OpcodeArgBase("attacker", OpcodeArgValuePlayer::factory),
-            OpcodeArgBase("victim",   OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("attacker", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("victim",   OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("assisted_kill_of", "", {1}, 0),
          "assisted", "did not assist"
@@ -128,8 +128,8 @@ namespace Megalo {
          "Checks whether an object has a Forge label.",
          "%1 %v label %2.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
-            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("has_forge_label", "", {1}, 0),
          "has", "does not have"
@@ -139,7 +139,7 @@ namespace Megalo {
          "Checks whether a player is NOT waiting to respawn.", // TODO: includes loadout cam time?
          "%1 %v waiting to respawn.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_not_respawning", "", {}, 0),
          "is not", "is"
@@ -149,7 +149,7 @@ namespace Megalo {
          "",
          "%1 %v in use.",
          {
-            OpcodeArgBase("object", OpcodeArgValueObject::factory),
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_in_use", "", {}, 0)
       ),
@@ -158,7 +158,7 @@ namespace Megalo {
          "Checks whether a player is a Spartan.",
          "%1 %v a Spartan.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_spartan", "", {}, 0)
       ),
@@ -167,7 +167,7 @@ namespace Megalo {
          "Checks whether a player is an Elite.",
          "%1 %v an Elite.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_elite", "is_sangheili", {}, 0)
       ),
@@ -176,20 +176,20 @@ namespace Megalo {
          "Checks whether a player is a Monitor.",
          "%1 %v a Monitor.",
          {
-            OpcodeArgBase("player", OpcodeArgValuePlayer::factory),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("is_monitor", "", {}, 0)
       ),
       ConditionFunction( // 17
-         "In Matchmaking",
-         "This condition is believed to test whether the current match is taking place in Matchmaking.",
-         "This match %v taking place in Matchmaking.",
+         "In Forge",
+         "This condition is believed to test whether the current match is taking place in Forge.",
+         "This match %v taking place in Forge.",
          {},
-         OpcodeFuncToScriptMapping::make_function("is_in_matchmaking", "", {}, OpcodeFuncToScriptMapping::game_namespace)
+         OpcodeFuncToScriptMapping::make_function("is_in_forge", "", {}, OpcodeFuncToScriptMapping::game_namespace)
       ),
    }};
 
-   bool Condition::read(cobb::ibitreader& stream) noexcept {
+   bool Condition::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
          this->bit_offset = stream.get_bitpos();
       #endif
@@ -224,10 +224,10 @@ namespace Megalo {
       size_t argCount = base.size();
       this->arguments.resize(argCount);
       for (size_t i = 0; i < argCount; i++) {
-         auto factory = base[i].factory;
-         this->arguments[i] = factory(stream);
+         auto  factory = base[i].typeinfo.factory;
+         this->arguments[i] = factory();
          if (this->arguments[i]) {
-            if (!this->arguments[i]->read(stream)) {
+            if (!this->arguments[i]->read(stream, mp)) {
                auto& error = GameEngineVariantLoadError::get();
                error.state            = GameEngineVariantLoadError::load_state::failure;
                error.failure_point    = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
@@ -252,9 +252,6 @@ namespace Megalo {
       return true;
    }
    void Condition::write(cobb::bitwriter& stream) const noexcept {
-      #if _DEBUG
-         printf("Saving condition: %s\n", this->debug_str.c_str());
-      #endif
       {
          size_t index = 0;
          auto&  list   = conditionFunctionList;
@@ -276,48 +273,8 @@ namespace Megalo {
       size_t argCount = base.size();
       assert(this->arguments.size() == argCount && "A condition didn't have enough arguments during save!");
       for (size_t i = 0; i < argCount; i++) {
-         #if _DEBUG
-            printf(" - Serializing argument #%d...\n", i);
-         #endif
-         auto* arg     = this->arguments[i];
-         auto  factory = base[i].factory;
-         assert(arg && "A condition's argument is nullptr during save!");
-         //
-         // This is really ugly but I've sort of painted myself into a corner here... Some 
-         // arguments can take multiple variable types, and currently the variable classes 
-         // have no way of "knowing" that that's how they got here.
-         //
-         if (factory == OpcodeArgAnyVariableFactory) {
-            #if _DEBUG
-               printf("   Opcode base type is <any-variable>. Serializing variable type code...\n");
-            #endif
-            stream.write((uint8_t)arg->get_variable_type(), 3);
-         } else if (factory == OpcodeArgTeamOrPlayerVariableFactory) {
-            #if _DEBUG
-               printf("   Opcode base type is <team-or-player>. Serializing variable type code...\n");
-            #endif
-            switch (arg->get_variable_type()) {
-               case variable_type::team:
-                  stream.write(0, 2);
-                  break;
-               case variable_type::player:
-                  stream.write(1, 2);
-                  break;
-               case variable_type::not_a_variable:
-                  stream.write(2, 2);
-                  break;
-            }
-         }
-         //
-         // Now we can serialize the argument value.
-         //
-         #if _DEBUG
-            printf("   About to write argument of type %s...\n", typeid(*arg).name());
-         #endif
+         auto* arg = this->arguments[i];
          arg->write(stream);
-         #if _DEBUG
-            printf("   Wrote argument.\n");
-         #endif
       }
    }
    void Condition::to_string(std::string& out) const noexcept {
@@ -341,7 +298,8 @@ namespace Megalo {
             continue;
          }
          if (c == 'v') {
-            out += (this->inverted) ? this->function->verb_invert : this->function->verb_normal;
+            auto cnd = (const ConditionFunction*)this->function;
+            out += (this->inverted) ? cnd->verb_invert : cnd->verb_normal;
             continue;
          }
          if (c >= '1' && c <= '9') {
@@ -361,5 +319,18 @@ namespace Megalo {
       if (this->inverted)
          out.write("not ");
       this->function->decompile(out, this->arguments);
+   }
+   void Condition::reset() noexcept {
+      Opcode::reset(); // call super
+      #if _DEBUG
+         this->debug_str.clear();
+      #endif
+   }
+   Opcode* Condition::clone() const noexcept {
+      auto cnd = (Condition*)Opcode::clone(); // call super
+      cnd->inverted = this->inverted;
+      cnd->action   = this->action;
+      cnd->or_group = this->or_group;
+      return cnd;
    }
 }

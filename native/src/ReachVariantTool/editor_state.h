@@ -31,6 +31,7 @@ class ReachEditorState : public QObject {
       void variantAbandoned(GameVariant* variant); // the game variant is deleted after this is emitted
       void variantAcquired(GameVariant* variant);
       void variantFilePathChanged(const wchar_t* path);
+      void variantRecompiled(GameVariant* variant);
       //
       void switchedLoadoutPalette(ReachLoadoutPalette* which);
       void switchedMultiplayerTeam(GameVariant*, int8_t index, ReachTeamData*);

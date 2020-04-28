@@ -30,14 +30,14 @@ ScriptEditorPagePlayerRating::ScriptEditorPagePlayerRating(QWidget* parent) : QW
          auto mp = ReachEditorState::get().multiplayerData();
          if (!mp)
             return;
-         mp->playerRatingParams.unknown[i] = v;
+         mp->playerRatingParams.values[i] = v;
       });
    }
-   QObject::connect(this->ui.flag, &QCheckBox::stateChanged, [](int state) {
+   QObject::connect(this->ui.showInScoreboard, &QCheckBox::stateChanged, [](int state) {
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
          return;
-      mp->playerRatingParams.flag = state == Qt::Checked;
+      mp->playerRatingParams.showInScoreboard = (state == Qt::Checked);
    });
    //
    this->updateFromVariant(nullptr);
@@ -51,11 +51,11 @@ void ScriptEditorPagePlayerRating::updateFromVariant(GameVariant* variant) {
    if (!mp)
       return;
    //
-   const QSignalBlocker blocker(this->ui.flag);
-   this->ui.flag->setChecked(mp->playerRatingParams.flag);
+   const QSignalBlocker blocker(this->ui.showInScoreboard);
+   this->ui.showInScoreboard->setChecked(mp->playerRatingParams.showInScoreboard);
    for (size_t i = 0; i < this->floatWidgets.size(); i++) {
       auto widget = this->floatWidgets[i];
       const QSignalBlocker blocker(widget);
-      widget->setValue(mp->playerRatingParams.unknown[i]);
+      widget->setValue(mp->playerRatingParams.values[i]);
    }
 }

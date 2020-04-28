@@ -10,6 +10,6 @@ namespace Megalo {
    //
    using const_team_index = cobb::bitnumber<cobb::bitcount((int)const_team::_count - 1), const_team, true>;
    //
-   using object_type_index_optional = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_object_types), int32_t, true>;
+   using object_type_index_optional = cobb::bitnumber<cobb::bitcount(Megalo::Limits::max_object_types), int32_t>;
    using forge_label_index = cobb::bitnumber<cobb::bitcount(Limits::max_script_labels), int32_t, true>;
 }

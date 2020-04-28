@@ -3,7 +3,8 @@
 #include "../../helpers/bitnumber.h"
 #include "../../helpers/bitwriter.h"
 #include "../../formats/localized_string_table.h"
-#include "../../helpers/reference_tracked_object.h"
+#include "../../formats/indexed_lists.h"
+#include "../../helpers/refcounting.h"
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 #include "megalo/limits.h"
@@ -23,10 +24,10 @@ class ReachBlockMPVR;
 
 class ReachMegaloOption;
 
-class ReachMegaloOptionValueEntry : public cobb::reference_tracked_object {
+class ReachMegaloOptionValueEntry {
    public:
-      MegaloStringRef name = MegaloStringRef::make(*this);
-      MegaloStringRef desc = MegaloStringRef::make(*this);
+      MegaloStringRef name;
+      MegaloStringRef desc;
       ReachMegaloOptionValue value;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
@@ -36,11 +37,10 @@ class ReachMegaloOptionValueEntry : public cobb::reference_tracked_object {
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept;
 };
 
-class ReachMegaloOption : public cobb::reference_tracked_object {
+class ReachMegaloOption : public indexed_list_item {
    public:
-      int8_t index = -1;
-      MegaloStringRef name = MegaloStringRef::make(*this);
-      MegaloStringRef desc = MegaloStringRef::make(*this);
+      MegaloStringRef name;
+      MegaloStringRef desc;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       cobb::bitbool isRange;

@@ -45,10 +45,18 @@
    
     - Variable declarations -- number and timer variables can be default-initialized to just about 
       any variable/value they can be set to at run-time. We'll need OpcodeArgValues to hold those.
+      
+       - Speaking of which, we don't actually have any means with which to edit these. We'll need 
+         to add them to the (de)compiler, preferably with a new keyword e.g. "declare". This key-
+         word would only be needed for setting the initial value of a variable; if you use a var-
+         iable without declaring it, then we generate the declaration implicitly.
    
     - Use of cobb::reference_tracked_object to know when script options, player traits, etc., are 
       in use by any opcodes. We'd need to keep an array of refs, I guess, and of course we need to 
       make OpcodeArgValue a reference-tracked object itself. The load functor would fill the array.
+      
+       - It can be a fixed-length array; we'll never need more than... oh, I don't know, maybe six 
+         of these for a single value. We can audit all of the types and figure out the exact max.
       
        - Actually, this requires postprocessing, because Bungie didn't lay out the file format very 
          well. A lot of types can be referred to in script content before they're actually loaded 
@@ -57,7 +65,17 @@
          
          For simplicity's sake, we should also retool the trigger-loading process so that we can 
          pass the game variant down to the OpcodeArgValue and have it "register" itself to receive 
-         a postprocess call.
+         a postprocess call. This will all but ensure we avoid another v1.0.5-style mishap where 
+         we forget to postprocess some OpcodeArgValue objects because they don't actually appear 
+         inside of script data. We'll want to define a class IGameVariantObjectNeedsPostprocessing 
+         and use multiple inheritance (which may require that we make reference_tracked_object 
+         virtual?).
+         
+         If we really wanna be paranoid -- and frankly, I do -- we could even store a "is post-
+         processed" flag on each OpcodeArgValue and, when saving, warn/assert if the flag isn't 
+         set. We'd just need to remember to set it ourselves when compiling.
+         
+          - I went and defined IGameVariantDataObjectNeedingPostprocess as an abstract base class.
    
    ---
    
@@ -122,17 +140,32 @@ enum class arg_consume_result {
 }
 class OpcodeArgTypeinfo {
    public:
-      using load_functor_t    = std::function<bool(OpcodeArgValue&, void*, uint8_t)>; // loads data from binary stream; returns success/failure; args are the value, starting byte, and offset in bits
-      using decode_functor_t  = std::function<bool(OpcodeArgValue&, std::string&)>; // returns success/failure
-      using compile_functor_t = std::function<arg_consume_result(OpcodeArgValue&, const std::string&, Compiler&)>;
+      using load_functor_t        = std::function<bool(OpcodeArgValue&, void*, uint8_t)>; // loads data from binary stream; returns success/failure; args are the value, starting byte, and offset in bits
+      using decode_functor_t      = std::function<bool(OpcodeArgValue&, std::string&)>; // returns success/failure
+      using compile_functor_t     = std::function<arg_consume_result(OpcodeArgValue&, const std::string&, Compiler&)>;
+      using postprocess_functor_t = std::function<bool(OpcodeArgValue&, GameVariant&)>;
       //
-      QString name;
-      QString desc;
+      struct flags {
+         flags() = delete;
+         enum type : uint32_t {
+            none = 0,
+            may_need_postprocessing = 0x00000001,
+            is_variable             = 0x00000002,
+            is_nestable_variable    = 0x00000004,
+            is_static_variable      = 0x00000008, // e.g. player[3], team[3]
+         }
+      }
+      using flags_type = flags::type;
       //
-      load_functor_t    load       = nullptr;
-      decode_functor_t  to_english = nullptr;
-      decode_functor_t  decompile  = nullptr;
-      compile_functor_t compile    = nullptr;
+      QString  name;
+      QString  desc;
+      uint32_t flags = 0;
+      //
+      load_functor_t        load       = nullptr;
+      decode_functor_t      to_english = nullptr;
+      decode_functor_t      decompile  = nullptr;
+      compile_functor_t     compile    = nullptr;
+      postprocess_functor_t postprocess = nullptr;
       //
       // compile_functor_t takes a string representing an argument, and can modify the bits in 
       // an OpcodeArgValue to compile that argument. For types that represent multiple arguments 
@@ -159,12 +192,14 @@ class OpcodeArgTypeinfo {
       OpcodeArgTypeinfo(
          QString name,
          QString desc,
-         load_functor_t    l,
-         decode_functor_t  e,
-         decode_functor_t  d,
-         compile_functor_t c = nullptr // optional for now so that we can add these incrementally once we begin actually implementing a compiler
+         uint32_t f,
+         load_functor_t        l,
+         postprocess_functor_t p,
+         decode_functor_t      e,
+         decode_functor_t      d,
+         compile_functor_t     c = nullptr // optional for now so that we can add these incrementally once we begin actually implementing a compiler
       )
-         : name(name), desc(desc), load(l), to_english(e), decompile(d), compile(c)
+         : name(name), desc(desc), flags(f), load(l), postprocess(p), to_english(e), decompile(d), compile(c)
       {}
 }
 
