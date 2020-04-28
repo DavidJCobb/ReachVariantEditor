@@ -127,8 +127,12 @@ namespace Megalo {
       }
       if (index < 0)
          return arg_compile_result::failure("A Forge label cannot have a negative index.");
-      if (index >= list.size())
-         return arg_compile_result::failure(QString("You specified the Forge label with index %1, but the maximum defined index is %2.").arg(index).arg(list.size()));
+      size_t count = list.size();
+      if (index >= count) {
+         if (count)
+            return arg_compile_result::failure(QString("You specified the Forge label with index %1, but the maximum defined index is %2.").arg(index).arg(count - 1));
+         return arg_compile_result::failure(QString("You specified the Forge label with index %1, but no Forge labels are defined.").arg(index));
+      }
       this->value = &list[index];
       return arg_compile_result::success();
    }

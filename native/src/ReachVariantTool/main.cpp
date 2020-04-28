@@ -117,10 +117,16 @@ int main(int argc, char *argv[]) {
 //     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
 //       MCC's menus don't enforce this. Investigate.
 //
-//     - Identify unknown values in the "number" scope list.
+//     - Number variables should warn when compiling a constant that can't fit in a 16-bit 
+//       signed integer.
 //
-//     - We need UI for letting the user set the default value of an enum option in the script 
-//       editor.
+//     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH: WE NEED TO SWAP 
+//       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
+//
+//     - When creating something with a string, the default string chosen should always be 
+//       the first empty string found in the game variant (if there is one), or the first 
+//       string in the table otherwise. Right now, everything created through the UI (e.g. 
+//       script option values and so on) uses the first string in the table.
 //
 //     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
 //       a dropdown). The arrow should allow you to select what to copy: the full English 
@@ -237,12 +243,6 @@ int main(int argc, char *argv[]) {
 //          modified versions of the decompiled scripts that use aliases where appropriate 
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
-//
-//        - KSoft.Tool seems to have switched around the "Teams Enabled" flag (misc 
-//          options bit 0) and the "Perfection Medal Enabled" flag (misc options bit 3). 
-//          We've got these set up properly for normal settings, but for scripts/Megalo, 
-//          we will need to test BOTH FLAGS (game.teams_enabled and game.misc_unk0_bit3) 
-//          to make sure we have them right (or fix them) there.
 //
 //        - Do user-defined functions actually work? Don't just test whether the game 
 //          can load a script that contains triggers called from multiple places; test 

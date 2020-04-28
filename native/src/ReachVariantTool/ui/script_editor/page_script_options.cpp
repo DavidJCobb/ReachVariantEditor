@@ -125,7 +125,16 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          }
          this->targetOption = list.emplace_back();
-         this->targetOption->add_value(); // enum-options must have at least one value
+         auto value = this->targetOption->add_value(); // enum-options must have at least one value
+         {  // If possible, default the new option's name and description to an empty string; ditto for its value
+            auto str = mp->scriptData.strings.get_empty_entry();
+            if (str) {
+               this->targetOption->name = str;
+               this->targetOption->desc = str;
+               value->name = str;
+               value->desc = str;
+            }
+         }
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
@@ -230,6 +239,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          if (!value)
             return;
          this->targetValue = value;
+         {  // If possible, default the new value's name and description to an empty string
+            auto& editor = ReachEditorState::get();
+            auto  mp     = editor.multiplayerData();
+            if (mp) {
+               auto str = mp->scriptData.strings.get_empty_entry();
+               if (str) {
+                  value->name = str;
+                  value->desc = str;
+               }
+            }
+         }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);

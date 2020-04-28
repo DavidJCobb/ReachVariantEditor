@@ -43,10 +43,7 @@ namespace Megalo {
             std::vector<RawPart> raw;
             //
          public:
-            QString content;
-            #if !_DEBUG
-               static_assert(false, "replace (content) with logic to actually parse parts");
-            #endif
+            QString content; // only retained for debugging
             //
             bool is_resolved = false;
             bool is_invalid  = false;

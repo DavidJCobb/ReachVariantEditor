@@ -42,8 +42,8 @@ namespace {
       &friendly_fire,
       &betrayal_booting,
       &proximity_voice,
-      &social_flag_3,
-      &social_flag_4,
+      &dont_team_restrict_chat,
+      &dead_players_can_talk,
       &grenades_on_map,
       &indestructible_vehicles,
       &powerup_duration_r,
@@ -140,8 +140,8 @@ namespace Megalo {
          extern VariableScopeIndicatorValue friendly_fire           = VariableScopeIndicatorValue::make_game_value("game.friendly_fire",           "Friendly Fire", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue betrayal_booting        = VariableScopeIndicatorValue::make_game_value("game.betrayal_booting",        "Betrayal Booting", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue proximity_voice         = VariableScopeIndicatorValue::make_game_value("game.proximity_voice",         "Proximity Voice", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
-         extern VariableScopeIndicatorValue social_flag_3           = VariableScopeIndicatorValue::make_game_value("game.social_flags_bit_3",      "Social-Bit-3", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
-         extern VariableScopeIndicatorValue social_flag_4           = VariableScopeIndicatorValue::make_game_value("game.social_flags_bit_4",      "Social-Bit-4", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue dont_team_restrict_chat = VariableScopeIndicatorValue::make_game_value("game.dont_team_restrict_chat", "Don't Team-Restrict Voice Chat", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue dead_players_can_talk   = VariableScopeIndicatorValue::make_game_value("game.dead_players_can_talk",   "Dead Players Can Talk", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
          extern VariableScopeIndicatorValue grenades_on_map         = VariableScopeIndicatorValue::make_game_value("game.grenades_on_map",         "Grenades on Map", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue indestructible_vehicles = VariableScopeIndicatorValue::make_game_value("game.indestructible_vehicles", "Indestructible Vehicles", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue powerup_duration_r      = VariableScopeIndicatorValue::make_game_value("game.powerup_duration_red",    "Red Powerup Duration", VariableScopeIndicatorValue::flags::is_readonly);;

@@ -84,6 +84,7 @@ class ReachString : public indexed_list_item {
       bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
       //
       bool can_be_forge_label() const noexcept;
+      bool empty() const noexcept;
 };
 
 class ReachStringTable {
@@ -117,6 +118,7 @@ class ReachStringTable {
       bool read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) noexcept;
       //
+      ReachString* get_empty_entry() const noexcept;
       ReachString* get_entry(size_t index) const noexcept {
          if (index < this->strings.size())
             return const_cast<ReachString*>(&this->strings[index]); // this function does not, itself, modify the table, but the string returned can be modified

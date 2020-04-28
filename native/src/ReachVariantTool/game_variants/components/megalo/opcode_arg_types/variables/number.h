@@ -54,8 +54,8 @@ namespace Megalo {
          extern VariableScopeIndicatorValue friendly_fire;
          extern VariableScopeIndicatorValue betrayal_booting;
          extern VariableScopeIndicatorValue proximity_voice;
-         extern VariableScopeIndicatorValue social_flag_3;
-         extern VariableScopeIndicatorValue social_flag_4;
+         extern VariableScopeIndicatorValue dont_team_restrict_chat;
+         extern VariableScopeIndicatorValue dead_players_can_talk;
          extern VariableScopeIndicatorValue grenades_on_map;
          extern VariableScopeIndicatorValue indestructible_vehicles;
          extern VariableScopeIndicatorValue powerup_duration_r;

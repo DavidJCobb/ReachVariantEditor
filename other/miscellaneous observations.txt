@@ -33,3 +33,7 @@ play automatically, but the round itself will not end automatically; the script 
 the round. This is probably to faciliate things like Invasion writing directly to the 
 round timer to display the current phase's remaining time.
 
+The object.shape_contains condition only checks the pivot point for the target object. 
+For example, if you try to check whether a shape contains a Warthog, the check will only 
+pass if the Warthog's centerpoint is inside of the shape.
+

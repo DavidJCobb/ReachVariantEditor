@@ -916,7 +916,7 @@ namespace Megalo {
             OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {2, 1, 3, 4}, 0)
+         OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {1, 2, 3}, 0)
       ),
       ActionFunction( // 88
          "Deprecated-88",

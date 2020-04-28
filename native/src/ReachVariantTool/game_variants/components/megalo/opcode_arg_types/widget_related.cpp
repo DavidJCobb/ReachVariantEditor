@@ -90,8 +90,11 @@ namespace Megalo {
          auto& mp    = compiler.get_variant();
          auto& list  = mp.scriptContent.widgets;
          auto  size  = list.size();
-         if (index >= size)
-            return arg_compile_result::failure(QString("You specified widget index %1, but only indices up to %2 are defined.").arg(index).arg(size - 1));
+         if (index >= size) {
+            if (size)
+               return arg_compile_result::failure(QString("You specified widget index %1, but only indices up to %2 are defined.").arg(index).arg(size - 1));
+            return arg_compile_result::failure(QString("You specified widget index %1, but no widgets are defined.").arg(index));
+         }
          this->value = &list[index];
          return arg_compile_result::success();
       }

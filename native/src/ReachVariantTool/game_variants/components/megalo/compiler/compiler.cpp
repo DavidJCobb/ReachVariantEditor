@@ -1849,7 +1849,13 @@ namespace Megalo {
          auto index = match->mapping.arg_context;
          const OpcodeArgBase& base = match->arguments[index];
          opcode->arguments[index] = (base.typeinfo.factory)();
-         opcode->arguments[index]->compile(*this, *context, 0);
+         auto result = opcode->arguments[index]->compile(*this, *context, 0);
+         if (result.is_failure()) {
+            QString error = "Failed to compile the context for this function call. ";
+            if (!result.error.isEmpty())
+               error += result.error;
+            this->raise_error(call_start, error);
+         }
       }
       if (assign_to) {
          //

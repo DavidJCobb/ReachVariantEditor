@@ -162,6 +162,13 @@ bool ReachString::can_be_forge_label() const noexcept {
    }
    return true;
 }
+bool ReachString::empty() const noexcept {
+   for (size_t i = 1; i < reach::language_count; i++) {
+      if (!this->strings[i].empty())
+         return false;
+   }
+   return true;
+}
 
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
@@ -304,6 +311,13 @@ uint32_t ReachStringTable::total_bytecount() noexcept {
       string.write_strings(combined);
    }
    return combined.size();
+}
+ReachString* ReachStringTable::get_empty_entry() const noexcept {
+   for (auto& string : this->strings) {
+      if (string.empty())
+         return const_cast<ReachString*>(&string);
+   }
+   return nullptr;
 }
 ReachString* ReachStringTable::lookup(const QString& english, bool& matched_multiple) const noexcept {
    matched_multiple = false;

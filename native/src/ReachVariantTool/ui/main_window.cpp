@@ -112,21 +112,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          return;
       }
       int32_t index = traits->index;
-      /*int32_t index = -1;
-      {
-         auto& list = mp->scriptData.traits;
-         auto  size = list.size();
-         for (size_t i = 0; i < size; i++) {
-            if (list[i] == traits) {
-               index = i;
-               break;
-            }
-         }
-         if (index == -1) {
-            this->regenerateNavigation();
-            return;
-         }
-      }*/
       QTreeWidgetItem* target = this->getNavItemForScriptTraits(traits, index);
       if (!target) {
          this->regenerateNavigation();
@@ -146,6 +131,12 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          target->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
       else
          target->setToolTip(0, "");
+   });
+   QObject::connect(&editor, &ReachEditorState::scriptOptionModified, [this](ReachMegaloOption*) {
+      this->ui.optionTogglesScripted->updateModelFromGameVariant();
+   });
+   QObject::connect(&editor, &ReachEditorState::scriptOptionsModified, [this]() {
+      this->ui.optionTogglesScripted->updateModelFromGameVariant();
    });
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
