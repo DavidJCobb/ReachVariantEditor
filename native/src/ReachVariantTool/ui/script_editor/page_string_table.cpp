@@ -1,6 +1,11 @@
 #include "page_string_table.h"
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
+#include <QMenu>
 #include <QMessageBox>
 #include "../localized_string_editor.h"
+#include "../../game_variants/components/megalo/compiler/string_scanner.h"
 
 namespace {
    bool _selectByPointerData(QListWidget* widget, void* target) {
@@ -44,6 +49,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
          //
          this->_selected = nullptr;
    });
+   QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageStringTable::updateFromVariant);
    //
    QObject::connect(this->ui.list, &QListWidget::currentItemChanged, [this](QListWidgetItem* current, QListWidgetItem* previous) {
       this->_selected = nullptr;
@@ -134,8 +140,51 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
             list->setCurrentRow(index);
       }
    });
-   QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageStringTable::updateFromVariant);
+   //
+   {  // Set up the "copy" button.
+      auto button = this->ui.buttonCopy;
+      auto menu   = new QMenu(this);
+      button->setMenu(menu);
+      //
+      auto act_copy_text  = menu->addAction(tr("Copy Text",  "string table copy option"));
+      auto act_copy_code  = menu->addAction(tr("Copy Code",  "string table copy option"));
+      auto act_copy_index = menu->addAction(tr("Copy Index", "string table copy option"));
+      QObject::connect(act_copy_text, &QAction::triggered, [this, act_copy_text]() {
+         auto str = this->getSelected();
+         if (str) {
+            auto english = str->english().c_str();
+            QApplication::clipboard()->setText(english, QClipboard::Clipboard);
+         }
+      });
+      QObject::connect(act_copy_code, &QAction::triggered, [this, act_copy_code]() {
+         auto str = this->getSelected();
+         if (str) {
+            QString english = str->english().c_str();
+            english = Megalo::Script::string_scanner::escape(english, '"');
+            english.prepend('"');
+            english.append('"');
+            QApplication::clipboard()->setText(english, QClipboard::Clipboard);
+         }
+      });
+      QObject::connect(act_copy_index, &QAction::triggered, [this, act_copy_index]() {
+         auto str = this->getSelected();
+         if (str) {
+            auto text = QString("%1").arg(str->index);
+            QApplication::clipboard()->setText(text, QClipboard::Clipboard);
+         }
+      });
+   }
+   //
    this->updateFromVariant(nullptr);
+}
+ReachString* ScriptEditorPageStringTable::getSelected() {
+   auto mp = ReachEditorState::get().multiplayerData();
+   if (!mp)
+      return nullptr;
+   auto   list  = this->ui.list;
+   auto   index = list->currentRow();
+   auto&  table = mp->scriptData.strings;
+   return table.get_entry(index);
 }
 void ScriptEditorPageStringTable::updateFromVariant(GameVariant* variant) {
    GameVariantDataMultiplayer* mp = nullptr;

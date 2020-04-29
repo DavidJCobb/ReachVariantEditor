@@ -80,6 +80,8 @@ void CompilerUnresolvedStringsDialog::selectReference(int32_t str, int32_t ref) 
    //
    this->_currentStr = str;
    this->_currentRef = ref;
+   this->ui.selStrIndex->setSuffix("/ 0");
+   this->ui.selRefIndex->setSuffix("/ 0");
    if (str < 0 || ref < 0) {
       this->_currentStr = -1;
       this->_currentRef = -1;
@@ -88,6 +90,7 @@ void CompilerUnresolvedStringsDialog::selectReference(int32_t str, int32_t ref) 
    }
    auto& list = this->_compiler->get_unresolved_string_references();
    auto& keys = this->_keys;
+   this->ui.selStrIndex->setSuffix(QString("/ %1").arg(keys.size()));
    if (str >= keys.size()) {
       this->_currentStr = -1;
       this->_currentRef = -1;
@@ -96,6 +99,7 @@ void CompilerUnresolvedStringsDialog::selectReference(int32_t str, int32_t ref) 
    }
    auto  key  = keys[str];
    auto  refs = this->getRefsByKey(key);
+   this->ui.selRefIndex->setSuffix(QString("/ %1").arg(refs.size()));
    if (ref >= refs.size()) {
       this->_currentRef = -1;
       this->ui.stringPreview->setPlainText("");

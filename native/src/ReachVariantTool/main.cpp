@@ -123,16 +123,8 @@ int main(int argc, char *argv[]) {
 //     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
 //       MCC's menus don't enforce this. Investigate.
 //
-//     - Number variables should warn when compiling a constant that can't fit in a 16-bit 
-//       signed integer.
-//
 //     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH; WE NEED TO SWAP 
 //       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
-//
-//     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
-//       a dropdown). The arrow should allow you to select what to copy: the full English 
-//       content of the string; the English content as a string literal, with delimiters and 
-//       escape codes; and the string's index in the table.
 //
 //     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
 //       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
@@ -151,10 +143,6 @@ int main(int argc, char *argv[]) {
 //          decompile produces identical output to the first. However, the resulting file is 
 //          not binary-identical to the "resaved in Release build" version. I've addressed the 
 //          else(if) Bungie behavior and am not sure where the new discrepancy lies.
-//
-//     - Compiler::handle_unresolved_string_references will fail to resolve "create string" 
-//       references if the string table is full, but it has no way to signal that it has run 
-//       into that problem i.e. the caller would have to run that check itself.
 //
 //     = DEFERRED TASKS
 //
@@ -212,10 +200,6 @@ int main(int argc, char *argv[]) {
 //
 //        - UI for showing compiler warnings and errors; should include the ability to jump 
 //          to the error location in the code
-//
-//        - UI needed for letting the script author deal with unresolved string references. 
-//          We can start with something basic ("create all strings" or "cancel") and add 
-//          full functionality to it after we're sure the compiler itself works.
 //
 //        - The string table needs a button to copy the content of a selected string as a 
 //          string literal (i.e. with escape codes), and a button to copy the index of a 

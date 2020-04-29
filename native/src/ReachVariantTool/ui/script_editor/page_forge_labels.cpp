@@ -119,6 +119,10 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
 }
 void ScriptEditorPageForgeLabels::selectLabel(int32_t labelIndex) {
    this->currentForgeLabel = labelIndex;
+   //
+   const QSignalBlocker blocker(this->ui.list);
+   this->ui.list->setCurrentRow(this->currentForgeLabel);
+   //
    this->updateLabelFromVariant();
 }
 Megalo::ReachForgeLabel* ScriptEditorPageForgeLabels::getLabel() const noexcept {

@@ -1,6 +1,7 @@
 #include "number.h"
 #include "../../../../types/multiplayer.h" // game variant class
 #include "../../compiler/compiler.h"
+#include "../../../../helpers/numeric.h"
 
 namespace {
    using namespace Megalo;
@@ -165,8 +166,13 @@ namespace Megalo {
       //
       if (result.code == arg_compile_result::code_t::base_class_is_expecting_override_behavior) {
          if (arg.resolved.top_level.is_constant) {
+            auto value = arg.resolved.top_level.index;
+            //
             this->set_to_const_zero();
-            this->index = arg.resolved.top_level.index;
+            this->index = value;
+            if (!cobb::integral_type_can_hold<int16_t>(value)) {
+               compiler.raise_warning(QString("Value %1 cannot be held in a signed 16-bit integer; value %2 has been stored instead.").arg(value).arg(this->index));
+            }
             return arg_compile_result::success();
          }
          return arg_compile_result::failure();
