@@ -582,73 +582,51 @@ namespace Megalo {
    }
    //
    void Compiler::_commit_unresolved_strings(Compiler::unresolved_str_list& add) {
-      auto& list = this->results.unresolved_strings;
-      list.reserve(list.size() + add.size());
-      for (auto& e : add)
-         list.push_back(e);
+      this->results.unresolved_strings += add;
       add.clear();
    }
    bool Compiler::handle_unresolved_string_references() {
-      struct _Created {
-         QString content;
-         int32_t index = -1;
-         //
-         _Created(const QString& s, int32_t i) : content(s), index(i) {}
-      };
-      std::vector<_Created> created;
-      //
       auto& string_table = this->variant.scriptData.strings;
       auto& list         = this->results.unresolved_strings;
+      //
+      std::vector<QString> to_remove;
       bool  any_unresolved = false;
-      for (auto& ref : list) {
-         if (ref.pending.action == unresolved_string_pending_action::none) {
-            any_unresolved = true;
-            continue;
-         }
-         int32_t index = ref.pending.index;
-         if (ref.pending.action == unresolved_string_pending_action::create) {
-            index = -1;
-            for (auto& c : created) {
-               if (c.content == ref.string) {
-                  index = c.index;
-                  break;
+      for (auto& key : list.uniqueKeys()) {
+         bool    string_resolved = true;
+         int32_t new_index       = -1;
+         for (auto& ref : list.values(key)) {
+            int32_t index = ref.pending.index;
+            if (ref.pending.action == unresolved_string_pending_action::create) {
+               index = new_index;
+               if (index < 0) { // string not yet created?
+                  auto str = string_table.add_new();
+                  if (!str) {
+                     string_resolved = false;
+                     continue;
+                  }
+                  str->english() = key.toStdString();
+                  index = str->index;
+                  assert(index >= 0 && "Something went wrong. A newly-created ReachString did not have its index member set by the containing string table.");
                }
+            } else {
+               assert(index >= 0 && "For unresolved_string_pending_action::use_existing, you must specify a valid string index to use.");
             }
-            if (index == -1) {
-               auto str = string_table.add_new();
-               if (!str) {
-                  any_unresolved = true;
-                  continue;
-               }
-               str->english() = ref.string.toStdString();
-               //
-               index = str->index;
-               created.emplace_back(ref.string, index);
+            auto arg    = string_scanner(QString("%1").arg(index));
+            auto result = ref.value->compile(*this, arg, ref.part);
+            if (result.is_unresolved_string() || result.is_failure()) {
+               string_resolved = false;
+               continue;
             }
+            ref.handled = true;
          }
-         if (index < 0) {
+         if (string_resolved)
+            to_remove.push_back(key);
+         else
             any_unresolved = true;
-            continue;
-         }
-         auto arg    = string_scanner(QString("%1").arg(index));
-         auto result = ref.value->compile(*this, arg, ref.part);
-         if (result.is_unresolved_string() || result.is_failure()) {
-            any_unresolved = true;
-            continue;
-         }
-         ref.handled = true;
       }
-      list.erase(
-         std::remove_if(
-            list.begin(),
-            list.end(),
-            [](unresolved_str& item) {
-               return item.handled;
-            }
-         ),
-         list.end()
-      );
-      return any_unresolved;
+      for (auto& key : to_remove)
+         list.remove(key);
+      return !any_unresolved;
    }
    //
    Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
@@ -912,7 +890,26 @@ namespace Megalo {
       mp_vars.player.adopt(new_vars.player);
       mp_vars.team.adopt(new_vars.team);
    }
-
+   
+   Compiler::extract_int_result::type Compiler::extract_integer_literal_detailed(int32_t& out) {
+      auto result = string_scanner::extract_integer_literal(out);
+      if (result) {
+         if (this->extract_specific_char('.', true)) {
+            this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
+            //
+            // Extract the decimal content.
+            //
+            int32_t discard;
+            string_scanner::extract_integer_literal(discard);
+            //
+            return extract_int_result::floating_point;
+         }
+      }
+      return result ? extract_int_result::success : extract_int_result::failure;
+   }
+   bool Compiler::extract_integer_literal(int32_t& out) {
+      return this->extract_integer_literal_detailed(out) == extract_int_result::success;
+   }
    QString Compiler::extract_operator() {
       auto prior = this->backup_stream_state();
       QString word;
@@ -1600,7 +1597,10 @@ namespace Megalo {
                this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
             } else {
                if (result.is_unresolved_string())
-                  unresolved_strings.emplace_back(*current_argument, result.get_unresolved_string(), opcode_arg_part);
+                  unresolved_strings.insert(
+                     result.get_unresolved_string(), // key
+                     unresolved_str(*current_argument, opcode_arg_part) // value
+                  );
             }
          }
          if (another && has_more) {
@@ -2214,12 +2214,12 @@ namespace Megalo {
             //
             if (this->extract_specific_char('=')) {
                int32_t int_initial;
-               auto    result = this->extract_integer_literal(int_initial);
-               if (result == extract_result::floating_point) {
+               auto    result = this->extract_integer_literal_detailed(int_initial);
+               if (result == extract_int_result::floating_point) {
                   this->raise_error("You cannot initialize a variable to a floating-point value.");
-               } else if (result == extract_result::success) {
+               } else if (result == extract_int_result::success) {
                   str_initial = QString("%1").arg(int_initial);
-               } else if (result == extract_result::failure) {
+               } else if (result == extract_int_result::failure) {
                   str_initial = this->extract_word();
                   if (Compiler::is_keyword(str_initial)) {
                      this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));
@@ -2262,12 +2262,12 @@ namespace Megalo {
                //
                if (this->extract_specific_char('=')) {
                   int32_t int_initial;
-                  auto    result = this->extract_integer_literal(int_initial);
-                  if (result == extract_result::floating_point) {
+                  auto    result = this->extract_integer_literal_detailed(int_initial);
+                  if (result == extract_int_result::floating_point) {
                      this->raise_error("You cannot initialize a variable to a floating-point value.");
-                  } else if (result == extract_result::success) {
+                  } else if (result == extract_int_result::success) {
                      str_initial = QString("%1").arg(int_initial);
-                  } else if (result == extract_result::failure) {
+                  } else if (result == extract_int_result::failure) {
                      str_initial = this->extract_word();
                      if (Compiler::is_keyword(str_initial)) {
                         this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));

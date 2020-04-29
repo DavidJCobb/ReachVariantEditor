@@ -100,6 +100,12 @@ int main(int argc, char *argv[]) {
 //             a comment indicating the trigger's index; this would be useful for debugging 
 //             the (de)compiler and the loader.
 //
+//           = We can avoid the need for additional memory allocations if we give every 
+//             Trigger a (decompile_state) member struct, and use indices instead of pointers. 
+//             As a bonus, triggers would be able to access that when decompiling themselves 
+//             and wouldn't need to be hold by the Decompiler whether any given other trigger 
+//             is a user-defined function.
+//
 //     - SHORT-TERM PLANS
 //
 //        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
@@ -120,18 +126,17 @@ int main(int argc, char *argv[]) {
 //     - Number variables should warn when compiling a constant that can't fit in a 16-bit 
 //       signed integer.
 //
-//     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH: WE NEED TO SWAP 
+//     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH; WE NEED TO SWAP 
 //       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
-//
-//     - When creating something with a string, the default string chosen should always be 
-//       the first empty string found in the game variant (if there is one), or the first 
-//       string in the table otherwise. Right now, everything created through the UI (e.g. 
-//       script option values and so on) uses the first string in the table.
 //
 //     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
 //       a dropdown). The arrow should allow you to select what to copy: the full English 
 //       content of the string; the English content as a string literal, with delimiters and 
 //       escape codes; and the string's index in the table.
+//
+//     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
+//       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
+//       variables as flags-masks.
 //
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
@@ -244,6 +249,9 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
+//        - In team games, can you assign a player to a team that isn't present in a match? 
+//          Some of my tests suggest you can't.
+//
 //        - Do user-defined functions actually work? Don't just test whether the game 
 //          can load a script that contains triggers called from multiple places; test 
 //          to ensure that if a trigger is called multiple times from multiple places in 
@@ -267,6 +275,64 @@ int main(int argc, char *argv[]) {
 //             timer to a number (which I don't remember seeing in vanilla content).
 //
 //     = GAMETYPE PLANS
+//
+//        - Vanilla+
+//
+//           - Race+
+//
+//              - object.shape_contains only tests the centerpoints of vehicles (and 
+//                possibly all objects including bipeds); this means that checkpoints 
+//                and landmines don't react as accurately to large vehicles, to the 
+//                point that especially large vehicles (e.g. sabres and some civilian 
+//                vehicles) can render a race unplayable.
+//
+//                My solution to this is to spawn and attach Hill Markers to each 
+//                vehicle, and test whether the vehicle, the biped, or any of the 
+//                vehicle's Hill Markers (hereafter: "nodes") are inside of a shape. 
+//                Each vehicle will need a custom assortment of nodes:
+//
+//                 - Warthogs and civilian vehicles will need four nodes: one at each 
+//                   lower corner of the vehicle. The units in Megalo seem to be 
+//                   whole Forge units, so precise positioning may be difficult.
+//
+//                    - We also have object.place_between_me_and, but KSoft.Tool 
+//                      recently renamed that to "create tunnel." We need to test it 
+//                      so we can figure out what that even means; if it indeed 
+//                      creates an object equidistant between two existing objects, 
+//                      then we can use it for sub-unit positioning.
+//
+//                 - A Sabre's nodes will form a rough triangle shape, with nodes at 
+//                   the midpoints of each edge. We can't place a Sabre in Forge, so 
+//                   we can't easily plan this out; fortunately, nodes can be any 
+//                   immobile object, so we can simply spawn something visible and 
+//                   trial-and-error our way to victory.
+//
+//                 - If we store the nodes as a linked list, then we can use fewer 
+//                   variables. A recursive user-defined function could be used to 
+//                   compare a shape boundary against any vehicle and its nodes.
+//
+//              - Edit the variant settings to have the mine proximity set to 10 feet. 
+//                Do this in the main window, not the script editor window; the script 
+//                editor window already flags that value as the default but that won't 
+//                override the already-chosen value.
+//
+//           - Infection+
+//
+//              - Base on Alpha Zombies.
+//
+//              - We can fix the bug where rounds don't end if all zombies run out of 
+//                lives, if we manually track each player's number of remaining lives 
+//                and use this as the backbone for a handler that will run when all 
+//                zombies are at the respawn screen. (The handler would end the round 
+//                immediately if it thinks that all zombies are out of lives; otherwise 
+//                it would end the round if all zombies remain dead for longer than the 
+//                base spawn time plus the suicide and betrayal penalties. The second 
+//                case is for emergencies e.g. host migration wiping the life tracker; 
+//                it could be refined e.g. by tracking whether a zombie's most recent 
+//                death was by suicide.)
+//
+//              - We can introduce Halo 3's "Next Zombie" option if we use a hidden 
+//                scoreboard stat to track cross-round state.
 //
 //        - Minesweeper
 //

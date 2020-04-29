@@ -1,5 +1,6 @@
 #include "page_script_code.h"
 #include "../../game_variants/components/megalo/compiler/compiler.h"
+#include "compiler_unresolved_strings.h"
 #include <QMessageBox>
 
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
@@ -52,12 +53,14 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
          //
          auto& unresolved_str = compiler.get_unresolved_string_references();
          if (unresolved_str.size()) {
-            QMessageBox::information(this, tr("Unable to commit the compiled data"), tr("There are unresolved string references and the UI to deal with that hasn't been built yet"));
-         } else {
-            compiler.apply();
-            ReachEditorState::get().variantRecompiled(variant);
-            QMessageBox::information(this, tr("Compiled contents applied!"), tr("The compiled content has been applied."));
+            if (!CompilerUnresolvedStringsDialog::handleCompiler(this, compiler)) {
+               QMessageBox::information(this, tr("Unable to commit the compiled data"), tr("Unresolved string references were not handled."));
+               return;
+            }
          }
+         compiler.apply();
+         ReachEditorState::get().variantRecompiled(variant);
+         QMessageBox::information(this, tr("Compiled contents applied!"), tr("The compiled content has been applied."));
       }
    });
 }

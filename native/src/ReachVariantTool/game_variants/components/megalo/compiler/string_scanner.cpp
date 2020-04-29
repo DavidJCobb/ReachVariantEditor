@@ -266,13 +266,12 @@ namespace Megalo {
          return true;
       }
       //
-      string_scanner::extract_result_t string_scanner::extract_integer_literal(int32_t& out) {
+      bool string_scanner::extract_integer_literal(int32_t& out) {
          auto    prior   = this->backup_stream_state();
          QChar   sign    = '\0';
          QString found   = "";
-         bool    decimal = false;
          out = 0;
-         this->scan([this, &sign, &found, &decimal](QChar c) {
+         this->scan([this, &sign, &found](QChar c) {
             if (c == '-') { // handle numeric sign
                if (sign != '\0' || found.size())
                   return true; // stop
@@ -285,35 +284,35 @@ namespace Megalo {
             }
             if (string_scanner::is_whitespace_char(c))
                return found.size() > 0; // stop if we have any digits
-            if (c == '.' && found.size())
-               decimal = true;
-               //
-               // ...and fall through.
-               //
             return true; // stop
          });
-         if (decimal) {
-            return extract_result::floating_point;
-         }
          if (!found.size()) {
             this->restore_stream_state(prior);
-            return extract_result::failure;
+            return false;
          }
          if (sign != '\0')
             found = sign + found;
          out = found.toInt();
-         return extract_result::success;
+         return true;
       }
-      bool string_scanner::extract_specific_char(QChar which) {
+      bool string_scanner::extract_specific_char(QChar which, bool immediate) {
          auto prior = this->backup_stream_state();
          bool found = false;
-         this->scan([this, which, &found](QChar c) {
-            if (string_scanner::is_whitespace_char(c))
-               return false;
-            if (c == which)
-               found = true;
-            return true;
+         if (immediate) {
+            this->scan([this, which, &found](QChar c) {
+               if (c == which)
+                  found = true;
+               return true;
             });
+         } else {
+            this->scan([this, which, &found](QChar c) {
+               if (string_scanner::is_whitespace_char(c))
+                  return false;
+               if (c == which)
+                  found = true;
+               return true;
+            });
+         }
          if (!found) {
             this->restore_stream_state(prior);
             return false;

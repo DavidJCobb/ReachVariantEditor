@@ -172,6 +172,7 @@
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
+    <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
     <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
@@ -226,6 +227,7 @@
     <QtUic Include="ui\main_window\page_player_traits.ui" />
     <QtUic Include="ui\script_editor.ui" />
     <QtUic Include="ui\script_editor\bottom_bar.ui" />
+    <QtUic Include="ui\script_editor\compiler_unresolved_strings.ui" />
     <QtUic Include="ui\script_editor\page_forge_labels.ui" />
     <QtUic Include="ui\script_editor\page_map_perms.ui" />
     <QtUic Include="ui\script_editor\page_metadata_strings.ui" />
@@ -385,6 +387,7 @@
     <ClInclude Include="services\ini.h" />
     <QtMoc Include="ui\script_editor\page_req_obj_types.h" />
     <QtMoc Include="ui\script_editor\bottom_bar.h" />
+    <QtMoc Include="ui\script_editor\compiler_unresolved_strings.h" />
     <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />

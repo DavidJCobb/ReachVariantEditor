@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include <QMultiMap>
 #include <QString>
 #include "string_scanner.h"
 #include "../opcode_arg_type_registry.h"
@@ -124,7 +125,6 @@ namespace Megalo {
          };
          //
          enum class unresolved_string_pending_action {
-            none,
             create,
             use_existing,
          };
@@ -158,19 +158,20 @@ namespace Megalo {
             //
             protected:
                OpcodeArgValue* value = nullptr;
-               QString string;
                uint8_t part = 0;
                bool    handled = false;
                //
             public:
+               using action = unresolved_string_pending_action;
+               //
                struct {
-                  unresolved_string_pending_action action = unresolved_string_pending_action::none;
-                  int32_t index = -1;
+                  unresolved_string_pending_action action = unresolved_string_pending_action::create;
+                  uint8_t index = 0;
                } pending;
                //
-               unresolved_str(OpcodeArgValue& v, QString s, uint8_t p) : value(&v), string(s), part(p) {}
+               unresolved_str(OpcodeArgValue& v, uint8_t p) : value(&v), part(p) {}
          };
-         using unresolved_str_list = std::vector<unresolved_str>;
+         using unresolved_str_list = QMultiMap<QString, unresolved_str>;
          //
       protected:
          using keyword_handler_t = void (Compiler::*)();
@@ -224,7 +225,7 @@ namespace Megalo {
          //
          void parse(QString text); // parse and compile the text
          void apply(); // applies compiled content to the game variant, and relinquishes ownership of it
-         bool handle_unresolved_string_references(); // handles any strings with an action set; returns true if any unresolved strings remain
+         bool handle_unresolved_string_references(); // handles any strings with an action set; returns success bool (failure if any unresolved remain)
          inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
@@ -292,12 +293,17 @@ namespace Megalo {
          void _openBlock(Script::Block*);
          bool _closeCurrentBlock();
          //
-         extract_result_t extract_integer_literal(int32_t& out) {
-            auto result = string_scanner::extract_integer_literal(out);
-            if (result == string_scanner::extract_result::floating_point)
-               this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
-            return result;
-         }
+         struct extract_int_result {
+            extract_int_result() = delete;
+            enum type : int {
+               failure,
+               success,
+               floating_point,  // extracted an integer literal, but it ended with a decimal point
+            };
+         };
+         extract_int_result::type extract_integer_literal_detailed(int32_t& out);
+         bool extract_integer_literal(int32_t& out);
+         //
          QString extract_operator();
          //
          #pragma region Variable declaration helpers
