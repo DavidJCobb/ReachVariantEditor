@@ -31,81 +31,6 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
-//     = CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0]?
-//
-//     = REAL QUICK, WE SHOULD ADDRESS THE PROBLEM OF THE DECOMPILER NOT BEING ABLE TO 
-//       HANDLE USER-DEFINED FUNCTIONS (I.E. "SUBROUTINE" TRIGGERS CALLED FROM MULTIPLE 
-//       PLACES), ESPECIALLY RECURSION. THIS WILL BE SIGNIFICANT ONCE WE HAVE THE COMPILER 
-//       WORKING; WE DON'T WANT TO BE UNABLE TO DECOMPILE OUR OWN COMPILER OUTPUT.
-//
-//       Specifically, we need to be able to handle this:
-//
-//          function foo()
-//             action
-//             if condition then
-//                foo()
-//             end
-//             action -- this being here makes the "if" a nested trigger calling an ancestor
-//          end
-//          function bar()
-//             action
-//             if condition then -- no actions after this if, so it's the same trigger
-//                bar()
-//             end
-//          end
-//
-//       So how do we make that possible? Well,...
-//
-//        - In decompiler.cpp, we should define a class called _TriggerTreeNode:
-//
-//             struct _TriggerTreeNode {
-//                using list_t = std::vector<_TriggerTreeNode*>;
-//                
-//                int32_t index; // trigger index; -1 == root
-//                list_t  callers;
-//                list_t  callees;
-//             }
-//
-//          Before decompiling triggers, we would scan all triggers in the list to construct 
-//          a tree of _TriggerTreeNodes. Then, after the tree is fully constructed, we would 
-//          construct a std::vector<uint32_t> of trigger indices that need to be decompiled 
-//          as user-defined functions. A trigger needs to be decompiled as a user-defined 
-//          function if any of the conditions are met:
-//
-//           - The trigger has more than one caller.
-//
-//           - The trigger's callees include itself.
-//
-//           - The trigger's callees include any of its callers.
-//
-//           - The trigger's callees include any of its callers' callers, or its callers' 
-//             callers' callers, or so on.
-//
-//          (Kind of wondering whether traversing the tree to do that is the best idea; it 
-//          may be better to have a flat list of _TriggerTreeNode*s that point to each 
-//          other as appropriate, and then loop over them. Mainly, this would make it easier 
-//          to ensure that we only run the above checks once per trigger even when a trigger 
-//          is called from multiple places.)
-//
-//          User-defined functions would be decompiled in advance of all triggers, with 
-//          auto-generated names (e.g. "trigger_1"). The function to decompile an individual 
-//          Trigger object would need to accept a boolean indicating whether it should wrap 
-//          its block header in a "function" declaration (or replace the block header 
-//          entirely if it's a generic "do" block).
-//
-//           - If an event Trigger is told to decompile as a function, it should place the 
-//             event name before the "function" keyword.
-//
-//           - Consider adding a decompiler option to suffix every block-opening line with 
-//             a comment indicating the trigger's index; this would be useful for debugging 
-//             the (de)compiler and the loader.
-//
-//           = We can avoid the need for additional memory allocations if we give every 
-//             Trigger a (decompile_state) member struct, and use indices instead of pointers. 
-//             As a bonus, triggers would be able to access that when decompiling themselves 
-//             and wouldn't need to be hold by the Decompiler whether any given other trigger 
-//             is a user-defined function.
-//
 //     - SHORT-TERM PLANS
 //
 //        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
@@ -136,6 +61,12 @@ int main(int argc, char *argv[]) {
 //     - Consider adding a new OpcodeFuncToScriptMapping flag for conditions: "secondary name 
 //       inverts condition." Then, we could give "is_not_respawning" the more intuitive 
 //       secondary name "is_respawning" with the negate flag set.
+//
+//     - Decompiler: consider moving TriggerDecompileState from trigger.h to decompiler.cpp 
+//       since the trigger itself has minimal interaction with it. We could make it possible 
+//       to pass a TriggerDecompileState* to Trigger::decompile and forward-declare the class 
+//       there, but I'd like the "meat" of the decompile state to exist in the files for the 
+//       decompiler itself.
 //
 //     = COMPILER TESTS
 //
@@ -200,10 +131,6 @@ int main(int argc, char *argv[]) {
 //
 //        - UI for showing compiler warnings and errors; should include the ability to jump 
 //          to the error location in the code
-//
-//        - The string table needs a button to copy the content of a selected string as a 
-//          string literal (i.e. with escape codes), and a button to copy the index of a 
-//          selected string.
 //
 //     = AUDITING
 //
