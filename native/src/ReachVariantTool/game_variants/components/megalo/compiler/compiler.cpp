@@ -389,14 +389,17 @@ namespace Megalo {
                         continue;
                      QString english = QString::fromUtf8(name->english().c_str());
                      if (english == this->label_name) {
-                        if (index != -1)
-                           compiler.raise_error("The specified string literal matches multiple defined Forge labels. Use an index instead.");
+                        if (index != -1) {
+                           QString lit = string_scanner::escape(this->label_name, '"');
+                           compiler.raise_error(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
+                        }
                         index = i;
                      }
                   }
-                  if (index == -1)
-                     compiler.raise_error("The specified string literal does not match any defined Forge label.");
-                  else
+                  if (index == -1) {
+                     QString lit = string_scanner::escape(this->label_name, '"');
+                     compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+                  } else
                      t->forgeLabel = &list[index];
                }
                break;

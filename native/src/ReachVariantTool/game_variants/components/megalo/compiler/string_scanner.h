@@ -14,6 +14,9 @@ namespace Megalo {
                pos& operator+=(const pos&) noexcept;
                //
                [[nodiscard]] int32_t col() const noexcept { return this->offset - this->last_newline; }
+               //
+               pos() {}
+               pos(int32_t o, int32_t l, int32_t ln) : offset(o), line(l), last_newline(ln) {}
             };
             using scan_functor_t = std::function<bool(QChar)>;
             //

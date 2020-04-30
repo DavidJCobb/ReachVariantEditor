@@ -68,6 +68,38 @@ int main(int argc, char *argv[]) {
 //       there, but I'd like the "meat" of the decompile state to exist in the files for the 
 //       decompiler itself.
 //
+//     = The compiler typically logs errors at the end of the affected object. In some cases, 
+//       this goes especially awry; for example, if a for-each-object-with-label loop refers 
+//       to an invalid trigger, the log is positioned at the end of the block rather than the 
+//       start. To fix this, we'll need to modify how ParsedItem stores its start and end 
+//       position: instead of separating values out, the start should be a string_scanner::pos 
+//       and the end should be a single offset.
+//
+//       Once that's done, we'll want to audit all error messaging and whenever possible, have 
+//       errors use the start of the relevant ParsedItem. (That still won't be perfect, since 
+//       we often don't even create a ParsedItem until we've parsed enough text to know what 
+//       we're dealing with, but it'll vastly improve certain situations like for loops having 
+//       bad labels.)
+//
+//     = (DE)COMPILER UI
+//
+//        - Decompiler: before writing the decompiled text to the textbox, check if the content 
+//          of the checkbox is non-empty/non-whitespace and differs from the text to be written; 
+//          if so, confirm before overwriting it. (Currently needed since QTextEdit::setPlainText 
+//          apparently yeets the entire undo history into the void. If we find a way to prevent 
+//          that, then we may not need to be this careful.)
+//
+//        - Script warning/error log
+//
+//           - Set icons on each QListWidgetItem depending on whether it is a warning, error, 
+//             or fatal error. Modify the QListWidgetEx's copy-transform functor to check the 
+//             icon and prepend the message type to the copied text (e.g. "[ERROR]").
+//
+//           - Add a context menu that lets the users copy all selected items or the full log. 
+//             (Yes, that'd be redundant, but I see little issue with that.)
+//
+//        - Syntax highlighting in the code editor
+//
 //     = COMPILER TESTS
 //
 //        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
@@ -125,13 +157,6 @@ int main(int argc, char *argv[]) {
 //             In any case, however it plays out, we should document it in comments near the 
 //             "symmetry" VariableScopeIndicatorValue definition and/or declaration.
 //
-//     = (DE)COMPILER UI
-//
-//        - Code editor with syntax highlighting
-//
-//        - UI for showing compiler warnings and errors; should include the ability to jump 
-//          to the error location in the code
-//
 //     = AUDITING
 //
 //        - Exception safety for anything that gets heap-allocated.
@@ -162,6 +187,9 @@ int main(int argc, char *argv[]) {
 //          object.attach_to (which we should probably test again), then instead of a bool 
 //          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
 //          arguments either way.
+//
+//        - Test object.place_between_me_and. I want to know why KSoft.Tool decided to call 
+//          it "create_tunnel".
 //
 //        - In team games, can you assign a player to a team that isn't present in a match? 
 //          Some of my tests suggest you can't.
@@ -263,9 +291,6 @@ int main(int argc, char *argv[]) {
 //                to continue from where a failing player/team left off, with the round 
 //                ending on victory or when all players are dead.
 //
-//  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
-//    numbers, syntax highlighting, code folding, etc..
-//
 //  - Script editor window: MPVR space usage meter: we should also show absolute counts 
 //    out of maximums for triggers, conditions, actions, number of strings, and perhaps 
 //    other data items if we use two or three columns as well. We could even correlate 
@@ -281,9 +306,6 @@ int main(int argc, char *argv[]) {
 //       Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
 //       standard_options_bitcount, etc., or perhaps a single getter that switch-cases on 
 //       an enum indicating what we want counted.
-//
-//  - Format string arguments: use QStrings so we have UTF-8 support, and modify the 
-//    escaping code in the decompiler to do UTF-8 printable checks.
 //
 
 // OLD PLANS BELOW

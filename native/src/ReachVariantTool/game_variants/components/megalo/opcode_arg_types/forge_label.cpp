@@ -96,13 +96,17 @@ namespace Megalo {
                continue;
             QString english = QString::fromUtf8(name->english().c_str());
             if (english == str) {
-               if (index != -1)
-                  return arg_compile_result::failure("The specified string literal matches multiple defined Forge labels. Use an index instead.");
+               if (index != -1) {
+                  QString lit = Script::string_scanner::escape(str, '"');
+                  return arg_compile_result::failure(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
+               }
                index = i;
             }
          }
-         if (index == -1)
-            return arg_compile_result::failure("The specified string literal does not match any defined Forge label.");
+         if (index == -1) {
+            QString lit = Script::string_scanner::escape(str, '"');
+            return arg_compile_result::failure(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+         }
          this->value = &list[index];
          return arg_compile_result::success();
       }

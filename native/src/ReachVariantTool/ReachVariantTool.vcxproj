@@ -168,6 +168,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
+    <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />
+    <QtMoc Include="ui\generic\QListWidgetEx.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />
