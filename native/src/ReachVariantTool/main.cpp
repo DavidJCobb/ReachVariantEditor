@@ -144,9 +144,6 @@ int main(int argc, char *argv[]) {
 //
 //     = RANDOM NOTES
 //
-//        - It'd be cool if the "object player variable" type accepted either the index 
-//          of an object.player variable, or a relative alias of an object.player var.
-//
 //        - Kornman00 and Assembly both identify the unknown movement option as "double jump," 
 //          but in my tests, it didn't seem to work. I even tested with Jumper Jumper disabled 
 //          in case that was interfering, and nope. Nothin'.
@@ -160,19 +157,18 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
+//        - Test object.copy_rotation_from: we want to know whether the bool is an absolute 
+//          bool or a relative bool (i.e. which is true and which is false). If it matches 
+//          object.attach_to (which we should probably test again), then instead of a bool 
+//          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
+//          arguments either way.
+//
 //        - In team games, can you assign a player to a team that isn't present in a match? 
 //          Some of my tests suggest you can't.
 //
-//        - Do user-defined functions actually work? Don't just test whether the game 
-//          can load a script that contains triggers called from multiple places; test 
-//          to ensure that if a trigger is called multiple times from multiple places in 
-//          the same tick, it will actually run each time. The file format as designed 
-//          allows for user-defined functions to exist, but it's unknown how the runtime 
-//          will actually handle them.
-//
-//           - We should also see if user-defined functions can be event handlers and 
-//             still work. If so, that would also indicate that nested blocks can be 
-//             event handlers (something we don't currently allow).
+//        - Can user-defined functions be event handlers and still work? If so, that would 
+//          indicate that nested blocks can be event handlers (something we don't currently 
+//          allow).
 //
 //        - What happens when we perform an invalid assignment, such as the assignment 
 //          of a number to an object? Be sure to check the resulting value of the target 

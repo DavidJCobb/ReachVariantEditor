@@ -37,3 +37,28 @@ The object.shape_contains condition only checks the pivot point for the target o
 For example, if you try to check whether a shape contains a Warthog, the check will only 
 pass if the Warthog's centerpoint is inside of the shape.
 
+Deleting the player's current biped will cause them to instantly respawn.
+
+When a biped enters a vehicle, it is considered to be attached to that vehicle. This 
+means that a biped cannot be attached to another object if it is occupying a vehicle, 
+and detaching a biped will instantly force it out of any vehicle it is currently using.
+
+Attaching a biped to an object will lock the biped in place. If the biped is controlled 
+by the player, they will be able to turn but not to move, and their first-person legs 
+will desynch from their upper body.
+
+Megalo script actions can be used to get and modify a vehicle's current health. Actions 
+for modifying the maximum health seem to affect the current health only. Modifying a 
+vehicle's health via script will not affect its visual appearance (i.e. damage graphics 
+won't appear or disappear); however, the next time a vehicle takes damage normally, it 
+will gain all damage graphics associated with its current health (though it will not 
+lose any damage graphics present if it has health restored and then takes damage). A 
+vehicle will be destroyed normally and with appropriate visuals when its health is set 
+to zero.
+
+Damaged vehicles will regenerate health if left alone. This doesn't seem to occur 
+consistently if Megalo script is used to cause the damage, and regeneration only occurs 
+up to specific thresholds. Observed thresholds are: 20, 50.
+
+Halo Chess uses object.face_toward and object.copy_rotation_from to get the chess pieces 
+facing in the right directions.

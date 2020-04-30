@@ -14,6 +14,12 @@ alias selector = global.number[0]
 alias temporary_obj = global.object[0]
 alias temporary_num = global.number[1]
 
+declare selector      with network priority high = 0
+declare temporary_num with network priority high = 0
+declare temporary_obj with network priority low
+declare object.player_count with network priority default = 0
+declare object.is_active    with network priority default = 0
+
 alias label_for_created = 3
 
 on pregame: do
@@ -24,7 +30,7 @@ for each object with label "cobb_motl_reset" do
    current_object.set_shape_visibility(everyone)
    current_object.set_waypoint_visibility(everyone)
    current_object.set_waypoint_priority(high)
-   current_object.set_waypoint_text("Reset", temporary_num)
+   current_object.set_waypoint_text("Reset")
    --
    current_object.player_count = 0
    for each player do
@@ -55,7 +61,7 @@ for each object with label "cobb_motl_increment" do
    --
    current_object.player_count = 0
    for each player do
-      if current_object.shape_contains(current_player.biped) then
+      if current_player.is_not_respawning() and current_object.shape_contains(current_player.biped) then
          current_object.player_count += 1
          if current_object.is_active == 0 then
             current_object.is_active = 1
@@ -80,7 +86,7 @@ for each object with label "cobb_motl_decrement" do
    --
    current_object.player_count = 0
    for each player do
-      if current_object.shape_contains(current_player.biped) then
+      if current_player.is_not_respawning() and current_object.shape_contains(current_player.biped) then
          current_object.player_count += 1
          if current_object.is_active == 0 then
             current_object.is_active = 1
@@ -102,7 +108,7 @@ for each object with label "cobb_motl_spawn" do
    --
    current_object.player_count = 0
    for each player do
-      if current_object.shape_contains(current_player.biped) then
+      if current_player.is_not_respawning() and current_object.shape_contains(current_player.biped) then
          current_object.player_count += 1
          --
          if current_object.is_active == 0 then

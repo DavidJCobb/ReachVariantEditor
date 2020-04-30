@@ -576,7 +576,7 @@ namespace Megalo {
       }
    }
    void TriggerDecompileState::check_if_is_function() {
-      if (!this->callees.size()) {
+      if (!this->callers.size()) {
          //
          // This trigger is never called from anywhere. If it's a top-level trigger, then that's 
          // normal, but if it's a subroutine, then it must be an unused user-defined function.

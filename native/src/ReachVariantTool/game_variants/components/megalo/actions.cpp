@@ -432,7 +432,7 @@ namespace Megalo {
       ),
       ActionFunction( // 41
          "Force Player Into Vehicle",
-         "Forces the player into a vehicle. The player is instantly teleported in.",
+         "Forces the player into a vehicle. The player is instantly teleported in. This action will not work if the player is already in a vehicle, or if the target vehicle is destroyed. It does work if the target vehicle is overturned, but the player will be instantly ejected without ever having spent any actual time in the vehicle.",
          "Force %1 into any unoccupied seat in %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -552,7 +552,7 @@ namespace Megalo {
       ),
       ActionFunction( // 53
          "Set Waypoint Text",
-         "",
+         "Sets the text of an object's waypoint. Any variables used will be passed by reference, not by value, and certain values (e.g. object.spawn_sequence) seem to always render as 0.",
          "Set %1's waypoint text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
