@@ -51,6 +51,13 @@ int main(int argc, char *argv[]) {
 //     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH; WE NEED TO SWAP 
 //       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
 //
+//        - ADDING/REMOVING MEGALO OPTIONS ALSO NEEDS TO CLEAR THE RESPECTIVE TOGGLE-FLAGS.
+//
+//     - MCC seems to hang when clicking through the title screen if any game variant invokes 
+//       the (game.show_message_to) opcode with (none) as the sound. Verify that this is 
+//       consistent, and if so, check whether any opcodes that accept sounds allow the use 
+//       of (none).
+//
 //     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
 //       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
 //       variables as flags-masks.
@@ -188,8 +195,8 @@ int main(int argc, char *argv[]) {
 //          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
 //          arguments either way.
 //
-//        - Test object.place_between_me_and. I want to know why KSoft.Tool decided to call 
-//          it "create_tunnel".
+//        - Can object.face_toward be used to point objects upward or downward, or does it 
+//          only affect the yaw?
 //
 //        - In team games, can you assign a player to a team that isn't present in a match? 
 //          Some of my tests suggest you can't.

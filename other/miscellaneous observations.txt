@@ -47,6 +47,21 @@ Attaching a biped to an object will lock the biped in place. If the biped is con
 by the player, they will be able to turn but not to move, and their first-person legs 
 will desynch from their upper body.
 
+Attaching a vehicle to an object will lock the vehicle in place. The pilot will be able 
+to look around in any angle, but the vehicle will not turn, and any vehicle weapons fire 
+will be constrained to the weapon's turn radius. Attached vehicles will not play any 
+entry/exit animations (e.g. a Banshee's canopy opening on exit) while attached, but will 
+instantaneously update to any animations end states when detached (i.e. a Banshee's 
+canopy will instantly snap open or closed as appropriate). If a Banshee is performing an 
+evasive maneuver at the moment it is attached, the maneuver will end instantaneously; no 
+such maneuvers can be performed once the vehicle is attached. Spartans in an attached 
+vehicle will lose most animations; passengers' hands may move slightly (and incorrectly) 
+when reloading their weapon; though passengers have no reloading or weapon swap 
+animations, appropriate sounds still play, and they cannot fire their weapons while the 
+non-animations are taking place. Some animations have player model jiggle physics (I 
+swear I'm not making that up) which will remain functional even though the rest of the 
+animation does not.
+
 Megalo script actions can be used to get and modify a vehicle's current health. Actions 
 for modifying the maximum health seem to affect the current health only. Modifying a 
 vehicle's health via script will not affect its visual appearance (i.e. damage graphics 
@@ -62,3 +77,30 @@ up to specific thresholds. Observed thresholds are: 20, 50.
 
 Halo Chess uses object.face_toward and object.copy_rotation_from to get the chess pieces 
 facing in the right directions.
+
+Whenever a number is used as a coordinate, e.g. in a vector3 argument, the unit of 
+measurement is 0.1 Forge units.
+
+In FFA games, the player doesn't appear to be considered part of team[0]. However, Forge 
+labels set to target all Team 1 objects will also target players in FFA and any rockets, 
+grenades, and other iterable projectiles that they create.
+
+Attaching an object to a Hill Marker will render that object mostly incorporal: it will 
+turn invisible and lose all collision and physics. Attached vehicles will still offer 
+activation prompts, allowing players to enter and exit the vehicle.
+
+The set_waypoint_range opcode will hide waypoints, but not disable them. If you're adding 
+waypoints to very many objects, this opcode will not prevent the UI from misbehaving, 
+with observed problems including flickering waypoints, some objects failing to show 
+waypoints, and the game preferring to show waypoints on the closest objects (yet also 
+preferring to show waypoints on some object types rather than others). This can be 
+worked around by manually checking object distances and adjusting who can see the way-
+points based on those distances.
+
+I need to test to confirm this explicitly, but it seems like the game can only render 64 
+shape boundaries at a time, regardless of which ones are in the field of view. The game 
+likewise seems to be capped to displaying waypoints for 18 objects, and it apparently 
+reselects which objects to display waypoints for as you move based on the waypoint ranges 
+(though as noted above, that isn't done reliably).
+
+

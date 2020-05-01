@@ -851,16 +851,16 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', ""),
             DetailedEnumValueInfo::make_description("A Block 1x1 Flat, of the same variety as those placeable in Forge.")
          ),
-         DetailedEnumValue("shade_turret_anti_air",
+         DetailedEnumValue("shade_anti_air",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Anti-Air)"),
             DetailedEnumValueInfo::make_map_tag('vehi', ""),
             DetailedEnumValueInfo::make_description("A Shade turret which fires devastatingly powerful shots at a high rate. Shields protect its operator.")
          ),
-         DetailedEnumValue("shade_turret_fuel_rod",
+         DetailedEnumValue("shade_fuel_rod",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Fuel Rod)"),
             DetailedEnumValueInfo::make_map_tag('vehi', "")
          ),
-         DetailedEnumValue("shade_turret_plasma",
+         DetailedEnumValue("shade_plasma",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Plasma)"),
             DetailedEnumValueInfo::make_map_tag('vehi', "")
          ),

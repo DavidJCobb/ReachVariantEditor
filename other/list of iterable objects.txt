@@ -1,0 +1,86 @@
+The following objects can be matched with for-each-object triggers:
+
+ - Dead bipeds, their equipped armor ability, and their dropped weapons and grenades. 
+   Notably, grenades dropped by players have a different default waypoint color (one 
+   which implies team ownership or alliance status) than ambient grenades (which use 
+   a neutral grey).
+
+ - Hologram bipeds (object type differs from Spartan, Elite, and Monitor)
+
+ - Weapons integrated into any multi-seat vehicle, as well as the weapon integrated 
+   into a shade. (Weapons for single-seat vehicles such as Ghosts have not been 
+   observed to react to for-each-object loops.) The objects in question continue to 
+   exist even when the owning vehicle is destroyed.
+
+ - Some, but not all, vehicle debris objects, e.g. the detached wheels of a destroyed 
+   Warthog.
+
+ - The stand for a newly-detached Machine Gun Turret or Plasma Cannon. These stands 
+   do not test as equivalent to the turrets' own object types. (Detaching a Plasma 
+   Cannon while using it will destroy the stand; however, detaching it by damaging 
+   it will leave the stand intact and iterable.)
+
+ - Powerups and Jersey Barriers.
+
+ - Some Forge rocks on Breakpoint and Tempest.
+
+ - The radio boxes on Boardwalk, Boneyard, Tempest, etc..
+
+ - Forge Teleporter Receiver Nodes, but not Two-Way Nodes. These nodes don't match 
+   the "teleporter" types in the object type list as of this writing.
+
+ - Forgeable Man Cannons on Tempest.
+
+ - Forgeable (Soft) Safe and Kill Boundaries.
+
+ - Those weird objects on Boneyard that show up in Forge and look like Respawn Zones, 
+   but can't be edited. This includes both the ones actually in the map and the ones 
+   that line the map boundaries.
+
+ - The flourescent lights above some doors in Boneyard.
+
+ - Several invisible objects embedded inside or just past the western portion of 
+   Boneyard's southern wall (for reference, the cliffs are the northern boundary).
+
+
+The following objects can be matched with for-each-object-with-label triggers that use 
+an appropriately configured label, though the precise operational definition of "appro-
+priately configured" is yet to be determined. Forge labels with no names, set to point 
+to a team, seem to work. Some of these objects may also be iterable with for-each-
+object loops (and have been marked accordingly); I can only run so many tests in so 
+much time.
+
+ - Rockets fired from a rocket launcher or from a Rocket Warthog
+
+ - Plasma rounds fired from a plasma launcher, both in flight and on a surface
+
+ - Grenades fired from a grenade launcher, whether EMP or plain
+
+ - Fuel rods fired from a Banshee
+
+ - Mortars fired from a Revenant or Wraith
+
+ - Charged shots from a Plasma Pistol, but not normal shots
+
+ - Thrown grenades (though they do not test as equivalent to the grenade object types, 
+   i.e. a "thrown plasma grenade" is not a "plasma grenade")
+
+ - Folding chairs and camping stools [TODO: for-each-object?]
+
+ - Propane tanks [TODO: for-each-object?]
+
+ - Crates [TODO: for-each-object?]
+
+ - The animated generators on Breakpoint, and the front windows for the Research 
+   Station building. An unknown object embedded in the rock between the Upper Tunnel 
+   and Lower Tunnel. An unknown object embedded in the ceiling of the Main Tunnel's 
+   northwest-side corner room.
+
+
+The following objects are not iterable through any means:
+
+ - Rounds fired from a Concussion Rifle
+
+ - Rounds fired from any needle weapon
+
+ - Rounds fired from any bullet weapon

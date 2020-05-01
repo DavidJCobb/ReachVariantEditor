@@ -74,6 +74,7 @@ namespace Megalo {
             void _get_effective_items(std::vector<ParsedItem*>& out, bool include_functions = true); // returns the list of items with only Statements and Blocks, i.e. only things that generate compiled output
             bool _is_if_block() const noexcept;
             void _make_trigger(Compiler&);
+            void _setup_trigger_forge_label(Compiler&);
       };
       class Statement : public ParsedItem {
          public:

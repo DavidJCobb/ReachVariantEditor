@@ -281,6 +281,45 @@ namespace Megalo {
          }
          return false;
       }
+      void Block::_setup_trigger_forge_label(Compiler& compiler) {
+         //
+         // TODO: MAKE THIS AND OpcodeArgValueForgeLabel::compile SHARE SOME HELPER FUNCTION, IDEALLY 
+         // ON Compiler.
+         //
+         auto t = this->trigger;
+         //
+         if (this->label_name.isEmpty()) {
+            auto  index = this->label_index;
+            auto& list  = compiler.get_variant().scriptContent.forgeLabels;
+            if (index < 0 || index >= list.size()) {
+               compiler.raise_error(QString("Label index %1 does not exist.").arg(index));
+            } else {
+               t->forgeLabel = &list[index];
+            }
+         } else {
+            int32_t index = -1;
+            auto&   list  = compiler.get_variant().scriptContent.forgeLabels;
+            for (size_t i = 0; i < list.size(); ++i) {
+               auto& label = list[i];
+               ReachString* name = label.name;
+               if (!name)
+                  continue;
+               QString english = QString::fromUtf8(name->english().c_str());
+               if (english == this->label_name) {
+                  if (index != -1) {
+                     QString lit = string_scanner::escape(this->label_name, '"');
+                     compiler.raise_error(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
+                  }
+                  index = i;
+               }
+            }
+            if (index == -1) {
+               QString lit = string_scanner::escape(this->label_name, '"');
+               compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+            } else
+               t->forgeLabel = &list[index];
+         }
+      }
       void Block::_make_trigger(Compiler& compiler) {
          if (this->type == Type::function) {
             assert(this->trigger && "The Compiler should've given this user-defined-function Block a trigger when it was first opened.");
@@ -315,6 +354,11 @@ namespace Megalo {
                   //
                   item->trigger = this->trigger; // get the inner Block to write into the function's trigger
                   this->trigger->blockType = _block_type_to_trigger_type(item->type);
+                  if (item->type == Block::Type::for_each_object_with_label) {
+                     this->label_name  = item->label_name;
+                     this->label_index = item->label_index;
+                     this->_setup_trigger_forge_label(compiler);
+                  }
                }
             }
             return;
@@ -367,41 +411,7 @@ namespace Megalo {
                break;
             case Type::for_each_object_with_label:
                t->blockType = block_type::for_each_object_with_label;
-               //
-               // TODO: MAKE THIS AND OpcodeArgValueForgeLabel::compile SHARE SOME HELPER FUNCTION, IDEALLY 
-               // ON Compiler.
-               //
-               if (this->label_name.isEmpty()) {
-                  auto  index = this->label_index;
-                  auto& list  = compiler.get_variant().scriptContent.forgeLabels;
-                  if (index < 0 || index >= list.size()) {
-                     compiler.raise_error(QString("Label index %1 does not exist.").arg(index));
-                  } else {
-                     t->forgeLabel = &list[index];
-                  }
-               } else {
-                  int32_t index = -1;
-                  auto&   list  = compiler.get_variant().scriptContent.forgeLabels;
-                  for (size_t i = 0; i < list.size(); ++i) {
-                     auto& label = list[i];
-                     ReachString* name = label.name;
-                     if (!name)
-                        continue;
-                     QString english = QString::fromUtf8(name->english().c_str());
-                     if (english == this->label_name) {
-                        if (index != -1) {
-                           QString lit = string_scanner::escape(this->label_name, '"');
-                           compiler.raise_error(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
-                        }
-                        index = i;
-                     }
-                  }
-                  if (index == -1) {
-                     QString lit = string_scanner::escape(this->label_name, '"');
-                     compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
-                  } else
-                     t->forgeLabel = &list[index];
-               }
+               this->_setup_trigger_forge_label(compiler);
                break;
             case Type::for_each_player:
                t->blockType = block_type::for_each_player;
@@ -600,17 +610,17 @@ namespace Megalo {
          for (auto& ref : list.values(key)) {
             int32_t index = ref.pending.index;
             if (ref.pending.action == unresolved_string_pending_action::create) {
-               index = new_index;
-               if (index < 0) { // string not yet created?
+               if (new_index < 0) { // string not yet created?
                   auto str = string_table.add_new();
                   if (!str) {
                      string_resolved = false;
                      continue;
                   }
                   str->english() = key.toStdString();
-                  index = str->index;
-                  assert(index >= 0 && "Something went wrong. A newly-created ReachString did not have its index member set by the containing string table.");
+                  new_index = str->index;
+                  assert(new_index >= 0 && "Something went wrong. A newly-created ReachString did not have its index member set by the containing string table.");
                }
+               index = new_index;
             } else {
                assert(index >= 0 && "For unresolved_string_pending_action::use_existing, you must specify a valid string index to use.");
             }

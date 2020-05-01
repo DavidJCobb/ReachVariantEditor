@@ -240,18 +240,21 @@ namespace Megalo {
       assert(base);
       return base->as_integer() + index;
    }
-   void Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
+   bool Variable::_update_object_pointer_from_index(Compiler& compiler) noexcept {
       this->object = nullptr;
       auto scope = this->scope;
       if (!scope)
-         return;
+         return true;
       //
       auto& mp = compiler.get_variant();
       if (scope->is_indexed_data()) {
          auto accessor = scope->indexed_list_accessor;
          assert(accessor && "If a VariableScopeIndicatorValue is flagged as an indexed list item, then it must have an accessor for the list.");
          this->object = (accessor)(mp, this->index);
+         if (!this->object || !this->object->is_defined)
+            return false;
       }
+      return true;
    }
    arg_compile_result Variable::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {
       if (arg.is_accessor())
@@ -294,7 +297,8 @@ namespace Megalo {
          }
          if (prop->has_index()) {
             this->index = arg.resolved.property.index;
-            this->_update_object_pointer_from_index(compiler);
+            if (!this->_update_object_pointer_from_index(compiler))
+               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
          }
          return arg_compile_result::success();
       }
@@ -316,8 +320,11 @@ namespace Megalo {
       }
       if (top.scope) { // namespace scope-member
          this->scope = top.scope;
-         if (this->scope->has_index())
+         if (this->scope->has_index()) {
             this->index = top.index;
+            if (!this->_update_object_pointer_from_index(compiler))
+               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
+         }
          return arg_compile_result::success();
       }
       if (top.type) {
@@ -335,7 +342,8 @@ namespace Megalo {
                this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
             }
             this->index = res.nested.index;
-            this->_update_object_pointer_from_index(compiler);
+            if (!this->_update_object_pointer_from_index(compiler))
+               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
             return arg_compile_result::success();
          }
          //
@@ -351,7 +359,8 @@ namespace Megalo {
                this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
          } else {
             this->index = top.index;
-            this->_update_object_pointer_from_index(compiler);
+            if (!this->_update_object_pointer_from_index(compiler))
+               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
          }
          return arg_compile_result::success();
       }

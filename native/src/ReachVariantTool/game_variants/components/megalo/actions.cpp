@@ -284,7 +284,7 @@ namespace Megalo {
       ),
       ActionFunction( // 27
          "Get Object Orientation",
-         "Retrieve some unknown value from an object, always between 1 and 7 inclusive. This can fail, so you should consider resetting the number variable before calling this.",
+         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. A value of 1 indicates that the object is upright.",
          "Set %2 to the \"orientation\" value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -913,7 +913,7 @@ namespace Megalo {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo), // meaning of this arg is unknown. KSoft calls the action "create_tunnel", whatever that means, but it is indeed "place_between_me_and"
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {1, 2, 3}, 0)
