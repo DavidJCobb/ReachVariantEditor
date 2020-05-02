@@ -1586,7 +1586,7 @@ namespace Megalo {
          if (failure) {
             bool irresolvable = result.is_irresolvable_failure();
             //
-            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index + 1);
+            QString error = QString("Failed to parse script argument %1 (type %2).").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name);
             if (!result.error.isEmpty()) {
                error.reserve(error.size() + 1 + result.error.size());
                error += ' ';
@@ -1609,7 +1609,7 @@ namespace Megalo {
          }
          if (success) {
             if (!argument.is_at_effective_end()) {
-               this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index + 1));
+               this->raise_error(QString("Failed to parse script argument %1 (type %2). There was unexpected content at the end of the argument.").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name));
             } else {
                if (result.is_unresolved_string())
                   unresolved_strings.insert(

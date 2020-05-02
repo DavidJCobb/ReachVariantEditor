@@ -971,7 +971,7 @@ namespace Megalo {
       ),
       ActionFunction( // 93
          "Add Weapon To Biped",
-         "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
+         "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor. If the biped's owner player has Weapon Pickup disabled in their player traits, you must use \"force\" to add the weapon.",
          "Add weapon of type %2 to %1 using mode %3.",
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),

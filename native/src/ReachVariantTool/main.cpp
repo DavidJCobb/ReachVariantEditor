@@ -50,11 +50,6 @@ int main(int argc, char *argv[]) {
 //
 //        - ADDING/REMOVING MEGALO OPTIONS ALSO NEEDS TO CLEAR THE RESPECTIVE TOGGLE-FLAGS.
 //
-//     - MCC seems to hang when clicking through the title screen if any game variant invokes 
-//       the (game.show_message_to) opcode with (none) as the sound. Verify that this is 
-//       consistent, and if so, check whether any opcodes that accept sounds allow the use 
-//       of (none).
-//
 //     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
 //       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
 //       variables as flags-masks.

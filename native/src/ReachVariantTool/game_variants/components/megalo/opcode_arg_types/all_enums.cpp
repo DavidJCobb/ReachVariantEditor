@@ -73,8 +73,8 @@ namespace Megalo {
          DetailedEnumValue("blink"),
       });
       auto weapon_slot = DetailedEnum({
-         DetailedEnumValue("primary"),
          DetailedEnumValue("secondary"),
+         DetailedEnumValue("primary"),
       });
    }
 

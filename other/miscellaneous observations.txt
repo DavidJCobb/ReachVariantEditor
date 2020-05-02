@@ -104,4 +104,12 @@ I need to test to confirm this explicitly, but it seems like the game can only r
 shape boundaries at a time, regardless of which ones are in the field of view. The game 
 likewise seems to be capped to displaying waypoints for 18 objects.
 
+In one of my tests, the "object death" event did not trigger when blowing up Fusion Coils, 
+but did trigger when a player biped died. It's possible that only certain types of objects 
+can "die," as opposed to being deleted with an explosion.
+
+The object.set_scale action can fail if the following conditions are met: you have created 
+the subject object and attached it to another object in the same game tick; and the other 
+object already existed at the start of this tick.
+
 
