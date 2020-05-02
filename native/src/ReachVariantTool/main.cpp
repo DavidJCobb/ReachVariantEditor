@@ -45,9 +45,6 @@ int main(int argc, char *argv[]) {
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
-//       MCC's menus don't enforce this. Investigate.
-//
 //     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH; WE NEED TO SWAP 
 //       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
 //
@@ -189,14 +186,24 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
+//        - Do objects attached to other objects lose their collision? I know they can still 
+//          respond to projectiles in most cases, but what about walking on them? Does this 
+//          vary depending on whether the thing they're attached to has collision (e.g. a 
+//          non-solid Flag Stand)?
+//
+//        - Confirm that the unit of measurement for Vector3 positions is consistent for 
+//          all opcodes; 0.1 Forge units = 1.0 Megalo units is confirmed for place_at_me 
+//          and set_shape but not any other opcodes.
+//
+//        - Re-test setting a vehicle's maximum health; use a constant like 150; see if it 
+//          still sets current health to 1 without changing max health and if so, document 
+//          that.
+//
 //        - Test object.copy_rotation_from: we want to know whether the bool is an absolute 
 //          bool or a relative bool (i.e. which is true and which is false). If it matches 
 //          object.attach_to (which we should probably test again), then instead of a bool 
 //          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
 //          arguments either way.
-//
-//        - Can object.face_toward be used to point objects upward or downward, or does it 
-//          only affect the yaw?
 //
 //        - In team games, can you assign a player to a team that isn't present in a match? 
 //          Some of my tests suggest you can't.

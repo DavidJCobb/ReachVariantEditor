@@ -471,6 +471,8 @@ namespace Megalo {
                block->compile(compiler);
                if (!block->trigger) // empty blocks get skipped
                   continue;
+               if (block->type == Block::Type::function) // don't mis-compile function definitions as function calls
+                  continue;
                if (block->trigger != this->trigger) {
                   //
                   // Create a "call nested trigger" opcode.
@@ -1584,7 +1586,7 @@ namespace Megalo {
          if (failure) {
             bool irresolvable = result.is_irresolvable_failure();
             //
-            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index);
+            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index + 1);
             if (!result.error.isEmpty()) {
                error.reserve(error.size() + 1 + result.error.size());
                error += ' ';
@@ -1607,7 +1609,7 @@ namespace Megalo {
          }
          if (success) {
             if (!argument.is_at_effective_end()) {
-               this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
+               this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index + 1));
             } else {
                if (result.is_unresolved_string())
                   unresolved_strings.insert(
@@ -1845,12 +1847,10 @@ namespace Megalo {
             this->revert_to_log_checkpoint(check);
             if (context)
                this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-            else {
-               if (context_is_game)
-                  this->raise_error(call_start, QString("The arguments you passed to game.%1 did not match any of its function signatures.").arg(function_name));
-               else
-                  this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
-            }
+            else if (context_is_game)
+               this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg("game").arg(function_name));
+            else
+               this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
          }
          return nullptr;
       }
@@ -1887,7 +1887,12 @@ namespace Megalo {
             }
          }
          if (index < 0) {
-            this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            if (context)
+               this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            else if (context_is_game)
+               this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg("game").arg(function_name));
+            else
+               this->raise_error(call_start, QString("Function %1 does not return a value.").arg(function_name));
             fail = true;
          }
          //
@@ -1897,12 +1902,20 @@ namespace Megalo {
          //
          auto target_type = assign_to->get_type();
          if (&base.typeinfo != target_type) {
-            this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
-               .arg(context->get_type()->internal_name.c_str())
-               .arg(function_name)
-               .arg(base.typeinfo.internal_name.c_str())
-               .arg(target_type->internal_name.c_str())
-            );
+            if (target_type) {
+               this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
+                  .arg(context->get_type()->internal_name.c_str())
+                  .arg(function_name)
+                  .arg(base.typeinfo.internal_name.c_str())
+                  .arg(target_type->internal_name.c_str())
+               );
+            } else {
+               this->raise_error(call_start, QString("Function %1.%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
+                  .arg(context->get_type()->internal_name.c_str())
+                  .arg(function_name)
+                  .arg(base.typeinfo.internal_name.c_str())
+               );
+            }
             fail = true;
          }
          //
@@ -1961,6 +1974,16 @@ namespace Megalo {
                   this->block->insert_item(statement);
                }
             }
+         }
+      } else {
+         auto index = match->index_of_out_argument();
+         if (index >= 0) {
+            if (context)
+               this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            else if (context_is_game)
+               this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg("game").arg(function_name));
+            else
+               this->raise_error(call_start, QString("Function %1 returns a value, and that value must be assigned to a variable.").arg(function_name));
          }
       }
       Script::Statement* statement;
@@ -2096,13 +2119,19 @@ namespace Megalo {
          this->raise_fatal("Expected \"=\".");
          return;
       }
-      auto target = this->extract_word();
-      if (target.isEmpty()) {
-         this->raise_fatal("An alias declaration must supply a target.");
-         return;
-      }
+      Script::Alias* item = nullptr;
       //
-      auto item = new Script::Alias(*this, name, target);
+      int32_t value;
+      if (this->extract_integer_literal(value)) { // need to handle this separately from word parsing so that negative numbers are interpreted properly
+         item = new Script::Alias(*this, name, value);
+      } else {
+         auto target = this->extract_word();
+         if (target.isEmpty()) {
+            this->raise_fatal("An alias declaration must supply a target.");
+            return;
+         }
+         item = new Script::Alias(*this, name, target);
+      }
       if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
          delete item;
          return;

@@ -85,9 +85,12 @@ In FFA games, the player doesn't appear to be considered part of team[0]. Howeve
 labels set to target all Team 1 objects will also target players in FFA and any rockets, 
 grenades, and other iterable projectiles that they create.
 
-Attaching an object to a Hill Marker will render that object mostly incorporal: it will 
+Attaching an object to a Hill Marker will render that object mostly incorporeal: it will 
 turn invisible and lose all collision and physics. Attached vehicles will still offer 
 activation prompts, allowing players to enter and exit the vehicle.
+
+Attaching an object to a non-solid target, such as a Flag Stand, will render the attached 
+object non-solid as well.
 
 The set_waypoint_range opcode will hide waypoints, but not disable them. If you're adding 
 waypoints to very many objects, this opcode will not prevent the UI from misbehaving, 
@@ -99,8 +102,6 @@ points based on those distances.
 
 I need to test to confirm this explicitly, but it seems like the game can only render 64 
 shape boundaries at a time, regardless of which ones are in the field of view. The game 
-likewise seems to be capped to displaying waypoints for 18 objects, and it apparently 
-reselects which objects to display waypoints for as you move based on the waypoint ranges 
-(though as noted above, that isn't done reliably).
+likewise seems to be capped to displaying waypoints for 18 objects.
 
 

@@ -34,16 +34,16 @@ namespace Megalo {
       ),
       ActionFunction( // 2
          "Create Object",
-         "Create an object.",
+         "Creates an object. Note that even if the new object and/or the basis are non-solid, the new object may not be created exactly at the desired position. Attaching and detaching after the object is created is a more reliable way to ensure exact positioning when exact positioning is needed.",
          "Create %1 at offset %6 from %3 with Forge label %4, settings (%5), and name %7. Store a reference to it in %2.",
          {
-            OpcodeArgBase("type",        OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
-            OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("label",       OpcodeArgValueForgeLabel::typeinfo),
-            OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
-            OpcodeArgBase("offset",      OpcodeArgValueVector3::typeinfo),
-            OpcodeArgBase("name",        OpcodeArgValueVariantStringID::typeinfo),
+            OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
+            OpcodeArgBase("basis",  OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::typeinfo),
+            OpcodeArgBase("flags",  OpcodeArgValueCreateObjectFlags::typeinfo),
+            OpcodeArgBase("offset", OpcodeArgValueVector3::typeinfo),
+            OpcodeArgBase("name",   OpcodeArgValueVariantStringID::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
       ),
@@ -230,7 +230,7 @@ namespace Megalo {
       ),
       ActionFunction( // 21
          "End Round",
-         "Ends the round.",
+         "Ends the round. If the round limit is hit, ends the game as well.",
          "End the current round, and declare the player or team with the highest score the winner of the round.",
          {},
          OpcodeFuncToScriptMapping::make_function("end_round", "", {}, OpcodeFuncToScriptMapping::game_namespace)
@@ -284,7 +284,7 @@ namespace Megalo {
       ),
       ActionFunction( // 27
          "Get Object Orientation",
-         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. A value of 1 indicates that the object is upright.",
+         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. Per Rocket Hog Race's scripts, a value of 1 indicates that the object is upright, but per testing, weapons and scenery objects rotated at various angles always returned 1.",
          "Set %2 to the \"orientation\" value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -351,7 +351,7 @@ namespace Megalo {
       ),
       ActionFunction( // 33
          "Attach Objects",
-         "Attach one object to another.",
+         "Attach one object to another. The subject will be moved to the target's position plus the offset before being attached. An additional parameter controls whether the offset exists in the target's reference frame (i.e. whether the target's rotation affects the subject's final position); however, the subject will not be rotated (to match the target or otherwise) even if a relative position offset is used.",
          "Attach %1 to %2 at %4 offset %3.",
          {
             OpcodeArgBase("subject",  OpcodeArgValueObject::typeinfo),
@@ -422,7 +422,7 @@ namespace Megalo {
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
-         "Sets an object variable to the vehicle that a player is currently using. Does not include boarding.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
+         "Sets an object variable to the vehicle that a player is currently using.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
          "Set %2 to the vehicle that %1 is currently using.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -906,14 +906,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("get_crosshair_target", "", {}, 0)
       ),
       ActionFunction( // 87
-         "Create Object Equidistant", // TODO: KSoft.Tool now calls this "create_tunnel"; what does that mean?
+         "Create Object Equidistant", // KSoft.Tool now calls this "create_tunnel"; I'm not sure why, because testing confirms it does what I think it does.
          "",
          "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Radius: %4.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo), // meaning of this arg is unknown. KSoft calls the action "create_tunnel", whatever that means, but it is indeed "place_between_me_and"
+            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo), // meaning of this arg is unknown; tested different values in-game with no visible effect
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {1, 2, 3}, 0)
@@ -956,11 +956,11 @@ namespace Megalo {
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("absolute", OpcodeArgValueConstBool::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
+         OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {1, 2}, 0)
       ),
       ActionFunction( // 92
          "Point Object Toward Object",
-         "",
+         "Makes one object face toward another. Only seems to affect the subject's heading; pitch and roll rotations don't seem to occur. If you face an object toward itself, you can use the offset position to rotate it.",
          "Make %1 point toward the location in space %3 away from %2.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),

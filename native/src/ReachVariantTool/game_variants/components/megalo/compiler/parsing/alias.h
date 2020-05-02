@@ -7,6 +7,10 @@ namespace Megalo {
    class OpcodeArgTypeinfo;
    namespace Script {
       class Alias : public ParsedItem {
+         protected:
+            bool _validate_name_initial(Compiler&);
+            bool _validate_name_final(Compiler&);
+            //
          public:
             QString name;
             QString target_imported_name; // for imported names only
@@ -14,6 +18,7 @@ namespace Megalo {
             bool invalid = true;
             //
             Alias(Compiler&, QString name, QString target);
+            Alias(Compiler&, QString name, int32_t target);
             ~Alias();
             //
             bool    is_integer_constant()  const noexcept;

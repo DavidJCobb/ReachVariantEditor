@@ -164,6 +164,7 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
    container->setCurrentRow(sel);
 }
 void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
+   this->ui.name->clearTarget();
    if (!variant) {
       variant = ReachEditorState::get().variant();
       if (!variant)

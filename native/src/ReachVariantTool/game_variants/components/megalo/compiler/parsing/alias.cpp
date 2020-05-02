@@ -23,6 +23,132 @@ namespace {
    }
 }
 namespace Megalo::Script {
+   bool Alias::_validate_name_initial(Compiler& compiler) {
+      if (name.isEmpty()) {
+         compiler.raise_fatal("An alias must have a name.");
+         return false;
+      }
+      if (name[0].isNumber()) {
+         //
+         // Do not allow an alias's name to start with a number. This will make it easier for opcode 
+         // argument compile functions to check for both integer literals and integer alias names.
+         //
+         compiler.raise_error("An alias's name cannot begin with a number.");
+         return false;
+      }
+      if (Compiler::is_keyword(name)) {
+         compiler.raise_fatal(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
+         return false;
+      }
+      if (cobb::qt::string_has_any_of(name, "[].")) {
+         compiler.raise_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
+         return false;
+      }
+      if (cobb::qt::string_is_integer(name)) {
+         compiler.raise_error(QString("Invalid alias name \"%1\". An integer literal cannot be used as the name of an alias.").arg(this->name));
+         return false;
+      }
+      if (namespaces::get_by_name(name)) {
+         compiler.raise_error(QString("Namespace \"%1\" cannot be used as the name of an alias.").arg(this->name));
+         return false;
+      }
+      if (auto type = OpcodeArgTypeRegistry::get().get_variable_type(this->name)) {
+         //
+         // Do not allow aliases to shadow variable typenames.
+         //
+         compiler.raise_error(QString("Typename \"%1\" cannot be used as the name of an alias.").arg(type->internal_name.c_str()));
+         return false;
+      }
+      if (auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(this->name)) {
+         //
+         // Do not allow aliases to shadow statically-indexable types. (This isn't strictly redundant 
+         // with the above; remember that widgets and traits are included here, not just variables.)
+         //
+         compiler.raise_error(QString("Typename \"%1\" cannot be used as the name of an alias.").arg(type->internal_name.c_str()));
+         return false;
+      }
+      return true;
+   }
+   bool Alias::_validate_name_final(Compiler& compiler) {
+      if (this->is_relative_alias()) {
+         //
+         // Restrictions on relative aliases:
+         //
+         auto type = this->target->get_type();
+         if (type->can_have_variables()) {
+            //
+            // Do not allow aliases to shadow nested variables.
+            //
+            if (auto nested = OpcodeArgTypeRegistry::get().get_variable_type(name)) {
+               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.%2.").arg(type->internal_name.c_str()).arg(nested->internal_name.c_str()));
+               return false;
+            }
+         }
+         if (auto prop = type->get_property_by_name(name)) {
+            //
+            // Do not allow aliases to shadow properties.
+            //
+            compiler.raise_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(prop->name.c_str()));
+            return false;
+         }
+         //
+         // Do not allow aliases to shadow member functions or accessors:
+         //
+         auto mapping = _check_rel_alias_name_against_opcodes(conditionFunctionList, name, type);
+         if (!mapping)
+            mapping = _check_rel_alias_name_against_opcodes(actionFunctionList, name, type);
+         if (mapping) {
+            switch (mapping->type) {
+               case OpcodeFuncToScriptMapping::mapping_type::property_get:
+               case OpcodeFuncToScriptMapping::mapping_type::property_set:
+                  compiler.raise_error(QString("Invalid alias name. An alias cannot shadow accessors like %1.%2.").arg(type->internal_name.c_str()).arg(name));
+                  break;
+               default:
+                  compiler.raise_error(QString("Invalid alias name. An alias cannot shadow member functions like %1.%2.").arg(type->internal_name.c_str()).arg(name));
+            }
+            return false;
+         }
+      } else {
+         //
+         // Restrictions on absolute aliases:
+         //
+         OpcodeArgTypeRegistry::type_list_t types;
+         auto name_source = Compiler::check_name_is_taken(name, types);
+         switch (name_source) {
+            case Compiler::name_source::none:
+               break;
+               //
+            case Compiler::name_source::action:
+            case Compiler::name_source::condition:
+               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow a non-member function like %1.").arg(name));
+               return false;
+            case Compiler::name_source::static_typename:
+            case Compiler::name_source::variable_typename:
+               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(name));
+               return false;
+            case Compiler::name_source::namespace_member:
+               compiler.raise_error(QString("Invalid alias name. The specified name is already in use by the \"%1\" value.").arg(name));
+               return false;
+            case Compiler::name_source::imported_name:
+               {
+                  if (types.size() == 1) {
+                     compiler.raise_error(QString("The \"%1\" value defined by the %2 type cannot be used as an alias name.").arg(name).arg(types[0]->internal_name.c_str()));
+                     return false;
+                  }
+                  auto error = QString("Invalid alias name. The \"%1\" value is defined by the following types: %2.");
+                  auto list = QString();
+                  for (auto type : types) {
+                     if (!list.isEmpty())
+                        list += ", ";
+                     list += type->internal_name.c_str();
+                  }
+                  compiler.raise_error(error.arg(name).arg(list));
+               }
+               return false;
+         }
+      }
+      return true;
+   }
    Alias::Alias(Compiler& compiler, QString name, QString target) {
       this->name = name;
       //
@@ -34,51 +160,8 @@ namespace Megalo::Script {
       // Alias::invalid default-initializes to true. If we make it to the end of this function without 
       // detecting any errors, then we will set it to false. Any early return is a failure case.
       //
-      {  // Validate name.
-         if (name.isEmpty()) {
-            compiler.raise_fatal("An alias must have a name.");
-            return;
-         }
-         if (name[0].isNumber()) {
-            //
-            // Do not allow an alias's name to start with a number. This will make it easier for opcode 
-            // argument compile functions to check for both integer literals and integer alias names.
-            //
-            compiler.raise_error("An alias's name cannot begin with a number.");
-            return;
-         }
-         if (Compiler::is_keyword(name)) {
-            compiler.raise_fatal(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
-            return;
-         }
-         if (cobb::qt::string_has_any_of(name, "[].")) {
-            compiler.raise_error(QString("Invalid alias name \"%1\". Alias names cannot contain square brackets or periods.").arg(this->name));
-            return;
-         }
-         if (cobb::qt::string_is_integer(name)) {
-            compiler.raise_error(QString("Invalid alias name \"%1\". An integer literal cannot be used as the name of an alias.").arg(this->name));
-            return;
-         }
-         if (namespaces::get_by_name(name)) {
-            compiler.raise_error(QString("Namespace \"%1\" cannot be used as the name of an alias.").arg(this->name));
-            return;
-         }
-         if (auto type = OpcodeArgTypeRegistry::get().get_variable_type(this->name)) {
-            //
-            // Do not allow aliases to shadow variable typenames.
-            //
-            compiler.raise_error(QString("Typename \"%1\" cannot be used as the name of an alias.").arg(type->internal_name.c_str()));
-            return;
-         }
-         if (auto type = OpcodeArgTypeRegistry::get().get_static_indexable_type(this->name)) {
-            //
-            // Do not allow aliases to shadow statically-indexable types. (This isn't strictly redundant 
-            // with the above; remember that widgets and traits are included here, not just variables.)
-            //
-            compiler.raise_error(QString("Typename \"%1\" cannot be used as the name of an alias.").arg(type->internal_name.c_str()));
-            return;
-         }
-      }
+      if (!this->_validate_name_initial(compiler))
+         return;
       auto& type_registry = OpcodeArgTypeRegistry::get();
       this->target = new VariableReference(compiler, target);
       this->target->owner = this;
@@ -123,83 +206,38 @@ namespace Megalo::Script {
       //
       // Apply further restrictions to the alias's name based on its type:
       //
-      if (this->is_relative_alias()) {
-         //
-         // Restrictions on relative aliases:
-         //
-         auto type = this->target->get_type();
-         if (type->can_have_variables()) {
-            //
-            // Do not allow aliases to shadow nested variables.
-            //
-            if (auto nested = type_registry.get_variable_type(name)) {
-               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.%2.").arg(type->internal_name.c_str()).arg(nested->internal_name.c_str()));
-               return;
-            }
-         }
-         if (auto prop = type->get_property_by_name(name)) {
-            //
-            // Do not allow aliases to shadow properties.
-            //
-            compiler.raise_error(QString("Invalid alias name. An alias cannot shadow properties like %1.%2.").arg(type->internal_name.c_str()).arg(prop->name.c_str()));
-            return;
-         }
-         //
-         // Do not allow aliases to shadow member functions or accessors:
-         //
-         auto mapping = _check_rel_alias_name_against_opcodes(conditionFunctionList, name, type);
-         if (!mapping)
-            mapping = _check_rel_alias_name_against_opcodes(actionFunctionList, name, type);
-         if (mapping) {
-            switch (mapping->type) {
-               case OpcodeFuncToScriptMapping::mapping_type::property_get:
-               case OpcodeFuncToScriptMapping::mapping_type::property_set:
-                  compiler.raise_error(QString("Invalid alias name. An alias cannot shadow accessors like %1.%2.").arg(type->internal_name.c_str()).arg(name));
-                  break;
-               default:
-                  compiler.raise_error(QString("Invalid alias name. An alias cannot shadow member functions like %1.%2.").arg(type->internal_name.c_str()).arg(name));
-            }
-            return;
-         }
-      } else {
-         //
-         // Restrictions on absolute aliases:
-         //
-         OpcodeArgTypeRegistry::type_list_t types;
-         auto name_source = Compiler::check_name_is_taken(name, types);
-         switch (name_source) {
-            case Compiler::name_source::none:
-               break;
-               //
-            case Compiler::name_source::action:
-            case Compiler::name_source::condition:
-               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow a non-member function like %1.").arg(name));
-               return;
-            case Compiler::name_source::static_typename:
-            case Compiler::name_source::variable_typename:
-               compiler.raise_error(QString("Invalid alias name. An alias cannot shadow built-in types like %1.").arg(name));
-               return;
-            case Compiler::name_source::namespace_member:
-               compiler.raise_error(QString("Invalid alias name. The specified name is already in use by the \"%1\" value.").arg(name));
-               return;
-            case Compiler::name_source::imported_name:
-               {
-                  if (types.size() == 1) {
-                     compiler.raise_error(QString("The \"%1\" value defined by the %2 type cannot be used as an alias name.").arg(name).arg(types[0]->internal_name.c_str()));
-                     return;
-                  }
-                  auto error = QString("Invalid alias name. The \"%1\" value is defined by the following types: %2.");
-                  auto list = QString();
-                  for (auto type : types) {
-                     if (!list.isEmpty())
-                        list += ", ";
-                     list += type->internal_name.c_str();
-                  }
-                  compiler.raise_error(error.arg(name).arg(list));
-               }
-               return;
-         }
+      if (!this->_validate_name_final(compiler))
+         return;
+      //
+      this->invalid = false;
+   }
+   Alias::Alias(Compiler& compiler, QString name, int32_t target) {
+      this->name = name;
+      //
+      // Aliases need to perform some very strict validation, because when we resolve variable references, 
+      // we check for aliases before we check for built-ins. (More efficient that way.) We don't want 
+      // aliases to shadow built-ins, so we have to do all of the checking to prevent that shadowing when 
+      // we're actually instantiating the alias.
+      //
+      // Alias::invalid default-initializes to true. If we make it to the end of this function without 
+      // detecting any errors, then we will set it to false. Any early return is a failure case.
+      //
+      if (!this->_validate_name_initial(compiler))
+         return;
+      this->target = new VariableReference(target);
+      this->target->owner = this;
+      //
+      auto check = compiler.create_log_checkpoint();
+      if (this->target->is_invalid) {
+         delete this->target;
+         this->target = nullptr;
       }
+      //
+      // Apply further restrictions to the alias's name based on its type:
+      //
+      if (!this->_validate_name_final(compiler))
+         return;
+      //
       this->invalid = false;
    }
    Alias::~Alias() {
