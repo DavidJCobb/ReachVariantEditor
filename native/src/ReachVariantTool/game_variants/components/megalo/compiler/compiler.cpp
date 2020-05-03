@@ -219,6 +219,8 @@ namespace Megalo {
             auto clone = cnd->clone();
             clone->negate();
             this->conditions_else.push_back(clone);
+            if (i == size_c - 1)
+               clone->next_is_or = false;
          }
       }
       //

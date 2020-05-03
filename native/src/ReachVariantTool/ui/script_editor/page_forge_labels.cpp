@@ -22,7 +22,7 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
          return;
       auto& list  = mp->scriptContent.forgeLabels;
       auto& label = *list.emplace_back();
-      label.index = list.size() - 1;
+      label.is_defined = true;
       this->updateListFromVariant(ReachEditorState::get().variant());
       this->selectLabel(label.index);
    });

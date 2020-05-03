@@ -80,6 +80,7 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
             return;
          }
          this->target = list.emplace_back();
+         this->target->is_defined = true;
          if (auto str = mp->scriptData.strings.get_empty_entry()) // If possible, default the new stat's name to an empty string
             this->target->name = str;
          this->updateStatFromVariant();

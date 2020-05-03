@@ -60,6 +60,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
             return;
          }
          this->target = list.emplace_back();
+         this->target->is_defined = true;
          this->updateWidgetFromVariant();
          this->updateWidgetsListFromVariant();
       });

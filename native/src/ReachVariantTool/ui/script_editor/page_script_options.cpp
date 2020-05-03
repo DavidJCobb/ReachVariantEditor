@@ -125,6 +125,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          }
          this->targetOption = list.emplace_back();
+         this->targetOption->is_defined = true;
          auto value = this->targetOption->add_value(); // enum-options must have at least one value
          {  // If possible, default the new option's name and description to an empty string; ditto for its value
             auto str = mp->scriptData.strings.get_empty_entry();

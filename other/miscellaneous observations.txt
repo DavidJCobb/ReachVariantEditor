@@ -112,4 +112,5 @@ The object.set_scale action can fail if the following conditions are met: you ha
 the subject object and attached it to another object in the same game tick; and the other 
 object already existed at the start of this tick.
 
-
+The object.copy_rotation_to action can fail if the subject object is attached to another 
+object when the opcode is called.

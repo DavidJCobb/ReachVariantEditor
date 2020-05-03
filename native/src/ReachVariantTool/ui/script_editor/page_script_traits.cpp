@@ -52,6 +52,7 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
          return;
       }
       this->target = list.emplace_back();
+      this->target->is_defined = true;
       {  // If possible, default the new trait-set's name and description to an empty string
          auto str = mp->scriptData.strings.get_empty_entry();
          if (str) {
