@@ -13,7 +13,15 @@ void ReachTeamData::read(cobb::ibitreader& stream) noexcept {
 void ReachTeamData::write(cobb::bitwriter& stream) noexcept {
    this->flags.write(stream);
    this->name.write(stream);
-   this->initialDesignator.write(stream);
+   if (this->flags & Flags::enabled) {
+      this->initialDesignator.write(stream);
+   } else {
+      //
+      // If a team is disabled but has a non-zero designator, then the gametype is invalid.
+      //
+      decltype(this->initialDesignator) temporary = 0;
+      temporary.write(stream);
+   }
    this->spartanOrElite.write(stream);
    this->colorPrimary.write(stream);
    this->colorSecondary.write(stream);
