@@ -24,6 +24,8 @@ namespace reach {
       chinese_simplified,
       portugese,
       polish, // optional
+      //
+      not_a_language = -1
    };
    constexpr int language_count = (int)language::polish + 1;
    //
@@ -77,6 +79,12 @@ class ReachString : public indexed_list_item {
       }
       const std::string& english() const noexcept {
          return this->strings[(int)reach::language::english];
+      }
+      std::string& language(reach::language l) noexcept {
+         return this->strings[(int)l];
+      }
+      const std::string& language(reach::language l) const noexcept {
+         return this->strings[(int)l];
       }
       bool operator==(const ReachString& other) const noexcept {
          return this->strings == other.strings;

@@ -367,6 +367,9 @@
     <ClCompile Include="ui\generic\QListWidgetEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="services\localization_library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -587,6 +590,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="ui\main_window.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <QtRcc Include="Resources\localized_string_library\localized_string_library.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>
@@ -916,6 +922,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\timer_rate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\localization_library.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

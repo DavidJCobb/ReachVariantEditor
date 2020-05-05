@@ -166,6 +166,7 @@
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="services\localization_library.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
@@ -243,6 +244,7 @@
     <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
   <ItemGroup>
+    <QtRcc Include="Resources\localized_string_library\localized_string_library.qrc" />
     <QtRcc Include="ui\main_window.qrc" />
   </ItemGroup>
   <ItemGroup>
@@ -324,6 +326,7 @@
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />
     <QtMoc Include="ui\generic\QListWidgetEx.h" />
+    <ClInclude Include="services\localization_library.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

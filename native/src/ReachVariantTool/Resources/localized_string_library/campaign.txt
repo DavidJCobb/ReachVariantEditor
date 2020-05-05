@@ -1,0 +1,69 @@
+[sabre_hostiles]
+name=Sabre Hostiles Warning
+cate=hud
+desc=The HUD message shown on the Sabre HUD in Long Night of Solace, when hostile fighters are about to arrive at Anchor 9.
+source=ui\hud\hud_messages\sabre_hostiles
+sourcetype=map
+en=MULTIPLE INBOUND SIGNATURES\nFIGHTER CLASS
+jp=複数の敵を感知\nファイター級
+de=MEHRERE SIGNATUREN IM ANFLUG\nJAGDFLUGZEUGE
+fr=SIGNATURES ENNEMIS EN APPROCHE\nCLASSE CHASSEUR
+es=MÚLTIPLES PATRONES DETECTADOS\nTIPO CAZA
+mx=MÚLTIPLES PATRONES DETECTADOS\nTIPO CAZA
+it=SCIE MULTIPLE IN ARRIVO\nCLASSE CACCIA
+ko=다수의 적 비행기\n전투기 급
+zh=多架敵軍來襲\n戰鬥機
+pt=ASSINATURAS MÚLTIPLAS CHEGANDO\nCLASSE CAÇA
+
+[sabre_health_damage]
+name=Sabre Hull Integrity Warning
+cate=hud
+desc=The HUD message shown on the Sabre HUD in Long Night of Solace, when your health is damaged.
+source=ui\hud\hud_messages\hull_compromised
+sourcetype=map
+en=HULL INTEGRITY COMPROMISED
+jp=機体ダメージ
+de=HÜLLENINTEGRITÄT BESCHÄDIGT
+fr=INTÉGRITÉ DE LA COQUE COMPROMISE
+es=INTEGRIDAD DEL CASCO COMPROMETIDA
+mx=INTEGRIDAD DEL CASCO COMPROMETIDA
+it=INTEGRITÀ SCAFO COMPROMESSA
+ko=선체 상태 손상
+zh=船身完整性危急
+pt=INTEGRIDADE DO CASCO COMPROMETIDA
+
+[campaign_objectivecomplete]
+name=Objective Complete HUD
+cate=hud
+tags=campaign
+desc=The HUD message shown in Campaign when you complete an objective.
+source=ui\hud\hud_messages\campaign_hud_objcomplete
+sourcetype=map
+en=>>>OBJECTIVE COMPLETE<<<
+jp=>>>OBJECTIVE COMPLETE<<<
+de=>>>ZIEL ERREICHT<<<
+fr=>>>OBJECTIF ATTEINT<<<
+es=>>>OBJETIVO CUMPLIDO<<<
+mx=>>>OBJETIVO CUMPLIDO<<<
+it=>>>OBIETTIVO COMPLETATO<<<
+ko=>>>임무 완수<<<
+zh=>>>目標完成<<<
+pt=>>>OBJETIVO CONCLUÍDO<<<
+
+[campaign_killedcivilian]
+name=You killed a civilian!
+cate=notification
+tags=campaign
+desc=The message shown in Campaign if you kill a civilian.
+source=ui\hud\hud_messages\civilian_betrayal
+sourcetype=map
+en=You killed a civilian!
+jp=民間人を倒した！
+de=Sie haben einen Zivilisten getötet!
+fr=Vous avez tué un civil !
+es=¡Has matado a un civil!
+mx=¡Has matado a un civil!
+it=Hai ucciso un civile!
+ko=민간인 사살!
+zh=你殺死了一個平民！
+pt=Você matou um civil!
