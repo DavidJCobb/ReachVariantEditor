@@ -370,6 +370,9 @@
     <ClCompile Include="services\localization_library.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\localized_string_library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -495,6 +498,9 @@
     <QtMoc Include="ui\generic\QListWidgetEx.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\localized_string_library.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
@@ -587,12 +593,12 @@
     <QtUic Include="ui\script_editor\compiler_unresolved_strings.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="ui\localized_string_library.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="ui\main_window.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
-    <QtRcc Include="Resources\localized_string_library\localized_string_library.qrc">
+    <QtRcc Include="Resources\main_window.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>

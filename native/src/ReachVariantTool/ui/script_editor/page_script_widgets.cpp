@@ -33,7 +33,7 @@ ScriptEditorPageHUDWidgets::ScriptEditorPageHUDWidgets(QWidget* parent) : QWidge
       this->updateWidgetsListFromVariant();
    });
    //
-   this->ui.preview->addImage(QImage(":/ScriptEditor/Resources/hud_widget_preview/base_hud.png"));
+   this->ui.preview->addImage(QImage(":/ScriptEditor/hud_widget_preview/base_hud.png"));
    //
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageHUDWidgets::selectWidget);
    //
@@ -189,5 +189,5 @@ void ScriptEditorPageHUDWidgets::updateWidgetPreview(int8_t position) {
          return;
       position = this->target->position;
    }
-   widget->addImage(QImage(QString(":/ScriptEditor/Resources/hud_widget_preview/%1.png").arg(position)));
+   widget->addImage(QImage(QString(":/ScriptEditor/hud_widget_preview/%1.png").arg(position)));
 }

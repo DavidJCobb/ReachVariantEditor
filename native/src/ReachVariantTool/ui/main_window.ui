@@ -70,7 +70,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="main_window.qrc">:/ReachVariantTool/Resources/icon_128px.png</pixmap>
+           <pixmap resource="../Resources/main_window.qrc">:/ReachVariantTool/icon_128px.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -517,6 +517,7 @@
   <tabstop>optionTogglesEngine</tabstop>
  </tabstops>
  <resources>
+  <include location="../Resources/main_window.qrc"/>
   <include location="main_window.qrc"/>
  </resources>
  <connections/>

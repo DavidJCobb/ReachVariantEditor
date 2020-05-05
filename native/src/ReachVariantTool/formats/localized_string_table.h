@@ -63,9 +63,9 @@ class ReachString : public indexed_list_item {
       //
       // Strings are encoded as UTF-8.
       //
-      ReachString(ReachStringTable& o) : owner(o) {}
+      ReachString() {}
+      ReachString(ReachStringTable& o) {}
       //
-      ReachStringTable& owner;
       std::array<int, reach::language_count>         offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
       //
@@ -90,6 +90,7 @@ class ReachString : public indexed_list_item {
          return this->strings == other.strings;
       }
       bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
+      ReachString& operator=(const ReachString& other) noexcept;
       //
       bool can_be_forge_label() const noexcept;
       bool empty() const noexcept;

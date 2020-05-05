@@ -38,12 +38,10 @@ namespace {
       }
       return reach::language::not_a_language;
    }
-   //
-   ReachStringTable _dummy_string_owner(1000, 99999);
 }
 
 LocalizedStringLibrary::Entry::Entry() {
-   this->content = new ReachString(_dummy_string_owner);
+   this->content = new ReachString;
 }
 LocalizedStringLibrary::Entry::~Entry() {
    if (this->content) {
@@ -52,7 +50,7 @@ LocalizedStringLibrary::Entry::~Entry() {
    }
 }
 LocalizedStringLibrary::Entry::permutation::permutation() {
-   this->content = new ReachString(_dummy_string_owner);
+   this->content = new ReachString;
 }
 LocalizedStringLibrary::Entry::permutation::~permutation() {
    if (this->content) {
@@ -60,6 +58,20 @@ LocalizedStringLibrary::Entry::permutation::~permutation() {
       this->content = nullptr;
    }
 }
+LocalizedStringLibrary::Entry::permutation& LocalizedStringLibrary::Entry::permutation::operator=(permutation&& other) noexcept {
+   this->content = other.content;
+   other.content = nullptr;
+   this->integer = other.integer;
+   return *this;
+}
+LocalizedStringLibrary::Entry::permutation& LocalizedStringLibrary::Entry::permutation::operator=(const permutation& other) noexcept {
+   this->integer = other.integer;
+   if (!this->content)
+      this->content = new ReachString;
+   *this->content = *other.content;
+   return *this;
+}
+
 void LocalizedStringLibrary::Entry::copy(reach::language lang, QString& out) {
    out = QString::fromStdString(this->content->language(lang));
 }
@@ -80,19 +92,54 @@ LocalizedStringLibrary::Entry::permutation* LocalizedStringLibrary::Entry::get_o
    for (auto& perm : this->permutations)
       if (perm.integer == v)
          return &perm;
-   auto& p = this->permutations.emplace_back();
-   return &p;
+   return &this->permutations.emplace_back();
+}
+LocalizedStringLibrary::Entry& LocalizedStringLibrary::Entry::operator=(Entry&& other) noexcept {
+   this->content = other.content;
+   other.content = nullptr;
+   std::swap(this->permutations, other.permutations);
+   std::swap(this->internal_name, other.internal_name);
+   std::swap(this->friendly_name, other.friendly_name);
+   std::swap(this->description, other.description);
+   std::swap(this->category, other.category);
+   std::swap(this->tags, other.tags);
+   std::swap(this->source, other.source);
+   std::swap(this->source_type, other.source_type);
+   this->token = other.token;
+   return *this;
+}
+LocalizedStringLibrary::Entry& LocalizedStringLibrary::Entry::operator=(const Entry& other) noexcept {
+   if (!this->content)
+      this->content = new ReachString;
+   *this->content = *other.content;
+   //
+   this->permutations.reserve(other.permutations.size());
+   for (auto& perm : other.permutations) {
+      auto& created = this->permutations.emplace_back();
+      created = perm;
+   }
+   //
+   this->internal_name = other.internal_name;
+   this->friendly_name = other.friendly_name;
+   this->description   = other.description;
+   this->category = other.category;
+   this->source = other.source;
+   this->source_type = other.source_type;
+   this->tags = other.tags;
+   this->token = other.token;
+   return *this;
 }
 
 LocalizedStringLibrary::LocalizedStringLibrary() {
-   auto dir = QDir(":/localized_string_library/");
+   auto dir = QDir(":/ScriptEditor/localized_string_library/");
    for (auto entry : dir.entryList()) {
-      auto file = QFile(entry);
+      auto file = QFile(dir.path() + '/' + entry);
       if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
          continue;
       //
       auto   stream  = QTextStream(&file);
       Entry* current = nullptr;
+      stream.setCodec("UTF-8");
       while (!stream.atEnd()) {
          QString line = stream.readLine().trimmed();
          if (line[0] == '#') // comment
@@ -139,6 +186,12 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
          }
          if (key.compare(QString("sourcetype"), Qt::CaseInsensitive) == 0) {
             current->source_type = value.toString(); // TODO: enum
+            continue;
+         }
+         if (key.compare(QString("token"), Qt::CaseInsensitive) == 0) {
+            if (value.compare(QString("integer"), Qt::CaseInsensitive) == 0) {
+               current->token = token_type::integer;
+            }
             continue;
          }
          //

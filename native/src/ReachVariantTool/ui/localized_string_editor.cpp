@@ -1,6 +1,10 @@
 #include "localized_string_editor.h"
+#include "localized_string_library.h"
 #include "../editor_state.h"
 
+namespace {
+   ReachStringTable _dummy_string_owner(1, 99999);
+}
 LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialog(parent) {
    this->ui.setupUi(this);
    //
@@ -80,6 +84,19 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
       ReachEditorState::get().stringTableModified();
       this->accept();
    });
+   QObject::connect(this->ui.buttonOpenLibrary, &QPushButton::clicked, [this]() {
+      ReachString str;
+      if (this->_target)
+         str = *this->_target;
+      else if (this->_targetRef) {
+         ReachString* p = this->_targetRef->pointer_cast<ReachString>();
+         if (p)
+            str = *p;
+      }
+      if (LocalizedStringLibraryDialog::openForString(this, &str)) {
+         this->updateTextboxes(&str);
+      }
+   });
 }
 /*static*/ bool LocalizedStringEditorModal::editString(QWidget* parent, uint32_t flags, ReachString* target) {
    LocalizedStringEditorModal modal(parent);
@@ -114,22 +131,13 @@ void LocalizedStringEditorModal::updateControls() {
    //
    if (target) {
       this->ui.labelStringIndex->setText(this->ui.labelStringIndex->text().arg(target->index));
-      //
-      for (auto& control : this->languageFields) {
-         auto lang = control->property("ReachLanguage");
-         if (!lang.isValid())
-            continue;
-         auto index = lang.toInt();
-         if (index < 0 || index >= reach::language_count)
-            continue;
-         const QSignalBlocker blocker(control);
-         control->setPlainText(QString::fromUtf8(target->strings[index].c_str()));
-      }
+      this->updateTextboxes();
    } else {
       this->ui.labelStringIndex->setText(tr("New string", "string editor"));
       this->ui.buttonSave->setDisabled(true);
    }
    if (this->_limitToSingleLanguageStrings) {
+      this->ui.buttonOpenLibrary->setDisabled(true);
       for (auto& control : this->languageFields) {
          auto lang = control->property("ReachLanguage");
          if (!lang.isValid())
@@ -152,5 +160,20 @@ void LocalizedStringEditorModal::updateControls() {
    }
    if (this->_disallowSaveAsNew || this->_isNotInStandardStringTable || (mp && mp->scriptData.strings.is_at_count_limit())) {
       this->ui.buttonSaveAsNew->setDisabled(true);
+   }
+}
+void LocalizedStringEditorModal::updateTextboxes(ReachString* use) {
+   auto target = use ? use : this->_target;
+   if (!target)
+      return;
+   for (auto& control : this->languageFields) {
+      auto lang = control->property("ReachLanguage");
+      if (!lang.isValid())
+         continue;
+      auto index = lang.toInt();
+      if (index < 0 || index >= reach::language_count)
+         continue;
+      const QSignalBlocker blocker(control);
+      control->setPlainText(QString::fromUtf8(target->strings[index].c_str()));
    }
 }

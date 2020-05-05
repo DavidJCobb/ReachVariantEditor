@@ -171,6 +171,7 @@
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
     <ClCompile Include="ui\localized_string_editor.cpp" />
+    <ClCompile Include="ui\localized_string_library.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
@@ -213,6 +214,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\localized_string_editor.ui" />
+    <QtUic Include="ui\localized_string_library.ui" />
     <QtUic Include="ui\main_window.ui" />
     <QtUic Include="ui\options_window.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
@@ -244,8 +246,7 @@
     <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="Resources\localized_string_library\localized_string_library.qrc" />
-    <QtRcc Include="ui\main_window.qrc" />
+    <QtRcc Include="Resources\main_window.qrc" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ReachVariantTool.rc" />
@@ -327,6 +328,7 @@
     <QtMoc Include="ui\generic\AllocationMeter.h" />
     <QtMoc Include="ui\generic\QListWidgetEx.h" />
     <ClInclude Include="services\localization_library.h" />
+    <QtMoc Include="ui\localized_string_library.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

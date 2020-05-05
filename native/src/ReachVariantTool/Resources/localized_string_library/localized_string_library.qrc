@@ -1,9 +1,0 @@
-<RCC>
-  <qresource prefix="localized_string_library">
-    <file>campaign.txt</file>
-    <file>generic.txt</file>
-    <file>items.txt</file>
-    <file>vehicles.txt</file>
-    <file>vip.txt</file>
-  </qresource>
-</RCC>

@@ -5,13 +5,24 @@
 #include "helpers/endianness.h"
 #include "helpers/files.h"
 #include "helpers/stream.h"
-#include "formats/sha1.h"
 #include "services/ini.h"
+#if _DEBUG
+   #include <QDebug>
+   #include <QDirIterator>
+#endif
 
 int main(int argc, char *argv[]) {
    ReachINI::get().load();
    //
    QApplication a(argc, argv);
+   //
+   #if _DEBUG // log all qt resources to the "output" tab in the debugger
+      QDirIterator it(":", QDirIterator::Subdirectories);
+      while (it.hasNext()) {
+         qDebug() << it.next();
+      }
+   #endif
+   //
    ReachVariantTool w;
    w.show();
    return a.exec();
@@ -93,6 +104,8 @@ int main(int argc, char *argv[]) {
 //       entries should be categorized. For fill-in-the-blank entries, have a UI for that; don't 
 //       force mod authors to repeatedly copy and paste the number because avoiding that is the 
 //       sole purpose of this feature.
+//
+//        = IN PROGRESS.
 //
 //        - "Disabled" and "Enabled" are in Assault
 //        - "X points" is in various

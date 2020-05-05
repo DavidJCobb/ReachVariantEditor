@@ -169,6 +169,11 @@ bool ReachString::empty() const noexcept {
    }
    return true;
 }
+ReachString& ReachString::operator=(const ReachString& other) noexcept {
+   this->offsets = other.offsets;
+   this->strings = other.strings;
+   return *this;
+}
 
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
