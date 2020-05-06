@@ -40,18 +40,10 @@ LocalizedStringLibraryDialog::LocalizedStringLibraryDialog(QWidget* parent) : QD
    ui.setupUi(this);
    //
    QObject::connect(this->ui.list, &QListWidget::currentItemChanged, [this](QListWidgetItem* item, QListWidgetItem* previous) {
-      if (!item)
-         return;
-      auto data = item->data(Qt::ItemDataRole::UserRole);
-      if (!data.isValid())
-         return;
-      auto ptr = (entry_t*)data.value<void*>();
-      this->selectItem(ptr);
+      this->selectItem(this->_getListSelection(item));
    });
-   QObject::connect(this->ui.search, &QLineEdit::textChanged, [this]() {
-      //
-      // TODO: ability to filter the list of strings
-      //
+   QObject::connect(this->ui.search, &QLineEdit::textEdited, [this]() {
+      this->updateEntryList();
    });
    //
    QObject::connect(this->ui.buttonLanguageLeft, &QPushButton::clicked, [this]() {
@@ -69,13 +61,19 @@ LocalizedStringLibraryDialog::LocalizedStringLibraryDialog(QWidget* parent) : QD
       this->updatePreview();
    });
    QObject::connect(this->ui.buttonApply, &QPushButton::clicked, [this]() {
-      //
-      // TODO: modify (this->target)
-      //
+      QString text;
+      for (uint8_t i = 0; i < reach::language_count; ++i) {
+         this->_makeString(text, (reach::language)i);
+         this->target->strings[i] = text.toStdString();
+      }
       this->accept();
    });
    QObject::connect(this->ui.buttonCancel, &QPushButton::clicked, [this]() {
       this->reject();
+   });
+   //
+   QObject::connect(this->ui.stringOptionInteger_Value, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+      this->updatePreview();
    });
 }
 
@@ -88,6 +86,15 @@ LocalizedStringLibraryDialog::LocalizedStringLibraryDialog(QWidget* parent) : QD
 
 void LocalizedStringLibraryDialog::selectItem(entry_t* entry) {
    this->current = entry;
+   if (this->last_token_type != this->current->token) {
+      const QSignalBlocker blocker0(this->ui.stringOptionInteger_Value);
+      switch (this->last_token_type) {
+         case token_t::integer:
+            this->ui.stringOptionInteger_Value->setValue(0);
+            break;
+      }
+      this->last_token_type = this->current->token;
+   }
    this->updateControls();
 }
 void LocalizedStringLibraryDialog::updateControls() {
@@ -96,10 +103,7 @@ void LocalizedStringLibraryDialog::updateControls() {
       this->ui.description->setText(tr("N/A", "localized string library description"));
       this->ui.buttonLanguageLeft->setDisabled(true);
       this->ui.buttonLanguageRight->setDisabled(true);
-      //
-      // TODO: Delete all children of (this->ui.stringOptionsPane), and add a label whose text is 
-      // tr("No additional options.").
-      //
+      this->ui.stringOptionsPane->setCurrentWidget(this->ui.stringOptionsPageNone);
       return;
    }
    {
@@ -112,40 +116,44 @@ void LocalizedStringLibraryDialog::updateControls() {
    }
    this->ui.buttonLanguageLeft->setDisabled(false);
    this->ui.buttonLanguageRight->setDisabled(false);
-   //
-   // TODO: Delete all children of (this->ui.stringOptionsPane).
-   //
-   if (this->current->has_token()) {
-      //
-      // TODO: Generate form controls based on the token type. Currently the only defined token 
-      // type is a single integer. The integer that the user selects will determine the string 
-      // permutation used (we'll need to live-update the preview accordingly).
-      //
-   } else {
-      //
-      // TODO: Add a label whose text is tr("No additional options.").
-      //
+   switch (this->current->token) {
+      case token_t::none:
+         this->ui.stringOptionsPane->setCurrentWidget(this->ui.stringOptionsPageNone);
+         break;
+      case token_t::integer:
+         this->ui.stringOptionsPane->setCurrentWidget(this->ui.stringOptionsPageInteger);
+         break;
    }
 }
 void LocalizedStringLibraryDialog::updateEntryList() {
    auto  list = this->ui.list;
    auto& lib  = LocalizedStringLibrary::get();
    auto  size = lib.size();
+   //
+   auto filters = this->ui.search->text().split(' ');
+   //
    const QSignalBlocker blocker(list);
+   list->clear();
    for (size_t i = 0; i < size; ++i) {
-      //
-      // TODO: FILTER LIST ITEMS BASED ON (this->ui.search). SEARCHING SHOULD INCLUDE ITEMS 
-      // BASED ON THEIR NAME, TAGS, AND TEXT IN ANY LANGUAGE, BUT NOT BASED ON ANY OTHER DATA.
-      //
       auto* entry = lib[i];
-      auto  item  = new QListWidgetItem;
+      if (filters.size() && entry != this->current) {
+         bool matches = false;
+         for (auto& filter : filters) {
+            if (entry->matches(filter)) {
+               matches = true;
+               break;
+            }
+         }
+         if (!matches)
+            continue;
+      }
+      auto item = new QListWidgetItem;
       item->setText(entry->friendly_name);
       item->setData(Qt::UserRole, QVariant::fromValue((void*)entry));
       list->addItem(item);
    }
-   //
-   // TODO: SORT THE LIST ALPHABETICALLY
-   //
+   if (this->current)
+      _selectByPointerData(list, this->current);
 }
 void LocalizedStringLibraryDialog::updatePreview() {
    const QSignalBlocker blocker0(this->ui.preview);
@@ -154,14 +162,31 @@ void LocalizedStringLibraryDialog::updatePreview() {
       this->ui.preview->setPlainText("");
       return;
    }
-   auto& lang = this->current->content->language(this->previewLanguage);
-   this->ui.preview->setPlainText(QString::fromStdString(lang));
    //
-   // TODO: If the current entry has a token, we need to apply permutations to the preview 
-   // text as appropriate.
-   //
+   QString text;
+   this->_makeString(text, this->previewLanguage);
+   this->ui.preview->setPlainText(text);
 }
 void LocalizedStringLibraryDialog::onOpened() { // called by openForString when the modal is first opened
    this->updateEntryList();
    this->updateControls();
+}
+LocalizedStringLibraryDialog::entry_t* LocalizedStringLibraryDialog::_getListSelection(QListWidgetItem* item) {
+   if (!item) {
+      item = this->ui.list->currentItem();
+      if (!item)
+         return nullptr;
+   }
+   auto data = item->data(Qt::ItemDataRole::UserRole);
+   if (!data.isValid())
+      return nullptr;
+   return (entry_t*)data.value<void*>();
+}
+void LocalizedStringLibraryDialog::_makeString(QString& out, reach::language lang) {
+   assert(this->current);
+   if (this->current->token == token_t::integer) {
+      this->current->apply_permutation(lang, out, this->ui.stringOptionInteger_Value->value());
+   } else {
+      this->current->copy(lang, out);
+   }
 }

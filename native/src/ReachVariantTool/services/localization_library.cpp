@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QVector>
+#include "../game_variants/components/megalo/compiler/string_scanner.h"
 
 namespace {
    struct _lang_code {
@@ -77,22 +78,39 @@ void LocalizedStringLibrary::Entry::copy(reach::language lang, QString& out) {
 }
 void LocalizedStringLibrary::Entry::apply_permutation(reach::language lang, QString& out, int32_t value) {
    uint32_t search = value;
-   if (search < 0)
-      search = -search;
+   if (value < 0)
+      search = -value;
    //
+   auto sub = QString("%1").arg(value);
    for (auto& perm : this->permutations) {
       if (perm.integer == search) {
-         out = QString::fromStdString(perm.content->language(lang)).arg(value);
+         out = QString::fromStdString(perm.content->language(lang)).replace("%1", sub); // QString::arg dumps a warning if the string has no %-token
          return;
       }
    }
-   out = QString::fromStdString(this->content->language(lang)).arg(value);
+   out = QString::fromStdString(this->content->language(lang)).replace("%1", sub);
+}
+bool LocalizedStringLibrary::Entry::matches(const QString& search) const noexcept {
+   if (this->friendly_name.contains(search, Qt::CaseInsensitive))
+      return true;
+   for (auto& tag : this->tags)
+      if (tag.contains(search, Qt::CaseInsensitive))
+         return true;
+   QString temp;
+   for (auto& lang : this->content->strings) {
+      temp = QString::fromStdString(lang);
+      if (temp.contains(search, Qt::CaseInsensitive))
+         return true;
+   }
+   return false;
 }
 LocalizedStringLibrary::Entry::permutation* LocalizedStringLibrary::Entry::get_or_create_permutation(uint32_t v) {
    for (auto& perm : this->permutations)
       if (perm.integer == v)
          return &perm;
-   return &this->permutations.emplace_back();
+   auto perm = &this->permutations.emplace_back();
+   perm->integer = v;
+   return perm;
 }
 LocalizedStringLibrary::Entry& LocalizedStringLibrary::Entry::operator=(Entry&& other) noexcept {
    this->content = other.content;
@@ -214,10 +232,10 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
                if (!ok)
                   continue;
                auto perm = current->get_or_create_permutation(index);
-               perm->content->language(lang) = value.toString().toStdString();
+               perm->content->language(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
                continue;
             }
-            current->content->language(lang) = value.toString().toStdString();
+            current->content->language(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
          }
       }
    }

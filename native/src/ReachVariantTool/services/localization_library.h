@@ -38,7 +38,7 @@ class LocalizedStringLibrary {
          QString    category;
          QString    source;
          QString    source_type;
-         token_type token;
+         token_type token = token_type::none;
          std::vector<QString> tags;
          ReachString* content = nullptr; // must NOT be nullptr at run-time (would use a reference but std::vector can't cope with that)
          std::vector<permutation> permutations; // e.g. for "X points", the (content) would be "%1 points" and there'd be permutations for {0, "no points"} and {1, "%1 point"}.
@@ -47,6 +47,7 @@ class LocalizedStringLibrary {
          void apply_permutation(reach::language, QString&, int32_t value);
          //
          inline bool has_token() const noexcept { return this->token != token_type::none; }
+         bool matches(const QString& search) const noexcept;
          //
          Entry& operator=(Entry&&) noexcept; // move-assign
          Entry& operator=(const Entry&) noexcept; // copy-assign

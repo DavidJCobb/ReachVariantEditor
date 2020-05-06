@@ -94,49 +94,18 @@ int main(int argc, char *argv[]) {
 //     - A disabled team with a non-zero initial designator is invalid: MCC considers the file 
 //       corrupt. What about an enabled team with a zero initial designator?
 //
-//     = Add a string "templates" library accessible via a "Library..." button in the lower-left 
-//       corner of the localized string editor. This would contain common strings from Bungie and 
-//       343i's gametypes, along with their localizations; it would also contain fill-in-the-blank 
-//       phrases such as "X seconds" and "X minutes". Mod authors could use this to instantly 
-//       obtain already-localized strings for use in custom game options.
+//     = Strings to add to the localization library:
 //
-//       Each string entry should have a short description of its original context and source, and 
-//       entries should be categorized. For fill-in-the-blank entries, have a UI for that; don't 
-//       force mod authors to repeatedly copy and paste the number because avoiding that is the 
-//       sole purpose of this feature.
-//
-//        = IN PROGRESS.
-//
-//        - "Disabled" and "Enabled" are in Assault
-//        - "X points" is in various
-//        - "X seconds" is in various
-//        - "X minutes" is in Invasion
-//        - "X laps" is in Race
-//        - "Instant" is in Assault and Invasion
-//        - "Never" is in Headhunter and CTF; the CTF one is capitalized
-//        - "Your turn!" is in Halo Chess
-//        - "Invalid move. Try another!" is in Halo Chess
 //        - "Sides", "Multi", "One-sided", and "Neutral" are in Assault and CTF
 //        - "Style" (as in, hill movement type) is in KOTH
-//        - "Vehicle" and various vehicle names are in Race
-//        - Kill feed announcement "Flip your vehicle!" is in Rocket Hog Race
 //        - "Teleporting to vehicle: %s" (for use with a timer) is in Rocket Hog Race
 //        - Kill feed announcements re: bomb (dis)arms in progress are in Assault
-//        - The "Destination Moved" string is in Headhunter
 //        - Invasion Slayer contains various kill feed announcements e.g. "Warthogs Delivered"
 //        - "Allow instant win" is in Headhunter
 //        - "Headshots Only" is in Headhunter
-//        - "No" and "Yes" are in Headhunter and CTF, but double-check Japanese and Chinese
-//        - "%nm" (as in, "X meters") is in Race
-//        - "Teleport Time" is in Rocket Hog Race
 //        - "Random" and "Fair" are in Rocket Hog Race and Stockpile
 //        - "Safe Time" ("period of invincibility" in French) is in Juggernaut
-//        - "Attacking Team", "Spartans", and "Elites" are in Invasion. There are two of each 
-//          species string; one is inconsistently pluralized across languages (referring to the 
-//          teams), while the other is always non-plural (double-check Japanese and Chinese).
 //        - "CTF", "Assault", and "Territories" are in Invasion
-//        - Kill feed announcement "Your objective is under attack!" is in Invasion
-//        - "Offense" and "Defense" as round titles are in CTF
 //
 //        - Consider checking *.map files in Assembly to see if we can find localized strings for 
 //          common game objects, vehicles, and so on that haven't appeared in multiplayer (e.g. 

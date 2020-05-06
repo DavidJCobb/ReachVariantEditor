@@ -479,3 +479,17 @@ zh=噴射推進器
 pt=Jet Pack
 
 [aa_sprint]
+name=Sprint
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_sprint
+sourcetype=map
+en=Sprint
+jp=スプリント
+de=Sprint
+fr=Sprint
+es=Esprintar
+mx=Esprintar
+it=Scatto
+ko=질주
+zh=衝刺
+pt=Correr
