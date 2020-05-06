@@ -372,7 +372,7 @@ namespace Megalo {
       ),
       ActionFunction( // 35
          "Get Player Scoreboard Position",
-         "Get a player's position on the scoreboard, across all players and teams.",
+         "Get a player's position on the scoreboard, across all players and teams. This function returns 0 if the player used is (no_player).",
          "Set %2 to %1's position on the scoreboard.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -552,7 +552,7 @@ namespace Megalo {
       ),
       ActionFunction( // 53
          "Set Waypoint Text",
-         "Sets the text of an object's waypoint. Any variables used will be passed by reference, not by value, and certain values (e.g. object.spawn_sequence) seem to always render as 0.",
+         "Sets the text of an object's waypoint. Any variables used with a format string will be passed by reference, not by value, if the variable in question doesn't have network priority \"high,\" and this may lead to results contrary to what you expect.",
          "Set %1's waypoint text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),

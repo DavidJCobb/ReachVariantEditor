@@ -1,0 +1,42 @@
+
+My tests have indicated that Megalo does not have an easily-discoverable maximum 
+call depth. If, however, a maximum call depth is discovered, then we will want 
+our script compiler to generate warnings (not errors) for it.
+
+"Call depth," in this context, refers to the use of the "run nested trigger" 
+opcode. This opcode powers not just user-defined functions (an unintended use), 
+but also any nested trigger.
+
+If a maximum call depth is discovered, here's how the compiler can detect when 
+a script is likely to exceed that limit:
+
+ - Give Script::Block a max_depth value initialized at zero, and give it a 
+   current_depth value.
+
+ - When compiling a nested block in Block::compile:
+
+    - If the nested block has its own trigger and is not a function, then 
+      traverse up to the nearest function or top-level block (hereafter: depth-
+      -tracked block) and increment its current_depth *before* calling 
+      Block::compile on the nested block.
+
+      If the current_depth exceeds the depth limit, issue a warning at the  
+      start of the containing block of the block being opened, and then flag the 
+      containing block to not issue any further such warnings.
+
+      After calling Block::compile, check whether the depth-tracked block's 
+      current_depth exceeds its max_depth; if so, overwrite the max_depth with 
+      the current_depth. Either way, decrement the current_depth.
+
+       - The use of two values allows us to distinguish between branches, i.e. 
+         a block that contains two or more child blocks, such that the branches 
+         have their depths considered individually.
+
+       - This has to be done at compile time, because not all Blocks will have 
+         their own Trigger and the depth limit (if there is one) only applies to 
+         Triggers.
+
+ - When compiling a function call, traverse up to the nearest function or top-
+   -level block (hereafter: depth-tracked block). Check whether the depth-tracked 
+   block's current_depth plus the function's max_depth is greater than the depth 
+   limit; if so, issue a warning.

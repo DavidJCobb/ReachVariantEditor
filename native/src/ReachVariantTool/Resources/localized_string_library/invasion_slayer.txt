@@ -1,0 +1,132 @@
+[notif_terrcaptured]
+name=Territory Captured
+cate=notification
+desc=Text for a notification displayed when a territory is captured.
+tags=territories,territory
+source=Invasion Slayer
+sourcetype=gametype
+en=Territory Captured
+jp=テリトリーを制圧
+de=Territorium erobert
+fr=Territoire capturé
+es=Territorio conquistado
+mx=Territorio conquistado
+it=Territorio conquistato
+ko=지역 점령
+zh=已佔領領土
+pt=Território capturado
+
+[notif_weaponsdelivered]
+name=Weapons Delivered
+cate=notification
+desc=Text for a notification displayed when weapons are delivered to some location.
+tags=invasion slayer
+source=Invasion Slayer
+sourcetype=gametype
+en=Weapons Delivered
+jp=武器が到着した
+de=Waffen geliefert
+fr=Armes déployées
+es=Armas entregadas
+mx=Armas entregadas
+it=Armi pronte
+ko=무기 지원
+zh=武器抵達
+pt=Armas entregues
+
+[notif_warthogdelivered]
+name=Warthog Delivered
+cate=notification
+desc=Text for a notification displayed when a Warthog is delivered to some location.
+tags=invasion slayer,warthog
+source=Invasion Slayer
+sourcetype=gametype
+en=Warthog Delivered
+jp=ワートホグが到着した
+de=Warthog geliefert
+fr=Warthog déployé
+es=Warthog entregado
+mx=Warthog entregado
+it=Warthog a destinazione
+ko=워트호그 지원
+zh=疣豬號抵達
+pt=Warthog entregue
+
+[notif_bansheedelivered]
+name=Banshee Delivered
+cate=notification
+desc=Text for a notification displayed when a Banshee is delivered to some location.
+tags=invasion slayer,banshee
+source=Invasion Slayer
+sourcetype=gametype
+en=Banshee Delivered
+jp=バンシーが到着した
+de=Banshee geliefert
+fr=Banshee déployé
+es=Banshee entregado
+mx=Banshee entregado
+it=Banshee a destinazione
+ko=밴시 지원
+zh=妖姬號抵達
+pt=Banshee entregue
+
+[notif_ghostdelivered]
+name=Ghost Delivered
+cate=notification
+desc=Text for a notification displayed when a Ghost is delivered to some location.
+tags=invasion slayer,ghost
+source=Invasion Slayer
+sourcetype=gametype
+en=Ghost Delivered
+jp=ゴーストが到着した
+de=Ghost geliefert
+fr=Ghost déployé
+es=Ghost entregado
+mx=Ghost entregado
+it=Ghost a destinazione
+ko=고스트 지원
+zh=幽靈號抵達
+pt=Ghost entregue
+
+[notif_scorpiondelivered]
+name=Scorpion Delivered
+cate=notification
+desc=Text for a notification displayed when a Scorpion is delivered to some location.
+tags=invasion slayer,scorpion,tank
+source=Invasion Slayer
+sourcetype=gametype
+en=Scorpion Delivered
+jp=スコーピオンが到着した
+de=Scorpion geliefert
+fr=Scorpion déployé
+es=Scorpion entregado
+mx=Scorpion entregado
+it=Scorpion a destinazione
+ko=스콜피온 지원
+zh=天蠍號抵達
+pt=Scorpion entregue
+
+[notif_wraithdelivered]
+name=Wraith Delivered
+cate=notification
+desc=Text for a notification displayed when a Wraith is delivered to some location. Note that the French translation here (Wraith) is inconsistent with the French translation that Bungie used in Forge (Apparition).
+tags=invasion slayer,wraith,tank
+source=Invasion Slayer
+sourcetype=gametype
+en=Wraith Delivered
+jp=レイスが到着した
+de=Wraith geliefert
+fr=Wraith déployé
+es=Wraith entregado
+mx=Wraith entregado
+it=Wraith a destinazione
+ko=레이스 지원
+zh=亡魂號抵達
+pt=Wraith entregue
+
+
+
+
+
+
+

@@ -65,6 +65,8 @@ int main(int argc, char *argv[]) {
 //       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
 //       variables as flags-masks.
 //
+//     = MOVE string_scanner TO THE HELPERS FOLDER, AND PUT IT UNDER A CC0 LICENSE.
+//
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
 //
@@ -93,23 +95,6 @@ int main(int argc, char *argv[]) {
 //
 //     - A disabled team with a non-zero initial designator is invalid: MCC considers the file 
 //       corrupt. What about an enabled team with a zero initial designator?
-//
-//     = Strings to add to the localization library:
-//
-//        - "Sides", "Multi", "One-sided", and "Neutral" are in Assault and CTF
-//        - "Style" (as in, hill movement type) is in KOTH
-//        - "Teleporting to vehicle: %s" (for use with a timer) is in Rocket Hog Race
-//        - Kill feed announcements re: bomb (dis)arms in progress are in Assault
-//        - Invasion Slayer contains various kill feed announcements e.g. "Warthogs Delivered"
-//        - "Allow instant win" is in Headhunter
-//        - "Headshots Only" is in Headhunter
-//        - "Random" and "Fair" are in Rocket Hog Race and Stockpile
-//        - "Safe Time" ("period of invincibility" in French) is in Juggernaut
-//        - "CTF", "Assault", and "Territories" are in Invasion
-//
-//        - Consider checking *.map files in Assembly to see if we can find localized strings for 
-//          common game objects, vehicles, and so on that haven't appeared in multiplayer (e.g. 
-//          "Sabre", all weapons, Noble Team members, etc.).
 //
 //     = (DE)COMPILER UI
 //
@@ -211,68 +196,6 @@ int main(int argc, char *argv[]) {
 //          modified versions of the decompiled scripts that use aliases where appropriate 
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
-//
-//        - What happens if you detach a player's armor ability and held weapons? Are they 
-//          forcibly dropped, like how detaching a player forces them out of any vehicle?
-//
-//        - Test whether player.get_scoreboard_pos properly sets the result variable if the 
-//          player variable used is empty (i.e. set the variable to 99, and then call the 
-//          function and see if the value is still 99). If not, then rename the function to 
-//          player.try_get_scoreboard_pos and add a non-try secondary name like we did with 
-//          (try_)get_vehicle and (try_)get_killer.
-//
-//        - What is the maximum recursion depth? What happens when we hit it? It'd probably 
-//          be best to do an MOTL-style test where you can step in and out of shapes to 
-//          increment or decrement a counter, and then enter another shape to fire off a 
-//          process that recursively decrements the counter until it reaches zero. We'll 
-//          want some kind of guard after the process is fired -- something that checks 
-//          whether the counter is still non-zero (and if so, sets it to zero and dumps a 
-//          message to the kill feed) so that we can tell if the game refuses to recurse. 
-//          (We'll want two guards, actually: one immediately after the top-level call to 
-//          the recursive function, and another at the very top of the script. The former 
-//          would detect whether the game responds to hitting a recursion depth limit by 
-//          simply refusing to recurse; the latter would detect whether the game responds 
-//          to hitting a recursion depth limit by terminating script execution entirely 
-//          for that tick.)
-//
-//           - To be clear: any depth limit identified is a call depth limit, not strictly 
-//             a "recursion limit." It would apply just as much to nested blocks that do 
-//             not recurse and are not part of a user-defined function.
-//
-//           - If we identify a depth limit, then we should have the compiler warn (but 
-//             not error) whenever code is compiled that is likely to hit or exceed the 
-//             limit. The way to do this would be:
-//
-//              - Give Script::Block a max_depth value initialized at zero, and give it 
-//                a current_depth value.
-//
-//              - When compiling a nested block in Block::compile:
-//
-//                 - If the nested block has its own trigger and is not a function, then 
-//                   traverse up to the nearest function or top-level block (hereafter: 
-//                   depth-tracked block) and increment its current_depth *before* calling 
-//                   Block::compile on the nested block.
-//
-//                   If the current_depth exceeds the depth limit, issue a warning at the 
-//                   start of the containing block of the block being opened, and then flag 
-//                   the containing block to not issue any further such warnings.
-//
-//                   After calling Block::compile, check whether the depth-tracked block's 
-//                   current_depth exceeds its max_depth; if so, overwrite the max_depth 
-//                   with the current_depth. Either way, decrement the current_depth.
-//
-//                    - The use of two values allows us to distinguish between branches, 
-//                      i.e. a block that contains two or more child blocks, such that the 
-//                      branches have their depths considered individually.
-//
-//                    - This has to be done at compile time, because not all Blocks will 
-//                      have their own Trigger and the depth limit (if there is one) only 
-//                      applies to Triggers.
-//
-//              - When compiling a function call, traverse up to the nearest function or 
-//                top-level block (hereafter: depth-tracked block). Check whether the 
-//                depth-tracked block's current_depth plus the function's max_depth is 
-//                greater than the depth limit; if so, issue a warning.
 //
 //        - Confirm that the unit of measurement for Vector3 positions is consistent for 
 //          all opcodes; 0.1 Forge units = 1.0 Megalo units is confirmed for place_at_me 

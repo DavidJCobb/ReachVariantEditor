@@ -25,7 +25,7 @@ namespace {
          case reach::language::german: return QObject::tr("German");
          case reach::language::french: return QObject::tr("French");
          case reach::language::spanish: return QObject::tr("Spanish");
-         case reach::language::mexican: return QObject::tr("Mexican");
+         case reach::language::mexican: return QObject::tr("Spanish (Latin America)");
          case reach::language::italian: return QObject::tr("Italian");
          case reach::language::korean: return QObject::tr("Korean");
          case reach::language::chinese_traditional: return QObject::tr("Chinese (Traditional)");

@@ -52,6 +52,6 @@
         <file>localized_string_library/items.txt</file>
         <file>localized_string_library/vehicles.txt</file>
         <file>localized_string_library/vip.txt</file>
+        <file>localized_string_library/invasion_slayer.txt</file>
     </qresource>
 </RCC>
-

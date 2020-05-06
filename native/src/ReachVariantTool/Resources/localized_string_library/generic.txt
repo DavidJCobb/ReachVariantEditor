@@ -1045,3 +1045,55 @@ it=Impossibile creare l'elemento. Spazio insufficiente.
 ko=여유 공간이 없어서 아이템을 만들 수 없습니다.
 zh=無法建立物件，空間不夠。
 pt=Não foi possível criar objeto. Não há espaço suficiente.
+
+[safetime]
+name=Safe Time
+cate=option-names
+desc=The name of an option to control the period of time in which a player is safe. In some languages, this is rendered as "Period of Invincibility."
+source=Juggernaut
+sourcetype=gametype
+en=Safe Time
+jp=セーフ タイム
+de=Sichere Zeit
+fr=Période d'invincibilité
+es=Tiempo de seguridad
+mx=Tiempo de seguridad
+it=Tempo invulnerabilità
+ko=무적 시간
+zh=安全時間
+pt=Tempo seguro
+
+[supershieldsname]
+name=Super Shields
+cate=option-names
+desc=The name of an option to control whether players with overshields have fire graphics coming out of their feet.
+source=TU Buddy Slayer
+sourcetype=gametype
+en=Super Shields
+jp=スーパー シールド
+de=Super-Schilde
+fr=Super boucliers
+es=Superescudos
+mx=Superescudos
+it=Super scudi
+ko=슈퍼 방어막
+zh=超級護盾
+pt=Super Escudo
+
+[supershieldsdesc]
+name=Super Shields (Desc.)
+cate=option-descriptions
+desc=The description of an option to control whether players with overshields have fire graphics coming out of their feet.
+source=TU Buddy Slayer
+sourcetype=gametype
+en=Players with overshields will have flaming feet
+jp=オーバーシールド状態のプレイヤーの足元が炎に包まれる
+de=Spieler mit Super-Schilden haben flammende Füße
+fr=Les joueurs munis d'armures auront les pieds enflammés.
+es=Los jugadores con sobrescudos tendrán pies llameantes.
+mx=Los jugadores con sobrescudos tendrán pies llameantes.
+it=I giocatori con sovrascudi avranno i piedi fiammeggianti
+ko=오버실드를 가진 플레이어들이 불타는 발을 갖게 됩니다.
+zh=有超能護盾的玩家，會擁有冒出火焰的雙腳
+pt=Jogadores com escudo em excesso vão ter pés ardentes
+

@@ -43,6 +43,23 @@ When a biped enters a vehicle, it is considered to be attached to that vehicle. 
 means that a biped cannot be attached to another object if it is occupying a vehicle, 
 and detaching a biped will instantly force it out of any vehicle it is currently using.
 
+Detaching a player's held weapons will remove those weapons from them.
+
+Detaching a player's equipped Armor Ability will not remove it from them; however, it 
+will stop moving in synch with them. At this point it can be moved independently of them 
+without them losing it (though I've not tested independently moving it out of bounds); 
+they do not have physics or collision and will remain fixed at whatever spot a script 
+moves them to. The armor abilities will be teleported back to their carrying player if 
+their carrying player dies.
+
+ - A jetpack moved in this manner will show thruster animations without moving whenever 
+   its carrying player uses it.
+
+ - An active camo moved in this manner will no longer turn invisible with its carrying 
+   player. The radar-jamming effect comes from the armor ability object itself, so 
+   detaching the ability from the player's back will cause the radar jammer to no longer 
+   follow them.
+
 Attaching a biped to an object will lock the biped in place. If the biped is controlled 
 by the player, they will be able to turn but not to move, and their first-person legs 
 will desynch from their upper body.
@@ -114,3 +131,22 @@ object already existed at the start of this tick.
 
 The object.copy_rotation_to action can fail if the subject object is attached to another 
 object when the opcode is called.
+
+---
+
+There is no easily discoverable limit to the script engine's call depth. I wrote a test 
+script which would recursively decrement a counter to zero when some trigger condition 
+was activated, and which allowed me to control the value of the counter in-game. I wrote 
+checks which were designed to catch the following failure modes:
+
+ - The game halts script execution when the max call depth is reached. The counter will 
+   retain a non-zero value at the start of the next script execution.
+
+ - The game refuses to perform any further calls when the max call depth is reached, but 
+   otherwise continues script execution. The counter will have a non-zero value directly 
+   after the recursive call was made.
+
+Neither failure mode was caught when testing counter values up to 5000.
+
+---
+
