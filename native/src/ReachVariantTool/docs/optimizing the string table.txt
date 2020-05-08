@@ -139,9 +139,12 @@ Then what we need is this:
         applet
 
 A sorting function which produces those results (or similar enough results) is easy 
-to implement. As for the mechanics of sorting localizations individually, apart from 
+to implement. (As for the mechanics of sorting localizations individually, apart from 
 their containing ReachStrings: we can accomplish this by constructing a list of 
-pairs of ReachString* pointers and language identifiers.
+pairs of ReachString* pointers and language identifiers.) Once the sorting is done, 
+when it comes time to actually write a localization into the buffer, we just check if 
+it is a suffix of the previous localization we wrote, and if so, we reuse the offset 
+of that previous localization and avoid writing duplicate content.
 
 Bungie's official Alpha Zombies release contains 0x2D10 bytes of hashable content in 
 the MPVR block. When resaved through ReachVariantTool with the first non-Bungie 
