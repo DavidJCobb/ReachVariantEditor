@@ -92,7 +92,7 @@ while my approach was to just write the localizations to a combined std::string
 combined std::string already had a given string was as simple as iterating over it, 
 looking for null terminators, and checking whether the distance from the current 
 null terminator to the previous was equal to the length of the string about to be 
-added.
+added (with a call to strncmp if so).
 
 This optimization is necessary to facilitate the resaving of "SvE Mythic Slayer," a 
 modded gametype with a script large enough to exceed filesize limits if the string 
@@ -122,6 +122,7 @@ so that each "suffix" string is directly next to the "superstring" it matches. W
 makes this somewhat tricky is the need to sort the strings by their ends rather than 
 their beginnings; if normal alphabetical sorting looks like this:
 
+   apple
    applet
    application
    hoopla
@@ -131,6 +132,7 @@ their beginnings; if normal alphabetical sorting looks like this:
 Then what we need is this:
 
         hoopla
+         apple
    application
     substation
        station
@@ -160,11 +162,15 @@ or a counterpart with the same terminal digit.
     5 Points
    15 Points
 
+The savings are quite a bit less for Invasion, where the above two conditions are 
+met in fewer cases.
+
 Halo: Reach supports twelve languages for localization, but official Bungie game 
 variants only use ten of these. Almost all languages place the unit of measurement 
 on the end, with the only exception I've seen being Alpha Zombies' "Zombie Count" 
-option in Japanese (which is formatted as "Zombies x 5"). (Japanese still places 
-the unit on the end for units of time and for points.) As such, this optimization 
+option in Japanese (which is formatted as "Zombies x 5"). Japanese still places 
+the unit on the end for units of time and for points. As such, this optimization 
 produces benefits for all officially supported languages in almost all cases: 
-optimizing out a redundant copy of the byte sequence "5 Points" doesn't seem like 
-a lot, but the actual savings is very roughly ten times that.
+optimizing out one redundant copy of the byte sequence "5 Points" doesn't seem 
+important, but the actual savings is very roughly ten times that for each eligible 
+ReachString.
