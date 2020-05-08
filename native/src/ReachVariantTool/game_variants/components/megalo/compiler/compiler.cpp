@@ -306,7 +306,7 @@ namespace Megalo {
                ReachString* name = label.name;
                if (!name)
                   continue;
-               QString english = QString::fromUtf8(name->language(reach::language::english).c_str());
+               QString english = QString::fromUtf8(name->get_content(reach::language::english).c_str());
                if (english == this->label_name) {
                   if (index != -1) {
                      QString lit = string_scanner::escape(this->label_name, '"');

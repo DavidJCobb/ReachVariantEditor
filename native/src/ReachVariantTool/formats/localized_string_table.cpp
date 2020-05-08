@@ -26,7 +26,7 @@ extern "C" {
 
 namespace reach {
    extern bool language_is_optional(language l) noexcept {
-      return l == language::polish;
+      return l == language::polish || l == language::chinese_simplified; // Bungie doesn't define strings for either of these, and KSoft explicitly describes the former as optional
    }
 };
 
@@ -195,6 +195,14 @@ ReachString& ReachString::operator=(const ReachString& other) noexcept {
 }
 #pragma endregion
 
+bool ReachStringTable::_check_dirty() const noexcept {
+   if (this->dirty)
+      return true;
+   for (auto& str : this->strings)
+      if (str.is_dirty())
+         return true;
+   return false;
+}
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
    bool     is_compressed     = stream.read_bits(1) != 0;
@@ -241,6 +249,11 @@ void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    }
    return buffer;
 }
+void ReachStringTable::_set_not_dirty() noexcept {
+   this->dirty = false;
+   for (auto& str : this->strings)
+      str.dirty = false;
+}
 bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    if (count > this->max_count) {
@@ -266,57 +279,96 @@ bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    this->set_dirty();
    return true;
 }
-void ReachStringTable::write(cobb::bitwriter& stream) noexcept {
+ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
+   if (!this->_check_dirty() && this->cached_export.raw.get_bitpos() > 0)
+      return save_error::none;
+   //
+   // The format for a string table in the file is as follows:
+   //
+   //  - First, the number of ReachStrings.
+   //
+   //  - Then, the offsets for each localization in each ReachString.
+   //
+   //     - Each offset is written as a presence bit followed, if the bit is 1, by the offset 
+   //       value.
+   //
+   //  - Then, the size of the uncompressed data in the next bullet point.
+   //
+   //  - Then, a buffer containing all of the content of all localizations of all ReachStrings. 
+   //    This buffer may optionally be zlib-compressed. The ReachString offsets mentioned above 
+   //    are relative to the start of this buffer's uncompressed content.
+   //
+   auto& stream = this->cached_export.raw;
+   stream.resize(0);
+   //
    stream.write(this->strings.size(), this->count_bitlength);
-   if (this->strings.size()) {
-      std::string combined; // UTF-8 buffer holding all string data including null terminators
-      for (auto& string : this->strings) {
-         string.write_strings(combined);
-         string.write_offsets(stream, *this);
-      }
-      uint32_t uncompressed_size = combined.size();
-      if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
-         printf("WARNING: TOTAL STRING DATA IS TOO LARGE\n");
-         #if _DEBUG
-            __debugbreak();
-         #endif
-         assert(false && "String table cannot hold data this large");
-      }
-      stream.write(uncompressed_size, this->buffer_size_bitlength);
-      //
-      bool should_compress = uncompressed_size >= 0x80; // TODO: better logic
-      stream.write(should_compress, 1);
-      if (should_compress) {
-         auto bound = compressBound(uncompressed_size);
-         auto buffer = malloc(bound);
-         if (!buffer) {
-            printf("WARNING: FAILED TO ALLOCATE STORAGE FOR COMPRESSED STRING DATA!");
-            __debugbreak();
-            assert(false && "Insufficient memory to compress string data.");
-         }
-         uint32_t compressed_size = bound;
-         int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
-         switch (result) {
-            case Z_OK:
-               break;
-            case Z_MEM_ERROR:
-               assert(false && "Memory error occurred when trying to compress string table.");
-               break;
-            case Z_BUF_ERROR:
-               assert(false && "Insufficient buffer space when trying to compress string table.");
-               break;
-         }
-         stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
-         static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
-         stream.write(uncompressed_size); // redundant uncompressed size
-         for (size_t i = 0; i < compressed_size; i++)
-            stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
-         free(buffer);
-      } else {
-         for (size_t i = 0; i < uncompressed_size; i++)
-            stream.write((uint8_t)combined[i]);
-      }
+   if (!this->strings.size()) {
+      this->_set_not_dirty();
+      return save_error::none;
    }
+   std::string combined; // UTF-8 buffer holding all string data including null terminators
+   for (auto& string : this->strings) {
+      string.write_strings(combined);
+      string.write_offsets(stream, *this);
+   }
+   uint32_t uncompressed_size = combined.size();
+   if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      return save_error::data_too_large;
+   }
+   stream.write(uncompressed_size, this->buffer_size_bitlength);
+   //
+   bool should_compress = uncompressed_size >= 0x80; // TODO: better logic
+   stream.write(should_compress, 1);
+   //
+   if (!should_compress) {
+      //
+      // Write uncompressed data to the stream.
+      //
+      for (size_t i = 0; i < uncompressed_size; i++)
+         stream.write((uint8_t)combined[i]);
+      this->_set_not_dirty();
+      return save_error::none;
+   }
+   //
+   // Compress the data with zlib, and then write it to the stream.
+   //
+   auto bound  = compressBound(uncompressed_size);
+   auto buffer = malloc(bound);
+   if (!buffer) {
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      return save_error::out_of_memory;
+   }
+   uint32_t compressed_size = bound;
+   int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+   switch (result) {
+      case Z_OK:
+         break;
+      case Z_MEM_ERROR:
+         return save_error::zlib_memory_error;
+      case Z_BUF_ERROR:
+         return save_error::zlib_buffer_error;
+   }
+   stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
+   static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
+   stream.write(uncompressed_size); // redundant uncompressed size
+   for (size_t i = 0; i < compressed_size; i++)
+      stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+   free(buffer);
+   this->_set_not_dirty();
+   return save_error::none;
+}
+uint32_t ReachStringTable::get_size_to_save() noexcept {
+   this->generate_export_data();
+   return this->cached_export.raw.get_bitpos();
+}
+void ReachStringTable::write(cobb::bitwriter& stream) noexcept {
+   this->generate_export_data();
+   stream.write_stream(this->cached_export.raw);
 }
 ReachString* ReachStringTable::add_new() noexcept {
    if (this->is_at_count_limit())

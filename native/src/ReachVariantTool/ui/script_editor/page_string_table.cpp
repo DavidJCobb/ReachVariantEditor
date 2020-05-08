@@ -152,14 +152,14 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       QObject::connect(act_copy_text, &QAction::triggered, [this, act_copy_text]() {
          auto str = this->getSelected();
          if (str) {
-            auto english = str->language(reach::language::english).c_str();
+            auto english = str->get_content(reach::language::english).c_str();
             QApplication::clipboard()->setText(english, QClipboard::Clipboard);
          }
       });
       QObject::connect(act_copy_code, &QAction::triggered, [this, act_copy_code]() {
          auto str = this->getSelected();
          if (str) {
-            QString english = str->language(reach::language::english).c_str();
+            QString english = str->get_content(reach::language::english).c_str();
             english = Megalo::Script::string_scanner::escape(english, '"');
             english.prepend('"');
             english.append('"');
@@ -204,7 +204,7 @@ void ScriptEditorPageStringTable::updateFromVariant(GameVariant* variant) {
    for (size_t i = 0; i < count; i++) {
       auto& string = table.strings[i];
       auto  item   = new QListWidgetItem();
-      item->setText(QString::fromUtf8(string.language(reach::language::english).c_str()));
+      item->setText(QString::fromUtf8(string.get_content(reach::language::english).c_str()));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&string));
       list->addItem(item);
    }

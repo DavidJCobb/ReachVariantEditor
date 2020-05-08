@@ -241,7 +241,7 @@ namespace Megalo {
                   cobb::sprintf(line, "label index %u", f->index);
                   break;
                }
-               cobb::sprintf(line, "for each object with label %s", f->name->language(reach::language::english).c_str());
+               cobb::sprintf(line, "for each object with label %s", f->name->get_content(reach::language::english).c_str());
             }
             out += line;
             break;
@@ -430,7 +430,7 @@ namespace Megalo {
                      cobb::sprintf(temp, "%u", f->index);
                      out.write(temp);
                   } else {
-                     auto english = f->name->language(reach::language::english).c_str();
+                     auto english = f->name->get_content(reach::language::english).c_str();
                      out.write_string_literal(english);
                   }
 

@@ -154,7 +154,7 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
       auto  item  = new QListWidgetItem;
       auto& label = list[i];
       if (label.name) {
-         item->setText(QString::fromUtf8(label.name->language(reach::language::english).c_str()));
+         item->setText(QString::fromUtf8(label.name->get_content(reach::language::english).c_str()));
       } else {
          item->setText(tr("<unnamed label %1>").arg(i));
       }
@@ -205,7 +205,7 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
          auto& other = labels[i];
          if (!other.name)
             continue;
-         others.push_back(QString::fromUtf8(other.name->language(reach::language::english).c_str()));
+         others.push_back(QString::fromUtf8(other.name->get_content(reach::language::english).c_str()));
       }
       this->ui.name->setBlacklistedStrings(std::move(others));
    }

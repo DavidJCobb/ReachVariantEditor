@@ -74,7 +74,7 @@ LocalizedStringLibrary::Entry::permutation& LocalizedStringLibrary::Entry::permu
 }
 
 void LocalizedStringLibrary::Entry::copy(reach::language lang, QString& out) {
-   out = QString::fromStdString(this->content->language(lang));
+   out = QString::fromStdString(this->content->get_content(lang));
 }
 void LocalizedStringLibrary::Entry::apply_permutation(reach::language lang, QString& out, int32_t value) {
    uint32_t search = value;
@@ -84,11 +84,11 @@ void LocalizedStringLibrary::Entry::apply_permutation(reach::language lang, QStr
    auto sub = QString("%1").arg(value);
    for (auto& perm : this->permutations) {
       if (perm.integer == search) {
-         out = QString::fromStdString(perm.content->language(lang)).replace("%1", sub); // QString::arg dumps a warning if the string has no %-token
+         out = QString::fromStdString(perm.content->get_content(lang)).replace("%1", sub); // QString::arg dumps a warning if the string has no %-token
          return;
       }
    }
-   out = QString::fromStdString(this->content->language(lang)).replace("%1", sub);
+   out = QString::fromStdString(this->content->get_content(lang)).replace("%1", sub);
 }
 bool LocalizedStringLibrary::Entry::matches(const QString& search) const noexcept {
    if (this->friendly_name.contains(search, Qt::CaseInsensitive))

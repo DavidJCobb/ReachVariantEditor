@@ -105,9 +105,19 @@ class ReachString : public indexed_list_item {
       //
       bool can_be_forge_label() const noexcept;
       bool empty() const noexcept;
+      inline bool is_dirty() const noexcept { return this->dirty; }
 };
 
 class ReachStringTable {
+   public:
+      enum class save_error {
+         none,
+         data_too_large,
+         out_of_memory,
+         zlib_memory_error,
+         zlib_buffer_error,
+      };
+      //
    public:
       const int max_count;
       const int max_buffer_size;
@@ -133,13 +143,22 @@ class ReachStringTable {
       cobb::indexed_list<ReachString> strings;
       //
    protected:
-      bool dirty = false;
+      bool dirty = true;
       //
-      void* _make_buffer(cobb::ibitreader&) const noexcept;
+      bool  _check_dirty() const noexcept;
+      void* _make_buffer(cobb::ibitreader&) const noexcept; // for reading
+      void  _set_not_dirty() noexcept;
+      //
+      struct {
+         cobb::bitwriter raw;
+      } cached_export;
+      //
    public:
       bool read(cobb::ibitreader&) noexcept;
       void write(cobb::bitwriter& stream) noexcept;
       //
+      save_error generate_export_data() noexcept; // returns success bool
+      uint32_t get_size_to_save() noexcept;
       ReachString* get_empty_entry() const noexcept;
       ReachString* get_entry(size_t index) const noexcept {
          if (index < this->strings.size())
@@ -157,5 +176,6 @@ class ReachStringTable {
       //
       uint32_t total_bytecount() noexcept; // number of bytes it would take to store all strings (accounting for overlapping and other optimizations)
       //
+      inline bool is_dirty() const noexcept { return this->dirty; }
       inline void set_dirty() noexcept { this->dirty = true; }; // for ReachString
 };

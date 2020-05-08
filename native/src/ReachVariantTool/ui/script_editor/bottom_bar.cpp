@@ -257,10 +257,8 @@ void ScriptEditorBottomPane::updateFromVariant(GameVariant* variant) {
       writer.bits.go_to_bitpos(0);
    }
    {  // Strings
-      mp->scriptData.strings.write(writer.bits);
-      //
-      widget->modifySegmentQuantity(indices.script_strings, writer.bits.get_bitpos());
-      writer.bits.go_to_bitpos(0);
+      auto size = mp->scriptData.strings.get_size_to_save();
+      widget->modifySegmentQuantity(indices.script_strings, size);
    }
    {  // Map permissions
       widget->modifySegmentQuantity(indices.map_perms, mp->mapPermissions.bitcount());

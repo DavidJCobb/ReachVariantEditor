@@ -182,7 +182,7 @@ void ScriptEditorPageScriptStats::updateStatsListFromVariant(GameVariant* varian
       auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
-         item->setText(QString::fromUtf8(option.name->language(reach::language::english).c_str()));
+         item->setText(QString::fromUtf8(option.name->get_content(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed stat %1>", "scripted stat editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&option));

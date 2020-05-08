@@ -378,7 +378,7 @@ void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* va
       auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
-         item->setText(QString::fromUtf8(option.name->language(reach::language::english).c_str()));
+         item->setText(QString::fromUtf8(option.name->get_content(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed option %1>", "scripted option editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&option));
@@ -436,7 +436,7 @@ void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
       auto    item  = new QListWidgetItem;
       QString name;
       if (value.name)
-         name = QString::fromUtf8(value.name->language(reach::language::english).c_str());
+         name = QString::fromUtf8(value.name->get_content(reach::language::english).c_str());
       else
          name = tr("<unnamed value %1>", "scripted option editor").arg(i);
       item->setText(name);
