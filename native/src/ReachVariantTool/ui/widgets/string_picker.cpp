@@ -108,7 +108,7 @@ void ReachStringPicker::refreshList() {
          if (!allSame)
             continue;
       //
-      QString text = QString::fromUtf8(string.english().c_str());
+      QString text = QString::fromUtf8(string.language(reach::language::english).c_str());
       if (this->_blacklist.size()) {
          bool skip = false;
          if (allSame) {
@@ -120,7 +120,7 @@ void ReachStringPicker::refreshList() {
             }
          } else {
             for (auto& bl : this->_blacklist) {
-               for (auto& tl : string.strings) {
+               for (auto& tl : string.languages()) {
                   if (QString::fromUtf8(tl.c_str()) == text) {
                      skip = true;
                      break;
@@ -167,7 +167,7 @@ void ReachStringPicker::refreshListItem(uint32_t index) {
    auto& table = mp->scriptData.strings;
    if (index >= table.strings.size())
       return;
-   auto text      = QString::fromUtf8(table.strings[index].english().c_str());
+   auto text      = QString::fromUtf8(table.strings[index].language(reach::language::english).c_str());
    auto itemIndex = this->_combobox->findData(index);
    if (itemIndex >= 0)
       this->_combobox->setItemText(itemIndex, text);

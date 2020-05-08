@@ -163,7 +163,7 @@ void ScriptEditorPageScriptTraits::updateTraitsListFromVariant(GameVariant* vari
       auto& traits = list[i];
       auto  item = new QListWidgetItem;
       if (traits.name)
-         item->setText(QString::fromUtf8(traits.name->english().c_str()));
+         item->setText(QString::fromUtf8(traits.name->language(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed traits %1>", "scripted traits editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&traits));

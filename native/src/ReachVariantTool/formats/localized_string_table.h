@@ -49,6 +49,7 @@ using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, 
 using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
 class ReachString : public indexed_list_item {
+   friend ReachStringTable;
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 
@@ -63,29 +64,39 @@ class ReachString : public indexed_list_item {
       //
       // Strings are encoded as UTF-8.
       //
-      ReachString() {}
-      ReachString(ReachStringTable& o) {}
-      //
-      std::array<int, reach::language_count>         offsets;
+   protected:
+      ReachStringTable* owner = nullptr;
+      std::array<int,         reach::language_count> offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
+      bool dirty = true;
+      //
+      void _set_dirty() noexcept;
+      //
+   public:
+      ReachString() {}
+      ReachString(ReachStringTable& o) : owner(&o) {}
+      //
+      using language_list_t = std::array<std::string, reach::language_count>;
       //
       void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) noexcept;
       //
-      std::string& english() noexcept {
-         return this->strings[(int)reach::language::english];
-      }
-      const std::string& english() const noexcept {
-         return this->strings[(int)reach::language::english];
-      }
-      std::string& language(reach::language l) noexcept {
+      inline const std::string& get_content(reach::language l) const noexcept {
          return this->strings[(int)l];
       }
-      const std::string& language(reach::language l) const noexcept {
+      inline const language_list_t& languages() const noexcept { return this->strings; }
+      //
+      void set_content(reach::language, const std::string& text) noexcept;
+      void set_content(reach::language, const char* text) noexcept;
+      void set_content(reach::language, std::string&& text) noexcept;
+      //
+      inline std::string& get_write_access(reach::language l) noexcept {
+         this->_set_dirty();
          return this->strings[(int)l];
       }
+      //
       bool operator==(const ReachString& other) const noexcept {
          return this->strings == other.strings;
       }
@@ -122,6 +133,8 @@ class ReachStringTable {
       cobb::indexed_list<ReachString> strings;
       //
    protected:
+      bool dirty = false;
+      //
       void* _make_buffer(cobb::ibitreader&) const noexcept;
    public:
       bool read(cobb::ibitreader&) noexcept;
@@ -143,4 +156,6 @@ class ReachStringTable {
       void remove(size_t index) noexcept;
       //
       uint32_t total_bytecount() noexcept; // number of bytes it would take to store all strings (accounting for overlapping and other optimizations)
+      //
+      inline void set_dirty() noexcept { this->dirty = true; }; // for ReachString
 };

@@ -306,7 +306,7 @@ namespace Megalo {
                ReachString* name = label.name;
                if (!name)
                   continue;
-               QString english = QString::fromUtf8(name->english().c_str());
+               QString english = QString::fromUtf8(name->language(reach::language::english).c_str());
                if (english == this->label_name) {
                   if (index != -1) {
                      QString lit = string_scanner::escape(this->label_name, '"');
@@ -620,7 +620,8 @@ namespace Megalo {
                      string_resolved = false;
                      continue;
                   }
-                  str->english() = key.toStdString();
+                  for (int i = 0; i < reach::language_count; ++i)
+                     str->get_write_access((reach::language)i) = key.toStdString();
                   new_index = str->index;
                   assert(new_index >= 0 && "Something went wrong. A newly-created ReachString did not have its index member set by the containing string table.");
                }

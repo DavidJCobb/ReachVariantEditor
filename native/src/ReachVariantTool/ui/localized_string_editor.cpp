@@ -50,7 +50,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          auto index = lang.toInt();
          if (index < 0 || index >= reach::language_count)
             continue;
-         s->strings[index] = control->toPlainText().toUtf8();
+         s->set_content((reach::language)index, control->toPlainText().toUtf8());
       }
       if (!this->_isNotInStandardStringTable)
          ReachEditorState::get().stringModified(s->index);
@@ -76,7 +76,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          auto index = lang.toInt();
          if (index < 0 || index >= reach::language_count)
             continue;
-         s->strings[index] = control->toPlainText().toUtf8();
+         s->set_content((reach::language)index, control->toPlainText().toUtf8());
       }
       if (this->_targetRef) {
          *this->_targetRef = s;
@@ -174,6 +174,6 @@ void LocalizedStringEditorModal::updateTextboxes(ReachString* use) {
       if (index < 0 || index >= reach::language_count)
          continue;
       const QSignalBlocker blocker(control);
-      control->setPlainText(QString::fromUtf8(target->strings[index].c_str()));
+      control->setPlainText(QString::fromUtf8(target->get_content((reach::language)index).c_str()));
    }
 }

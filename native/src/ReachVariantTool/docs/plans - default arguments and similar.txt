@@ -1,0 +1,26 @@
+
+Since OpcodeArgValue now has virtual clone and copy methods, it is theoretically 
+possible to specify default arguments for a script opcode by simply providing an 
+already-constructed OpcodeArgValue (initialized to the desired defaults) to the 
+OpcodeArgBase. We do need to think real hard about whether this may introduce 
+complications when multi-part argument types (e.g. vector3) are involved.
+
+Named parameters could also be possible, but would require an OpcodeArgBase to 
+be able to store multiple names each mapped to a part number; this is the only 
+way to accommodate specifying individual parts within a multi-part argument type 
+(e.g. "x", "y", and "z" for the offset in object.place_at_me).
+
+Whenever a multi-part type uses one part to determine the number and behavior of 
+subsequent parts, that argument type will be incompatible with any relatively 
+simple implementation of default arguments and named parameters. One example of 
+this is the "shape" argument type, which takes an enum representing a shape type 
+and follows that up with between zero and four number parameters depending on 
+that type. In order to make that type compatible with a named parameter system, 
+we'd need to let types define their own "named sub-parameters", and we'd need to 
+have a system wherein: if the OpcodeArgBase defines a name, then that name is 
+prepended to the names defined by the type itself e.g. "foo_length"; and if the 
+type defines names (and ONLY if the type defines names), then the OpcodeArgBase 
+does not need to define names. Even there, we run into some complications: we 
+wanted OpcodeArgBase to be able to define multiple names for use with multi-part 
+argument types, so that would need to be made mutually exclusive with defining a 
+single name (or no name) to be used with type-side names.

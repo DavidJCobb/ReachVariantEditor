@@ -97,7 +97,7 @@ bool LocalizedStringLibrary::Entry::matches(const QString& search) const noexcep
       if (tag.contains(search, Qt::CaseInsensitive))
          return true;
    QString temp;
-   for (auto& lang : this->content->strings) {
+   for (auto& lang : this->content->languages()) {
       temp = QString::fromStdString(lang);
       if (temp.contains(search, Qt::CaseInsensitive))
          return true;
@@ -232,10 +232,10 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
                if (!ok)
                   continue;
                auto perm = current->get_or_create_permutation(index);
-               perm->content->language(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
+               perm->content->get_write_access(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
                continue;
             }
-            current->content->language(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
+            current->content->get_write_access(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
          }
       }
    }

@@ -61,11 +61,81 @@ int main(int argc, char *argv[]) {
 //
 //        - ADDING/REMOVING MEGALO OPTIONS ALSO NEEDS TO CLEAR THE RESPECTIVE TOGGLE-FLAGS.
 //
+//        - Probably best to have add/remove/reorder operations taken care of by member 
+//          functions on the MP data class.
+//
 //     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
 //       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
 //       variables as flags-masks.
 //
 //     = MOVE string_scanner TO THE HELPERS FOLDER, AND PUT IT UNDER A CC0 LICENSE.
+//
+//     = STRING TABLE OPTIMIZATIONS: Right now, the string table isn't capable of retaining 
+//       the buffer that it creates in preparation to save. We use that buffer both for saving 
+//       and for measuring the string table's final size as part of the script editor's bottom 
+//       bar, which means that whenever we need to re-measure, we are (re)creating that buffer 
+//       even if no string data has changed.
+//
+//       How about this: we should cache the final buffer (with zlib compression) along with a 
+//       "dirty" flag indicating whether the buffer needs to be rebuilt; ideally anything that 
+//       modifies a string would set the flag. (Even better: we can create ReachStrings with 
+//       a pointer to their owning tables, and make it so that non-const access to the string 
+//       content is only available via getters that flag the owning table as dirty. The use of 
+//       ReachString::operator= would also flag the owning table as dirty. We need to ensure 
+//       that it's not mandatory to construct a ReachString with an owning table, because some 
+//       parts of our current code (mainly the localized string library) use unowned strings 
+//       as convenient holders for data.)
+//
+//        - We need a "dirty" flag on the table to detect all changes including the removal of 
+//          strings, but an additional "dirty" flag on ReachString would also allow us to do 
+//          specific optimizations in the event that we program a more advanced way of saving 
+//          strings.
+//
+//        - If we decide to implement our plans for more extensive space optimizations (see 
+//          localized_string_table.cpp -- MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP branch), 
+//          then the string table should also cache sorting/overlapping data on ReachStrings 
+//          so that rebuilds of the buffer are faster even when some strings have been edited. 
+//          Flagging a ReachString as dirty should also discard its cached sorting/overlapping 
+//          data.
+//
+//           - In order to implement this, we need to first sort the strings with a reverse 
+//             iteration. If normal alphabetical sorting would be like this:
+//
+//                applet
+//                application
+//                hoopla
+//                station
+//                substation
+//
+//             then we need instead:
+//
+//                     hoopla
+//                application
+//                 substation
+//                    station
+//                     applet
+//
+//             Then, the saving process becomes simple, because each suffix string is directly 
+//             after a string that it is a suffix of. We write strings to the buffer in the 
+//             sorted order; when we're writing a string, we check if it is a suffix of the 
+//             last written string, and if so, we skip it (thus "last written" string and not 
+//             "previous string").
+//
+//             (Of course, we don't want literal "alphabetical" sorting; let's not waste time 
+//             processing advanced sorting for Unicode, etc.. We need to sort by code point; 
+//             the goal is just to get suffixes next to their wholes, such that the larger 
+//             strings come first.)
+//
+//             But there's a wrinkle: localization. We can't use a sorted list of ReachStrings; 
+//             we need a sorted list of the individual localizations within each ReachString. 
+//             In practice, what we need is a sorted list of <ReachString*, reach::language> 
+//             pairs. Not difficult, but potentially easy to forget.
+//
+//              - As for how this relates to the "dirty" flag? We'd retain the sorted list 
+//                after building the buffer. The next time we're asked for the buffer, we 
+//                search through the sorted list and remove any pairs whose ReachStrings are 
+//                dirty; then, we search through our ReachStrings and create pairs for any 
+//                that are dirty.
 //
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
@@ -197,6 +267,23 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
+//        - Deleting a player's biped instantly respawns the player. Does it deduct from 
+//          their pool of lives (or that of their team) in limited-life game variants?
+//
+//        - Test the "reset round" flags -- specifically, test what happens when they're 
+//          turned off. (This isn't related to Megalo but oh well, this is my in-game test 
+//          list now)
+//
+//        - Test how many times per second a script runs.
+//
+//        - Can we force a biped into a vehicle by spawning the biped, forcing a player 
+//          into the biped, forcing the player into a vehicle, and then forcing the player 
+//          back into their original biped? Do they witness any side-effects?
+//
+//        - What happens if we attach the player to an object that is destroyed or equipped 
+//          on contact (e.g. a powerup, a landmine; an armor ability or weapon when they 
+//          are not carrying one)?
+//
 //        - Confirm that the unit of measurement for Vector3 positions is consistent for 
 //          all opcodes; 0.1 Forge units = 1.0 Megalo units is confirmed for place_at_me 
 //          and set_shape but not any other opcodes.
@@ -211,7 +298,10 @@ int main(int argc, char *argv[]) {
 //          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
 //          arguments either way.
 //
-//        - In team games, can you assign a player to a team that isn't present in a match? 
+//        - Can you assign a player to neutral_team, or reassign their team, during a team 
+//          game?
+//
+//        - In team games, can you assign an object to a team that isn't present in a match? 
 //          Some of my tests suggest you can't.
 //
 //        - Can user-defined functions be event handlers and still work? If so, that would 

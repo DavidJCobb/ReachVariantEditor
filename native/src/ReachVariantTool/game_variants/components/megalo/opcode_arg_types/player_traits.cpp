@@ -54,7 +54,7 @@ namespace Megalo {
          cobb::sprintf(out, "script traits %u", f->index);
          return;
       }
-      out = f->name->english();
+      out = f->name->language(reach::language::english);
    }
    void OpcodeArgValuePlayerTraits::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (!this->value) {

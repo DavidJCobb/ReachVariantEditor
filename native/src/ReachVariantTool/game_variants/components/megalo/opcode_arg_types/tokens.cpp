@@ -142,7 +142,7 @@ namespace Megalo {
    void OpcodeArgValueStringTokens2::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachString* format = this->string;
       if (format) {
-         std::string english = format->english();
+         std::string english = format->language(reach::language::english);
          out.write_string_literal(english);
       } else {
          out.write("none");

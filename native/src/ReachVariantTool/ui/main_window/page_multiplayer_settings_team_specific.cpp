@@ -34,7 +34,7 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
       }
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::SingleLanguageString | ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->language(reach::language::english);
          this->ui.fieldName->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -101,7 +101,7 @@ void PageMPSettingsTeamSpecific::updateFromVariant(GameVariant* variant, int8_t 
    {
       auto name = team->get_name();
       if (name)
-         this->ui.fieldName->setText(QString::fromUtf8(name->english().c_str()));
+         this->ui.fieldName->setText(QString::fromUtf8(name->language(reach::language::english).c_str()));
       else
          this->ui.fieldName->setText("");
       this->ui.buttonName->setDisabled(false);

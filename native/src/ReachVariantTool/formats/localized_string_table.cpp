@@ -30,6 +30,12 @@ namespace reach {
    }
 };
 
+#pragma region ReachString
+void ReachString::_set_dirty() noexcept {
+   this->dirty = true;
+   if (this->owner)
+      this->owner->set_dirty();
+}
 void ReachString::read_offsets(cobb::ibitreader& stream, ReachStringTable& table) noexcept {
    this->is_defined = true;
    for (size_t i = 0; i < this->offsets.size(); i++) {
@@ -84,7 +90,7 @@ void ReachString::write_strings(std::string& out) noexcept {
       // NOTE: DO NOT serialize empty strings with a -1 offset; Bungie doesn't do that and I assume it's for a 
       // reason.
       //
-      if (this->offsets[i] == -1) // string was absent when we read it, so keep it absent (in lieu of the above)
+      if (s.empty() && this->offsets[i] == -1) // string was absent when we read it, so keep it absent (in lieu of the above)
          continue;
       #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
          //
@@ -154,6 +160,18 @@ void ReachString::write_strings(std::string& out) noexcept {
       out += '\0';
    }
 }
+void ReachString::set_content(reach::language lang, const std::string& text) noexcept {
+   this->strings[(size_t)lang] = text;
+   this->_set_dirty();
+}
+void ReachString::set_content(reach::language lang, const char* text) noexcept {
+   this->strings[(size_t)lang] = text;
+   this->_set_dirty();
+}
+void ReachString::set_content(reach::language lang, std::string&& text) noexcept {
+   std::swap(text, this->strings[(size_t)lang]);
+   this->_set_dirty();
+}
 bool ReachString::can_be_forge_label() const noexcept {
    auto& first = this->strings[0];
    for (size_t i = 1; i < reach::language_count; i++) {
@@ -172,8 +190,10 @@ bool ReachString::empty() const noexcept {
 ReachString& ReachString::operator=(const ReachString& other) noexcept {
    this->offsets = other.offsets;
    this->strings = other.strings;
+   this->_set_dirty();
    return *this;
 }
+#pragma endregion
 
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
@@ -243,6 +263,7 @@ bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
       } else
          return false;
    }
+   this->set_dirty();
    return true;
 }
 void ReachStringTable::write(cobb::bitwriter& stream) noexcept {
@@ -301,6 +322,7 @@ ReachString* ReachStringTable::add_new() noexcept {
    if (this->is_at_count_limit())
       return nullptr;
    auto& string = *this->strings.push_back(new ReachString(*this));
+   this->set_dirty();
    return &string;
 }
 void ReachStringTable::remove(size_t index) noexcept {
@@ -309,6 +331,7 @@ void ReachStringTable::remove(size_t index) noexcept {
    if (this->strings[index].get_refcount())
       return;
    this->strings.erase(index);
+   this->set_dirty();
 }
 uint32_t ReachStringTable::total_bytecount() noexcept {
    std::string combined; // UTF-8 buffer holding all string data including null terminators
@@ -328,7 +351,7 @@ ReachString* ReachStringTable::lookup(const QString& english, bool& matched_mult
    matched_multiple = false;
    ReachString* match = nullptr;
    for (auto& string : this->strings) {
-      QString current = QString::fromUtf8(string.english().c_str());
+      QString current = QString::fromUtf8(string.get_content(reach::language::english).c_str());
       if (current == english) {
          if (match) {
             matched_multiple = true;

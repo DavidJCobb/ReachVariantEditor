@@ -121,14 +121,14 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       ReachString* name = traits->name;
       QString text;
       if (name) {
-         text = QString::fromUtf8(name->english().c_str());
+         text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
       } else {
          text = QString("Unnamed Traits %1").arg(index);
       }
       target->setText(0, text);
       ReachString* desc = traits->desc;
       if (desc)
-         target->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+         target->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
       else
          target->setToolTip(0, "");
    });
@@ -199,7 +199,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                auto& item      = list[i];
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (item.name) {
-                  formatted = formatted.arg(QString::fromUtf8(item.name->english().c_str()));
+                  formatted = formatted.arg(QString::fromUtf8(item.name->get_content(reach::language::english).c_str()));
                } else {
                   formatted = formatted.arg("");
                }
@@ -215,7 +215,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
                auto& label     = list[i];
                auto  formatted = QString("%1: %2\r\n").arg(i);
                if (label.name) {
-                  formatted = formatted.arg(QString::fromUtf8(label.name->english().c_str()));
+                  formatted = formatted.arg(QString::fromUtf8(label.name->get_content(reach::language::english).c_str()));
                } else {
                   formatted = formatted.arg("");
                }
@@ -257,10 +257,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
             return;
          }
-         bool write_offsets = true;
-         if (QMessageBox::No == QMessageBox::question(this, tr("Write offsets?"), tr("Write each string's offset within the string table's buffer? (Note: Data refers to the last file that was loaded OR SAVED.)"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No)) {
-            write_offsets = false;
-         }
          QTextStream out(&file);
          out.setCodec(QTextCodec::codecForName("UTF-8"));
          out << QString::fromUtf16(mp->variantHeader.title);
@@ -269,11 +265,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          for (size_t i = 0; i < table.strings.size(); i++) {
             auto& string = table.strings[i];
             out << "STRING #" << i << ":\r\n";
-            for (size_t j = 0; j < string.offsets.size(); j++) {
+            for (auto& str : string.languages()) {
                out << "   ";
-               if (write_offsets)
-                  out << string.offsets[j] << ": ";
-               out << QString::fromUtf8(string.strings[j].c_str()) << "\r\n";
+               out << QString::fromUtf8(str.c_str()) << "\r\n";
             }
             out << "\r\n";
          }
@@ -624,14 +618,14 @@ void ReachVariantTool::regenerateNavigation() {
                ReachString* name = traits.name;
                QString text;
                if (name) {
-                  text = QString::fromUtf8(name->english().c_str());
+                  text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
                } else {
                   text = QString("Unnamed Traits %1").arg(i);
                }
                auto item = _makeNavItemMegaloTraits(script, text, i);
                ReachString* desc = traits.desc;
                if (desc)
-                  item->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+                  item->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
             }
          }
       }

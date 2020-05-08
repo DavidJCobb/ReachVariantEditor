@@ -29,7 +29,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->language(reach::language::english);
          this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -61,7 +61,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->language(reach::language::english);
          this->ui.labelDesc->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -93,7 +93,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->language(reach::language::english);
          this->ui.labelCategory->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -133,7 +133,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.language(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }
@@ -145,7 +145,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.language(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }
@@ -157,7 +157,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.language(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }

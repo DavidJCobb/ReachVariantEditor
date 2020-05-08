@@ -64,7 +64,7 @@ LocalizedStringLibraryDialog::LocalizedStringLibraryDialog(QWidget* parent) : QD
       QString text;
       for (uint8_t i = 0; i < reach::language_count; ++i) {
          this->_makeString(text, (reach::language)i);
-         this->target->strings[i] = text.toStdString();
+         this->target->set_content((reach::language)i, text.toStdString());
       }
       this->accept();
    });

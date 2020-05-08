@@ -54,13 +54,13 @@ void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, c
    auto label = new QLabel(this);
    label->setProperty("MegaloOptionIndex", i);
    if (option.name) {
-      label->setText(QString::fromUtf8(option.name->english().c_str()));
+      label->setText(QString::fromUtf8(option.name->language(reach::language::english).c_str()));
    } else {
       label->setText(QString("Unnamed Option #%1").arg(i + 1));
    }
    layout->addWidget(label, i, 0);
    if (desc)
-      label->setToolTip(QString::fromUtf8(desc->english().c_str()));
+      label->setToolTip(QString::fromUtf8(desc->language(reach::language::english).c_str()));
    //
    if (option.isRange) {
       auto container = new QWidget(this);
@@ -78,7 +78,7 @@ void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, c
       widget->setAlignment(Qt::AlignRight);
       QObject::connect(widget, QOverload<int>::of(&QSpinBox::valueChanged), [widget](int v) { _onMegaloSliderChange(widget, v); });
       if (desc)
-         widget->setToolTip(QString::fromUtf8(desc->english().c_str()));
+         widget->setToolTip(QString::fromUtf8(desc->language(reach::language::english).c_str()));
       //
       auto labelMin = new QLabel(container);
       labelMin->setText(QString::fromUtf8(u8"%1 \u2264 ").arg(option.rangeMin->value));
@@ -99,7 +99,7 @@ void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, c
       for (uint32_t j = 0; j < option.values.size(); j++) {
          auto& value = *option.values[j];
          if (value.name) {
-            combo->addItem(QString::fromUtf8(value.name->english().c_str()), (int16_t)value.value);
+            combo->addItem(QString::fromUtf8(value.name->language(reach::language::english).c_str()), (int16_t)value.value);
          } else {
             combo->addItem(QString(value.value), (int16_t)value.value);
          }
@@ -111,7 +111,7 @@ void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, c
       //
       QObject::connect(combo, QOverload<int>::of(&QComboBox::currentIndexChanged), [combo](int v) { _onMegaloComboboxChange(combo, v); });
       if (desc)
-         combo->setToolTip(QString::fromUtf8(desc->english().c_str()));
+         combo->setToolTip(QString::fromUtf8(desc->language(reach::language::english).c_str()));
       label->setBuddy(combo);
    }
 }

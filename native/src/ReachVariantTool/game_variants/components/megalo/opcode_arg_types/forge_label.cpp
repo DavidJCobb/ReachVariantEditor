@@ -56,7 +56,7 @@ namespace Megalo {
          cobb::sprintf(out, "label index %u", f->index);
          return;
       }
-      out = f->name->english();
+      out = f->name->language(reach::language::english);
    }
    void OpcodeArgValueForgeLabel::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachForgeLabel* f = this->value;
@@ -67,7 +67,7 @@ namespace Megalo {
       std::string temp;
       if (f->name) {
          ReachString* name = f->name;
-         auto english = name->english();
+         auto english = name->language(reach::language::english);
          auto data    = english.c_str();
          if (!english.empty()) {
             //
@@ -94,7 +94,7 @@ namespace Megalo {
             ReachString* name = label.name;
             if (!name)
                continue;
-            QString english = QString::fromUtf8(name->english().c_str());
+            QString english = QString::fromUtf8(name->language(reach::language::english).c_str());
             if (english == str) {
                if (index != -1) {
                   QString lit = Script::string_scanner::escape(str, '"');
