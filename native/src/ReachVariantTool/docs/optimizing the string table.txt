@@ -1,0 +1,170 @@
+﻿
+Before we can discuss how text is stored in a game variant, we need to define our terms. 
+Accordingly:
+
+   A "ReachString" is a single entry in the string table, consisting of multiple pieces of 
+   text. Each piece of text expresses the same meaning, but is in a different language.
+
+   A "localization" is one of the pieces of text in a ReachString.
+
+The string table consists of two elements. The first is a list of ReachString metadata; 
+the second (the "buffer") is a massive blob of null-terminated strings written one after 
+another. The ReachString metadata consists of one offset per localization indicating the 
+start position (within the buffer) of that localization's content; when the localization 
+is loaded by the game, data is copied out of the buffer beginning at that offset and 
+ending at the next null terminator.
+
+As such, the naive approach to serializing string data into a game variant is to write 
+every single localization in every single ReachString end-to-end. (For legibility's sake, 
+I will be using line breaks instead of null terminators, and indenting the strings.)
+
+   Invasion: Boneyard
+   Invasion: Boneyard
+   Invasion: Knochenacker
+   Invasion : Ossuaire
+   Invasión: Cementerio
+   Invasión: Cementerio
+   Invasione: Il deposito
+   Invasion: Boneyard
+   入侵：Boneyard
+   Invasão: Cemitério
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+   invasion
+
+Those are the first two ReachStrings in Invasion: Boneyard: the gametype name, and the 
+first Forge label. You can see that there's a considerable amount of duplicate content, 
+and that may seem less than ideal. I assure you that it's actually worse. Let's look at 
+a ReachString from Alpha Zombies:
+
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+   Zombies
+
+That string isn't actually in Alpha Zombies' main string table. Instead, it's used to 
+override the name of Team 2 (ordinarily Blue Team). Every team has its own miniature 
+string table capable of holding only a single string, and crucially, the maximum 
+number of bytes that these mini-tables can hold is 32, including any null terminators. 
+That means that if we were to serialize every localization in that string, we'd easily 
+blow past what the string table can actually hold.
+
+Accordingly, Bungie implemented a very simple optimization, which applies to team 
+names by necessity and to Forge labels by happenstance: if every localization in a 
+ReachString is identical, then only one of them needs to be written to the buffer. All 
+of the localizations in that ReachString can share an offset and consequently share 
+buffer space. For that Alpha Zombies team name, "Zombies" is only written into the 
+team name string table's buffer one time, consuming eight bytes (remember the null 
+terminator) of the thirty-two available.
+
+But this is still not ideal. Looking back at the "Invasion: Boneyard" gametype name 
+string from above, you'll see that Japanese and Korean reuse the English text, while 
+Spanish and Spanish (Latin American) share text with each other. However, because the 
+text isn't exactly identical across all languages, Bungie's compiler doesn't optimize 
+it: each localization is written out independently, and so buffer space is wasted as 
+three identical copies of "Invasion: Boneyard" and two identical copies of the text 
+"Invasión: Cementerio" are written.
+
+This is easy to optimize: when serializing an individual localization, check if it 
+already exists inside of the buffer; if so, reuse that offset. KSoft.Tool uses this 
+optimization, allowing for larger modded gametype scripts than Bungie's compiler; my 
+own ReachVariantTool implemented a similar optimization for compatibility. KSoft's 
+approach is to create a "string memory pool" class akin to a std::set<std::string>, 
+while my approach was to just write the localizations to a combined std::string 
+(taking care to manually add the null terminators as needed); checking whether the 
+combined std::string already had a given string was as simple as iterating over it, 
+looking for null terminators, and checking whether the distance from the current 
+null terminator to the previous was equal to the length of the string about to be 
+added.
+
+This optimization is necessary to facilitate the resaving of "SvE Mythic Slayer," a 
+modded gametype with a script large enough to exceed filesize limits if the string 
+table only receives Bungie-level optimizations.
+
+However, at this stage, we can still do better. Identical strings can share space 
+in the buffer, because they can start at the same offset and end at the same null 
+terminator. However, if one string is identical to the end of another, larger, 
+string, then those, too, can share space at the buffer. If we write the larger 
+string out first, then the smaller string can have its offset placed after the 
+beginning of the string inside of the buffer. In other words, the following two 
+strings can be overlapped:
+
+    5 points
+   15 points
+
+This is because they are "anchored" at the null terminator:
+
+    5 points\0
+   15 points\0
+
+However, applying this optimization properly requires us to guarantee that the 
+larger localization will be written before the smaller localization. As such, we 
+need to pre-sort the localizations before saving. Since we're already pre-sorting 
+the localizations, we may as well sort them by content first and by length second, 
+so that each "suffix" string is directly next to the "superstring" it matches. What 
+makes this somewhat tricky is the need to sort the strings by their ends rather than 
+their beginnings; if normal alphabetical sorting looks like this:
+
+   applet
+   application
+   hoopla
+   station
+   substation
+
+Then what we need is this:
+
+        hoopla
+   application
+    substation
+       station
+        applet
+
+A sorting function which produces those results (or similar enough results) is easy 
+to implement. As for the mechanics of sorting localizations individually, apart from 
+their containing ReachStrings: we can accomplish this by constructing a list of 
+pairs of ReachString* pointers and language identifiers.
+
+Bungie's official Alpha Zombies release contains 0x2D10 bytes of hashable content in 
+the MPVR block. When resaved through ReachVariantTool with the first non-Bungie 
+optimization described above, it contains 0x2C4E bytes. When resaved with the last 
+optimization described, it contains 0x2AC4 bytes. This represents a savings of 588 
+bytes over Bungie's tools, with 394 bytes of savings attributable directly to the 
+"suffix" optimization.
+
+Most of the savings come from Custom Game option values. In particular, anything 
+with a unit, like "5 Points" or "10 Minutes", is eligible for savings so long as 
+there exists either a negative counterpart
+
+    1 Point
+   -1 Point
+
+or a counterpart with the same terminal digit.
+
+    5 Points
+   15 Points
+
+Halo: Reach supports twelve languages for localization, but official Bungie game 
+variants only use ten of these. Almost all languages place the unit of measurement 
+on the end, with the only exception I've seen being Alpha Zombies' "Zombie Count" 
+option in Japanese (which is formatted as "Zombies x 5"). (Japanese still places 
+the unit on the end for units of time and for points.) As such, this optimization 
+produces benefits for all officially supported languages in almost all cases: 
+optimizing out a redundant copy of the byte sequence "5 Points" doesn't seem like 
+a lot, but the actual savings is very roughly ten times that.

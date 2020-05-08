@@ -149,9 +149,24 @@ class ReachStringTable {
       void* _make_buffer(cobb::ibitreader&) const noexcept; // for reading
       void  _set_not_dirty() noexcept;
       //
+      struct _sort_pair {
+         ReachString*    entry    = nullptr;
+         reach::language language = reach::language::not_a_language;
+         //
+         _sort_pair() {}
+         _sort_pair(ReachString* s, reach::language l) : entry(s), language(l) {}
+         int compare(const _sort_pair& other) const noexcept;
+      };
       struct {
          cobb::bitwriter raw;
+         std::vector<_sort_pair> pairs;
+         uint32_t uncompressed_size = 0;
       } cached_export;
+      //
+      void _remove_from_sorted_pairs(ReachString*);
+      void _ensure_sort_pairs_for(ReachString*);
+      void _ensure_sort_pairs_for_all_strings();
+      void _sort_all_pairs();
       //
    public:
       bool read(cobb::ibitreader&) noexcept;

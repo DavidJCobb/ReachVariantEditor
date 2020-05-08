@@ -37,9 +37,9 @@ namespace cobb {
          inline uint32_t get_bytepos()  const noexcept { return this->_bitpos / 8; };
          inline uint32_t get_bytespan() const noexcept {
             //
-            // "Bytepos" is the byte we're currently reading from, i.e. the number of 
-            // entire bytes we've read. "Bytespan" is the number of all bytes that 
-            // we've read any bits from.
+            // "Bytepos" is the byte we're currently writing to, i.e. the number of 
+            // entire bytes we've written. "Bytespan" is the number of all bytes that 
+            // we've written any bits to.
             //
             return this->get_bytepos() + (this->get_bitshift() ? 1 : 0);
          }
@@ -123,5 +123,7 @@ namespace cobb {
          }
          //
          void write_compressed_float(float value, const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept;
+         //
+         void write_stream(const bitwriter& other) noexcept;
    };
 }

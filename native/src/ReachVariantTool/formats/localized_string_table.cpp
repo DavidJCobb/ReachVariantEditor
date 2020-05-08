@@ -3,11 +3,12 @@ extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 #include "../game_variants/errors.h"
+#include "../helpers/strings.h"
 
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1 // Only optimize single-language strings (Bungie approach)
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2 // If two strings are exactly identical in their entirety, overlap them
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // If one string is exactly identical to the end of another, overlap them (my approach; needs revision for performance)
-#define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
+#define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
 
 
 //
@@ -119,42 +120,6 @@ void ReachString::write_strings(std::string& out) noexcept {
             continue;
          }
       #endif
-      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
-         //
-         // If one string is identical to the end of another string, then they can be overlapped: 
-         // the longer string can be encoded in the string table, and the shorter string can 
-         // reference its end.
-         //
-         // In practice, we can't do that from here; what we would have to do instead is gather 
-         // every string into a pool with a reference to the (offsets) value in its owner, and 
-         // then compare every string to see which strings are suffixes of other strings. This 
-         // is necessary to avoid situations where the shorter string is written to the buffer 
-         // first and therefore misses out on optimization.
-         //
-         // Moreover, the performance on this is really bad as-is precisely because we're just 
-         // scanning into a buffer, blindly, and we can only even do a string comparison once 
-         // we find a null char.
-         //
-         this->offsets[i] = -1;
-         size_t j = 0; // current  null char index
-         size_t k = 0; // previous null char index
-         size_t size = s.size();
-         for (; j < out.size(); j++) {
-            if (out[j] != '\0')
-               continue;
-            if (j - k >= size) {
-               const char* start = out.data() + j - size;
-               if (strncmp(s.data(), start, size) == 0) {
-                  this->offsets[i] = j - s.size();
-                  break;
-               }
-            }
-            k = j;
-         }
-         if (this->offsets[i] >= 0) {
-            continue;
-         }
-      #endif
       this->offsets[i] = out.size();
       out += s;
       out += '\0';
@@ -194,6 +159,83 @@ ReachString& ReachString::operator=(const ReachString& other) noexcept {
    return *this;
 }
 #pragma endregion
+
+
+int ReachStringTable::_sort_pair::compare(const _sort_pair& other) const noexcept {
+   constexpr int before = -1;
+   constexpr int equal  =  0;
+   constexpr int after  =  1;
+   //
+   // -1 = put us before the other
+   //  0 = we equal the other
+   //  1 = put us after the other
+   //
+   // Goal: Sort strings alphabetically but with a reverse iterator over the string 
+   // content; if one string is exactly equal to the end of another string, put the 
+   // substring last.
+   //
+   if (!this->entry)
+      return -1;
+   if (!other.entry)
+      return  1;
+   auto&  a  = this->entry->get_content(this->language);
+   auto&  b  = other.entry->get_content(other.language);
+   size_t sa = a.size();
+   size_t sb = b.size();
+   if (sa == 0)
+      return after;
+   if (sb == 0)
+      return before;
+   size_t s = sa <= sb ? sa : sb;
+   for (size_t i = 0; i < s; ++i) {
+      QChar ca = a[sa - i - 1];
+      QChar cb = b[sb - i - 1];
+      if (ca < cb)
+         return before;
+      if (ca > cb)
+         return after;
+   }
+   if (sa == sb)
+      return equal;
+   if (sa < sb)
+      return after;
+   return before;
+}
+
+void ReachStringTable::_remove_from_sorted_pairs(ReachString* target) {
+   auto& list = this->cached_export.pairs;
+   list.erase(std::remove_if(list.begin(), list.end(), [target](const _sort_pair& p) { return p.entry == target; }), list.end());
+}
+void ReachStringTable::_ensure_sort_pairs_for(ReachString* subject) {
+   constexpr uint8_t  max_language = reach::language_count - 1;
+   constexpr uint16_t all = cobb::bitmax(cobb::bitcount(max_language));
+   //
+   uint16_t mask = 0;
+   static_assert(max_language <= cobb::bits_in<decltype(all)>,  "Use a larger type to hold (all).");
+   static_assert(max_language <= cobb::bits_in<decltype(mask)>, "Use a larger type to hold (mask).");
+   //
+   for (auto& pair : this->cached_export.pairs) {
+      if (pair.entry != subject)
+         continue;
+      mask |= 1 << (uint8_t)pair.language;
+   }
+   if (mask == all)
+      return;
+   //
+   for (uint8_t i = 0; i < reach::language_count; ++i) {
+      if (mask & (1 << i))
+         continue;
+      this->cached_export.pairs.emplace_back(subject, (reach::language)i);
+   }
+}
+void ReachStringTable::_ensure_sort_pairs_for_all_strings() {
+   for (auto& str : this->strings)
+      this->_ensure_sort_pairs_for(&str);
+}
+void ReachStringTable::_sort_all_pairs() {
+   auto& list = this->cached_export.pairs;
+   std::sort(list.begin(), list.end(), [](const _sort_pair& a, const _sort_pair& b) { return a.compare(b) < 0; });
+}
 
 bool ReachStringTable::_check_dirty() const noexcept {
    if (this->dirty)
@@ -299,19 +341,61 @@ ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
    //    are relative to the start of this buffer's uncompressed content.
    //
    auto& stream = this->cached_export.raw;
-   stream.resize(0);
+   stream.resize(0); // clear the cached data
+   this->cached_export.uncompressed_size = 0;
    //
    stream.write(this->strings.size(), this->count_bitlength);
+   std::string combined; // UTF-8 buffer holding all string data including null terminators
    if (!this->strings.size()) {
       this->_set_not_dirty();
       return save_error::none;
    }
-   std::string combined; // UTF-8 buffer holding all string data including null terminators
-   for (auto& string : this->strings) {
-      string.write_strings(combined);
-      string.write_offsets(stream, *this);
-   }
+   //
+   #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
+      //
+      // If one string is identical to the end of another string, then they can be overlapped: 
+      // the longer string can be encoded in the string table, and the shorter string can 
+      // reference its end. For example, "15 points" and "5 points" can share buffer space.
+      //
+      // Applying this optimization requires that we pre-sort strings to ensure that the 
+      // longest strings get written first. Since we have to sort strings, we may as well do 
+      // a "real" sort by content, not just by length; this will ensure that each "suffix" 
+      // string is directly next to the string that it is a suffix of, making it easier to 
+      // actually write the strings out once the sort is complete.
+      //
+      this->_ensure_sort_pairs_for_all_strings();
+      this->_sort_all_pairs();
+      //
+      std::string last_written;
+      int32_t     last_offset = -1;
+      for (auto& pair : this->cached_export.pairs) {
+         auto& entry  = *pair.entry;
+         auto& text   = entry.get_content(pair.language);
+         auto& offset = entry.offsets[(size_t)pair.language];
+         if (text.empty() && offset == -1) // don't write empty strings for optional languages
+            continue;
+         if (cobb::string_ends_with(last_written, text)) { // last_written.ends_with(text)
+            offset = last_offset;
+            continue;
+         }
+         offset = combined.size();
+         combined += text;
+         combined += '\0';
+         last_written = text;
+         last_offset  = offset;
+      }
+      for (auto& string : this->strings) {
+         string.write_offsets(stream, *this);
+      }
+   #else
+      for (auto& string : this->strings) {
+         string.write_strings(combined);
+         string.write_offsets(stream, *this);
+      }
+   #endif
+   //
    uint32_t uncompressed_size = combined.size();
+   this->cached_export.uncompressed_size = uncompressed_size;
    if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
       #if _DEBUG
          __debugbreak();
@@ -380,17 +464,16 @@ ReachString* ReachStringTable::add_new() noexcept {
 void ReachStringTable::remove(size_t index) noexcept {
    if (index >= this->size())
       return;
-   if (this->strings[index].get_refcount())
+   auto target = &this->strings[index];
+   if (target->get_refcount())
       return;
    this->strings.erase(index);
    this->set_dirty();
+   this->_remove_from_sorted_pairs(target);
 }
 uint32_t ReachStringTable::total_bytecount() noexcept {
-   std::string combined; // UTF-8 buffer holding all string data including null terminators
-   for (auto& string : this->strings) {
-      string.write_strings(combined);
-   }
-   return combined.size();
+   this->generate_export_data();
+   return this->cached_export.uncompressed_size;
 }
 ReachString* ReachStringTable::get_empty_entry() const noexcept {
    for (auto& string : this->strings) {

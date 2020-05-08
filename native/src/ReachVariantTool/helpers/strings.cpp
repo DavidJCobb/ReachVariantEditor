@@ -204,4 +204,11 @@ namespace cobb {
       }
       return true;
    }
+   bool string_ends_with(const std::string& haystack, const std::string& suffix) noexcept {
+      size_t h = haystack.size();
+      size_t s = suffix.size();
+      if (s > h)
+         return false;
+      return haystack.compare(h - s, std::string::npos, suffix, 0, std::string::npos) == 0;
+   }
 }
