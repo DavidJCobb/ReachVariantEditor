@@ -18,8 +18,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string>
 
 namespace cobb {
-   void sprintf(std::string& out, const char* format, ...);
-   int  strieq(const std::string& a, const std::string& b);
+   extern void sprintf(std::string& out, const char* format, ...);
+   extern int  strieq(const std::string& a, const std::string& b);
    //
    extern bool string_says_false(const char* str); // the string spells the case-insensitive word "false", ignoring whitespace
    extern bool string_to_int(const char* str, int32_t& out, bool allowHexOrDecimal = false); // returns true if it's a valid integer and no non-whitespace follows the number; out is not modified otherwise

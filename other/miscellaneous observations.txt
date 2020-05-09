@@ -154,7 +154,7 @@ Neither failure mode was caught when testing counter values up to 5000.
 
 ---
 
-If you attempt to attach an object to a Warthog, near one of its corners, the object may 
-attach to the nearest Warthog tire specifically; it will rotate about that tire's center 
-as the vehicle is driven.
+If you attempt to attach an object to a Warthog, it may instead attach to the nearest 
+animated part of the Warthog and rotate with that individual part. Observed attachments 
+include all four tires and the Warthog's steering wheel.
 

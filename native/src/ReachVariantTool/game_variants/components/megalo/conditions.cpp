@@ -34,7 +34,7 @@ namespace Megalo {
       ),
       ConditionFunction( // 2
          "Object In Boundary",
-         "Checks whether one object is inside of another object's Shape. Note that this is a centerpoint check. If, for example, you check whether a shape contains a Warthog, the check will pass only when the Warthog's centerpoint is inside of the shape.",
+         "Checks whether one object is inside of another object's Shape. Note that this is a centerpoint check. If, for example, you check whether a shape contains a Warthog, the check will pass only when the Warthog's centerpoint is inside of the shape. If this check is run on an attached object, it will instead test the centerpoint of the parent object; for example, if A is attached to B, then A will only count as being in C's shape when B's centerpoint is in C's shape, regardless of the position of A's centerpoint.",
          "%1 %v inside of %2's shape.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),

@@ -7,9 +7,8 @@ extern "C" {
 
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1 // Only optimize single-language strings (Bungie approach)
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2 // If two strings are exactly identical in their entirety, overlap them
-#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // If one string is exactly identical to the end of another, overlap them (my approach; needs revision for performance)
-#define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
-
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // [not supported by MCC] If one string is exactly identical to the end of another, overlap them
+#define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
 
 //
 // Notes on Bungie's string table compression:
@@ -374,10 +373,19 @@ ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
          auto& offset = entry.offsets[(size_t)pair.language];
          if (text.empty() && offset == -1) // don't write empty strings for optional languages
             continue;
-         if (cobb::string_ends_with(last_written, text)) { // last_written.ends_with(text)
-            offset = last_offset + (last_written.size() - text.size());
-            continue;
-         }
+         #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
+            if (last_written == text) {
+               offset = last_offset;
+               continue;
+            }
+         #else
+            #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
+               if (cobb::string_ends_with(last_written, text)) { // last_written.ends_with(text)
+                  offset = last_offset + (last_written.size() - text.size());
+                  continue;
+               }
+            #endif
+         #endif
          offset = combined.size();
          combined += text;
          combined += '\0';

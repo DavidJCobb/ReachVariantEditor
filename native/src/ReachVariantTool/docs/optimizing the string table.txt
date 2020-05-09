@@ -98,13 +98,21 @@ This optimization is necessary to facilitate the resaving of "SvE Mythic Slayer,
 modded gametype with a script large enough to exceed filesize limits if the string 
 table only receives Bungie-level optimizations.
 
-However, at this stage, we can still do better. Identical strings can share space 
-in the buffer, because they can start at the same offset and end at the same null 
-terminator. However, if one string is identical to the end of another, larger, 
-string, then those, too, can share space at the buffer. If we write the larger 
-string out first, then the smaller string can have its offset placed after the 
-beginning of the string inside of the buffer. In other words, the following two 
-strings can be overlapped:
+There is an additional optimization that we could undertake at this stage. Sadly, 
+files which use it are misinterpreted by MCC as being corrupt; it is unknown how 
+Reach itself would react to them. Still, I'm going to describe the optimization in 
+full just because I'm sure someone else will think of it, and I'm going to describe 
+the space benefits it could have yielded in the hopes that my disappointment comes 
+through in the text.
+
+So, then. The "suffix" optimization.
+
+Identical strings can share space in the buffer, because they can start at the same 
+offset and end at the same null terminator. However, if one string is identical to 
+the end of another, larger, string, then those, too, can share space at the buffer. 
+If we write the larger string out first, then the smaller string can have its offset 
+placed after the beginning of the string inside of the buffer. In other words, the 
+following two strings can be overlapped:
 
     5 points
    15 points
