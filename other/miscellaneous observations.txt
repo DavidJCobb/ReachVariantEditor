@@ -45,6 +45,8 @@ and detaching a biped will instantly force it out of any vehicle it is currently
 
 Detaching a player's held weapons will remove those weapons from them.
 
+---
+
 Detaching a player's equipped Armor Ability will not remove it from them; however, it 
 will stop moving in synch with them. At this point it can be moved independently of them 
 without them losing it (though I've not tested independently moving it out of bounds); 
@@ -58,7 +60,9 @@ their carrying player dies.
  - An active camo moved in this manner will no longer turn invisible with its carrying 
    player. The radar-jamming effect comes from the armor ability object itself, so 
    detaching the ability from the player's back will cause the radar jammer to no longer 
-   follow them.
+   follow their movement.
+
+---
 
 Attaching a biped to an object will lock the biped in place. If the biped is controlled 
 by the player, they will be able to turn but not to move, and their first-person legs 
@@ -149,4 +153,8 @@ checks which were designed to catch the following failure modes:
 Neither failure mode was caught when testing counter values up to 5000.
 
 ---
+
+If you attempt to attach an object to a Warthog, near one of its corners, the object may 
+attach to the nearest Warthog tire specifically; it will rotate about that tire's center 
+as the vehicle is driven.
 

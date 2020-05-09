@@ -375,7 +375,7 @@ ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
          if (text.empty() && offset == -1) // don't write empty strings for optional languages
             continue;
          if (cobb::string_ends_with(last_written, text)) { // last_written.ends_with(text)
-            offset = last_offset;
+            offset = last_offset + (last_written.size() - text.size());
             continue;
          }
          offset = combined.size();
