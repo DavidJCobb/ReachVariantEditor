@@ -200,18 +200,9 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
-//        - Deleting a player's biped instantly respawns the player. Does it deduct from 
-//          their pool of lives (or that of their team) in limited-life game variants?
-//
 //        - Test the "reset round" flags -- specifically, test what happens when they're 
 //          turned off. (This isn't related to Megalo but oh well, this is my in-game test 
 //          list now)
-//
-//        - Test how many times per second a script runs.
-//
-//        - Can we force a biped into a vehicle by spawning the biped, forcing a player 
-//          into the biped, forcing the player into a vehicle, and then forcing the player 
-//          back into their original biped? Do they witness any side-effects?
 //
 //        - What happens if we attach the player to an object that is destroyed or equipped 
 //          on contact (e.g. a powerup, a landmine; an armor ability or weapon when they 
@@ -252,47 +243,19 @@ int main(int argc, char *argv[]) {
 //             timer (which we know from vanilla scripts is valid) and of assigning a 
 //             timer to a number (which I don't remember seeing in vanilla content).
 //
+//     = POSSIBLE COMPILER ENHANCEMENTS
+//
+//        - #pragma: region
+//          #pragma: region: [name]
+//          #pragma: endregion
+//
+//        - #pragma: same-scope alias shadowing: [warn|error] on [alias name]
+//
 //     = GAMETYPE PLANS
 //
 //        - Vanilla+
 //
-//           - Race+
-//
-//              - object.shape_contains only tests the centerpoints of vehicles (and 
-//                possibly all objects including bipeds); this means that checkpoints 
-//                and landmines don't react as accurately to large vehicles, to the 
-//                point that especially large vehicles (e.g. sabres and some civilian 
-//                vehicles) can render a race unplayable.
-//
-//                My solution to this is to spawn and attach Hill Markers to each 
-//                vehicle, and test whether the vehicle, the biped, or any of the 
-//                vehicle's Hill Markers (hereafter: "nodes") are inside of a shape. 
-//                Each vehicle will need a custom assortment of nodes:
-//
-//                 - Warthogs and civilian vehicles will need four nodes: one at each 
-//                   lower corner of the vehicle. The units in Megalo seem to be 
-//                   whole Forge units, so precise positioning may be difficult.
-//
-//                    - We also have object.place_between_me_and, but KSoft.Tool 
-//                      recently renamed that to "create tunnel." We need to test it 
-//                      so we can figure out what that even means; if it indeed 
-//                      creates an object equidistant between two existing objects, 
-//                      then we can use it for sub-unit positioning.
-//
-//                 - A Sabre's nodes will form a rough triangle shape, with nodes at 
-//                   the midpoints of each edge. We can't place a Sabre in Forge, so 
-//                   we can't easily plan this out; fortunately, nodes can be any 
-//                   immobile object, so we can simply spawn something visible and 
-//                   trial-and-error our way to victory.
-//
-//                 - If we store the nodes as a linked list, then we can use fewer 
-//                   variables. A recursive user-defined function could be used to 
-//                   compare a shape boundary against any vehicle and its nodes.
-//
-//              - Edit the variant settings to have the mine proximity set to 10 feet. 
-//                Do this in the main window, not the script editor window; the script 
-//                editor window already flags that value as the default but that won't 
-//                override the already-chosen value.
+//           - Halo Chess+
 //
 //           - Infection+
 //

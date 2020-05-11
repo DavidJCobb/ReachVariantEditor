@@ -1905,16 +1905,20 @@ namespace Megalo {
          //
          auto target_type = assign_to->get_type();
          if (&base.typeinfo != target_type) {
+            QString context_name = "";
+            if (context)
+               context_name = QString("%1.").arg(context->get_type()->internal_name.c_str());
+            //
             if (target_type) {
-               this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
-                  .arg(context->get_type()->internal_name.c_str())
+               this->raise_error(call_start, QString("Function %1%2 returns a %3, not a %4.")
+                  .arg(context_name)
                   .arg(function_name)
                   .arg(base.typeinfo.internal_name.c_str())
                   .arg(target_type->internal_name.c_str())
                );
             } else {
-               this->raise_error(call_start, QString("Function %1.%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
-                  .arg(context->get_type()->internal_name.c_str())
+               this->raise_error(call_start, QString("Function %1%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
+                  .arg(context_name)
                   .arg(function_name)
                   .arg(base.typeinfo.internal_name.c_str())
                );

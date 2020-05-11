@@ -156,5 +156,29 @@ Neither failure mode was caught when testing counter values up to 5000.
 
 If you attempt to attach an object to a Warthog, it may instead attach to the nearest 
 animated part of the Warthog and rotate with that individual part. Observed attachments 
-include all four tires and the Warthog's steering wheel.
+include all four tires and the Warthog's steering wheel. Distance didn't appear to 
+affect the result; in my tests, a bomb attached to exactly 2.0 Forge units (20 Megalo 
+units) above a Warthog anchored to the Warthog's steering wheel. My recommendation is to 
+attach a "basis" object to (0, 0, 0) on the vehicle, and then attach all relative objects 
+to that basis.
+
+I set up a test to measure how many times per second a Megalo script runs. When run on my 
+machine, locally, as part of a simple test variant, it registered 61 executions per second.
+
+You can force a player into a biped while the initial loadout camera is playing, and they 
+will be able to play.
+
+If necessary, you can spawn a biped inside of a vehicle by spawning the biped, forcing a 
+player to control it, forcing the player into the vehicle, and then returning the player 
+to their original biped. However, there will be a brief cut to black for that player; they 
+will notice the loss of control.
+
+When a player attempts to enter an unoccupied seat in a vehicle, they perform an animation, 
+but as far as the game is concerned, their position is instantly moved to that of the seat. 
+If you write a script to delete any player biped that enters a volume, and place the volume 
+to cover the turret on a Warthog, a player will be deleted and respawned the very instant 
+they interact with the turret, before any animation can play.
+
+Moving an Initial Loadout Camera object during the loadout camera period will not update 
+the game camera's position in real-time; you can't animate the loadout camera.
 

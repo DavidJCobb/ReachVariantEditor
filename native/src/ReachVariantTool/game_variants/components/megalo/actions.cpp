@@ -49,7 +49,7 @@ namespace Megalo {
       ),
       ActionFunction( // 3
          "Delete Object",
-         "Delete an object.",
+         "Delete an object. If the deleted object is a player's current biped, then the player will respawn instantly; in limited-life game variants, they will not lose a life as a result of the deletion. Deleting a player's biped repeatedly for a prolonged period of time will cause the screen to cut to black for them; no HUD widgets will be visible, and most sounds will not be audible.",
          "Delete %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -267,7 +267,7 @@ namespace Megalo {
       ),
       ActionFunction( // 25
          "Random Number",
-         "Set a number variable to a random value.",
+         "Set a number variable to a random value greater than or equal to zero and less than the provided cap (i.e. [0, cap) as the range).",
          "Set %2 to a random number greater than or equal to 0 and less than %1.",
          {
             OpcodeArgBase("cap",    OpcodeArgValueScalar::typeinfo),
@@ -294,7 +294,7 @@ namespace Megalo {
       ),
       ActionFunction( // 28
          "Get Speed",
-         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero. The unit of measurement seems to be feet per second; Race multiplies by 100 and then divides by 109 to convert to kilometers per hour.",
+         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero. The unit of measurement seems to be feet per second; Race multiplies by 109 and then divides by 100 to convert to kilometers per hour.",
          "Set integer %2 to the current speed of %1 multiplied by 10.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
