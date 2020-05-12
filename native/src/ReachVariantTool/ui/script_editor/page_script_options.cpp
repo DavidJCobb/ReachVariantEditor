@@ -124,18 +124,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             QMessageBox::information(this, tr("Cannot add option"), tr("Game variants cannot have more than %1 options.").arg(Megalo::Limits::max_script_options));
             return;
          }
-         this->targetOption = list.emplace_back();
-         this->targetOption->is_defined = true;
-         auto value = this->targetOption->add_value(); // enum-options must have at least one value
-         {  // If possible, default the new option's name and description to an empty string; ditto for its value
-            auto str = mp->scriptData.strings.get_empty_entry();
-            if (str) {
-               this->targetOption->name = str;
-               this->targetOption->desc = str;
-               value->name = str;
-               value->desc = str;
-            }
-         }
+         this->targetOption = mp->create_script_option();
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
@@ -147,15 +136,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptData.options;
-         auto  index = list.index_of(this->targetOption);
-         if (index < 0)
-            return;
-         if (index == 0) // can't move the first item up
-            return;
-         list.swap_items(index, index - 1);
-         this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionsModified();
+         auto index = this->targetOption->index;
+         #if _DEBUG
+            assert(index >= 0 && "Script Editor: Options: Move Up: Target option doesn't know its index?");
+         #else
+            if (index < 0)
+               return;
+         #endif
+         if (mp->swap_script_options(index, index - 1)) {
+            this->updateOptionsListFromVariant();
+            ReachEditorState::get().scriptOptionsModified();
+         }
       });
       QObject::connect(this->ui.buttonOptionsMoveDown, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
@@ -164,15 +155,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptData.options;
-         auto  index = list.index_of(this->targetOption);
-         if (index < 0)
-            return;
-         if (index == list.size() - 1) // can't move the last item down
-            return;
-         list.swap_items(index, index + 1);
-         this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionsModified();
+         auto index = this->targetOption->index;
+         #if _DEBUG
+            assert(index >= 0 && "Script Editor: Options: Move Up: Target option doesn't know its index?");
+         #else
+            if (index < 0)
+               return;
+         #endif
+         if (mp->swap_script_options(index, index + 1)) {
+            this->updateOptionsListFromVariant();
+            ReachEditorState::get().scriptOptionsModified();
+         }
       });
       QObject::connect(this->ui.buttonOptionsDelete, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
@@ -189,7 +182,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  index = list.index_of(this->targetOption);
          if (index < 0)
             return;
-         list.erase(index);
+         mp->delete_script_option(this->targetOption);
          size_t size = list.size();
          if (size) {
             if (index >= size)

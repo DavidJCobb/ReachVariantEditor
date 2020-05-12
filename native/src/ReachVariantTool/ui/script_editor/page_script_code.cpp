@@ -4,6 +4,25 @@
 #include <QListWidget>
 #include <QTextBlock>
 
+namespace {
+   static const QString ce_icon_success = ":/ScriptEditor/compiler_log/success.png";
+   static const QString ce_icon_warning = ":/ScriptEditor/compiler_log/warning.png";
+   static const QString ce_icon_error   = ":/ScriptEditor/compiler_log/error.png";
+   static const QString ce_icon_fatal   = ":/ScriptEditor/compiler_log/fatal.png";
+   //
+   enum class _icon_type {
+      unknown = 0,
+      success,
+      warning,
+      error,
+      fatal,
+   };
+   constexpr int role_offset = Qt::ItemDataRole::UserRole + 0;
+   constexpr int role_line   = Qt::ItemDataRole::UserRole + 1;
+   constexpr int role_col    = Qt::ItemDataRole::UserRole + 2;
+   constexpr int role_icon   = Qt::ItemDataRole::UserRole + 3;
+}
+
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
@@ -60,17 +79,29 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
       this->ui.compileLog->copyAllToClipboard();
    });
    this->ui.compileLog->setCopyTransformFunctor([](QString& out, QListWidgetItem* item) {
-      int line = item->data(Qt::ItemDataRole::UserRole + 1).toInt();
-      int col  = item->data(Qt::ItemDataRole::UserRole + 2).toInt();
+      switch ((_icon_type)item->data(role_icon).toInt()) {
+         case _icon_type::success:
+            out.prepend("[GOOD!] ");
+            break;
+         case _icon_type::warning:
+            out.prepend("[WARN!] ");
+            break;
+         case _icon_type::error:
+            out.prepend("[ERROR] ");
+            break;
+         case _icon_type::fatal:
+            out.prepend("[FATAL] ");
+            break;
+      }
+      //
+      int line = item->data(role_line).toInt();
+      int col  = item->data(role_col).toInt();
       if (line < 1 || col < 0)
          return;
-      //
-      // TODO: Prepend "warning", "error", or "fatal" based on the item's icon, too.
-      //
       out.prepend(QString("Line %1 col %2: ").arg(line).arg(col));
    });
    QObject::connect(this->ui.compileLog, &QListWidget::itemDoubleClicked, [this](QListWidgetItem* item) {
-      int line = item->data(Qt::ItemDataRole::UserRole + 1).toInt();
+      int line = item->data(role_line).toInt();
       if (line < 1)
          return;
       --line;
@@ -96,14 +127,21 @@ void ScriptEditorPageScriptCode::redrawLog() {
    //
    const QSignalBlocker blocker(widget);
    widget->clear();
+   //
+   auto ico_success = QIcon(ce_icon_success);
+   auto ico_warning = QIcon(ce_icon_warning);
+   auto ico_error   = QIcon(ce_icon_error);
+   auto ico_fatal   = QIcon(ce_icon_fatal);
+   //
    if (this->ui.compileLogFilterWarn->isChecked()) {
       for (auto& entry : this->_lastWarnings) {
          auto item = new QListWidgetItem;
          item->setText(entry.text);
-         item->setData(Qt::ItemDataRole::UserRole + 0, entry.pos.offset);
-         item->setData(Qt::ItemDataRole::UserRole + 1, entry.pos.line + 1);
-         item->setData(Qt::ItemDataRole::UserRole + 2, entry.pos.col());
-         // TODO: icon for warnings
+         item->setData(role_offset, entry.pos.offset);
+         item->setData(role_line,   entry.pos.line + 1);
+         item->setData(role_col,    entry.pos.col());
+         item->setData(role_icon,   (int)_icon_type::warning);
+         item->setIcon(ico_warning);
          widget->addItem(item);
       }
    }
@@ -111,29 +149,32 @@ void ScriptEditorPageScriptCode::redrawLog() {
       for (auto& entry : this->_lastErrors) {
          auto item = new QListWidgetItem;
          item->setText(entry.text);
-         item->setData(Qt::ItemDataRole::UserRole + 0, entry.pos.offset);
-         item->setData(Qt::ItemDataRole::UserRole + 1, entry.pos.line + 1);
-         item->setData(Qt::ItemDataRole::UserRole + 2, entry.pos.col());
-         // TODO: icon for non-fatal errors
+         item->setData(role_offset, entry.pos.offset);
+         item->setData(role_line,   entry.pos.line + 1);
+         item->setData(role_col,    entry.pos.col());
+         item->setData(role_icon,   (int)_icon_type::error);
+         item->setIcon(ico_error);
          widget->addItem(item);
       }
       for (auto& entry : this->_lastFatals) {
          auto item = new QListWidgetItem;
          item->setText(entry.text);
-         item->setData(Qt::ItemDataRole::UserRole + 0, entry.pos.offset);
-         item->setData(Qt::ItemDataRole::UserRole + 1, entry.pos.line + 1);
-         item->setData(Qt::ItemDataRole::UserRole + 2, entry.pos.col());
-         // TODO: icon for fatal errors
+         item->setData(role_offset, entry.pos.offset);
+         item->setData(role_line,   entry.pos.line + 1);
+         item->setData(role_col,    entry.pos.col());
+         item->setData(role_icon,   (int)_icon_type::fatal);
+         item->setIcon(ico_fatal);
          widget->addItem(item);
       }
    }
    if (!this->_lastErrors.size() && !this->_lastFatals.size()) {
       auto item = new QListWidgetItem;
       item->setText(tr("The script is valid and contains no errors!"));
-      item->setData(Qt::ItemDataRole::UserRole + 0, -1);
-      item->setData(Qt::ItemDataRole::UserRole + 1, -1);
-      item->setData(Qt::ItemDataRole::UserRole + 2, -1);
-      // TODO: icon for success
+      item->setData(role_offset, -1);
+      item->setData(role_line,   -1);
+      item->setData(role_col,    -1);
+      item->setData(role_icon,   (int)_icon_type::success);
+      item->setIcon(ico_success);
       widget->addItem(item);
    }
 }

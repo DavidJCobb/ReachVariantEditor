@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+   <head>
+   </head>
+   <body>
+<script>
+class Bitset {
+   constructor(count) {
+      this.count          = count;
+      this.bits_per_chunk = 32;
+      this.chunk_count    = count / this.bits_per_chunk + (count % this.bits_per_chunk ? 1 : 0);
+      //
+      this.data = [];
+      for(let i = 0; i < this.chunk_count; ++i)
+         this.data[i] = 0;
+   }
+   toString() {
+      let s = "";
+      for(let i = 0; i < this.count; ++i)
+         s += this.test(i) ? "1" : "0";
+      return s;
+   }
+   //
+   modify(index, state) {
+      this[state ? "set" : "reset"](index);
+   }
+   set(index) {
+      let ci  = index / this.bits_per_chunk;
+      let bit = 1 << (index % this.bits_per_chunk);
+      this.data[ci] |= bit;
+   }
+   reset(index) {
+      let ci  = index / this.bits_per_chunk;
+      let bit = 1 << (index % this.bits_per_chunk);
+      this.data[ci] &= ~bit;
+   }
+   test(index) {
+      let ci  = index / this.bits_per_chunk;
+      let bit = 1 << (index % this.bits_per_chunk);
+      return (this.data[ci] & bit) != 0;
+   }
+   //
+   remove(index) {
+      let cap = index - (index % this.bits_per_chunk) + this.bits_per_chunk;
+      if (cap > this.count) {
+         cap = this.count;
+         for(; index + 1 < cap; ++index)
+            this.modify(index, this.test(index + 1));
+         this.reset(index);
+         return;
+      }
+      let ci = index / this.bits_per_chunk;
+      for(; index + 1 < cap; ++index)
+         this.modify(index, this.test(index + 1));
+      this.modify(index, this.test(index + 1));
+      ++ci;
+      for(; ci + 1 < this.chunk_count; ++ci) {
+         this.data[ci] >>= 1;
+         this.data[ci] |= (this.data[ci + 1] & 1) ? 1 : 0;
+      }
+   }
+}
+</script>
+   </body>
+</html>

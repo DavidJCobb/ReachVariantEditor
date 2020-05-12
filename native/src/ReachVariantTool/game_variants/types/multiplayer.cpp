@@ -460,3 +460,53 @@ void GameVariantDataMultiplayer::_tear_down_indexed_dummies() {
    if (should_log_warning)
       GameEngineVariantLoadWarningLog::get().push_back(warning);
 }
+
+ReachMegaloOption* GameVariantDataMultiplayer::create_script_option() {
+   auto& list = this->scriptData.options;
+   if (list.size() >= list.max_count)
+      return nullptr;
+   auto option = list.emplace_back();
+   option->is_defined = true;
+   auto value = option->add_value(); // enum-options must have at least one value
+   {  // If possible, default the new option's name and description to an empty string; ditto for its value
+      auto str = this->scriptData.strings.get_empty_entry();
+      if (str) {
+         option->name = str;
+         option->desc = str;
+         value->name = str;
+         value->desc = str;
+      }
+   }
+   auto index = option->index;
+   if (index >= 0) { // should always be true
+      this->optionToggles.megalo.disabled.bits.reset(index);
+      this->optionToggles.megalo.hidden.bits.reset(index);
+   }
+   return option;
+}
+void GameVariantDataMultiplayer::delete_script_option(ReachMegaloOption* option) {
+   if (!option || option->get_refcount())
+      return;
+   auto& list  = this->scriptData.options;
+   auto  index = list.index_of(option);
+   if (index < 0)
+      return;
+   list.erase(index);
+   //
+   auto& disabled = this->optionToggles.megalo.disabled.bits;
+   auto& hidden   = this->optionToggles.megalo.hidden.bits;
+   disabled.remove(index);
+   hidden.remove(index);
+}
+bool GameVariantDataMultiplayer::swap_script_options(int8_t index_a, int8_t index_b) {
+   if (index_a < 0 || index_b < 0)
+      return false;
+   auto& list = this->scriptData.options;
+   auto  size = list.size();
+   if (index_a >= size || index_b >= size)
+      return false;
+   list.swap_items(index_a, index_b);
+   this->optionToggles.megalo.disabled.bits.swap_bits(index_a, index_b);
+   this->optionToggles.megalo.hidden.bits.swap_bits(index_a, index_b);
+   return true;
+}

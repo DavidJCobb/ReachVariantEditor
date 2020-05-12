@@ -9,7 +9,6 @@
 #include "../../../helpers/string_scanner.h"
 #include "../../../helpers/strings.h"
 #include "variables_and_scopes.h"
-#include "compiler/string_scanner.h"
 #include "decompiler/decompiler.h"
 #include "compiler/types.h"
 #include <QString>

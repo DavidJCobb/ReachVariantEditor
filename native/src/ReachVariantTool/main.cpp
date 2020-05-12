@@ -56,14 +56,6 @@ int main(int argc, char *argv[]) {
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
-//     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH; WE NEED TO SWAP 
-//       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
-//
-//        - ADDING/REMOVING MEGALO OPTIONS ALSO NEEDS TO CLEAR THE RESPECTIVE TOGGLE-FLAGS.
-//
-//        - Probably best to have add/remove/reorder operations taken care of by member 
-//          functions on the MP data class.
-//
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
 //
@@ -102,10 +94,6 @@ int main(int argc, char *argv[]) {
 //          that, then we may not need to be this careful.)
 //
 //        - Script warning/error log
-//
-//           - Set icons on each QListWidgetItem depending on whether it is a warning, error, 
-//             or fatal error. Modify the QListWidgetEx's copy-transform functor to check the 
-//             icon and prepend the message type to the copied text (e.g. "[ERROR]").
 //
 //           - Add a context menu that lets the users copy all selected items or the full log. 
 //             (Yes, that'd be redundant, but I see little issue with that.)
@@ -170,8 +158,6 @@ int main(int argc, char *argv[]) {
 //             "symmetry" VariableScopeIndicatorValue definition and/or declaration.
 //
 //     = AUDITING
-//
-//        - Exception safety for anything that gets heap-allocated.
 //
 //        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
 //

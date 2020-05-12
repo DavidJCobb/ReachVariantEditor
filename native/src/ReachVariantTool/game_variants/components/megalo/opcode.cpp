@@ -1,7 +1,6 @@
 #include "opcode.h"
 #include <cassert>
 #include "actions.h"
-#include "compiler/string_scanner.h"
 
 namespace Megalo {
    bool OpcodeBase::context_is(const OpcodeArgTypeinfo& type) const noexcept {

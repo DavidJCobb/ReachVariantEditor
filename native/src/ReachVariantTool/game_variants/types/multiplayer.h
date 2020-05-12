@@ -149,4 +149,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
          cobb::bitnumber<6, uint8_t> respawnTime = 0;
          ReachPlayerTraits editorTraits;
       } forgeData;
+
+      ReachMegaloOption* create_script_option();
+      void delete_script_option(ReachMegaloOption*);
+      bool swap_script_options(int8_t index_a, int8_t index_b);
 };

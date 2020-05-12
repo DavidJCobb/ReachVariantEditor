@@ -53,5 +53,9 @@
         <file>localized_string_library/vehicles.txt</file>
         <file>localized_string_library/vip.txt</file>
         <file>localized_string_library/invasion_slayer.txt</file>
+        <file>compiler_log/error.png</file>
+        <file>compiler_log/fatal.png</file>
+        <file>compiler_log/success.png</file>
+        <file>compiler_log/warning.png</file>
     </qresource>
 </RCC>
