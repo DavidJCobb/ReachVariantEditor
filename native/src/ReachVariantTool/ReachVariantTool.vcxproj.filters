@@ -322,9 +322,6 @@
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="helpers\qt\string.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -371,6 +368,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\localized_string_library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\string_scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -900,9 +900,6 @@
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\qt\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -931,6 +928,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="services\localization_library.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\string_scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

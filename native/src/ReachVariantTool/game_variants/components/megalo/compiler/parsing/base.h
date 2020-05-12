@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <QString>
-#include "../string_scanner.h"
+#include "../../../../../helpers/string_scanner.h"
 
 namespace Megalo {
    class Compiler;
@@ -20,8 +20,8 @@ namespace Megalo {
                int32_t end   = -1;
             } range;
             //
-            void set_start(const string_scanner::pos&);
-            void set_end(const string_scanner::pos&);
+            void set_start(const cobb::string_scanner::pos&);
+            void set_end(const cobb::string_scanner::pos&);
       };
    }
 }

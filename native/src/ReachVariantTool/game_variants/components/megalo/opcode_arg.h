@@ -6,6 +6,7 @@
 #include "../../../helpers/bitwriter.h"
 #include "../../../helpers/refcounting.h"
 #include "../../../helpers/stream.h"
+#include "../../../helpers/string_scanner.h"
 #include "../../../helpers/strings.h"
 #include "variables_and_scopes.h"
 #include "compiler/string_scanner.h"
@@ -249,7 +250,7 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept = 0;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, uint64_t flags = 0) noexcept = 0;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&,    uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as a script argument
+         virtual arg_compile_result compile(Compiler&, cobb::string_scanner&,      uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as a script argument
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept { return arg_compile_result::failure("OpcodeArgValue::compile overload not defined for this type."); }; // used if the OpcodeArgValue was received as the lefthand or righthand side of a statement, or the context of a function call
          virtual OpcodeArgValue* create_of_this_type() const noexcept = 0;
          virtual void copy(const OpcodeArgValue*) noexcept = 0;

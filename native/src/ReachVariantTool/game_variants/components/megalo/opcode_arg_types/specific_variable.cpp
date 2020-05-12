@@ -50,7 +50,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->index);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueObjectTimerVariable::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueObjectTimerVariable::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
             auto word = arg.extract_word();
@@ -157,7 +157,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->playerIndex);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
             auto word = arg.extract_word();

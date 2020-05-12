@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QVector>
-#include "../game_variants/components/megalo/compiler/string_scanner.h"
+#include "../helpers/string_scanner.h"
 
 namespace {
    struct _lang_code {
@@ -232,10 +232,10 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
                if (!ok)
                   continue;
                auto perm = current->get_or_create_permutation(index);
-               perm->content->get_write_access(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
+               perm->content->get_write_access(lang) = cobb::string_scanner::unescape(value.toString()).toStdString();
                continue;
             }
-            current->content->get_write_access(lang) = Megalo::Script::string_scanner::unescape(value.toString()).toStdString();
+            current->content->get_write_access(lang) = cobb::string_scanner::unescape(value.toString()).toStdString();
          }
       }
    }

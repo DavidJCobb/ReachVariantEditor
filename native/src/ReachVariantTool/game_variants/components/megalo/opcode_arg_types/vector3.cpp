@@ -31,7 +31,7 @@ namespace Megalo {
       cobb::sprintf(temp, "%d, %d, %d", this->value.x, this->value.y, this->value.z);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueVector3::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueVector3::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part > 2)
          return arg_compile_result::failure();
       //

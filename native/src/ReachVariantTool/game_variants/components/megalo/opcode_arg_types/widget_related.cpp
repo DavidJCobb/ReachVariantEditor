@@ -67,7 +67,7 @@ namespace Megalo {
          cobb::sprintf(temp, "script_widget[%u]", this->value->index);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueWidget::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueWidget::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
          auto arg = compiler.arg_to_variable(arg_text);
          if (!arg)
             return arg_compile_result::failure();
@@ -196,7 +196,7 @@ namespace Megalo {
                return;
          }
       }
-      arg_compile_result OpcodeArgValueMeterParameters::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueMeterParameters::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
          if (part > 0) {
             auto arg = compiler.arg_to_variable(arg_text);
             if (!arg)

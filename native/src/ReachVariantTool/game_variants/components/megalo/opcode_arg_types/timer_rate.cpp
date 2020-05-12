@@ -72,7 +72,7 @@ namespace Megalo {
       this->to_string(temp);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueTimerRate::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueTimerRate::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       int32_t value;
       if (arg.extract_integer_literal(value)) {
          if (!arg.extract_specific_char('%'))

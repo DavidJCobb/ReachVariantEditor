@@ -35,7 +35,7 @@ namespace Megalo {
       if (base.text_false)
          this->baseStringFalse = base.text_false;
    }
-   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
          return arg_compile_result::failure();
       //
@@ -109,7 +109,7 @@ namespace Megalo {
       cobb::sprintf(temp, "%d", this->value);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
          return arg_compile_result::failure();
       //

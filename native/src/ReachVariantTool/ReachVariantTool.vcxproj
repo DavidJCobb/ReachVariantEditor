@@ -103,7 +103,6 @@
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\alias.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\base.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\parsing\variable_reference.cpp" />
-    <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\types.cpp" />
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
@@ -165,6 +164,7 @@
     <ClCompile Include="helpers\steam.cpp" />
     <ClCompile Include="helpers\stream.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
+    <ClCompile Include="helpers\string_scanner.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="services\localization_library.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
@@ -258,7 +258,6 @@
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\alias.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\base.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\variable_reference.h" />
-    <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\types.h" />
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
@@ -323,6 +322,7 @@
     <ClInclude Include="helpers\refcounting.h" />
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />
+    <ClInclude Include="helpers\string_scanner.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />

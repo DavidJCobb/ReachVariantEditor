@@ -154,7 +154,7 @@ namespace Megalo {
          std::vector<OpcodeArgValue*> arguments;
          const OpcodeBase* function = nullptr;
          //
-         arg_compile_result compile_argument(Compiler&, Script::string_scanner&,    uint8_t arg_index, uint8_t part) noexcept; // creates the argument if it doesn't exist
+         arg_compile_result compile_argument(Compiler&, cobb::string_scanner&,    uint8_t arg_index, uint8_t part) noexcept; // creates the argument if it doesn't exist
          arg_compile_result compile_argument(Compiler&, Script::VariableReference&, uint8_t arg_index, uint8_t part) noexcept; // creates the argument if it doesn't exist
    };
 

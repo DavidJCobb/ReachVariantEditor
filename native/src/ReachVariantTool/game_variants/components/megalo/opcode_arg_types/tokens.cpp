@@ -153,7 +153,7 @@ namespace Megalo {
          this->tokens[i].decompile(out, flags);
       }
    }
-   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       if (part == 0) {
          //
          // Get the format string.

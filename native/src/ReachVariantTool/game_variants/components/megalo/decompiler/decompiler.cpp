@@ -1,6 +1,6 @@
 #include "decompiler.h"
-#include "../compiler/string_scanner.h"
 #include "../../../types/multiplayer.h"
+#include "../../../../helpers/string_scanner.h"
 
 namespace {
    int _index_of(const std::vector<int16_t>& v, int16_t e) {
@@ -96,13 +96,13 @@ namespace Megalo {
       this->write(content);
    }
    void Decompiler::write_string_literal(const char* content) {
-      QString t = Script::string_scanner::escape(QString::fromUtf8(content), '"');
+      QString t = cobb::string_scanner::escape(QString::fromUtf8(content), '"');
       this->write('"');
       this->write(t);
       this->write('"');
    }
    void Decompiler::write_string_literal(std::string& content) {
-      QString t = Script::string_scanner::escape(QString::fromStdString(content), '"');
+      QString t = cobb::string_scanner::escape(QString::fromStdString(content), '"');
       this->write('"');
       this->write(t);
       this->write('"');

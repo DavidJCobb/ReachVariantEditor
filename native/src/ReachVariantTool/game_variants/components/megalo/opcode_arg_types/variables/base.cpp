@@ -211,7 +211,7 @@ namespace Megalo {
       _default_stringify(this->scope->format, *this, code);
       out.write(code.c_str());
    }
-   arg_compile_result Variable::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result Variable::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       auto arg = compiler.arg_to_variable(arg_text);
       if (!arg)
          return arg_compile_result::failure("This argument is not a variable.");

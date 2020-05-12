@@ -157,7 +157,7 @@ namespace Megalo {
       return -1;
    }
 
-   arg_compile_result Opcode::compile_argument(Compiler& compiler, Script::string_scanner& arg, uint8_t arg_index, uint8_t part) noexcept {
+   arg_compile_result Opcode::compile_argument(Compiler& compiler, cobb::string_scanner& arg, uint8_t arg_index, uint8_t part) noexcept {
       if (!this->arguments[arg_index]) {
          auto base = this->function->arguments[arg_index];
          this->arguments[arg_index] = (base.typeinfo.factory)();
@@ -278,7 +278,7 @@ namespace Megalo {
             continue;
          //
          arg.reset((type->factory)());
-         if (arg->compile(compiler, Script::string_scanner(name), 0).is_success())
+         if (arg->compile(compiler, cobb::string_scanner(name), 0).is_success())
             return &entry;
       }
       return nullptr;

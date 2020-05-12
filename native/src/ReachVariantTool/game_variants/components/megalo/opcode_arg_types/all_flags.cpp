@@ -88,7 +88,7 @@ namespace Megalo {
          out = "none";
       decompiler.write(out);
    }
-   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       this->value = 0;
       //
       auto prior = arg.backup_stream_state();

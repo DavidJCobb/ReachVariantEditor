@@ -154,7 +154,7 @@ namespace Megalo {
             cobb::sprintf(temp, "%u", this->value);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueIconBase::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueIconBase::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          if (part > 0)
             return arg_compile_result::failure();
          //

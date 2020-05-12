@@ -112,7 +112,7 @@ namespace Megalo::Script {
                }
                continue;
             }
-            if (index.isEmpty() && string_scanner::is_whitespace_char(c))
+            if (index.isEmpty() && cobb::string_scanner::is_whitespace_char(c))
                continue;
             index += c;
          } else {

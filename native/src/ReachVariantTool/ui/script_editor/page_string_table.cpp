@@ -5,7 +5,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include "../localized_string_editor.h"
-#include "../../game_variants/components/megalo/compiler/string_scanner.h"
+#include "../../helpers/string_scanner.h"
 
 namespace {
    bool _selectByPointerData(QListWidget* widget, void* target) {
@@ -160,7 +160,7 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
          auto str = this->getSelected();
          if (str) {
             QString english = str->get_content(reach::language::english).c_str();
-            english = Megalo::Script::string_scanner::escape(english, '"');
+            english = cobb::string_scanner::escape(english, '"');
             english.prepend('"');
             english.append('"');
             QApplication::clipboard()->setText(english, QClipboard::Clipboard);

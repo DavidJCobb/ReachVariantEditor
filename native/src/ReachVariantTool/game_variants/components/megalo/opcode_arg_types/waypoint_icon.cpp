@@ -108,7 +108,7 @@ namespace Megalo {
          this->number.decompile(out, flags);
       }
    }
-   arg_compile_result OpcodeArgValueWaypointIcon::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueWaypointIcon::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part == 1)
          return ((OpcodeArgValue*)&this->number)->compile(compiler, arg, part); // need to access it this way because the overloads and overrides together are confusing MSVC
       if (part > 1)

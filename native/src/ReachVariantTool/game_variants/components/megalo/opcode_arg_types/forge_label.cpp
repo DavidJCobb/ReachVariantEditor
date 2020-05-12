@@ -81,7 +81,7 @@ namespace Megalo {
       cobb::sprintf(temp, "%u", f->index);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueForgeLabel::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueForgeLabel::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       QString str;
       int32_t index = -1;
       //
@@ -97,14 +97,14 @@ namespace Megalo {
             QString english = QString::fromUtf8(name->get_content(reach::language::english).c_str());
             if (english == str) {
                if (index != -1) {
-                  QString lit = Script::string_scanner::escape(str, '"');
+                  QString lit = cobb::string_scanner::escape(str, '"');
                   return arg_compile_result::failure(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
                }
                index = i;
             }
          }
          if (index == -1) {
-            QString lit = Script::string_scanner::escape(str, '"');
+            QString lit = cobb::string_scanner::escape(str, '"');
             return arg_compile_result::failure(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
          }
          this->value = &list[index];

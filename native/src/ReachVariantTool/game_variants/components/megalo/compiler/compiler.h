@@ -3,7 +3,7 @@
 #include <vector>
 #include <QMultiMap>
 #include <QString>
-#include "string_scanner.h"
+#include "../../../../helpers/string_scanner.h"
 #include "../opcode_arg_type_registry.h"
 #include "../trigger.h"
 #include "../variable_declarations.h"
@@ -109,14 +109,14 @@ namespace Megalo {
       };
    }
    //
-   class Compiler : public Script::string_scanner {
+   class Compiler : public cobb::string_scanner {
       public:
          struct LogEntry {
             QString text;
             pos     pos;
             //
             LogEntry() {}
-            LogEntry(const QString& t, Script::string_scanner::pos p) : text(t), pos(p) {}
+            LogEntry(const QString& t, cobb::string_scanner::pos p) : text(t), pos(p) {}
          };
          using log_t = std::vector<LogEntry>;
          struct log_checkpoint {

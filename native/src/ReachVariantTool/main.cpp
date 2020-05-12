@@ -64,12 +64,6 @@ int main(int argc, char *argv[]) {
 //        - Probably best to have add/remove/reorder operations taken care of by member 
 //          functions on the MP data class.
 //
-//     - Can we give (string_scanner::extract_integer_literal) the ability to understand 
-//       non-base-10 integers i.e. 0x... for hex and 0b... for binary? It'd help with using 
-//       variables as flags-masks.
-//
-//     = MOVE string_scanner TO THE HELPERS FOLDER, AND PUT IT UNDER A CC0 LICENSE.
-//
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
 //

@@ -128,7 +128,7 @@ namespace Megalo {
             out.write("none");
       }
    }
-   arg_compile_result OpcodeArgValueShape::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueShape::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       if (part > 0) {
          auto arg = compiler.arg_to_variable(arg_text);
          if (!arg)

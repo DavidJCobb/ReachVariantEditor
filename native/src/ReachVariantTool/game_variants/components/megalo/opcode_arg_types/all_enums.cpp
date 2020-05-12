@@ -114,7 +114,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->value);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       auto word  = arg.extract_word();
       if (word.isEmpty()) {
          //

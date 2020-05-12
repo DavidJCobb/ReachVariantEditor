@@ -163,10 +163,11 @@ attach a "basis" object to (0, 0, 0) on the vehicle, and then attach all relativ
 to that basis.
 
 I set up a test to measure how many times per second a Megalo script runs. When run on my 
-machine, locally, as part of a simple test variant, it registered 61 executions per second.
+machine, locally, as part of a simple test variant, it registered 61 executions per second, 
+though it's possible the first second of gameplay had one or two extra.
 
 You can force a player into a biped while the initial loadout camera is playing, and they 
-will be able to play.
+will be able to play early.
 
 If necessary, you can spawn a biped inside of a vehicle by spawning the biped, forcing a 
 player to control it, forcing the player into the vehicle, and then returning the player 
