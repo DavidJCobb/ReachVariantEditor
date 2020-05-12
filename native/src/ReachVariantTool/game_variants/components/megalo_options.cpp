@@ -30,6 +30,13 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
       this->descIndex.write(stream);
    }
 }
+/*static*/ uint32_t ReachMegaloOptionValueEntry::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(value)::max_bitcount;
+   bitcount += decltype(nameIndex)::max_bitcount;
+   bitcount += decltype(descIndex)::max_bitcount;
+   return bitcount;
+}
 
 void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
    this->is_defined = true;
@@ -161,4 +168,21 @@ void ReachMegaloOption::make_range() noexcept {
    }
    this->rangeCurrent = this->rangeDefault->value;
    this->isRange = true;
+}
+//
+uint32_t ReachMegaloOption::bitcount() const noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(nameIndex)::max_bitcount;
+   bitcount += decltype(descIndex)::max_bitcount;
+   bitcount += decltype(isRange)::max_bitcount;
+   if (this->isRange) {
+      bitcount += ReachMegaloOptionValueEntry::bitcount() * 3; // range default, min, and max
+      bitcount += decltype(rangeCurrent)::max_bitcount;
+   } else {
+      bitcount += decltype(defaultValueIndex)::max_bitcount;
+      bitcount += 8;
+      bitcount += ReachMegaloOptionValueEntry::bitcount() * this->values.size();
+      bitcount += decltype(currentValueIndex)::max_bitcount;
+   }
+   return bitcount;
 }

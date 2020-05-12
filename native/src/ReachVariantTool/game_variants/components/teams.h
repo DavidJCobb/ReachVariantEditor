@@ -33,4 +33,6 @@ class ReachTeamData {
             return &this->name.strings[0];
          return nullptr;
       }
+      //
+      uint32_t bitcount() noexcept;
 };

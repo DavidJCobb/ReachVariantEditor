@@ -35,6 +35,8 @@ class ReachMegaloOptionValueEntry {
       void read(cobb::ibitreader&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept;
+      //
+      static uint32_t bitcount() noexcept;
 };
 
 class ReachMegaloOption : public indexed_list_item {
@@ -59,4 +61,6 @@ class ReachMegaloOption : public indexed_list_item {
       ReachMegaloOptionValueEntry* add_value() noexcept;
       void delete_value(ReachMegaloOptionValueEntry*) noexcept;
       void make_range() noexcept;
+      //
+      uint32_t bitcount() const noexcept;
 };

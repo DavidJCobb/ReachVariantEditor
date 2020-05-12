@@ -255,28 +255,6 @@ int main(int argc, char *argv[]) {
 //              - We can introduce Halo 3's "Next Zombie" option if we use a hidden 
 //                scoreboard stat to track cross-round state.
 //
-//        - Minesweeper
-//
-//           - Horizontal board. A flag and a bomb spawn on an elevated platform that 
-//             overlooks the entire board. Drop the flag on a square to mark it with a 
-//             flag. Drop a bomb on a square to "click" it.
-//
-//           - A teleporter provides access between the overlook and the board. Maybe 
-//             we can label each teleporter (e.g. "UP" and "DOWN") with a gametype 
-//             label e.g. "MINESWEEP_TEXT_LABEL" where the spawn sequence controls the 
-//             text.
-//
-//           - FFA: One person solves the board. Team: One team solves the board, with 
-//             team members taking turns. In both cases there should be an option to 
-//             let people who aren't working the board see where the mines are, to 
-//             potentially add a party game aspect to things.
-//
-//              - Another good option: control the round end condition. By default, FFA 
-//                should end the round on the first failure, and Team when all team 
-//                members are killed; an alternate mode could allow other players/teams 
-//                to continue from where a failing player/team left off, with the round 
-//                ending on victory or when all players are dead.
-//
 //  - Script editor window: MPVR space usage meter: we should also show absolute counts 
 //    out of maximums for triggers, conditions, actions, number of strings, and perhaps 
 //    other data items if we use two or three columns as well. We could even correlate 
@@ -287,9 +265,7 @@ int main(int argc, char *argv[]) {
 //       ALTERED IN ANY WAY. BONUS POINTS IF WE ONLY UPDATE THE PART OF THE METER THAT 
 //       ACTUALLY REPRESENTS THE CHANGED DATA.
 //
-//     - Continue improving the code for the meter: add bitcount getters to more objects 
-//       so we aren't just reaching into them from outside and counting stuff ourselves. 
-//       Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
+//     - Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
 //       standard_options_bitcount, etc., or perhaps a single getter that switch-cases on 
 //       an enum indicating what we want counted.
 //

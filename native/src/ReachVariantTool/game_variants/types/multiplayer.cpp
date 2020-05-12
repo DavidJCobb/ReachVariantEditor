@@ -435,7 +435,8 @@ namespace {
             item.is_defined = true;
             continue;
          }
-         list.erase(i);
+         if (!fails)
+            list.erase(i);
       }
       return fails;
    }

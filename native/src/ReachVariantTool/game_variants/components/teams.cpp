@@ -28,6 +28,18 @@ void ReachTeamData::write(cobb::bitwriter& stream) noexcept {
    this->colorText.write(stream);
    this->fireteamCount.write(stream);
 }
+uint32_t ReachTeamData::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(flags)::max_bitcount;
+   bitcount += this->name.get_size_to_save();
+   bitcount += decltype(initialDesignator)::max_bitcount;
+   bitcount += decltype(spartanOrElite)::max_bitcount;
+   bitcount += decltype(colorPrimary)::max_bitcount;
+   bitcount += decltype(colorSecondary)::max_bitcount;
+   bitcount += decltype(colorText)::max_bitcount;
+   bitcount += decltype(fireteamCount)::max_bitcount;
+   return bitcount;
+}
 
 /*
 
