@@ -1022,7 +1022,11 @@ namespace Megalo {
                //
                lhs = this->__parseVariable(word, false, true);
             } else {
-               this->raise_fatal("Expected the start of a new statement.");
+               auto op = this->extract_operator();
+               if (!op.isEmpty())
+                  this->raise_fatal(QString("Statements cannot begin with an operator such as %1.").arg(op));
+               else
+                  this->raise_fatal("Expected the start of a new statement.");
                return;
             }
          #pragma endregion

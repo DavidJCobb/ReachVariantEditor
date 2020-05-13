@@ -48,7 +48,9 @@ int main(int argc, char *argv[]) {
 //          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
 //
 //           - If we make it possible to define a NamespaceMember that refers to a constant 
-//             integer, then we can create a namespace of named values for this enum.
+//             integer, then we can create a namespace of named values for this enum. However, 
+//             I'd prefer to nest anything like that under an "enums" namespace, which would 
+//             require adding support for nested namespaces.
 //
 //        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
 //          to the UI.
@@ -68,6 +70,15 @@ int main(int argc, char *argv[]) {
 //       to pass a TriggerDecompileState* to Trigger::decompile and forward-declare the class 
 //       there, but I'd like the "meat" of the decompile state to exist in the files for the 
 //       decompiler itself.
+//
+//     = IT APPEARS THAT THE isBuiltIn FLAG ON THE MP DATA TELLS MCC NOT TO USE THE CHDR/MPVR 
+//       TITLE AND DESCRIPTION, PREFERRING INSTEAD TO USE LOCALIZED TEXT EITHER INSIDE OF THE 
+//       GAME VARIANT OR BASED ON THE MCC. INVESTIGATE.
+//
+//     = THE SCRIPT EDITOR NEEDS TO INDICATE WHICH STRING IS IN USE FOR THE "GENERIC NAME REF" 
+//       (GameVariantDataMultiplayer::genericName) AND ALLOW USERS TO CONTROL IT. IT SEEMS THAT 
+//       WHEN THE isBuiltIn FLAG IS SET, MCC TRIES TO RETRIEVE MCC LOCALIZED STRINGS (RATHER 
+//       THAN USING THOSE IN THE VARIANT) VIA E.G. "$HR_GVAR_[genericName]".
 //
 //     = The compiler typically logs errors at the end of the affected object. In some cases, 
 //       this goes especially awry; for example, if a for-each-object-with-label loop refers 
@@ -100,12 +111,42 @@ int main(int argc, char *argv[]) {
 //
 //        - Syntax highlighting in the code editor
 //
-//     = COMPILER TESTS
+//     = IDEA FOR HANDLING SAVE ERRORS
 //
-//        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
-//          decompile produces identical output to the first. However, the resulting file is 
-//          not binary-identical to the "resaved in Release build" version. I've addressed the 
-//          else(if) Bungie behavior and am not sure where the new discrepancy lies.
+//        - There are really only two problems that can occur when saving a file: the string 
+//          table is too large, or the total content of the file is too large (itself due to 
+//          the string table and script content in combination being too big). Currently, the 
+//          editor has no handling for these: some cases of a string table being too large will 
+//          result in an assertion failure during save, while all other problems will just 
+//          silently produce a corrupt file. This is a problem: it prevents overambitious script 
+//          authors from saving their work and correcting their mistakes later.
+//
+//          There is, however, a solution.
+//
+//          We should define a "cobb" file chunk. This chunk should be composed of subrecords, 
+//          each having a signature, version, and length. The GameVariantData class should have 
+//          the following abstract virtual methods (where CobbFileRecord is a loaded subrecord):
+//
+//             virtual bool take_cobb(const CobbFileRecord&) noexcept = 0;
+//             virtual void make_cobb(std::vector<CobbFileRecord>& out) noexcept = 0;
+//
+//          The "make" class will generate any needed subrecords at save time. The "take" class 
+//          will be called for each subrecord found at load time, and will return true if the 
+//          GameVariantData reads, understands, and takes ownership of the data therein.
+//
+//          The idea, then, is that we can have subrecords for every string table in the file 
+//          (because remember: there is more than one) and a subrecord for the script content. 
+//          If it turns out that the string table is too large to save in the normal Megalo 
+//          format, then we can just write each string as "str001", "str002", etc., and write 
+//          the "true" string content into a cobb subrecord. Similarly, if the Megalo script 
+//          cannot fit, we can write a placeholder script (if there is room) and write the 
+//          "true" string content into a cobb subrecord. When loading a file, we will first 
+//          load the dummy string/script content; then, the MP data can "take" the subrecords, 
+//          overwriting the loaded dummy content with the "true" string/script content.
+//
+//          Halo: Reach and the MCC discard any unrecognized file chunks when resaving a file, 
+//          so we can't use custom chunks to embed any data we want to persist through the 
+//          game, but using a custom chunk to embed editor-specific data should be fine.
 //
 //     = DEFERRED TASKS
 //

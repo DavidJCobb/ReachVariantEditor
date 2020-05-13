@@ -183,3 +183,6 @@ they interact with the turret, before any animation can play.
 Moving an Initial Loadout Camera object during the loadout camera period will not update 
 the game camera's position in real-time; you can't animate the loadout camera.
 
+It appears that attaching an object to no_object and detaching it will teleport it to the 
+world origin. On Forge World, this is a point out by Hemorrhage's beach.
+
