@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
 //       WHEN THE isBuiltIn FLAG IS SET, MCC TRIES TO RETRIEVE MCC LOCALIZED STRINGS (RATHER 
 //       THAN USING THOSE IN THE VARIANT) VIA E.G. "$HR_GVAR_[genericName]".
 //
+//     - The compiler interprets "0x" and "0b" as valid integer literals.
+//
 //     = The compiler typically logs errors at the end of the affected object. In some cases, 
 //       this goes especially awry; for example, if a for-each-object-with-label loop refers 
 //       to an invalid trigger, the log is positioned at the end of the block rather than the 

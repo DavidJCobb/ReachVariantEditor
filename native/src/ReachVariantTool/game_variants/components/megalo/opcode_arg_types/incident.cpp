@@ -234,7 +234,9 @@ namespace Megalo {
          DetailedEnumValue("terr_contested",
             DetailedEnumValueInfo::make_friendly_name("Territory Contested")
          ),
-         DetailedEnumValue("teleporter_used"),
+         DetailedEnumValue("teleporter_used",
+            DetailedEnumValueInfo::make_description("Plays a \"teleporter used\" sound effect?")
+         ),
          DetailedEnumValue("race_game_start",
             DetailedEnumValueInfo::make_friendly_name("Announce Game Start (Race)")
          ),

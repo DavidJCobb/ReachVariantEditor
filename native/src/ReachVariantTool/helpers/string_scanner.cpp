@@ -335,12 +335,12 @@ namespace cobb {
       //
       auto after_sign = this->backup_stream_state();
       if (this->extract_specific_char('0')) {
-         if (this->extract_specific_char('b')) {
+         if (this->extract_specific_char('b', true)) {
             this->_extract_bin_integer_literal(out);
             out *= sign;
             return true;
          }
-         if (this->extract_specific_char('x')) {
+         if (this->extract_specific_char('x', true)) {
             this->_extract_hex_integer_literal(out);
             out *= sign;
             return true;

@@ -148,6 +148,14 @@ QString GameEngineVariantLoadError::to_qstring() const noexcept {
             case load_failure_reason::block_missing:
                result += QObject::tr("The data block is missing.", tr_disambiguator);
                break;
+            case load_failure_reason::unsupported_game:
+               result = QObject::tr("This file is not for Halo: Reach.", tr_disambiguator);
+               switch (this->detail) {
+                  case load_failure_detail::game_is_halo_2_anniversary:
+                     result += QObject::tr(" The file appears to be intended for use with Halo 2 Anniversary.", tr_disambiguator);
+                     break;
+               }
+               break;
          }
          return result;
       case load_failure_point::content_type:

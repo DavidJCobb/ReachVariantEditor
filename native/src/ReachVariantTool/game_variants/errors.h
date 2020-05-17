@@ -34,6 +34,7 @@ struct GameEngineVariantLoadError {
       block_ended_early,
       block_missing,
       not_a_blam_file, // can be sent by the "block_blam" failure point
+      unsupported_game,
    };
    enum class load_failure_detail {
       none,
@@ -44,6 +45,7 @@ struct GameEngineVariantLoadError {
       bad_variable_scope, // extra[0] is a (variable_scope) constant; extra[1] is which scope of that type; extra[2] is the variable index; extra[3] is the variable type; extra[4] is 1 if it's a biped variable
       bad_opcode_impossible_index, // extra[0] is the index; extra[1] is the max allowed index
       bad_widget_meter_parameters_type, // extra[0] is the type
+      game_is_halo_2_anniversary,
    };
 
    load_state          state            = load_state::incomplete;

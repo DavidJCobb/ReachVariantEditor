@@ -166,8 +166,28 @@ I set up a test to measure how many times per second a Megalo script runs. When 
 machine, locally, as part of a simple test variant, it registered 61 executions per second, 
 though it's possible the first second of gameplay had one or two extra.
 
+---
+
 You can force a player into a biped while the initial loadout camera is playing, and they 
-will be able to play early.
+will be able to play early. However, if you do this, the player will hear a constant shrill 
+beeping, like the ring of an alarm clock. It appears that this beeping plays for every 
+frame that the player spends in control of a biped, if that player has never controlled a 
+"natural" biped before; the solution is to ensure that the player has spent at least one 
+frame in control of a normally-spawned biped before forcing them into a new biped.
+
+I was able to identify the beeping sound; it is defined in the following tags. These tags 
+seem to have been intended for the Missile Pod, a weapon present only in Halo 3; however, 
+a search for Missile Pod gameplay videos on YouTube failed to turn up any where this exact 
+sound plays.
+
+   lsnd\sound\weapons\missile_launcher\tracking_locking\locking\loop
+   snd!\sound\weapons\missile_launcher\tracking_locking\locking\loop
+
+I was unable to locate anything that could use the tag. If the usual community tools for 
+browsing *.MAP files allow you to search for anything that uses a tag, I haven't managed 
+to find that feature.
+
+---
 
 If necessary, you can spawn a biped inside of a vehicle by spawning the biped, forcing a 
 player to control it, forcing the player into the vehicle, and then returning the player 
@@ -185,4 +205,7 @@ the game camera's position in real-time; you can't animate the loadout camera.
 
 It appears that attaching an object to no_object and detaching it will teleport it to the 
 world origin. On Forge World, this is a point out by Hemorrhage's beach.
+
+Teams cannot be displayed in format strings; you may expect "%s" to display the team name, 
+but it instead displays nothing.
 

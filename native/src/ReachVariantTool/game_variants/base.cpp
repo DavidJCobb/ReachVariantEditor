@@ -198,6 +198,15 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    uint32_t offset_after_hashable;
    //
    if (!this->header.read(reader.bytes)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      if (this->header.found.signature == this->header.expected.signature && this->header.found.version == block_header_version::halo_2_annie) {
+         //
+         // Note: This won't catch all Halo 2 Anniversary variants; some use a new file chunk, "athr", 
+         // so those trip the "no 'chdr' block" check instead.
+         //
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::unsupported_game;
+         error_report.detail = GameEngineVariantLoadError::load_failure_detail::game_is_halo_2_anniversary;
+      }
       return false;
    }
    auto& stream = reader.bits;
@@ -217,12 +226,11 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       case ReachGameEngine::campaign:
          // fall through
       case ReachGameEngine::firefight:
+         // fall through
+      default:
          error_report.state         = GameEngineVariantLoadError::load_state::failure;
          error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;
          error_report.extra[0]      = (int32_t)this->type;
-         return false;
-      default:
-         printf("Variant has unknown type. Can't load it.\n"); // TODO: Ask the user what type we should use.
          return false;
    }
    if (!this->data->read(reader)) {

@@ -143,6 +143,14 @@ class ReachBlockCHDR {
 
 class ReachBlockMPVR {
    public:
+      struct block_header_version {
+         block_header_version() = delete;
+         enum type : uint16_t {
+            halo_reach   = 0x0032,
+            halo_2_annie = 0x0089,
+         };
+      };
+      //
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
       uint8_t  hashSHA1[0x14];
       cobb::bitnumber<4, ReachGameEngine> type;
