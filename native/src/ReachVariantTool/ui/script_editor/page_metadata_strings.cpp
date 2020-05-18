@@ -123,6 +123,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       this->ui.buttonName->setDisabled(true);
       this->ui.buttonDesc->setDisabled(true);
       this->ui.buttonCategory->setDisabled(true);
+      this->ui.genericName->clearTarget();
       return;
    }
    {
@@ -161,4 +162,5 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       }
       button->setDisabled(false);
    }
+   this->ui.genericName->setTarget(mp->genericName);
 }

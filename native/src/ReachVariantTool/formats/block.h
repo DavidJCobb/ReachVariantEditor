@@ -19,6 +19,9 @@ class ReachFileBlockHeader {
 
 class ReachFileBlock {
    public:
+      static constexpr uint32_t any_size      = 0;
+      static constexpr uint32_t any_signature = 0;
+      //
       ReachFileBlockHeader expected;
       ReachFileBlockHeader found;
       struct {
