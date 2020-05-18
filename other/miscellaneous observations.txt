@@ -123,7 +123,7 @@ points based on those distances.
 
 I need to test to confirm this explicitly, but it seems like the game can only render 64 
 shape boundaries at a time, regardless of which ones are in the field of view. The game 
-likewise seems to be capped to displaying waypoints for 18 objects.
+likewise seems to be capped to displaying scripted waypoints for about 18 objects.
 
 In one of my tests, the "object death" event did not trigger when blowing up Fusion Coils, 
 but did trigger when a player biped died. It's possible that only certain types of objects 
@@ -208,4 +208,7 @@ world origin. On Forge World, this is a point out by Hemorrhage's beach.
 
 Teams cannot be displayed in format strings; you may expect "%s" to display the team name, 
 but it instead displays nothing.
+
+If one biped is assassinating another, deleting the victim will not interrupt the killer's 
+assassination animation.
 
