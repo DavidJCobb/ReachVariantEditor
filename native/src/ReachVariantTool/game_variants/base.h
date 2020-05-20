@@ -30,6 +30,33 @@ enum class ReachFileType : int8_t {
    playlist,
 };
 
+class RVTEditorBlock : public ReachFileBlock {
+   public:
+      RVTEditorBlock() : ReachFileBlock('xRVT', ReachFileBlock::any_size) {}
+      ~RVTEditorBlock();
+      //
+      static constexpr uint32_t signature_megalo_string_table   = 'mstr';
+      static constexpr uint32_t signature_team_string_table     = 'tstr';
+      static constexpr uint32_t signature_metadata_string_table = 'lstr';
+      static constexpr uint32_t signature_megalo_script         = 'mscr';
+      //
+      struct subrecord {
+         uint32_t signature = 0;
+         uint32_t version   = 0;
+         uint32_t flags     = 0;
+         uint32_t size      = 0;
+         cobb::generic_buffer data;
+      };
+      std::vector<subrecord*> subrecords;
+      //
+      bool read(reach_block_stream&) noexcept;
+      void write(cobb::bytewriter&) const noexcept;
+      //
+      void adopt(std::vector<subrecord*>&) noexcept;
+      subrecord* lookup(uint32_t signature) const;
+      //
+      inline bool has_subrecords() const noexcept { return this->subrecords.size(); }
+};
 
 class GameVariantDataMultiplayer;
 class GameVariantData {
@@ -39,6 +66,8 @@ class GameVariantData {
       virtual void write(cobb::bit_or_byte_writer&) noexcept = 0;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
+      virtual void offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept {};
+      virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept { return false; }; // return true to indicate that you've accepted the subrecord
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
          switch (this->get_type()) {
@@ -48,14 +77,6 @@ class GameVariantData {
          }
          return nullptr;
       }
-};
-
-class IGameVariantDataObjectNeedingPostprocess {
-   //
-   // TODO: Use this to semi-automate postprocess fixup for MPVR
-   //
-   public:
-      virtual bool postprocess(GameVariantData*) = 0;
 };
 
 class BlamHeader {

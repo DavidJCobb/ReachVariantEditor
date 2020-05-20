@@ -27,10 +27,45 @@
 #include "../components/teams.h"
 #include "../components/tu1_options.h"
 
+struct ReachMPSizeData {
+   //
+   // Holds information on bit usage.
+   //
+   ReachMPSizeData();
+   struct {
+      uint32_t total   = 0;
+      uint32_t maximum = 0x5028 * 8;
+      //
+      uint32_t header         = 0;
+      uint32_t header_strings = 0;
+      uint32_t cg_options     = 0;
+      uint32_t team_config    = 0;
+      uint32_t script_traits  = 0;
+      uint32_t script_options = 0;
+      uint32_t script_strings = 0;
+      uint32_t map_perms      = 0;
+      uint32_t script_content = 0;
+      uint32_t script_stats   = 0;
+      uint32_t script_widgets = 0;
+      uint32_t forge_labels   = 0;
+   } bits;
+   struct {
+      uint32_t conditions = 0;
+      uint32_t actions    = 0;
+      uint32_t triggers   = 0;
+   } counts;
+   //
+   void update_from(GameVariant&);
+   void update_from(GameVariantDataMultiplayer&);
+   void update_script_from(GameVariantDataMultiplayer&);
+};
+
 class GameVariantDataMultiplayer : public GameVariantData {
    protected:
       void _set_up_indexed_dummies();
       void _tear_down_indexed_dummies();
+      //
+      std::vector<RVTEditorBlock::subrecord*> editor_subrecords_pending_write;
       //
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
@@ -40,6 +75,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
       virtual void write(cobb::bit_or_byte_writer&) noexcept override;
       virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
+      virtual void offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept override;
+      virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept override;
       //
       static constexpr uint8_t encoding_version_vanilla = 0x6A;
       static constexpr uint8_t encoding_version_tu1     = 0x6B;

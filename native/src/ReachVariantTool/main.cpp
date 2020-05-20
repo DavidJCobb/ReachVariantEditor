@@ -71,11 +71,6 @@ int main(int argc, char *argv[]) {
 //       there, but I'd like the "meat" of the decompile state to exist in the files for the 
 //       decompiler itself.
 //
-//     = IT APPEARS THAT THE isBuiltIn FLAG ON THE MP DATA TELLS MCC NOT TO USE THE CHDR/MPVR 
-//       TITLE AND DESCRIPTION, PREFERRING INSTEAD TO USE LOCALIZED TEXT EITHER INSIDE OF THE 
-//       GAME VARIANT OR BASED ON THE MCC. SPECIFICALLY, MCC FITS THE genericName ON THE MP 
-//       DATA INTO THE STRINGS IT USES INSTEAD I.E. "$HR_GVAR_[genericName]".
-//
 //     - The compiler interprets "0x" and "0b" as valid integer literals.
 //
 //     = The compiler typically logs errors at the end of the affected object. In some cases, 
@@ -110,6 +105,43 @@ int main(int argc, char *argv[]) {
 //        - Syntax highlighting in the code editor
 //
 //     = IDEA FOR HANDLING SAVE ERRORS
+//
+//        = IN PROGRESS.
+//
+//           = Reconsider something: is there any situation where, even after moving both the 
+//             main string table and the script content to the xRVT block, we'd still be out of 
+//             room due to team names or localized name/description/category content? Can the 
+//             total sizes of their buffers add up to large enough to cause problems? I'm not 
+//             sure that could happen even if we stored them uncompressed. If it can't happen, 
+//             then there's no reason to ever move those strings to an editor subrecord, so we 
+//             shouldn't ever do so (and should remove support for it e.g. subrecord signatures 
+//             reserved for them).
+//
+//           - Have the script editor's bottom bar use ReachMPSizeData.
+//
+//           - Define ReachStringTable::write_placeholder_data, which should write all string 
+//             content out as "str001", "str002", etc.. Make sure to also define a getter which 
+//             allows us to retrieve the size of this data.
+//
+//              - This should be set up in such a way that it DOESN'T clobber the cached export 
+//                data for non-placeholder content.
+//
+//           - Have the MP data itself use ReachMPSizeData to determine whether the string 
+//             table and/or gametype script need to be written to an editor subrecord.
+//
+//              - Be sure to catch the case of the string table placeholder data not giving us 
+//                enough of a size reduction to fit the whole gametype (i.e. the case of needing 
+//                to move both strings and script to an editor subrecord).
+//
+//              - Define ReachStringTable::write_fallback_data, which writes its strings as raw 
+//                content (no offsets; just every string end-to-end) to a cobb::generic_buffer. 
+//                We'll use this to generate the editor subrecord.
+//
+//           - If the string table's own internal limits are exceeded, writing should return a 
+//             failure result instead of crashing/asserting/etc., and the MP data write code 
+//             should handle this by writing the string table to a subrecord.
+//
+//           - Allow the MP data to read the relevant editor subrecords.
 //
 //        - There are really only two problems that can occur when saving a file: the string 
 //          table is too large, or the total content of the file is too large (itself due to 
@@ -226,10 +258,6 @@ int main(int argc, char *argv[]) {
 //        - What happens if we attach the player to an object that is destroyed or equipped 
 //          on contact (e.g. a powerup, a landmine; an armor ability or weapon when they 
 //          are not carrying one)?
-//
-//        - Confirm that the unit of measurement for Vector3 positions is consistent for 
-//          all opcodes; 0.1 Forge units = 1.0 Megalo units is confirmed for place_at_me 
-//          and set_shape but not any other opcodes.
 //
 //        - Re-test setting a vehicle's maximum health; use a constant like 150; see if it 
 //          still sets current health to 1 without changing max health and if so, document 

@@ -41,6 +41,63 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.write(uint8_t(0));
 }
 
+RVTEditorBlock::~RVTEditorBlock() {
+   for (auto* sub : this->subrecords)
+      if (sub)
+         delete sub;
+   this->subrecords.clear();
+}
+bool RVTEditorBlock::read(reach_block_stream& stream) noexcept {
+   auto bytes = stream.bytes;
+   if (!ReachFileBlock::read(bytes))
+      return false;
+   while (stream.is_in_bounds(0x10)) { // has a subrecord header
+      auto sub = new subrecord;
+      this->subrecords.push_back(sub);
+      bytes.read(sub->signature);
+      bytes.read(sub->version);
+      bytes.read(sub->flags);
+      bytes.read(sub->size);
+      //
+      sub->data.allocate(sub->size);
+      auto base = sub->data.data();
+      for (uint32_t i = 0; i < sub->size; ++i)
+         bytes.read(base[i]);
+   }
+   return true;
+}
+void RVTEditorBlock::write(cobb::bytewriter& stream) const noexcept {
+   ReachFileBlock::write(stream);
+   for (auto* sub : this->subrecords) {
+      if (!sub)
+         continue;
+      stream.write(sub->signature);
+      stream.write(sub->version);
+      stream.write(sub->flags);
+      stream.write(sub->size);
+      //
+      auto base = sub->data.data();
+      for (uint32_t i = 0; i < sub->size; ++i)
+         stream.write(base[i]);
+   }
+   ReachFileBlock::write_postprocess(stream);
+}
+void RVTEditorBlock::adopt(std::vector<RVTEditorBlock::subrecord*>& adoptees) noexcept {
+   auto& list = this->subrecords;
+   auto  size = list.size();
+   auto  add  = adoptees.size();
+   list.resize(size + add);
+   for (size_t i = 0; i < add; ++i)
+      list[size + i] = adoptees[i];
+   adoptees.clear();
+}
+RVTEditorBlock::subrecord* RVTEditorBlock::lookup(uint32_t signature) const {
+   for (auto* sub : this->subrecords)
+      if (sub && sub->signature == signature)
+         return sub;
+   return nullptr;
+}
+
 bool GameVariantHeader::read(cobb::ibitreader& stream) noexcept {
    this->build.major = 0; // not in mpvr
    this->build.minor = 0; // not in mpvr
@@ -365,6 +422,7 @@ bool GameVariant::read(cobb::mapped_file& file) {
    bool chdr   = false;
    bool mpvr   = false;
    bool _eof   = false;
+   RVTEditorBlock editor_block;
    while (auto block = blocks.next()) {
       if (!blam) {
          //
@@ -425,6 +483,9 @@ bool GameVariant::read(cobb::mapped_file& file) {
             this->eofBlock.read(block);
             _eof = true;
             break;
+         case 'xRVT':
+            editor_block.read(block);
+            break;
          default:
             this->unknownBlocks.emplace_back().read(block);
       }
@@ -443,9 +504,17 @@ bool GameVariant::read(cobb::mapped_file& file) {
       error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
       return false;
    }
+   if (auto mp = this->get_multiplayer_data()) {
+      for (auto*& sub : editor_block.subrecords) {
+         if (mp->receive_editor_data(sub))
+            sub = nullptr;
+      }
+   }
    return true;
 }
 void GameVariant::write(cobb::bit_or_byte_writer& writer) noexcept {
+   RVTEditorBlock editor_block;
+   //
    this->blamHeader.write(writer.bytes);
    this->contentHeader.write(writer.bytes);
    writer.synchronize();
@@ -456,6 +525,14 @@ void GameVariant::write(cobb::bit_or_byte_writer& writer) noexcept {
    //
    this->contentHeader.write_last_minute_fixup(writer.bytes);
    this->multiplayer.write_last_minute_fixup(writer);
+   //
+   std::vector<RVTEditorBlock::subrecord*> offerings;
+   if (auto mp = this->get_multiplayer_data()) {
+      mp->offer_editor_data(offerings);
+      editor_block.adopt(offerings);
+      if (editor_block.has_subrecords())
+         editor_block.write(writer.bytes);
+   }
 }
 void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
    printf("Testing our hashing algorithm on this game variant...\n");

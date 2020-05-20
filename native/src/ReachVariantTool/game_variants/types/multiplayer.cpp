@@ -12,6 +12,202 @@
 #include "../errors.h"
 #include "../warnings.h"
 
+ReachMPSizeData::ReachMPSizeData() {
+   {  // Header information
+      auto& bitcount = this->bits.header;
+      bitcount = 0;
+      // ReachBlockMPVR members:
+      bitcount += 0x0C * 8; // size of a block header
+      bitcount += 0x14 * 8; // size of SHA-1 hash
+      bitcount += 0x08 * 8; // size of four padding bytes and four-byte length of hashable content
+      bitcount += decltype(ReachBlockMPVR::type)::bitcount;
+      // GameVariantDataMultiplayer members:
+      bitcount += cobb::bits_in<decltype(GameVariantDataMultiplayer::encodingVersion)>;
+      bitcount += cobb::bits_in<decltype(GameVariantDataMultiplayer::engineVersion)>;
+      bitcount += MegaloStringIndexOptional::bitcount; // mp->genericName
+      bitcount += decltype(GameVariantDataMultiplayer::isBuiltIn)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::engineIcon)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::engineCategory)::bitcount;
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_traits);
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_options);
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_stats);
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_labels);
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_widgets);
+      bitcount += ReachGameVariantUsedMPObjectTypeList::flag_count;
+      bitcount += decltype(GameVariantDataMultiplayer::variantHeader)::bitcount();
+   }
+   {  // Custom Game options
+      auto& bitcount = this->bits.cg_options;
+      bitcount = 0;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.flags)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.timeLimit)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.roundLimit)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.roundsToWin)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.suddenDeathTime)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.misc.gracePeriod)::bitcount;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.flags)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.livesPerRound)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.teamLivesPerRound)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.respawnTime)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.suicidePenalty)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.betrayalPenalty)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.respawnGrowth)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.loadoutCamTime)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.traitsDuration)::bitcount;
+      bitcount += ReachPlayerTraits::bitcount(); // respawn traits
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.social.observers)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.social.teamChanges)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.social.flags)::bitcount;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.flags)::bitcount;
+      bitcount += ReachPlayerTraits::bitcount(); // base player traits
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.weaponSet)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.vehicleSet)::bitcount;
+      bitcount += ReachPlayerTraits::bitcount() * 3; // powerup traits
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.red.duration)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.blue.duration)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.yellow.duration)::bitcount;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.team.scoring)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.team.species)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::options.team.designatorSwitchType)::bitcount;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::options.loadouts.flags)::bitcount;
+      //
+      bitcount += decltype(GameVariantDataMultiplayer::scoreToWin)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::fireteamsEnabled)::bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::symmetric)::bitcount;
+      //
+      bitcount += ReachLoadoutPalette::bitcount() * std::tuple_size<decltype(GameVariantDataMultiplayer::options.loadouts.palettes)>::value;
+   }
+}
+void ReachMPSizeData::update_from(GameVariant& variant) {
+   auto mp = variant.get_multiplayer_data();
+   if (mp)
+      this->update_from(*mp);
+}
+void ReachMPSizeData::update_from(GameVariantDataMultiplayer& mp) {
+   #pragma region header strings
+      this->bits.header_strings += mp.localizedName.get_size_to_save();
+      this->bits.header_strings += mp.localizedDesc.get_size_to_save();
+      this->bits.header_strings += mp.localizedCategory.get_size_to_save();
+   #pragma endregion
+   #pragma region team configuration
+   {
+      auto& bitcount = this->bits.team_config;
+      auto& list     = mp.options.team.teams;
+      bitcount = 0;
+      for (int i = 0; i < std::extent<decltype(mp.options.team.teams)>::value; i++) // decltype(any_reference) is broken
+         bitcount += list[i].bitcount();
+   }
+   #pragma endregion
+   this->bits.script_traits = ReachMegaloPlayerTraits::bitcount() * mp.scriptData.traits.size(); // list count is included in "header information"
+   #pragma region script options
+   {
+      auto& bitcount = this->bits.script_options;
+      auto& list     = mp.scriptData.options;
+      bitcount = 0; // list count is included in "header information"
+      for (auto& item : list)
+         bitcount += item.bitcount();
+   }
+   #pragma endregion
+   this->bits.script_stats   = ReachMegaloGameStat::bitcount() * mp.scriptContent.stats.size(); // list count is included in "header information"
+   this->bits.script_widgets = Megalo::HUDWidgetDeclaration::bitcount() * mp.scriptContent.widgets.size(); // list count is included in "header information"
+   #pragma region Forge labels
+   {
+      auto& bitcount = this->bits.forge_labels;
+      auto& list     = mp.scriptContent.forgeLabels;
+      bitcount = 0; // list count is included in "header information"
+      for (auto& item : list)
+         bitcount += item.bitcount();
+   }
+   #pragma endregion
+   this->bits.script_strings = mp.scriptData.strings.get_size_to_save();
+   this->bits.map_perms      = mp.mapPermissions.bitcount();
+   //
+   this->update_script_from(mp);
+}
+void ReachMPSizeData::update_script_from(GameVariantDataMultiplayer& mp) {
+   auto& bitcount = this->bits.script_content;
+   //
+   bitcount  = cobb::bitcount(Megalo::Limits::max_conditions); // count
+   bitcount += cobb::bitcount(Megalo::Limits::max_actions);    // count
+   bitcount += cobb::bitcount(Megalo::Limits::max_triggers);   // count
+   //
+   cobb::bit_or_byte_writer writer;
+   auto& list = mp.scriptContent.triggers;
+   auto& bits = writer.bits;
+   //
+   this->counts.triggers   = 0;
+   this->counts.conditions = 0;
+   this->counts.actions    = 0;
+   for (auto& trigger : list) {
+      ++this->counts.triggers;
+      //
+      trigger.write(bits);
+      for (auto opcode : trigger.opcodes) {
+         opcode->write(bits);
+         //
+         auto action = dynamic_cast<Megalo::Action*>(opcode);
+         if (action)
+            ++this->counts.actions;
+         else
+            ++this->counts.conditions;
+      }
+   }
+   mp.scriptContent.entryPoints.write(bits);
+   {  // Script variable declarations
+      auto& vars = mp.scriptContent.variables;
+      vars.global.write(bits);
+      vars.player.write(bits);
+      vars.object.write(bits);
+      vars.team.write(bits);
+   }
+   bitcount += writer.bits.get_bitpos();
+}
+
+void GameVariantDataMultiplayer::offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept {
+   auto& send = this->editor_subrecords_pending_write;
+   out.resize(send.size());
+   out.clear();
+   std::swap(out, send);
+}
+bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept {
+   if (!subrecord)
+      return false;
+   switch (subrecord->signature) {
+      //
+      // TODO
+      //
+      case RVTEditorBlock::signature_megalo_string_table:
+         //
+         // - read table content
+         //
+         break;
+      case RVTEditorBlock::signature_team_string_table:
+         //
+         // - read team index
+         // - read table content
+         //
+         break;
+      case RVTEditorBlock::signature_metadata_string_table:
+         //
+         // - read enum indicating which metadata
+         // - read table content
+         //
+         break;
+      case RVTEditorBlock::signature_megalo_script:
+         //
+         // - discard existing script content
+         // - read script content
+         //
+         break;
+   }
+   return false;
+}
 bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    auto& error_report = GameEngineVariantLoadError::get();
    error_report.reset();
@@ -24,6 +220,15 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    stream.read(this->engineVersion);
    this->variantHeader.read(stream);
    this->isBuiltIn.read(stream);
+   if (this->isBuiltIn) {
+      //
+      // If this flag is true, then MCC ignores the title and description of the game variant, instead using 
+      // MCC-side localized strings whose keys are derived from the English text of the string pointed to by 
+      // GameVariantDataMultiplayer::genericName i.e. "$hr_gvar_[genericName]" e.g. "$hr_gvar_Halo_Chess+".
+      //
+      this->isBuiltIn = false;
+      printf("Loaded a game variant with isBuiltIn set to (true). There is no value in keeping that, so forcing it to false.");
+   }
    {
       auto& o = this->options;
       auto& m = o.misc;
