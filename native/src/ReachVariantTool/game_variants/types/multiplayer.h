@@ -33,7 +33,6 @@ struct ReachMPSizeData {
    //
    ReachMPSizeData();
    struct {
-      uint32_t total   = 0;
       uint32_t maximum = 0x5028 * 8;
       //
       uint32_t header         = 0;
@@ -58,6 +57,8 @@ struct ReachMPSizeData {
    void update_from(GameVariant&);
    void update_from(GameVariantDataMultiplayer&);
    void update_script_from(GameVariantDataMultiplayer&);
+   //
+   uint32_t total_bits() const noexcept;
 };
 
 class GameVariantDataMultiplayer : public GameVariantData {
@@ -190,4 +191,10 @@ class GameVariantDataMultiplayer : public GameVariantData {
       ReachMegaloOption* create_script_option();
       void delete_script_option(ReachMegaloOption*);
       bool swap_script_options(int8_t index_a, int8_t index_b);
+
+      inline ReachMPSizeData get_size_data() noexcept {
+         ReachMPSizeData data;
+         data.update_from(*this);
+         return data;
+      }
 };

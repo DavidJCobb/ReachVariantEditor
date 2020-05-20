@@ -117,8 +117,6 @@ int main(int argc, char *argv[]) {
 //             shouldn't ever do so (and should remove support for it e.g. subrecord signatures 
 //             reserved for them).
 //
-//           - Have the script editor's bottom bar use ReachMPSizeData.
-//
 //           - Define ReachStringTable::write_placeholder_data, which should write all string 
 //             content out as "str001", "str002", etc.. Make sure to also define a getter which 
 //             allows us to retrieve the size of this data.

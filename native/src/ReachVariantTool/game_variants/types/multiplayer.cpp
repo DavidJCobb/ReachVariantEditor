@@ -168,6 +168,22 @@ void ReachMPSizeData::update_script_from(GameVariantDataMultiplayer& mp) {
    }
    bitcount += writer.bits.get_bitpos();
 }
+uint32_t ReachMPSizeData::total_bits() const noexcept {
+   uint32_t bitcount = 0;
+   bitcount += this->bits.header;
+   bitcount += this->bits.header_strings;
+   bitcount += this->bits.cg_options;
+   bitcount += this->bits.team_config;
+   bitcount += this->bits.script_traits;
+   bitcount += this->bits.script_options;
+   bitcount += this->bits.script_strings;
+   bitcount += this->bits.map_perms;
+   bitcount += this->bits.script_content;
+   bitcount += this->bits.script_stats;
+   bitcount += this->bits.script_widgets;
+   bitcount += this->bits.forge_labels;
+   return bitcount;
+}
 
 void GameVariantDataMultiplayer::offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept {
    auto& send = this->editor_subrecords_pending_write;
@@ -200,9 +216,10 @@ bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* 
          //
          break;
       case RVTEditorBlock::signature_megalo_script:
+         this->scriptContent.triggers.clear(); // owns its contents; deletes them automatically
          //
-         // - discard existing script content
-         // - read script content
+         // TODO: read trigger entry points
+         // TODO: read script content
          //
          break;
    }

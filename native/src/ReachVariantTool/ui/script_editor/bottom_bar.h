@@ -30,4 +30,5 @@ class ScriptEditorBottomPane : public QWidget {
          int script_widgets;
          int forge_labels;
       } indices;
+      ReachMPSizeData sizeData;
 };
