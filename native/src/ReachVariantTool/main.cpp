@@ -117,23 +117,12 @@ int main(int argc, char *argv[]) {
 //             shouldn't ever do so (and should remove support for it e.g. subrecord signatures 
 //             reserved for them).
 //
-//           - Define ReachStringTable::write_placeholder_data, which should write all string 
-//             content out as "str001", "str002", etc.. Make sure to also define a getter which 
-//             allows us to retrieve the size of this data.
-//
-//              - This should be set up in such a way that it DOESN'T clobber the cached export 
-//                data for non-placeholder content.
-//
 //           - Have the MP data itself use ReachMPSizeData to determine whether the string 
 //             table and/or gametype script need to be written to an editor subrecord.
 //
 //              - Be sure to catch the case of the string table placeholder data not giving us 
 //                enough of a size reduction to fit the whole gametype (i.e. the case of needing 
 //                to move both strings and script to an editor subrecord).
-//
-//              - Define ReachStringTable::write_fallback_data, which writes its strings as raw 
-//                content (no offsets; just every string end-to-end) to a cobb::generic_buffer. 
-//                We'll use this to generate the editor subrecord.
 //
 //           - If the string table's own internal limits are exceeded, writing should return a 
 //             failure result instead of crashing/asserting/etc., and the MP data write code 

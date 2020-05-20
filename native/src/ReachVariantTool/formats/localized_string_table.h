@@ -4,6 +4,7 @@
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/indexed_list.h"
+#include "../helpers/memory.h"
 #include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
@@ -170,7 +171,9 @@ class ReachStringTable {
       //
    public:
       bool read(cobb::ibitreader&) noexcept;
-      void write(cobb::bitwriter& stream) noexcept;
+      bool write(cobb::bitwriter& stream) noexcept;
+      bool write_placeholder(cobb::bitwriter& stream) noexcept; // writes all strings as "str000", "str001", etc.
+      void write_fallback_data(cobb::generic_buffer& out) noexcept;
       //
       save_error generate_export_data() noexcept; // returns success bool
       uint32_t get_size_to_save() noexcept;
