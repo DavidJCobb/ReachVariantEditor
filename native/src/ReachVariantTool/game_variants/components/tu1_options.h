@@ -54,6 +54,8 @@ class ReachGameVariantTU1Options {
          this->precisionBloom = 0.0F;
       }
       //
+      static uint32_t bitcount() noexcept;
+      //
       #if __cplusplus <= 201703L
       bool operator==(const ReachGameVariantTU1Options&) const noexcept;
       bool operator!=(const ReachGameVariantTU1Options& other) const noexcept { return !(*this == other); }

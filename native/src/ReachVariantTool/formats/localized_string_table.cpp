@@ -464,7 +464,7 @@ bool ReachStringTable::write(cobb::bitwriter& stream) noexcept {
    stream.write_stream(this->cached_export.raw);
    return true;
 }
-bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
+void ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
    auto prior = stream.get_bitpos();
    //
    auto count = this->strings.size();
@@ -489,14 +489,26 @@ bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
          combined += '\0';
       }
       for (size_t j = 0; j < string.offsets.size(); ++j) {
+         if (string.offsets[j] < 0 && string.strings[j].empty()) {
+            stream.write(0, 1);
+            continue;
+         }
          stream.write(1, 1);
          stream.write(offset, this->offset_bitlength);
       }
    }
    uint32_t uncompressed_size = combined.size();
    if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+      //
+      // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+      // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+      // failure (and should probably assert, actually).
+      //
+      // This failure should only happen if the number of strings times seven is greater than the 
+      // buffer size for the table, which... shouldn't ever happen.
+      //
       stream.go_to_bitpos(prior);
-      return false;
+      return;
    }
    stream.write(uncompressed_size, this->buffer_size_bitlength);
    bool should_compress = uncompressed_size >= 0x40;
@@ -506,7 +518,7 @@ bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
       //
       for (size_t i = 0; i < uncompressed_size; i++)
          stream.write((uint8_t)combined[i]);
-      return true;
+      return;
    }
    //
    // Compress the data with zlib, and then write it to the stream.
@@ -514,8 +526,13 @@ bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
    auto bound = compressBound(uncompressed_size);
    auto buffer = malloc(bound);
    if (!buffer) {
+      //
+      // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+      // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+      // failure (and should probably assert, actually).
+      //
       stream.go_to_bitpos(prior);
-      return false;
+      return;
    }
    uint32_t compressed_size = bound;
    int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
@@ -524,8 +541,13 @@ bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
          break;
       case Z_MEM_ERROR:
       case Z_BUF_ERROR:
+         //
+         // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+         // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+         // failure (and should probably assert, actually).
+         //
          stream.go_to_bitpos(prior);
-         return false;
+         return;
    }
    stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
    static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
@@ -533,7 +555,6 @@ bool ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
    for (size_t i = 0; i < compressed_size; i++)
       stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
    free(buffer);
-   return true;
 }
 void ReachStringTable::write_fallback_data(cobb::generic_buffer& out) noexcept {
    out.allocate(0);

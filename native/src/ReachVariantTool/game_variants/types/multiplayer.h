@@ -35,18 +35,21 @@ struct ReachMPSizeData {
    struct {
       uint32_t maximum = 0x5028 * 8;
       //
-      uint32_t header         = 0;
+      uint32_t header         = 0; // we include MPVR's block header and SHA-1 stuff in this count despite that existing outside of the MP data class
       uint32_t header_strings = 0;
       uint32_t cg_options     = 0;
       uint32_t team_config    = 0;
       uint32_t script_traits  = 0;
       uint32_t script_options = 0;
       uint32_t script_strings = 0;
+      uint32_t option_toggles = 0;
+      uint32_t rating_params  = 0;
       uint32_t map_perms      = 0;
       uint32_t script_content = 0;
       uint32_t script_stats   = 0;
       uint32_t script_widgets = 0;
       uint32_t forge_labels   = 0;
+      uint32_t title_update_1 = 0;
    } bits;
    struct {
       uint32_t conditions = 0;

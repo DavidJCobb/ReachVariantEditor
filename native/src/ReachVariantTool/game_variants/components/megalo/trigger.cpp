@@ -687,6 +687,15 @@ namespace Megalo {
       _stream(stream, i.local);
       _stream(stream, i.pregame);
    }
+   void TriggerEntryPoints::write_placeholder(cobb::bitwriter& stream) const noexcept {
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+   }
    int32_t TriggerEntryPoints::get_index_of_event(entry_type et) const noexcept {
       auto& i = this->indices;
       switch (et) {

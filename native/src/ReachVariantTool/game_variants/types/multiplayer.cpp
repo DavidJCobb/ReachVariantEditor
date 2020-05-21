@@ -26,13 +26,13 @@ ReachMPSizeData::ReachMPSizeData() {
       bitcount += cobb::bits_in<decltype(GameVariantDataMultiplayer::engineVersion)>;
       bitcount += MegaloStringIndexOptional::bitcount; // mp->genericName
       bitcount += decltype(GameVariantDataMultiplayer::isBuiltIn)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::engineIcon)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::engineCategory)::bitcount;
-      bitcount += cobb::bitcount(Megalo::Limits::max_script_traits);
-      bitcount += cobb::bitcount(Megalo::Limits::max_script_options);
-      bitcount += cobb::bitcount(Megalo::Limits::max_script_stats);
-      bitcount += cobb::bitcount(Megalo::Limits::max_script_labels);
-      bitcount += cobb::bitcount(Megalo::Limits::max_script_widgets);
+      bitcount += decltype(GameVariantDataMultiplayer::engineIcon)::max_bitcount;
+      bitcount += decltype(GameVariantDataMultiplayer::engineCategory)::max_bitcount;
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_traits);  // count
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_options); // count
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_stats);   // count
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_labels);  // count
+      bitcount += cobb::bitcount(Megalo::Limits::max_script_widgets); // count
       bitcount += ReachGameVariantUsedMPObjectTypeList::flag_count;
       bitcount += decltype(GameVariantDataMultiplayer::variantHeader)::bitcount();
    }
@@ -83,6 +83,9 @@ ReachMPSizeData::ReachMPSizeData() {
       //
       bitcount += ReachLoadoutPalette::bitcount() * std::tuple_size<decltype(GameVariantDataMultiplayer::options.loadouts.palettes)>::value;
    }
+   this->bits.option_toggles = (ReachGameVariantEngineOptionToggles::dword_count + ReachGameVariantMegaloOptionToggles::dword_count) * 32 * 2;
+   this->bits.rating_params  = ReachPlayerRatingParams::bitcount();
+   this->bits.title_update_1 = ReachGameVariantTU1Options::bitcount();
 }
 void ReachMPSizeData::update_from(GameVariant& variant) {
    auto mp = variant.get_multiplayer_data();
@@ -177,11 +180,14 @@ uint32_t ReachMPSizeData::total_bits() const noexcept {
    bitcount += this->bits.script_traits;
    bitcount += this->bits.script_options;
    bitcount += this->bits.script_strings;
+   bitcount += this->bits.option_toggles;
+   bitcount += this->bits.rating_params;
    bitcount += this->bits.map_perms;
    bitcount += this->bits.script_content;
    bitcount += this->bits.script_stats;
    bitcount += this->bits.script_widgets;
    bitcount += this->bits.forge_labels;
+   bitcount += this->bits.title_update_1;
    return bitcount;
 }
 
@@ -462,6 +468,16 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    //
    this->encodingVersion = encoding_version_tu1; // upgrade, so that TU1 settings are always saved
    //
+   auto predicted_size = this->get_size_data();
+   bool strings_in_ex  = false;
+   bool script_in_ex   = false;
+   {
+      auto total = predicted_size.total_bits();
+      if (total > predicted_size.bits.maximum) {
+         strings_in_ex = true;
+      }
+   }
+   //
    bits.write(this->encodingVersion);
    bits.write(this->engineVersion);
    this->variantHeader.write(bits);
@@ -528,7 +544,28 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       bits.write(o.size(), cobb::bitcount(Megalo::Limits::max_script_options));
       for (auto& option : o)
          option.write(bits);
-      sd.strings.write(bits);
+      //
+      if (!strings_in_ex) {
+         bool success = sd.strings.write(bits);
+         strings_in_ex = !success;
+      }
+      if (strings_in_ex) {
+         auto prior = bits.get_bitpos();
+         sd.strings.write_placeholder(bits);
+         auto after = bits.get_bitpos();
+         predicted_size.bits.script_strings = after - prior;
+         //
+         auto subrecord = new RVTEditorBlock::subrecord;
+         this->editor_subrecords_pending_write.push_back(subrecord);
+         subrecord->signature = RVTEditorBlock::signature_megalo_string_table;
+         subrecord->version   = 0;
+         sd.strings.write_fallback_data(subrecord->data);
+         subrecord->size = subrecord->data.size();
+         //
+         if (predicted_size.total_bits() > predicted_size.bits.maximum) {
+            script_in_ex = true;
+         }
+      }
    }
    {
       MegaloStringIndexOptional index = this->genericName->index;
@@ -566,17 +603,59 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          for (auto& trigger : content.triggers)
             trigger.generate_flat_opcode_lists(*this, allConditions, allActions);
          //
-         bits.write(allConditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
-         for (auto opcode : allConditions)
-            opcode->write(bits);
-         //
-         bits.write(allActions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
-         for (auto opcode : allActions)
-            opcode->write(bits);
-         //
-         bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
-         for (auto& trigger : content.triggers)
-            trigger.write(bits);
+         if (script_in_ex) {
+            //
+            // The script cannot fit inside of the MPVR block. Write an empty script as a placeholder, and 
+            // store the true script content in an xRVT subrecord.
+            //
+            auto prior = bits.get_bitpos();
+            bits.write(0, cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+            bits.write(0, cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+            bits.write(0, cobb::bitcount(Megalo::Limits::max_triggers));
+            auto after = bits.get_bitpos();
+            predicted_size.bits.script_content = after - prior;
+            //
+            auto subrecord = new RVTEditorBlock::subrecord;
+            this->editor_subrecords_pending_write.push_back(subrecord);
+            subrecord->signature = RVTEditorBlock::signature_megalo_script;
+            subrecord->version   = 0;
+            //
+            cobb::bitwriter temp;
+            temp.write(allConditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+            for (auto opcode : allConditions)
+               opcode->write(temp);
+            //
+            temp.write(allActions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+            for (auto opcode : allActions)
+               opcode->write(temp);
+            //
+            temp.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
+            for (auto& trigger : content.triggers)
+               trigger.write(temp);
+            //
+            content.entryPoints.write(temp);
+            //
+            auto& buffer = subrecord->data;
+            auto  size   = temp.get_bytespan();
+            buffer.allocate(size);
+            memcpy(buffer.data(), temp.data(), size);
+            subrecord->size = size;
+         } else {
+            //
+            // Normal save code for a script that can fit inside of the MPVR block.
+            //
+            bits.write(allConditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+            for (auto opcode : allConditions)
+               opcode->write(bits);
+            //
+            bits.write(allActions.size(), cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+            for (auto opcode : allActions)
+               opcode->write(bits);
+            //
+            bits.write(content.triggers.size(), cobb::bitcount(Megalo::Limits::max_triggers));
+            for (auto& trigger : content.triggers)
+               trigger.write(bits);
+         }
       }
       //
       bits.write(content.stats.size(), cobb::bitcount(Megalo::Limits::max_script_stats));
@@ -595,7 +674,11 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
       for (auto& widget : content.widgets)
          widget.write(bits);
       //
-      content.entryPoints.write(bits);
+      if (script_in_ex)
+         content.entryPoints.write_placeholder(bits);
+      else
+         content.entryPoints.write(bits);
+      //
       content.usedMPObjectTypes.write(bits);
       //
       bits.write(content.forgeLabels.size(), cobb::bitcount(Megalo::Limits::max_script_labels));

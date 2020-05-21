@@ -41,6 +41,10 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.write(uint8_t(0));
 }
 
+RVTEditorBlock::RVTEditorBlock() : ReachFileBlock('xRVT', ReachFileBlock::any_size) {
+   this->found = this->expected; // TODO: we do this so the block writes properly if it wasn't already present in the file, but this is ugly; make it better
+   this->found.size = 0;
+}
 RVTEditorBlock::~RVTEditorBlock() {
    for (auto* sub : this->subrecords)
       if (sub)
@@ -54,10 +58,10 @@ bool RVTEditorBlock::read(reach_block_stream& stream) noexcept {
    while (stream.is_in_bounds(0x10)) { // has a subrecord header
       auto sub = new subrecord;
       this->subrecords.push_back(sub);
-      bytes.read(sub->signature);
-      bytes.read(sub->version);
-      bytes.read(sub->flags);
-      bytes.read(sub->size);
+      bytes.read(sub->signature, cobb::endian_t::big);
+      bytes.read(sub->version,   cobb::endian_t::big);
+      bytes.read(sub->flags,     cobb::endian_t::big);
+      bytes.read(sub->size,      cobb::endian_t::big);
       //
       sub->data.allocate(sub->size);
       auto base = sub->data.data();
@@ -71,10 +75,14 @@ void RVTEditorBlock::write(cobb::bytewriter& stream) const noexcept {
    for (auto* sub : this->subrecords) {
       if (!sub)
          continue;
-      stream.write(sub->signature);
-      stream.write(sub->version);
-      stream.write(sub->flags);
-      stream.write(sub->size);
+      #if _DEBUG
+         if (sub->size < sub->data.size())
+            __debugbreak();
+      #endif
+      stream.write(sub->signature, cobb::endian_t::big);
+      stream.write(sub->version,   cobb::endian_t::big);
+      stream.write(sub->flags,     cobb::endian_t::big);
+      stream.write(sub->size,      cobb::endian_t::big);
       //
       auto base = sub->data.data();
       for (uint32_t i = 0; i < sub->size; ++i)

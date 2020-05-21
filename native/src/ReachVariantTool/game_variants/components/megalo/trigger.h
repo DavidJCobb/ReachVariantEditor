@@ -130,6 +130,7 @@ namespace Megalo {
          //
          bool read(cobb::ibitreader& stream) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
+         void write_placeholder(cobb::bitwriter& stream) const noexcept;
          //
          int32_t get_index_of_event(entry_type) const noexcept;
          void set_index_of_event(entry_type, int32_t trigger_index) noexcept; // does nothing if the (entry_type) does not correspond to an event

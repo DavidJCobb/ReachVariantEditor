@@ -20,6 +20,17 @@ void ReachGameVariantTU1Options::write(cobb::bitwriter& stream) const noexcept {
    stream.write_compressed_float(this->magnumDamage,              8, 0.0F, 10.0F, false, true);
    stream.write_compressed_float(this->magnumFireDelay,           8, 0.0F, 10.0F, false, true);
 }
+/*static*/ uint32_t ReachGameVariantTU1Options::bitcount() noexcept {
+   uint32_t bitcount = decltype(flags)::max_bitcount;
+   bitcount += 8;
+   bitcount += 8;
+   bitcount += 8;
+   bitcount += 8;
+   bitcount += 8;
+   bitcount += 8;
+   bitcount += 8;
+   return bitcount;
+}
 
 void ReachGameVariantTU1Options::make_vanilla() noexcept {
    this->flags = 0;

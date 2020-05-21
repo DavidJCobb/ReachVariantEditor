@@ -104,6 +104,13 @@ int main(int argc, char *argv[]) {
 //
 //        - Syntax highlighting in the code editor
 //
+//     - OPENING A ZERO-BYTE FILE SHOWS AN INCORRECT ERROR MESSAGE (WinAPI code 0x3EE: the volume 
+//       for the file has been externally altered).
+//
+//     - Opening a file with an MPVR block that is too large (size > 0x5028) yields only a very 
+//       generic error message stating that "something went wrong while reading the multiplayer 
+//       data."
+//
 //     = IDEA FOR HANDLING SAVE ERRORS
 //
 //        = IN PROGRESS.
@@ -120,15 +127,15 @@ int main(int argc, char *argv[]) {
 //           - Have the MP data itself use ReachMPSizeData to determine whether the string 
 //             table and/or gametype script need to be written to an editor subrecord.
 //
-//              - Be sure to catch the case of the string table placeholder data not giving us 
-//                enough of a size reduction to fit the whole gametype (i.e. the case of needing 
-//                to move both strings and script to an editor subrecord).
-//
-//           - If the string table's own internal limits are exceeded, writing should return a 
-//             failure result instead of crashing/asserting/etc., and the MP data write code 
-//             should handle this by writing the string table to a subrecord.
+//              - FINISH TESTING.
 //
 //           - Allow the MP data to read the relevant editor subrecords.
+//
+//           = UX: We should generate the file to save BEFORE we ask the user where to save it; 
+//             that way, we can detect (how?) whether anything had to be moved to the xRVT block 
+//             and if so, ask the user if they really want to save the file in that condition. 
+//             (We could even use an alternate file extension for affected files, calling them 
+//             "work-in-progress game variants" or somesuch.)
 //
 //        - There are really only two problems that can occur when saving a file: the string 
 //          table is too large, or the total content of the file is too large (itself due to 
@@ -237,6 +244,8 @@ int main(int argc, char *argv[]) {
 //          modified versions of the decompiled scripts that use aliases where appropriate 
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
+//
+//        - The film clip opcode, now that MCC has theater.
 //
 //        - Test the "reset round" flags -- specifically, test what happens when they're 
 //          turned off. (This isn't related to Megalo but oh well, this is my in-game test 

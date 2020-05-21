@@ -32,7 +32,7 @@ enum class ReachFileType : int8_t {
 
 class RVTEditorBlock : public ReachFileBlock {
    public:
-      RVTEditorBlock() : ReachFileBlock('xRVT', ReachFileBlock::any_size) {}
+      RVTEditorBlock();
       ~RVTEditorBlock();
       //
       static constexpr uint32_t signature_megalo_string_table   = 'mstr';

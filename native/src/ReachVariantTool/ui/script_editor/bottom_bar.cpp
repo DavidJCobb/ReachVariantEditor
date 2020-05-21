@@ -107,14 +107,14 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
       tr("Player rating parameters"),
       tr("Bits used to encode player rating parameters. This data cannot be made smaller."),
       QColor(140, 80, 60),
-      ReachPlayerRatingParams::bitcount() // bits
+      this->sizeData.bits.rating_params // bits
    );
    //
    widget->addSegment(
       tr("Option toggles"),
       tr("Bits used to encode option visibility and availability toggles. This data cannot be made smaller."),
       QColor(130, 70, 100),
-      (ReachGameVariantEngineOptionToggles::dword_count + ReachGameVariantMegaloOptionToggles::dword_count) * 32 * 2 // bits
+      this->sizeData.bits.option_toggles // bits
    );
    //
    indices.script_content = this->ui.meter->segmentCount();
@@ -125,6 +125,7 @@ ScriptEditorBottomPane::ScriptEditorBottomPane(QWidget* parent) : QWidget(parent
       0 // bits
    );
    //
+   indices.title_update_1 = this->ui.meter->segmentCount();
    widget->addSegment(
       tr("TU1 Configuration"),
       tr("Bits used to encode the Title Update settings. This data cannot be made smaller."),
@@ -173,8 +174,9 @@ void ScriptEditorBottomPane::updateFixedLengthAreas() {
    auto  widget  = this->ui.meter;
    auto& indices = this->indices;
    auto& data    = this->sizeData;
-   widget->modifySegmentQuantity(indices.header,     data.bits.header);
-   widget->modifySegmentQuantity(indices.cg_options, data.bits.cg_options);
+   widget->modifySegmentQuantity(indices.header,         data.bits.header);
+   widget->modifySegmentQuantity(indices.cg_options,     data.bits.cg_options);
+   widget->modifySegmentQuantity(indices.title_update_1, data.bits.title_update_1);
 }
 void ScriptEditorBottomPane::updateScriptSize(GameVariant* variant) {
    if (!variant) {
