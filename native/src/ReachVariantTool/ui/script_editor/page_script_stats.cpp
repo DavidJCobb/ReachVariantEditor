@@ -75,11 +75,13 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          if (!mp)
             return;
          auto& list = mp->scriptContent.stats;
-         if (list.size() >= Megalo::Limits::max_script_options) {
+         if (list.size() >= Megalo::Limits::max_script_stats) {
             QMessageBox::information(this, tr("Cannot add stat"), tr("Game variants cannot have more than %1 stats.").arg(Megalo::Limits::max_script_stats));
             return;
          }
          this->target = list.emplace_back();
+         if (!this->target)
+            return;
          this->target->is_defined = true;
          if (auto str = mp->scriptData.strings.get_empty_entry()) // If possible, default the new stat's name to an empty string
             this->target->name = str;

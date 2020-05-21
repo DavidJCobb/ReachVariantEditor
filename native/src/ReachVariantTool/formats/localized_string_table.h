@@ -173,6 +173,7 @@ class ReachStringTable {
       bool read(cobb::ibitreader&) noexcept;
       bool write(cobb::bitwriter& stream) noexcept;
       void write_placeholder(cobb::bitwriter& stream) noexcept; // writes all strings as "str000", "str001", etc.
+      void read_fallback_data(cobb::generic_buffer&) noexcept;
       void write_fallback_data(cobb::generic_buffer& out) noexcept;
       //
       save_error generate_export_data() noexcept; // returns success bool

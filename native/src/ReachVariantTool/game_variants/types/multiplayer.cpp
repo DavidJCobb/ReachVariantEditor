@@ -94,7 +94,7 @@ void ReachMPSizeData::update_from(GameVariant& variant) {
 }
 void ReachMPSizeData::update_from(GameVariantDataMultiplayer& mp) {
    #pragma region header strings
-      this->bits.header_strings += mp.localizedName.get_size_to_save();
+      this->bits.header_strings  = mp.localizedName.get_size_to_save();
       this->bits.header_strings += mp.localizedDesc.get_size_to_save();
       this->bits.header_strings += mp.localizedCategory.get_size_to_save();
    #pragma endregion
@@ -201,35 +201,99 @@ bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* 
    if (!subrecord)
       return false;
    switch (subrecord->signature) {
-      //
-      // TODO
-      //
       case RVTEditorBlock::signature_megalo_string_table:
-         //
-         // - read table content
-         //
-         break;
-      case RVTEditorBlock::signature_team_string_table:
-         //
-         // - read team index
-         // - read table content
-         //
-         break;
-      case RVTEditorBlock::signature_metadata_string_table:
-         //
-         // - read enum indicating which metadata
-         // - read table content
-         //
-         break;
+         this->scriptData.strings.read_fallback_data(subrecord->data);
+         delete subrecord;
+         return true;
       case RVTEditorBlock::signature_megalo_script:
          this->scriptContent.triggers.clear(); // owns its contents; deletes them automatically
-         //
-         // TODO: read trigger entry points
-         // TODO: read script content
-         //
-         break;
+         {
+            auto& error_report = GameEngineVariantLoadError::get();
+            cobb::reader reader(subrecord->data.data(), subrecord->data.size());
+            this->_read_script_code(reader.bits);
+            if (!this->scriptContent.entryPoints.read(reader.bits))
+               return false;
+         }
+         delete subrecord;
+         return true;
    }
    return false;
+}
+bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noexcept {
+   this->scriptContent.triggers.clear(); // owns its contents; deletes them automatically
+   //
+   auto& error_report = GameEngineVariantLoadError::get();
+   //
+   int   count;
+   auto& conditions = this->scriptContent.raw.conditions;
+   auto& actions    = this->scriptContent.raw.actions;
+   auto& triggers   = this->scriptContent.triggers;
+   //
+   count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
+   conditions.resize(count);
+   for (size_t i = 0; i < count; i++) {
+      if (!conditions[i].read(stream, *this)) {
+         error_report.failure_index = i;
+         return false;
+      }
+      if (!stream.is_in_bounds()) {
+         error_report.state         = GameEngineVariantLoadError::load_state::failure;
+         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
+         error_report.failure_index = i;
+         error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+         return false;
+      }
+   }
+   //
+   count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
+   actions.resize(count);
+   for (size_t i = 0; i < count; i++) {
+      if (!actions[i].read(stream, *this)) {
+         error_report.failure_index = i;
+         return false;
+      }
+      if (!stream.is_in_bounds()) {
+         error_report.state         = GameEngineVariantLoadError::load_state::failure;
+         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
+         error_report.failure_index = i;
+         error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+         return false;
+      }
+   }
+   //
+   count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
+   triggers.reserve(count);
+   for (size_t i = 0; i < count; i++) {
+      auto trigger = triggers.emplace_back();
+      if (!trigger->read(stream, *this)) {
+         error_report.failure_index = i;
+         return false;
+      }
+      if (!stream.is_in_bounds()) {
+         error_report.state         = GameEngineVariantLoadError::load_state::failure;
+         error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_triggers;
+         error_report.failure_index = i;
+         error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+         return false;
+      }
+      trigger->postprocess_opcodes(conditions, actions);
+   }
+}
+
+namespace {
+   bool _error_check_count(int count, int maximum, GameEngineVariantLoadError::load_failure_detail detail) {
+      if (count > maximum) {
+         auto& error_report = GameEngineVariantLoadError::get();
+         //
+         error_report.state  = GameEngineVariantLoadError::load_state::failure;
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::invalid_mpvr_data;
+         error_report.detail = detail;
+         error_report.extra[0] = count;
+         error_report.extra[1] = maximum;
+         return false;
+      }
+      return true;
+   }
 }
 bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    auto& error_report = GameEngineVariantLoadError::get();
@@ -311,12 +375,16 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       int count;
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_traits));
+      if (!_error_check_count(count, Megalo::Limits::max_script_traits, GameEngineVariantLoadError::load_failure_detail::too_many_script_traits))
+         return false;
       for (int i = 0; i < count; i++) {
          auto& traits = t[i];
          traits.read(stream);
       }
       //
       count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_options));
+      if (!_error_check_count(count, Megalo::Limits::max_script_options, GameEngineVariantLoadError::load_failure_detail::too_many_script_options))
+         return false;
       for (int i = 0; i < count; i++) {
          auto& option = o[i];
          option.read(stream);
@@ -356,62 +424,11 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       m.hidden.read(stream);
    }
    {  // Megalo
-      int  count;
-      auto& conditions = this->scriptContent.raw.conditions;
-      auto& actions    = this->scriptContent.raw.actions;
-      auto& triggers   = this->scriptContent.triggers;
+      this->_read_script_code(stream);
       //
-      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
-      conditions.resize(count);
-      for (size_t i = 0; i < count; i++) {
-         if (!conditions[i].read(stream, *this)) {
-            error_report.failure_index = i;
-            return false;
-         }
-         if (!stream.is_in_bounds()) {
-            error_report.state         = GameEngineVariantLoadError::load_state::failure;
-            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_conditions;
-            error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
-            return false;
-         }
-      }
-      //
-      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_actions)); // 11 bits
-      actions.resize(count);
-      for (size_t i = 0; i < count; i++) {
-         if (!actions[i].read(stream, *this)) {
-            error_report.failure_index = i;
-            return false;
-         }
-         if (!stream.is_in_bounds()) {
-            error_report.state         = GameEngineVariantLoadError::load_state::failure;
-            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
-            error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
-            return false;
-         }
-      }
-      //
-      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_triggers));
-      triggers.reserve(count);
-      for (size_t i = 0; i < count; i++) {
-         auto trigger = triggers.emplace_back();
-         if (!trigger->read(stream, *this)) {
-            error_report.failure_index = i;
-            return false;
-         }
-         if (!stream.is_in_bounds()) {
-            error_report.state         = GameEngineVariantLoadError::load_state::failure;
-            error_report.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_triggers;
-            error_report.failure_index = i;
-            error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
-            return false;
-         }
-         trigger->postprocess_opcodes(conditions, actions);
-      }
-      //
-      count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
+      int count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_stats));
+      if (!_error_check_count(count, Megalo::Limits::max_script_stats, GameEngineVariantLoadError::load_failure_detail::too_many_script_stats))
+         return false;
       for (size_t i = 0; i < count; i++) {
          this->scriptContent.stats[i].read(stream, *this);
       }
@@ -425,9 +442,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       }
       {  // HUD widget declarations
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));
-         auto& widgets = this->scriptContent.widgets;
+         if (!_error_check_count(count, Megalo::Limits::max_script_widgets, GameEngineVariantLoadError::load_failure_detail::too_many_script_widgets))
+            return false;
          for (size_t i = 0; i < count; i++) {
-            widgets[i].read(stream);
+            this->scriptContent.widgets[i].read(stream);
          }
       }
       if (!this->scriptContent.entryPoints.read(stream))
@@ -435,10 +453,11 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       this->scriptContent.usedMPObjectTypes.read(stream);
       //
       {  // Forge labels
-         auto&  list  = this->scriptContent.forgeLabels;
          size_t count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_labels));
+         if (!_error_check_count(count, Megalo::Limits::max_script_labels, GameEngineVariantLoadError::load_failure_detail::too_many_forge_labels))
+            return false;
          for (size_t i = 0; i < count; i++) {
-            list[i].read(stream, *this);
+            this->scriptContent.forgeLabels[i].read(stream, *this);
          }
       }
    }

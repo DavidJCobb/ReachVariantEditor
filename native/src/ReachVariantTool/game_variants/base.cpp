@@ -495,10 +495,10 @@ bool GameVariant::read(cobb::mapped_file& file) {
             editor_block.read(block);
             break;
          default:
+            if (_eof) // some files have a TON of empty padding space at their ends
+               break;
             this->unknownBlocks.emplace_back().read(block);
       }
-      if (_eof) // some files have a TON of empty padding space at their ends
-         break;
    }
    if (!chdr) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
@@ -516,6 +516,9 @@ bool GameVariant::read(cobb::mapped_file& file) {
       for (auto*& sub : editor_block.subrecords) {
          if (mp->receive_editor_data(sub))
             sub = nullptr;
+      }
+      if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
+         return false;
       }
    }
    return true;

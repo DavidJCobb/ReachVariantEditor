@@ -35,10 +35,8 @@ class RVTEditorBlock : public ReachFileBlock {
       RVTEditorBlock();
       ~RVTEditorBlock();
       //
-      static constexpr uint32_t signature_megalo_string_table   = 'mstr';
-      static constexpr uint32_t signature_team_string_table     = 'tstr';
-      static constexpr uint32_t signature_metadata_string_table = 'lstr';
-      static constexpr uint32_t signature_megalo_script         = 'mscr';
+      static constexpr uint32_t signature_megalo_string_table = 'mstr';
+      static constexpr uint32_t signature_megalo_script       = 'mscr';
       //
       struct subrecord {
          uint32_t signature = 0;

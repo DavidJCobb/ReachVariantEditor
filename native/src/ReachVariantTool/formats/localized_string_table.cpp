@@ -498,20 +498,17 @@ void ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
       }
    }
    uint32_t uncompressed_size = combined.size();
-   if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
-      //
-      // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
-      // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
-      // failure (and should probably assert, actually).
-      //
-      // This failure should only happen if the number of strings times seven is greater than the 
-      // buffer size for the table, which... shouldn't ever happen.
-      //
-      stream.go_to_bitpos(prior);
-      return;
-   }
+   //
+   // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+   // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+   // failure. If we ever do devise a way to recover, we should use stream.go_to_bitpos(prior) to 
+   // rewind the stream to before we wrote anything.
+   //
+   assert(uncompressed_size < cobb::bitmax(this->buffer_size_bitlength) && "At present, the design of this program means that a failure in ReachStringTable::write_placeholder is irrecoverable. Uncompressed size is too large to be represented using the buffer size bitlength.");
    stream.write(uncompressed_size, this->buffer_size_bitlength);
+   //
    bool should_compress = uncompressed_size >= 0x40;
+   stream.write(should_compress, 1);
    if (!should_compress) {
       //
       // Write uncompressed data to the stream.
@@ -525,15 +522,7 @@ void ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
    //
    auto bound = compressBound(uncompressed_size);
    auto buffer = malloc(bound);
-   if (!buffer) {
-      //
-      // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
-      // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
-      // failure (and should probably assert, actually).
-      //
-      stream.go_to_bitpos(prior);
-      return;
-   }
+   assert(buffer != nullptr && "At present, the design of this program means that a failure in ReachStringTable::write_placeholder is irrecoverable. Unable to allocate memory for the compressed data buffer.");
    uint32_t compressed_size = bound;
    int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
    switch (result) {
@@ -555,6 +544,34 @@ void ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
    for (size_t i = 0; i < compressed_size; i++)
       stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
    free(buffer);
+}
+void ReachStringTable::read_fallback_data(cobb::generic_buffer& buffer) noexcept {
+   uint32_t size = buffer.size();
+   uint8_t* base = buffer.data();
+   uint32_t si   = 0;
+   uint32_t li   = 0;
+   ReachString* string = nullptr;
+   for (uint32_t offset = 0; offset < size; ++offset) {
+      if (li >= reach::language_count) {
+         li = 0;
+         ++si;
+         string = nullptr;
+      }
+      if (!string) {
+         string = this->get_entry(si);
+         if (!string) {
+            string = this->add_new();
+            assert(string);
+         }
+      }
+      //
+      auto c = base[offset];
+      if (c == '\0') {
+         ++li;
+         continue;
+      }
+      string->strings[li] += c;
+   }
 }
 void ReachStringTable::write_fallback_data(cobb::generic_buffer& out) noexcept {
    out.allocate(0);

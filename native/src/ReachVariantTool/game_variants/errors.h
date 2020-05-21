@@ -35,6 +35,7 @@ struct GameEngineVariantLoadError {
       block_missing,
       not_a_blam_file, // can be sent by the "block_blam" failure point
       unsupported_game,
+      invalid_mpvr_data,
    };
    enum class load_failure_detail {
       none,
@@ -46,6 +47,11 @@ struct GameEngineVariantLoadError {
       bad_opcode_impossible_index, // extra[0] is the index; extra[1] is the max allowed index
       bad_widget_meter_parameters_type, // extra[0] is the type
       game_is_halo_2_anniversary,
+      too_many_script_widgets, // extra[0] is the number the file claims to have; extra[1] is the number allowed
+      too_many_script_stats,   // extra[0] is the number the file claims to have; extra[1] is the number allowed
+      too_many_forge_labels,   // extra[0] is the number the file claims to have; extra[1] is the number allowed
+      too_many_script_traits,  // extra[0] is the number the file claims to have; extra[1] is the number allowed
+      too_many_script_options, // extra[0] is the number the file claims to have; extra[1] is the number allowed
    };
 
    load_state          state            = load_state::incomplete;

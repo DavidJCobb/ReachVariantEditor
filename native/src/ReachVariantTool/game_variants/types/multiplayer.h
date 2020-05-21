@@ -71,6 +71,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
       //
       std::vector<RVTEditorBlock::subrecord*> editor_subrecords_pending_write;
       //
+      bool _read_script_code(cobb::ibitreader&) noexcept;
+      //
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
       //
