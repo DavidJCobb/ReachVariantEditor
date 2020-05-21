@@ -875,9 +875,9 @@ namespace Megalo {
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
-               this->raise_error(QString("The compiled script contains %1 conditions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_conditions));
+               this->raise_error(QString("The compiled script contains %1 conditions, but only a maximum of %2 are allowed.").arg(cc).arg(Limits::max_conditions));
             if (ac > Limits::max_actions)
-               this->raise_error(QString("The compiled script contains %1 actions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_actions));
+               this->raise_error(QString("The compiled script contains %1 actions, but only a maximum of %2 are allowed.").arg(ac).arg(Limits::max_actions));
          }
          //
          if (!this->has_errors())

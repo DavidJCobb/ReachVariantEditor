@@ -430,6 +430,7 @@ bool GameVariant::read(cobb::mapped_file& file) {
    bool chdr   = false;
    bool mpvr   = false;
    bool _eof   = false;
+   bool stop   = false;
    RVTEditorBlock editor_block;
    while (auto block = blocks.next()) {
       if (!blam) {
@@ -495,10 +496,14 @@ bool GameVariant::read(cobb::mapped_file& file) {
             editor_block.read(block);
             break;
          default:
-            if (_eof) // some files have a TON of empty padding space at their ends
+            if (_eof) { // some files have a TON of empty padding space at their ends
+               stop = true;
                break;
+            }
             this->unknownBlocks.emplace_back().read(block);
       }
+      if (stop)
+         break;
    }
    if (!chdr) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;

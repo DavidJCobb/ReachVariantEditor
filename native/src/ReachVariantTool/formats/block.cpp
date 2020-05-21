@@ -145,6 +145,9 @@ reach_block_stream ReachFileBlockReader::next() noexcept {
    bytes.read(header.size,      cobb::endian::big);
    bytes.read(header.version,   cobb::endian::big);
    bytes.read(header.flags,     cobb::endian::big);
+   if (header.size < 0xC) { // indicates a bad block, because this should include the size of the header itself
+      return reach_block_stream(reach_block_stream::bad_block);
+   }
    uint32_t pos_block_end = pos_block_start + header.size;
    if (header.signature == '_cmp') {
       uint8_t  decompressed_unk00 = 0;
