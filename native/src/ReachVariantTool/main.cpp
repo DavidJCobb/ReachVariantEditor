@@ -113,64 +113,19 @@ int main(int argc, char *argv[]) {
 //
 //     = IDEA FOR HANDLING SAVE ERRORS
 //
-//        = IN PROGRESS.
+//        = UX: We should generate the file to save BEFORE we ask the user where to save it; 
+//          that way, we can detect (how?) whether anything had to be moved to the xRVT block 
+//          and if so, ask the user if they really want to save the file in that condition. 
+//          (We could even use an alternate file extension for affected files, calling them 
+//          "work-in-progress game variants" or somesuch.)
 //
-//           = Reconsider something: is there any situation where, even after moving both the 
-//             main string table and the script content to the xRVT block, we'd still be out of 
-//             room due to team names or localized name/description/category content? Can the 
-//             total sizes of their buffers add up to large enough to cause problems? I'm not 
-//             sure that could happen even if we stored them uncompressed. If it can't happen, 
-//             then there's no reason to ever move those strings to an editor subrecord, so we 
-//             shouldn't ever do so (and should remove support for it e.g. subrecord signatures 
-//             reserved for them).
+//           - Either way, we need to indicate what we've done i.e. indicate that the saved 
+//             file is usable for further editing but will not be fully functional in-game.
 //
-//           - Have the MP data itself use ReachMPSizeData to determine whether the string 
-//             table and/or gametype script need to be written to an editor subrecord.
-//
-//              - FINISH TESTING.
-//
-//           - Allow the MP data to read the relevant editor subrecords.
-//
-//           = UX: We should generate the file to save BEFORE we ask the user where to save it; 
-//             that way, we can detect (how?) whether anything had to be moved to the xRVT block 
-//             and if so, ask the user if they really want to save the file in that condition. 
-//             (We could even use an alternate file extension for affected files, calling them 
-//             "work-in-progress game variants" or somesuch.)
-//
-//        - There are really only two problems that can occur when saving a file: the string 
-//          table is too large, or the total content of the file is too large (itself due to 
-//          the string table and script content in combination being too big). Currently, the 
-//          editor has no handling for these: some cases of a string table being too large will 
-//          result in an assertion failure during save, while all other problems will just 
-//          silently produce a corrupt file. This is a problem: it prevents overambitious script 
-//          authors from saving their work and correcting their mistakes later.
-//
-//          There is, however, a solution.
-//
-//          We should define a "cobb" file chunk. This chunk should be composed of subrecords, 
-//          each having a signature, version, and length. The GameVariantData class should have 
-//          the following abstract virtual methods (where CobbFileRecord is a loaded subrecord):
-//
-//             virtual bool take_cobb(const CobbFileRecord&) noexcept = 0;
-//             virtual void make_cobb(std::vector<CobbFileRecord>& out) noexcept = 0;
-//
-//          The "make" class will generate any needed subrecords at save time. The "take" class 
-//          will be called for each subrecord found at load time, and will return true if the 
-//          GameVariantData reads, understands, and takes ownership of the data therein.
-//
-//          The idea, then, is that we can have subrecords for every string table in the file 
-//          (because remember: there is more than one) and a subrecord for the script content. 
-//          If it turns out that the string table is too large to save in the normal Megalo 
-//          format, then we can just write each string as "str001", "str002", etc., and write 
-//          the "true" string content into a cobb subrecord. Similarly, if the Megalo script 
-//          cannot fit, we can write a placeholder script (if there is room) and write the 
-//          "true" string content into a cobb subrecord. When loading a file, we will first 
-//          load the dummy string/script content; then, the MP data can "take" the subrecords, 
-//          overwriting the loaded dummy content with the "true" string/script content.
-//
-//          Halo: Reach and the MCC discard any unrecognized file chunks when resaving a file, 
-//          so we can't use custom chunks to embed any data we want to persist through the 
-//          game, but using a custom chunk to embed editor-specific data should be fine.
+//        - The load process can't handle out-of-range indices in indexed lists for files 
+//          using this failsafe system, e.g. accessing widget 1 in a gametype that has no 
+//          widgets. However, we're the only ones generating files like this so malformed 
+//          data like that shouldn't occur (if it does, we screwed up and we'll take the L).
 //
 //     = DEFERRED TASKS
 //
