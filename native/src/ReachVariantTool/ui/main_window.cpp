@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QProcess>
+#include <QSaveFile>
 #include <QString>
 #include <QTextCodec>
 #include <QTextStream>
@@ -14,6 +15,7 @@
 #include <QWidget>
 #include "../editor_state.h"
 #include "../game_variants/base.h"
+#include "../game_variants/io_process.h"
 #include "../game_variants/errors.h"
 #include "../game_variants/warnings.h"
 #include "../helpers/ini.h"
@@ -479,10 +481,33 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    } else {
       fileName = QString::fromWCharArray(editor.variantFilePath());
    }
-   QFile file(fileName);
+   QSaveFile file(fileName);
    if (!file.open(QIODevice::WriteOnly)) {
       QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
       return;
+   }
+   //
+   GameVariantSaveProcess save_process;
+   editor.variant()->write(save_process);
+   if (save_process.variant_is_editor_only()) {
+      auto text = tr("Your game variant exceeds the limits of Halo: Reach's game variant file format. As such, the following data will have to be embedded in a non-standard way to avoid data loss:\n\n");
+      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_scripts))
+         text += tr(" - All script code\n");
+      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_strings))
+         text += tr(" - All script strings\n");
+      text += tr("\nThis data is still visible to this editor; you will not lose any of your work. However, the data is invisible to the game; moreover, if you resave this file through Halo: Reach or the Master Chief Collection, the data will then be lost.\n\nDo you still wish to save this file to <%1>?").arg(fileName);
+      //
+      QMessageBox::StandardButton result = QMessageBox::warning(
+         this,
+         tr("Incomplete game variant"),
+         text,
+         QMessageBox::Yes | QMessageBox::No,
+         QMessageBox::Yes // default button
+      );
+      if (result == QMessageBox::StandardButton::No) {
+         file.cancelWriting();
+         return;
+      }
    }
    if (saveAs) {
       std::wstring temp = fileName.toStdWString();
@@ -491,10 +516,8 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    }
    QDataStream out(&file);
    out.setVersion(QDataStream::Qt_4_5);
-   //
-   cobb::bit_or_byte_writer writer;
-   editor.variant()->write(writer);
-   out.writeRawData((const char*)writer.bytes.data(), writer.bytes.get_bytespan());
+   out.writeRawData((const char*)save_process.writer.bytes.data(), save_process.writer.bytes.get_bytespan());
+   file.commit();
 }
 
 namespace {

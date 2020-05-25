@@ -9,6 +9,7 @@
 #include "../../formats/sha1.h"
 #include "../../helpers/sha1.h"
 
+#include "../io_process.h"
 #include "../errors.h"
 #include "../warnings.h"
 
@@ -191,12 +192,6 @@ uint32_t ReachMPSizeData::total_bits() const noexcept {
    return bitcount;
 }
 
-void GameVariantDataMultiplayer::offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept {
-   auto& send = this->editor_subrecords_pending_write;
-   out.resize(send.size());
-   out.clear();
-   std::swap(out, send);
-}
 bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept {
    if (!subrecord)
       return false;
@@ -278,6 +273,7 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
       }
       trigger->postprocess_opcodes(conditions, actions);
    }
+   return true;
 }
 
 namespace {
@@ -481,9 +477,10 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
    //
    return true;
 }
-void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcept {
+void GameVariantDataMultiplayer::write(GameVariantSaveProcess& save_process) noexcept {
+   auto& writer = save_process.writer;
    writer.synchronize();
-   auto& bits = writer.bits;
+   auto& bits   = writer.bits;
    //
    this->encodingVersion = encoding_version_tu1; // upgrade, so that TU1 settings are always saved
    //
@@ -569,15 +566,15 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
          strings_in_ex = !success;
       }
       if (strings_in_ex) {
+         save_process.set_flag(GameVariantSaveProcess::flag::uses_xrvt_strings);
+         //
          auto prior = bits.get_bitpos();
          sd.strings.write_placeholder(bits);
          auto after = bits.get_bitpos();
          predicted_size.bits.script_strings = after - prior;
          //
-         auto subrecord = new RVTEditorBlock::subrecord;
-         this->editor_subrecords_pending_write.push_back(subrecord);
-         subrecord->signature = RVTEditorBlock::signature_megalo_string_table;
-         subrecord->version   = 0;
+         auto subrecord = save_process.create_subrecord(RVTEditorBlock::signature_megalo_string_table);
+         subrecord->version = 0;
          sd.strings.write_fallback_data(subrecord->data);
          subrecord->size = subrecord->data.size();
          //
@@ -623,6 +620,7 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
             trigger.generate_flat_opcode_lists(*this, allConditions, allActions);
          //
          if (script_in_ex) {
+            save_process.set_flag(GameVariantSaveProcess::flag::uses_xrvt_scripts);
             //
             // The script cannot fit inside of the MPVR block. Write an empty script as a placeholder, and 
             // store the true script content in an xRVT subrecord.
@@ -634,10 +632,8 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
             auto after = bits.get_bitpos();
             predicted_size.bits.script_content = after - prior;
             //
-            auto subrecord = new RVTEditorBlock::subrecord;
-            this->editor_subrecords_pending_write.push_back(subrecord);
-            subrecord->signature = RVTEditorBlock::signature_megalo_script;
-            subrecord->version   = 0;
+            auto subrecord = save_process.create_subrecord(RVTEditorBlock::signature_megalo_script);
+            subrecord->version = 0;
             //
             cobb::bitwriter temp;
             temp.write(allConditions.size(), cobb::bitcount(Megalo::Limits::max_conditions)); // 10 bits
@@ -715,8 +711,9 @@ void GameVariantDataMultiplayer::write(cobb::bit_or_byte_writer& writer) noexcep
    }
    writer.synchronize();
 }
-void GameVariantDataMultiplayer::write_last_minute_fixup(cobb::bit_or_byte_writer& writer) const noexcept {
-   auto& bytes = writer.bytes;
+void GameVariantDataMultiplayer::write_last_minute_fixup(GameVariantSaveProcess& save_process) const noexcept {
+   auto& writer = save_process.writer;
+   auto& bytes  = writer.bytes;
    writer.synchronize();
    this->variantHeader.write_last_minute_fixup(writer.bits);
    writer.synchronize();

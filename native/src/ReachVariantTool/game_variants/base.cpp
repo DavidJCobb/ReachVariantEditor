@@ -6,6 +6,7 @@
 #include "../helpers/sha1.h"
 
 #include "types/multiplayer.h"
+#include "io_process.h"
 #include "errors.h"
 
 bool BlamHeader::read(reach_block_stream& stream) noexcept {
@@ -39,71 +40,6 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    ReachFileBlock::write(stream);
    stream.write(myPos, cobb::endian::big); // NOTE: in some files this is little-endian, without the block having a different version or flags
    stream.write(uint8_t(0));
-}
-
-RVTEditorBlock::RVTEditorBlock() : ReachFileBlock('xRVT', ReachFileBlock::any_size) {
-   this->found = this->expected; // TODO: we do this so the block writes properly if it wasn't already present in the file, but this is ugly; make it better
-   this->found.size = 0;
-}
-RVTEditorBlock::~RVTEditorBlock() {
-   for (auto* sub : this->subrecords)
-      if (sub)
-         delete sub;
-   this->subrecords.clear();
-}
-bool RVTEditorBlock::read(reach_block_stream& stream) noexcept {
-   auto bytes = stream.bytes;
-   if (!ReachFileBlock::read(bytes))
-      return false;
-   while (stream.is_in_bounds(0x10)) { // has a subrecord header
-      auto sub = new subrecord;
-      this->subrecords.push_back(sub);
-      bytes.read(sub->signature, cobb::endian_t::big);
-      bytes.read(sub->version,   cobb::endian_t::big);
-      bytes.read(sub->flags,     cobb::endian_t::big);
-      bytes.read(sub->size,      cobb::endian_t::big);
-      //
-      sub->data.allocate(sub->size);
-      auto base = sub->data.data();
-      for (uint32_t i = 0; i < sub->size; ++i)
-         bytes.read(base[i]);
-   }
-   return true;
-}
-void RVTEditorBlock::write(cobb::bytewriter& stream) const noexcept {
-   ReachFileBlock::write(stream);
-   for (auto* sub : this->subrecords) {
-      if (!sub)
-         continue;
-      #if _DEBUG
-         if (sub->size < sub->data.size())
-            __debugbreak();
-      #endif
-      stream.write(sub->signature, cobb::endian_t::big);
-      stream.write(sub->version,   cobb::endian_t::big);
-      stream.write(sub->flags,     cobb::endian_t::big);
-      stream.write(sub->size,      cobb::endian_t::big);
-      //
-      auto base = sub->data.data();
-      for (uint32_t i = 0; i < sub->size; ++i)
-         stream.write(base[i]);
-   }
-   ReachFileBlock::write_postprocess(stream);
-}
-void RVTEditorBlock::adopt(std::vector<RVTEditorBlock::subrecord*>& adoptees) noexcept {
-   auto& list = this->subrecords;
-   auto  size = list.size();
-   auto  add  = adoptees.size();
-   list.resize(size + add);
-   for (size_t i = 0; i < add; ++i)
-      list[size + i] = adoptees[i];
-   adoptees.clear();
-}
-RVTEditorBlock::subrecord* RVTEditorBlock::lookup(uint32_t signature) const {
-   for (auto* sub : this->subrecords)
-      if (sub && sub->signature == signature)
-         return sub;
-   return nullptr;
 }
 
 bool GameVariantHeader::read(cobb::ibitreader& stream) noexcept {
@@ -340,10 +276,11 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    //
    return true;
 }
-void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
-   auto& bytes = writer.bytes;
-   auto& bits  = writer.bits;
-   auto& wd    = this->writeData;
+void ReachBlockMPVR::write(GameVariantSaveProcess& save_process) noexcept {
+   auto& writer = save_process.writer;
+   auto& bytes  = writer.bytes;
+   auto& bits   = writer.bits;
+   auto& wd     = this->writeData;
 
    uint32_t offset_of_hash;
    uint32_t offset_before_hashable;
@@ -373,7 +310,7 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
       this->type.write(bits);
 
    if (this->data)
-      this->data->write(writer);
+      this->data->write(save_process);
 
    wd.offset_after_hashable = bits.get_bytespan();
    //
@@ -384,13 +321,14 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
    //
    writer.synchronize();
 }
-void ReachBlockMPVR::write_last_minute_fixup(cobb::bit_or_byte_writer& writer) const noexcept {
-   auto& wd    = this->writeData;
-   auto& bytes = writer.bytes;
+void ReachBlockMPVR::write_last_minute_fixup(GameVariantSaveProcess& save_process) const noexcept {
+   auto& writer = save_process.writer;
+   auto& wd     = this->writeData;
+   auto& bytes  = writer.bytes;
    writer.synchronize();
    //
    if (this->data)
-      this->data->write_last_minute_fixup(writer);
+      this->data->write_last_minute_fixup(save_process);
    {  // SHA-1 hash
       auto hasher = cobb::sha1();
       uint32_t size = wd.offset_after_hashable - wd.offset_before_hashable;
@@ -528,24 +466,23 @@ bool GameVariant::read(cobb::mapped_file& file) {
    }
    return true;
 }
-void GameVariant::write(cobb::bit_or_byte_writer& writer) noexcept {
-   RVTEditorBlock editor_block;
+void GameVariant::write(GameVariantSaveProcess& save_process) noexcept {
+   auto& writer = save_process.writer;
    //
    this->blamHeader.write(writer.bytes);
    this->contentHeader.write(writer.bytes);
    writer.synchronize();
-   this->multiplayer.write(writer);
+   this->multiplayer.write(save_process);
    for (auto& unknown : this->unknownBlocks)
       unknown.write(writer.bytes);
    this->eofBlock.write(writer.bytes);
    //
    this->contentHeader.write_last_minute_fixup(writer.bytes);
-   this->multiplayer.write_last_minute_fixup(writer);
+   this->multiplayer.write_last_minute_fixup(save_process);
    //
-   std::vector<RVTEditorBlock::subrecord*> offerings;
-   if (auto mp = this->get_multiplayer_data()) {
-      mp->offer_editor_data(offerings);
-      editor_block.adopt(offerings);
+   if (save_process.has_subrecords()) {
+      RVTEditorBlock editor_block;
+      editor_block.adopt(save_process.xrvt_subrecords);
       if (editor_block.has_subrecords())
          editor_block.write(writer.bytes);
    }

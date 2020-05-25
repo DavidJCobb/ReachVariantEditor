@@ -148,7 +148,9 @@
     <ClCompile Include="game_variants\components\teams.cpp" />
     <ClCompile Include="game_variants\components\tu1_options.cpp" />
     <ClCompile Include="game_variants\data\object_types.cpp" />
+    <ClCompile Include="game_variants\editor_file_block.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
+    <ClCompile Include="game_variants\io_process.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
@@ -281,6 +283,8 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\variant_string_id.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_type_registry.h" />
     <ClInclude Include="game_variants\data\object_types.h" />
+    <ClInclude Include="game_variants\editor_file_block.h" />
+    <ClInclude Include="game_variants\io_process.h" />
     <ClInclude Include="game_variants\warnings.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
@@ -412,6 +416,7 @@
     <Image Include="ReachVariantTool.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="README.txt" />
   </ItemGroup>

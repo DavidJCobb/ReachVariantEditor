@@ -111,21 +111,26 @@ int main(int argc, char *argv[]) {
 //       generic error message stating that "something went wrong while reading the multiplayer 
 //       data."
 //
-//     = IDEA FOR HANDLING SAVE ERRORS
+//     = UX FOR FILE SAVE PROCESS: Do we want to generate the file data to write before asking 
+//       the user where to save it? That would allow us to suggest a different file extension 
+//       for editor-only (i.e. xRVT) variants.
 //
-//        = UX: We should generate the file to save BEFORE we ask the user where to save it; 
-//          that way, we can detect (how?) whether anything had to be moved to the xRVT block 
-//          and if so, ask the user if they really want to save the file in that condition. 
-//          (We could even use an alternate file extension for affected files, calling them 
-//          "work-in-progress game variants" or somesuch.)
+//        - If we make a custom confirmation dialog, we can do things like text formatting 
+//          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
+//          clicking "yes."
 //
-//           - Either way, we need to indicate what we've done i.e. indicate that the saved 
-//             file is usable for further editing but will not be fully functional in-game.
+//     - The load process can't handle out-of-range indices in indexed lists for files that 
+//       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
+//       However, we're the only ones generating files like this so malformed data like that 
+//       shouldn't occur (if it does, we screwed up and we'll take the L). This is worth noting 
+//       but not a priority to fix at present.
 //
-//        - The load process can't handle out-of-range indices in indexed lists for files 
-//          using this failsafe system, e.g. accessing widget 1 in a gametype that has no 
-//          widgets. However, we're the only ones generating files like this so malformed 
-//          data like that shouldn't occur (if it does, we screwed up and we'll take the L).
+//     = DOCUMENTATION
+//
+//        - We should auto-generate documentation on all opcodes (sorted by context type) in 
+//          XML format, like I did for one of my Skyrim projects. I can then edit the result 
+//          and either integrate it into a custom help window, or just write code to generate 
+//          HTML files from it.
 //
 //     = DEFERRED TASKS
 //
@@ -200,7 +205,17 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
-//        - The film clip opcode, now that MCC has theater.
+//        - Test the film clip opcode, now that MCC has theater. Race+ would be a good test 
+//          candidate: saving a film checkpoint the first time each lap is completed by the 
+//          player in the lead would be useful.
+//
+//        - Test what happens if script code forces a player to control a dead biped. Based 
+//          on bugs I'm seeing in Halo Chess+ I suspect this would lead to the camera angle 
+//          flipping 180, to a constant vibrating/impact noise, and to the screen being 
+//          faded to a very deep blue (almost black), with the fade mostly vanishing when 
+//          you pause the game.
+//
+//           - Test forcing a player into (no_object) as well.
 //
 //        - Test the "reset round" flags -- specifically, test what happens when they're 
 //          turned off. (This isn't related to Megalo but oh well, this is my in-game test 

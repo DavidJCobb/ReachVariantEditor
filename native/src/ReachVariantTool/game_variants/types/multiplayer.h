@@ -69,8 +69,6 @@ class GameVariantDataMultiplayer : public GameVariantData {
       void _set_up_indexed_dummies();
       void _tear_down_indexed_dummies();
       //
-      std::vector<RVTEditorBlock::subrecord*> editor_subrecords_pending_write;
-      //
       bool _read_script_code(cobb::ibitreader&) noexcept;
       //
    public:
@@ -78,10 +76,9 @@ class GameVariantDataMultiplayer : public GameVariantData {
       //
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
       virtual bool read(cobb::reader&) noexcept override;
-      virtual void write(cobb::bit_or_byte_writer&) noexcept override;
-      virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
+      virtual void write(GameVariantSaveProcess&) noexcept override;
+      virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
-      virtual void offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept override;
       virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept override;
       //
       static constexpr uint8_t encoding_version_vanilla = 0x6A;

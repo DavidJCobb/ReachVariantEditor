@@ -10,6 +10,7 @@
 #include "../helpers/bytewriter.h"
 #include "../helpers/files.h"
 #include "../helpers/stream.h"
+#include "editor_file_block.h"
 
 enum class ReachGameEngine : uint8_t {
    none,
@@ -30,41 +31,16 @@ enum class ReachFileType : int8_t {
    playlist,
 };
 
-class RVTEditorBlock : public ReachFileBlock {
-   public:
-      RVTEditorBlock();
-      ~RVTEditorBlock();
-      //
-      static constexpr uint32_t signature_megalo_string_table = 'mstr';
-      static constexpr uint32_t signature_megalo_script       = 'mscr';
-      //
-      struct subrecord {
-         uint32_t signature = 0;
-         uint32_t version   = 0;
-         uint32_t flags     = 0;
-         uint32_t size      = 0;
-         cobb::generic_buffer data;
-      };
-      std::vector<subrecord*> subrecords;
-      //
-      bool read(reach_block_stream&) noexcept;
-      void write(cobb::bytewriter&) const noexcept;
-      //
-      void adopt(std::vector<subrecord*>&) noexcept;
-      subrecord* lookup(uint32_t signature) const;
-      //
-      inline bool has_subrecords() const noexcept { return this->subrecords.size(); }
-};
+class GameVariantSaveProcess; // io_process.h
 
 class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
       virtual ReachGameEngine get_type() const noexcept { return ReachGameEngine::none; }
       virtual bool read(cobb::reader&) noexcept = 0;
-      virtual void write(cobb::bit_or_byte_writer&) noexcept = 0;
-      virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
+      virtual void write(GameVariantSaveProcess&) noexcept = 0;
+      virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
-      virtual void offer_editor_data(std::vector<RVTEditorBlock::subrecord*>& out) noexcept {};
       virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept { return false; }; // return true to indicate that you've accepted the subrecord
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
@@ -184,8 +160,8 @@ class ReachBlockMPVR {
       } writeData;
       //
       bool read(reach_block_stream&);
-      void write(cobb::bit_or_byte_writer&) noexcept;
-      void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
+      void write(GameVariantSaveProcess&) noexcept;
+      void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
       void cloneTo(ReachBlockMPVR&) const noexcept; // deep copy, accounting for pointers
 };
 
@@ -198,7 +174,7 @@ class GameVariant {
       std::vector<ReachFileBlockUnknown> unknownBlocks;
       //
       bool read(cobb::mapped_file& file);
-      void write(cobb::bit_or_byte_writer& writer) noexcept;
+      void write(GameVariantSaveProcess&) noexcept;
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //

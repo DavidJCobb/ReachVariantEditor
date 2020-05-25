@@ -373,6 +373,12 @@
     <ClCompile Include="helpers\string_scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\editor_file_block.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\io_process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -933,6 +939,12 @@
     <ClInclude Include="helpers\string_scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\io_process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\editor_file_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -940,5 +952,6 @@
   <ItemGroup>
     <Text Include="README.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
+    <Text Include="docs\saving files that exceed file format limits.txt" />
   </ItemGroup>
 </Project>

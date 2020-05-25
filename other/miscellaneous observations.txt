@@ -212,3 +212,10 @@ but it instead displays nothing.
 If one biped is assassinating another, deleting the victim will not interrupt the killer's 
 assassination animation.
 
+When a host migration occurs, script-spawned bipeds may be duplicated (with the originals 
+dying even if the biped had invincibility set) or other oddities may occur. Halo Chess 
+deletes all spawned bipeds upon host migration, and crucially, it does so without trying 
+to reference them through script variables (i.e. it uses a for-each-object loop and just 
+yeets all Spartans and Elites out of existence). In my own experience with this issue, 
+trying to delete affected bipeds through script variables does nothing; tests for a brute-
+force deletion a la Halo Chess are pending as of this writing.
