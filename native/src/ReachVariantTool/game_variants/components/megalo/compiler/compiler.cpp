@@ -2190,11 +2190,11 @@ namespace Megalo {
          bool bad = false;
          if (initial && !decl->initial_value_is_implicit()) {
             bad = true;
-            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species an initial value even though a previous declaration already provided one.").arg(str));
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration specifies an initial value even though a previous declaration already provided one.").arg(str));
          }
          if (network_specified && !decl->networking_is_implicit()) {
             bad = true;
-            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species a network type even though a previous declaration already provided one.").arg(str));
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration specifies a network type even though a previous declaration already provided one.").arg(str));
          }
          if (bad) {
             return;

@@ -253,13 +253,23 @@ namespace Megalo::Script {
       QString result;
       if (top_level.which) {
          result = top_level.which->name.c_str();
-      } else {
+      } else if (top_level.type) {
          if (!top_level.is_static)
             result = "global.";
          result += top_level.type->internal_name.c_str();
          result += '[';
          result += QString("%1").arg(top_level.index);
          result += ']';
+      } else {
+         auto top_type = this->resolved.alias_basis;
+         //
+         if (!top_level.is_static)
+            result = "global.";
+         if (top_type) {
+            result += top_type->internal_name.c_str();
+         } else {
+            result += "?????";
+         }
       }
       //
       if (nested.type) {
