@@ -219,3 +219,16 @@ to reference them through script variables (i.e. it uses a for-each-object loop 
 yeets all Spartans and Elites out of existence). In my own experience with this issue, 
 trying to delete affected bipeds through script variables does nothing; tests for a brute-
 force deletion a la Halo Chess are pending as of this writing.
+
+If a team is not present in a match, then attempting to assign it to a team variable will 
+not change that team variable's value; if the team variable had previously referred to a 
+different team then it will continue to refer to that different team. The workaround is 
+to set the team variable to (no_team) before assigning a team that you're not sure is in 
+the match.
+
+If a player quits, and a player variable refers to that player, then the variable may not 
+be cleared out. A (for each player) loop will only iterate players that are currently 
+present in the match, so in the worst case scenario, you can use that loop to check if a 
+given player-variable's player is still present in the match.
+
+
