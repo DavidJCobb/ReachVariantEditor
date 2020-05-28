@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="object">
+   <friendly>Object</friendly>
+   <blurb>An object in the game world.</blurb>
+   <methods>
+      <conditions>
+         <method name="shape_contains" id="2">
+            <args>
+               <arg name="other" type="object" />
+            </args>
+            <blurb>Check whether this object's shape boundary contains another object.</blurb>
+            <description>
+               <p>
+                  This function checks whether the context object contains <var>other</var>'s 
+                  pivot point. An object's pivot point is usually its centerpoint or center of 
+                  mass, but there are exceptions; for example, a Sabre's pivot point is located 
+                  roughly at the bottom of its landing gear, while a Dice's pivot point is 
+                  located very slightly off-center on the "six" face.
+               </p>
+               <p>
+                  If <var>other</var> is attached to some parent object, then this function 
+                  tests the parent object's pivot point rather than <var>other</var>'s pivot 
+                  point.
+               </p>
+            </description>
+            <example>
+               --
+               -- Drain the shields of all players in the hill.
+               --
+               for each player do
+                  if current_hill.shape_contains(current_player.biped) then
+                     current_player.biped.shields = 0
+                  end
+               end
+            </example>
+         </method>
+         <method name="is_of_type" id="6">
+            <args>
+               <arg name="type" type="object-type" />
+            </args>
+            <blurb>Check whether this object is of a given type.</blurb>
+            <description>
+               <p>
+                  This function checks whether the context object is of a given type.
+               </p>
+            </description>
+            <example>
+               --
+               -- Do not allow Elites to pick up Assault Rifles.
+               --
+               for each player do
+                  if current_player.biped.is_of_type(elite) then
+                     for each object do
+                        if current_object.is_of_type(assault_rifle) then
+                           current_object.set_pickup_permissions(mod_player, current_player, 0)
+                        end
+                     end
+                  end
+               end
+            </example>
+            <note>
+               Holograms do not test as being of type <var>spartan</var> or <var>elite</var>.
+            </note>
+         </method>
+         <method name="is_out_of_bounds" id="8">
+            <blurb>Check whether this object is out of bounds.</blurb>
+            <description>
+               <p>
+                  This condition function tests as true if the context object is outside of 
+                  the level's defined playable space, or if the context object is inside of 
+                  a Forge-placed Kill Boundary or Soft Kill Boundary.
+               </p>
+            </description>
+            <example>
+               --
+               -- Delete objects that fall out of bounds.
+               --
+               for each object do
+                  if current_object.is_out_of_bounds() then
+                     current_object.delete()
+                  end
+               end
+            </example>
+         </method>
+         <method name="has_forge_label" id="11">
+            <blurb>Check whether this object has a given Forge label.</blurb>
+            <args>
+               <arg name="label" type="forge-label" />
+            </args>
+            <example>
+               for each player do
+                  global.object[0] = current_player.get_weapon(primary)
+                  if global.object[0].has_forge_label("bad_weapon") then
+                     current_player.biped.kill(false)
+                  end
+               end
+            </example>
+         </method>
+         <method name="is_in_use" id="13">
+            <blurb>Check whether this object is an Armor Ability currently being used by a player.</blurb>
+            <example>
+               for each player do
+                  global.object[0] = current_player.get_armor_ability()
+                  if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+                     global.object[0].delete()
+                     game.show_message_to(current_player, none, "don't do that")
+                  end
+               end
+            </example>
+         </method>
+      </conditions>
+      <actions>
+         <method name="place_at_me" id="2">
+            <args>
+               <arg name="type"  type="object-type" />
+               <arg name="label" type="forge-label" />
+               <arg name="flags">
+                  <p>The word <var>none</var>, or one or more of the following flags separated with 
+                  the <code>|</code> symbol:</p>
+                  <dl>
+                     <dt>never_garbage_collect</dt>
+                        <dd>Prevents the created object from being garbage-collected.</dd>
+                     <dt>suppress_effect</dt>
+                        <dd>Unknown.</dd>
+                     <dt>absolute_orientation</dt>
+                        <dd>Unknown.</dd>
+                  </dl>
+               </arg>
+               <arg type="vector-3">
+                  A position offset from the context object.
+               </arg>
+               <arg type="variant-string-id">
+                  A variation to apply to the created object, if the object type supports it.
+               </arg>
+            </args>
+            <blurb>Spawn a new object at this object.</blurb>
+            <example>
+               --
+               -- Spawn a Spartan with Kat's armor:
+               --
+               global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_collect, 0, 0, 0, kat)
+            </example>
+            <note>
+               The new object will be created as close to the context object as possible. It will 
+               not be created exactly at the context object, even if one or both of the objects 
+               are non-solid. To create one object exactly at another object, 
+               <a href="script/api/object/actions/attach_to">attach</a> 
+               the created object to the basis object and then 
+               <a href="script/api/object/actions/detach">detach</a> 
+               it.
+            </note>
+         </method>
+         <method name="delete" id="3">
+            <blurb>Delete this object from the game world.</blurb>
+            <example>
+               for each object with label "team_only" do
+                  if game.teams_enabled == 0 then
+                     current_object.delete()
+                  end
+               end
+               for each object with label "ffa_only" do
+                  if game.teams_enabled != 0 then
+                     current_object.delete()
+                  end
+               end
+            </example>
+            <note>
+               Deleting a player's current biped will cause them to instantaneously respawn, 
+               without deducting from their pool of lives in limited-life game variants. 
+               Continuously deleting their biped over a span of time will cause the screen 
+               to hard-cut to black for them, with no HUD widgets visible and no game sounds 
+               audible besides some announcer voiceovers.
+            </note>
+         </method>
+      </actions>
+   </methods>
+</script-type>
