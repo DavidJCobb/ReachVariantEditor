@@ -119,32 +119,6 @@ int main(int argc, char *argv[]) {
 //          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
 //          clicking "yes."
 //
-//     = THE ELSE(IF) STATEMENT
-//
-//        - We should rename "else" and "elseif" to "alt" and "altif" on the grounds that they 
-//          aren't true else(if) statements. Consider:
-//
-//             if x == 0 then
-//                x = 1
-//             else
-//                crash_the_game()
-//             end
-//
-//          A real else statement would only allow the first branch to run, but Megalo would 
-//          run both branches, because it compiles as
-//
-//             if x == 0 then
-//                x = 1
-//             end
-//             if x != 0 then
-//                crash_the_game()
-//             end
-//
-//          It would be possible to implement a "true" else(if) statement if we allowed script 
-//          authors to sacrifice two global number variables to be managed by the compiler (see 
-//          relevant file in our documentation folder), though I don't intend to implement that 
-//          at this time. I want to leave the possibility open.
-//
 //     = DOCUMENTATION
 //
 //        - We should auto-generate documentation on all opcodes (sorted by context type) in 

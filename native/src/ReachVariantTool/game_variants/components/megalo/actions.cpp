@@ -520,7 +520,7 @@ namespace Megalo {
       ),
       ActionFunction( // 50
          "Set Widget Visibility",
-         "Modify a HUD widget's icon.",
+         "Control whether a given player can see a HUD widget.",
          "%3 widget %1 for player %2.",
          {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::typeinfo),

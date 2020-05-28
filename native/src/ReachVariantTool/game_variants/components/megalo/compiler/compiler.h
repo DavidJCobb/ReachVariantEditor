@@ -23,8 +23,8 @@ namespace Megalo {
                basic, // do
                root,
                if_block,
-               elseif_block,
-               else_block,
+               altif_block, // like elseif, but not mutually exclusive with its previous-sibling branch
+               alt_block,   // like else,   but not mutually exclusive with its previous-sibling branch
                for_each_object,
                for_each_object_with_label,
                for_each_player,
@@ -52,7 +52,7 @@ namespace Megalo {
             Type     type  = Type::basic;
             Event    event = Event::none;
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
-            std::vector<Comparison*> conditions_else; // only for else(if) blocks // contents are owned by this Block and deleted in the destructor
+            std::vector<Comparison*> conditions_alt; // only for alt(if) blocks // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions; // only for if blocks // contents are owned by this Block and deleted in the destructor
             //
             ~Block();
@@ -62,8 +62,8 @@ namespace Megalo {
             void remove_item(ParsedItem*);
             int32_t index_of_item(const ParsedItem*) const noexcept;
             //
-            void get_ifs_for_else(std::vector<Block*>& out);
-            void make_else_of(const Block& other);
+            void get_ifs_for_alt(std::vector<Block*>& out);
+            void make_alt_of(const Block& other);
             //
             void clear(bool deleting = false);
             void compile(Compiler&);
@@ -312,10 +312,10 @@ namespace Megalo {
          #pragma endregion
          //
          void _handleKeyword_Alias();
+         void _handleKeyword_Alt();
+         void _handleKeyword_AltIf();
          void _handleKeyword_Declare(); // INCOMPLETE
          void _handleKeyword_Do();
-         void _handleKeyword_Else();
-         void _handleKeyword_ElseIf();
          void _handleKeyword_End();
          void _handleKeyword_If();
          void _handleKeyword_For();

@@ -94,8 +94,8 @@ namespace {
       switch (type) {
          case Block::Type::basic:
          case Block::Type::if_block:
-         case Block::Type::elseif_block:
-         case Block::Type::else_block:
+         case Block::Type::altif_block:
+         case Block::Type::alt_block:
             break;
          case Block::Type::for_each_object:
             return block_type::for_each_object;
@@ -176,7 +176,7 @@ namespace Megalo {
                return i;
          return -1;
       }
-      void Block::get_ifs_for_else(std::vector<Block*>& out) {
+      void Block::get_ifs_for_alt(std::vector<Block*>& out) {
          out.clear();
          auto parent = dynamic_cast<Block*>(this->parent);
          if (!parent)
@@ -192,25 +192,25 @@ namespace Megalo {
                break;
             switch (block->type) {
                case Type::if_block:
-               case Type::elseif_block:
-               case Type::else_block:
+               case Type::altif_block:
+               case Type::alt_block:
                   temp.push_back(block);
             }
-            if (block->type != Type::elseif_block)
+            if (block->type != Type::altif_block)
                break;
          }
          out.reserve(temp.size());
          for (auto it = temp.rbegin(); it != temp.rend(); ++it)
             out.push_back(*it);
       }
-      void Block::make_else_of(const Block& other) {
-         size_t size_e = other.conditions_else.size();
+      void Block::make_alt_of(const Block& other) {
+         size_t size_e = other.conditions_alt.size();
          size_t size_c = other.conditions.size();
-         this->conditions_else.reserve(this->conditions_else.size() + size_e + size_c);
+         this->conditions_alt.reserve(this->conditions_alt.size() + size_e + size_c);
          for (size_t i = 0; i < size_e; ++i) {
-            auto cnd   = other.conditions_else[i];
+            auto cnd   = other.conditions_alt[i];
             auto clone = cnd->clone();
-            this->conditions_else.push_back(clone);
+            this->conditions_alt.push_back(clone);
             if (i == size_e - 1)
                clone->next_is_or = false;
          }
@@ -218,7 +218,7 @@ namespace Megalo {
             auto cnd   = other.conditions[i];
             auto clone = cnd->clone();
             clone->negate();
-            this->conditions_else.push_back(clone);
+            this->conditions_alt.push_back(clone);
             if (i == size_c - 1)
                clone->next_is_or = false;
          }
@@ -247,9 +247,9 @@ namespace Megalo {
             std::swap(this->items, keep);
          }
          //
-         for (auto condition : this->conditions_else)
+         for (auto condition : this->conditions_alt)
             delete condition;
-         this->conditions_else.clear();
+         this->conditions_alt.clear();
          for (auto condition : this->conditions)
             delete condition;
          this->conditions.clear();
@@ -276,8 +276,8 @@ namespace Megalo {
          switch (this->type) {
             case Type::if_block:
             #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS != 1
-            case Type::elseif_block: // Bungie/343i don't collapse terminating else(if) blocks into their parent trigger
-            case Type::else_block:
+            case Type::altif_block: // Bungie/343i don't collapse terminating alt(if) blocks into their parent trigger?
+            case Type::alt_block:
             #endif
                return true;
          }
@@ -405,8 +405,8 @@ namespace Megalo {
          switch (this->type) {
             case Type::basic:
             case Type::if_block:
-            case Type::elseif_block:
-            case Type::else_block:
+            case Type::altif_block:
+            case Type::alt_block:
                break;
             case Type::for_each_object:
                t->blockType = block_type::for_each_object;
@@ -442,7 +442,7 @@ namespace Megalo {
          this->_make_trigger(compiler);
          {
             auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
-            for (auto item : this->conditions_else) {
+            for (auto item : this->conditions_alt) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
                   this->trigger->opcodes.push_back(cnd);
@@ -569,15 +569,19 @@ namespace Megalo {
       s = s.toLower();
       if (s == "alias") // declare an alias
          return true;
+      if (s == "alt") // close an if- or altif-block and open a new block
+         return true;
+      if (s == "altif") // close an if- or altif-block and open a new block with conditions
+         return true;
       if (s == "and") // bridge conditions
          return true;
       if (s == "declare") // declare a variable
          return true;
       if (s == "do") // open a generic block
          return true;
-      if (s == "else") // close an if- or elseif-block and open a new block
+      if (s == "else") // reserved
          return true;
-      if (s == "elseif") // close an if- or elseif-block and open a new block with conditions
+      if (s == "elseif") // reserved
          return true;
       if (s == "end") // close a block
          return true;
@@ -593,7 +597,7 @@ namespace Megalo {
          return true;
       if (s == "or") // bridge conditions
          return true;
-      if (s == "then") // close an if- or elseif-statement's conditions
+      if (s == "then") // close an if- or altif-statement's conditions
          return true;
       return false;
    }
@@ -959,14 +963,14 @@ namespace Megalo {
    /*static*/ Compiler::keyword_handler_t Compiler::__get_handler_for_keyword(QString word) noexcept {
       if (word == "alias")
          return &Compiler::_handleKeyword_Alias;
+      else if (word == "alt")
+         return &Compiler::_handleKeyword_Alt;
+      else if (word == "altif")
+         return &Compiler::_handleKeyword_AltIf;
       else if (word == "declare")
          return &Compiler::_handleKeyword_Declare;
       else if (word == "do")
          return &Compiler::_handleKeyword_Do;
-      else if (word == "else")
-         return &Compiler::_handleKeyword_Else;
-      else if (word == "elseif")
-         return &Compiler::_handleKeyword_ElseIf;
       else if (word == "end")
          return &Compiler::_handleKeyword_End;
       else if (word == "for")
@@ -1001,6 +1005,10 @@ namespace Megalo {
                }
                if (word == "and" || word == "or" || word == "not" || word == "then") {
                   this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+                  return;
+               }
+               if (word == "else" || word == "elseif") {
+                  this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
                   return;
                }
                if (this->extract_specific_char('(')) {
@@ -2153,6 +2161,61 @@ namespace Megalo {
       if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
    }
+   void Compiler::_handleKeyword_Alt() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
+               this->raise_fatal("Unexpected \"alt\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->raise_fatal("Unexpected \"alt\".");
+         return;
+      }
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"alt\".");
+         return;
+      }
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::alt_block;
+      item->set_start(this->state);
+      this->block->insert_item(item);
+      this->_openBlock(item);
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_alt(blocks);
+         for (auto block : blocks)
+            item->make_alt_of(*block);
+      }
+   }
+   void Compiler::_handleKeyword_AltIf() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
+               this->raise_fatal("Unexpected \"altif\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->raise_fatal("Unexpected \"altif\".");
+         return;
+      }
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"altif\".");
+         return;
+      }
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::altif_block;
+      item->set_start(this->state);
+      this->block->insert_item(item);
+      this->_openBlock(item);
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_alt(blocks);
+         for (auto block : blocks)
+            item->make_alt_of(*block);
+      }
+      this->_parseBlockConditions();
+   }
    //
    void Compiler::_declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified) {
       auto type  = variable.get_type();
@@ -2418,61 +2481,6 @@ namespace Megalo {
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
       this->_openBlock(item);
-   }
-   void Compiler::_handleKeyword_Else() {
-      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
-         auto prev = this->block->item(-1);
-         auto p_bl = dynamic_cast<Script::Block*>(prev);
-         if (p_bl) {
-            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->raise_fatal("Unexpected \"else\". This keyword should not be preceded by the \"end\" keyword.");
-         }
-         this->raise_fatal("Unexpected \"else\".");
-         return;
-      }
-      if (!this->_closeCurrentBlock()) {
-         this->raise_fatal("Unexpected \"else\".");
-         return;
-      }
-      auto item = new Script::Block;
-      item->type = Script::Block::Type::else_block;
-      item->set_start(this->state);
-      this->block->insert_item(item);
-      this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_else(blocks);
-         for (auto block : blocks)
-            item->make_else_of(*block);
-      }
-   }
-   void Compiler::_handleKeyword_ElseIf() {
-      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
-         auto prev = this->block->item(-1);
-         auto p_bl = dynamic_cast<Script::Block*>(prev);
-         if (p_bl) {
-            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->raise_fatal("Unexpected \"elseif\". This keyword should not be preceded by the \"end\" keyword.");
-         }
-         this->raise_fatal("Unexpected \"elseif\".");
-         return;
-      }
-      if (!this->_closeCurrentBlock()) {
-         this->raise_fatal("Unexpected \"elseif\".");
-         return;
-      }
-      auto item = new Script::Block;
-      item->type = Script::Block::Type::elseif_block;
-      item->set_start(this->state);
-      this->block->insert_item(item);
-      this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_else(blocks);
-         for (auto block : blocks)
-            item->make_else_of(*block);
-      }
-      this->_parseBlockConditions();
    }
    void Compiler::_handleKeyword_End() {
       if (!this->_closeCurrentBlock())
