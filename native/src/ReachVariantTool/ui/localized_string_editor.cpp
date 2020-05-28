@@ -106,7 +106,15 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    modal._isNotInStandardStringTable   = flags & Flags::IsNotInStandardTable;
    modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
-   // TODO: anything else?
+   if (!modal._isNotInStandardStringTable && !modal._limitToSingleLanguageStrings) {
+      //
+      // If this string is currently in use as a Forge label, force single-language content.
+      //
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (mp && mp->get_forge_label_using_string(modal._target)) {
+         modal._limitToSingleLanguageStrings = true;
+      }
+   }
    //
    modal.updateControls();
    return modal.exec() == QDialog::Accepted;
@@ -119,7 +127,15 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
    modal._isNotInStandardStringTable   = flags & Flags::IsNotInStandardTable;
    modal._limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
-   // TODO: anything else?
+   if (!modal._isNotInStandardStringTable && !modal._limitToSingleLanguageStrings) {
+      //
+      // If this string is currently in use as a Forge label, force single-language content.
+      //
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (mp && mp->get_forge_label_using_string(modal._target)) {
+         modal._limitToSingleLanguageStrings = true;
+      }
+   }
    //
    modal.updateControls();
    return modal.exec() == QDialog::Accepted;

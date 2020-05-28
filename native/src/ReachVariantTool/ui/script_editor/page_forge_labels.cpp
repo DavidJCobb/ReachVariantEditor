@@ -174,8 +174,19 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    if (!mp)
       return;
    auto& labels = mp->scriptContent.forgeLabels;
-   if (this->currentForgeLabel >= labels.size())
+   if (this->currentForgeLabel < 0 || this->currentForgeLabel >= labels.size()) {
+      this->ui.reqFlagNumber->setChecked(false);
+      this->ui.reqFlagObjectType->setChecked(false);
+      this->ui.reqFlagTeam->setChecked(false);
+      //
+      this->ui.reqNumber->setDisabled(true);
+      this->ui.reqObjectType->setCurrentIndex(-1);
+      this->ui.reqObjectType->setDisabled(true);
+      this->ui.reqTeam->setCurrentIndex(-1);
+      this->ui.reqTeam->setDisabled(true);
+      //
       return;
+   }
    auto& label = labels[this->currentForgeLabel];
    //
    const QSignalBlocker blocker1(this->ui.reqFlagNumber);
@@ -185,19 +196,28 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    const QSignalBlocker blocker5(this->ui.reqObjectType);
    const QSignalBlocker blocker6(this->ui.reqTeam);
    const QSignalBlocker blocker7(this->ui.minCount);
-   this->ui.reqFlagNumber->setChecked(label.requires_number());
-   this->ui.reqFlagObjectType->setChecked(label.requires_object_type());
-   this->ui.reqFlagTeam->setChecked(label.requires_assigned_team());
+   bool req_num  = label.requires_number();
+   bool req_type = label.requires_object_type();
+   bool req_team = label.requires_assigned_team();
+   this->ui.reqFlagNumber->setChecked(req_num);
+   this->ui.reqFlagObjectType->setChecked(req_type);
+   this->ui.reqFlagTeam->setChecked(req_team);
    this->ui.reqNumber->setValue(label.requiredNumber);
-   this->ui.reqObjectType->setValue(label.requiredObjectType);
-   this->ui.reqTeam->setValue(label.requiredTeam);
+   if (req_type)
+      this->ui.reqObjectType->setValue(label.requiredObjectType);
+   else
+      this->ui.reqObjectType->setCurrentIndex(-1);
+   if (req_team)
+      this->ui.reqTeam->setValue(label.requiredTeam);
+   else
+      this->ui.reqTeam->setCurrentIndex(-1);
    this->ui.minCount->setValue(label.mapMustHaveAtLeast);
    //
-   this->ui.reqNumber->setDisabled(!label.requires_number());
-   this->ui.reqObjectType->setDisabled(!label.requires_object_type());
-   this->ui.reqTeam->setDisabled(!label.requires_assigned_team());
+   this->ui.reqNumber->setDisabled(!req_num);
+   this->ui.reqObjectType->setDisabled(!req_type);
+   this->ui.reqTeam->setDisabled(!req_team);
    //
-   {
+   {  // Do not allow multiple Forge labels to be set to use the same name.
       QList<QString> others;
       for (size_t i = 0; i < labels.size(); i++) {
          if (i == this->currentForgeLabel)

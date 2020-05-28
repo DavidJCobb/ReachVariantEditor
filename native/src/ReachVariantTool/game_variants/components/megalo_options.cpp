@@ -169,6 +169,14 @@ void ReachMegaloOption::make_range() noexcept {
    this->rangeCurrent = this->rangeDefault->value;
    this->isRange = true;
 }
+bool ReachMegaloOption::uses_string(ReachString* str) const noexcept {
+   if (this->name == str || this->desc == str)
+      return true;
+   for (auto* value : this->values)
+      if (value->name == str || value->desc == str)
+         return true;
+   return false;
+}
 //
 uint32_t ReachMegaloOption::bitcount() const noexcept {
    uint32_t bitcount = 0;

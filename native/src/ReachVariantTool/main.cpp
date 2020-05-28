@@ -119,31 +119,6 @@ int main(int argc, char *argv[]) {
 //          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
 //          clicking "yes."
 //
-//     - STRING EDITING
-//
-//        - If you edit the strings used for scripted options or player traits using the string 
-//          table editor, rather than the specific UI for options and traits, then the main 
-//          window will not react to the change (unless I coded it to just blindly regenerate 
-//          everything when the script editor window closes; don't remember).
-//
-//          Similarly, the string table editor UI doesn't enforce limitations on strings that 
-//          are being used as Forge labels, i.e. you can set each language to use different text.
-//          
-//          This isn't specific to the string table editor; there are other contexts where you 
-//          can edit existing strings, such as when resolving unrecognized string literals when 
-//          compiling script code.
-//
-//           - GameVariantDataMultiplayer::get_forge_label_using_string could be used to detect 
-//             that a string is in use by a Forge label. I've added similar member functions to 
-//             the class for traits and options, but the problem is: when do I call them? I'd 
-//             need to handle them within ReachStringPicker, the localized string editor dialog, 
-//             or perhaps in ReachEditorState itself. The handling would just involve sending 
-//             the ReachEditorState signal for the specific trait-set/option/etc. being changed.
-//
-//             The UI for traits and options already sends the appropriate signals for those 
-//             objects when their strings are changed; I'd need to strip that out if I decide 
-//             to handle that centrally.
-//
 //     = DOCUMENTATION
 //
 //        - We should auto-generate documentation on all opcodes (sorted by context type) in 

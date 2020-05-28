@@ -1,5 +1,21 @@
 #include "editor_state.h"
 
+ReachEditorState::ReachEditorState() {
+   QObject::connect(this, &ReachEditorState::stringModified, [this](uint32_t index) {
+      auto mp = this->multiplayerData();
+      if (!mp)
+         return;
+      ReachString* str = mp->scriptData.strings.get_entry(index);
+      if (!str)
+         return;
+      for (auto& option : mp->scriptData.options)
+         if (option.uses_string(str))
+            this->scriptOptionModified(&option);
+      for (auto& traits : mp->scriptData.traits)
+         if (traits.uses_string(str))
+            this->scriptTraitsModified(&traits);
+   });
+}
 void ReachEditorState::abandonVariant() noexcept {
    if (this->currentVariantClone) {
       delete this->currentVariantClone;

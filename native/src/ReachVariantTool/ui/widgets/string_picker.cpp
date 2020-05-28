@@ -38,6 +38,7 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
          return;
       ref = &table.strings[index];
       //
+      emit selectedStringSwitched();
       emit selectedStringChanged();
    });
    QObject::connect(this->_button, &QPushButton::clicked, [this]() {
@@ -139,8 +140,10 @@ void ReachStringPicker::refreshList() {
    this->refreshSelection();
 }
 void ReachStringPicker::refreshSelection() {
-   if (!this->_targetRef)
+   if (!this->_targetRef) {
+      this->_combobox->setCurrentIndex(-1);
       return;
+   }
    auto& ptr = *this->_targetRef;
    int32_t i = -1;
    if (ptr) {

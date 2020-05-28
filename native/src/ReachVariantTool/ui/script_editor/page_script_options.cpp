@@ -64,20 +64,28 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       this->targetValue  = nullptr;
       this->updateValuesListFromVariant();
    });
-   {  // Handle option/value name changes
-      //
-      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
-      // That's also the laziest way to handle things... :<
-      //
-      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle option/value name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_option  = false;
+      bool is_current = false;
+      for (auto& option : mp->scriptData.options) {
+         if (option.uses_string(str)) {
+            is_option = true;
+            if (&option == this->targetOption)
+               is_current = true;
+         }
+      }
+      if (is_option) {
          this->updateOptionsListFromVariant();
-         this->updateValuesListFromVariant();
-      });
-      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
-         this->updateOptionsListFromVariant();
-         this->updateValuesListFromVariant();
-      });
-   }
+         if (is_current)
+            this->updateValuesListFromVariant();
+      }
+   });
    //
    QObject::connect(this->ui.listOptions, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOption);
    QObject::connect(this->ui.listValues,  &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOptionValue);
@@ -89,11 +97,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       //
       QObject::connect(this->ui.optionName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
-      QObject::connect(this->ui.optionDesc, &ReachStringPicker::selectedStringChanged, [this]() {
-         ReachEditorState::get().scriptOptionModified(this->targetOption); // main window shows descriptions as tooltips
+      QObject::connect(this->ui.optionName, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
       });
+      QObject::connect(this->ui.optionDesc, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+      });
+      //
       QObject::connect(this->ui.optionType, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
          if (!this->targetOption)
             return;
@@ -127,6 +138,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          this->targetOption = mp->create_script_option();
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
+         if (this->targetOption) {
+            const QSignalBlocker blocker(this->ui.listOptions);
+            this->ui.listOptions->setCurrentRow(this->targetOption->index);
+         }
          ReachEditorState::get().scriptOptionsModified();
       });
       QObject::connect(this->ui.buttonOptionsMoveUp, &QPushButton::clicked, [this]() {
@@ -207,10 +222,12 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       //
       QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateValuesListFromVariant();
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
-      QObject::connect(this->ui.valueDesc, &ReachStringPicker::selectedStringChanged, [this]() {
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+      });
+      QObject::connect(this->ui.valueDesc, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
       });
       QObject::connect(this->ui.valueValue, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
          if (!this->targetValue)
@@ -246,6 +263,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
+         if (this->targetValue) {
+            const QSignalBlocker blocker(this->ui.listValues);
+            this->ui.listValues->setCurrentRow(option.values.size());
+         }
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
       QObject::connect(this->ui.buttonValuesMoveUp, &QPushButton::clicked, [this]() {

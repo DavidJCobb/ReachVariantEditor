@@ -35,10 +35,12 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
    //
    QObject::connect(this->ui.name, &ReachStringPicker::selectedStringChanged, [this]() {
       this->updateTraitsListFromVariant();
-      ReachEditorState::get().scriptTraitsModified(this->target);
    });
-   QObject::connect(this->ui.desc, &ReachStringPicker::selectedStringChanged, [this]() {
-      ReachEditorState::get().scriptTraitsModified(this->target); // main window shows descriptions as tooltips
+   QObject::connect(this->ui.name, &ReachStringPicker::selectedStringSwitched, [this]() {
+      ReachEditorState::get().scriptTraitsModified(this->target); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+   });
+   QObject::connect(this->ui.desc, &ReachStringPicker::selectedStringSwitched, [this]() {
+      ReachEditorState::get().scriptTraitsModified(this->target); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
    });
    //
    QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {

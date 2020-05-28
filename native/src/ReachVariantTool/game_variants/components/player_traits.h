@@ -373,4 +373,6 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_it
          bitcount += MegaloStringIndex::bitcount * 2;
          return bitcount;
       }
+      //
+      bool uses_string(ReachString*) const noexcept;
 };
