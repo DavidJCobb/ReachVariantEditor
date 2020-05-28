@@ -832,3 +832,27 @@ bool GameVariantDataMultiplayer::swap_script_options(int8_t index_a, int8_t inde
    this->optionToggles.megalo.hidden.bits.swap_bits(index_a, index_b);
    return true;
 }
+
+Megalo::ReachForgeLabel* GameVariantDataMultiplayer::get_forge_label_using_string(ReachString* str) const noexcept {
+   for (auto& label : this->scriptContent.forgeLabels)
+      if (label.name == str)
+         return const_cast<Megalo::ReachForgeLabel*>(&label);
+   return nullptr;
+}
+ReachMegaloOption* GameVariantDataMultiplayer::get_option_using_string(ReachString* str) const noexcept {
+   for (auto& option : this->scriptData.options) {
+      if (option.name == str || option.desc == str)
+         return const_cast<ReachMegaloOption*>(&option);
+      //
+      for (auto* value : option.values)
+         if (value->name == str || value->desc == str)
+            return const_cast<ReachMegaloOption*>(&option);
+   }
+   return nullptr;
+}
+ReachMegaloPlayerTraits* GameVariantDataMultiplayer::get_traits_using_string(ReachString* str) const noexcept {
+   for (auto& traits : this->scriptData.traits)
+      if (traits.name == str || traits.desc == str)
+         return const_cast<ReachMegaloPlayerTraits*>(&traits);
+   return nullptr;
+}

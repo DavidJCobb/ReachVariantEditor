@@ -119,11 +119,30 @@ int main(int argc, char *argv[]) {
 //          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
 //          clicking "yes."
 //
-//     - The load process can't handle out-of-range indices in indexed lists for files that 
-//       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
-//       However, we're the only ones generating files like this so malformed data like that 
-//       shouldn't occur (if it does, we screwed up and we'll take the L). This is worth noting 
-//       but not a priority to fix at present.
+//     - STRING EDITING
+//
+//        - If you edit the strings used for scripted options or player traits using the string 
+//          table editor, rather than the specific UI for options and traits, then the main 
+//          window will not react to the change (unless I coded it to just blindly regenerate 
+//          everything when the script editor window closes; don't remember).
+//
+//          Similarly, the string table editor UI doesn't enforce limitations on strings that 
+//          are being used as Forge labels, i.e. you can set each language to use different text.
+//          
+//          This isn't specific to the string table editor; there are other contexts where you 
+//          can edit existing strings, such as when resolving unrecognized string literals when 
+//          compiling script code.
+//
+//           - GameVariantDataMultiplayer::get_forge_label_using_string could be used to detect 
+//             that a string is in use by a Forge label. I've added similar member functions to 
+//             the class for traits and options, but the problem is: when do I call them? I'd 
+//             need to handle them within ReachStringPicker, the localized string editor dialog, 
+//             or perhaps in ReachEditorState itself. The handling would just involve sending 
+//             the ReachEditorState signal for the specific trait-set/option/etc. being changed.
+//
+//             The UI for traits and options already sends the appropriate signals for those 
+//             objects when their strings are changed; I'd need to strip that out if I decide 
+//             to handle that centrally.
 //
 //     = DOCUMENTATION
 //
@@ -131,6 +150,22 @@ int main(int argc, char *argv[]) {
 //          XML format, like I did for one of my Skyrim projects. I can then edit the result 
 //          and either integrate it into a custom help window, or just write code to generate 
 //          HTML files from it.
+//
+//        - We need to decompile all official gametypes and decode them as much as we can, and 
+//          provide aliases for them. We should provide these as "source scripts."
+//
+//     - The load process can't handle out-of-range indices in indexed lists for files that 
+//       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
+//       However, we're the only ones generating files like this so malformed data like that 
+//       shouldn't occur (if it does, we screwed up and we'll take the L). This is worth noting 
+//       but not a priority to fix at present.
+//
+//        = The reason we "can't handle" this is because we do postprocess (including the code 
+//          to finalize indexed lists) immediately at the end of loading the core MP data, but 
+//          we would end up "seeing" the xRVT chunk after. If the script content is moved to 
+//          the xRVT chunk and it has an out-of-range reference to a widget or something, then 
+//          by the time we actually load that script content, we've already shrunk the indexed 
+//          lists to fit and we'll probably get a bad pointer or something.
 //
 //     = DEFERRED TASKS
 //
@@ -215,8 +250,6 @@ int main(int argc, char *argv[]) {
 //          faded to a very deep blue (almost black), with the fade mostly vanishing when 
 //          you pause the game.
 //
-//           - Test forcing a player into (no_object) as well.
-//
 //        - Test the "reset round" flags -- specifically, test what happens when they're 
 //          turned off. (This isn't related to Megalo but oh well, this is my in-game test 
 //          list now)
@@ -232,8 +265,7 @@ int main(int argc, char *argv[]) {
 //        - Test object.copy_rotation_from: we want to know whether the bool is an absolute 
 //          bool or a relative bool (i.e. which is true and which is false). If it matches 
 //          object.attach_to (which we should probably test again), then instead of a bool 
-//          we should use OpcodeArgValueAttachPositionEnum. Moreover, we should reorder the 
-//          arguments either way.
+//          we should use OpcodeArgValueAttachPositionEnum.
 //
 //        - Can you assign a player to neutral_team, or reassign their team, during a team 
 //          game?
@@ -268,8 +300,6 @@ int main(int argc, char *argv[]) {
 //
 //        - Vanilla+
 //
-//           - Halo Chess+
-//
 //           - Infection+
 //
 //              - Base on Alpha Zombies.
@@ -287,6 +317,8 @@ int main(int argc, char *argv[]) {
 //
 //              - We can introduce Halo 3's "Next Zombie" option if we use a hidden 
 //                scoreboard stat to track cross-round state.
+//
+//        - Tetris?
 //
 //  - Script editor window: MPVR space usage meter: we should also show absolute counts 
 //    out of maximums for triggers, conditions, actions, number of strings, and perhaps 
@@ -322,16 +354,9 @@ int main(int argc, char *argv[]) {
 //
 
 //
-//  - IN-GAME TESTS
-//
-//     - Some game-namespace numbers that refer to social options are unknown; identify 
-//       them.
-//
 //  - POTENTIAL EDITOR IMPROVEMENTS:
 //
 //     - String table: warn when loaded count exceeds max count
-//
-//     - String table: offer option to recover work if string buffer is too large to save
 //
 // ======================================================================================
 //
@@ -341,23 +366,7 @@ int main(int argc, char *argv[]) {
 //  - In Alpha Zombies, where are the "Humans" and "Zombies" strings near the top of the 
 //    variant used? *Are* they used?
 //
-//  - When editing single-string tables, can we use the table's max length to enforce a 
-//    max length on the UI form fields?
-//
 //  - STRING TABLE EDITING
-//
-//     - If we start editing a string that is in use by a Forge label, we should 
-//       be blocked from changing its localizations to different values. This 
-//       requires the ability to check *what* is using a string which in turn 
-//       requires that all cobb::reference_tracked_object subclasses support 
-//       dynamic casts -- we need to add a dummy virtual method to that superclass.
-//
-//     = NOTE: Some strings don't properly show up as in-use, but this is because 
-//       not all data that can use a string uses cobb::reference_tracked_object 
-//       yet. While all opcode argument types now subclass it, they don't all use 
-//       its functionality yet.
-//
-//        = URGENT; MUST BE COMPLETED BEFORE RELEASE OF ANY SCRIPT EDITOR BETA
 //
 //     - Consider having a button to prune unreferenced strings. Alternatively, 
 //       consider having a button to list them and let the user select which ones 
@@ -368,65 +377,6 @@ int main(int argc, char *argv[]) {
 //
 //        - It won't be safe to implement this until we're properly tracking all 
 //          string references.
-//
-//    - If a changed string is in use by player traits, the main window needs to 
-//      be updated (i.e. if the user renames player traits through the string 
-//      editor rather than the script traits editor). Ditto for anything else 
-//      that can show up in the main window (script options, etc.).
-//
-//  - Work on script editor
-//
-//     - String table editing - MAIN FUNCTIONALITY DONE
-//
-//        - We need to make sure that the total length of all strings falls below 
-//          the string table buffer size.
-//
-//           - When saving, we enforce this with an assert; we should come up with 
-//             an error-handling system for saving files, and possibly be willing 
-//             to devise a file format for projects-in-progress.
-//
-//        - We also need to make sure that the compressed size of the string table 
-//          leaves enough room for script content, and that's more challenging. 
-//          Essentially we either need to be able to tolerate faults when saving 
-//          (without losing user data or forcing the user to fix things before 
-//          saving again -- what if they're short on time?), OR we need to maintain 
-//          bit-aligned copies of all script-related data in memory (as if saving a 
-//          file) and show a warning in the UI when that exceeds some threshold.
-//
-//           - The size of non-scripted data can vary but not enough to matter; 
-//             some player traits and odds and ends use a presence bit, and of 
-//             course the variant metadata can be up to 127 widechars. We should 
-//             just assume the max possible length for all non-scripted data and 
-//             then measure the scripted data against the space that remains. (In 
-//             any case, we have to allow for the maximum length of the title, 
-//             description, author, and editor, or the gametype might be corrupted 
-//             when resaving it in-game with longer metadata text. Similarly we 
-//             should also assume that there will always be TU1 data, both because 
-//             we always add that when saving and because the game may possibly 
-//             add it when resaving.)
-//
-//        - It would be helpful to have something that can alert the user to any 
-//          unused strings.
-//
-//     - Script content
-//
-//        - Need to modify how we handle saving script content: we need to serialize 
-//          from the triggers. Currently we just serialize from the raw data.
-//
-//        - It would also be a good idea to give each opcode argument a pointer 
-//          to its owning opcode. The ideas above -- Use Info for Forge labels and 
-//          such -- require being able to locate a given opcode arg within the 
-//          broader script, after having collected a list of opcode args.
-//
-//           - Sadly, we cannot give nested triggers a reference to their parents, 
-//             because technically, one nested trigger can be called from multiple 
-//             containing blocks (i.e. a subroutine instead of a nested block). I 
-//             haven't paid close enough attention to know if any of Bungie's 
-//             content does this, but the format should allow it.
-//
-//             What we could do instead is have triggers maintain a list of callers. 
-//             Separately we could try and differentiate between a nested block and 
-//             a subroutine while things are in-memory.
 //
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 

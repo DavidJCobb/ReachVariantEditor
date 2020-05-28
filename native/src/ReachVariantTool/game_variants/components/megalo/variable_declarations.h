@@ -12,7 +12,7 @@ namespace Megalo {
       none, // offline
       low,  // survives host migration
       high, // survives host migration
-      default, // does not survive host migration
+      default, // apparently networked, but does not survive host migration
    };
    using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
    //

@@ -199,4 +199,8 @@ class GameVariantDataMultiplayer : public GameVariantData {
          data.update_from(*this);
          return data;
       }
+
+      Megalo::ReachForgeLabel* get_forge_label_using_string(ReachString*) const noexcept;
+      ReachMegaloOption*       get_option_using_string(ReachString*) const noexcept;
+      ReachMegaloPlayerTraits* get_traits_using_string(ReachString*) const noexcept;
 };

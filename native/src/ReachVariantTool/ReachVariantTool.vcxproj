@@ -176,6 +176,7 @@
     <ClCompile Include="ui\localized_string_library.cpp" />
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
+    <ClCompile Include="ui\main_window\debug_helper_functions.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
@@ -333,6 +334,7 @@
     <QtMoc Include="ui\generic\QListWidgetEx.h" />
     <ClInclude Include="services\localization_library.h" />
     <QtMoc Include="ui\localized_string_library.h" />
+    <ClInclude Include="ui\main_window\debug_helper_functions.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />
