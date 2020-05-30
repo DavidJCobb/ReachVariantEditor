@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-namespace name="">
+   <blurb>Contains various utility functions.</blurb>
+   <methods>
+      <actions>
+         <method name="debug_print" id="18">
+            <args>
+               <arg name="text"  type="format-string">The text to print.</arg>
+            </args>
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably writes a message to some log file.</blurb>
+            <example>
+               debug_print("This function doesn't do anything! :D")
+            </example>
+         </method>
+      </actions>
+   </methods>
+</script-type>

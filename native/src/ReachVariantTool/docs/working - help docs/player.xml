@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="player">
+   <friendly>Player</friendly>
+   <blurb>A player that is or was present in the current match.</blurb>
+   <methods>
+      <actions>
+         <method name="apply_traits" id="11">
+            <args>
+               <arg name="traits" type="traits">The player traits to apply.</arg>
+            </args>
+            <blurb>Apply a set of player traits to a player for the current tick.</blurb>
+            <example>
+               alias is_zombie     = player.number[0]
+               alias zombie_traits = script_traits[0]
+               for each player do
+                  if current_player.is_zombie == 0 then
+                     current_player.apply_traits(zombie_traits)
+                  end
+               end
+            </example>
+         </method>
+      </actions>
+   </methods>
+</script-type>

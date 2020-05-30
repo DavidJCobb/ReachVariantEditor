@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-namespace name="game">
+   <blurb>Contains game state values and functions for managing game state.</blurb>
+   <members>
+      <!-- TODO -->
+   </members>
+   <methods>
+      <actions>
+         <method name="show_message_to" id="16">
+            <args>
+               <arg name="who">
+                  The <a href="script/api/player">player</a> or <a href="script/api/team">team</a> 
+                  to display the message for, or the value <var>all_players</var>.
+               </arg>
+               <arg name="sound" type="sound">An optional sound to play with the message.</arg>
+               <arg name="text"  type="format-string">The text to display.</arg>
+            </args>
+            <blurb>Display a message in the kill feed.</blurb>
+            <example>
+               game.show_message_to(team[0], none, "Defend your VIP!")
+               game.show_message_to(team[1], none, "Kill the VIP!")
+            </example>
+         </method>
+         <method name="end_round" id="21">
+            <blurb>Ends the round.</blurb>
+            <example>
+               if game.round_time_limit > 0 and game.round_timer.is_zero() then
+                  game.end_round()
+                  --
+                  -- That's right: the round timer doesn't automatically end the round. Bungie 
+                  -- probably set it up that way so that Invasion could use the timer for each 
+                  -- individual phase.
+                  --
+               end
+            </example>
+         </method>
+      </actions>
+   </methods>
+</script-type>
