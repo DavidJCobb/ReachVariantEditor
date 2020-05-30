@@ -396,8 +396,6 @@
                   current_object.set_spawn_location_permissions(allies)
                end
             </example>
-            <related context="player" type="action" name="set_co_op_spawning" />
-            <related type="action" name="set_spawn_location_fireteam" />
          </method>
          <method name="set_progress_bar" id="15">
             <args>
@@ -435,6 +433,99 @@
                      global.player[0].kill(false)
                   end
                end
+            </example>
+         </method>
+         <method name="set_shape_visibility" id="22">
+            <args>
+               <arg name="who" type="player-set" />
+            </args>
+            <blurb>Adjust which players can see an object's shape boundary.</blurb>
+            <example>
+               for each object with label "territory" do
+                  current_object.set_shape_visibility(everyone)
+               end
+            </example>
+            <note>
+               You cannot make objects with spherical shapes visible. Spherical shapes are 
+               only available via scripting, not in Forge, and the game apparently has no 
+               code to display them.
+            </note>
+         </method>
+         <method name="kill" id="23">
+            <args>
+               <arg name="silent" type="bool">
+                  Controls whether the object's death counts toward any statistics.
+               </arg>
+            </args>
+            <blurb>Kill an object.</blurb>
+            <example>
+               for each object with label "avoid_me" do
+                  for each player do
+                     if current_object.shape_contains(current_player.biped) then
+                        current_player.biped.kill(false)
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="set_invincibility" id="24">
+            <args>
+               <arg name="state" type="number">
+                  If this value is non-zero, the object is made invincible.
+               </arg>
+            </args>
+            <blurb>Make an object invincible.</blurb>
+            <description>
+               <p>
+                  This function makes an object invulnerable. Invulnerable objects cannot 
+                  be killed or destroyed by weapons, explosions, physics, Forge-placed level 
+                  boundaries, a map's built-in level boundaries, or (in the case of bipeds) 
+                  the destruction of the vehicle they are piloting, or any other form of 
+                  damage.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.biped.set_invincibility(1)
+               end
+            </example>
+         </method>
+         <method name="get_orientation" id="29" returns="number">
+            <blurb>Returns a number representing the object's overall rotation.</blurb>
+            <description>
+               <p>
+                  This function returns a number between 1 and 6 representing an object's 
+                  overall rotation. The values seem to indicate which side of an object 
+                  is facing up, i.e. if you were to imagine a cube enclosing the object, 
+                  the values would each correspond to one side of the cube.
+               </p>
+               <p>
+                  Analysis of the code for Rocket Hog Race indicates that a value of 1 
+                  indicates that the object is upright (Rocket Hog Race uses this to 
+                  count the number of times a player's vehicle has rotated); however, 
+                  tests on various objects pre-rotated in Forge always returned 1.
+               </p>
+            </description>
+            <example>
+               global.number[0] = current_object.get_orientation()
+               if global.number[0] != 1 then
+                  --
+                  -- object isn't upright
+                  --
+               end
+            </example>
+         </method>
+         <method name="get_speed" id="30" returns="number">
+            <blurb>Returns the object's speed in feet per second.</blurb>
+            <description>
+               <p>
+                  This function returns an object's speed, apparently measured in feet 
+                  per second. Race multiplies the value by 109 and then divides by 100 
+                  to convert it to kilometers per hour.
+               </p>
+            </description>
+            <example>
+               global.number[0] = current_object.get_speed()
             </example>
          </method>
       </actions>

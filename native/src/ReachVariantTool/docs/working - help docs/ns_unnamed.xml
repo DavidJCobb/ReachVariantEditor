@@ -13,6 +13,34 @@
                debug_print("This function doesn't do anything! :D")
             </example>
          </method>
+         <method name="rand" id="25" returns="number">
+            <args>
+               <arg name="cap"  type="number">
+                  The generated number will not be equal to or greater than this value.
+               </arg>
+            </args>
+            <blurb>Generates a random number.</blurb>
+            <description>
+               <p>
+                  This function generates a random integer, which is greater than or 
+                  equal to zero, and less than the <var>cap</var> value.
+               </p>
+            </description>
+            <example>
+               global.number[0] = rand(7)
+            </example>
+         </method>
+         <method name="debug_break" id="28">
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably broke into a debugger.</blurb>
+            <example>
+               alias this_should_not_be_1 = global.number[0]
+               --
+               if this_should_not_be_1 == 1 then
+                  debug_break()
+               end
+            </example>
+         </method>
       </actions>
    </methods>
 </script-type>
