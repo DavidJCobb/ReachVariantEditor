@@ -111,6 +111,11 @@ int main(int argc, char *argv[]) {
 //       generic error message stating that "something went wrong while reading the multiplayer 
 //       data."
 //
+//        - Wonder if we should alert the user to this case and then give them the option to 
+//          open the file anyway. Would require us to implement a "load process" complimentary 
+//          to the existing "save process" so we can pass data, options, etc., down to load 
+//          code.
+//
 //     = UX FOR FILE SAVE PROCESS: Do we want to generate the file data to write before asking 
 //       the user where to save it? That would allow us to suggest a different file extension 
 //       for editor-only (i.e. xRVT) variants.
@@ -129,6 +134,21 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
+//     = IN FREEZE TAG, 343i CLEARS THE VALUE OF A PLAYER VARIABLE BEFORE ASSIGNING TO IT THE 
+//       RETURN VALUE OF object.get_carrier. CHECK WHETHER THIS IS NEEDED IN ANY OF THE FOLLOWING 
+//       CASES, AND IF SO, RENAME IT TO try_get_carrier AND ADD AN ALTERNATE NAME LIKE WE DID 
+//       WITH SOME OTHER GETTERS:
+//
+//        - The object is none.
+//        - The object is not a weapon.
+//        - The object is not being carried by any biped.
+//        - The object is being carried by a non-player-controlled biped.
+//
+//       WHILE WE'RE AT IT, WE SHOULD SEE IF THIS OPCODE WORKS ON ARMOR ABILITIES.
+//
+//        - IF WE RENAME THIS, DON'T FORGET TO AMEND ALL SOURCE SCRIPTS (I.E. FREEZE TAG AND 
+//          JUGGERNAUT IN PARTICULAR)!
+//
 //     = DOES object.delete DELETE THE OBJECT INSTANTANEOUSLY, OR QUEUE IT FOR DELETION AT THE 
 //       END OF THE SCRIPT TICK? CAN WE ACCESS MEMBER VARIABLES ON AN OBJECT WE'VE JUST DELETED? 
 //       DOES IT CONTINUE TO REGISTER IN FOR-EACH-OBJECT(-WITH-LABEL) LOOPS? When Freeze Tag 
@@ -144,6 +164,37 @@ int main(int argc, char *argv[]) {
 //
 //        - We need to decompile all official gametypes and decode them as much as we can, and 
 //          provide aliases for them. We should provide these as "source scripts."
+//
+//           - DONE:
+//              - Freeze Tag
+//              - Juggernaut
+//              - King of the Hill (but give it a second pass; not intuitive enough as-is)
+//              - Race (but double-check it again now that we've improved our tools)
+//              - Slayer (vanilla; see if MM variants have DLC achievement code like Freeze Tag)
+//                 - (also look for TU variants with the "Super Shields" option)
+//
+//           - PENDING:
+//              - Assault
+//              - Buddy Slayer / "Bro Slayer"
+//              - Capture the Flag
+//                 - Flag Slayer
+//                 - Speedflag
+//              - Halo Chess (high-complexity; low-priority)
+//              - Headhunter
+//              - Infection
+//                 - Alpha Zombies
+//              - Invasion
+//                 - Invasion: Boneyard
+//                 - Invasion: Breakpoint
+//                 - Invasion: Spire
+//              - Oddball
+//              - Power Slayer
+//              - Rally
+//                 - Rocket Hog Race
+//              - Skeeball / "HaloBall"
+//              - Stockpile
+//                 - Speedpile
+//              - Territories
 //
 //     - The load process can't handle out-of-range indices in indexed lists for files that 
 //       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
