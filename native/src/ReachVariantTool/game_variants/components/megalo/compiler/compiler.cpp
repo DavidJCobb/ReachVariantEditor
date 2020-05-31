@@ -1997,12 +1997,34 @@ namespace Megalo {
       } else {
          auto index = match->index_of_out_argument();
          if (index >= 0) {
-            if (context)
-               this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-            else if (context_is_game)
-               this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg("game").arg(function_name));
-            else
-               this->raise_error(call_start, QString("Function %1 returns a value, and that value must be assigned to a variable.").arg(function_name));
+            //
+            // This function returns a value, but we are not calling it in an assign statement (i.e. we are discarding its 
+            // return value). We need to check whether that's allowed.
+            //
+            bool error = true;
+            if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded) {
+               //
+               // If the return value is allowed to be discarded, then handle that scenario by compiling a "none" value 
+               // as the out-argument.
+               //
+               auto& base = match->arguments[index];
+               auto  arg  = opcode->arguments[index] = (base.typeinfo.factory)();
+               auto* var  = dynamic_cast<Variable*>(arg);
+               assert(arg && "Failed to handle OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded: failed to create the argument.");
+               assert(var && "Failed to handle OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded: created argument is not a variable.");
+               if (var->set_to_zero_or_none()) {
+                  error = false;
+               }
+            }
+            //
+            if (error) {
+               if (context)
+                  this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+               else if (context_is_game)
+                  this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg("game").arg(function_name));
+               else
+                  this->raise_error(call_start, QString("Function %1 returns a value, and that value must be assigned to a variable.").arg(function_name));
+            }
          }
       }
       Script::Statement* statement;

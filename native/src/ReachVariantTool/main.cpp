@@ -119,6 +119,22 @@ int main(int argc, char *argv[]) {
 //          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
 //          clicking "yes."
 //
+//     = THE object.place_at_me OPCODE ALLOWS ASSIGNING TO no_object AS A WAY OF CREATING AN 
+//       OBJECT WITHOUT BOTHERING TO KEEP A REFERENCE TO IT. WE NEED TO GIVE OPCODES A WAY TO 
+//       SIGNAL THAT THEY ALLOW ASSIGNING THEIR RETURN VALUES TO "NONE", AND WE NEED TO 
+//       IMPLEMENT THE SYNTAX (FOR COMPILING AND DECOMPILING) AS SIMPLY NOT USING AN ASSIGN 
+//       STATEMENT I.E. (basis.place_at_me(...)) INSTEAD OF (no_object = basis.place_at_me(...)).
+//
+//        - IMPLEMENTED. SEEMS TO COMPILE PROPERLY BUT WE SHOULD TEST IN-GAME TO BE SURE.
+//
+//        - We should test if object.place_between_me_and also has this behavior.
+//
+//     = DOES object.delete DELETE THE OBJECT INSTANTANEOUSLY, OR QUEUE IT FOR DELETION AT THE 
+//       END OF THE SCRIPT TICK? CAN WE ACCESS MEMBER VARIABLES ON AN OBJECT WE'VE JUST DELETED? 
+//       DOES IT CONTINUE TO REGISTER IN FOR-EACH-OBJECT(-WITH-LABEL) LOOPS? When Freeze Tag 
+//       sends the flag_reset_neutral incident, it tries to use a member-variable of an object 
+//       that it has just called object.delete on.
+//
 //     = DOCUMENTATION
 //
 //        - We should auto-generate documentation on all opcodes (sorted by context type) in 

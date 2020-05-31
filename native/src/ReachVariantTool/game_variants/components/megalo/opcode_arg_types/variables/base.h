@@ -218,5 +218,8 @@ namespace Megalo {
          // suitable for use as the righthand side.
          //
          virtual Variable* create_zero_or_none() const noexcept = 0;
+         virtual bool set_to_zero_or_none() noexcept = 0; // returns success
+         //
+         bool is_none() const noexcept;
    };
 }

@@ -10,6 +10,7 @@ namespace Megalo {
          OpcodeArgValueTimer();
          //
          virtual Variable* create_zero_or_none() const noexcept override;
+         virtual bool set_to_zero_or_none() noexcept override;
    };
    namespace variable_scope_indicators {
       namespace timer {

@@ -201,4 +201,8 @@ namespace Megalo {
       arg->index = 0;
       return arg;
    }
+   bool OpcodeArgValueScalar::set_to_zero_or_none() noexcept {
+      this->set_to_const_zero();
+      return true;
+   }
 }

@@ -1,6 +1,7 @@
 #include "opcode.h"
 #include <cassert>
 #include "actions.h"
+#include "opcode_arg_types/variables/base.h"
 
 namespace Megalo {
    bool OpcodeBase::context_is(const OpcodeArgTypeinfo& type) const noexcept {
@@ -39,6 +40,12 @@ namespace Megalo {
                size_t count = list.size();
                for (size_t i = 0; i < count; ++i) {
                   if (list[i].is_out_variable) {
+                     if (mapping.flags & OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded) {
+                        auto var = dynamic_cast<Variable*>(args[i]);
+                        if (var && var->is_none()) {
+                           break;
+                        }
+                     }
                      args[i]->decompile(out);
                      out.write(" = ");
                      break;

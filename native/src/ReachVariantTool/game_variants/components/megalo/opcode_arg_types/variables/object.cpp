@@ -118,4 +118,10 @@ namespace Megalo {
       arg->index = 0;
       return arg;
    }
+   bool OpcodeArgValueObject::set_to_zero_or_none() noexcept {
+      this->scope = &variable_scope_indicators::object::global_object;
+      this->which = variable_which_values::object::no_object.as_integer();
+      this->index = 0;
+      return true;
+   }
 }

@@ -53,4 +53,10 @@ namespace Megalo {
       arg->index = 0;
       return arg;
    }
+   bool OpcodeArgValueTeam::set_to_zero_or_none() noexcept {
+      this->scope = &variable_scope_indicators::team::global_team;
+      this->which = variable_which_values::team::no_team.as_integer();
+      this->index = 0;
+      return true;
+   }
 }

@@ -1,3 +1,6 @@
+A "for each team" loop also iterates over neutral_team, judging by a look at Freeze Tag's 
+script.
+
 If a player is forced into a Monitor biped and then given a weapon, they will be able 
 to fire that weapon if it is a ranged weapon, and they will be able to swap it out 
 with any other weapon. Ranged weapons can do damage and kill, though this may only be 

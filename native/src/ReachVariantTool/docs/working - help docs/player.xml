@@ -9,6 +9,15 @@
                <arg name="traits" type="traits">The player traits to apply.</arg>
             </args>
             <blurb>Apply a set of player traits to a player for the current tick.</blurb>
+            <description>
+               <p>
+                  This function applies a set of player traits to the context player until 
+                  the next time the script runs. There is no function to stop applying 
+                  traits to a player; rather, you call this function for every tick that 
+                  the player should have a given set of traits, and then revoke those 
+                  traits by no longer calling this function.
+               </p>
+            </description>
             <example>
                alias is_zombie     = player.number[0]
                alias zombie_traits = script_traits[0]

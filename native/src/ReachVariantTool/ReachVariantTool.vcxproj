@@ -418,6 +418,7 @@
     <Image Include="ReachVariantTool.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="README.txt" />

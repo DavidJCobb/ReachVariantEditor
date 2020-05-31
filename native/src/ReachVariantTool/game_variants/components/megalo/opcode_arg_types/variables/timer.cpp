@@ -47,4 +47,7 @@ namespace Megalo {
       arg->index = 0;
       return arg;
    }
+   bool OpcodeArgValueTimer::set_to_zero_or_none() noexcept {
+      return false;
+   }
 }

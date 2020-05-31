@@ -45,7 +45,7 @@ namespace Megalo {
             OpcodeArgBase("offset", OpcodeArgValueVector3::typeinfo),
             OpcodeArgBase("name",   OpcodeArgValueVariantStringID::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
+         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2, OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded)
       ),
       ActionFunction( // 3
          "Delete Object",

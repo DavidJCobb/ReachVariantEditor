@@ -375,4 +375,22 @@ namespace Megalo {
       this->index  = cast->index;
       this->object = cast->object;
    }
+   bool Variable::is_none() const noexcept {
+      bool this_type_is_a_scope = getScopeObjectForConstant(this->type.var_type) != nullptr;
+      if (!this_type_is_a_scope)
+         return false;
+      auto global_scope_v = this->type.get_variable_scope(variable_scope::global);
+      if (!global_scope_v) // shouldn't happen
+         return false;
+      if (this->scope != global_scope_v) // "none" values are always globally-scoped
+         return false;
+      auto global_scope_s = global_scope_v->base;
+      if (!global_scope_s) // shouldn't happen
+         return false;
+      //
+      auto& which_list = global_scope_s->list;
+      if (this->which >= which_list.size())
+         return false;
+      return global_scope_s->list[this->which].is_none();
+   }
 }
