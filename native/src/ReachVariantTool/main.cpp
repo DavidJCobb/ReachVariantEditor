@@ -147,7 +147,16 @@ int main(int argc, char *argv[]) {
 //       WHILE WE'RE AT IT, WE SHOULD SEE IF THIS OPCODE WORKS ON ARMOR ABILITIES.
 //
 //        - IF WE RENAME THIS, DON'T FORGET TO AMEND ALL SOURCE SCRIPTS (I.E. FREEZE TAG AND 
-//          JUGGERNAUT IN PARTICULAR)!
+//          JUGGERNAUT AND ODDBALL IN PARTICULAR)!
+//
+//     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
+//       I SHOULD TEST THIS.
+//
+//        - Also worth testing:
+//
+//           - Can NPC bipeds assigned to a team qualify as (hud_target) objects?
+//              - If not, then hud_target is probably actually hud_player.biped.
+//              - If so, is hud_team equivalent to hud_target.team or hud_target_player.team?
 //
 //     = DOES object.delete DELETE THE OBJECT INSTANTANEOUSLY, OR QUEUE IT FOR DELETION AT THE 
 //       END OF THE SCRIPT TICK? CAN WE ACCESS MEMBER VARIABLES ON AN OBJECT WE'VE JUST DELETED? 
@@ -167,34 +176,33 @@ int main(int argc, char *argv[]) {
 //
 //           - DONE:
 //              - Freeze Tag
+//              - Headhunter TU
 //              - Juggernaut
 //              - King of the Hill (but give it a second pass; not intuitive enough as-is)
+//              - Oddball
 //              - Race (but double-check it again now that we've improved our tools)
-//              - Slayer (vanilla; see if MM variants have DLC achievement code like Freeze Tag)
-//                 - (also look for TU variants with the "Super Shields" option)
+//              - Slayer
+//                 - Slayer TU (includes Buddy Slayer code)
+//              - Territories
 //
 //           - PENDING:
 //              - Assault
-//              - Buddy Slayer / "Bro Slayer"
 //              - Capture the Flag
 //                 - Flag Slayer
 //                 - Speedflag
 //              - Halo Chess (high-complexity; low-priority)
-//              - Headhunter
 //              - Infection
 //                 - Alpha Zombies
 //              - Invasion
 //                 - Invasion: Boneyard
 //                 - Invasion: Breakpoint
 //                 - Invasion: Spire
-//              - Oddball
 //              - Power Slayer
 //              - Rally
 //                 - Rocket Hog Race
 //              - Skeeball / "HaloBall"
 //              - Stockpile
 //                 - Speedpile
-//              - Territories
 //
 //     - The load process can't handle out-of-range indices in indexed lists for files that 
 //       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
