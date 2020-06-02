@@ -121,22 +121,22 @@ namespace Megalo {
                   "script",     // UI labels this "The Guardians"
                   "ai_suicide", // map file doesn't appear to have a string for this
                   "magnum",
-                  "assault_rifle",
+                  "assault_rifle", // 5
                   "dmr", // "marksman rifle" internally
                   "shotgun",
                   "sniper_rifle",
                   "rocket_launcher",
-                  "spartan_laser",
+                  "spartan_laser", // 10
                   "frag_grenade",
                   "grenade_launcher",
                   "plasma_pistol",
                   "needler",
-                  "plasma_rifle",
+                  "plasma_rifle", // 15
                   "plasma_repeater",
                   "needle_rifle",
                   "spiker",
                   "plasma_launcher",
-                  "gravity_hammer", // includes golf club damage
+                  "gravity_hammer", // 20 // includes golf club damage
                   "energy_sword",
                   "plasma_grenade",
                   "concussion_rifle",
@@ -146,43 +146,43 @@ namespace Megalo {
                   "wraith", // mortar or splatters
                   "wraith_anti_infantry",
                   "banshee", // cannons or splatters
-                  "banshee_bomb",
+                  "banshee_bomb", // 30
                   "seraph",
                   "mongoose", // splatters
                   "warthog", // splatters
                   "warthog_turret_chaingun",
-                  "warthog_turret_gauss",
-                  // shouldn't "warthog_turret_rocket" be at this point in the list?
+                  "warthog_turret_gauss", // 35
+                  "warthog_turret_rocket",
                   "scorpion", // cannon or splatters
                   "scorpion_anti_infantry",
                   "falcon", // front chaingun (if any) or splatters
-                  "falcon_gunner", // passengers
+                  "falcon_gunner", // 40 // passengers
                   "fall_damage",
                   "collision_damage", // any collision damage not attributable to a specific cause
                   "melee_generic",
                   "explosion_generic",
-                  "explosion_birthday_party",
+                  "explosion_birthday_party", // 45
                   "melee_flag",
                   "melee_bomb",
                   "explosion_bomb",
                   "melee_skull",
-                  "teleporter", // ?
+                  "teleporter", // 50 // ?
                   "shifted_blame", // "transfer_damage" internally; no one seems to know what it actually is
                   "armor_lock_crush",
-                  // shouldn't "target_locator" be at this point in the list?
+                  "target_locator",
                   "machine_gun_turret", // mounted or non-mounted
                   "plasma_cannon", // mounted or non-mounted
                   "plasma_mortar", // pre-Halo-3 leftover?
                   "plasma_turret", // this is NOT for the mounted, detachable plasma cannon
                   "shade_turret",
-                  "sabre", // "excavator" internally
-                  "smg",
+                  "sabre",        // "excavator" internally, though i believe Halo 3 used that name internally for the prowler
+                  "smg",          // 60 // leftover
                   "carbine",      // leftover
                   "battle_rifle", // leftover
                   "focus_rifle",  // "beam_rifle" internally // monitors' default "beam" weapon would count as this, if you managed to damage someone with it
                   "fuel_rod_gun",
-                  "missile_pod", // leftover
-                  "brute_shot", // leftover
+                  "missile_pod",  // 65 // leftover
+                  "brute_shot",   // leftover
                   "flamethrower", // leftover
                   "sentinel_gun", // how does this differ from "sentinel_beam"?
                   "spike_grenade",    // leftover // "claymore_grenade" internally; there are tutorial strings in the map files which identify it as the spike grenade

@@ -678,10 +678,12 @@ namespace Megalo {
                return arg_compile_result::success();
             if (word_must_be_imported_from) {
                if (word_must_be_imported_from->has_imported_name(word)) {
+                  out_name = word;
                   return arg_compile_result::success();
                }
                return arg_compile_result::failure();
             }
+            out_name = word;
             return arg_compile_result::success();
          }
       }

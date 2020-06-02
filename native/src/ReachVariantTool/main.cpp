@@ -44,17 +44,6 @@ int main(int argc, char *argv[]) {
 //
 //     - SHORT-TERM PLANS
 //
-//        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
-//          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
-//
-//           - If we make it possible to define a NamespaceMember that refers to a constant 
-//             integer, then we can create a namespace of named values for this enum. However, 
-//             I'd prefer to nest anything like that under an "enums" namespace, which would 
-//             require adding support for nested namespaces.
-//
-//        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
-//          to the UI.
-//
 //        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
 //          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
 //
