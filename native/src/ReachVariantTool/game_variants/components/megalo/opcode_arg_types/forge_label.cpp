@@ -114,20 +114,16 @@ namespace Megalo {
       // No string literal was specified. We also allow an integer alias, an alias of an integer index, 
       // the word "none", or an alias of the word "none".
       //
-      if (!arg.extract_integer_literal(index)) {
-         auto word  = arg.extract_word();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (alias && alias->is_imported_name())
-             word = alias->target_imported_name;
-         if (alias && alias->is_integer_constant()) {
-            index = alias->get_integer_constant();
-         } else {
-            if (word.compare("none", Qt::CaseInsensitive) == 0) {
-               this->value = nullptr;
-               return arg_compile_result::success();
-            }
-            return arg_compile_result::failure();
+      QString word;
+      auto    result = compiler.try_get_integer_or_word(arg, index, word, "", &OpcodeArgValueForgeLabel::typeinfo, -1);
+      if (result.is_failure())
+         return result;
+      if (!word.isEmpty()) {
+         if (word.compare("none", Qt::CaseInsensitive) == 0) {
+            this->value = nullptr;
+            return arg_compile_result::success();
          }
+         return arg_compile_result::failure();
       }
       if (index < 0)
          return arg_compile_result::failure("A Forge label cannot have a negative index.");

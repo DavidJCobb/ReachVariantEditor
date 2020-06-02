@@ -139,13 +139,9 @@ int main(int argc, char *argv[]) {
 //
 //        - VariableReference support for enums: DONE
 //
-//        - Support for enums in places where the compiler expects an integer: NOT DONE
+//        - Support for enums in places where the compiler expects an integer: DONE
 //
-//        - Support for enums in OpcodeArgValue::compile overloads: NOT DONE
-//
-//           - Both this and the compiler-level stuff will be easier if we give the compiler a 
-//             function that takes a string like "enums.damage_reporting_type.dmr" and resolves 
-//             it to an integer if possible (returning a failure code if not).
+//        - Support for enums in OpcodeArgValue::compile overloads: DONE
 //
 //        - User-defined enums: NOT DONE
 //
