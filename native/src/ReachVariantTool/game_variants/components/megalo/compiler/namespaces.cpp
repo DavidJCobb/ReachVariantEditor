@@ -1,4 +1,5 @@
 #include "namespaces.h"
+#include "enums.h"
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/player_or_group.h"
 #include "../opcode_arg_types/widget_related.h"
@@ -6,6 +7,11 @@
 
 namespace Megalo {
    namespace Script {
+      /*static*/ NamespaceMember NamespaceMember::make_enum_member(Namespace& ns, Enum& e) {
+         auto member = make_bare_member(e.name.toLatin1(), OpcodeArgValueScalar::typeinfo);
+         member.enumeration = &e;
+         return member;
+      }
       bool NamespaceMember::has_index() const noexcept {
          if (this->scope)
             return this->scope->has_index();
@@ -29,7 +35,7 @@ namespace Megalo {
       }
 
       namespace namespaces {
-         std::array<Namespace*, 3> list = { &unnamed, &global, &game };
+         std::array<Namespace*, 4> list = { &unnamed, &global, &game, &enums };
          Namespace* get_by_name(const QString& name) {
             for (auto& ns : namespaces::list)
                if (cobb::qt::stricmp(name, ns->name) == 0)
@@ -97,6 +103,107 @@ namespace Megalo {
             NamespaceMember::make_scope_member("round_timer",             OpcodeArgValueTimer::typeinfo,  Megalo::variable_scope_indicators::timer::round_timer),
             NamespaceMember::make_scope_member("sudden_death_timer",      OpcodeArgValueTimer::typeinfo,  Megalo::variable_scope_indicators::timer::sudden_death_timer),
             NamespaceMember::make_scope_member("grace_period_timer",      OpcodeArgValueTimer::typeinfo,  Megalo::variable_scope_indicators::timer::grace_period_timer),
+         });
+         //
+         namespace {
+            namespace _enum_definitions {
+               Enum damage_reporting_modifier = Enum("damage_reporting_modifier", {
+                  "none",
+                  "pummel",
+                  "assassination",
+                  "splatter",
+                  "sticky",
+                  "headshot",
+               });
+               Enum damage_reporting_type = Enum("damage_reporting_type", {
+                  "unknown",    // UI labels this "The Guardians"
+                  "guardians",  // UI labels this "The Guardians"
+                  "script",     // UI labels this "The Guardians"
+                  "ai_suicide", // map file doesn't appear to have a string for this
+                  "magnum",
+                  "assault_rifle",
+                  "dmr", // "marksman rifle" internally
+                  "shotgun",
+                  "sniper_rifle",
+                  "rocket_launcher",
+                  "spartan_laser",
+                  "frag_grenade",
+                  "grenade_launcher",
+                  "plasma_pistol",
+                  "needler",
+                  "plasma_rifle",
+                  "plasma_repeater",
+                  "needle_rifle",
+                  "spiker",
+                  "plasma_launcher",
+                  "gravity_hammer", // includes golf club damage
+                  "energy_sword",
+                  "plasma_grenade",
+                  "concussion_rifle",
+                  "ghost", // cannons or splatters
+                  "revenant", // mortar or splatters
+                  "revenant_gunner", // passengers
+                  "wraith", // mortar or splatters
+                  "wraith_anti_infantry",
+                  "banshee", // cannons or splatters
+                  "banshee_bomb",
+                  "seraph",
+                  "mongoose", // splatters
+                  "warthog", // splatters
+                  "warthog_turret_chaingun",
+                  "warthog_turret_gauss",
+                  // shouldn't "warthog_turret_rocket" be at this point in the list?
+                  "scorpion", // cannon or splatters
+                  "scorpion_anti_infantry",
+                  "falcon", // front chaingun (if any) or splatters
+                  "falcon_gunner", // passengers
+                  "fall_damage",
+                  "collision_damage", // any collision damage not attributable to a specific cause
+                  "melee_generic",
+                  "explosion_generic",
+                  "explosion_birthday_party",
+                  "melee_flag",
+                  "melee_bomb",
+                  "explosion_bomb",
+                  "melee_skull",
+                  "teleporter", // ?
+                  "shifted_blame", // "transfer_damage" internally; no one seems to know what it actually is
+                  "armor_lock_crush",
+                  // shouldn't "target_locator" be at this point in the list?
+                  "machine_gun_turret", // mounted or non-mounted
+                  "plasma_cannon", // mounted or non-mounted
+                  "plasma_mortar", // pre-Halo-3 leftover?
+                  "plasma_turret", // this is NOT for the mounted, detachable plasma cannon
+                  "shade_turret",
+                  "sabre", // "excavator" internally
+                  "smg",
+                  "carbine",      // leftover
+                  "battle_rifle", // leftover
+                  "focus_rifle",  // "beam_rifle" internally // monitors' default "beam" weapon would count as this, if you managed to damage someone with it
+                  "fuel_rod_gun",
+                  "missile_pod", // leftover
+                  "brute_shot", // leftover
+                  "flamethrower", // leftover
+                  "sentinel_gun", // how does this differ from "sentinel_beam"?
+                  "spike_grenade",    // leftover // "claymore_grenade" internally; there are tutorial strings in the map files which identify it as the spike grenade
+                  "firebomb_grenade", // leftover
+                  "elephant_turret",  // leftover
+                  "spectre_driver",   // leftover? // there are no strings in the map files with any relation to "spectre"
+                  "spectre_gunner",   // leftover?
+                  "tank",    // unknown
+                  "chopper", // leftover
+                  "hornet",  // leftover
+                  "mantis",  // scrapped in Reach; implemented in Halo 4?
+                  "prowler", // leftover
+                  "sentinel_beam", // based on list placement, this is likely the Halo 3 weapon, except that Halo 3 internally called it "sentinel_gun" which is another value in this list
+                  "sentinel_rpg",  // ?
+                  "tripmine", // ?
+               });
+            }
+         }
+         Namespace enums = Namespace("enums", false, false, {
+            NamespaceMember::make_enum_member(enums, _enum_definitions::damage_reporting_modifier),
+            NamespaceMember::make_enum_member(enums, _enum_definitions::damage_reporting_type),
          });
       }
    }

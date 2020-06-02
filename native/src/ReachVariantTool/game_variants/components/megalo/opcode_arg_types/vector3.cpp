@@ -36,15 +36,8 @@ namespace Megalo {
          return arg_compile_result::failure();
       //
       int32_t coordinate = 0;
-      if (!arg.extract_integer_literal(coordinate)) {
-         //
-         // Try to resolve the argument as an alias.
-         //
-         auto word  = arg.extract_word();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure().set_needs_more(part < 2);
-         coordinate = alias->get_integer_constant();
+      if (!compiler.try_get_integer(arg, coordinate)) {
+         return arg_compile_result::failure().set_needs_more(part < 2);
       }
       if (!cobb::integral_type_can_hold<int8_t>(coordinate)) {
          compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(coordinate).arg((int8_t)coordinate));

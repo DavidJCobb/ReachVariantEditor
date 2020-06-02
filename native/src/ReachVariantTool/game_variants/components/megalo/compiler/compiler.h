@@ -236,9 +236,12 @@ namespace Megalo {
          inline const log_t& get_fatal_errors() const noexcept { return this->fatal_errors; }
          //
          [[nodiscard]] static bool is_keyword(QString word);
+         [[nodiscard]] bool try_decode_enum_reference(QString word, int32_t& out) const;
+         [[nodiscard]] bool try_get_integer(string_scanner&, int32_t& out) const;
+         [[nodiscard]] arg_compile_result try_get_integer_or_word(string_scanner&, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from = nullptr, int32_t limit_int = -1) const;
          //
-         [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
-         [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name);
+         [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const;
+         [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name) const;
          [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name);
          //
          log_checkpoint create_log_checkpoint();

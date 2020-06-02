@@ -114,16 +114,8 @@ namespace Megalo {
          return arg_compile_result::failure();
       //
       int32_t v = 0;
-      if (!arg.extract_integer_literal(v)) {
-         //
-         // Try to resolve the argument as an alias.
-         //
-         auto word  = arg.extract_word();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure();
-         v = alias->get_integer_constant();
-      }
+      if (!compiler.try_get_integer(arg, v))
+         return arg_compile_result::failure();
       if (!cobb::integral_type_can_hold<int8_t>(v)) {
          compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(v).arg((uint8_t)v));
       }

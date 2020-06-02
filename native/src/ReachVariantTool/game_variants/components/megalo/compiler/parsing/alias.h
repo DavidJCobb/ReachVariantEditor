@@ -6,6 +6,8 @@
 namespace Megalo {
    class OpcodeArgTypeinfo;
    namespace Script {
+      class Enum;
+      //
       class Alias : public ParsedItem {
          protected:
             bool _validate_name_initial(Compiler&);
@@ -21,6 +23,8 @@ namespace Megalo {
             Alias(Compiler&, QString name, int32_t target);
             ~Alias();
             //
+            bool    is_enumeration() const noexcept;
+            const Enum* get_enumeration() const noexcept;
             bool    is_integer_constant()  const noexcept;
             int32_t get_integer_constant() const noexcept;
             bool    is_relative_alias() const noexcept;

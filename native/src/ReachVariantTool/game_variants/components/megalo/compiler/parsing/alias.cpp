@@ -247,7 +247,17 @@ namespace Megalo::Script {
       }
    }
 
-   bool Alias::is_integer_constant()  const noexcept {
+   bool Alias::is_enumeration() const noexcept {
+      if (!this->target)
+         return false;
+      return this->target->resolved.top_level.enumeration != nullptr;
+   }
+   const Enum* Alias::get_enumeration() const noexcept {
+      if (!this->target)
+         return nullptr;
+      return this->target->resolved.top_level.enumeration;
+   }
+   bool Alias::is_integer_constant() const noexcept {
       if (!this->target)
          return false;
       return this->target->resolved.top_level.is_constant;

@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include "enums.h"
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
@@ -565,6 +566,131 @@ namespace Megalo {
       this->functions_in_scope.clear();
    }
    //
+   bool Compiler::try_decode_enum_reference(QString word, int32_t& out) const {
+      auto i = word.indexOf('.');
+      if (i <= 0)
+         return false;
+      auto j = word.indexOf('.', i + 1);
+      if (j <= 0)
+         j = word.size();
+      QString base = word.left(i);
+      QString prop = word.mid(i + 1, j - i - 1);
+      //
+      const Script::Enum* match = nullptr;
+      //
+      auto ns = Script::namespaces::get_by_name(base);
+      if (ns) {
+         auto member = ns->get_member(prop);
+         if (!member)
+            return false;
+         if (!member->is_enum_member())
+            return false;
+         match = member->enumeration;
+         //
+         // Move onto next part:
+         //
+         base = prop;
+         i = j;
+         j = word.indexOf('.', i + 1);
+         if (j >= 0)
+            return false; // "namespace_name.enum_name.value.something_else"
+         prop = word.right(word.size() - i - 1);
+      } else if (auto alias = this->lookup_absolute_alias(base)) {
+         if (alias->is_enumeration())
+            match = alias->get_enumeration();
+         else
+            return false;
+      } else {
+         //
+         // TODO: check for user-defined enums, once we implement those
+         //
+         return false;
+      }
+      #if _DEBUG
+         assert(match);
+      #endif
+      return match->lookup(prop, out);
+   }
+   bool Compiler::try_get_integer(string_scanner& str, int32_t& out) const {
+      if (str.extract_integer_literal(out))
+         return true;
+      auto word  = str.extract_word();
+      if (word.isEmpty())
+         return false;
+      auto alias = this->lookup_absolute_alias(word);
+      if (alias && alias->is_integer_constant()) {
+         out = alias->get_integer_constant();
+         return true;
+      }
+      if (!alias) {
+         //
+         // Okay. Maybe it's a reference to an enum value.
+         //
+         if (this->try_decode_enum_reference(word, out))
+            return true;
+      }
+      return false;
+   }
+   arg_compile_result Compiler::try_get_integer_or_word(string_scanner& str, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from, int32_t limit_int) const {
+      //
+      // This function is provided as a helper for OpcodeArgValue::compile overloads, and attempts to do the 
+      // following tasks:
+      //
+      //  - If (str) is any value that represents an integer, then extract that integer. Validate it if the 
+      //    caller wants us to; if it's valid, then send it to the caller and exit.
+      //
+      //     - Values that represent integers include: integer literals; aliases of integer constants; enum 
+      //       values; and aliases of enum values.
+      //
+      //  - If (str) is not a value that represents an integer, then provide the caller with a word...
+      //
+      //     - If the word is the name of an alias, then provide the caller with the integer constant or 
+      //       imported name that the alias refers to; if the alias refers to something else, then fail with 
+      //       an error.
+      //
+      //     - If the word is not an alias, then check if the caller wants us to constrain it to names that 
+      //       a specific type imports; if so, then apply those constraints.
+      //
+      //     - Provide the word back to the caller.
+      //
+      //  - If (str) has no word, then fail with an error.
+      //
+      // One practical example of this function's usage is the "incident" type, which accepts an incident 
+      // name, the word "none", or the integer index of an incident.
+      //
+      out_int = 0;
+      out_name.clear();
+      if (!str.extract_integer_literal(out_int)) {
+         auto word  = str.extract_word();
+         if (word.isEmpty())
+            return arg_compile_result::failure();
+         auto alias = this->lookup_absolute_alias(word);
+         if (alias) {
+            if (alias->is_integer_constant()) {
+               out_int = alias->get_integer_constant();
+            } else if (alias->is_imported_name()) {
+               out_name = alias->target_imported_name;
+            } else {
+               return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here. Only integer literals, %2, and aliases of either may appear here.").arg(alias->name).arg(thing_getting));
+            }
+         } else {
+            if (this->try_decode_enum_reference(word, out_int))
+               return arg_compile_result::success();
+            if (word_must_be_imported_from) {
+               if (word_must_be_imported_from->has_imported_name(word)) {
+                  return arg_compile_result::success();
+               }
+               return arg_compile_result::failure();
+            }
+            return arg_compile_result::success();
+         }
+      }
+      if (limit_int >= 0) {
+         if (out_int < 0 || out_int > limit_int)
+            return arg_compile_result::failure(QString("Integer literal %1 is out of bounds; valid integers range from 0 to %2.").arg(out_int).arg(limit_int));
+      }
+      return arg_compile_result::success();
+   }
    /*static*/ bool Compiler::is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias") // declare an alias
@@ -584,6 +710,8 @@ namespace Megalo {
       if (s == "elseif") // reserved
          return true;
       if (s == "end") // close a block
+         return true;
+      if (s == "enum") // user-defined enums
          return true;
       if (s == "for") // open a for loop block
          return true;
@@ -651,7 +779,7 @@ namespace Megalo {
       return !any_unresolved;
    }
    //
-   Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
+   Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const {
       auto& list = this->aliases_in_scope;
       size_t size = list.size();
       if (!size)
@@ -671,7 +799,7 @@ namespace Megalo {
       }
       return nullptr;
    }
-   Script::Alias* Compiler::lookup_absolute_alias(QString name) {
+   Script::Alias* Compiler::lookup_absolute_alias(QString name) const {
       auto& list = this->aliases_in_scope;
       size_t size = list.size();
       if (!size)
@@ -2567,14 +2695,9 @@ namespace Megalo {
                return;
             }
             if (!this->extract_string_literal(label)) {
-               if (!this->extract_integer_literal(label_index)) {
-                  auto word  = this->extract_word();
-                  auto alias = this->lookup_absolute_alias(word);
-                  if (!alias || !alias->is_integer_constant()) {
-                     this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
-                     return;
-                  }
-                  label_index = alias->get_integer_constant();
+               if (!this->try_get_integer(*this, label_index)) {
+                  this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                  return;
                }
                label_is_index = true;
             }

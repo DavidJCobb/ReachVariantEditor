@@ -46,15 +46,8 @@ namespace Megalo {
    }
    arg_compile_result OpcodeArgValueBaseIndex::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       int32_t index;
-      if (!arg.extract_integer_literal(index)) {
-         auto word = arg.extract_word();
-         if (word.isEmpty())
-            return arg_compile_result::failure();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure();
-         index = alias->get_integer_constant();
-      }
+      if (!compiler.try_get_integer(arg, index))
+         return arg_compile_result::failure();
       if (index > this->max)
          return arg_compile_result::failure(QString("You specified %1, but the maximum allowed value is %2.").arg(index).arg(this->max - 1));
       this->value = index;

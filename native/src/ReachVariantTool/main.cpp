@@ -134,6 +134,21 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
+//     = IMPLEMENT ENUMS AS A FIRST-CLASS LANGUAGE FEATURE, TO MAKE IT EASIER TO IMPLEMENT BUILT-IN 
+//       ENUMS FOR DAMAGE REPORTING TYPES AND MODIFIERS.
+//
+//        - VariableReference support for enums: DONE
+//
+//        - Support for enums in places where the compiler expects an integer: NOT DONE
+//
+//        - Support for enums in OpcodeArgValue::compile overloads: NOT DONE
+//
+//           - Both this and the compiler-level stuff will be easier if we give the compiler a 
+//             function that takes a string like "enums.damage_reporting_type.dmr" and resolves 
+//             it to an integer if possible (returning a failure code if not).
+//
+//        - User-defined enums: NOT DONE
+//
 //     = IN FREEZE TAG, 343i CLEARS THE VALUE OF A PLAYER VARIABLE BEFORE ASSIGNING TO IT THE 
 //       RETURN VALUE OF object.get_carrier. CHECK WHETHER THIS IS NEEDED IN ANY OF THE FOLLOWING 
 //       CASES, AND IF SO, RENAME IT TO try_get_carrier AND ADD AN ALTERNATE NAME LIKE WE DID 
@@ -155,8 +170,8 @@ int main(int argc, char *argv[]) {
 //        - Also worth testing:
 //
 //           - Can NPC bipeds assigned to a team qualify as (hud_target) objects?
-//              - If not, then hud_target is probably actually hud_player.biped.
-//              - If so, is hud_team equivalent to hud_target.team or hud_target_player.team?
+//              - If not, then hud_target is probably actually hud_target_player.biped.
+//              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
 //
 //     = DOES object.delete DELETE THE OBJECT INSTANTANEOUSLY, OR QUEUE IT FOR DELETION AT THE 
 //       END OF THE SCRIPT TICK? CAN WE ACCESS MEMBER VARIABLES ON AN OBJECT WE'VE JUST DELETED? 

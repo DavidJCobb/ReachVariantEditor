@@ -78,13 +78,8 @@ namespace Megalo {
          if (!arg.extract_specific_char('%'))
             compiler.raise_warning("You omitted the \"%\" suffix on the end of the timer rate. This may be considered an error in future versions of the compiler.");
       } else {
-         auto word = arg.extract_word();
-         if (word.isEmpty())
+         if (!compiler.try_get_integer(arg, value)) // this'll redundantly call arg.extract_integer_literal but that should end up aborting immediately, so it's fine
             return arg_compile_result::failure();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure();
-         value = alias->get_integer_constant();
       }
       //
       for (int i = 0; i < _percentage_count; ++i) {
