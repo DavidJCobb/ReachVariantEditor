@@ -123,17 +123,6 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = IMPLEMENT ENUMS AS A FIRST-CLASS LANGUAGE FEATURE, TO MAKE IT EASIER TO IMPLEMENT BUILT-IN 
-//       ENUMS FOR DAMAGE REPORTING TYPES AND MODIFIERS.
-//
-//        - VariableReference support for enums: DONE
-//
-//        - Support for enums in places where the compiler expects an integer: DONE
-//
-//        - Support for enums in OpcodeArgValue::compile overloads: DONE
-//
-//        - User-defined enums: NOT DONE
-//
 //     = IN FREEZE TAG, 343i CLEARS THE VALUE OF A PLAYER VARIABLE BEFORE ASSIGNING TO IT THE 
 //       RETURN VALUE OF object.get_carrier. CHECK WHETHER THIS IS NEEDED IN ANY OF THE FOLLOWING 
 //       CASES, AND IF SO, RENAME IT TO try_get_carrier AND ADD AN ALTERNATE NAME LIKE WE DID 

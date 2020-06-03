@@ -110,7 +110,7 @@ namespace Megalo {
                Enum damage_reporting_modifier = Enum("damage_reporting_modifier", {
                   "none",
                   "pummel",
-                  "assassination",
+                  "assassination", // includes normal melees to the back
                   "splatter",
                   "sticky",
                   "headshot",
@@ -199,11 +199,28 @@ namespace Megalo {
                   "sentinel_rpg",  // ?
                   "tripmine", // ?
                });
+               Enum orientation = Enum("orientation", {
+                  //
+                  // Naming convention is "local axis is world up," with a few values having 
+                  // special-case names where those would be more obvious.
+                  //
+                  { 1, "up_is_up" },
+                  { 1, "upright" },
+                  { 2, "right_is_up" },
+                  { 3, "backward_is_up" },
+                  { 3, "nose_down" },
+                  { 4, "forward_is_up" },
+                  { 4, "nose_up" },
+                  { 5, "left_is_up" },
+                  { 6, "down_is_up" },
+                  { 6, "upside_down" },
+               });
             }
          }
          Namespace enums = Namespace("enums", false, false, {
             NamespaceMember::make_enum_member(enums, _enum_definitions::damage_reporting_modifier),
             NamespaceMember::make_enum_member(enums, _enum_definitions::damage_reporting_type),
+            NamespaceMember::make_enum_member(enums, _enum_definitions::orientation),
          });
       }
    }

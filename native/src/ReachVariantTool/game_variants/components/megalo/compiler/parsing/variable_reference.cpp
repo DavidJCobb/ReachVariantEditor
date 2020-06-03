@@ -629,6 +629,19 @@ namespace Megalo::Script {
       //
       auto member = ns->get_member(part->name);
       if (!member) {
+         //
+         // Real quick: could this be a user-defined enum?
+         //
+         auto ude = compiler.lookup_user_defined_enum(part->name);
+         if (ude) {
+            auto& res = this->resolved.top_level;
+            res.type        = &OpcodeArgValueScalar::typeinfo;
+            res.enumeration = ude->definition;
+            return ++i;
+         }
+         //
+         // Guess not. Error time! :)
+         //
          if (ns == &namespaces::unnamed)
             compiler.raise_error(QString("There are no unscoped values named \"%1\".").arg(part->name));
          else
@@ -665,11 +678,13 @@ namespace Megalo::Script {
    }
    bool VariableReference::_resolve_enumeration(Compiler& compiler, size_t raw_index) {
       auto& top  = this->resolved.top_level;
-      auto  e    = top.enumeration;
+      auto* e    = top.enumeration;
       if (!e)
          return false;
       auto  part = this->_get_raw_part(raw_index);
       auto& name = part->name;
+      //
+      top.enumeration = nullptr; // do not retain references to enums, as user-defined enums may be deleted when they go out of scope (the exception is aliases of enums, which would also go out of scope)
       //
       top.is_constant = true;
       if (!e->lookup(name, top.index)) {

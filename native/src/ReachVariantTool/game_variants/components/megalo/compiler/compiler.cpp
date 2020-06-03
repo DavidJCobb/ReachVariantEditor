@@ -139,6 +139,7 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
+      #pragma region Block
       Block::~Block() {
          this->clear(true);
       }
@@ -502,6 +503,7 @@ namespace Megalo {
             }
          }
       }
+      #pragma endregion
       //
       Statement::~Statement() {
          if (this->lhs) {
@@ -545,6 +547,34 @@ namespace Megalo {
                cnd->inverted = !cnd->inverted;
             }
          }
+      }
+      //
+      UserDefinedEnum::~UserDefinedEnum() {
+         if (this->definition) {
+            delete this->definition;
+            this->definition = nullptr;
+         }
+      }
+      UserDefinedEnum::UserDefinedEnum(UserDefinedEnum&& other) {
+         this->definition = other.definition;
+         this->parent     = other.parent;
+         other.definition = nullptr;
+      }
+      UserDefinedEnum& UserDefinedEnum::operator=(const UserDefinedEnum& other) noexcept {
+         this->parent     = other.parent;
+         if (other.definition) {
+            this->definition = new Enum;
+            *this->definition = *other.definition;
+         } else {
+            this->definition = nullptr;
+         }
+         return *this;
+      }
+      UserDefinedEnum& UserDefinedEnum::operator=(UserDefinedEnum&& other) noexcept {
+         this->definition = other.definition;
+         this->parent     = other.parent;
+         other.definition = nullptr;
+         return *this;
       }
    }
    //
@@ -601,10 +631,10 @@ namespace Megalo {
          else
             return false;
       } else {
-         //
-         // TODO: check for user-defined enums, once we implement those
-         //
-         return false;
+         auto* def = this->lookup_user_defined_enum(base);
+         if (!def)
+            return false;
+         match = def->definition;
       }
       #if _DEBUG
          assert(match);
@@ -819,8 +849,23 @@ namespace Megalo {
       }
       return nullptr;
    }
-   Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) {
-      auto& list = this->functions_in_scope;
+   Script::UserDefinedEnum* Compiler::lookup_user_defined_enum(QString name) const {
+      auto&  list = this->enums_in_scope;
+      size_t size = list.size();
+      if (!size)
+         return nullptr;
+      for (size_t i = 0; i < size; i++) {
+         auto& item = list[i];
+         auto& inam = item.definition->name;
+         if (inam.isEmpty()) // used for invalid enum names, when the bad names are non-fatal rather than fatal errors
+            continue;
+         if (inam.compare(name, Qt::CaseInsensitive) == 0)
+            return const_cast<Script::UserDefinedEnum*>(&item);
+      }
+      return nullptr;
+   }
+   Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) const {
+      auto&  list = this->functions_in_scope;
       size_t size = list.size();
       if (!size)
          return nullptr;
@@ -829,7 +874,7 @@ namespace Megalo {
          if (func.name.isEmpty()) // used for invalid function names, when the bad names are non-fatal rather than fatal errors
             continue;
          if (func.name.compare(name, Qt::CaseInsensitive) == 0)
-            return &func;
+            return const_cast<Script::UserDefinedFunction*>(&func);
       }
       return nullptr;
    }
@@ -845,6 +890,9 @@ namespace Megalo {
       for (auto& member : Script::namespaces::unnamed.members)
          if (cobb::qt::stricmp(name, member.name) == 0)
             return name_source::namespace_member;
+      for (auto& ns : Script::namespaces::list)
+         if (cobb::qt::stricmp(name, ns->name) == 0)
+            return name_source::namespace_name;
       //
       // Search the opcode lists to see if the name is in use by a non-member function:
       //
@@ -1103,6 +1151,8 @@ namespace Megalo {
          return &Compiler::_handleKeyword_Do;
       else if (word == "end")
          return &Compiler::_handleKeyword_End;
+      else if (word == "enum")
+         return &Compiler::_handleKeyword_Enum;
       else if (word == "for")
          return &Compiler::_handleKeyword_For;
       else if (word == "function")
@@ -2242,6 +2292,18 @@ namespace Megalo {
                this->aliases_in_scope.resize(i);
          }
       }
+      {  // The block's contained enums are going out of scope.
+         auto& list = this->enums_in_scope;
+         list.erase(std::remove_if(list.begin(), list.end(),
+            [this](Script::UserDefinedEnum& entry) {
+               auto enum_parent = entry.parent;
+               if (!enum_parent || enum_parent == this->block)
+                  return true;
+               return false;
+            }),
+            list.end()
+         );
+      }
       {  // The block's contained functions are going out of scope.
          auto& list = this->functions_in_scope;
          list.erase(std::remove_if(list.begin(), list.end(),
@@ -2638,6 +2700,142 @@ namespace Megalo {
       if (!this->_closeCurrentBlock())
          this->raise_fatal("Unexpected \"end\".");
    }
+   void Compiler::_handleKeyword_Enum() {
+      auto name = this->extract_word();
+      {  // Validate the name.
+         if (name.isEmpty()) {
+            this->raise_fatal("Expected the name of an enum.");
+            return;
+         }
+         if (name[0].isNumber()) {
+            //
+            // Do not allow a function's name to start with a number. We want this to be consistent with 
+            // alias names, which disallow numbers at their start so that it's easier for opcode argument 
+            // compile functions to check for both integer literals and integer alias names.
+            //
+            this->raise_error("An enum's name cannot begin with a number.");
+            //
+            // This error shouldn't halt parsing. Set the function's name to empty to signal that the 
+            // Block represents a function with an invalid name.
+            //
+            name = "";
+         } else {
+            for (QChar c : name) {
+               if (QString("[].").contains(c)) {
+                  this->raise_fatal(QString("Unexpected %1 inside of an enum name.").arg(c));
+                  return;
+               }
+            }
+            if (Compiler::is_keyword(name)) {
+               this->raise_fatal(QString("Keyword \"%1\" cannot be used as the name of an enum.").arg(name));
+               return;
+            }
+         }
+         if (!name.isEmpty()) { // Run additional checks on the enum name.
+            if (this->lookup_user_defined_enum(name)) {
+               this->raise_fatal(QString("A user-defined enum named \"%1\" is already in scope. Enums cannot shadow each other.").arg(name));
+               name = "";
+            } else if (this->lookup_user_defined_function(name)) {
+               this->raise_fatal(QString("A user-defined function named \"%1\" is already in scope. Enums and functions cannot shadow each other.").arg(name));
+               name = "";
+            } else {
+               //
+               // Do not allow user-defined functions to shadow built-ins:
+               //
+               OpcodeArgTypeRegistry::type_list_t sources;
+               auto built_in_type = Compiler::check_name_is_taken(name, sources);
+               //
+               bool fail = true;
+               switch (built_in_type) {
+                  case name_source::action:
+                  case name_source::condition:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in functions such as %1.").arg(name));
+                     break;
+                  case name_source::static_typename:
+                  case name_source::variable_typename:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in type names such as %1.").arg(name));
+                     break;
+                  case name_source::namespace_member:
+                  case name_source::imported_name:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in values such as %1.").arg(name));
+                     break;
+                  case name_source::none:
+                  default:
+                     fail = false;
+                     break;
+               }
+               if (fail)
+                  name = "";
+            }
+         }
+      }
+      auto def = std::make_unique<Script::Enum>(name);
+      //
+      bool    ended      = false;
+      int32_t prev_value = -1;
+      while (!this->is_at_effective_end()) {
+         auto word = this->extract_word();
+         if (word.isEmpty()) {
+            this->raise_fatal("Expected the name of an enum value, or the word \"end\" marking the end of the enum.");
+            return;
+         }
+         if (word.compare("end", Qt::CaseInsensitive) == 0) {
+            ended = true;
+            break;
+         }
+         if (Compiler::is_keyword(word)) {
+            this->raise_fatal(QString("The \"%1\" keyword cannot be used here.").arg(word));
+            return;
+         }
+         //
+         auto    value_name = word;
+         bool    is_explicit = false;
+         int32_t current_value = prev_value + 1;
+         if (this->extract_specific_char('=')) {
+            is_explicit = true;
+            if (!this->extract_integer_literal(current_value)) {
+               word = this->extract_word();
+               if (word.isEmpty()) {
+                  this->raise_fatal(QString("Expected an integer constant (or alias or enum-value reference) for enum value \"%1\".").arg(value_name));
+                  return;
+               }
+               if (!def->lookup(word, current_value)) {
+                  auto alias = this->lookup_absolute_alias(word);
+                  if (alias && alias->is_integer_constant()) {
+                     current_value = alias->get_integer_constant();
+                  } else {
+                     if (!this->try_decode_enum_reference(word, current_value)) {
+                        this->raise_error(QString("Unable to set value \"%1\" in user-defined enum \"%2\": word \"%3\" is unrecognized.")
+                           .arg(value_name)
+                           .arg(name)
+                           .arg(word)
+                        );
+                        continue;
+                     }
+                  }
+               }
+            }
+         }
+         int32_t throwaway;
+         if (def->lookup(value_name, throwaway)) {
+            this->raise_error(QString("Attempted to redefine value \"%1\" in user-defined enum \"%2\"; existing value is %3, new is %4.")
+               .arg(value_name)
+               .arg(name)
+               .arg(throwaway)
+               .arg(current_value)
+            );
+         } else {
+            def->add_value(value_name, current_value);
+         }
+         prev_value = current_value;
+      }
+      if (!ended) {
+         this->raise_fatal("Unterminated user-defined enum.");
+         return;
+      }
+      //
+      this->enums_in_scope.emplace_back(def.release(), this->block);
+   }
    void Compiler::_handleKeyword_If() {
       auto item = new Script::Block;
       item->type = Script::Block::Type::if_block;
@@ -2764,7 +2962,10 @@ namespace Megalo {
          return;
       }
       if (!name.isEmpty()) { // Run additional checks on the function name.
-         if (this->lookup_user_defined_function(name)) {
+         if (this->lookup_user_defined_enum(name)) {
+            this->raise_fatal(QString("A user-defined enum named \"%1\" is already in scope. Enums and functions cannot shadow each other.").arg(name));
+            name = "";
+         } else if (this->lookup_user_defined_function(name)) {
             this->raise_fatal(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
             name = "";
          } else {

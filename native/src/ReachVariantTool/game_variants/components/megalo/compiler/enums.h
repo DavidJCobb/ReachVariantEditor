@@ -20,9 +20,11 @@ namespace Megalo {
             std::vector<Value> values;
             //
             Enum() {}
+            Enum(QString n) : name(n) {}
             Enum(QString n, std::initializer_list<Value> v) : name(n), values(v) {}
             Enum(QString n, std::initializer_list<QString> v);
             //
+            void add_value(QString, int32_t) noexcept;
             bool lookup(const QString&, int32_t&) const noexcept;
       };
    }

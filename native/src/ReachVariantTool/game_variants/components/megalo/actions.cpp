@@ -284,7 +284,7 @@ namespace Megalo {
       ),
       ActionFunction( // 27
          "Get Object Orientation",
-         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. Per Rocket Hog Race's scripts, a value of 1 indicates that the object is upright, but per testing, weapons and scenery objects rotated at various angles always returned 1.",
+         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. Testing with vehicles indicates that the orientation indicates which of the object's local vectors (up, down, etc.) is most closely aligned with world-up, with the vectors numbered from 1 to 6 being: up (i.e. object is upright), left, backward (i.e. nose down), forward (i.e. nose up), left, and down (i.e. object is upside-down). However, testing with pre-placed and pre-rotated weapons and scenery objects always returned 1.",
          "Set %2 to the \"orientation\" value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),

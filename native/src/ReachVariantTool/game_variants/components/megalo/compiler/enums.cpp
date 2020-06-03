@@ -14,6 +14,9 @@ namespace Megalo {
             this->values[i].value = i;
          }
       }
+      void Enum::add_value(QString name, int32_t v) noexcept {
+         this->values.emplace_back(v, name);
+      }
       bool Enum::lookup(const QString& name, int32_t& out) const noexcept {
          for (auto& value : this->values) {
             if (value.name.compare(name, Qt::CaseInsensitive) == 0) {

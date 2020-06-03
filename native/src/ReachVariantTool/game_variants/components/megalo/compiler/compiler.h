@@ -16,6 +16,8 @@ namespace Megalo {
    class Compiler;
    //
    namespace Script {
+      class Enum;
+      //
       class Comparison;
       class Block : public ParsedItem {
          public:
@@ -90,6 +92,18 @@ namespace Megalo {
             //
             Comparison* clone() const noexcept; // doesn't clone (lhs) or (rhs)
             void negate() noexcept;
+      };
+      class UserDefinedEnum {
+         public:
+            Enum*  definition = nullptr; // owned by this object
+            Block* parent     = nullptr; // used so we can tell when the enum goes out of scope
+            //
+            UserDefinedEnum(Enum* d, Block* p) : definition(d), parent(p) {}
+            ~UserDefinedEnum();
+            //
+            UserDefinedEnum(UserDefinedEnum&&);
+            UserDefinedEnum& operator=(const UserDefinedEnum&) noexcept;
+            UserDefinedEnum& operator=(UserDefinedEnum&&) noexcept;
       };
       class UserDefinedFunction {
          //
@@ -190,6 +204,7 @@ namespace Megalo {
          bool     negate_next_condition = false;
          c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
+         std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          GameVariantDataMultiplayer& variant;
          //
@@ -242,7 +257,8 @@ namespace Megalo {
          //
          [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const;
          [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name) const;
-         [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name);
+         [[nodiscard]] Script::UserDefinedEnum* lookup_user_defined_enum(QString name) const;
+         [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name) const;
          //
          log_checkpoint create_log_checkpoint();
          void revert_to_log_checkpoint(log_checkpoint);
@@ -257,6 +273,7 @@ namespace Megalo {
             action,
             condition,
             imported_name,
+            namespace_name,
             namespace_member,
             static_typename,
             variable_typename,
@@ -320,6 +337,7 @@ namespace Megalo {
          void _handleKeyword_Declare(); // INCOMPLETE
          void _handleKeyword_Do();
          void _handleKeyword_End();
+         void _handleKeyword_Enum();
          void _handleKeyword_If();
          void _handleKeyword_For();
          void _handleKeyword_Function();
