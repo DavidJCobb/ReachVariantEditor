@@ -123,20 +123,7 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = IN FREEZE TAG, 343i CLEARS THE VALUE OF A PLAYER VARIABLE BEFORE ASSIGNING TO IT THE 
-//       RETURN VALUE OF object.get_carrier. CHECK WHETHER THIS IS NEEDED IN ANY OF THE FOLLOWING 
-//       CASES, AND IF SO, RENAME IT TO try_get_carrier AND ADD AN ALTERNATE NAME LIKE WE DID 
-//       WITH SOME OTHER GETTERS:
-//
-//        - The object is none.
-//        - The object is not a weapon.
-//        - The object is not being carried by any biped.
-//        - The object is being carried by a non-player-controlled biped.
-//
-//       WHILE WE'RE AT IT, WE SHOULD SEE IF THIS OPCODE WORKS ON ARMOR ABILITIES.
-//
-//        - IF WE RENAME THIS, DON'T FORGET TO AMEND ALL SOURCE SCRIPTS (I.E. FREEZE TAG AND 
-//          JUGGERNAUT AND ODDBALL IN PARTICULAR)!
+//     = DOES object.get_carrier WORK ON ARMOR ABILITIES?
 //
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
@@ -147,11 +134,8 @@ int main(int argc, char *argv[]) {
 //              - If not, then hud_target is probably actually hud_target_player.biped.
 //              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
 //
-//     = DOES object.delete DELETE THE OBJECT INSTANTANEOUSLY, OR QUEUE IT FOR DELETION AT THE 
-//       END OF THE SCRIPT TICK? CAN WE ACCESS MEMBER VARIABLES ON AN OBJECT WE'VE JUST DELETED? 
-//       DOES IT CONTINUE TO REGISTER IN FOR-EACH-OBJECT(-WITH-LABEL) LOOPS? When Freeze Tag 
-//       sends the flag_reset_neutral incident, it tries to use a member-variable of an object 
-//       that it has just called object.delete on.
+//     = IF A TIMER HAS A NEGATIVE RATE AND TICKS DOWN TO ZERO, DOES ITS RATE THEN CHANGE TO 0%? 
+//       Code in Oddball acts like that's the case.
 //
 //     = DOCUMENTATION
 //

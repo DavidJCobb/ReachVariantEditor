@@ -110,7 +110,14 @@
          </method>
       </conditions>
       <actions>
-         <method name="place_at_me" id="2" returns="object">
+         <method name="place_at_me" id="2" returns="object" nodiscard="false">
+            <!--
+               The default value of the "nodiscard" argument is "true" for any 
+               opcode with a return value. If an opcode is nodiscard, then the 
+               following sentence should be appended to the description, on its 
+               own line: "Calling this function without assigning its return 
+               value to a variable is a compile error."
+            -->
             <args>
                <arg name="type"  type="object-type" />
                <arg name="label" type="forge-label" />
@@ -500,10 +507,8 @@
                   the values would each correspond to one side of the cube.
                </p>
                <p>
-                  Analysis of the code for Rocket Hog Race indicates that a value of 1 
-                  indicates that the object is upright (Rocket Hog Race uses this to 
-                  count the number of times a player's vehicle has rotated); however, 
-                  tests on various objects pre-rotated in Forge always returned 1.
+                  The different values are available in the 
+                  <a href="script/api/enums/orientation">orientation enum</a>.
                </p>
             </description>
             <example>

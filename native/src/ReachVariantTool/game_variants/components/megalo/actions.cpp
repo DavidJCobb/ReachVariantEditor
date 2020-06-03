@@ -211,13 +211,13 @@ namespace Megalo {
       ),
       ActionFunction( // 19
          "Get Item Carrier",
-         "Set a player variable to the owner of an object.",
+         "Set a player variable to the owner of an object. Testing reveals no cases where this function can fail (i.e. it behaves correctly for dropped objects, none-objects, and objects held by an NPC biped), but Bungie and 343i still manually clear the out-variable before calling it.",
          "Set %2 to the player who is carrying %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_carrier", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("try_get_carrier", "get_carrier", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 20
          "Run Nested Trigger",
