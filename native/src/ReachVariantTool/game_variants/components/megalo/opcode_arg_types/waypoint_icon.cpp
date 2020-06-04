@@ -36,7 +36,7 @@ namespace Megalo {
          DetailedEnumValue("supply_ammo",     DetailedEnumValueInfo::make_friendly_name("supply (ammo)")),
          DetailedEnumValue("arrow"),
          DetailedEnumValue("defend"),
-         DetailedEnumValue("unk_26"),
+         DetailedEnumValue("ordnance"),
          DetailedEnumValue("unk_27"),
       });
    }

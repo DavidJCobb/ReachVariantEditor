@@ -177,7 +177,7 @@ namespace Megalo {
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
+         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {2, 1}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
       ),
       ActionFunction( // 16
          "CHUD Message",
@@ -192,7 +192,7 @@ namespace Megalo {
       ),
       ActionFunction( // 17
          "Set Timer Rate",
-         "",
+         "Modify the rate at which a timer's value changes, and whether the value increases or decreases. If you set the timer to decrease, then its rate will automatically switch to 0% when it reaches zero. If you set the timer to increase, then it will not increase past its initial value (TODO: does this apply if the initial value is zero?).",
          "Have %1 tick at rate %2.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),

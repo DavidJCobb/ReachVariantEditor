@@ -1,6 +1,13 @@
 A "for each team" loop also iterates over neutral_team, judging by a look at Freeze Tag's 
 script.
 
+If a timer's rate is negative and the timer reaches zero, then the timer's rate will be 
+changed to 0%.
+
+Analysis of Invasion Slayer's script indicates that if a timer's rate is positive, the 
+timer will be capped at its declared initial value. Unknown whether that changes if the 
+initial value is zero. Manually assigning a number may allow you to circumvent the cap.
+
 If a player is forced into a Monitor biped and then given a weapon, they will be able 
 to fire that weapon if it is a ranged weapon, and they will be able to swap it out 
 with any other weapon. Ranged weapons can do damage and kill, though this may only be 
@@ -233,5 +240,7 @@ If a player quits, and a player variable refers to that player, then the variabl
 be cleared out. A (for each player) loop will only iterate players that are currently 
 present in the match, so in the worst case scenario, you can use that loop to check if a 
 given player-variable's player is still present in the match.
+
+Testing suggests that weapons cannot show waypoints if they are being carried by bipeds.
 
 

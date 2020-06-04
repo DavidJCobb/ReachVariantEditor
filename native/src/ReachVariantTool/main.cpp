@@ -125,6 +125,14 @@ int main(int argc, char *argv[]) {
 //
 //     = DOES object.get_carrier WORK ON ARMOR ABILITIES?
 //
+//     = IF A TIMER'S INITIAL VALUE IS ZERO, CAN IT INCREASE INDEFINITELY? VERIFY, ALSO, THAT A 
+//       NON-ZERO INITIAL VALUE FUNCTIONS AS A CAP (AND SEE IF MANUALLY ASSIGNING THE VALUE CAN 
+//       CIRCUMVENT THE CAP).
+//
+//     = DOES object.place_at_me DEFAULT-ASSIGN THE CREATED OBJECT TO THE BASIS OBJECT'S TEAM? 
+//       ASSAULT'S CODE FOR LETTING A TEAM SEE A WAYPOINT ON THEIR OWN BOMB PLANT POINT ACTS LIKE 
+//       IT DOES.
+//
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
 //
@@ -133,9 +141,6 @@ int main(int argc, char *argv[]) {
 //           - Can NPC bipeds assigned to a team qualify as (hud_target) objects?
 //              - If not, then hud_target is probably actually hud_target_player.biped.
 //              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
-//
-//     = IF A TIMER HAS A NEGATIVE RATE AND TICKS DOWN TO ZERO, DOES ITS RATE THEN CHANGE TO 0%? 
-//       Code in Oddball acts like that's the case.
 //
 //     = DOCUMENTATION
 //
@@ -148,18 +153,22 @@ int main(int argc, char *argv[]) {
 //          provide aliases for them. We should provide these as "source scripts."
 //
 //           - DONE:
+//              - Assault
 //              - Freeze Tag
 //              - Headhunter TU
+//              - Invasion Slayer
 //              - Juggernaut
 //              - King of the Hill (but give it a second pass; not intuitive enough as-is)
 //              - Oddball
 //              - Race (but double-check it again now that we've improved our tools)
+//              - Skeeball / "HaloBall"
 //              - Slayer
 //                 - Slayer TU (includes Buddy Slayer code)
+//              - Stockpile
+//                 - Speedpile
 //              - Territories
 //
 //           - PENDING:
-//              - Assault
 //              - Capture the Flag
 //                 - Flag Slayer
 //                 - Speedflag
@@ -173,9 +182,6 @@ int main(int argc, char *argv[]) {
 //              - Power Slayer
 //              - Rally
 //                 - Rocket Hog Race
-//              - Skeeball / "HaloBall"
-//              - Stockpile
-//                 - Speedpile
 //
 //     - The load process can't handle out-of-range indices in indexed lists for files that 
 //       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
