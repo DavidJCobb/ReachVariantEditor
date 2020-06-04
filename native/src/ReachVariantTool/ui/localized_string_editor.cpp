@@ -82,6 +82,7 @@ LocalizedStringEditorModal::LocalizedStringEditorModal(QWidget* parent) : QDialo
          *this->_targetRef = s;
       }
       ReachEditorState::get().stringTableModified();
+      ReachEditorState::get().stringModified(mp->scriptData.strings.size() - 1);
       this->accept();
    });
    QObject::connect(this->ui.buttonOpenLibrary, &QPushButton::clicked, [this]() {

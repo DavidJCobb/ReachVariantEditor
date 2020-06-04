@@ -30,6 +30,23 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
       this->target = nullptr;
       this->updateTraitsListFromVariant();
    });
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle trait set name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_traits = false;
+      for (auto& traits : mp->scriptData.traits) {
+         if (traits.uses_string(str)) {
+            is_traits = true;
+            break;
+         }
+      }
+      if (is_traits)
+         this->updateTraitsListFromVariant();
+   });
    //
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptTraits::selectTraits);
    //

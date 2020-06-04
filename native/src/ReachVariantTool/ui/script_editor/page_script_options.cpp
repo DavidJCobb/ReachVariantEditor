@@ -76,8 +76,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       for (auto& option : mp->scriptData.options) {
          if (option.uses_string(str)) {
             is_option = true;
-            if (&option == this->targetOption)
+            if (&option == this->targetOption) {
                is_current = true;
+               break;
+            }
          }
       }
       if (is_option) {
@@ -138,10 +140,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          this->targetOption = mp->create_script_option();
          this->updateOptionFromVariant();
          this->updateOptionsListFromVariant();
-         if (this->targetOption) {
-            const QSignalBlocker blocker(this->ui.listOptions);
-            this->ui.listOptions->setCurrentRow(this->targetOption->index);
-         }
+         this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
       });
       QObject::connect(this->ui.buttonOptionsMoveUp, &QPushButton::clicked, [this]() {

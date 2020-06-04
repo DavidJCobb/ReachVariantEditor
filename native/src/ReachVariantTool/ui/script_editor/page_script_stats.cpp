@@ -30,18 +30,23 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
       this->target = nullptr;
       this->updateStatsListFromVariant();
    });
-   {  // Handle option/value name changes
-      //
-      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
-      // That's also the laziest way to handle things... :<
-      //
-      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle stat name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_stat = false;
+      for (auto& stat : mp->scriptContent.stats) {
+         if (stat.uses_string(str)) {
+            is_stat = true;
+            break;
+         }
+      }
+      if (is_stat)
          this->updateStatsListFromVariant();
-      });
-      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
-         this->updateStatsListFromVariant();
-      });
-   }
+   });
    //
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptStats::selectStat);
    //

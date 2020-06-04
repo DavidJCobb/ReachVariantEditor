@@ -46,6 +46,11 @@ namespace Megalo {
          DetailedEnumValue("35_spire_fp"),
          DetailedEnumValue("mp_spire_fp"),
       });
+      //
+      // As a side note, it's a shame this doesn't allow arbitrary strings. If I'm understanding right, 
+      // this could be used to activate "model variants" on arbitrary objects. The Banshee, for example, 
+      // has an alternate color scheme keyed to the variant name "heretic".
+      //
    }
    
    OpcodeArgTypeinfo OpcodeArgValueVariantStringID::typeinfo = OpcodeArgTypeinfo(
