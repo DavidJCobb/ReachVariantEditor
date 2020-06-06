@@ -154,24 +154,26 @@ int main(int argc, char *argv[]) {
 //
 //           - DONE:
 //              - Assault
+//              - Capture the Flag TU (includes Flag Slayer)
+//                 - Speedflag
 //              - Freeze Tag
 //              - Headhunter TU
 //              - Invasion Slayer
 //              - Juggernaut
-//              - King of the Hill (but give it a second pass; not intuitive enough as-is)
+//              - King of the Hill (use TU file; I misunderstood the scoring the first time around)
 //              - Oddball
 //              - Race (but double-check it again now that we've improved our tools)
+//              - Rally
+//                 - Rocket Hog Race
 //              - Skeeball / "HaloBall"
 //              - Slayer
+//                 - Power Slayer
 //                 - Slayer TU (includes Buddy Slayer code)
 //              - Stockpile
 //                 - Speedpile
 //              - Territories
 //
 //           - PENDING:
-//              - Capture the Flag
-//                 - Flag Slayer
-//                 - Speedflag
 //              - Halo Chess (high-complexity; low-priority)
 //              - Infection
 //                 - Alpha Zombies
@@ -179,9 +181,6 @@ int main(int argc, char *argv[]) {
 //                 - Invasion: Boneyard
 //                 - Invasion: Breakpoint
 //                 - Invasion: Spire
-//              - Power Slayer
-//              - Rally
-//                 - Rocket Hog Race
 //
 //     - The load process can't handle out-of-range indices in indexed lists for files that 
 //       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
@@ -328,6 +327,11 @@ int main(int argc, char *argv[]) {
 //     = GAMETYPE PLANS
 //
 //        - Vanilla+
+//
+//           - Race+
+//
+//              - Add Driver Traits, Gunner Traits, and Passenger Traits based on our 
+//                proof-of-concept for implementing those.
 //
 //           - Infection+
 //

@@ -11,6 +11,7 @@
 #include "variables/any_variable.h"
 #include "variables/player_or_group.h"
 //
+#include "fireteam_list.h"
 #include "forge_label.h"
 #include "icons.h"
 #include "incident.h"

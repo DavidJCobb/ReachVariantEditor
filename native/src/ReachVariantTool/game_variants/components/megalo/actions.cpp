@@ -159,14 +159,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
       ),
       ActionFunction( // 14
-         "Set Spawn Location Fireteam",
-         "Limit which fireteam can spawn at an object.",
-         "Only allow fireteam #%2 to spawn at %1.",
+         "Set Spawn Location Fireteams",
+         "Limit which fireteams can spawn at an object.",
+         "Only allow fireteams #%2 to spawn at %1.",
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::typeinfo), // TODO: -1 == "no fireteam"
+            OpcodeArgBase("fireteams",      OpcodeArgValueFireteamList::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteam", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteams", "", {1}, 0)
       ),
       ActionFunction( // 15
          "Set Object Progress Bar",

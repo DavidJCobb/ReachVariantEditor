@@ -6,6 +6,8 @@
 #include <QTextCodec>
 #include <QTextStream>
 
+
+
 namespace DebugHelperFunctions {
    void break_on_variant() {
       auto variant = ReachEditorState::get().variant();
@@ -115,5 +117,13 @@ namespace DebugHelperFunctions {
          }
          out << "\r\n";
       }
+   }
+   //
+   void export_documentation(QWidget* parentWindow) {
+
+      //
+      // TODO
+      //
+
    }
 }
