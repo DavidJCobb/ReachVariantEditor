@@ -6,57 +6,127 @@ namespace {
 }
 namespace Megalo {
    namespace enums {
+      //
+      // The variant string list is defined in the MSIT tag in any given map. Variants can appear in 
+      // the following places:
+      //
+      //  - HLMT (Model): Variant
+      //  - JMAD (Animation Model): Animation Name
+      //
       auto variant_string_id = DetailedEnum({
-         DetailedEnumValue("mp_boneyard_a_idle_start"),
-         DetailedEnumValue("mp_boneyard_a_fly_in"),
-         DetailedEnumValue("mp_boneyard_a_idle_mid"),
-         DetailedEnumValue("mp_boneyard_a_fly_out"),
-         DetailedEnumValue("mp_boneyard_b_fly_in"),
-         DetailedEnumValue("mp_boneyard_b_idle_mid"),
-         DetailedEnumValue("mp_boneyard_b_fly_out"),
-         DetailedEnumValue("mp_boneyard_b_idle_start"),
-         DetailedEnumValue("mp_boneyard_a_leave1"),
-         DetailedEnumValue("mp_boneyard_b_leave1"),
-         DetailedEnumValue("mp_boneyard_b_pickup"),
-         DetailedEnumValue("mp_boneyard_b_idle_pickup"),
-         DetailedEnumValue("mp_boneyard_a"),
-         DetailedEnumValue("mp_boneyard_b"),
+         DetailedEnumValue("mp_boneyard_a_idle_start",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_a_fly_in",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_a_idle_mid",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_a_fly_out",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_fly_in",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_idle_mid",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_fly_out",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_idle_start",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_a_leave1",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_leave1",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_pickup",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b_idle_pickup",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_a",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
+         DetailedEnumValue("mp_boneyard_b",
+            DetailedEnumValueInfo::make_description("An animation name for Phantom models.")
+         ),
          DetailedEnumValue("default"),
-         DetailedEnumValue("carter"),
-         DetailedEnumValue("jun"),
-         DetailedEnumValue("female"),
-         DetailedEnumValue("male"),
-         DetailedEnumValue("emile"),
-         DetailedEnumValue("player_skull"),
-         DetailedEnumValue("kat"),
-         DetailedEnumValue("minor"),
-         DetailedEnumValue("officer"),
-         DetailedEnumValue("ultra"),
-         DetailedEnumValue("space"),
-         DetailedEnumValue("spec_ops"),
-         DetailedEnumValue("general"),
-         DetailedEnumValue("zealot"),
-         DetailedEnumValue("mp"),
-         DetailedEnumValue("jetpack"),
-         DetailedEnumValue("gauss"),
-         DetailedEnumValue("troop"),
-         DetailedEnumValue("rocket"),
-         DetailedEnumValue("fr"), // frag?!
-         DetailedEnumValue("pl"), // plasma?!
+         DetailedEnumValue("carter",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a male Spartan with Noble 1 (Carter)'s armor.")
+         ),
+         DetailedEnumValue("jun",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a male Spartan with Noble 3 (Jun)'s armor.")
+         ),
+         DetailedEnumValue("female",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a female Spartan with default armor.")
+         ),
+         DetailedEnumValue("male",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a male Spartan with default armor.")
+         ),
+         DetailedEnumValue("emile",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a male Spartan with Noble 4 (Emile)'s armor.")
+         ),
+         DetailedEnumValue("player_skull",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a male Spartan with the Haunted helmet.")
+         ),
+         DetailedEnumValue("kat",
+            DetailedEnumValueInfo::make_description("A variant name for Spartan bipeds; produces a female Spartan with Noble 2 (Kat)'s armor.")
+         ),
+         DetailedEnumValue("minor",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Minor armor.")
+         ),
+         DetailedEnumValue("officer",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Officer armor.")
+         ),
+         DetailedEnumValue("ultra",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Ultra armor.")
+         ),
+         DetailedEnumValue("space",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Ranger armor.")
+         ),
+         DetailedEnumValue("spec_ops",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Spec Ops armor.")
+         ),
+         DetailedEnumValue("general",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite General armor.")
+         ),
+         DetailedEnumValue("zealot",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Zealot armor.")
+         ),
+         DetailedEnumValue("mp",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces a random armor set.")
+         ),
+         DetailedEnumValue("jetpack",
+            DetailedEnumValueInfo::make_description("A variant name for Elite bipeds; produces Elite Ranger armor.")
+         ),
+         DetailedEnumValue("gauss",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a standard Warthog, produces a Gauss Warthog instead.")
+         ),
+         DetailedEnumValue("troop",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a standard Warthog, produces a Troop Transport Warthog instead.")
+         ),
+         DetailedEnumValue("rocket",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a standard Warthog, produces a Rocket Warthog instead.")
+         ),
+         DetailedEnumValue("fr"), // frag?
+         DetailedEnumValue("pl"), // plasma?
          DetailedEnumValue("35_spire_fp"),
-         DetailedEnumValue("mp_spire_fp"),
+         DetailedEnumValue("mp_spire_fp",
+            DetailedEnumValueInfo::make_description("An animation name for Pelican models.")
+         ),
       });
-      //
-      // As a side note, it's a shame this doesn't allow arbitrary strings. If I'm understanding right, 
-      // this could be used to activate "model variants" on arbitrary objects. The Banshee, for example, 
-      // has an alternate color scheme keyed to the variant name "heretic".
-      //
    }
    
    OpcodeArgTypeinfo OpcodeArgValueVariantStringID::typeinfo = OpcodeArgTypeinfo(
       "_variant_string",
       "Variant String",
-      "A small name indicating a variation of an object type, such as an armor permutation for a biped.",
+      "A small name indicating a variation of an object type, such as an armor permutation for a biped, or an animation to be applied to a device-machine.",
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueVariantStringID>,

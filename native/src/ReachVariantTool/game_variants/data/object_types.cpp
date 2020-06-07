@@ -499,17 +499,17 @@ namespace Megalo {
          DetailedEnumValue("fireteam_1_respawn_zone",
             DetailedEnumValueInfo::make_friendly_name("Respawn Zone, Fireteam 1"),
             DetailedEnumValueInfo::make_map_tag('scen', ""),
-            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge, but not edited.")
+            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge on maps like Boneyard, but not edited.")
          ),
          DetailedEnumValue("fireteam_2_respawn_zone",
             DetailedEnumValueInfo::make_friendly_name("Respawn Zone, Fireteam 2"),
             DetailedEnumValueInfo::make_map_tag('scen', ""),
-            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge, but not edited.")
+            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge on maps like Boneyard, but not edited.")
          ),
          DetailedEnumValue("fireteam_3_respawn_zone",
             DetailedEnumValueInfo::make_friendly_name("Respawn Zone, Fireteam 3"),
             DetailedEnumValueInfo::make_map_tag('scen', ""),
-            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge, but not edited.")
+            DetailedEnumValueInfo::make_description("A special type of Respawn Zone defined on Boneyard. It can be seen in Forge on maps like Boneyard, but not edited.")
          ),
          DetailedEnumValue("fireteam_4_respawn_zone",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -620,9 +620,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_description("A UNSC data core, used as the \"capture the flag\" objective in Invasion: Boneyard. It can be picked up and carried by a player, reducing their speed and preventing them from attacking.")
          ),
          DetailedEnumValue("danger_zone", // TODO: what is this?
-            DetailedEnumValueInfo::make_unused_sentinel(), // or it's invisible?
-            DetailedEnumValueInfo::make_friendly_name("danger_zone"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/spawning/danger_zone")
+            DetailedEnumValueInfo::make_friendly_name("Danger Zone"),
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/spawning/danger_zone"),
+            DetailedEnumValueInfo::make_description("Analysis of this object's map tag is inconclusive but suggests that it influences spawning when a shape is set on it.")
          ),
          DetailedEnumValue("teleporter_sender",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -969,12 +969,12 @@ namespace Megalo {
          DetailedEnumValue("sound_emitter_alarm_1",
             DetailedEnumValueInfo::make_friendly_name("Invisible Cube of Alarming 1"),
             DetailedEnumValueInfo::make_map_tag('scen', "objects/multi/invisible_cube_of_derek/invisible_cube_of_alarming_1"),
-            DetailedEnumValueInfo::make_description("An invisible object which emits an alarm sound. It is available only on specific maps.")
+            DetailedEnumValueInfo::make_description("An invisible object which emits an alarm sound. The emitter may be silent by default; call set_scenario_interpolator_state(1, 1) to make it audible, and set_scenario_interpolator_state(1, 0) to silence it again.")
          ),
          DetailedEnumValue("sound_emitter_alarm_2",
             DetailedEnumValueInfo::make_friendly_name("Invisible Cube of Alarming 2"),
             DetailedEnumValueInfo::make_map_tag('scen', "objects/multi/invisible_cube_of_derek/invisible_cube_of_alarming_2"),
-            DetailedEnumValueInfo::make_description("An invisible object which emits an alarm sound. It is available only on specific maps.")
+            DetailedEnumValueInfo::make_description("An invisible object which emits an alarm sound. The emitter may be silent by default; call set_scenario_interpolator_state(2, 1) to make it audible, and set_scenario_interpolator_state(2, 0) to silence it again.")
          ),
          DetailedEnumValue("safe_boundary",
             DetailedEnumValueInfo::make_friendly_name("Safe Boundary"),
@@ -999,11 +999,12 @@ namespace Megalo {
          DetailedEnumValue("unsc_data_core_holder",
             DetailedEnumValueInfo::make_friendly_name("UNSC Data Core Holder"),
             DetailedEnumValueInfo::make_map_tag('mach', ""),
-            DetailedEnumValueInfo::make_description("The Boneyard: Invasion prop which holds the UNSC Data Core used as an objective in Phase 3.")
+            DetailedEnumValueInfo::make_description("The Invasion: Boneyard prop which holds the UNSC Data Core used as an objective in Phase 3.")
          ),
          DetailedEnumValue("covenant_power_module_stand",
-            DetailedEnumValueInfo::make_friendly_name("cov_powermodule_stand"),
-            DetailedEnumValueInfo::make_map_tag('mach', "")
+            DetailedEnumValueInfo::make_friendly_name("Covenant Power Module Stand"),
+            DetailedEnumValueInfo::make_map_tag('mach', ""),
+            DetailedEnumValueInfo::make_description("The Invasion: Spire prop linked to the Phase 1 territories.")
          ),
          DetailedEnumValue("covenant_bomb",
             DetailedEnumValueInfo::make_friendly_name("Covenant Bomb"),

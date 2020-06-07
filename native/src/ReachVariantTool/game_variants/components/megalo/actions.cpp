@@ -993,11 +993,11 @@ namespace Megalo {
       ),
       ActionFunction( // 95
          "Set Scenario Interpolator State",
-         "",
-         "Set scenario interpolator state: %1, %2.",
+         "Modify the \"state\" value of a scenario interpolator. Each scenario interpolator is defined by a \"sirp\" tag in the map file.",
+         "Set the state of scenario interpolator %1 to %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("b", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("which", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("state", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_scenario_interpolator_state", "", {0, 1})
       ),
