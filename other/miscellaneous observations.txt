@@ -4,6 +4,9 @@ script.
 If a timer's rate is negative and the timer reaches zero, then the timer's rate will be 
 changed to 0%.
 
+If a timer's rate is positive, it will count up to its initial value and then stop... 
+unless its initial value is zero, in which case it will count up indefinitely.
+
 Analysis of Invasion Slayer's script indicates that if a timer's rate is positive, the 
 timer will be capped at its declared initial value. Unknown whether that changes if the 
 initial value is zero. Manually assigning a number may allow you to circumvent the cap.

@@ -41,6 +41,102 @@
                end
             </example>
          </method>
+         <method name="debug_set_tracing_enabled" id="32">
+            <args>
+               <arg name="enable" type="bool">A <var>true</var> or <var>false</var> value 
+               indicating whether to enable or disable tracing.</arg>
+            </args>
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably set whether tracing was enabled.</blurb>
+            <example>
+               debug_set_tracing_enabled(true)
+            </example>
+         </method>
+         <method name="send_incident" id="75">
+            <args>
+               <arg type="incident" />
+               <arg name="cause">
+                  The cause of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="target">
+                  The target of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+            </args>
+            <blurb>Send an incident.</blurb>
+            <description>
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            </description>
+            <example>
+               --
+               -- Typical code for announcing the start of a round:
+               --
+               alias announced_game_start = player.number[0]
+               alias announce_start_timer = player.timer[0]
+               
+               declare player.announce_start_timer = 5
+               
+               for each player do
+                  if current_player.announced_game_start == 0 and current_player.announce_game_start_timer.is_zero() then 
+                     send_incident(race_game_start, current_player, no_player)
+                     current_player.announced_game_start = 1
+                  end
+               end
+            </example>
+         </method>
+         <method name="send_incident" id="76">
+            <args>
+               <arg type="incident" />
+               <arg name="cause">
+                  The cause of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="target">
+                  The target of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="detail" type="number" />
+            </args>
+            <blurb>Send an incident.</blurb>
+            <description>
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            </description>
+            <example>
+               --
+               -- Code for awarding the "Dive Bomber" DLC achievement, which you earn by 
+               -- killing a player with an assassination while they're using a jetpack:
+               --
+               -- (Assumes Forge Label #0 is an unnamed label referring to jetpacks.)
+               --
+               for each player do -- award Dive Bomber achievement as appropriate
+                  alias killer    = global.player[0]
+                  alias killer_aa = global.object[0]
+                  alias death_mod = global.number[2]
+                  if current_player.killer_type_is(kill) then 
+                     killer    = no_player
+                     killer    = current_player.try_get_killer()
+                     death_mod = 0
+                     death_mod = current_player.try_get_death_damage_mod()
+                     if death_mod == enums.damage_reporting_modifier.assassination then 
+                        killer_aa = no_object
+                        killer_aa = killer.try_get_armor_ability()
+                        if killer_aa.has_forge_label(0) and killer_aa.is_in_use() then 
+                           send_incident(dlc_achieve_2, killer, killer, 65)
+                        end
+                     end
+                  end
+               end
+            </example>
+         </method>
       </actions>
    </methods>
 </script-type>

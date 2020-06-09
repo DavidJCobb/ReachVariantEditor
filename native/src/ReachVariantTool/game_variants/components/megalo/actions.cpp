@@ -211,7 +211,7 @@ namespace Megalo {
       ),
       ActionFunction( // 19
          "Get Item Carrier",
-         "Set a player variable to the owner of an object. Testing reveals no cases where this function can fail (i.e. it behaves correctly for dropped objects, none-objects, and objects held by an NPC biped), but Bungie and 343i still manually clear the out-variable before calling it.",
+         "Set a player variable to the carrier of a weapon or Armor Ability. Testing reveals no cases where this function can fail (i.e. it behaves correctly for dropped objects, none-objects, and objects held by an NPC biped), but Bungie and 343i still manually clear the out-variable before calling it.",
          "Set %2 to the player who is carrying %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -331,14 +331,6 @@ namespace Megalo {
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_mod", "get_death_damage_mod", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
-         //
-         // Known return values:
-         // 1: pummel
-         // 2: assassination (does this include backsmacks or just stabs?)
-         // 3: splatter
-         // 4: stuck with grenade
-         // 5: headshot
-         //
       ),
       ActionFunction( // 32
          "Debugging: Enable Tracing",
@@ -888,10 +880,10 @@ namespace Megalo {
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",
          "Set whether an object can be garbage-collected.",
-         "%2 garbage collection of %1.",
+         "Enable garbage collection of %1? %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("state",  OpcodeArgValueConstBool::typeinfo, "Enable", "Disable"),
+            OpcodeArgBase("state (treated as bool)",  OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
       ),

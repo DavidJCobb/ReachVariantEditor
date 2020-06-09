@@ -253,11 +253,11 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("ctf_flag_return_area",
-            DetailedEnumValueInfo::make_unused_sentinel(), // TODO: confirm
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("ctf_flag_spawn_point",
-            DetailedEnumValueInfo::make_unused_sentinel(), // TODO: confirm
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("respawn_zone",

@@ -34,6 +34,21 @@
                end
             </example>
          </method>
+         <method name="play_sound_for" id="51">
+            <args>
+               <arg name="who">
+                  The <a href="script/api/player">player</a> or <a href="script/api/team">team</a> 
+                  to play the sound for, or the value <var>all_players</var>.
+               </arg>
+               <arg name="sound" type="sound">The sound to play.</arg>
+               <arg name="immediate" type="bool">Whether to allow the sound to overlap with 
+               other scripted sounds, or queue up to play after them.</arg>
+            </args>
+            <blurb>Play a sound.</blurb>
+            <example>
+               game.play_sound_for(all_players, timer_beep, true)
+            </example>
+         </method>
       </actions>
    </methods>
 </script-type>

@@ -138,9 +138,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          }
          this->targetOption = mp->create_script_option();
-         this->updateOptionFromVariant();
+         this->selectOption(this->targetOption ? this->targetOption->index : -1);
          this->updateOptionsListFromVariant();
-         this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
       });
       QObject::connect(this->ui.buttonOptionsMoveUp, &QPushButton::clicked, [this]() {
@@ -200,12 +199,11 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          size_t size = list.size();
          if (size) {
             if (index >= size)
-               this->targetOption = &list[size - 1];
-            else
-               this->targetOption = &list[index];
-         } else
-            this->targetOption = nullptr;
-         this->updateOptionFromVariant();
+               index = size - 1;
+            this->selectOption(index);
+         } else {
+            this->selectOption(-1);
+         }
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
       });
@@ -357,10 +355,9 @@ void ScriptEditorPageScriptOptions::selectOption(int32_t i) {
          return;
       this->targetOption = &list[i];
    }
-   this->targetValue = nullptr;
    this->updateOptionFromVariant();
-   this->updateValueFromVariant();
    this->updateValuesListFromVariant();
+   this->selectOptionValue(0);
 }
 void ScriptEditorPageScriptOptions::selectOptionValue(int32_t i) {
    this->targetValue = nullptr;

@@ -33,6 +33,7 @@
                   end
                end
             </example>
+            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="is_of_type" id="6">
             <args>
@@ -193,6 +194,7 @@
             <related type="action" name="set_waypoint_priority" />
             <related type="action" name="set_waypoint_timer" />
             <related type="action" name="set_waypoint_range" />
+            <related type="action" name="set_waypoint_text" />
          </method>
          <method name="set_waypoint_icon" id="5">
             <args>
@@ -353,6 +355,7 @@
                   end
                end
             </example>
+            <related type="action" name="set_weapon_pickup_priority" />
          </method>
          <method name="set_spawn_location_permissions" id="13">
             <args>
@@ -432,7 +435,7 @@
             </example>
          </method>
          <method name="get_carrier" id="19" returns="player">
-            <blurb>Identify the player carrying a weapon.</blurb>
+            <blurb>Identify the player carrying a weapon or Armor Ability.</blurb>
             <example>
                for each object with label "awful_gun" do
                   global.player[0] = current_object.get_carrier()
@@ -533,6 +536,446 @@
                global.number[0] = current_object.get_speed()
             </example>
          </method>
+         <method name="attach_to" id="33">
+            <args>
+               <arg name="basis" type="object">
+                  The object to attach this one to.
+               </arg>
+               <arg name="x" type="vector3:x">
+                  The X-coordinate to anchor this object at, relative to the position 
+                  of the other object.
+               </arg>
+               <arg name="y" type="vector3:y">
+                  The X-coordinate to anchor this object at, relative to the position 
+                  of the other object.
+               </arg>
+               <arg name="z" type="vector3:z">
+                  The X-coordinate to anchor this object at, relative to the position 
+                  of the other object.
+               </arg>
+               <arg name="reference_frame">
+                  Either the word <var>relative</var>, indicating that the position 
+                  offset passed to this function is relative to the rotation of the 
+                  <var>basis</var> object, or the word <var>absolute</var>, indicating 
+                  that the position offset passed to this function uses the world axes.
+               </arg>
+            </args>
+            <blurb>Attaches this object to another one.</blurb>
+            <description>
+               <p>
+                  This function attaches the context object to a given basis object. 
+                  The context object will be moved to the basis object's position plus 
+                  the supplied offset before the attachment is performed; an argument 
+                  allows you to control whether the offset is relative to the rotation 
+                  of the basis object. Note that the context object will <em>not</em> 
+                  be rotated before the attachment is performed.
+               </p>
+               <p>
+                  Attached objects effectively take on Phased physics; their movement 
+                  cannot be impeded by other objects. Additionally, if objects are 
+                  attached to a non-solid basis, such as a Flag Stand, then they 
+                  themselves stop being solid; and if they are attached to an invisible 
+                  basis, such as a Hill Marker, then they stop being visible altogether. 
+                  Note that non-solid vehicles still offer entry prompts.
+               </p>
+            </description>
+            <example>
+               alias basis = global.object[0]
+               current_object.attach_to(basis, 0, 0, 20, relative)
+            </example>
+            <note title="Anchoring">
+               <p>
+                  Objects appear to be attached to the nearest node on a basis object's 
+                  3D model, with no apparent distance limit. For example, this piece 
+                  of code would create a skull and anchor that skull to a Warthog's 
+                  steering wheel:
+               </p>
+               <pre>
+                  alias some_warthog = ...
+                  --
+                  global.object[0] = some_warthog.place_at_me(skull, none, none, 0, 0, 0, none)
+                  global.object[0].attach_to(some_warthog, 0, 0, 20, relative)
+               </pre>
+               <p>
+                  Even though the skull is attached to a point two full Forge units 
+                  above the Warthog, it still attaches to the nearest node in the 
+                  Warthog's 3D model, which happens to be the steering wheel. If a 
+                  player enters the driver's seat and turns to the left or right, 
+                  the skull will move and rotate in an arc above them, in synch with 
+                  the steering wheel. Different offsets would anchor the skull to 
+                  other nodes in the Warthog's 3D model, such as its tires.
+               </p>
+               <p>
+                  Most objects have a node defined at their origins, and that can 
+                  be used to avoid this behavior: spawn an extra object, have it 
+                  copy the rotation of the basis, and then attach it to the basis 
+                  with offset (0, 0, 0); then, attach the rest of your objects to 
+                  that extra object.
+               </p>
+            </note>
+            <note id="vehicle-attachment" title="Effects of attaching vehicles to other objects">
+               <p>
+                  Attaching a vehicle to an object will lock the vehicle in place. The 
+                  pilot will be able to look around at any angle, but the vehicle will 
+                  not turn, and the vehicle's weapons fire will be constrained to the 
+                  weapon's turn radius.
+               </p>
+               <p>
+                  Attached vehicles will not play any entry/exit animations (e.g. a 
+                  Banshee's canopy opening and closing), but will instantaneously 
+                  update to any animations' end stateds when detached (e.g. a Banshee's 
+                  canopy will instantly snap open or closed as appropriate).
+               </p>
+               <p>
+                  Bipeds in an attached vehicle will lose mose animations. Passengers' 
+                  hands may move slightly (and incorrectly) while reloading their weapon; 
+                  though they have no reloading or weapon swap animations, appropriate 
+                  sounds still play, and they cannot fire their animations while the 
+                  animations would be taking place. Some animations have player model 
+                  jiggle physics; these jiggle physics remain functional even though 
+                  the rest of the animation does not. <!-- i swear to god i'm not making 
+                  this up and i don't know why bungie put that in the game lol -->
+               </p>
+               <p>
+                  If a Banshee is performing an evasive maneuver at the moment it is 
+                  attached, the maneuver will end instantly; no such maneuvers can be 
+                  performed once the vehicle is attached.
+               </p>
+            </note>
+            <note>
+               Attaching a biped to an object will lock the biped in place. If the 
+               biped is controlled by the player, they will be able to turn but not 
+               to move, and their first-person legs will desynch from their upper 
+               body.
+            </note>
+            <note>
+               When a biped enters a vehicle, it is considered attached to that 
+               vehicle. Scripts cannot attach it to something else while it is in 
+               the vehicle. Weapons being carried by a biped are expected to behave 
+               similarly.
+            </note>
+            <note>
+               If something is attached to a Monitor biped, it will bob up and down 
+               in synch with that biped's animation.
+            </note>
+            <note>
+               It appears that attaching an object to <var>no_object</var> and then 
+               detaching it will teleport it to the world origin. On Forge World, 
+               this is a point out by the canyon's beach.
+            </note>
+            <related type="action" name="detach" />
+         </method>
+         <method name="detach" id="34">
+            <blurb>Detaches this object from anything it is attached to.</blurb>
+            <description>
+               <p>
+                  This function detaches an object from anything it has been attached 
+                  to &mdash; even if that attachment wasn't set up by script.
+               </p>
+            </description>
+            <example>
+               current_object.detach()
+            </example>
+            <note>
+               Detaching a player's carried weapons will cause those weapons to 
+               drop into the game world. Of course, there is already a member 
+               function that can be used to achieve this effect directly.
+            </note>
+            <note>
+               If a player is occupying a vehicle, calling this function on their 
+               biped will instantly force them out of the vehicle.
+            </note>
+            <note>
+               <p>
+                  Detaching a player's equipped Armor Ability will not cause them to 
+                  drop it; however, the Armor Ability's 3D model (ordinarily visible 
+                  on the player's back) will detach and stop moving in synch with the 
+                  player. At this point, a script can move the ability independently 
+                  of the player without the player losing it (though the effects of 
+                  moving an equipped Armor Ability out of bounds have not been tested). 
+                  Armor Abilities in this state do not have physics and collision, and 
+                  will remain wherever a script places them until such time as the 
+                  player carrying them is killed: the ability will teleport back to 
+                  the player's body at that moment.
+               </p>
+               <p>
+                  A jetpack moved in this manner will show thruster animations without 
+                  moving whenever its carrier uses it. Other abilities have glowing 
+                  lights whose brightness indicates the player's ability energy (i.e. 
+                  cooldown).
+               </p>
+               <p>
+                  The most interesting side-effect of detaching an Armor Ability 
+                  occurs when Active Camo is used: the radar-jamming effect comes 
+                  from the Armor Ability's 3D model and remains centered on that, 
+                  not on the carrier. No other Armor Abilities have gameplay side-effects 
+                  from being detached, even when their visuals would imply it; Armor Lock, 
+                  for example, shows EMP surge graphics on the ability while it's held, 
+                  but the EMP itself still comes from the player.
+               </p>
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_weapon_pickup_priority" id="44">
+            <args>
+               <arg name="priority">
+                  <p>One of the following values:</p>
+                  <dl>
+                     <dt>normal</dt>
+                        <dd>The weapon's pickup behavior is not modified.</dd>
+                     <dt>hold_action</dt>
+                        <dd>Players must hold a button to pick up the weapon.</dd>
+                     <dt>automatic</dt>
+                        <dd>Players automatically pick up the weapon when they come into 
+                        contact with it.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>Set how a weapon is picked up.</blurb>
+            <description>
+               <p>
+                  If this function is called on a weapon, then it modifies how players 
+                  pick up the weapon: you can require that players hold a button down 
+                  to pick up the weapon (as is normal for most playable weapons), or 
+                  make them pick the weapon up automatically when they come into contact 
+                  with it.
+               </p>
+               <p>
+                  This function does nothing when called on something that isn't a 
+                  weapon. Sadly, you can't make grenades hold-to-pick-up or anything 
+                  wacky like that.
+               </p>
+            </description>
+            <example>
+               current_object.set_weapon_pickup_priority(automatic)
+            </example>
+            <note>
+               Flags, bombs, and skulls are weapons and so can be used with this member 
+               function.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="push_upward" name2="apply_upward_impulse" id="45">
+            <blurb>Apply a random mostly-upward force to the object.</blurb>
+            <description>
+               <p>
+                  This function pushes the context object upward with a random amount 
+                  of force, and a random offset to the force vector. Headhunter uses 
+                  it to push dropped skulls upward from a dying player in a somewhat 
+                  random manner.
+               </p>
+            </description>
+            <example>
+               current_object.push_upward()
+            </example>
+         </method>
+         <method name="set_scale" id="52">
+            <args>
+               <arg name="scale" type="number">The scale to apply to this object, with 
+               the value 100 representing normal (100%) size.</arg>
+            </args>
+            <blurb>Resize an object.</blurb>
+            <description>
+               <p>
+                  This function changes the size of the context object's visual model. 
+                  Objects can be made smaller or larger.
+               </p>
+               <p>
+                  This function applies to the object's visuals and to hit detection 
+                  against bullets, projectiles, and thrown grenades: an object that 
+                  is scaled up can be shot in any of the enlarged areas and register 
+                  damage normally, and it can also be stuck with grenades on the 
+                  enlarged areas. However, scaling does not apply to physical 
+                  collisions or splash damage processing. An object that is made 
+                  larger will not take splash damage from an explosion unless the 
+                  explosion would, at the same distance from the object's pivot 
+                  point, deal splash damage to a normally sized object of that type.
+               </p>
+            </description>
+            <example>
+               current_object.set_scale(200) -- make the object twice as large
+            </example>
+            <note>
+               Rescaling a player's biped will not necessarily change their camera 
+               position. Scaling a player up, for example, will cause their first-person 
+               legs to appear much larger to them, but will not actually move the 
+               camera upward to match the rescaled head.
+            </note>
+         </method>
+         <method name="set_waypoint_text" id="53">
+            <args>
+               <arg name="text" type="format-string">The text to use.</arg>
+            </args>
+            <blurb>Set the text of an object's waypoint.</blurb>
+            <description>
+               <p>
+                  This function modifies the text of the context object's waypoint.
+               </p>
+            </description>
+            <example>
+               current_object.set_text("VIP #%n", current_object.number[0])
+            </example>
+            <note>
+               The text will be truncated to about 15 characters.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="get_distance_to" id="66" returns="number">
+            <args>
+               <arg name="other" type="object" />
+            </args>
+            <blurb>Returns the distance between this object and another.</blurb>
+            <description>
+               <p>
+                  This function returns the distance between the context object and 
+                  the object supplied as an argument. The distance is measured in 
+                  tenths of Forge units, i.e. a value of 10 represents 1.0 units in 
+                  Forge.
+               </p>
+            </description>
+            <example>
+               global.number[0] = current_object.get_distance_to(global.object[0])
+               if global.number[0] &lt 10 then
+                  --
+                  -- The objects are close!
+                  --
+               end
+            </example>
+         </method>
+         <method name="set_device_power" id="70">
+            <args>
+               <arg name="power" type="number" />
+            </args>
+            <blurb>Sets the current power level of a device machine.</blurb>
+            <example>
+               current_object.set_device_power(100)
+            </example>
+            <related type="action" name="get_device_power" />
+            <related type="action" name="set_device_position" />
+            <related type="action" name="get_device_position" />
+            <related type="action" name="set_device_animation_position" />
+            <related type="action" name="animate_device_position" />
+            <related type="action" name="set_device_actual_position" />
+         </method>
+         <method name="get_device_power" id="71" returns="number">
+            <blurb>Gets the current power level of a device machine.</blurb>
+            <example>
+               global.number[0] = current_object.get_device_power()
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_device_position" id="72">
+            <args>
+               <arg name="position" type="number" />
+            </args>
+            <blurb>Sets the current position level of a device machine.</blurb>
+            <example>
+               current_object.set_device_position(100)
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="get_device_position" id="73" returns="number">
+            <blurb>Gets the current position level of a device machine.</blurb>
+            <example>
+               global.number[0] = current_object.get_device_position()
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_device_animation_position" id="78">
+            <args>
+               <arg name="animation" type="variant-string-id" />
+               <arg name="position"  type="number" />
+            </args>
+            <blurb>Sets the current animation and position of a device machine.</blurb>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="animate_device_position" id="79">
+            <args>
+               <arg name="animation_target" type="number" />
+               <arg name="animation_duration" type="number">
+                  The duration of the animation, in seconds.
+               </arg>
+               <arg name="acceleration" type="number">
+                  The acceleration, in seconds.
+               </arg>
+               <arg name="deceleration" type="number">
+                  The deceleration, in seconds.
+               </arg>
+            </args>
+            <blurb>Animate a device machine's position over time.</blurb>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_device_actual_position" id="80">
+            <args>
+               <arg name="position"  type="number" />
+            </args>
+            <!-- relationships only need to be specified on one end -->
+         </method>
       </actions>
    </methods>
+   <properties>
+      <property name="shields">
+         <blurb>The object's current shields.</blurb>
+         <description>
+            <p>
+               This property holds the object's current shields. A value of 100 
+               represents 100% shields.
+            </p>
+         </description>
+         <example>
+            for each player do
+               global.number[0] = current_player.biped.shields
+               if global.number[0] > 100 then -- the player has overshields
+                  current_player.biped.shields /= 2
+               end
+            end
+         </example>
+         <related type="property" name="health" />
+         <related type="property" name="max_shields" />
+         <related type="property" name="max_health" />
+      </property>
+      <property name="health">
+         <blurb>The object's current health.</blurb>
+         <description>
+            <p>
+               This property holds the object's current health. A value of 100 
+               represents 100% health.
+            </p>
+         </description>
+         <example>
+            for each player do
+               global.number[0] = current_player.biped.health
+               if global.number[0] &lt;= 50 then
+                  current_player.biped.health *= 2
+               end
+            end
+         </example>
+      </property>
+      <property name="max_shields" setter-only="true">
+         <blurb>The object's maximum shields.</blurb>
+         <description>
+            <p>
+               This property can be used to set an object's maximum shields.
+            </p>
+         </description>
+         <example>
+            for each player do
+               current_player.biped.max_shields = 50
+            end
+         </example>
+      </property>
+      <property name="max_health" setter-only="true">
+         <blurb>The object's maximum health.</blurb>
+         <description>
+            <p>
+               This property can be used to set an object's maximum health.
+            </p>
+         </description>
+         <example>
+            for each player do
+               current_player.biped.max_health = 50
+            end
+         </example>
+      </property>
+   </properties>
 </script-type>

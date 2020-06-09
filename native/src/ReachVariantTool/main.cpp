@@ -123,15 +123,10 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = DOES object.get_carrier WORK ON ARMOR ABILITIES?
+//     = DOES object.enable_spawn_zone ENABLE/DISABLE A CO-OP SPAWN POINT, OR DOES IT INSTEAD 
+//       ENABLE/DISABLE THE INFLUENCE A RESPAWN ZONE HAS ON RESPAWN POINTS?
 //
-//     = IF A TIMER'S INITIAL VALUE IS ZERO, CAN IT INCREASE INDEFINITELY? VERIFY, ALSO, THAT A 
-//       NON-ZERO INITIAL VALUE FUNCTIONS AS A CAP (AND SEE IF MANUALLY ASSIGNING THE VALUE CAN 
-//       CIRCUMVENT THE CAP).
-//
-//     = DOES object.place_at_me DEFAULT-ASSIGN THE CREATED OBJECT TO THE BASIS OBJECT'S TEAM? 
-//       ASSAULT'S CODE FOR LETTING A TEAM SEE A WAYPOINT ON THEIR OWN BOMB PLANT POINT ACTS LIKE 
-//       IT DOES.
+//     = TEST object.set_garbage_collection_enabled.
 //
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
