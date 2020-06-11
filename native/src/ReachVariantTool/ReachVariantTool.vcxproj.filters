@@ -388,6 +388,9 @@
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\fireteam_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\qt\widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -961,6 +964,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\fireteam_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\widget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

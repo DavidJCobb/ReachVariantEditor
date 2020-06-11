@@ -848,7 +848,7 @@ namespace Megalo {
       ),
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
-         "",
+         "Control whether a Respawn Zone is influencing spawning.",
          "Modify enable state for spawn zone %1: set to %2.",
          {
             OpcodeArgBase("spawn zone", OpcodeArgValueObject::typeinfo),
@@ -879,13 +879,13 @@ namespace Megalo {
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",
-         "Set whether an object can be garbage-collected.",
-         "Enable garbage collection of %1? %2.",
+         "Set whether an object can be garbage-collected. This does not work if the object was created with the never_garbage_collect flag.",
+         "Disable garbage collection of %1? %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("state (treated as bool)",  OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_garbage_collection_disabled", "", {1}, 0)
       ),
       ActionFunction( // 86
          "Get Player Target Object",
@@ -899,7 +899,7 @@ namespace Megalo {
       ),
       ActionFunction( // 87
          "Create Object Equidistant", // KSoft.Tool now calls this "create_tunnel"; I'm not sure why, because testing confirms it does what I think it does.
-         "",
+         "Create an object exactly in between two other objects. Unlike object.place_at_me, this seems to create an object in an exact location, at least when the object being created is non-solid e.g. a Hill Marker.",
          "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Radius: %4.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
@@ -921,7 +921,7 @@ namespace Megalo {
       ),
       ActionFunction( // 89
          "Add Weapon to Player",
-         "This function attempts to add a weapon to a player, without having to access their biped.",
+         "This function attempts to add a weapon object to a player, without having to access their biped.",
          "Give weapon %2 to %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),

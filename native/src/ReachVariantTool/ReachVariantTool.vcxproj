@@ -164,6 +164,7 @@
     <ClCompile Include="helpers\miscellaneous.cpp" />
     <ClCompile Include="helpers\qt\string.cpp" />
     <ClCompile Include="helpers\qt\tree_widget.cpp" />
+    <ClCompile Include="helpers\qt\widget.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
     <ClCompile Include="helpers\steam.cpp" />
     <ClCompile Include="helpers\stream.cpp" />
@@ -328,6 +329,7 @@
     <ClInclude Include="helpers\memory.h" />
     <ClInclude Include="helpers\qt\string.h" />
     <ClInclude Include="helpers\qt\tree_widget.h" />
+    <ClInclude Include="helpers\qt\widget.h" />
     <ClInclude Include="helpers\refcounting.h" />
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />

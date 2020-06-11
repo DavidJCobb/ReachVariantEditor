@@ -276,16 +276,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          if (index == 0) // can't move the first item up
             return;
-         option.values.swap_items(index, index - 1);
-         {
-            auto c = option.currentValueIndex;
-            if (c == index)
-               c = index - 1;
-            else if (c == index - 1)
-               c = index;
-         }
-         if (index == this->targetOption->defaultValueIndex)
-            this->targetOption->defaultValueIndex -= 1;
+         option.swap_values(index, index - 1);
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -299,16 +290,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          if (index == option.values.size() - 1) // can't move the last item down
             return;
-         option.values.swap_items(index, index + 1);
-         {
-            auto c = option.currentValueIndex;
-            if (c == index)
-               c = index + 1;
-            else if (c == index + 1)
-               c = index;
-         }
-         if (index == this->targetOption->defaultValueIndex)
-            this->targetOption->defaultValueIndex += 1;
+         option.swap_values(index, index + 1);
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -324,15 +306,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          }
          auto  index  = list.index_of(value);
          option.delete_value(value);
-         if (index > 0)
-            this->targetValue = list[index - 1];
-         else if (option.values.size())
-            this->targetValue = list[0];
-         else
+         //
+         size_t size = list.size();
+         if (size) {
+            if (index >= size)
+               index = size - 1;
+            this->targetValue = list[index];
+         } else {
             this->targetValue = nullptr;
-         if (index == this->targetOption->defaultValueIndex) {
-            int diff = (list.size() - 1) - index;
-            this->targetOption->defaultValueIndex -= diff;
          }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();

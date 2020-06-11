@@ -57,4 +57,8 @@ class ReachStringPicker : public QWidget {
       void refreshList();
       //
       void refreshListItem(uint32_t index);
+      //
+      #if _DEBUG
+         QString _debug_hierarchy;
+      #endif
 };

@@ -123,11 +123,6 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = DOES object.enable_spawn_zone ENABLE/DISABLE A CO-OP SPAWN POINT, OR DOES IT INSTEAD 
-//       ENABLE/DISABLE THE INFLUENCE A RESPAWN ZONE HAS ON RESPAWN POINTS?
-//
-//     = TEST object.set_garbage_collection_enabled.
-//
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
 //

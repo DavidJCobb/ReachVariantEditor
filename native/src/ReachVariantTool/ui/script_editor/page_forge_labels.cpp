@@ -76,7 +76,14 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       if (index < 0)
          return;
       mp->scriptContent.forgeLabels.erase(index);
-      this->ui.name->clearTarget();
+      size_t size = list.size();
+      if (size) {
+         if (index >= size)
+            index = size - 1;
+         this->selectLabel(index);
+      } else {
+         this->selectLabel(-1);
+      }
       this->updateListFromVariant();
    });
    //

@@ -3,8 +3,20 @@
 #include <QFont>
 #include "../../editor_state.h"
 #include "../localized_string_editor.h"
+#include "../../helpers/qt/widget.h"
 
 ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(parent) {
+   #if _DEBUG
+      //
+      // ReachStringPicker can crash if you forget to call (clearTarget) on it before 
+      // deleting some object that contains a MegaloStringRef that the string picker 
+      // was working with. These crashes are really, really nasty to debug if you're 
+      // dynamically linking Qt -- you can't easily check the widget's data, such as 
+      // its parent widgets, to see what's going on.
+      //
+      this->_debug_hierarchy = cobb::qt::dump_ancestors(this);
+   #endif
+   //
    this->_limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
    auto layout = new QBoxLayout(QBoxLayout::LeftToRight, this);

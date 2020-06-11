@@ -911,6 +911,74 @@
             </args>
             <!-- relationships only need to be specified on one end -->
          </method>
+         <method name="enable_spawn_zone" id="82">
+            <args>
+               <arg name="enable" type="number">
+                  If this argument is 1, the respawn zone will be enabled; if it 
+                  is 0, the respawn zone will be disabled.
+               </arg>
+            </args>
+            <blurb>Sets whether a Respawn Zone is enabled and able to affect spawning.</blurb>
+            <example>
+               alias flag    = team.object[0]
+               alias is_away = object.number[0]
+               
+               for each object with label "ctf_res_zone_away" do
+                  current_object.enable_spawn_zone(0)
+                  --
+                  global.team[0]   = current_object.team
+                  global.object[0] = global.team[0].flag
+                  if global.object[0].is_away == 1 then
+                     current_object.enable_spawn_zone(1)
+                  end
+               end
+            </example>
+         </method>
+         <method name="set_garbage_collection_disabled" id="85">
+            <args>
+               <arg name="disable" type="number">
+                  If this argument is 1, then garbage collection will be disabled; 
+                  if it is 0, then garbage collection will be enabled.
+               </arg>
+            </args>
+            <blurb>Disables garbage collection for objects.</blurb>
+            <description>
+               <p>
+                  This function can be used to enable and disable garbage collection for 
+                  individual objects after they have been created. However, it only works 
+                  if the object <em>was not</em> created with the 
+                  <var>never_garbage_collect</var> 
+                  flag set. Objects created with that flag cannot have garbage collection 
+                  re-enabled using this function.
+               </p>
+            </description>
+            <example>
+               alias expire_timer = object.timer[0]
+               declare object.expire_timer = 60
+               
+               -- pretend this is a Forge label with no name, targeted to Rocket Launchers:
+               alias all_rockets  = 1
+               
+               -- Let's say we want to prevent dropped Rocket Launchers from 
+               -- despawning for a full minute.
+               
+               for each object with label all_rockets do
+                  global.player[0] = current_object.get_carrier()
+                  if global.player[0] != no_player then
+                     current_object.set_garbage_collection_disabled(0)
+                     current_object.expire_timer.set_rate(0%)
+                     current_object.expire_timer.reset()
+                  end
+                  if global.player[0] == no_player then
+                     current_object.set_garbage_collection_disabled(1)
+                     current_object.expire_timer.set_rate(-100%)
+                     if current_object.expire_timer.is_zero() then
+                        current_object.set_garbage_collection_disabled(0)
+                     end
+                  end
+               end
+            </example>
+         </method>
       </actions>
    </methods>
    <properties>

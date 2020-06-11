@@ -61,6 +61,7 @@ class ReachMegaloOption : public indexed_list_item {
       ReachMegaloOptionValueEntry* add_value() noexcept;
       void delete_value(ReachMegaloOptionValueEntry*) noexcept;
       void make_range() noexcept;
+      void swap_values(size_t a, size_t b) noexcept;
       bool uses_string(ReachString*) const noexcept;
       //
       uint32_t bitcount() const noexcept;

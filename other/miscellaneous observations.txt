@@ -246,4 +246,9 @@ given player-variable's player is still present in the match.
 
 Testing suggests that weapons cannot show waypoints if they are being carried by bipeds.
 
+If, during an FFA game, a player is granted control of a scripted biped and then has that 
+control revoked, the scripted biped will retain that player's armor color and alliance, 
+i.e. that player will see a green reticle when aiming at the biped even if they had seen 
+a red one prior to taking control of the biped.
+
 
