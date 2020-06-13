@@ -157,6 +157,8 @@
                <a href="script/api/object/actions/detach">detach</a> 
                it.
             </note>
+            <related type="action" name="delete" />
+            <related type="action" name="place_between_me_and" />
          </method>
          <method name="delete" id="3">
             <blurb>Delete this object from the game world.</blurb>
@@ -355,7 +357,13 @@
                   end
                end
             </example>
+            <related type="action" name="add_weapon" />
+            <related type="action" name="get_carrier" />
+            <related type="action" name="remove_weapon" />
             <related type="action" name="set_weapon_pickup_priority" />
+            <related context="player" type="action" name="get_armor_ability" />
+            <related context="player" type="action" name="add_weapon" />
+            <related context="player" type="action" name="get_weapon" />
          </method>
          <method name="set_spawn_location_permissions" id="13">
             <args>
@@ -406,6 +414,7 @@
                   current_object.set_spawn_location_permissions(allies)
                end
             </example>
+            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="set_progress_bar" id="15">
             <args>
@@ -444,6 +453,7 @@
                   end
                end
             </example>
+            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="set_shape_visibility" id="22">
             <args>
@@ -460,6 +470,7 @@
                only available via scripting, not in Forge, and the game apparently has no 
                code to display them.
             </note>
+            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="kill" id="23">
             <args>
@@ -978,6 +989,166 @@
                   end
                end
             </example>
+         </method>
+         <method name="place_between_me_and" id="87" returns="object" nodiscard="false">
+            <args>
+               <arg type="other" type="object">
+                  The other object to use as a basis.
+               </arg>
+               <arg name="type"  type="object-type" />
+               <arg name="radius" type="number">Unknown. Testing has not revealed any 
+               obvious effect. A value of 0 seems safe.</arg>
+            </args>
+            <blurb>Spawn a new object between this object and another.</blurb>
+            <example>
+               global.object[0] = global.object[1].place_between_me_and(global.object[2], skull, 0)
+            </example>
+            <note>
+               Unlike <a href="script/api/object/actions/place_at_me">object.place_at_me</a>, 
+               this function appears to spawn objects exactly in place, provided they aren't 
+               solid or obstructed.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="copy_rotation_from" id="91">
+            <args>
+               <arg type="other" type="object">
+                  The object whose rotation should be copied.
+               </arg>
+               <arg name="all_axes"  type="bool">A boolean indicating whether to copy all of 
+               the other object's axes of rotation (<var>true</var>) or just its heading 
+               (<var>false</var>).</arg>
+            </args>
+            <blurb>Rotate one object to match another.</blurb>
+            <example>
+               global.object[0].copy_rotation_from(global.object[1], true)
+            </example>
+            <note>
+               Passing <var>true</var> as the boolean argument will perform the rotation without 
+               doing any further collision checking or physics. If the object being rotated is 
+               physics-simulated, and the rotation causes the object to clip into something else, 
+               then it may end up being launched away if something bumps it and updates its 
+               physics simulation.
+            </note>
+            <related type="action" name="face_toward" />
+         </method>
+         <method name="face_toward" id="92">
+            <args>
+               <arg type="other" type="object">
+                  The object whose rotation should be copied.
+               </arg>
+               <arg name="x" type="vector3:x">
+                  The X-coordinate of an offset-position. The object will rotate to face 
+                  <var>other</var>'s position plus the offset position.
+               </arg>
+               <arg name="y" type="vector3:y">
+                  The Y-coordinate of an offset-position. The object will rotate to face 
+                  <var>other</var>'s position plus the offset position.
+               </arg>
+               <arg name="z" type="vector3:z">
+                  The Z-coordinate of an offset-position. The object will rotate to face 
+                  <var>other</var>'s position plus the offset position.
+               </arg>
+            </args>
+            <blurb>Rotate one object to face another.</blurb>
+            <description>
+               <p>
+                  This function can be used to make one object face toward another. It only 
+                  affects the object's heading (yaw), not its pitch or roll rotations.
+               </p>
+            </description>
+            <example>
+               global.object[0].copy_rotation_from(global.object[1], true)
+            </example>
+            <note>
+               If you face an object toward itself, you can use the position offset to rotate it.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="add_weapon" id="93">
+            <args>
+               <arg name="weapon"  type="object-type" />
+               <arg name="mode">
+                  <p>One of the following values:</p>
+                  <dl>
+                     <dt>primary</dt>
+                        <dd>TBA</dd>
+                     <dt>secondary</dt>
+                        <dd>TBA</dd>
+                     <dt>force</dt>
+                        <dd>Forcibly adds the weapon to the player and switches them to use 
+                        it.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>Give a weapon to a biped, even if it isn't player-controlled.</blurb>
+            <example>
+               global.object[0].add_weapon(assault_rifle, force)
+            </example>
+            <note>
+               If the biped is player-controlled and the player's Weapon Pickup trait is set to 
+               Disabled, then you must use the "force" mode to add the weapon.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="remove_weapon" id="94">
+            <args>
+               <arg name="weapon"  type="object-type" />
+               <arg name="mode">
+                  <p>One of the following values:</p>
+                  <dl>
+                     <dt>primary</dt>
+                        <dd>Remove the biped's primary weapon.</dd>
+                     <dt>secondary</dt>
+                        <dd>Remove the biped's secondary weapon.</dd>
+                  </dl>
+               </arg>
+               <arg name="all_axes"  type="bool">A boolean indicating whether to delete the 
+               weapon (<var>true</var>) or merely drop it (<var>false</var>).</arg>
+            </args>
+            <blurb>Remove a weapon from a biped.</blurb>
+            <example>
+               --
+               -- Fore all players to be unarmed:
+               --
+               for each player do
+                  current_player.biped.remove_weapon(secondary, true)
+                  current_player.biped.remove_weapon(primary, true)
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="apply_shape_color_from_player_member" id="98">
+            <args>
+               <arg name="member">An integer constant indicating the index of an object.player 
+               variable, or a relative alias of an object-player variable prefixed with 
+               <code>object.</code> i.e. <code>object.alias_name</code>.</arg>
+            </args>
+            <blurb>Recolor an object's shape boundary based on a player variable.</blurb>
+            <description>
+               <p>
+                  This function recolors an object's shape boundary baesd on the armor color 
+                  of the player referred to by an <var>object.player</var> variable on the 
+                  object. The function's argument specifies which <var>object.player</var> 
+                  variable to use.
+               </p>
+               <p>
+                  This function is used in King of the Hill FFA modes to recolor the hill to 
+                  match the player currently controlling it.
+               </p>
+            </description>
+            <example>
+               alias owner = object.player[1]
+               
+               for each object with label "koth_hill" do
+                  --
+                  -- The next two lines do the exact same thing:
+                  --
+                  current_object.apply_shape_color_from_player_member(1)
+                  current_object.apply_shape_color_from_player_member(object.owner)
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
          </method>
       </actions>
    </methods>

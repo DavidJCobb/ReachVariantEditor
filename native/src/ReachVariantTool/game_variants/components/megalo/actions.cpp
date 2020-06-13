@@ -941,12 +941,12 @@ namespace Megalo {
       ),
       ActionFunction( // 91
          "Copy Object Rotation",
-         "",
+         "Have one object copy another object's rotation. The boolean argument indicates whether we copy all axes of rotation (true) or just the heading (false).",
          "Have %1 copy %2's rotation. Use absolute rotations? %3.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("absolute", OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("all_axes", OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {1, 2}, 0)
       ),

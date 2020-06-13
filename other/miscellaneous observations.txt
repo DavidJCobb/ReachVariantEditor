@@ -251,4 +251,12 @@ control revoked, the scripted biped will retain that player's armor color and al
 i.e. that player will see a green reticle when aiming at the biped even if they had seen 
 a red one prior to taking control of the biped.
 
+Suppose a player is given control of a biped and later has that control revoked. If at 
+some point afterward you try to rotate the biped and give the player control over it, all 
+on the same frame, then the rotation will fail: the biped will continue to aim in the last 
+direction the player was aiming when they lost control over it. This can cause issues in 
+cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
+is to rotate the biped on one frame and then wait 'til the next to actually force the 
+player into it.
+
 
