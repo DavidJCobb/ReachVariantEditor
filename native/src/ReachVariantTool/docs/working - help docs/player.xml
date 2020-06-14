@@ -2,7 +2,162 @@
 <script-type name="player">
    <friendly>Player</friendly>
    <blurb>A player that is or was present in the current match.</blurb>
+   <scope
+      numbers="8"
+      timers="4"
+      teams="4"
+      players="4"
+      objects="4"
+   />
    <methods>
+      <conditions>
+         <method name="killer_type_is" id="3">
+            <args>
+               <arg name="types">
+                  <p>The word <var>none</var>, or one or more of the following flags separated with 
+                  the <code>|</code> symbol:</p>
+                  <dl>
+                     <dt>guardians</dt>
+                        <dd>The player was killed by a level boundary or unexplained force.</dd>
+                     <dt>suicide</dt>
+                        <dd>The player killed themselves.</dd>
+                     <dt>kill</dt>
+                        <dd>The player was killed by an enemy.</dd>
+                     <dt>betrayal</dt>
+                        <dd>The player was betrayed by a teammate.</dd>
+                     <dt>quit</dt>
+                        <dd>The player died because they quit or disconnected from the match.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>Check what killed a player.</blurb>
+            <description>
+               <p>
+                  When called on the exact script tick after a player's death, this function can 
+                  be used to check the general circumstances of the player's death. Calling this 
+                  function with all permitted values is the primary way to react to a player's 
+                  death at the instant that it occurs.
+               </p>
+            </description>
+            <example>
+               alias opt_kill_points = script_option[1]
+               alias opt_spree_bonus = script_option[0]
+               
+               for each player do
+                  if current_player.killer_type_is(kill) then
+                     alias killer = global.player[0]
+                     --
+                     killer = current_player.get_killer()
+                     killer.score += opt_kill_points
+                     global.number[0]  = killer.get_spree_count()
+                     global.number[0] %= 5
+                     if global.number[0] == 0 then
+                        --
+                        -- This is the player's 5th, 10th, 15th, etc., kill.
+                        --
+                        killer.score += opt_spree_bonus
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="is_fireteam_leader" id="9">
+            <blurb>This function always returns false.</blurb>
+            <description>
+               <p>
+                  According to kornman00's findings, this function was meant to check if a player 
+                  is the "leader" of their fireteam. However, it apparently always returns false.
+               </p>
+            </description>
+         </method>
+         <method name="assisted_kill_of" id="10">
+            <args>
+               <arg name="victim" type="player" />
+            </args>
+            <blurb>Checks whether one player assisted another in killing a third.</blurb>
+            <description>
+               <p>
+                  This function checks whether the context player assisted in killing the argument 
+                  player. Note that players don't count as "assisting" themselves.
+               </p>
+            </description>
+            <example>
+               alias opt_kill_points   = script_option[0]
+               alias opt_assist_points = script_option[1]
+               
+               for each player do
+                  if current_player.killer_type_is(kill) then
+                     alias killer = global.player[0]
+                     alias victim = global.player[1]
+                     --
+                     victim = current_player
+                     killer = current_player.get_killer()
+                     killer.score += opt_kill_points
+                     --
+                     for each player do
+                        if current_player != victim and current_player.assisted_kill_of(victim) then
+                           current_player.score += opt_assist_points
+                        end
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="is_not_respawning" id="12">
+            <blurb>Checks whether a player <em>is not</em> respawning.</blurb>
+         </method>
+         <method name="is_spartan" id="13">
+            <blurb>Checks whether a player's current species is Spartan.</blurb>
+            <description>
+               <p>
+                  This function checks whether a player should spawn as a Spartan based on their 
+                  team settings and (when relevant) their preferred species.
+               </p>
+               <p>
+                  To Be Determined: the above description is relevant when the player is waiting 
+                  to spawn; if the player is in control of a biped, does this check the species 
+                  of that biped instead?
+               </p>
+            </description>
+            <example>
+               for each player do
+                  if current_player.is_spartan() then 
+                     current_player.set_loadout_palette(spartan_tier_1)
+                  alt
+                     current_player.set_loadout_palette(elite_tier_1)
+                  end
+               end
+            </example>
+            <related type="condition" name="is_elite" />
+            <related type="condition" name="is_monitor" />
+         </method>
+         <method name="is_elite" id="14">
+            <blurb>Checks whether a player's current species is Elite.</blurb>
+            <description>
+               <p>
+                  This function checks whether a player should spawn as an Elite based on their 
+                  team settings and (when relevant) their preferred species.
+               </p>
+               <p>
+                  To Be Determined: the above description is relevant when the player is waiting 
+                  to spawn; if the player is in control of a biped, does this check the species 
+                  of that biped instead?
+               </p>
+            </description>
+            <example>
+               for each player do
+                  if current_player.is_elite() then 
+                     current_player.set_loadout_palette(elite_tier_1)
+                  alt
+                     current_player.set_loadout_palette(spartan_tier_1)
+                  end
+               end
+            </example>
+         </method>
+         <method name="is_monitor" id="15">
+            <blurb>Checks whether a player's current species is Monitor.</blurb>
+         </method>
+      </conditions>
       <actions>
          <method name="apply_traits" id="11">
             <args>
@@ -21,6 +176,7 @@
             <example>
                alias is_zombie     = player.number[0]
                alias zombie_traits = script_traits[0]
+               
                for each player do
                   if current_player.is_zombie == 0 then
                      current_player.apply_traits(zombie_traits)
@@ -28,6 +184,868 @@
                end
             </example>
          </method>
+         <method name="try_get_killer" name2="get_killer" id="29" returns="player">
+            <blurb>Identify the player who killed this player.</blurb>
+            <description>
+               <p>
+                  When called on a player who is dead, this function returns the player 
+                  that killed them, if any.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the player variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_killer</code> will compile in an 
+                  assignment to <var>no_player</var> before the call, while calling 
+                  the function with the name <code>try_get_killer</code> will not.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then
+                     --
+                     -- The player is dead.
+                     --
+                     global.player[0] = current_player.get_killer()
+                     global.player[0].score += 1
+                  end
+               end
+            </example>
+            <related context="player" type="condition" name="killer_type_is" />
+            <related context="player" type="action" name="try_get_death_damage_type" />
+            <related context="player" type="action" name="try_get_death_damage_mod" />
+         </method>
+         <method name="try_get_death_damage_type" name2="get_death_damage_type" id="30" returns="number">
+            <blurb>Identify the player who killed this player.</blurb>
+            <description>
+               <p>
+                  When called on a player who is dead, this function returns a number 
+                  representing their cause of death. This number can represent any 
+                  cause of death that can be listed in a Post-Game Carnage Report,
+                  including weapons and vehicles. The potential values are listed and 
+                  named in the <a href="script/api/enums/damage_reporting_type">damage 
+                  reporting type enum</a>.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the number variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_death_damage_type</code> will compile in an 
+                  assignment to <var>0</var> before the call, while calling 
+                  the function with the name <code>try_get_death_damage_type</code> will not.
+               </p>
+            </description>
+            <example>
+               --
+               -- Award points for killing any other player (including allies) with a DMR.
+               --
+               for each player do
+                  if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then
+                     --
+                     -- The player is dead.
+                     --
+                     global.number[0] = current_player.get_death_damage_type()
+                     if global.number[0] == enums.damage_reporting_type.dmr then
+                        global.player[0] = current_player.get_killer()
+                        global.player[0].score += 1
+                     end
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="try_get_death_damage_mod" name2="get_death_damage_mod" id="31" returns="number">
+            <blurb>Identify the player who killed this player.</blurb>
+            <description>
+               <p>
+                  When called on a player who is dead, this function returns a number 
+                  representing a modifier for their cause of death. This number 
+                  complements the "damage reporting types" that can be listed in a 
+                  Post-Game Carnage Report. The potential values are listed and 
+                  named in the <a href="script/api/enums/damage_reporting_mod">damage 
+                  reporting modifier enum</a>.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the number variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_death_damage_mod</code> will compile in an 
+                  assignment to <var>0</var> before the call, while calling 
+                  the function with the name <code>try_get_death_damage_mod</code> will not.
+               </p>
+            </description>
+            <example>
+               --
+               -- Award points for killing any other player (including allies) with a splatter.
+               --
+               for each player do
+                  if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then
+                     --
+                     -- The player is dead.
+                     --
+                     global.number[0] = current_player.get_death_damage_mod()
+                     if global.number[0] == enums.damage_reporting_mod.splatter then
+                        global.player[0] = current_player.get_killer()
+                        global.player[0].score += 1
+                     end
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="get_scoreboard_pos" id="32" returns="number">
+            <blurb>Get a player's position on the scoreboard.</blurb>
+            <description>
+               <p>
+                  This function returns a player's position on the scoreboard. A value 
+                  of 1 represents 1st place, while a value of 0 results if the function 
+                  is called on <var>no_player</var>.
+               </p>
+            </description>
+            <example>
+               alias leader_traits = script_traits[0]
+               
+               for each player do
+                  global.number[0] = current_player.get_scoreboard_pos()
+                  if global.number[0] == 1 then
+                     current_player.apply_traits(leader_traits)
+                  end
+               end
+            </example>
+            <related context="team" type="action" name="get_scoreboard_pos" />
+         </method>
+         <method name="get_spree_count" id="37" returns="number">
+            <blurb>Get the number of players that someone has killed without dying.</blurb>
+            <description>
+               <p>
+                  This function returns the number of players that the context player 
+                  has killed without dying.
+               </p>
+            </description>
+            <example>
+               alias opt_kill_points = script_option[1]
+               alias opt_spree_bonus = script_option[0]
+               
+               for each player do
+                  if current_player.killer_type_is(kill) then
+                     alias killer = global.player[0]
+                     --
+                     killer = current_player.get_killer()
+                     killer.score += opt_kill_points
+                     global.number[0]  = killer.get_spree_count()
+                     global.number[0] %= 5
+                     if global.number[0] == 0 then
+                        --
+                        -- This is the player's 5th, 10th, 15th, etc., kill.
+                        --
+                        killer.score += opt_spree_bonus
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="increment_req_money_by" id="38">
+            <args>
+               <arg name="money" type="number">The amount of money to add.</arg>
+            </args>
+            <blurb>A development leftover related to a scrapped Requisition system.</blurb>
+            <description>
+               <p>
+                  This function increments the player's requisition money. This appears to be 
+                  a development leftover for a scrapped design idea.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.increment_req_money_by(9001)
+               end
+            </example>
+            <related context="player" type="action" name="set_req_purchase_modes" />
+            <related context="player" type="action" name="set_requisition_palette" />
+         </method>
+         <method name="set_req_purchase_modes" id="39">
+            <args>
+               <arg name="modes">
+                  <p>The word <var>none</var>, or one or more of the following flags 
+                  separated with the <code>|</code> symbol:</p>
+                  <dl>
+                     <dt>alive_weapons</dt>
+                        <dd>Unknown.</dd>
+                     <dt>alive_equipment</dt>
+                        <dd>Unknown.</dd>
+                     <dt>alive_vehicles</dt>
+                        <dd>Unknown.</dd>
+                     <dt>dead_weapons</dt>
+                        <dd>Unknown.</dd>
+                     <dt>dead_equipment</dt>
+                        <dd>Unknown.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>A development leftover related to a scrapped Requisition system.</blurb>
+            <description>
+               <p>
+                  This function apparently modifies what requisition types a player is allowed 
+                  to purchase. This appears to be a development leftover for a scrapped design 
+                  idea.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.set_req_purchase_modes(alive_weapons | alive_equipment | alive_vehicles | dead_weapons | dead_equipment)
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="try_get_vehicle" name2="get_vehicle" id="40" returns="object">
+            <blurb>Identify the vehicle that a player is in.</blurb>
+            <description>
+               <p>
+                  When called on a player, this function returns the vehicle that the 
+                  player is occupying or boarding.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the object variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_vehicle</code> will compile in an 
+                  assignment to <var>no_object</var> before the call, while calling 
+                  the function with the name <code>try_get_vehicle</code> will not.
+               </p>
+            </description>
+            <example>
+               --
+               -- Award points for killing an enemy using a sniper rifle while riding in a revenant.
+               --
+               for each player do
+                  alias killer  = global.player[0]
+                  alias vehicle = global.object[0]
+                  if current_player.killer_type_is(kill) then
+                     --
+                     -- The player is dead.
+                     --
+                     global.number[0] = current_player.get_death_damage_type()
+                     if global.number[0] == enums.damage_reporting_type.sniper_rifle then
+                        killer  = current_player.get_killer()
+                        vehicle = killer.get_vehicle()
+                        if vehicle.is_of_type(revenant) then
+                           killer.score += 1
+                        end
+                     end
+                  end
+               end
+            </example>
+            <note>
+               As mentioned in the description, this function also works for checking if a player 
+               is hijacking or boarding a vehicle. Vehicles can have multiple seats defined for 
+               them in the game data, and boarding relies on special "seats" that are flagged as 
+               being exclusively for boarding.
+            </note>
+            <related context="player" type="action" name="force_into_vehicle" />
+         </method>
+         <method name="force_into_vehicle" id="41">
+            <args>
+               <arg name="vehicle" type="object">The vehicle to force the player into.</arg>
+            </args>
+            <blurb>Force a player into a vehicle if any seat is available.</blurb>
+            <example>
+               --
+               -- Force players into Sabres.
+               --
+               for each player do
+                  --
+                  -- First, let's make sure the player is actually spawned on the map.
+                  --
+                  if current_player.biped != no_object then
+                     global.object[0] = current_player.get_vehicle()
+                     if global.object[0] == no_object then
+                        global.object[0] = current_player.biped.place_at_me(sabre, none, none, 0, 0, 0, none)
+                        current_player.force_into_vehicle(global.object[0])
+                     end
+                  end
+               end
+            </example>
+            <note>
+               If the vehicle is flipped, then the player will be moved to it, but will not 
+               be forced into it. <!-- TODO: RECHECK THIS -->
+            </note>
+            <related context="player" type="action" name="force_into_vehicle" />
+         </method>
+         <method name="set_biped" id="42">
+            <args>
+               <arg name="biped" type="object">The biped to force the player into.</arg>
+            </args>
+            <blurb>Revoke control of a player's current biped, and grant control of another one.</blurb>
+            <description>
+               <p>
+                  If this function is passed a valid biped, it forces the context player to 
+                  abandon control of their current biped and take control of the passed-in 
+                  biped. If this function is not passed a valid biped, then it does nothing. 
+                  Either way, the player's old biped is not deleted from the map; it simply 
+                  becomes an inactive NPC.
+               </p>
+            </description>
+            <example>
+               --
+               -- Force players into Monitors.
+               --
+               for each player do
+                  if current_player.biped != no_object and not current_player.biped.is_of_type(monitor) then
+                     global.object[0] = current_player.biped
+                     global.object[1] = current_player.biped.place_at_me(monitor, none, none, 0, 0, 0, none)
+                     current_player.set_biped(global.object[1])
+                     global.object[0].delete()
+                  end
+               end
+            </example>
+            <note>
+               Holograms do not <a href="script/api/object/conditions/is_of_type">test</a> 
+               as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
+               passing a Hologram to <code>set_biped</code> will place the player in control 
+               of the biped.
+            </note>
+            <note>
+               <p>
+                  If necessary, you can spawn a biped inside of a vehicle by spawning the 
+                  biped, forcing a player to control it, forcing the player into the vehicle, 
+                  and then returning the player to their original biped. However, if the 
+                  player is spawned on the map at the time, then there will be a brief cut to 
+                  black for that player; they will notice the loss of control. If you need to 
+                  spawn NPC bipeds into vehicles, it is best to do this during the initial 
+                  loadout camera or while a player is waiting to respawn, if possible.
+               </p>
+               <p>
+                  NPC bipeds that occupy vehicles will behave the same as players who are not 
+                  providing any inputs; for example, an NPC-occupied Banshee will fly forward 
+                  automatically.
+               </p>
+            </note>
+            <note>
+               By default, Monitors spawn with an invisible Focus Rifle, and are capable of 
+               picking up weapons, grenades, and Armor Abilities. Monitors can fire any 
+               ranged weapon and can use any Armor Ability that does not depend on character 
+               model animations (e.g. they can use Active Camo but cannot Sprint); they 
+               cannot melee or throw grenades, though they will make melee sounds. Equipped 
+               Armor Abilities will be visible on the Monitor's body, displaying their 
+               holographic icons as if they were still lying around waiting to be picked up.
+            </note>
+            <note>
+               Once a Megalo-spawned biped has been controlled by a player, it will take on 
+               that player's appropriate armor or team color and (if it's a Spartan) its 
+               voice will match the player's chosen gender regardless of its own gender 
+               presentation. Moreover, in FFA games, the biped will appear allied to the 
+               last player who controlled it, even if it appeared as an enemy to them 
+               beforehand.
+            </note>
+            <note>
+               <p>
+                  You can force a player into a biped while the initial loadout camera is playing, and they 
+                  will be able to play early. However, if you do this, the player will hear a constant shrill 
+                  beeping, like the ring of an alarm clock. It appears that this beeping plays for every 
+                  frame that the player spends in control of a biped, if that player has never controlled a 
+                  "natural" biped before; the solution is to ensure that the player has spent at least one 
+                  frame in control of a normally-spawned biped before forcing them into a new biped.
+               </p>
+               <p>
+                  I was able to identify the beeping sound; it is defined in the following tags. These tags 
+                  seem to have been intended for the Missile Pod, a weapon present only in Halo 3; however, 
+                  a search for Missile Pod gameplay videos on YouTube failed to turn up any where this exact 
+                  sound plays.
+               </p>
+               <ul>
+                  <li>lsnd\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+                  <li>snd!\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+               </ul>
+               <p>
+                  I was unable to locate anything that could use the tag. If the usual community tools for 
+                  browsing *.MAP files allow you to search for anything that uses a tag, I haven't managed 
+                  to find that feature.
+               </p>
+            </note>
+            <note>
+               Suppose a player is given control of a biped and later has that control revoked. If at 
+               some point afterward you try to rotate the biped and give the player control over it, all 
+               on the same frame, then the rotation will fail: the biped will continue to aim in the last 
+               direction the player was aiming when they lost control over it. This can cause issues in 
+               cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
+               is to rotate the biped on one frame and then wait 'til the next to actually force the 
+               player into it.
+            </note>
+         </method>
+         <method name="set_round_card_title" id="56">
+            <args>
+               <arg name="text" type="format-string" />
+            </args>
+            <blurb>Change the round card's description text.</blurb>
+            <description>
+               <p>
+                  This function sets the text of the round card. If the text passed in differs from 
+                  that used in the previous frame, then this function will also trigger display of the 
+                  round card.
+               </p>
+            </description>
+            <example>
+               --
+               -- Slayer TU round card description code:
+               --
+               for each player do -- round card
+                  if game.score_to_win != 0 and game.teams_enabled == 1 then 
+                     current_player.set_round_card_title("Kill players on the enemy team.\r\n%n points to win.", game.score_to_win)
+                  end
+                  if game.score_to_win != 0 and game.teams_enabled == 0 then 
+                     current_player.set_round_card_title("Score points by killing other players.\r\n%n points to win.", game.score_to_win)
+                  end
+                  if game.score_to_win == 0 and game.teams_enabled == 1 then 
+                     current_player.set_round_card_title("Kill players on the enemy team.")
+                  end
+                  if game.score_to_win == 0 and game.teams_enabled == 0 then 
+                     current_player.set_round_card_title("Score points by killing other players.")
+                  end
+               end
+            </example>
+            <related context="player" type="action" name="set_round_card_text" />
+         </method>
+         <method name="set_round_card_text" id="57">
+            <args>
+               <arg name="text" type="format-string" />
+            </args>
+            <blurb>Change the round card's icon caption.</blurb>
+            <description>
+               <p>
+                  This function sets the text of the caption below the round card's icon. If the 
+                  text passed in differs from that used in the previous frame, then this function 
+                  will also trigger display of the round card.
+               </p>
+            </description>
+            <example>
+               --
+               -- Relevant code from Invasion:
+               --
+               for each player do
+                  if current_player.team == team[1] then 
+                     current_player.set_round_card_icon(covenant)
+                     current_player.set_round_card_text("Elite")
+                  end
+               end
+               for each player do
+                  if current_player.team == team[0] then 
+                     current_player.set_round_card_icon(noble)
+                     current_player.set_round_card_text("Spartan")
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_round_card_icon" id="58">
+            <args>
+               <arg name="icon" type="engine-icon" />
+            </args>
+            <blurb>Change the round card's icon.</blurb>
+            <description>
+               <p>
+                  This function sets the round card's icon. If the text passed in differs from 
+                  that used in the previous frame, then this function will also trigger display 
+                  of the round card.
+               </p>
+               <p>
+                  The default icon is the game variant file's icon.
+               </p>
+            </description>
+            <example>
+               --
+               -- Relevant code from Invasion:
+               --
+               for each player do
+                  if current_player.team == team[1] then 
+                     current_player.set_round_card_icon(covenant)
+                     current_player.set_round_card_text("Elite")
+                  end
+               end
+               for each player do
+                  if current_player.team == team[0] then 
+                     current_player.set_round_card_icon(noble)
+                     current_player.set_round_card_text("Spartan")
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_primary_respawn_object" id="61">
+            <args>
+               <arg name="respawn" type="object">Unknown.</arg>
+            </args>
+            <blurb>This function appears to set a player's default respawn object, when 
+            co-op spawning is enabled.</blurb>
+            <example>
+               --
+               -- Excerpt from Invasion:
+               --
+               for each object with label "inv_res_p1" do
+                  --
+                  -- Ensure that Phase 1 respawn zones cannot be picked up or destroyed:
+                  --
+                  current_object.set_spawn_location_permissions(no_one)
+                  current_object.set_invincibility(1)
+                  current_object.set_pickup_permissions(no_one)
+                  --
+                  if global.number[2] == 1 then -- current phase is Phase 1?
+                     --
+                     -- Control which fireteams are allowed to spawn at this respawn zone:
+                     --
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 0 then 
+                           current_object.set_spawn_location_fireteam(1)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 1 then 
+                           current_object.set_spawn_location_fireteam(2)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 2 then 
+                           current_object.set_spawn_location_fireteam(4)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence > 2 then 
+                           current_object.set_spawn_location_fireteam(-1)
+                        end
+                     end
+                     --
+                     -- Use the respawn zone's Spawn Sequence to determine which fireteam 
+                     -- should use it as their default spawn:
+                     --
+                     current_object.set_spawn_location_permissions(allies)
+                     for each player do
+                        if current_object.team == current_player.team then 
+                           global.number[8] = 0
+                           global.number[8] = current_player.get_fireteam()
+                           if current_object.spawn_sequence == global.number[8] then 
+                              current_player.set_primary_respawn_object(current_object)
+                           end
+                        end
+                     end
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="get_fireteam" id="62" returns="number">
+            <blurb>Returns the index of the fireteam that a player is on.</blurb>
+            <example>
+               --
+               -- Excerpt from Invasion:
+               --
+               for each object with label "inv_res_p1" do
+                  --
+                  -- Ensure that Phase 1 respawn zones cannot be picked up or destroyed:
+                  --
+                  current_object.set_spawn_location_permissions(no_one)
+                  current_object.set_invincibility(1)
+                  current_object.set_pickup_permissions(no_one)
+                  --
+                  if global.number[2] == 1 then -- current phase is Phase 1?
+                     --
+                     -- Control which fireteams are allowed to spawn at this respawn zone:
+                     --
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 0 then 
+                           current_object.set_spawn_location_fireteam(1)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 1 then 
+                           current_object.set_spawn_location_fireteam(2)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence == 2 then 
+                           current_object.set_spawn_location_fireteam(4)
+                        end
+                     end
+                     for each object with label "inv_res_p1" do
+                        if current_object.spawn_sequence > 2 then 
+                           current_object.set_spawn_location_fireteam(-1)
+                        end
+                     end
+                     --
+                     -- Use the respawn zone's Spawn Sequence to determine which fireteam 
+                     -- should use it as their default spawn:
+                     --
+                     current_object.set_spawn_location_permissions(allies)
+                     for each player do
+                        if current_object.team == current_player.team then 
+                           global.number[8] = 0
+                           global.number[8] = current_player.get_fireteam()
+                           if current_object.spawn_sequence == global.number[8] then 
+                              current_player.set_primary_respawn_object(current_object)
+                           end
+                        end
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="set_fireteam" id="63">
+            <args>
+               <arg name="index" type="number" />
+            </args>
+            <blurb>Sets a player's current fireteam index.</blurb>
+         </method>
+         <method name="set_requisition_palette" id="69">
+            <args>
+               <arg name="palette">The index of a palette to use. Values between 0 and 15, 
+               inclusive, are possible, but the actual valid range is not known.</arg>
+            </args>
+            <blurb>A development leftover related to a scrapped Requisition system.</blurb>
+            <description>
+               <p>
+                  This function sets which requisition palette the player can use. This 
+                  appears to be a development leftover for a scrapped design idea.
+               </p>
+            </description>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_loadout_palette" id="77">
+            <args>
+               <arg name="palette">
+                  <p>Any of the following values:</p>
+                  <ul>
+                     <li>none</li>
+                     <li>spartan_tier_1</li>
+                     <li>spartan_tier_2</li>
+                     <li>spartan_tier_3</li>
+                     <li>elite_tier_1</li>
+                     <li>elite_tier_2</li>
+                     <li>elite_tier_3</li>
+                  </ul>
+               </arg>
+            </args>
+            <blurb>Sets which loadout palette a player can select loadouts from.</blurb>
+            <example>
+               for each player do
+                  if current_player.is_elite() then 
+                     current_player.set_loadout_palette(elite_tier_1)
+                  alt
+                     current_player.set_loadout_palette(spartan_tier_1)
+                  end
+               end
+            </example>
+         </method>
+         <method name="try_get_weapon" name2="get_weapon" id="83" returns="object">
+            <args>
+               <arg name="which">
+                  <p>Any one of the following values</p>
+                  <dl>
+                     <dt>primary</dt>
+                        <dd>The weapon that the player is currently using</dd>
+                     <dt>secondary</dt>
+                        <dd>The weapon that the player has holstered.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>Identify the player's current weapon.</blurb>
+            <description>
+               <p>
+                  This function can be used to access a player's readied or holstered 
+                  weapon.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the object variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_weapon</code> will compile in an 
+                  assignment to <var>no_object</var> before the call, while calling 
+                  the function with the name <code>try_get_weapon</code> will not.
+               </p>
+            </description>
+            <example>
+               --
+               -- Delete the player's weapon if it is not a Gravity Hammer:
+               --
+               for each player do
+                  global.object[0] = current_player.get_weapon(secondary)
+                  if not global.object[0].is_of_type(gravity_hammer) then
+                     global.object[0].delete()
+                  end
+                  global.object[0] = current_player.get_weapon(primary)
+                  if not global.object[0].is_of_type(gravity_hammer) then
+                     global.object[0].delete()
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="try_get_armor_ability" name2="get_armor_ability" id="84" returns="object">
+            <blurb>Identify the player's current Armor Ability.</blurb>
+            <description>
+               <p>
+                  This function can be used to access a player's readied or holstered 
+                  weapon.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the object variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_armor_ability</code> will compile in an 
+                  assignment to <var>no_object</var> before the call, while calling 
+                  the function with the name <code>try_get_armor_ability</code> will not.
+               </p>
+            </description>
+            <example>
+               --
+               -- Don't allow players to use Armor Lock:
+               --
+               for each player do
+                  global.object[0] = current_player.get_armor_ability()
+                  if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+                     global.object[0].delete()
+                     game.show_message_to(current_player, none, "nope")
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="get_crosshair_target" id="86" returns="object">
+            <blurb>Identify the player's current Armor Ability.</blurb>
+            <description>
+               <p>
+                  This function returns the object that the current player is aiming at, if 
+                  that object is giving the player a red or green reticle. It only appears 
+                  to work when called on host.
+               </p>
+            </description>
+         </method>
+         <method name="add_weapon" id="89">
+            <args>
+               <arg name="weapon"  type="object" />
+            </args>
+            <blurb>Give a weapon to a player.</blurb>
+            <example>
+               global.player[0].add_weapon(global.object[0])
+            </example>
+            <note>
+               Remember that this function works differently from <code>object.add_weapon</code>: 
+               the object function takes an object type and spawns a new weapon; while the player 
+               function takes an existing weapon object.
+            </note>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+         <method name="set_co_op_spawning" id="90">
+            <args>
+               <arg name="enable" type="bool" />
+            </args>
+            <blurb>Control whether a player uses co-op spawning.</blurb>
+            <description>
+               <p>
+                  This function controls whether players use co-op spawning, an alternate 
+                  spawning system that allows players to spawn at their teammates or at 
+                  any object on the map that has been appropriately configured. This is 
+                  the spawning system used in Invasion and Buddy Slayer (formerly called 
+                  "Bro Slayer").
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.set_co_op_spawning(true) -- enable it
+               end
+            </example>
+            <related context="team" type="action" name="set_co_op_spawning" />
+            <related context="object" type="action" name="set_spawn_location_fireteam" />
+            <related context="object" type="action" name="set_spawn_location_permissions" />
+            <related context="player" type="action" name="set_primary_respawn_object" />
+            <related context="team" type="action" name="set_primary_respawn_object" />
+         </method>
+         <method name="record_griefer_penalty" id="97">
+            <args>
+               <arg name="unknown"  type="number" />
+            </args>
+            <blurb>The specific function of this action is not known. Presumably it has something 
+            to do with keeping track of bad behavior in-game.</blurb>
+         </method>
       </actions>
    </methods>
+   <properties>
+      <property name="biped" type="object" read-only="true">
+         <blurb>The player's current biped.</blurb>
+         <description>
+            <p>
+               This property allows you to access the biped a player is currently 
+               in control of.
+            </p>
+         </description>
+         <note>
+            This is the only property that can be accessed on nested variables, e.g. 
+            <var>current_team.player[0].biped</var>.
+         </note>
+      </property>
+      <property name="rating" type="number" read-only="true">
+         <blurb>The player's Arena rating.</blurb>
+      </property>
+      <property name="score" type="number" setter-is-accessor="true">
+         <blurb>The player's current score.</blurb>
+         <example>
+            for each player do
+               if current_player.biped != no_object then
+                  --
+                  -- If the player has a biped on the map, then they must be alive.
+                  --
+                  current_player.score += 1
+               end
+            end
+         </example>
+         <related context="team" type="property" name="score" />
+      </property>
+      <property name="script_stat" type="number" indexed="true">
+         <blurb>The value of a scripted Post-Game Carnage Report stat for this player.</blurb>
+         <description>
+            <p>
+               This member allows you to access the values of script-defined Post-Game Carnage 
+               Report stats on a per-player basis. Stats can be read or modified. Their values 
+               persist between rounds, making them a useful way to persist state between rounds.
+            </p>
+         </description>
+         <example>
+            for each player do
+               current_player.script_stat[3] += 5
+            end
+         </example>
+         <related context="team" type="property" name="script_stat" />
+      </property>
+      <property name="team" type="team">
+         <blurb>The player's owner team.</blurb>
+         <example>
+            for each player do
+               if current_player.team == team[0] then
+                  --
+                  -- Player is on Team 1.
+                  --
+               end
+            end
+         </example>
+         <related context="object" type="property" name="team" />
+      </property>
+      <property name="unknown_09" type="number">
+         <blurb>Unknown. Possibly the player's requisition money.</blurb>
+      </property>
+   </properties>
+   <accessors>
+      <accessor name="frag_grenades" type="number" setter="opcode" id="74">
+         <blurb>The player's current frag grenade count.</blurb>
+         <example>
+            for each player do
+               current_player.frag_grenades += 1
+            end
+         </example>
+      </accessor>
+      <accessor name="plasma_grenades" type="number" setter="opcode" id="74">
+         <blurb>The player's current plasma grenade count.</blurb>
+         <example>
+            for each player do
+               current_player.plasma_grenades += 1
+            end
+         </example>
+      </accessor>
+   </accessors>
 </script-type>

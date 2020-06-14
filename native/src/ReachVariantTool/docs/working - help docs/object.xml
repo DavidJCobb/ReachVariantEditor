@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="object">
+<script-type name="object" is-variable="true">
    <friendly>Object</friendly>
    <blurb>An object in the game world.</blurb>
+   <scope
+      numbers="8"
+      timers="4"
+      teams="2"
+      players="4"
+      objects="4"
+   />
    <methods>
       <conditions>
          <method name="shape_contains" id="2">
@@ -181,6 +188,11 @@
                to hard-cut to black for them, with no HUD widgets visible and no game sounds 
                audible besides some announcer voiceovers.
             </note>
+            <note>
+               If one biped is assassinating another, deleting the victim will not interrupt 
+               the killer's assassination animation.
+            </note>
+            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="set_waypoint_visibility" id="4">
             <args>
@@ -192,6 +204,10 @@
                   current_object.set_waypoint_visibility(everyone)
                end
             </example>
+            <note>
+               Testing suggests that weapons cannot show waypoints if they are being carried 
+               by bipeds.
+            </note>
             <related type="action" name="set_waypoint_icon" />
             <related type="action" name="set_waypoint_priority" />
             <related type="action" name="set_waypoint_timer" />
@@ -357,10 +373,10 @@
                   end
                end
             </example>
-            <related type="action" name="add_weapon" />
-            <related type="action" name="get_carrier" />
-            <related type="action" name="remove_weapon" />
-            <related type="action" name="set_weapon_pickup_priority" />
+            <related context="object" type="action" name="add_weapon" />
+            <related context="object" type="action" name="get_carrier" />
+            <related context="object" type="action" name="remove_weapon" />
+            <related context="object" type="action" name="set_weapon_pickup_priority" />
             <related context="player" type="action" name="get_armor_ability" />
             <related context="player" type="action" name="add_weapon" />
             <related context="player" type="action" name="get_weapon" />
@@ -391,6 +407,7 @@
             </example>
             <related context="player" type="action" name="set_co_op_spawning" />
             <related type="action" name="set_spawn_location_fireteam" />
+            <related context="player" type="action" name="set_primary_respawn_object" />
          </method>
          <method name="set_spawn_location_fireteam" id="14">
             <args>
@@ -443,8 +460,22 @@
                end
             </example>
          </method>
-         <method name="get_carrier" id="19" returns="player">
+         <method name="try_get_carrier" name2="get_carrier" id="19" returns="player">
             <blurb>Identify the player carrying a weapon or Armor Ability.</blurb>
+            <description>
+               <p>
+                  When called on a weapon or Armor Ability, this function returns the 
+                  player carrying the item.
+               </p>
+               <p>
+                  When Bungie and 343i use this function, they often manually clear 
+                  the player variable they are assigning to before calling the function. 
+                  That functionality is automated in this Megalo dialect: calling the 
+                  function with the name <code>get_carrier</code> will compile in an 
+                  assignment to <var>no_player</var> before the call, while calling 
+                  the function with the name <code>try_get_carrier</code> will not.
+               </p>
+            </description>
             <example>
                for each object with label "awful_gun" do
                   global.player[0] = current_object.get_carrier()
@@ -654,6 +685,13 @@
                </p>
             </note>
             <note>
+               Armor Abilities equipped by other players are an exception to normal 
+               attachment behaviors. If you detach an Armor Ability from a player's 
+               back, you can move it around or attach it without unequipping it from 
+               that player; however, the Armor Ability will automatically detach 
+               itself every frame.
+            </note>
+            <note>
                Attaching a biped to an object will lock the biped in place. If the 
                biped is controlled by the player, they will be able to turn but not 
                to move, and their first-person legs will desynch from their upper 
@@ -811,6 +849,13 @@
                position. Scaling a player up, for example, will cause their first-person 
                legs to appear much larger to them, but will not actually move the 
                camera upward to match the rescaled head.
+            </note>
+            <note>
+               The <code>set_scale</code> function has been observed to fail under the 
+               following conditions: the context object was created and attached to 
+               another object during the same tick as the <code>set_scale</code> call 
+               and before the <code>set_scale</code> call; and the object to which it 
+               was attached already existed before the tick on which the call was made.
             </note>
          </method>
          <method name="set_waypoint_text" id="53">
@@ -1030,6 +1075,10 @@
                then it may end up being launched away if something bumps it and updates its 
                physics simulation.
             </note>
+            <note>
+               This function can fail to do anything if it is called on an object that is attached 
+               to something else.
+            </note>
             <related type="action" name="face_toward" />
          </method>
          <method name="face_toward" id="92">
@@ -1088,6 +1137,11 @@
             <note>
                If the biped is player-controlled and the player's Weapon Pickup trait is set to 
                Disabled, then you must use the "force" mode to add the weapon.
+            </note>
+            <note>
+               Remember that this function works differently from <code>player.add_weapon</code>: 
+               the object function takes an object type and spawns a new weapon; while the player 
+               function takes an existing weapon object.
             </note>
             <!-- relationships only need to be specified on one end -->
          </method>
@@ -1153,11 +1207,40 @@
       </actions>
    </methods>
    <properties>
-      <property name="shields">
+      <property name="spawn_sequence" type="number" read-only="true">
+         <blurb>The object's Spawn Sequence value set in Forge.</blurb>
+         <example>
+            for each object with label "koth_hill" do
+               if current_object.spawn_sequence == 1 then
+                  --
+                  -- ... do something ...
+                  --
+               end
+            end
+         </example>
+      </property>
+      <property name="team" type="team">
+         <blurb>The object's owner team.</blurb>
+         <example>
+            for each team do
+               for each object with label "ctf_res_zone" do
+                  if current_object.team == current_team then
+                     --
+                     -- do something
+                     --
+                  end
+               end
+            end
+         </example>
+         <related context="player" type="property" name="team" />
+      </property>
+   </properties>
+   <accessors>
+      <accessor name="shields" type="number" getter="opcode" setter="opcode">
          <blurb>The object's current shields.</blurb>
          <description>
             <p>
-               This property holds the object's current shields. A value of 100 
+               This accessor holds the object's current shields. A value of 100 
                represents 100% shields.
             </p>
          </description>
@@ -1169,15 +1252,15 @@
                end
             end
          </example>
-         <related type="property" name="health" />
-         <related type="property" name="max_shields" />
-         <related type="property" name="max_health" />
-      </property>
-      <property name="health">
+         <related type="accessor" name="health" />
+         <related type="accessor" name="max_shields" />
+         <related type="accessor" name="max_health" />
+      </accessor>
+      <accessor name="health" type="number" getter="opcode" setter="opcode">
          <blurb>The object's current health.</blurb>
          <description>
             <p>
-               This property holds the object's current health. A value of 100 
+               This accessor holds the object's current health. A value of 100 
                represents 100% health.
             </p>
          </description>
@@ -1189,12 +1272,12 @@
                end
             end
          </example>
-      </property>
-      <property name="max_shields" setter-only="true">
+      </accessor>
+      <accessor name="max_shields" type="number" setter="opcode">
          <blurb>The object's maximum shields.</blurb>
          <description>
             <p>
-               This property can be used to set an object's maximum shields.
+               This accessor can be used to set an object's maximum shields.
             </p>
          </description>
          <example>
@@ -1202,12 +1285,12 @@
                current_player.biped.max_shields = 50
             end
          </example>
-      </property>
-      <property name="max_health" setter-only="true">
+      </accessor>
+      <accessor name="max_health" type="number" setter="opcode">
          <blurb>The object's maximum health.</blurb>
          <description>
             <p>
-               This property can be used to set an object's maximum health.
+               This accessor can be used to set an object's maximum health.
             </p>
          </description>
          <example>
@@ -1215,6 +1298,6 @@
                current_player.biped.max_health = 50
             end
          </example>
-      </property>
-   </properties>
+      </accessor>
+   </accessors>
 </script-type>
