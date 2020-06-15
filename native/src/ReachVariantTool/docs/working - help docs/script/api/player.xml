@@ -703,22 +703,22 @@
                      --
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 0 then 
-                           current_object.set_spawn_location_fireteam(1)
+                           current_object.set_spawn_location_fireteams(0)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 1 then 
-                           current_object.set_spawn_location_fireteam(2)
+                           current_object.set_spawn_location_fireteams(1)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 2 then 
-                           current_object.set_spawn_location_fireteam(4)
+                           current_object.set_spawn_location_fireteams(2)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence > 2 then 
-                           current_object.set_spawn_location_fireteam(-1)
+                           current_object.set_spawn_location_fireteams(all)
                         end
                      end
                      --
@@ -760,22 +760,22 @@
                      --
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 0 then 
-                           current_object.set_spawn_location_fireteam(1)
+                           current_object.set_spawn_location_fireteams(0)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 1 then 
-                           current_object.set_spawn_location_fireteam(2)
+                           current_object.set_spawn_location_fireteams(1)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence == 2 then 
-                           current_object.set_spawn_location_fireteam(4)
+                           current_object.set_spawn_location_fireteams(2)
                         end
                      end
                      for each object with label "inv_res_p1" do
                         if current_object.spawn_sequence > 2 then 
-                           current_object.set_spawn_location_fireteam(-1)
+                           current_object.set_spawn_location_fireteams(all)
                         end
                      end
                      --
@@ -961,7 +961,7 @@
                end
             </example>
             <related context="team" type="action" name="set_co_op_spawning" />
-            <related context="object" type="action" name="set_spawn_location_fireteam" />
+            <related context="object" type="action" name="set_spawn_location_fireteams" />
             <related context="object" type="action" name="set_spawn_location_permissions" />
             <related context="player" type="action" name="set_primary_respawn_object" />
             <related context="team" type="action" name="set_primary_respawn_object" />

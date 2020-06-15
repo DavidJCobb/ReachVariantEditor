@@ -119,9 +119,10 @@ int main(int argc, char *argv[]) {
 //       IMPLEMENT THE SYNTAX (FOR COMPILING AND DECOMPILING) AS SIMPLY NOT USING AN ASSIGN 
 //       STATEMENT I.E. (basis.place_at_me(...)) INSTEAD OF (no_object = basis.place_at_me(...)).
 //
-//        - IMPLEMENTED. SEEMS TO COMPILE PROPERLY BUT WE SHOULD TEST IN-GAME TO BE SURE.
-//
 //        - We should test if object.place_between_me_and also has this behavior.
+//
+//     = player.is_spartan, is_elite, is_monitor: IF THE PLAYER IS IN CONTROL OF A BIPED, DO THESE 
+//       CHECK ITS SPECIES? DO THEY REACT PROPERLY TO THE PLAYER BEING SCRIPTED INTO A BIPED?
 //
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
@@ -133,6 +134,21 @@ int main(int argc, char *argv[]) {
 //              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
 //
 //     = DOCUMENTATION
+//
+//        - REMAINING XML:
+//
+//           - bool
+//           - engine-icon
+//           - forge-label
+//           - format-string
+//           - object-type
+//           - player-set
+//           - variant-string-id
+//           - widget-icon
+//
+//           - The "enums" namespace and its contents.
+//
+//           - Documentation for the editor UI / file format.
 //
 //        - We should auto-generate documentation on all opcodes (sorted by context type) in 
 //          XML format, like I did for one of my Skyrim projects. I can then edit the result 
@@ -148,6 +164,7 @@ int main(int argc, char *argv[]) {
 //                 - Speedflag
 //              - Freeze Tag
 //              - Headhunter TU
+//              - Invasion
 //              - Invasion Slayer
 //              - Juggernaut
 //              - King of the Hill (use TU file; I misunderstood the scoring the first time around)
@@ -167,10 +184,9 @@ int main(int argc, char *argv[]) {
 //              - Halo Chess (high-complexity; low-priority)
 //              - Infection
 //                 - Alpha Zombies
-//              - Invasion
-//                 - Invasion: Boneyard
-//                 - Invasion: Breakpoint
-//                 - Invasion: Spire
+//              - Invasion: Boneyard
+//              - Invasion: Breakpoint
+//              - Invasion: Spire
 //
 //     - The load process can't handle out-of-range indices in indexed lists for files that 
 //       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
@@ -280,11 +296,6 @@ int main(int argc, char *argv[]) {
 //          still sets current health to 1 without changing max health and if so, document 
 //          that.
 //
-//        - Test object.copy_rotation_from: we want to know whether the bool is an absolute 
-//          bool or a relative bool (i.e. which is true and which is false). If it matches 
-//          object.attach_to (which we should probably test again), then instead of a bool 
-//          we should use OpcodeArgValueAttachPositionEnum.
-//
 //        - Can you assign a player to neutral_team, or reassign their team, during a team 
 //          game?
 //
@@ -317,11 +328,6 @@ int main(int argc, char *argv[]) {
 //     = GAMETYPE PLANS
 //
 //        - Vanilla+
-//
-//           - Race+
-//
-//              - Add Driver Traits, Gunner Traits, and Passenger Traits based on our 
-//                proof-of-concept for implementing those.
 //
 //           - Infection+
 //

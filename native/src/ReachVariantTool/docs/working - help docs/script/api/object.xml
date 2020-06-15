@@ -13,6 +13,7 @@
       <conditions>
          <method name="shape_contains" id="2">
             <args>
+               <!-- The "args" tag can contain text or a list of "arg" elements. -->
                <arg name="other" type="object" />
             </args>
             <blurb>Check whether this object's shape boundary contains another object.</blurb>
@@ -141,8 +142,14 @@
                         <dd>Unknown.</dd>
                   </dl>
                </arg>
-               <arg type="vector-3">
-                  A position offset from the context object.
+               <arg name="x" type="vector3:x">
+                  The X-coordinate of a position offset. Allowed values are -128 to 127.
+               </arg>
+               <arg name="y" type="vector3:y">
+                  The Y-coordinate of a position offset. Allowed values are -128 to 127.
+               </arg>
+               <arg name="z" type="vector3:z">
+                  The Z-coordinate of a position offset. Allowed values are -128 to 127.
                </arg>
                <arg type="variant-string-id">
                   A variation to apply to the created object, if the object type supports it.
@@ -406,15 +413,14 @@
                next_checkpoint.set_spawn_location_permissions(mod_player, current_player, 1)
             </example>
             <related context="player" type="action" name="set_co_op_spawning" />
-            <related type="action" name="set_spawn_location_fireteam" />
+            <related type="action" name="set_spawn_location_fireteams" />
             <related context="player" type="action" name="set_primary_respawn_object" />
          </method>
-         <method name="set_spawn_location_fireteam" id="14">
+         <method name="set_spawn_location_fireteams" id="14">
             <args>
-               <arg name="fireteam" type="number">
-                  The fireteam index to limit this object to, or -1 to indicate that any 
-                  fireteam should be able to spawn at this object.
-               </arg>
+               The word <var>none</var>, the word <var>all</var>, or a comma-separated 
+               list of fireteam indices (starting at 0) that should be able to use this 
+               object as a spawn location.
             </args>
             <blurb>Adjust which fireteam can spawn at a location.</blurb>
             <description>
@@ -427,7 +433,7 @@
             </description>
             <example>
                for each object with label "fireteam_1_spawn" do
-                  current_object.set_spawn_location_fireteam(1)
+                  current_object.set_spawn_location_fireteams(0)
                   current_object.set_spawn_location_permissions(allies)
                end
             </example>
@@ -585,15 +591,15 @@
                </arg>
                <arg name="x" type="vector3:x">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object.
+                  of the other object. Allowed values are -128 to 127.
                </arg>
                <arg name="y" type="vector3:y">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object.
+                  of the other object. Allowed values are -128 to 127.
                </arg>
                <arg name="z" type="vector3:z">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object.
+                  of the other object. Allowed values are -128 to 127.
                </arg>
                <arg name="reference_frame">
                   Either the word <var>relative</var>, indicating that the position 
