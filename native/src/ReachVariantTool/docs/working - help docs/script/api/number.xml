@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="number" is-variable="true">
+   <friendly>Number</friendly>
+   <blurb>A numeric constant or variable.</blurb>
+   <description>
+      <p>
+         Number variables can be integer constants or numeric variables. The 
+         numbers in question are signed with allowed values ranging from -32768 
+         to 32767.
+      </p>
+   </description>
+</script-type>

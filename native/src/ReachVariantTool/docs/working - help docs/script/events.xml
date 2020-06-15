@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Events</title>
+   <body>
+      <p>
+         Megalo allows you to define "event handlers" for a number of situations that can 
+         occur during play. You may assign one block to handle each event. The available 
+         events are:
+      </p>
+      <dl>
+         <dt>pregame</dt>
+            <dd>This event fires once, before the start of the match.</dd>
+         <dt>init</dt>
+            <dd>This event fires once, at the very start of the match.</dd>
+         <dt>local init</dt>
+            <dd>This event is not networked, and fires once at the very start of the match.</dd>
+         <dt>host migration</dt>
+            <dd>This event fires after a host migration has occurred.</dd>
+         <dt>double host migration</dt>
+            <dd>This event fires after a double host migration has occurred.</dd>
+         <dt>object death</dt>
+            <dd>This event fires when certain objects die.</dd>
+         <dt>local</dt>
+            <dd>This event fires every script tick, but it is not networked.</dd>
+      </dl>
+      <p>
+         To set a top-level block as an event handler, prefix it with the "on" keyword 
+         followed by the event name and a colon:
+      </p>
+      <pre>
+         on object death: do
+         end
+      </pre>
+      
+      <h2>Object death</h2>
+      <p>
+         This event fires when certain objects "die." It does not necessarily fire when objects 
+         <em>are destroyed</em>; for example, shooting a Fusion Coil does not trigger this 
+         event.
+      </p>
+   </body>
+</article>
