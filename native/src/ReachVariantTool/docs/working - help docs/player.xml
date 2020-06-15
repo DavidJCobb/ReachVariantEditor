@@ -9,6 +9,15 @@
       players="4"
       objects="4"
    />
+   <description>
+      <p>
+         Player variables refer to players that are participating in the match, or that have 
+         participated in the match and since quit. Note that a "player" is distinct from a 
+         "player model," or "biped:" if the game has just started and you're still selecting 
+         a loadout, then you (the player) still exist even though you're not physically 
+         present on the map (you have no biped).
+      </p>
+   </description>
    <methods>
       <conditions>
          <method name="killer_type_is" id="3">
@@ -672,7 +681,7 @@
          </method>
          <method name="set_primary_respawn_object" id="61">
             <args>
-               <arg name="respawn" type="object">Unknown.</arg>
+               <arg name="respawn" type="object">The object to use as a respawn point.</arg>
             </args>
             <blurb>This function appears to set a player's default respawn object, when 
             co-op spawning is enabled.</blurb>

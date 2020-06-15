@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="team" is-variable="true">
+   <friendly>Team</friendly>
+   <blurb>A team.</blurb>
+   <scope
+      numbers="8"
+      timers="4"
+      teams="4"
+      players="4"
+      objects="6"
+   />
+   <methods>
+      <conditions>
+         <method name="has_alliance_status" id="4">
+            <args>
+               <arg name="other" type="team" />
+               <arg name="status">
+                  <p>Any of the following words:</p>
+                  <ul>
+                     <li>friendly</li>
+                     <li>neutral</li>
+                     <li>enemy</li>
+                  </ul>
+               </arg>
+            </args>
+            <blurb>Check this team's relationship with another team.</blurb>
+            <description>
+               <p>
+                  This function checks a team's alliance status toward another team.
+               </p>
+            </description>
+            <note>
+               During the <i>Halo: Reach</i> beta, Invasion implemented fireteams as actual 
+               entire teams: instead of having two teams invisibly divided into three pairs 
+               of two plyaers, the game had six teams, and the teams' alliance statuses were 
+               altered to ally them with each other.
+            </note>
+         </method>
+         <method name="has_any_players" id="7">
+            <blurb>Check whether a team still has players on it.</blurb>
+            <description>
+               <p>
+                  This function checks whether a team has any players on it. Players that have 
+                  left the match will not count.
+               </p>
+            </description>
+            <example>
+               -- From CTF: delete a team's flag if all of their players quit and their flag is 
+               -- at home.
+               
+               alias state = object.number[0]
+               alias flag  = team.object[1]
+            
+               for each team do
+                  alias current_flag = global.object[0]
+                  if current_team != neutral_team and not current_team.has_any_players() and current_team.flag != no_object then 
+                     current_flag = current_team.flag
+                     if current_flag.state == 0 then 
+                        current_team.flag.delete()
+                        current_team.flag = no_object
+                     end
+                  end
+               end
+            </example>
+         </method>
+      </conditions>
+      <actions>
+         <method name="get_scoreboard_pos" id="36" returns="number">
+            <blurb>Get a team's position on the scoreboard.</blurb>
+            <description>
+               <p>
+                  This function returns a team's position on the scoreboard. A value 
+                  of 1 represents 1st place, while a value of 0 results if the function 
+                  is called on <var>no_player</var>.
+               </p>
+            </description>
+            <example>
+               alias leader = global.team[0]
+               
+               for each team do
+                  leader = no_team
+                  global.number[0] = current_team.get_scoreboard_pos()
+                  if global.number[0] == 1 then
+                     leader = current_team
+                  end
+               end
+            </example>
+            <related context="player" type="action" name="get_scoreboard_pos" />
+         </method>
+         <method name="set_co_op_spawning" id="59">
+            <args>
+               <arg name="enable" type="bool" />
+            </args>
+            <blurb>Control whether a team uses co-op spawning.</blurb>
+            <description>
+               <p>
+                  This function controls whether players use co-op spawning, an alternate 
+                  spawning system that allows players to spawn at their teammates or at 
+                  any object on the map that has been appropriately configured. This is 
+                  the spawning system used in Invasion and Buddy Slayer (formerly called 
+                  "Bro Slayer").
+               </p>
+            </description>
+            <example>
+               for each team do
+                  current_team.set_co_op_spawning(true) -- enable it
+               end
+            </example>
+            <related context="player" type="action" name="set_co_op_spawning" />
+            <related context="object" type="action" name="set_spawn_location_fireteam" />
+            <related context="object" type="action" name="set_spawn_location_permissions" />
+            <related context="player" type="action" name="set_primary_respawn_object" />
+            <related context="team"   type="action" name="set_primary_respawn_object" />
+         </method>
+         <method name="set_primary_respawn_object" id="60">
+            <args>
+               <arg name="respawn" type="object">The object to use as a respawn point.</arg>
+            </args>
+            <blurb>This function appears to set a team's default respawn object, when 
+            co-op spawning is enabled.</blurb>
+            <example>
+               -- Set a team's primary respawn object to the object with a specific label 
+               -- and the lowest spawn sequence on the map.
+               
+               do
+                  alias lowest = global.number[0]
+                  --
+                  lowest = 32767
+                  for each object with label "defend_res_zone" do
+                     if current_object.spawn_sequence &lt; lowest then
+                        lowest = current_object.spawn_sequence
+                        team[0].set_primary_respawn_object(current_object)
+                     end
+                  end
+               end
+            </example>
+            <!-- relationships only need to be specified on one end -->
+         </method>
+      </actions>
+   </methods>
+   <properties>
+      <property name="score" type="number" setter-is-accessor="true">
+         <blurb>The team's current score.</blurb>
+         <description>
+            <p>
+               This property provides access to a team's score. Note that a team's score 
+               <em>is not</em> the total score of its players. Rather, both players and 
+               teams are entities that are able to "have points."
+            </p>
+            <p>
+               Suppose a match has two teams, Red and Blue, and no one (players or teams) 
+               has any points. If you set each team's score to 1, and then set a Red Team 
+               player's score to 1, then Red Team will be in the lead.
+            </p>
+         </description>
+         <example>
+            for each team do
+               if current_player.biped != no_object then
+                  --
+                  -- If the player has a biped on the map, then they must be alive.
+                  --
+                  current_player.team.score += 1
+               end
+            end
+         </example>
+         <note>
+            It may seem strange for teams to have distinct score values from their players, 
+            but there is a use for it. Suppose you're playing Assault, and a player arms 
+            the bomb and then quits before the bomb detonates. Normally, when a bomb 
+            detonates, a point is awarded to the player who planted it, but in this case, 
+            since the player quit, the point will be awarded to the team itself. A similar 
+            thing occurs in Stockpile, if a collected flag was placed into a team's goal 
+            by a player who quit or (perhaps accidentally) by an enemy of that team.
+         </note>
+         <related context="player" type="property" name="score" />
+      </property>
+      <property name="script_stat" type="number" indexed="true">
+         <blurb>The value of a scripted Post-Game Carnage Report stat for this player.</blurb>
+         <description>
+            <p>
+               This member allows you to access the values of script-defined Post-Game Carnage 
+               Report stats on a per-team basis. Stats can be read or modified. Their values 
+               persist between rounds, making them a useful way to persist state between rounds.
+            </p>
+         </description>
+         <example>
+            for each team do
+               current_team.script_stat[3] += 5
+            end
+         </example>
+         <related context="player" type="property" name="script_stat" />
+      </property>
+   </properties>
+   <accessors>
+   </accessors>
+</script-type>

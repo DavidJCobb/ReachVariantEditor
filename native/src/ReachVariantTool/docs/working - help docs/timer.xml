@@ -1,7 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="timer">
+<script-type name="timer" is-variable="true">
    <friendly>Timer</friendly>
    <blurb>A variable meant to represent time. It can be set to count up or down.</blurb>
+   <description>
+      <p>
+         Timer variables are essentially numbers that represent a high-resolution 
+         quantity of time. They can be set to count upward or downward, and the 
+         speed at which they count can be changed as well. They can have their 
+         current values set to any integer quantity of seconds by script. Timers 
+         don't have a networking priority.
+      </p>
+      <p>
+         If a timer variable is set to count down, then its rate will switch to 
+         stopped when it reaches zero. If a timer variable has a non-zero initial 
+         value and it is set to count up, then its rate will switch to stopped 
+         when it reaches that initial value. If a timer variable has a zero 
+         initial value and it is set to count up, then it will count up 
+         indefinitely.
+      </p>
+      <p>
+         Timer values are high-resolution. If two timers are compared to each other, 
+         then they will compare properly even if the differences in their values are 
+         less than one second.
+      </p>
+   </description>
    <methods>
       <conditions>
          <method name="is_zero" id="5">
@@ -32,11 +54,11 @@
          <method name="set_rate" id="17">
             <args>
                <arg name="rate">
-                  The rate and direction at which the timer should advance. Positive 
+                  <p>The rate and direction at which the timer should advance. Positive 
                   values will make the timer's value increase away from zero, while 
                   negative values will make the timer's value decrease to (but not 
                   past) zero. You may use any of the following rates (prefixed with 
-                  a minus sign for negative values):
+                  a minus sign for negative values):</p>
                   <ul>
                      <li>0%</li>
                      <li>10%</li>
@@ -73,6 +95,25 @@
                         current_player.announced_start = 1
                         send_incident(action_sack_game_start, current_player, no_player)
                      end
+                  end
+               end
+            </example>
+         </method>
+         <method name="reset" id="43">
+            <blurb>Reset a timer to its initial value.</blurb>
+            <example>
+               --
+               -- Do something every ten seconds:
+               --
+               declare global.timer[0] = 10
+               
+               do
+                  global.timer[0].set_rate(-100%)
+                  if global.timer[0].is_zero() then
+                     global.timer[0].reset()
+                     --
+                     -- ...and do the thing here
+                     --
                   end
                end
             </example>

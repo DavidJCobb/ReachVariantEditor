@@ -5,6 +5,11 @@
       <!-- TODO -->
    </members>
    <methods>
+      <conditions>
+         <condition name="is_in_forge" id="17">
+            <blurb>Checks whether the current match is a Forge match.</blurb>
+         </condition>
+      </conditions>
       <actions>
          <method name="show_message_to" id="16">
             <args>
@@ -23,6 +28,11 @@
          </method>
          <method name="end_round" id="21">
             <blurb>Ends the round.</blurb>
+            <description>
+               <p>
+                  This function ends the round when called.
+               </p>
+            </description>
             <example>
                if game.round_time_limit > 0 and game.round_timer.is_zero() then
                   game.end_round()
@@ -51,4 +61,4 @@
          </method>
       </actions>
    </methods>
-</script-type>
+</script-namespace>
