@@ -36,6 +36,8 @@
          my_cool_code()
          my_cool_code()
       </pre>
+      
+      <h2>Recursion</h2>
       <p>
          User-defined functions can be <dfn>recursive</dfn>: that is, they can call themselves 
          in order to run under specific conditions:
@@ -60,6 +62,13 @@
          --
          global.number[0] = 10
          spawn_skulls()
+         
+         --
+         -- Let's spawn a random number of skulls:
+         --
+         global.number[0]  = rand(19)
+         global.number[0] += 1 -- ensure it's at least one
+         spawn_skulls()
       </pre>
       <p>
          When writing recursive functions, you need to be careful to ensure that the function 
@@ -69,6 +78,20 @@
       <p>
          Megalo doesn't have the ability to loop over a numeric range; however, as shown above, 
          recursive functions can be used as a substitute.
+      </p>
+      
+      <h2>Availability</h2>
+      <p>
+         User-defined functions are supported by Megalo's bytecode &mdash; that is, the format 
+         that Megalo is compiled into. However, they did not exist in Bungie's actual design 
+         for the Megalo language. Nobody outside of Bungie and 343 Industries has ever seen 
+         Megalo in its "true" form, but in the past, Bungie described the language as being 
+         similar to BASIC, with no loops, functions, or other jumps.
+      </p>
+      <p>
+         As such, you won't see user-defined functions in official content, and other 
+         community-made tools made for Halo: Reach may fail to handle them properly. As far 
+         as I am aware, user-defined functions are entirely new to ReachVariantTool.
       </p>
    </body>
 </article>

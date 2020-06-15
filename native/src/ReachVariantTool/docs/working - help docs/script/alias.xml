@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Aliases</title>
+   <body>
+      <p>
+         Megalo only supports a limited number of variables; however, you can define 
+         <dfn>aliases</dfn>, or custom names, for each variable. Once defined, an 
+         alias can be used in any context where the original variable could be used.
+      </p>
+      <pre>
+         alias is_zombie = player.number[0]
+         
+         for each player do
+            if current_player.is_zombie == 1 then
+               --
+               -- ...
+               --
+            end
+         end
+      </pre>
+      <p>
+         Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
+         constant or to a global value, while a relative alias refers to a nested variable.
+      </p>
+      <p>
+         Absolute aliases with the same name will "shadow" each other: aliases defined 
+         later will prevent access to aliases defined earlier. Relative aliases with the 
+         same name will shadow each other if they belong to the same type. Aliases are 
+         block-scoped.
+      </p>
+      <pre>
+         -- Let's mark a variable for temporary use, with an alias.
+         alias temp_int_00 = global.number[0]
+         
+         for each player do
+            if current_player.killer_type_is(kill) then
+               alias death_type = temp_int_00
+               
+               death_type = current_player.get_death_damage_type()
+               if death_type == enums.damage_reporting_type.dmr then
+                  --
+                  -- (current_player) was killed with a DMR.
+                  --
+               end
+            end
+         end
+         
+         -- The "death_type" alias isn't available here, so it doesn't make a mess.
+      </pre>
+      <p>
+         You can also alias certain values that are specific to argument types, such as 
+         object types:
+      </p>
+      <pre>
+         alias temp_int_00   = global.number[0]
+         alias objective_obj = flag
+         
+         for each team do
+            alias created = temp_int_00
+            --
+            created = 0
+            for each object with label "ctf_return" do
+               if created == 0 and current_object.team == current_team then
+                  current_object.place_at_me(objective_obj, none, never_garbage_collect, 0, 0, 0, none)
+                  created = 1
+               end
+            end
+         end
+      </pre>
+   </body>
+</article>

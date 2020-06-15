@@ -80,7 +80,73 @@
       <p>
          Variables are either global or nested. There is one "global" set of variables that is 
          accessible at all times, and every object, player, and team is also capable of holding 
-         its own set of variables.
+         its own set of variables. Variables can be referred to by no more than two levels of 
+         depth:
+      </p>
+      <pre>
+         global.player[0]                     -- valid
+         global.player[0].player[1]           -- valid
+         global.player[0].player[1].player[2] -- invalid
+      </pre>
+      <p>
+         In this particular Megalo dialect, you cannot define your own variables; there are a 
+         fixed number available. However, you can <a href="alias">give names to variables</a>.
+      </p>
+      
+      <h3>Properties</h3>
+      <p>
+         A <dfn>property</dfn> is a member of a variable. Properties can appear in any place 
+         where a variable of the same type can be used. You cannot access variables or other 
+         properties through a property.
+      </p>
+      <pre>
+         current_player.team                 -- valid
+         current_player.biped.spawn_sequence -- invalid (var.property.property)
+         current_player.team.number[0]       -- invalid (var.property.var)
+      </pre>
+      <p>
+         Most properties cannot be accessed through a nested variable. The <var>biped</var> 
+         property on player variables is an exception.
+      </p>
+      <pre>
+         current_player.team            -- valid   (var.property)
+         current_player.player[0].team  -- invalid (var.var.property)
+         
+         current_player.biped           -- valid (var.biped)
+         current_player.player[0].biped -- valid (var.var.biped)
+      </pre>
+      <p>
+         Most properties do not have indices. There is one exception: the <var>script_stat</var> 
+         property on players and teams. There, you must use an index to specify the target stat:
+      </p>
+      <pre>
+         current_player.script_stat[0]
+      </pre>
+      
+      <h3>Accessors</h3>
+      <p>
+         An <dfn>accessor</dfn> uses similar syntax to a property, but can only appear in 
+         assignment statements. Internally, these exist as "getter" and "setter" functions. 
+         As such, you can use accessors on variables and properties.
+      </p>
+      <pre>
+         current_object.shields       += 50 -- valid; access through variable
+         current_player.biped.shields += 50 -- valid; access through property
+      </pre>
+      <p>
+         Most accessors have both getters and setters. Some do not, which means that they can 
+         only appear on the appropriate side of an assignment statement.
+      </p>
+      <pre>
+         current_object.max_shields += 50              -- valid; there is a setter for this
+         global.number[0] = current_object.max_shields -- invalid; there is no getter for this
+      </pre>
+      <p>
+         From a language design standpoint, accessors were preferred over getter/setter 
+         functions in cases where the internal setter takes the same range of assignment 
+         operators as an assignment statement. Although the parser as currently designed could 
+         accept an assignment operator as an argument (e.g. <code>foo.set_bar(+=, 5)</code>), 
+         it seems best to use operators only in statements.
       </p>
    </body>
 </article>
