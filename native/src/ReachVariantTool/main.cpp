@@ -124,6 +124,8 @@ int main(int argc, char *argv[]) {
 //     = player.is_spartan, is_elite, is_monitor: IF THE PLAYER IS IN CONTROL OF A BIPED, DO THESE 
 //       CHECK ITS SPECIES? DO THEY REACT PROPERLY TO THE PLAYER BEING SCRIPTED INTO A BIPED?
 //
+//     = WHAT IS THE "extermination" HUD WIDGET ICON?
+//
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
 //
@@ -137,11 +139,9 @@ int main(int argc, char *argv[]) {
 //
 //        - REMAINING XML:
 //
-//           - engine-icon
 //           - forge-label
 //           - object-type
 //           - player-set
-//           - widget-icon
 //
 //           - The "enums" namespace and its contents.
 //

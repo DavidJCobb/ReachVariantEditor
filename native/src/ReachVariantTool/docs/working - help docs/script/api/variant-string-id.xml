@@ -9,6 +9,10 @@
          variation, when creating objects, or an animation name, when working with 
          "device machines."
       </p>
+      <p>
+         You may use any of the values below, or you may use the value <var>none</var> 
+         to use the default ID for the object in question.
+      </p>
       
       <h2>Animations</h2>
       <dl>
