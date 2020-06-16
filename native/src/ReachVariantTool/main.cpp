@@ -137,13 +137,10 @@ int main(int argc, char *argv[]) {
 //
 //        - REMAINING XML:
 //
-//           - bool
 //           - engine-icon
 //           - forge-label
-//           - format-string
 //           - object-type
 //           - player-set
-//           - variant-string-id
 //           - widget-icon
 //
 //           - The "enums" namespace and its contents.

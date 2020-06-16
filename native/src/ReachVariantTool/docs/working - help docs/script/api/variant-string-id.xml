@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="variant-string-id">
+   <friendly>Variant ID</friendly>
+   <blurb>A predefined value which can refer to an object variant or to an animation 
+   name.</blurb>
+   <description>
+      <p>
+         Variant IDs are predefined values that can be used to specify an object 
+         variation, when creating objects, or an animation name, when working with 
+         "device machines."
+      </p>
+      
+      <h2>Animations</h2>
+      <dl>
+         <dt>mp_boneyard_a_idle_start</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_a_fly_in</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_a_idle_mid</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_a_fly_out</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_fly_in</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_idle_mid</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_fly_out</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_idle_start</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_a_leave1</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_leave1</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_pickup</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b_idle_pickup</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_a</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_boneyard_b</dt>
+            <dd>An animation name for Phantom models.</dd>
+         <dt>mp_spire_fp</dt>
+            <dd>An animation name for Pelican models.</dd>
+      </dl>
+      
+      <h2>Object variants</h2>
+      <dl>
+         <dt>default</dt>
+            <dd>Specifies an object's default variant.</dd>
+         <dt>carter</dt>
+            <dd>A variant name for Spartan bipeds; produces a male Spartan with Noble 1 (Carter)'s armor.</dd>
+         <dt>jun</dt>
+            <dd>A variant name for Spartan bipeds; produces a male Spartan with Noble 3 (Jun)'s armor.</dd>
+         <dt>female</dt>
+            <dd>A variant name for Spartan bipeds; produces a female Spartan with default armor.</dd>
+         <dt>male</dt>
+            <dd>A variant name for Spartan bipeds; produces a male Spartan with default armor.</dd>
+         <dt>emile</dt>
+            <dd>A variant name for Spartan bipeds; produces a male Spartan with Noble 4 (Emile)'s armor.</dd>
+         <dt>player_skull</dt>
+            <dd>A variant name for Spartan bipeds; produces a male Spartan with the Haunted helmet.</dd>
+         <dt>kat</dt>
+            <dd>A variant name for Spartan bipeds; produces a female Spartan with Noble 2 (Kat)'s armor.</dd>
+         <dt>minor</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Minor armor.</dd>
+         <dt>officer</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Officer armor.</dd>
+         <dt>ultra</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Ultra armor.</dd>
+         <dt>space</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Ranger armor.</dd>
+         <dt>spec_ops</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Spec Ops armor.</dd>
+         <dt>general</dt>
+            <dd>A variant name for Elite bipeds; produces Elite General armor.</dd>
+         <dt>zealot</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Zealot armor.</dd>
+         <dt>mp</dt>
+            <dd>A variant name for Elite bipeds; produces a random armor set.</dd>
+         <dt>jetpack</dt>
+            <dd>A variant name for Elite bipeds; produces Elite Ranger armor.</dd>
+         <dt>gauss</dt>
+            <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Gauss Warthog instead.</dd>
+         <dt>troop</dt>
+            <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Troop Transport Warthog instead.</dd>
+         <dt>rocket</dt>
+            <dd>A variant name for standard Warthogs only. When applied to a standard Warthog, produces a Rocket Warthog instead.</dd>
+      </dl>
+      
+      <h2>Unknown values</h2>
+      <dl>
+         <dt>fr</dt>
+            <dd>Unknown.</dd>
+         <dt>pl</dt>
+            <dd>Unknown.</dd>
+         <dt>35_spire_fp</dt>
+            <dd>Unknown.</dd>
+      </dl>
+      
+      <h2>Notes</h2>
+      <p>
+         The list of variant IDs available to Megalo is defined in a *.MAP file's <var>msit</var> tag. 
+         Objects can define named variants in their <var>hlmt</var> tags, while model animation data 
+         (including named animations) is defined in <var>jmad</var> tags.
+      </p>
+   </description>
+</script-type>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="widget" is-variable="true">
+<script-type name="widget">
    <friendly>HUD Widget</friendly>
    <blurb>A script-defined HUD widget.</blurb>
    <methods>
