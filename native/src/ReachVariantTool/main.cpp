@@ -144,9 +144,9 @@ int main(int argc, char *argv[]) {
 //
 //        - REMAINING XML:
 //
-//           - object-type
-//
 //           - Documentation for the editor UI / file format.
+//
+//        - RENDER THE XML OUT TO HTML.
 //
 //        - We should auto-generate documentation on all opcodes (sorted by context type) in 
 //          XML format, like I did for one of my Skyrim projects. I can then edit the result 
