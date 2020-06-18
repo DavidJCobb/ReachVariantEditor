@@ -135,15 +135,16 @@ int main(int argc, char *argv[]) {
 //              - If not, then hud_target is probably actually hud_target_player.biped.
 //              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
 //
+//     = CAN GAMETYPE SCRIPTS RUN IN FORGE IF THEY'RE EMBEDDED INTO FORGE VARIANTS? The existence 
+//       of a condition to test whether we're in Forge implies that they can, but it could be a 
+//       development leftover; perhaps Bungie once wanted gametypes to be playable in Forge to 
+//       improve testing, but later scrapped the idea.
+//
 //     = DOCUMENTATION
 //
 //        - REMAINING XML:
 //
-//           - forge-label
 //           - object-type
-//           - player-set
-//
-//           - The "enums" namespace and its contents.
 //
 //           - Documentation for the editor UI / file format.
 //
