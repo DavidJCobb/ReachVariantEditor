@@ -42,11 +42,6 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
-//     - SHORT-TERM PLANS
-//
-//        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
-//          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
-//
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
 //
@@ -135,16 +130,22 @@ int main(int argc, char *argv[]) {
 //              - If not, then hud_target is probably actually hud_target_player.biped.
 //              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
 //
-//     = CAN GAMETYPE SCRIPTS RUN IN FORGE IF THEY'RE EMBEDDED INTO FORGE VARIANTS? The existence 
-//       of a condition to test whether we're in Forge implies that they can, but it could be a 
-//       development leftover; perhaps Bungie once wanted gametypes to be playable in Forge to 
-//       improve testing, but later scrapped the idea.
+//     - CAN WE TEST THE VALUES OF THE "OVERSHIELD REGEN RATE" AND SHIELD DECAY RATES BY USING A 
+//       SCRIPT WIDGET TO DISPLAY OUR SHIELDS AS NUMBERS IN REAL-TIME, AND USING SCRIPT TO MEASURE 
+//       THE REGEN RATES AS POINTS PER SECOND?
+//
+//        - CAN WE TEST THE SHIELD VAMPIRISM VALUES ON AN NPC BIPED, WITH SIMILAR READOUTS AND 
+//          SCRIPT MATH FOR OUR SHIELDS?
 //
 //     = DOCUMENTATION
 //
 //        - REMAINING XML:
 //
-//           - Documentation for the editor UI / file format.
+//           - Documentation for the script editor UI / file format. (Screenshots of each page are 
+//             already taken.)
+//
+//              - Don't forget to document how "unresolved string references" are handled when 
+//                compiling scripts. (We don't have screenshots of that dialog yet either.)
 //
 //        - RENDER THE XML OUT TO HTML.
 //

@@ -32,13 +32,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="3" column="0">
-    <widget class="QLabel" name="labelEditModeAccess">
-     <property name="text">
-      <string>Edit Mode Access</string>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="0" colspan="2">
     <spacer name="verticalSpacer_16">
      <property name="orientation">
@@ -51,6 +44,20 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="labelEditorRespawnTime">
+     <property name="text">
+      <string>Editor Respawn Time</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QCheckBox" name="fieldFlag1">
+     <property name="text">
+      <string>Requires All Objects</string>
+     </property>
+    </widget>
    </item>
    <item row="2" column="1">
     <widget class="QSpinBox" name="fieldEditorRespawnTime">
@@ -72,37 +79,35 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QCheckBox" name="fieldFlag1">
-     <property name="text">
-      <string>Unknown Flag 1</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="labelEditorRespawnTime">
-     <property name="text">
-      <string>Editor Respawn Time</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="1">
     <widget class="QComboBox" name="fieldEditModeAccess">
      <item>
       <property name="text">
-       <string>unknown 0</string>
+       <string>Unknown 0</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>unknown 1</string>
+       <string>Unknown 1</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>unknown 2</string>
+       <string>Unknown 2</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Unknown 3</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="labelEditModeAccess">
+     <property name="text">
+      <string>Edit Mode Access</string>
+     </property>
     </widget>
    </item>
   </layout>

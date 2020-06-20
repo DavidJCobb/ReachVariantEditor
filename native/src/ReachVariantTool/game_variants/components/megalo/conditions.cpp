@@ -182,7 +182,7 @@ namespace Megalo {
       ),
       ConditionFunction( // 17
          "In Forge",
-         "This condition is believed to test whether the current match is taking place in Forge.",
+         "This condition is believed to test whether the current match is taking place in Forge. However, there is no known way to get gametype scripts to actually run in Forge.",
          "This match %v taking place in Forge.",
          {},
          OpcodeFuncToScriptMapping::make_function("is_in_forge", "", {}, OpcodeFuncToScriptMapping::game_namespace)

@@ -8,6 +8,16 @@
       <conditions>
          <condition name="is_in_forge" id="17">
             <blurb>Checks whether the current match is a Forge match.</blurb>
+            <description>
+               <p>
+                  Community reverse-engineers believe that this function checks whether the current 
+                  match is a Forge match. However, there doesn't appear to be any way to actually 
+                  get a gametype script to run in Forge. That doesn't necessarily mean that the 
+                  reverse-engineers who examined this function were wrong; perhaps Bungie originally 
+                  planned for gametypes to run in Forge (allowing you to playtest scripted behaviors, 
+                  like arming a bomb in Assault) and later scrapped the idea.
+               </p>
+            </description>
          </condition>
       </conditions>
       <actions>

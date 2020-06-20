@@ -143,6 +143,9 @@
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
+     <property name="specialValueText">
+      <string>no limit</string>
+     </property>
      <property name="maximum">
       <number>15</number>
      </property>
@@ -155,6 +158,9 @@
      </property>
      <property name="suffix">
       <string> seconds</string>
+     </property>
+     <property name="minimum">
+      <number>0</number>
      </property>
      <property name="maximum">
       <number>127</number>
