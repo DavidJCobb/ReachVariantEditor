@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Team Configuration</title>
+   <body>
+      <p>
+         The <b>team configuration</b> page allows you to edit data related to each of 
+         a game variant's eight teams.
+      </p>
+      <img src="options-team-specific.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Name</dt>
+            <dd>Allows you to override a team's name with custom text. The team name 
+            cannot be longer than 31 characters.</dd>
+         <dt>Enabled</dt>
+            <dd>Controls whether this team is active, and whether players are allowed 
+            to be on it.</dd>
+         <dt>Set Primary Color</dt>
+            <dd>If enabled, allows you to override a team's primary color. The primary 
+            color is used for players' armor color and for the color of any displayed 
+            objectives. Note that dark colors are likely to appear differently in-game 
+            due to the shaders used.</dd>
+         <dt>Set Secondary Color</dt>
+            <dd>If enabled, allows you to override a team's secondary color.</dd>
+         <dt>Set Tertiary Color</dt>
+            <dd>If enabled, allows you to override a team's tertiary color.</dd>
+         <dt>Player Species</dt>
+            <dd>If the <a href="options-team">general team settings</a> are set to have 
+            players use team-specific species, then this option controls whether this 
+            team's players spawn as Spartans or Elites.</dd>
+         <dt>Fireteam Count</dt>
+            <dd>Determines the number of "fireteams" on this team.</dd>
+         <dt>Initial Designator</dt>
+            <dd>
+               <p>Determines how this team definition is mapped to the list of teams 
+               in-game. Valid designators range from 1 to 8. The values chosen for 
+               all enabled teams should not leave any gaps.</p>
+               <p>After each round in a match, teams will swap places; for example, in 
+               offense/defense game variants with two teams, each team will take turns 
+               playing the "defense" role. The game engine takes care of this behavior 
+               by remapping teams internally: the gametype script always treats "Red 
+               Team" (or <code>team[0]</code> internally) as Defense, and the game 
+               engine just lies about which team <em>is</em> "Red Team."</p>
+               <p>This option, then, determines a team's initial identity. Which team 
+               is "Red Team," or <code>team[0]</code>, or "1," in the first round?</p>
+            </dd>
+      </dl>
+   </body>
+</article>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Team Settings</title>
+   <body>
+      <p>
+         The <b>team settings</b> page allows you to edit settings related to team scoring 
+         and configuration.
+      </p>
+      <img src="options-team.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Team Scoring Method</dt>
+            <dd>Unknown. This may be related to the oldest Halo games' options to 
+            control how a team's score was computed from the scores of its players, 
+            but testing is pending. <i>Halo: Reach</i> official files seem to use 
+            the value 0.</dd>
+         <dt>Player Species</dt>
+            <dd>
+               <p>Determines whether players play as Spartans or Elites. The available 
+               values are:</p>
+               <dl>
+                  <dt>Player Preference</dt>
+                     <dd>Players will spawn as the biped they've selected in their 
+                     customization options.</dd>
+                  <dt>All Spartans</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Spartans.</dd>
+                  <dt>All Elites</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Elites.</dd>
+                  <dt>Use Team Species</dt>
+                     <dd>Player customization will be ignored, and players will spawn 
+                     as the species set up in their team's individual configuration.</dd>
+                  <dt>Spartans vs Elites</dt>
+                     <dd>The "defense" team will be Spartans, and the "offense" team 
+                     will be Elites.</dd>
+               </dl>
+            </dd>
+         <dt>Designator Switch Type</dt>
+            <dd>
+               <p>This option controls how teams are remapped across rounds, but the 
+               meanings of its values are unknown.</p>
+               <p>After each round in a match, teams will swap places; for example, in 
+               offense/defense game variants with two teams, each team will take turns 
+               playing the "defense" role. The game engine takes care of this behavior 
+               by remapping teams internally: the gametype script always treats "Red 
+               Team" (or <code>team[0]</code> internally) as Defense, and the game 
+               engine just lies about which team <em>is</em> "Red Team."</p>
+               <p>This option, then, would presumably determine how teams are remapped. 
+               However, it is impossible to fully test its meanings without gathering 
+               up eight people to play game variants in-game.</p>
+            </dd>
+      </dl>
+   </body>
+</article>

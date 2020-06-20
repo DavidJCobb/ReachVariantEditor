@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Script-Specific Settings</title>
+   <body>
+      <p>
+         The <b>script-specific settings</b> page allows you to edit settings that are 
+         specific to the current gametype.
+      </p>
+      <img src="options-megalo.png" />
+      <p>
+         The fields available to edit will vary depending on the gametype script. Most 
+         fields will display as drop-down boxes. Some fields will display as sliders; 
+         these do not show up in the in-game settings menus. Some fields may not have 
+         names or descriptions, if players were not meant to edit them normally.
+      </p>
+   </body>
+</article>

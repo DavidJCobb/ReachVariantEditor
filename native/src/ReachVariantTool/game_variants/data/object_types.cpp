@@ -201,7 +201,7 @@ namespace Megalo {
          DetailedEnumValue("sabre",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Sabre"),
-            DetailedEnumValueInfo::make_map_tag('vehi', ""),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/sabre/sabre"),
             DetailedEnumValueInfo::make_description("An UNSC space vehicle capable of housing a single occupant. Sabres are armed with a chaingun and lock-on missiles, and can perform evasive maneuvers similarly to a Banshee. In addition, they can rotate about the roll axis, allowing them to turn sideways or upside-down mid-flight. This maneuverability comes at a cost, however: like Banshees, Sabres have a constant forward thrust, but a Sabre moves faster and takes damage upon any impact with the environment.")
          ),
          DetailedEnumValue("sprint",
@@ -236,12 +236,12 @@ namespace Megalo {
          ),
          DetailedEnumValue("revenant",
             DetailedEnumValueInfo::make_friendly_name("Revenant"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/revenant/revenant")
          ),
          DetailedEnumValue("pickup_truck",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Pickup Truck"),
-            DetailedEnumValueInfo::make_map_tag('vehi', ""),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/civilian/pickup/pickup"),
             DetailedEnumValueInfo::make_description("A truck with two front seats and a large truck bed. This is the first land vehicle seen in Reach's campaign, in the Winter Contingency mission.")
          ),
          DetailedEnumValue("focus_rifle",
@@ -519,7 +519,7 @@ namespace Megalo {
          DetailedEnumValue("semi_truck",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Semi Truck"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/civilian/truck_cab_large/truck_cab_large")
          ),
          DetailedEnumValue("soccer_ball",
             DetailedEnumValueInfo::make_friendly_name("Soccer Ball"),
@@ -559,9 +559,8 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/dice/dice"),
             DetailedEnumValueInfo::make_description("A giant six-sided die, of the same variety as those placeable in Forge. It is a muted green with white dots.")
          ),
-         DetailedEnumValue("covenant_crate",
+         DetailedEnumValue("space_crate",
             DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("Covenant Crate"),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("eradicator_loadout",
@@ -622,25 +621,22 @@ namespace Megalo {
          DetailedEnumValue("danger_zone", // TODO: what is this?
             DetailedEnumValueInfo::make_friendly_name("Danger Zone"),
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/spawning/danger_zone"),
-            DetailedEnumValueInfo::make_description("Analysis of this object's map tag is inconclusive but suggests that it influences spawning when a shape is set on it.")
+            DetailedEnumValueInfo::make_description("Analysis of this object's map tag is inconclusive but suggests that it influences spawning when a shape is set on it. It doesn't really matter, though, because only Tempest has the Megalo object tag list specify the tag as of this writing.")
          ),
          DetailedEnumValue("teleporter_sender",
-            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("teleporter_sender"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in Forge.")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_sender/teleporter_sender"),
+            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
          ),
          DetailedEnumValue("teleporter_receiver",
-            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("teleporter_reciever"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable in Forge.")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_receiver/teleporter_receiver"),
+            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
          ),
          DetailedEnumValue("teleporter_2way",
-            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("teleporter_2way"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
-            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in Forge.")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/teleporter_2way/teleporter_2way"),
+            DetailedEnumValueInfo::make_description("Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in Forge. Its default shape is a cylinder with dimensions 4, 0, 10, and 2.5. It is only available on Forge World.")
          ),
          DetailedEnumValue("data_core_beam",
             DetailedEnumValueInfo::make_friendly_name("data_core_beam"),
@@ -713,8 +709,9 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('mach', "objects/vehicles/covenant/phantom/phantom")
          ),
          DetailedEnumValue("resupply_capsule",
-            DetailedEnumValueInfo::make_friendly_name("resupply_capsule"),
-            DetailedEnumValueInfo::make_map_tag('scen', "")
+            DetailedEnumValueInfo::make_friendly_name("Resupply Capsule"),
+            DetailedEnumValueInfo::make_map_tag('scen', "objects/gear/human/military/resupply_capsule/resupply_capsule"),
+            DetailedEnumValueInfo::make_description("This object is available on Tempest, at least in the Thorage update.")
          ),
          DetailedEnumValue("resupply_capsule_open",
             DetailedEnumValueInfo::make_friendly_name("resupply_capsule_open"),
@@ -738,7 +735,7 @@ namespace Megalo {
          ),
          DetailedEnumValue("invisible_covenant_resupply_capsule",
             DetailedEnumValueInfo::make_friendly_name("invis_cov_resupply_capsule"),
-            DetailedEnumValueInfo::make_map_tag('mach', ""),
+            DetailedEnumValueInfo::make_map_tag('mach', "objects/levels/shared/device_machines/invis_cob_resupply_capsule/invis_cov_resully_capsule"),
             DetailedEnumValueInfo::make_description("This tag is defined on Boneyard, and inspection with third-party tools indicates that it takes the form of an invisible cube. Its function has yet to be tested in-game.")
          ),
          DetailedEnumValue("covenant_power_core",
@@ -791,7 +788,7 @@ namespace Megalo {
          ),
          DetailedEnumValue("shade",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/shade")
          ),
          DetailedEnumValue("cargo_truck",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -801,13 +798,13 @@ namespace Megalo {
          DetailedEnumValue("electric_cart",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Electric Cart"),
-            DetailedEnumValueInfo::make_map_tag('vehi', ""),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/civilian/cart_electric/cart_electric"),
             DetailedEnumValueInfo::make_description("An electric cart with no armaments.")
          ),
          DetailedEnumValue("forklift",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("Forklift"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/civilian/forklift/forklift")
          ),
          DetailedEnumValue("military_truck",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -817,7 +814,7 @@ namespace Megalo {
          DetailedEnumValue("oni_van",
             DetailedEnumValueInfo::make_flags(DetailedEnumValueInfo::flags::is_thorage),
             DetailedEnumValueInfo::make_friendly_name("ONI Van"),
-            DetailedEnumValueInfo::make_map_tag('vehi', ""),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/human/civilian/oni_van/oni_van"),
             DetailedEnumValueInfo::make_description("A huge black van with a driver and passenger seat. It is fairly slow.")
          ),
          DetailedEnumValue("warthog_turret",
@@ -860,28 +857,27 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('weap', ""),
             DetailedEnumValueInfo::make_description("A Target Locator capable of calling down a devastating air strike. This weapon will only spawn on maps that define its tag.")
          ),
-         DetailedEnumValue("ff_kill_zone", // internally, this tag name is used for the (Soft) Kill Boundary's 3D model, but not for the actual object
+         DetailedEnumValue("kill_boundary_3d_model", // "ff_kill_zone" // internally, this tag name is used for the (Soft) Kill Boundary's 3D model, but not for the actual object... and that tag in specific isn't even specified anyway
             DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_friendly_name("ff_kill_zone"),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("block_1x1_flat",
             DetailedEnumValueInfo::make_friendly_name("Block 1x1 Flat"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/forge/ff_plat_1x1_flat/ff_plat_1x1_flat"),
             DetailedEnumValueInfo::make_description("A Block 1x1 Flat, of the same variety as those placeable in Forge.")
          ),
          DetailedEnumValue("shade_anti_air",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Anti-Air)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', ""),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_anti_air_cannon/shade_anti_air_cannon"),
             DetailedEnumValueInfo::make_description("A Shade turret which fires devastatingly powerful shots at a high rate. Shields protect its operator.")
          ),
          DetailedEnumValue("shade_fuel_rod",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Fuel Rod)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_flak_cannon/shade_flak_cannon")
          ),
          DetailedEnumValue("shade_plasma",
             DetailedEnumValueInfo::make_friendly_name("Shade Turret (Plasma)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "")
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_plasma_cannon/shade_plasma_cannon")
          ),
          DetailedEnumValue("kill_ball",
             DetailedEnumValueInfo::make_friendly_name("Kill Ball"),
@@ -949,21 +945,21 @@ namespace Megalo {
          ),
          DetailedEnumValue("fx_purple",
             DetailedEnumValueInfo::make_friendly_name("FX (Purple)"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/shared/screen_fx_orb/fx/dusk"),
             DetailedEnumValueInfo::make_description("A Forge filter that covers the screen in a deep purple overlay, similar to the lighting in the Nightfall mission.")
          ),
          DetailedEnumValue("fx_orange",
             DetailedEnumValueInfo::make_friendly_name("FX (Orange)"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/shared/screen_fx_orb/fx/golden_hour")
          ),
          DetailedEnumValue("fx_green",
             DetailedEnumValueInfo::make_friendly_name("FX (Green)"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
-            DetailedEnumValueInfo::make_description("A Forge filter that covers the screen in a grimy, green overlay, with small visual distortions away from the center. This filter affects the UI, and it can stack; spawning multiple will blind all players.")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/shared/screen_fx_orb/fx/eerie"),
+            DetailedEnumValueInfo::make_description("A Forge filter that covers the screen in a grimy, green overlay, with small visual distortions away from the center. This filter affects the UI, and it can stack; spawning too many of it will blind all players.")
          ),
          DetailedEnumValue("grid",
             DetailedEnumValueInfo::make_friendly_name("Grid"),
-            DetailedEnumValueInfo::make_map_tag('bloc', ""),
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/forge/ff_grid_object/ff_grid_object"),
             DetailedEnumValueInfo::make_description("A glowing blue platform with a grid texture, of the same variety as those placeable in Forge. The platform is square, and each side is 30 Forge units long; on Tempest, a single grid placed at the center of the map can reach from one base's frontmost man cannon to the other base's frontmost man cannon.")
          ),
          DetailedEnumValue("sound_emitter_alarm_1",
@@ -998,12 +994,12 @@ namespace Megalo {
          ),
          DetailedEnumValue("unsc_data_core_holder",
             DetailedEnumValueInfo::make_friendly_name("UNSC Data Core Holder"),
-            DetailedEnumValueInfo::make_map_tag('mach', ""),
+            DetailedEnumValueInfo::make_map_tag('mach', "objects/multi/package_cabinet/package_cabinet"),
             DetailedEnumValueInfo::make_description("The Invasion: Boneyard prop which holds the UNSC Data Core used as an objective in Phase 3.")
          ),
          DetailedEnumValue("covenant_power_module_stand",
             DetailedEnumValueInfo::make_friendly_name("Covenant Power Module Stand"),
-            DetailedEnumValueInfo::make_map_tag('mach', ""),
+            DetailedEnumValueInfo::make_map_tag('mach', "objects/props/covenant/cov_powermodule_stand/cov_powermodule_stand"),
             DetailedEnumValueInfo::make_description("The Invasion: Spire prop linked to the Phase 1 territories.")
          ),
          DetailedEnumValue("covenant_bomb",

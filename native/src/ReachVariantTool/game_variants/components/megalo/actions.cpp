@@ -573,7 +573,7 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_getter("health", 0)
       ),
       ActionFunction( // 56
-         "Set Objective Title for Player",
+         "Set Objective Description for Player",
          "Alters the text of the title card shown at the start of a round.",
          "Set the objective title for %1 to %2.",
          {
@@ -583,7 +583,7 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
       ),
       ActionFunction( // 57
-         "Set Objective Description for Player",
+         "Set Objective Icon Caption for Player",
          "Alters the description of the title card shown at the start of a round.",
          "Set the objective description for %1 to %2.",
          {

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>General Settings</title>
+   <body>
+      <p>
+         The <b>general settings</b> page allows you to edit basic options about a game 
+         variant, such as the score to win.
+      </p>
+      <img src="options-general.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Perfection Medal Enabled</dt>
+            <dd>Controls whether it is possible to earn a Perfection Medal in this game 
+            variant. Bungie and 343 Industries only enable this for pure Slayer variants; 
+            even Flag Slayer keeps it disabled.</dd>
+         <dt>Reset Players on New Round</dt>
+            <dd>Supposedly resets player health and positions when a new round begins. 
+            Testing is pending.</dd>
+         <dt>Reset Map on New Round</dt>
+            <dd>Supposedly resets a map and its contained items when a new round begins. 
+            Testing is pending.</dd>
+         <dt>Teams Enabled</dt>
+            <dd>Controls whether teams are enabled.</dd>
+         <dt>Score to Win</dt>
+            <dd>The number of points that a player or team must accrue to win a round. 
+            The value "unlimited" exists in place of zero (i.e. to reach it, decrease 
+            the value to "1 point" and then decrease it again).</dd>
+         <dt>Round Time Limit</dt>
+            <dd>The maximum amount of time that a round can last. The value "no limit" 
+            exists in place of zero (i.e. to reach it, decrease the value to "1 minute" 
+            and then decrease it again).</dd>
+         <dt>Number of Rounsd</dt>
+            <dd>The maximum number of rounds that a match can have. The value "no limit" 
+            exists in place of zero (i.e. to reach it, decrease the value to "1 round" 
+            and then decrease it again).</dd>
+         <dt>Rounds to Win</dt>
+            <dd>Presumably the number of rounds that a single player or team must win 
+            to win a match early. Testing is pending.</dd>
+         <dt>Sudden Death Time</dt>
+            <dd>How long Sudden Death lasts, in game variants that use it. Sudden 
+            Death is "bonus time" granted to players if someone is near or using an 
+            objective object (e.g. carrying a flag) when the round time runs out.</dd>
+         <dt>Grace Period</dt>
+            <dd>
+               <p>How long the Grace Period lasts, in game variants that use it. If 
+               the conditions needed to trigger Sudden Death stop before the Sudden Death 
+               time limit is reached, then the Grace Period is how long players have to 
+               reinstate those conditions before the round ends.</p>
+               <p>For example, in Capture the Flag, if an attacker is standing on top of 
+               the flag when the round time limit is reached, then they will be granted 
+               Sudden Death time. If the attacker is killed before Sudden Death runs out, 
+               then the Grace Period timer will begin. If the attackers reach the flag 
+               within that time, then Sudden Death will continue from where it left off, 
+               while the Grace Period resets.</p>
+            </dd>
+      </dl>
+   </body>
+</article>

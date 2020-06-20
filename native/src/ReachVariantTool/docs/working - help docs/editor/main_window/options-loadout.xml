@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Loadout Settings</title>
+   <body>
+      <p>
+         The <b>loadout settings</b> page allows you to edit baseline settings that apply 
+         to all loadouts.
+      </p>
+      <img src="options-loadout.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Spartan Loadouts</dt>
+            <dd>Unknown. Testing is pending.</dd>
+         <dt>Elite Loadouts</dt>
+            <dd>Unknown. Testing is pending.</dd>
+      </dl>
+   </body>
+</article>
