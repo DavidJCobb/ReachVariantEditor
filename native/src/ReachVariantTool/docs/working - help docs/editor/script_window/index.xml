@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Script Editor</title>
+   <body>
+      <p>
+         The <b>script editor window</b> can be used to modify a gametype's script. The 
+         script determines a gametype's behavior. Gametype code isn't built into the game 
+         engine anymore; with <i>Halo: Reach</i>, each game variant includes its own copy 
+         of a gametype's code, and that code can be modified to produce entirely new game 
+         modes.
+      </p>
+      <img src="meta-strings.png" />
+      <p>
+         The pane on the left can be used to select a page to view. The bar on the bottom 
+         shows how much of the available space in the game variant has been used up; it's 
+         a good way to tell at a glance how "full" a file is.
+      </p>
+      <p>
+         The pages in this window are:
+      </p>
+      <dl>
+         <dt>Metadata Strings</dt>
+            <dd>Edit strings used for localizing gametype categories.</dd>
+         <dt>All Other Strings</dt>
+            <dd>Edit strings used by the gametype data and script.</dd>
+         <dt>Forge Labels</dt>
+            <dd>Edit the gametype's Forge labels.</dd>
+         <dt>Map Permissions</dt>
+            <dd>Control what maps the player can play this gametype on.</dd>
+         <dt>Player Rating Parameters</dt>
+            <dd>Control how this gametype interacts with Bungie's Arena rating system.</dd>
+         <dt>Required Object Types</dt>
+            <dd>Specify which object types a map must define for this gametype.</dd>
+         <dt>Scripted Options</dt>
+            <dd>Define which Custom Game options this gametype offers.</dd>
+         <dt>Scripted Player Traits</dt>
+            <dd>Define which player traits this gametype offers.</dd>
+         <dt>Scripted Stats</dt>
+            <dd>Define scripted scoreboard stats for this gametype.</dd>
+         <dt>Scripted HUD Widgets</dt>
+            <dd>Define scripted HUD widgets for this gametype.</dd>
+         <dt>Gametype Code</dt>
+            <dd>The compiler and decompiler. This is where the magic happens.</dd>
+      </dl>
+   </body>
+</article>

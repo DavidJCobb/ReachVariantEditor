@@ -11,6 +11,8 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       this->updateFromVariant();
    });
    //
+   this->ui.genericName->setAllowNoString(true);
+   //
    QObject::connect(this->ui.buttonName, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)

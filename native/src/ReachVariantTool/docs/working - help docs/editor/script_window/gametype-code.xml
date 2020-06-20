@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Gametype Code</title>
+   <body>
+      <p>
+         The <b>gametype code</b> page allows you to decompile a gametype's script code, 
+         and compile new code into a gametype.
+      </p>
+      <img src="gametype-code.png" />
+      <p>
+         The top half of the page consists of a code editor textbox and buttons to decompile 
+         or recompile. The bottom half of the page is a results log for the compiler. You 
+         can resize how much of the page each half uses by dragging the space between the 
+         two halves.
+      </p>
+      <p>
+         There is no confirmation prompt on decompiling or compiling; decompiling will wipe 
+         the code editor and fill it with decompiled code, while compiling will immediately 
+         replace the gametype's script code with whatever's in the code editor (unless an 
+         error occurs, in which case no data is changed).
+      </p>
+      
+      <h2>Unresolved string references</h2>
+      <p>
+         When you write and compile a gametype script, you don't need to add all of the text 
+         that you use to the <a href="string-table">string table</a> in advance. You can just 
+         <em>use</em> a string literal, and ReachVariantTool will try to handle it:
+      </p>
+      <pre>
+         for each player do
+            current_player.set_round_card_title("i didn't bother defining this text\nin advance lol")
+         end
+      </pre>
+      <p>
+         <em>However</em>, ReachVariantTool needs just a little bit of help to handle these. 
+         When it detects a new string literal in your script, it will display this dialog box:
+      </p>
+      <img src="unresolved-strings.png" />
+      <p>
+         For each string literal, you can choose to create the string's text, or you can choose 
+         to use an existing string in the string table. This decision isn't "per string," but 
+         "per string <em>reference</em>." If the same string literal occurs in two different 
+         places in the string, you can have one of those use an existing string in the table 
+         and have the other define a new string. Moreover, you can also edit existing strings 
+         from here by selecting them and clicking the "..." button.
+      </p>
+      <p>
+         The default course of action is to just define a new string, so you usually won't 
+         have to worry about this. You can click "Commit" and be on your way.
+      </p>
+      
+      <h2>Compiler messages</h2>
+      <p>
+         Each compiler message can be double-clicked to jump to the line and column in the 
+         script where the error was detected. This will usually be near, or at the end of, 
+         whatever construct actually has the error.
+      </p>
+      <p>
+         <dfn>Warnings</dfn> are non-essential notifications regarding things that are not 
+         necessarily errors, but that you may want to be aware of. For example, some functions 
+         can only take a number between -128 and 127. If you specify a number outside of this 
+         range, then it will overflow or underflow, and you will be warned; however, it will 
+         not prevent your script from compiling.
+      </p>
+      <p>
+         <dfn>Errors</dfn> are important issues that have prevented your script from compiling. 
+         If an error occurs, then your script will not be compiled into the game variant file; 
+         you need to fix the problem and try again. Even if an error occurs, ReachVariantTool's 
+         compiler will keep trying to process the rest of your script, so that if there are any 
+         other errors, it can tell you about all of them and you can handle them all at once.
+      </p>
+      <p>
+         <dfn>Fatal errors</dfn> are errors that prevent ReachVariantTool's compiler from 
+         continuing to read your script; they are errors that prevent the compiler from being 
+         able to understand anything that comes next.
+      </p>
+      <p>
+         An example of a non-fatal error is passing an invalid argument to a function, while an 
+         example of a fatal error is using a keyword like <code>end</code> in the wrong place.
+      </p>
+   </body>
+</article>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Metadata Strings</title>
+   <body>
+      <p>
+         The <b>metadata strings</b> page allows you to edit text used as metadata for 
+         the gametype.
+      </p>
+      <img src="meta-strings.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Name</dt>
+            <dd>A localized name for the game variant.</dd>
+         <dt>Description</dt>
+            <dd>A localized description for the game variant.</dd>
+         <dt>Category</dt>
+            <dd>A localized name for the category. This isn't used in Halo: The Master Chief 
+            Collection. Presumably, in the Xbox 360 release of <i>Halo: Reach</i>, this 
+            would be used to name an extended category ID if a game variant used one.</dd>
+         <dt>Generic Name</dt>
+            <dd>In Halo: The Master Chief Collection, this is used to generate a localization 
+            key for the game variant filename. If a certain flag is set inside of the game 
+            variant file, then its embedded title will be ignored in favor of a localization 
+            key of the form <code>$HR_GVAR_GenericNameHere</code>. However, ReachVariantTool 
+            always clears that flag in order to ensure that you can actually set a game 
+            variant's name.</dd>
+      </dl>
+   </body>
+</article>

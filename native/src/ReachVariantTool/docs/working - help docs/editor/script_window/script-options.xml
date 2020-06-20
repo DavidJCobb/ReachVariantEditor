@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Scripted Options</title>
+   <body>
+      <p>
+         The <b>scripted options</b> page allows you to define Custom Game options 
+         for the script, whose values can be changed in the in-game menus. Options 
+         can be added and reordered, and options that are not actively used by the 
+         gametype script can be deleted.
+      </p>
+      <img src="script-options.png" />
+      <p>
+         The fields available to edit for each option are as follows:
+      </p>
+      <dl>
+         <dt>Option Name</dt>
+            <dd>The <a href="string-table">string</a> used for the option name.</dd>
+         <dt>Option Description</dt>
+            <dd>The <a href="string-table">string</a> used for the option 
+            description.</dd>
+         <dt>Option Type</dt>
+            <dd>The option type. An "enum" is an option that has up to eight 
+            distinct values, each of which can be named. A "range" is an option 
+            that can be configured as a slider. Note that the game itself doesn't 
+            support displaying and customizing ranges in-game.</dd>
+      </dl>
+      <p>
+         For range options, you can customize the minimum, maximum, and default 
+         values.
+      </p>
+      <p>
+         For enum options, you can select the default value, and the fields available 
+         to edit for each value are as follows:
+      </p>
+      <dl>
+         <dt>Value Name</dt>
+            <dd>The <a href="string-table">string</a> used for the value name.</dd>
+         <dt>Value Description</dt>
+            <dd>The <a href="string-table">string</a> used for the value 
+            description. In Halo: The Master Chief Collection, this will be 
+            displayed instead of the option description when the user is 
+            mousing over this value.</dd>
+         <dt>Value</dt>
+            <dd>The integer value associated with this, um, value. If the user 
+            chooses this value for the option, then this is the integer that 
+            the gametype script will "see."</dd>
+      </dl>
+   </body>
+</article>
