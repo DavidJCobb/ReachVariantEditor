@@ -116,11 +116,6 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = player.is_spartan, is_elite, is_monitor: IF THE PLAYER IS IN CONTROL OF A BIPED, DO THESE 
-//       CHECK ITS SPECIES? DO THEY REACT PROPERLY TO THE PLAYER BEING SCRIPTED INTO A BIPED?
-//
-//     = WHAT IS THE "extermination" HUD WIDGET ICON?
-//
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
 //
@@ -134,8 +129,7 @@ int main(int argc, char *argv[]) {
 //       SCRIPT WIDGET TO DISPLAY OUR SHIELDS AS NUMBERS IN REAL-TIME, AND USING SCRIPT TO MEASURE 
 //       THE REGEN RATES AS POINTS PER SECOND?
 //
-//        - CAN WE TEST THE SHIELD VAMPIRISM VALUES ON AN NPC BIPED, WITH SIMILAR READOUTS AND 
-//          SCRIPT MATH FOR OUR SHIELDS?
+//        - Shield Vampirism doesn't work on NPC bipeds.
 //
 //     - THE SCRIPT EDITOR'S METADATA STRING UI NEEDS TO MAKE THE genericName STRING OPTIONAL, 
 //       SINCE IT IS OPTIONAL AND Basic Editing DOESN'T USE IT.

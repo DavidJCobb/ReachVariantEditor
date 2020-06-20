@@ -16,5 +16,10 @@
          widget positions will overlap standard HUD elements such as the shield bar 
          or motion tracker.
       </p>
+      <p>
+         Most of the page is taken up by an image which displays where the HUD widget 
+         will appear. This preview only shows the selected widget, and it assumes that 
+         only the selected widget is showing.
+      </p>
    </body>
 </article>

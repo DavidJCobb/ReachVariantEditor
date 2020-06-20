@@ -42,6 +42,6 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
       public:
-         OpcodeArgValueHUDWidgetIcon() : OpcodeArgValueIconBase(enums::engine_icon, 6) {}
+         OpcodeArgValueHUDWidgetIcon() : OpcodeArgValueIconBase(enums::hud_widget_icon, 6) {}
    };
 }

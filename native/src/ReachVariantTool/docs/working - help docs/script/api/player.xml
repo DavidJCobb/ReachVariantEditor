@@ -120,12 +120,8 @@
             <description>
                <p>
                   This function checks whether a player should spawn as a Spartan based on their 
-                  team settings and (when relevant) their preferred species.
-               </p>
-               <p>
-                  To Be Determined: the above description is relevant when the player is waiting 
-                  to spawn; if the player is in control of a biped, does this check the species 
-                  of that biped instead?
+                  team settings and (when relevant) their preferred species. Its result is not 
+                  affected by a script forcing a player into a biped of a different species.
                </p>
             </description>
             <example>
@@ -145,12 +141,8 @@
             <description>
                <p>
                   This function checks whether a player should spawn as an Elite based on their 
-                  team settings and (when relevant) their preferred species.
-               </p>
-               <p>
-                  To Be Determined: the above description is relevant when the player is waiting 
-                  to spawn; if the player is in control of a biped, does this check the species 
-                  of that biped instead?
+                  team settings and (when relevant) their preferred species. Its result is not 
+                  affected by a script forcing a player into a biped of a different species.
                </p>
             </description>
             <example>
@@ -165,6 +157,14 @@
          </method>
          <method name="is_monitor" id="15">
             <blurb>Checks whether a player's current species is Monitor.</blurb>
+            <description>
+               <p>
+                  This function checks whether a player should spawn as a Monitor based on the 
+                  current game settings. However, there are no settings that would actually 
+                  cause a player to naturally spawn as a Monitor. This may be a leftover akin 
+                  to the <code>game.is_in_forge()</code> condition.
+               </p>
+            </description>
          </method>
       </conditions>
       <actions>

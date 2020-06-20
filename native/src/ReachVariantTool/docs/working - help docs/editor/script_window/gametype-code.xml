@@ -53,7 +53,8 @@
       <p>
          Each compiler message can be double-clicked to jump to the line and column in the 
          script where the error was detected. This will usually be near, or at the end of, 
-         whatever construct actually has the error.
+         whatever construct actually has the error. You can also click the "Warnings" and 
+         "Errors" buttons to filter which log items are displayed.
       </p>
       <p>
          <dfn>Warnings</dfn> are non-essential notifications regarding things that are not 

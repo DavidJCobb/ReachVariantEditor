@@ -2,6 +2,17 @@
 <article>
    <title>Basic syntax</title>
    <body>
+      <p>
+         Only Bungie and 343 Industries know what Megalo "truly" looks like. However, community 
+         reverse-engineers have figured out Megalo's bytecode. This makes it possible for members 
+         of the public to design their own script languages which compile to the same bytecode... 
+         and this is what has been done for ReachVariantTool.
+      </p>
+      <p>
+         The RVT dialect of Megalo, then, is loosely inspired by Lua syntax, though there are 
+         quite a few differences such as the use of zero-indexed collections.
+      </p>
+      
       <h2>Statements</h2>
       <p>
          Statements in a Megalo script can be divided into three categories: conditions, actions, 
@@ -38,8 +49,8 @@
          can begin with a keyword, or they can take one of the following forms:
       </p>
       <ul>
-         <li><code>function()</code></li>
-         <li><code>variable = function()</code></li>
+         <li><code>function(...)</code></li>
+         <li><code>variable = function(...)</code></li>
          <li><code>variable = value</code></li>
       </ul>
       <p>
@@ -58,7 +69,7 @@
          two forms:
       </p>
       <ul>
-         <li><code>function()</code></li>
+         <li><code>function(...)</code></li>
          <li><code>value == other_value</code></li>
       </ul>
       <p>

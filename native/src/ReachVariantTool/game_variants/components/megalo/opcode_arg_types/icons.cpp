@@ -68,7 +68,7 @@ namespace Megalo {
          DetailedEnumValue("infection"),
          DetailedEnumValue("vip"),
          DetailedEnumValue("invasion"),
-         DetailedEnumValue("extermination"), // TODO: verify
+         DetailedEnumValue("invasion_slayer"),
          DetailedEnumValue("stockpile"),
          DetailedEnumValue("action_sack"),
          DetailedEnumValue("race"),

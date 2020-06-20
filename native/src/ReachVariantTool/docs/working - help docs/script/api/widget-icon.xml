@@ -29,8 +29,8 @@
             <dd>The icon for the VIP gametype.</dd>
          <dt>invasion</dt>
             <dd>The icon for the Invasion gametype.</dd>
-         <dt>extermination</dt>
-            <dd></dd> <!-- TODO: verify -->
+         <dt>invasion_slayer</dt>
+            <dd>The icon for the Invasion Slayer gametype.</dd>
          <dt>stockpile</dt>
             <dd>The icon for the Stockpile gametype.</dd>
          <dt>action_sack</dt>
