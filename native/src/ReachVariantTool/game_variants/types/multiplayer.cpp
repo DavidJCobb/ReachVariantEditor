@@ -584,7 +584,9 @@ void GameVariantDataMultiplayer::write(GameVariantSaveProcess& save_process) noe
       }
    }
    {
-      MegaloStringIndexOptional index = this->genericName->index;
+      MegaloStringIndexOptional index = -1;
+      if (this->genericName)
+         index = this->genericName->index;
       index.write(bits);
    }
    this->localizedName.write(bits);
