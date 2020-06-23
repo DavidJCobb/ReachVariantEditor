@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Index | ReachVariantTool Documentation</title>
+      <base href="../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
+                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Types</a>
+                     <ul>
+                        <li>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Basic syntax</h1>
+
+      <p>
+         Only Bungie and 343 Industries know what Megalo "truly" looks like. However, community 
+         reverse-engineers have figured out Megalo's bytecode. This makes it possible for members 
+         of the public to design their own script languages which compile to the same bytecode... 
+         and this is what has been done for ReachVariantTool.
+      </p>
+      <p>
+         The RVT dialect of Megalo, then, is loosely inspired by Lua syntax, though there are 
+         quite a few differences such as the use of zero-indexed collections.
+      </p>
+      
+      <h2>Statements</h2>
+      <p>
+         Statements in a Megalo script can be divided into three categories: conditions, actions, 
+         and blocks.
+      </p>
+      
+      <h3>Blocks</h3>
+      <p>
+         The following block types are available:
+      </p>
+      <dl>
+         <dt>do ... end</dt>
+            <dd>A generic block.</dd>
+         <dt>enum ... end</dt>
+            <dd>An <a href="enum">enum definition</a></dd>
+         <dt>for ... do ... end</dt>
+            <dd>A piece of code which should be executed multiple times in a row, 
+            with specific information made available each time.</dd>
+         <dt>function ... end</dt>
+            <dd>A user-defined function which can be "called," or triggered to run, 
+            from different parts of the script. <a href="function">More details here.</a></dd>
+         <dt>if ... altif ... alt ... end</dt>
+            <dd>A piece of code which should execute if specific conditions are met. 
+            <a href="if">More details here.</a></dd>
+      </dl>
+      <p>
+         Top-level blocks (that is, blocks not nested inside of other blocks) can be prefixed 
+         with <a href="events">event name</a>.
+      </p>
+      
+      <h3>Actions</h3>
+      <p>
+         An action is any statement that doesn't appear in an if-block's condition list. Actions 
+         can begin with a keyword, or they can take one of the following forms:
+      </p>
+      <ul>
+         <li<code>function(...)</code></li>
+         <li<code>variable = function(...)</code></li>
+         <li<code>variable = value</code></li>
+      </ul>
+      <p>
+         This particular Megalo dialect does not support expressions; for example, the following 
+         statement is interpreted as an assignment followed by an unexpected operator:
+      </p>
+      <pre>
+         a = b + c
+         
+         -- The above is interpreted as two statements: "a = b" and "+ c".
+      </pre>
+      <p>
+         You can call user-defined functions or hardcoded "action" functions. You cannot call 
+         hardcoded "condition" functions.
+      </p>
+      
+      <h3>Conditions</h3>
+      <p>
+         Conditions are terms in an if-block's condition list. They must take one of the following 
+         two forms:
+      </p>
+      <ul>
+         <li<code>function(...)</code></li>
+         <li<code>value == other_value</code></li>
+      </ul>
+      <p>
+         Conditions can be prefixed with the word <var>not</var> to invert them. Conditions must be 
+         separated from each other with the word <var>or</var> or the word <var>and</var>.
+      </p>
+      <p>
+         You can call hardcoded "condition" functions here, but not user-defined functions or any 
+         hardcoded "action" functions.
+      </p>
+      
+      <h2>Variables</h2>
+      <p>
+         Megalo supports the following variable types:
+      </p>
+      <ul>
+         <li<a href="api/number">Number</a></li>
+         <li<a href="api/object">Object</a></li>
+         <li<a href="api/player">Player</a></li>
+         <li<a href="api/team">Team</a></li>
+         <li<a href="api/timer">Timer</a></li>
+      </ul>
+      <p>
+         Variables are either global or nested. There is one "global" set of variables that is 
+         accessible at all times, and every object, player, and team is also capable of holding 
+         its own set of variables. Variables can be referred to by no more than two levels of 
+         depth:
+      </p>
+      <pre>
+         global.player[0]                     -- valid
+         global.player[0].player[1]           -- valid
+         global.player[0].player[1].player[2] -- invalid
+      </pre>
+      <p>
+         In this particular Megalo dialect, you cannot define your own variables; there are a 
+         fixed number available. However, you can <a href="alias">give names to variables</a>.
+      </p>
+      
+      <h3>Properties</h3>
+      <p>
+         A <dfn>property</dfn> is a member of a variable. Properties can appear in any place 
+         where a variable of the same type can be used. You cannot access variables or other 
+         properties through a property.
+      </p>
+      <pre>
+         current_player.team                 -- valid
+         current_player.biped.spawn_sequence -- invalid (var.property.property)
+         current_player.team.number[0]       -- invalid (var.property.var)
+      </pre>
+      <p>
+         Most properties cannot be accessed through a nested variable. The <var>biped</var> 
+         property on player variables is an exception.
+      </p>
+      <pre>
+         current_player.team            -- valid   (var.property)
+         current_player.player[0].team  -- invalid (var.var.property)
+         
+         current_player.biped           -- valid (var.biped)
+         current_player.player[0].biped -- valid (var.var.biped)
+      </pre>
+      <p>
+         Most properties do not have indices. There is one exception: the <var>script_stat</var> 
+         property on players and teams. There, you must use an index to specify the target stat:
+      </p>
+      <pre>
+         current_player.script_stat[0]
+      </pre>
+      
+      <h3>Accessors</h3>
+      <p>
+         An <dfn>accessor</dfn> uses similar syntax to a property, but can only appear in 
+         assignment statements. Internally, these exist as "getter" and "setter" functions. 
+         As such, you can use accessors on variables and properties.
+      </p>
+      <pre>
+         current_object.shields       += 50 -- valid; access through variable
+         current_player.biped.shields += 50 -- valid; access through property
+      </pre>
+      <p>
+         Most accessors have both getters and setters. Some do not, which means that they can 
+         only appear on the appropriate side of an assignment statement.
+      </p>
+      <pre>
+         current_object.max_shields += 50              -- valid; there is a setter for this
+         global.number[0] = current_object.max_shields -- invalid; there is no getter for this
+      </pre>
+      <p>
+         From a language design standpoint, accessors were preferred over getter/setter 
+         functions in cases where the internal setter takes the same range of assignment 
+         operators as an assignment statement. Although the parser as currently designed could 
+         accept an assignment operator as an argument (e.g. <code>foo.set_bar(+=, 5)</code>), 
+         it seems best to use operators only in statements.
+      </p>
+   
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>                                                                                                              

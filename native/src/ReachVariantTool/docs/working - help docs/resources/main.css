@@ -17,7 +17,6 @@ body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row 
       #sidebar>ul{list-style:none;margin:0;padding:0}
          #sidebar>ul>li{list-style:none}
             #sidebar .toggle{all:unset;position:absolute;right:100%;top:0;text-align:center;width:1.5ch;height:var(--line-height);padding:.25em 0;background:#CCC;color:#000;border-radius:.2rem 0 0 .2rem}
-            #sidebar .toggle{margin:0} /* Edge doesn't understand "all:unset" */
                #sidebar .toggle::before{content:"-"}
                #sidebar li.collapsed>.toggle::before{content:"+"}
             #sidebar .toggle+a{border-radius:0 .2rem .2rem 0}

@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Index | ReachVariantTool Documentation</title>
+      <base href="../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
+                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Types</a>
+                     <ul>
+                        <li>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>User-defined enums</h1>
+
+      <p>
+         An <dfn>enumerated type</dfn>, or <dfn>enum</dfn>, is in most programming languages a 
+         data type consisting of a list of named integer constants. Megalo doesn't offer enums 
+         as a separate type; nonetheless, you can create a list of integer constants grouped 
+         under a single name using the <code>enum</code> keyword:
+      </p>
+      <pre>
+         enum my_cool_enum
+            value_a
+            value_b
+            value_c
+            value_d
+         end
+         
+         global.number[0] = my_cool_enum.value_a
+      </pre>
+      <p>
+         The values in an enum are integer constants, and can be used in any context where an 
+         integer constant is accepted.
+      </p>
+      <p>
+         The syntax for an enum is: the word "enum" followed by a name for the enum, followed 
+         by one or more values and then the word "end." Values must be separated by whitespace 
+         and can optionally be followed by an equal sign and an integer constant (or alias or 
+         other enum value).
+      </p>
+      <p>
+         If an enum value doesn't have its number specified explicitly, then it will be set to 
+         0 if it's the first value in the enum, or to the previous value plus one.
+      </p>
+      <pre>
+         -- An enum with five values:
+         enum alphabet a b c d e end
+         --
+         -- alphabet.a == 0
+         -- alphabet.e == 4
+         
+         enum an_enum_with_explicit_values
+            a
+            b
+            c = 5
+            d
+            e
+         end
+         --
+         -- an_enum_with_explicit_values.a == 0
+         -- an_enum_with_explicit_values.b == 1
+         -- an_enum_with_explicit_values.c == 5
+         -- an_enum_with_explicit_values.d == 6
+         -- an_enum_with_explicit_values.e == 7
+         
+         alias foo = 5
+         enum some_enum
+            bar = foo
+         end
+         --
+         -- some_enum.bar == 5
+      </pre>
+      <p>
+         Enums are block-scoped, but cannot shadow each other.
+      </p>
+      <p>
+         Functionally speaking, there is no difference between an enum and just having an alias 
+         for each individual value. The following pieces of code are identical:
+      </p>
+      <pre>
+         enum chess_piece_type
+            none
+            pawn
+            rook
+            bishop
+            knight
+            queen
+            king
+         end
+         global.number[0] = chess_piece_type.pawn
+      </pre>
+      <pre>
+         alias chess_piece_type_none   = 0
+         alias chess_piece_type_pawn   = 1
+         alias chess_piece_type_rook   = 2
+         alias chess_piece_type_bishop = 3
+         alias chess_piece_type_knight = 4
+         alias chess_piece_type_queen  = 5
+         alias chess_piece_type_king   = 6
+         global.number[0] = chess_piece_type_pawn
+      </pre>
+   
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>                                                                                                              
