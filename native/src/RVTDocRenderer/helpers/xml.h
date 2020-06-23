@@ -53,6 +53,8 @@ namespace cobb {
          void clear(); // for looping over multiple files, it's better to create one XMLDocument outside of the loop and clear it every iteration; that way, you only need to configure it once
          void define_entity(const char* entity, const char* substitution);
 
+         void define_html_entities(); // maybe not finished
+
          int32_t find_element(const char* tagname) const; // returns index of the element_open token
          void element_content_to_string(uint32_t index, std::string& out);
          const char* root_node_name() const;

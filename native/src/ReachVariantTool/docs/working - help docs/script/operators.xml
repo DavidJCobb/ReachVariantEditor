@@ -6,7 +6,7 @@
          Operators are symbols used to compare or assign values.
       </p>
       
-      <h2>Comparison operators</var>
+      <h2>Comparison operators</h2>
       <dl>
          <dt>==</dt>
             <dd>Checks if the two values are equal. Don't confuse this with the assignment 
@@ -23,7 +23,7 @@
             <dd>Checks if the lefthand value is less than or equal to the righthand value.</dd>
       </dl>
       
-      <h2>Assignment operators</var>
+      <h2>Assignment operators</h2>
       <p>
          Expressions are not supported in this language; however, compound operations are 
          available. For example, <code>a += b</code> is equivalent to the hypothetical statement 

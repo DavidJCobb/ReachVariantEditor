@@ -86,6 +86,15 @@ namespace cobb {
       void document::define_entity(const char* entity, const char* substitution) {
          this->entities.emplace_back(entity, substitution);
       }
+      void document::define_html_entities() {
+         const char* entities[] = {
+            "&copy;",
+            "&mdash;",
+            "&reg;",
+         };
+         for (size_t i = 0; i < std::extent<decltype(entities)>::value; ++i)
+            this->define_entity(entities[i], entities[i]);
+      }
 
       int32_t document::find_element(const char* tagname) const {
          for (size_t i = 0; i < this->tokens.size(); ++i) {
@@ -113,6 +122,8 @@ namespace cobb {
             std::string temp;
             switch (token.code) {
                case token_code::element_open:
+                  if (is_in_open_tag)
+                     out += '>';
                   cobb::sprintf(temp, "<%s", token.name.c_str());
                   is_in_open_tag = true;
                   if (token.name == name)

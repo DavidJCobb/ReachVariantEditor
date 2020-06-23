@@ -113,15 +113,14 @@
          under a single name using the <code>enum</code> keyword:
       </p>
       <pre>
-         enum my_cool_enum
-            value_a
-            value_b
-            value_c
-            value_d
-         end
-         
-         global.number[0] = my_cool_enum.value_a
-      </pre>
+enum my_cool_enum
+   value_a
+   value_b
+   value_c
+   value_d
+end
+
+global.number[0] = my_cool_enum.value_a</pre>
       <p>
          The values in an enum are integer constants, and can be used in any context where an 
          integer constant is accepted.
@@ -137,33 +136,32 @@
          0 if it's the first value in the enum, or to the previous value plus one.
       </p>
       <pre>
-         -- An enum with five values:
-         enum alphabet a b c d e end
-         --
-         -- alphabet.a == 0
-         -- alphabet.e == 4
-         
-         enum an_enum_with_explicit_values
-            a
-            b
-            c = 5
-            d
-            e
-         end
-         --
-         -- an_enum_with_explicit_values.a == 0
-         -- an_enum_with_explicit_values.b == 1
-         -- an_enum_with_explicit_values.c == 5
-         -- an_enum_with_explicit_values.d == 6
-         -- an_enum_with_explicit_values.e == 7
-         
-         alias foo = 5
-         enum some_enum
-            bar = foo
-         end
-         --
-         -- some_enum.bar == 5
-      </pre>
+-- An enum with five values:
+enum alphabet a b c d e end
+--
+-- alphabet.a == 0
+-- alphabet.e == 4
+
+enum an_enum_with_explicit_values
+   a
+   b
+   c = 5
+   d
+   e
+end
+--
+-- an_enum_with_explicit_values.a == 0
+-- an_enum_with_explicit_values.b == 1
+-- an_enum_with_explicit_values.c == 5
+-- an_enum_with_explicit_values.d == 6
+-- an_enum_with_explicit_values.e == 7
+
+alias foo = 5
+enum some_enum
+   bar = foo
+end
+--
+-- some_enum.bar == 5</pre>
       <p>
          Enums are block-scoped, but cannot shadow each other.
       </p>
@@ -172,27 +170,25 @@
          for each individual value. The following pieces of code are identical:
       </p>
       <pre>
-         enum chess_piece_type
-            none
-            pawn
-            rook
-            bishop
-            knight
-            queen
-            king
-         end
-         global.number[0] = chess_piece_type.pawn
-      </pre>
+enum chess_piece_type
+   none
+   pawn
+   rook
+   bishop
+   knight
+   queen
+   king
+end
+global.number[0] = chess_piece_type.pawn</pre>
       <pre>
-         alias chess_piece_type_none   = 0
-         alias chess_piece_type_pawn   = 1
-         alias chess_piece_type_rook   = 2
-         alias chess_piece_type_bishop = 3
-         alias chess_piece_type_knight = 4
-         alias chess_piece_type_queen  = 5
-         alias chess_piece_type_king   = 6
-         global.number[0] = chess_piece_type_pawn
-      </pre>
+alias chess_piece_type_none   = 0
+alias chess_piece_type_pawn   = 1
+alias chess_piece_type_rook   = 2
+alias chess_piece_type_bishop = 3
+alias chess_piece_type_knight = 4
+alias chess_piece_type_queen  = 5
+alias chess_piece_type_king   = 6
+global.number[0] = chess_piece_type_pawn</pre>
    
       </main>
       <script src="resources/sidebar.js"></script>

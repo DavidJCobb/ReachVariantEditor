@@ -40,7 +40,7 @@
          </li>
       </ul>
       
-      <h2>Alt and alt-if</var>
+      <h2>Alt and alt-if</h2>
       <p>
          Megalo does not have any built-in "else" or "elseif" statements. However, the Megalo 
          dialect used by ReachVariantTool offers similar statements as a shortcut. The two 
@@ -111,7 +111,7 @@
          end
       </pre>
       
-      <h2>Else and else-if</var>
+      <h2>Else and else-if</h2>
       <p>
          As mentioned in the section above, the Megalo script engine doesn't have any built-in 
          support for "else(if)" statements. It would be theoretically possible for the compiler 

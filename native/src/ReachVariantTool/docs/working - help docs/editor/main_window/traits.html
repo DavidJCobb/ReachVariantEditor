@@ -110,7 +110,7 @@
          The pages for player traits allow you to edit traits applied to the player 
          during certain situations.
       </p>
-      <img src="traits.png"</img>
+      <img src="editor/main_window/traits.png"></img>
       
       <h2>Defense</h2>
       <dl>
@@ -234,7 +234,37 @@
                </dl>
             </dd>
          <dt>Forced Color</dt>
-            <dd
+            <dd>Override a player's armor color &mdash; both the one set in their 
+            customization options, and the one applied by team membership during team 
+            games.</dd>
+      </dl>
+      
+      <h2>Sensors</h2>
+      <dl>
+         <dt>Motion Tracker Mode</dt>
+            <dd>
+               <p>One of the following values:</p>
+               <dl>
+                  <dt>Unchanged</dt>
+                     <dd>No change.</dd>
+                  <dt>No Radar</dt>
+                     <dd>The player has no motion tracker.</dd>
+                  <dt>Show Only Allies</dt>
+                     <dd>Enemies do not appear on the motion tracker.</dd>
+                  <dt>Normal</dt>
+                     <dd>All players can appear on the motion tracker if they are moving 
+                     fast enough.</dd>
+                  <dt>Enhanced</dt>
+                     <dd>All players will appear on the motion tracker, regardless of 
+                     their movement speed.</dd>
+               </dl>
+            </dd>
+         <dt>Motion Tracker Range</dt>
+            <dd>Determine how far away the motion tracker can "see."</dd>
+         <dt>Directional Damage Indicator</dt>
+            <dd>Unknown. Single-player tests failed to discover this option's effect.</dd>
+      </dl>
+   
       </main>
       <script src="resources/sidebar.js"></script>
    </body>

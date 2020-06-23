@@ -10,9 +10,10 @@
          good way to repeat tasks.
       </p>
       <p>
-         Functions run with the "environment" of their caller. For example, a function 
-         called from inside of a <a href="for">for each object</a> loop can access the 
-         <var>current_object</var> value.
+         User-defined functions run with the "environment" of their caller. For example, 
+         a user-defined function called from inside of a <a href="for">for each object</a> 
+         loop can access the <var>current_object</var> value. User-defined functions can't 
+         take arguments or return values.
       </p>
       <p>
          This code sample creates five skulls and pushes them upward semi-randomly:

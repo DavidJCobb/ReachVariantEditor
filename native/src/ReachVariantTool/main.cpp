@@ -131,14 +131,25 @@ int main(int argc, char *argv[]) {
 //
 //        - REMAINING XML:
 //
+//           - Write a root "article" page for the Scripting API Reference.
+//
 //           - List all globally-accessible variables on each variable type page.
+//
+//           - You forgot to finish your sentence when writing the blurb for enums in syntax.xml.
 //
 //        - RENDER THE XML OUT TO HTML.
 //
-//        - We should auto-generate documentation on all opcodes (sorted by context type) in 
-//          XML format, like I did for one of my Skyrim projects. I can then edit the result 
-//          and either integrate it into a custom help window, or just write code to generate 
-//          HTML files from it.
+//           - Code to render "article" pages is complete.
+//
+//           - Namespaces
+//
+//              - Members
+//
+//           - Types
+//
+//              - Members
+//
+//              - Member functions
 //
 //        - We need to decompile all official gametypes and decode them as much as we can, and 
 //          provide aliases for them. We should provide these as "source scripts."

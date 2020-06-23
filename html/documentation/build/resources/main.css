@@ -5,7 +5,7 @@ html{
 *{line-height:var(--line-height)} 
 
 html{background:#888;margin:0;padding:0}
-body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row nowrap;max-width:1024px;margin:0 auto;padding:0}
+body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row nowrap;max-width:1600px;margin:0 auto;padding:0}
    body>*{box-sizing:border-box;height:100vh;overflow-y:auto}
    #sidebar{width:25%;min-width:18em;padding:1rem;font-size:.875rem;flex:0 0 auto}
       #sidebar ul{margin:0;padding:0 0 0 1.5em}
@@ -22,7 +22,7 @@ body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row 
                #sidebar li.collapsed>.toggle::before{content:"+"}
             #sidebar .toggle+a{border-radius:0 .2rem .2rem 0}
       #sidebar ul hr{border:0;border-top:1px solid #BBB}
-   main{background:#FFF;padding:1rem;flex:1 0 auto}
+   main{background:#FFF;padding:1rem;flex:1 1 auto}
 
 h1:first-child,
 h2:first-child,
@@ -43,6 +43,10 @@ body{font-family:Calibri,Verdana,sans-serif}
 dl{}
    dt{font-weight:bold}
    dd{}
+   *+dt{margin-top:1em}
+
+code{background:#EEE}
+pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD}
 
 a{text-decoration:none}
 a:link{color:#03E}
