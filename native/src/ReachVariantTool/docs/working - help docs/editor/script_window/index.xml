@@ -19,27 +19,27 @@
          The pages in this window are:
       </p>
       <dl>
-         <dt>Metadata Strings</dt>
+         <dt><a href="meta-strings">Metadata Strings</a></dt>
             <dd>Edit strings used for localizing gametype categories.</dd>
-         <dt>All Other Strings</dt>
+         <dt><a href="string-table">All Other Strings</a></dt>
             <dd>Edit strings used by the gametype data and script.</dd>
-         <dt>Forge Labels</dt>
+         <dt><a href="forge-labels">Forge Labels</a></dt>
             <dd>Edit the gametype's Forge labels.</dd>
-         <dt>Map Permissions</dt>
+         <dt><a href="map-permissions">Map Permissions</a></dt>
             <dd>Control what maps the player can play this gametype on.</dd>
-         <dt>Player Rating Parameters</dt>
+         <dt><a href="plaeyr-rating-parameters">Player Rating Parameters</a></dt>
             <dd>Control how this gametype interacts with Bungie's Arena rating system.</dd>
-         <dt>Required Object Types</dt>
+         <dt><a href="required-object-types">Required Object Types</a></dt>
             <dd>Specify which object types a map must define for this gametype.</dd>
-         <dt>Scripted Options</dt>
+         <dt><a href="script-options">Scripted Options</a></dt>
             <dd>Define which Custom Game options this gametype offers.</dd>
-         <dt>Scripted Player Traits</dt>
+         <dt><a href="script-traits">Scripted Player Traits</a></dt>
             <dd>Define which player traits this gametype offers.</dd>
-         <dt>Scripted Stats</dt>
+         <dt><a href="script-stats">Scripted Stats</a></dt>
             <dd>Define scripted scoreboard stats for this gametype.</dd>
-         <dt>Scripted HUD Widgets</dt>
+         <dt><a href="script-widgets">Scripted HUD Widgets</a></dt>
             <dd>Define scripted HUD widgets for this gametype.</dd>
-         <dt>Gametype Code</dt>
+         <dt><a href="gametype-code">Gametype Code</a></dt>
             <dd>The compiler and decompiler. This is where the magic happens.</dd>
       </dl>
    </body>

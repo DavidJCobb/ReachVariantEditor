@@ -147,14 +147,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
-   #if _DEBUG
-      QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
-         (new MegaloScriptEditorWindow(this))->exec();
-      });
-   #else
-      this->ui.actionEditScript->setEnabled(false);
-      this->ui.actionEditScript->setVisible(false);
-   #endif
+   QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
+      (new MegaloScriptEditorWindow(this))->exec();
+   });
    #if _DEBUG
       QObject::connect(this->ui.actionDebugMisc, &QAction::triggered, [this]() {
          //

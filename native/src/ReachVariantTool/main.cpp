@@ -119,11 +119,7 @@ int main(int argc, char *argv[]) {
 //     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
 //       I SHOULD TEST THIS.
 //
-//        - Also worth testing:
-//
-//           - Can NPC bipeds assigned to a team qualify as (hud_target) objects?
-//              - If not, then hud_target is probably actually hud_target_player.biped.
-//              - If so, is hud_target_team equivalent to hud_target.team or hud_target_player.team?
+//        - Testing was inconclusive even with other players present.
 //
 //     - CAN WE TEST THE VALUES OF THE "OVERSHIELD REGEN RATE" AND SHIELD DECAY RATES BY USING A 
 //       SCRIPT WIDGET TO DISPLAY OUR SHIELDS AS NUMBERS IN REAL-TIME, AND USING SCRIPT TO MEASURE 
@@ -131,18 +127,11 @@ int main(int argc, char *argv[]) {
 //
 //        - Shield Vampirism doesn't work on NPC bipeds.
 //
-//     - THE SCRIPT EDITOR'S METADATA STRING UI NEEDS TO MAKE THE genericName STRING OPTIONAL, 
-//       SINCE IT IS OPTIONAL AND Basic Editing DOESN'T USE IT.
-//
 //     = DOCUMENTATION
 //
 //        - REMAINING XML:
 //
-//           - Documentation for the script editor UI / file format. (Screenshots of each page are 
-//             already taken.)
-//
-//              - Don't forget to document how "unresolved string references" are handled when 
-//                compiling scripts. (We don't have screenshots of that dialog yet either.)
+//           - List all globally-accessible variables on each variable type page.
 //
 //        - RENDER THE XML OUT TO HTML.
 //

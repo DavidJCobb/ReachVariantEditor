@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool v1.0.6</string>
+           <string>ReachVariantTool v2.0.0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -518,7 +518,7 @@
  </tabstops>
  <resources>
   <include location="../Resources/main_window.qrc"/>
-  <include location="main_window.qrc"/>
+  <include location="../Resources/main_window.qrc"/>
  </resources>
  <connections/>
 </ui>

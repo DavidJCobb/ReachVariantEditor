@@ -17,7 +17,7 @@
          <dt>for each player randomly</dt>
             <dd>Process every player in a random order.</dd>
          <dt>for each team</dt>
-            <dd>Process every team currently participating in the match.</dd>
+            <dd>Process every team defined in the gametype, as well as Neutral Team.</dd>
       </dl>
       
       <h2>For each object</h2>

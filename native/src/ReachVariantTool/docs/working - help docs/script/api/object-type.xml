@@ -36,16 +36,16 @@
          <dt data-tag="weap:objects/weapons/multiplayer/assault_bomb/assault_bomb"><code>bomb</code> (Bomb)</dt>
             <dd>A UNSC bomb. It can be picked up by a player, carried, and used as a melee weapon.</dd>
             
-         <dt data-tag="weap:objects/weapons/multiplayer/skull/skull"><code>skull</code> (Skull)</dt>
+         <dt data-tag="weap:objects/weapons/multiplayer/skull/skull"><code>skull</code> (Skull)</dt> <!-- "ball" internally -->
             <dd>A skull. It can be picked up by a player, carried, and used as a melee weapon.</dd>
             
-         <dt data-tag="bloc:objects/multi/models/mp_hill_beacon/mp_hill_beacon"><code>hill_marker</code> (Hill Marker)</dt>
+         <dt data-tag="bloc:objects/multi/models/mp_hill_beacon/mp_hill_beacon"><code>hill_marker</code> (Hill Marker)</dt> <!-- "area" internally -->
             <dd>An invisible hill marker, of the same variety as those placeable in Forge.</dd>
 
-         <dt data-tag="bloc:objects/multi/models/mp_flag_base/mp_flag_base"><code>flag_stand</code> (Flag Stand)</dt>
+         <dt data-tag="bloc:objects/multi/models/mp_flag_base/mp_flag_base"><code>flag_stand</code> (Flag Stand)</dt> <!-- "stand" internally -->
             <dd>A flag stand. It is not solid.</dd>
             
-         <dt data-tag="bloc:objects/multi/models/mp_circle/mp_circle"><code>capture_plate</code> (Capture Plate)</dt>
+         <dt data-tag="bloc:objects/multi/models/mp_circle/mp_circle"><code>capture_plate</code> (Capture Plate)</dt> <!-- "destination" internally -->
             <dd>A thick, olive drab plate of metal. It is not solid. It is typically used as a spawn or 
             arming point for bombs.</dd>
 
@@ -81,7 +81,7 @@
             <dd>An automatic weapon introduced in Halo 3, created by the Brutes. It fires spikes that 
             arc over a short distance due to gravity.</dd>
             
-         <dt data-unused="true" data-tag="weap:"><code>smg</code> (SMG)</dt>
+         <dt data-unused="true"><code>smg</code> (SMG)</dt>
             <dd>A development leftover from Halo 2: a fully-automatic submachine gun with a high fire 
             rate and very low accuracy.</dd>
             
@@ -122,7 +122,7 @@
          <dt data-tag="weap:objects/weapons/rifle/sniper_rifle/sniper_rifle"><code>sniper_rifle</code> (Sniper Rifle)</dt>
             <dd>A human sniper rifle. It has two levels of zoom, and can load four rounds at a time.</dd>
             
-         <dt data-unused="true" data-tag="weap:"><code>brute_shot</code></dt>
+         <dt data-unused="true"><code>brute_shot</code></dt>
             <dd>A development leftover from Halo 3: a weapon of Brute design, which fires large explosive 
             shells.</dd>
             
@@ -136,15 +136,15 @@
          <dt data-tag="weap:objects/weapons/melee/gravity_hammer/gravity_hammer"><code>gravity_hammer</code> (Gravity Hammer)</dt>
             <dd>A Covenant melee weapon which generates a powerful physics impuolse when swung.</dd>
             
-         <dt data-unused="true" data-tag="weap:"><code>mauler</code></dt>
+         <dt data-unused="true"><code>mauler</code></dt>
             <dd>A development leftover from Halo 3: a cross between a pistol and a shotgun, with a drum 
             magazine.</dd>
             
-         <dt data-unused="true" data-tag="weap:"><code>flamethrower</code></dt>
+         <dt data-unused="true"><code>flamethrower</code></dt>
             <dd>A development leftover from Halo 3: a large flamethrower. In that game, it functioned 
             like a detachable turret.</dd>
             
-         <dt data-unused="true" data-tag="weap:"><code>missile_pod</code></dt>
+         <dt data-unused="true"><code>missile_pod</code></dt>
             <dd>A development leftover from Halo 3: a large cannon capable of firing homing missiles at 
             vehicles.</dd>
             
@@ -171,17 +171,17 @@
          <dt data-tag="vehi:objects/vehicles/human/mongoose/mongoose"><code>mongoose</code> (Mongoose)</dt>
             <dd>A two-seater ATV with no weapons.</dd>
             
-         <dt data-unused="true" data-tag="vehi:"><code>chopper</code></dt>
+         <dt data-unused="true"><code>chopper</code></dt>
             <dd>A development leftover from Halo 3: a single-occupant Covenant vehicle armed with 
             two cannons that fire explosive shells. The front of the vehicle was equipped with a 
             large bladed wheel; boosting into enemy vehicles with it will usually destroy them 
             instantly.</dd>
 
-         <dt data-unused="true" data-tag="vehi:"><code>prowler</code></dt>
+         <dt data-unused="true"><code>prowler</code></dt>
             <dd>A development leftover from Halo 3: a four-seater Covenant vehicle analogous to 
             the Warthog.</dd>
 
-         <dt data-unused="true" data-tag="vehi:"><code>hornet</code></dt>
+         <dt data-unused="true"><code>hornet</code></dt>
             <dd>A development leftover from Halo 3: a single-occupant human air vehicle, sometimes 
             equipped with rails allowing two passengers to ride on the sides.</dd>
             
@@ -191,10 +191,10 @@
          <dt data-unused="true" data-tag="vehi:"><code>heavy_wraith</code></dt>
             <dd>A development leftover.</dd>
             
-         <dt data-tag="vehi:"><code>falcon</code> (Falcon)</dt>
+         <dt data-tag="vehi:objects/vehicles/human/falcon/falcon"><code>falcon</code> (Falcon)</dt>
             <dd>A human air vehicle with two door guns operable by passengers.</dd>
 
-         <dt data-thorage="true" data-tag="vehi:.../sabre"><code>sabre</code></dt>
+         <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/sabre/sabre"><code>sabre</code></dt>
             <dd>An UNSC space vehicle capable of housing a single occupant. Sabres are armed with a chaingun and lock-on missiles, and can perform evasive maneuvers similarly to a Banshee. In addition, they can rotate about the roll axis, allowing them to turn sideways or upside-down mid-flight. This maneuverability comes at a cost, however: like Banshees, Sabres have a constant forward thrust, but a Sabre moves faster and takes damage upon any impact with the environment.</dd>
 
          <dt data-tag="eqip:objects/equipment/sprint/sprint"><code>sprint</code> (Sprint)</dt>
@@ -224,11 +224,11 @@
          <dt data-unused="true" data-tag="eqip:"><code>sensor_pack</code></dt>
             <dd>A development leftover: a scrapped Armor Ability.</dd>
             
-         <dt data-tag="vehi:.../revenant"><code>revenant</code> (Revenant)</dt>
+         <dt data-tag="vehi:objects/vehicles/covenant/revenant/revenant"><code>revenant</code> (Revenant)</dt>
             <dd>A Covenant vehicle that can move like a Ghost, but has a miniaturized mortar launcher akin 
             to a Wraith and a passenger seat akin to a Mongoose.</dd>
             
-         <dt data-thorage="true" data-tag="vehi:.../pickup_truck"><code>pickup_truck</code> (Pickup Truck)</dt>
+         <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/civilian/pickup/pickup"><code>pickup_truck</code> (Pickup Truck)</dt>
             <dd>A truck with two front seats and a large truck bed. This is the first land vehicle seen in Reach's campaign, in the Winter Contingency mission.</dd>
 
          <dt data-tag="weap:objects/weapons/rifle/focus_rifle/focus_rifle"><code>focus_rifle</code> (Focus Rifle)</dt>
@@ -296,7 +296,8 @@
             units. It is explosive and will detonate when it receives too much damage.</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>unsc_shield_generator</code></dt>
-            <dd>Unknown.</dd>
+            <dd>Unknown. This <em>is not</em> a Generator Defense generator; those use the internal 
+            name "generator_x_large".</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>cov_shield_generator</code></dt>
             <dd>Unknown.</dd>
@@ -451,8 +452,11 @@
          <dt data-unused="true" data-tag="scen:"><code>fireteam_4_respawn_zone</code> (Respawn Zone, Fireteam 4)</dt>
             <dd>As of this writing, no multiplayer maps define this tag; fireteam-specific respawn zones only go up to 3.</dd>
             
-         <dt data-thorage="true" data-tag="vehi:.../semi_truck"><code>semi_truck</code> (Semi Truck)</dt>
-            <dd>A semi truck with no trailer attached.</dd>
+         <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/civilian/truck_cab_large/truck_cab_large"><code>semi_truck</code> (Semi Truck)</dt>
+            <dd>A semi truck with no trailer attached. The ones placeable in Forge with the Thorage 
+            update have a truck bed attached, but the ones spawned in Megalo don't by default; as of 
+            this writing, 343 Industries would have to add a new variant ID for Megalo in order to 
+            make the truck bed available to scripts.</dd>
             
          <dt data-tag="bloc:objects/levels/shared/soccer_ball/soccer_ball"><code>soccer_ball</code> (Soccer Ball)</dt>
             <dd>A giant soccer ball, of the same variety as those placeable in Forge.</dd>
@@ -481,8 +485,11 @@
             <dd>A giant six-sided die, of the same variety as those placeable in Forge. It is a muted green 
             with white dots. The pivot point is on the "six" face, but is slightly off-center.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>covenant_crate</code> (Covenant Crate)</dt>
-            <dd></dd>
+         <dt data-unused="true" data-tag="bloc:objects/props/covenant/crate_space/crate_space"><code>covenant_crate</code> (Covenant Crate)</dt>
+            <dd>Defined on some Firefight maps, including Overlook. It is a Covenant weapon 
+            crate. This same crate is available on some Multiplayer maps, including Forge 
+            World, but it uses a different tag, and Megalo is not set up to make that tag 
+            available to scripts.</dd> <!-- crate_space_mp versus crate_space, ugh -->
             
          <dt data-unused="true" data-tag="eqip:"><code>eradicator_loadout</code></dt>
             <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
@@ -500,8 +507,9 @@
             <dd>An unused scenery item; it is <em>not</em> a leftover of the Flare equipment item from 
             Halo 3.</dd>
             
-         <dt data-unused="true" data-tag="bloc:"><code>glow_stick</code> (Glowstick)</dt>
-            <dd></dd>
+         <dt data-unused="true" data-tag="bloc:objects/props/human/unsc/unsc_glow_stick/unsc_glow_stick"><code>glow_stick</code> (Glowstick)</dt>
+            <dd>Defined on some Firefight maps, but doesn't appear to be defined in any Multiplayer 
+            maps.</dd>
             
          <dt data-tag="weap:objects/weapons/rifle/concussion_rifle/concussion_rifle"><code>concussion_rifle</code> (Concussion Rifle)</dt>
             <dd>A Covenant weapon similar to the Brute Shot; it does less damage but has a greater physics 
@@ -544,7 +552,7 @@
          <dt data-tag="mach:"><code>data_core_beam</code></dt>
             <dd>A device machine.</dd>
             
-         <dt data-tag="mach:.../phantom_overwatch"><code>phantom_overwatch</code> (Phantom, Overwatch)</dt>
+         <dt data-unused="true" data-tag="mach:"><code>phantom_overwatch</code> (Phantom, Overwatch)</dt>
             <dd>A device machine with the Phantom model, suitable for scripted animation.</dd>
             
          <dt data-tag="mach:objects/vehicles/human/longsword/longsword"><code>longsword</code> (Longsword)</dt>
@@ -569,11 +577,13 @@
          <dt data-unused="true" data-tag="scen:"><code>armory_shelf</code></dt>
             <dd></dd>
             
-         <dt data-tag="scen:"><code>covenant_resupply_capsule</code></dt>
+         <dt data-unused="true" data-tag="scen:"><code>covenant_resupply_capsule</code></dt> <!-- cov_resupply_capsule -->
             <dd></dd>
             
          <dt data-tag="mach:objects/levels/multi/70_boneyard/covy_drop_pod/covy_drop_pod"><code>covenant_drop_pod</code></dt>
-            <dd></dd>
+            <dd>An unfinished asset available on Boneyard. It is a small, untextured (i.e. flat 
+            grey) cylinder with an upward taper, about the diameter of a player model. It has 
+            no collision and no apparent function.</dd>
 
          <dt data-unused="true" data-tag="bloc:"><code>invisible_marker</code></dt>
             <dd></dd>
@@ -587,19 +597,27 @@
          <dt data-tag="mach:objects/vehicles/covenant/phantom/phantom"><code>phantom_device</code> (Phantom, Device)</dt>
             <dd></dd>
             
-         <dt data-tag="scen:"><code>resupply_capsule</code></dt>
+         <dt data-thorage="true" data-tag="scen:objects/gear/human/military/resupply_capsule/resupply_capsule"><code>resupply_capsule</code></dt>
+            <dd>A drop pod for a single weapon, like those seen in Firefight; as of this writing, 
+            the object is only available on Anchor 9. Unfortunately, the pod is sealed, and there 
+            doesn't seem to be any way to open it. Its tag data suggests that it opens when it 
+            reaches 0% health, implying that Firefight opens it by using scripts to "kill" it; 
+            however, attempting to do the same with Megalo scripts produces no result.</dd>
+            
+         <dt data-unused="true" data-tag="scen:"><code>resupply_capsule_open</code></dt>
+            <dd>This tag is not defined even in Firefight maps, which define the "closed" 
+            variant. Examination of the "closed" variant's tags suggest that an explicit "open" 
+            variant shouldn't even be necessary.</dd>
+            
+         <dt data-unused="true" data-tag="scen:objects/gear/human/military/weapon_box/weapon_box"><code>weapon_box</code></dt>
+            <dd>Defined on some Firefight maps, including Courtyard. It is a flat olive drab metal 
+            panel with UNSC branding that in Firefight can spawn with power weapons attached to 
+            it.</dd>
+            
+         <dt data-unused="true" data-tag="mach:"><code>tech_console_stationary</code></dt>
             <dd></dd>
             
-         <dt data-tag="scen:"><code>resupply_capsule_open</code></dt>
-            <dd></dd>
-            
-         <dt data-tag="scen:"><code>weapon_box</code></dt>
-            <dd></dd>
-            
-         <dt data-tag="mach:"><code>tech_console_stationary</code></dt>
-            <dd></dd>
-            
-         <dt data-tag="mach:"><code>tech_console_wall</code></dt>
+         <dt data-unused="true" data-tag="mach:"><code>tech_console_wall</code></dt>
             <dd></dd>
             
          <dt data-tag="scen:objects/multi/generic/mp_cinematic_camera"><code>initial_loadout_camera</code> (Initial Loadout Camera)</dt>
@@ -624,14 +642,14 @@
          <dt data-unused="true" data-tag="bloc:"><code>dropzone_boundary</code> (dropzone_boundary)</dt>
             <dd></dd>
             
-         <dt data-tag="bloc:"><code>shield_door_small</code> (Shield Door, Small)</dt>
-            <dd></dd>
+         <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_small/shield_door_small"><code>shield_door_small</code> (Shield Door, Small)</dt>
+            <dd>Defined on some Firefight maps, including Courtyard.</dd>
             
-         <dt data-tag="bloc:"><code>shield_door_medium</code> (Shield Door, Medium)</dt>
-            <dd></dd>
+         <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_medium/shield_door_medium"><code>shield_door_medium</code> (Shield Door, Medium)</dt>
+            <dd>Defined on some Firefight maps, including Courtyard.</dd>
             
-         <dt data-tag="bloc:"><code>shield_door_large</code> (Shield Door, Large)</dt>
-            <dd></dd>
+         <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_large/shield_door_large"><code>shield_door_large</code> (Shield Door, Large)</dt>
+            <dd>Defined on some Firefight maps, including Courtyard.</dd>
             
          <dt data-tag="eqip:objects/equipment/drop_shield/drop_shield"><code>drop_shield</code> (Drop Shield)</dt>
             <dd>An Armor Ability which allows the user to place a small bubble shield at their location.</dd>
@@ -698,15 +716,15 @@
          <dt data-tag="bloc:objects/multi/land_mine/land_mine"><code>landmine</code> (Land Mine)</dt>
             <dd>A landmine.</dd>
             
-         <dt data-tag="weap:"><code>target_locator</code> (Target Locator)</dt>
+         <dt data-tag="weap:objects/weapons/pistol/target_laser/target_laser"><code>target_locator</code> (Target Locator)</dt>
             <dd>A Target Locator capable of calling down a devastating air strike. This weapon will only spawn 
-            on maps that define its tag.</dd>
+            on maps that define its tag.</dd> <!-- can't find it on any MP maps but Firefight has it -->
             
-         <dt data-unused="true" data-tag="bloc:"><code>ff_kill_zone</code></dt>
+         <dt data-unused="true" data-tag="bloc:"><code>kill_boundary_3d_model</code></dt>
             <dd>Internally, a tag named "ff_kill_zone" is used for the (Soft) Kill Boundary's 3D model, but not 
             for the actual object.</dd>
 
-         <dt data-tag="bloc:"><code>block_1x1_flat</code> (Block 1x1 Flat)</dt>
+         <dt data-tag="bloc:objects/levels/forge/ff_plat_1x1_flat/ff_plat_1x1_flat"><code>block_1x1_flat</code> (Block 1x1 Flat)</dt>
             <dd>A Block 1x1 Flat, of the same variety as those placeable in Forge.</dd>
             
          <dt data-tag="vehi:objects/vehicles/covenant/turrets/shade/weapons/shade_anti_air_cannon/shade_anti_air_cannon"><code>shade_anti_air</code> (Shade Turret, Anti-Air)</dt>

@@ -248,15 +248,15 @@ namespace Megalo {
             DetailedEnumValueInfo::make_friendly_name("Focus Rifle"),
             DetailedEnumValueInfo::make_map_tag('weap', "objects/weapons/rifle/focus_rifle/focus_rifle")
          ),
-         DetailedEnumValue("territory_static",
+         DetailedEnumValue("territory_static", // Halo 3 leftover from before Forge labels were invented
             DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
-         DetailedEnumValue("ctf_flag_return_area",
+         DetailedEnumValue("ctf_flag_return_area", // Halo 3 leftover from before Forge labels were invented
             DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
-         DetailedEnumValue("ctf_flag_spawn_point",
+         DetailedEnumValue("ctf_flag_spawn_point", // Halo 3 leftover from before Forge labels were invented
             DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
@@ -295,8 +295,8 @@ namespace Megalo {
             DetailedEnumValueInfo::make_friendly_name("invasion_spawn_controller"),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
-         DetailedEnumValue("oddball_ball_spawn_point",
-            DetailedEnumValueInfo::make_unused_sentinel(), // TODO: confirm
+         DetailedEnumValue("oddball_ball_spawn_point", // Halo 3 leftover from before Forge labels were invented
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("oddball_ball_spawn_point"),
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
@@ -559,9 +559,10 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/dice/dice"),
             DetailedEnumValueInfo::make_description("A giant six-sided die, of the same variety as those placeable in Forge. It is a muted green with white dots.")
          ),
-         DetailedEnumValue("space_crate",
+         DetailedEnumValue("covenant_crate",
             DetailedEnumValueInfo::make_unused_sentinel(),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/props/covenant/crate_space/crate_space"),
+            DetailedEnumValueInfo::make_description("A Covenant weapon crate. This tag is only defined on some Firefight maps; Multiplayer maps use a different tag.")
          ),
          DetailedEnumValue("eradicator_loadout",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -591,7 +592,8 @@ namespace Megalo {
          DetailedEnumValue("glow_stick",
             DetailedEnumValueInfo::make_unused_sentinel(), // not defined on Forge World or Boneyard
             DetailedEnumValueInfo::make_friendly_name("Glowstick"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/props/human/unsc/unsc_glow_stick/unsc_glow_stick"),
+            DetailedEnumValueInfo::make_description("Defined on some Firefight maps.")
          ),
          DetailedEnumValue("concussion_rifle",
             DetailedEnumValueInfo::make_friendly_name("Concussion Rifle"),
@@ -687,7 +689,8 @@ namespace Megalo {
          ),
          DetailedEnumValue("covenant_drop_pod",
             DetailedEnumValueInfo::make_friendly_name("covy_drop_pod"),
-            DetailedEnumValueInfo::make_map_tag('mach', "")
+            DetailedEnumValueInfo::make_map_tag('mach', "objects/levels/multi/70_boneyard/covy_drop_pod/covy_drop_pod"),
+            DetailedEnumValueInfo::make_description("An unfinished asset available on Boneyard. It is a small, untextured (i.e. flat grey) cylinder with an upward taper, about the diameter of a player model. It has no collision and no apparent function.")
          ),
          DetailedEnumValue("invisible_marker",
             DetailedEnumValueInfo::make_unused_sentinel(),
@@ -711,15 +714,17 @@ namespace Megalo {
          DetailedEnumValue("resupply_capsule",
             DetailedEnumValueInfo::make_friendly_name("Resupply Capsule"),
             DetailedEnumValueInfo::make_map_tag('scen', "objects/gear/human/military/resupply_capsule/resupply_capsule"),
-            DetailedEnumValueInfo::make_description("This object is available on Tempest, at least in the Thorage update.")
+            DetailedEnumValueInfo::make_description("A drop pod for a single weapon, like those seen in Firefight; as of this writing, the object is only available on Anchor 9. Unfortunately, the pod is sealed, and there doesn't seem to be any way to open it. Its tag data suggests that it opens when it reaches 0% health, implying that Firefight opens it by using scripts to \"kill\" it; however, attempting to do the same with Megalo scripts produces no result.")
          ),
          DetailedEnumValue("resupply_capsule_open",
             DetailedEnumValueInfo::make_friendly_name("resupply_capsule_open"),
-            DetailedEnumValueInfo::make_map_tag('scen', "")
+            DetailedEnumValueInfo::make_map_tag('scen', ""),
+            DetailedEnumValueInfo::make_description("This tag is not defined even in Firefight maps, which define the \"closed\" variant. Examination of the \"closed\" variant's tags suggest that an explicit \"open\" variant shouldn't even be necessary.")
          ),
          DetailedEnumValue("weapon_box",
             DetailedEnumValueInfo::make_friendly_name("weapon_box"),
-            DetailedEnumValueInfo::make_map_tag('scen', "")
+            DetailedEnumValueInfo::make_map_tag('scen', "objects/gear/human/military/weapon_box/weapon_box"),
+            DetailedEnumValueInfo::make_description("Defined on some Firefight maps, including Courtyard. It is a flat olive drab metal panel with UNSC branding that in Firefight can spawn with power weapons attached to it.")
          ),
          DetailedEnumValue("tech_console_stationary",
             DetailedEnumValueInfo::make_friendly_name("tech_console_stationary"),
@@ -751,16 +756,22 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "")
          ),
          DetailedEnumValue("shield_door_small",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("shield_door_small"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/props/covenant/shield_door_small/shield_door_small"),
+            DetailedEnumValueInfo::make_description("Defined on some Firefight maps, including Courtyard.")
          ),
          DetailedEnumValue("shield_door_medium",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("shield_door_medium"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/props/covenant/shield_door_medium/shield_door_medium"),
+            DetailedEnumValueInfo::make_description("Defined on some Firefight maps, including Courtyard.")
          ),
          DetailedEnumValue("shield_door_large",
+            DetailedEnumValueInfo::make_unused_sentinel(),
             DetailedEnumValueInfo::make_friendly_name("shield_door_large"),
-            DetailedEnumValueInfo::make_map_tag('bloc', "")
+            DetailedEnumValueInfo::make_map_tag('bloc', "objects/props/covenant/shield_door_large/shield_door_large"),
+            DetailedEnumValueInfo::make_description("Defined on some Firefight maps, including Courtyard.")
          ),
          DetailedEnumValue("drop_shield",
             DetailedEnumValueInfo::make_friendly_name("Drop Shield (Armor Ability)"),
@@ -854,7 +865,7 @@ namespace Megalo {
          ),
          DetailedEnumValue("target_locator",
             DetailedEnumValueInfo::make_friendly_name("Target Locator"),
-            DetailedEnumValueInfo::make_map_tag('weap', ""),
+            DetailedEnumValueInfo::make_map_tag('weap', "objects/weapons/pistol/target_laser/target_laser"),
             DetailedEnumValueInfo::make_description("A Target Locator capable of calling down a devastating air strike. This weapon will only spawn on maps that define its tag.")
          ),
          DetailedEnumValue("kill_boundary_3d_model", // "ff_kill_zone" // internally, this tag name is used for the (Soft) Kill Boundary's 3D model, but not for the actual object... and that tag in specific isn't even specified anyway

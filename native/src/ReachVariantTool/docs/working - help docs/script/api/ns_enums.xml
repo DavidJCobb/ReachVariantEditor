@@ -52,37 +52,37 @@
                <dt>shotgun</dt>
                   <dd>The player was killed with a Shotgun.</dd>
                <dt>sniper_rifle</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Sniper Rifle.</dd>
                <dt>rocket_launcher</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Rocket Launcher.</dd>
                <dt>spartan_laser</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Spartan Laser.</dd>
                <dt>frag_grenade</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Frag Grenade.</dd>
                <dt>grenade_launcher</dt>
                   <dd>The player was killed with a Grenade Launcher.</dd>
                <dt>plasma_pistol</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Plasma Pistol.</dd>
                <dt>needler</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Needler.</dd>
                <dt>plasma_rifle</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Plasma Rifle.</dd>
                <dt>plasma_repeater</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Plasma Repeater.</dd>
                <dt>needle_rifle</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Needle Rifle.</dd>
                <dt>spiker</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Spiker.</dd>
                <dt>plasma_launcher</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Plasma Launcher.</dd>
                <dt>gravity_hammer</dt>
                   <dd>The player was killed with a Gravity Hammer or Golf Club.</dd>
                <dt>energy_sword</dt>
-                  <dd></dd>
+                  <dd>The player was killed with an Energy Sword whose battery is not depleted.</dd>
                <dt>plasma_grenade</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Plasma Grenade.</dd>
                <dt>concussion_rifle</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Concussion Rifle.</dd>
                <dt>ghost</dt>
                   <dd>The player was killed by a Ghost. This includes both the cannons and splatters; 
                   use the damage reporting modifier to tell the two apart.</dd>
@@ -102,7 +102,7 @@
                <dt>banshee_bomb</dt>
                   <dd>The player was killed by a Banshee's fuel rod bombs.</dd>
                <dt>seraph</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Seraph.</dd>
                <dt>mongoose</dt>
                   <dd>The player was splattered by a Mongoose.</dd>
                <dt>warthog</dt>
@@ -129,9 +129,9 @@
                <dt>collision_damage</dt>
                   <dd>The player died from collision damage not attributable to any specific cause.</dd>
                <dt>melee_generic</dt>
-                  <dd></dd>
+                  <dd>The player was killed by a melee attack.</dd>
                <dt>explosion_generic</dt>
-                  <dd></dd>
+                  <dd>The player was killed by an explosion.</dd>
                <dt>explosion_birthday_party</dt>
                   <dd>The player was killed by a Grunt Birthday Party explosion. This cause of death 
                   can normally only occur in Campaign and Firefight; the "Birthday Party" Armor Effect 
@@ -153,9 +153,10 @@
                   there is no information online about what it is, though some players incorrectly 
                   had deaths attributed to it during the <i>Halo: Reach</i> beta.</dd>
                <dt>armor_lock_crush</dt>
-                  <dd></dd>
+                  <dd>The player was killed when they tried to splatter someone who was using 
+                  Armor Lock.</dd>
                <dt>target_locator</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Target Locator.</dd>
                <dt>machine_gun_turret</dt>
                   <dd>The player was killed by a Machine Gun Turret. This includes mounted and carried 
                   turrets.</dd>
@@ -167,34 +168,34 @@
                <dt>plasma_turret</dt>
                   <dd>Unknown. This value <em>is not</em> used by the Plasma Cannon.</dd>
                <dt>shade_turret</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Shade.</dd>
                <dt>sabre</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Sabre.</dd>
                <dt>smg</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>carbine</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>battle_rifle</dt>
-                  <dd>Unused. This is a development leftover.</dd> 
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd> 
                <dt>focus_rifle</dt>
                   <dd>The player was killed with a Focus Rifle, or with the invisible weapon that Monitor 
                   bipeds spawn with.</dd>
                <dt>fuel_rod_gun</dt>
-                  <dd></dd>
+                  <dd>The player was killed with a Fuel Rod Gun.</dd>
                <dt>missile_pod</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>brute_shot</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>flamethrower</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>sentinel_gun</dt>
-                  <dd>Unknown.</dd>
+                  <dd>Unknown. Possibly a development leftover from <i>Halo 3</i>.</dd>
                <dt>spike_grenade</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>firebomb_grenade</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>elephant_turret</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>spectre_driver</dt>
                   <dd>Unused. This is a development leftover from <i>Halo 2</i>.</dd>
                <dt>spectre_gunner</dt>
@@ -202,19 +203,21 @@
                <dt>tank</dt>
                   <dd>Unknown.</dd>
                <dt>chopper</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>hornet</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>mantis</dt>
                   <dd>Unused. This is a development leftover.</dd>
                <dt>prowler</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>sentinel_beam</dt>
-                  <dd>Unused. This is a development leftover.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
                <dt>sentinel_rpg</dt>
-                  <dd>Unknown.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 2</i> and was 
+                  unused even in that game.</dd>
                <dt>tripmine</dt>
-                  <dd>Unknown.</dd>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>; the "landmine" 
+                  object in <i>Halo: Reach</i> just reports a generic explosion.</dd>
             </dl>
          </description>
       </enum>

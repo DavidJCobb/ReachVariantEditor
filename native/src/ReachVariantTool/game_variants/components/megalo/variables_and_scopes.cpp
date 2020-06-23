@@ -148,8 +148,8 @@ namespace Megalo {
          extern VariableScopeWhichValue global_6 = VariableScopeWhichValue("global.team[6]");
          extern VariableScopeWhichValue global_7 = VariableScopeWhichValue("global.team[7]");
          extern VariableScopeWhichValue current  = VariableScopeWhichValue("current_team", flags::is_read_only);
-         extern VariableScopeWhichValue hud_player_owner_team        = VariableScopeWhichValue("hud_player.team", flags::is_read_only);
-         extern VariableScopeWhichValue hud_target_player_owner_team = VariableScopeWhichValue("hud_target_player.team", flags::is_read_only);
+         extern VariableScopeWhichValue hud_player_owner_team        = VariableScopeWhichValue("hud_player_team", flags::is_read_only);
+         extern VariableScopeWhichValue hud_target_player_owner_team = VariableScopeWhichValue("hud_target_player_team", flags::is_read_only);
          extern VariableScopeWhichValue unk_14   = VariableScopeWhichValue("unk_14_team");
          extern VariableScopeWhichValue unk_15   = VariableScopeWhichValue("unk_15_team");
          //
