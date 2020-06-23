@@ -27,7 +27,7 @@
             <dd>Edit the gametype's Forge labels.</dd>
          <dt><a href="map-permissions">Map Permissions</a></dt>
             <dd>Control what maps the player can play this gametype on.</dd>
-         <dt><a href="plaeyr-rating-parameters">Player Rating Parameters</a></dt>
+         <dt><a href="player-rating-parameters">Player Rating Parameters</a></dt>
             <dd>Control how this gametype interacts with Bungie's Arena rating system.</dd>
          <dt><a href="required-object-types">Required Object Types</a></dt>
             <dd>Specify which object types a map must define for this gametype.</dd>

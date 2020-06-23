@@ -62,6 +62,10 @@
          
          -- The above is interpreted as two statements: "a = b" and "+ c".
       </pre>
+      <p>
+         You can call user-defined functions or hardcoded "action" functions. You cannot call 
+         hardcoded "condition" functions.
+      </p>
       
       <h3>Conditions</h3>
       <p>
@@ -75,6 +79,10 @@
       <p>
          Conditions can be prefixed with the word <var>not</var> to invert them. Conditions must be 
          separated from each other with the word <var>or</var> or the word <var>and</var>.
+      </p>
+      <p>
+         You can call hardcoded "condition" functions here, but not user-defined functions or any 
+         hardcoded "action" functions.
       </p>
       
       <h2>Variables</h2>
