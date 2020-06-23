@@ -10,12 +10,66 @@ bool read_file(const wchar_t* path, std::string& out) {
    std::ifstream in(path, std::ios::in);
    if (!in)
       return false;
-   in.seekg(0, std::ios::end);
-   out.resize(in.tellg());
-   in.seekg(0, std::ios::beg);
-   in.read(&out[0], out.size());
-   in.close();
+   constexpr size_t ce_read_size = 4096;
+   auto buf = std::string(ce_read_size, '\0');
+   while (in.read(&buf[0], ce_read_size)) {
+      out.append(buf, 0, in.gcount());
+   }
+   out.append(buf, 0, in.gcount());
+   //
    return true;
+}
+
+void extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std::string& out) {
+   using namespace cobb::xml;
+   //
+   std::string name;
+   uint32_t    nesting = 1;
+   bool        is_in_open_tag = false;
+   //
+   name = doc.tokens[token_index].name;
+   //
+   for (size_t i = token_index + 1; i < doc.tokens.size(); ++i) {
+      auto&       token = doc.tokens[i];
+      std::string temp;
+      switch (token.code) {
+         case token_code::element_open:
+            cobb::sprintf(temp, "<%s", token.name.c_str());
+            is_in_open_tag = true;
+            if (token.name == name)
+               ++nesting;
+            break;
+         case token_code::attribute:
+            if (token.name == "href" || token.name == "src") {
+               //
+               // TODO: custom function to collect article body into a string, so we can fix up "href" and 
+               // "src" attributes. They're written as relative to the XML file itself, but we use <base/> 
+               // so that we can use the same code for the CSS, JS, nav, etc., so we need to match attribs 
+               // in the body accordingly.
+               //
+            }
+            cobb::sprintf(temp, " %s=\"%s\"", token.name.c_str(), token.value.c_str());
+            break;
+         case token_code::text_content:
+            if (is_in_open_tag)
+               out += '>';
+            is_in_open_tag = false;
+            out += token.value;
+            break;
+         case token_code::element_close:
+            is_in_open_tag = false;
+            if (token.name == name) {
+               --nesting;
+               if (!nesting)
+                  break;
+            }
+            cobb::sprintf(temp, "</%s>", token.name.c_str());
+            break;
+      }
+      out += temp;
+      if (nesting == 0)
+         break;
+   }
 }
 
 void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int depth) {
@@ -29,28 +83,20 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    doc.element_content_to_string(index, title);
    //
    std::string body;
-   index = doc.find_element("body");
-   doc.element_content_to_string(index, body);
-   cobb::sprintf(body, "<h1>%s</h1>\n%s", title.c_str(), body.c_str());
-   //
-   // TODO: custom function to collect article body into a string, so we can fix up "href" and 
-   // "src" attributes. They're written as relative to the XML file itself, but we use <base/> 
-   // so that we can use the same code for the CSS, JS, nav, etc., so we need to match attribs 
-   // in the body accordingly.
-
-
+   cobb::sprintf(body, "<h1>%s</h1>\n", title.c_str());
+   extract_html_from_xml(doc.find_element("body"), doc, body);
    //
    std::string content = article_template; // copy
    std::string needle  = "<content-placeholder id=\"main\" />";
    std::size_t pos     = content.find(needle.c_str());
    assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
    content.replace(pos, needle.length(), body);
-
    //
-   // TODO: for some reason we sure are inserting a ton of \0s at the end of the file and it'd 
-   // be real swell if we weren't doing that
-   //
-
+   needle  = "<title>";
+   pos     = content.find(needle.c_str());
+   std::string replace;
+   cobb::sprintf(replace, "<title>%s", title.c_str());
+   content.replace(pos, needle.length(), replace);
    //
    if (depth > 0) {
       needle = "<base />";
@@ -89,7 +135,7 @@ int main(int argc, char* argv[]) {
    //
    auto out_path = std::filesystem::current_path();
    if (argc <= 1) {
-      std::wcout << L"Enter root folder: ";
+      std::wcout << L"Path format: forward-slashes; enclosed in double-quotes.\nEnter root folder: ";
       std::cin >> out_path;
       std::wcout << L"\nConfirmed. Path in use is: " << out_path.c_str() << L"\n";
    } else {
