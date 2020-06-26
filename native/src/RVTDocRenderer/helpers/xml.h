@@ -16,9 +16,8 @@ namespace cobb {
          token(uint32_t line, token_code a) : line(line), code(a) {};
          token(uint32_t line, token_code a, float b, const char* c, const char* d) : line(line), code(a), number(b), name(c), value(d) {};
 
-         uint32_t   line   = 0;
-         token_code code   = token_code::undefined;
-         float      number = 0.0F;
+         uint32_t    line = 0;
+         token_code  code = token_code::undefined;
          std::string name;
          std::string value;
       };

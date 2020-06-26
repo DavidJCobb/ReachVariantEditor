@@ -5,6 +5,7 @@
 #include <string>
 #include "helpers/strings.h"
 #include "helpers/xml.h"
+#include "api_entry.h"
 
 bool read_file(const wchar_t* path, std::string& out) {
    std::ifstream in(path, std::ios::in);
@@ -159,6 +160,7 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    //
    needle  = "<title>";
    pos     = content.find(needle.c_str());
+   assert(pos != std::string::npos);
    std::string replace;
    cobb::sprintf(replace, "<title>%s", title.c_str());
    content.replace(pos, needle.length(), replace);
@@ -166,6 +168,7 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    if (depth > 0) {
       needle = "<base />";
       pos    = content.find(needle.c_str());
+      assert(pos != std::string::npos);
       std::string replace = "<base href=\"";
       do {
          replace += "../";
@@ -178,6 +181,20 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    std::ofstream file(xml.c_str());
    file.write(content.c_str(), content.size());
    file.close();
+}
+void handle_namespace(std::filesystem::path xml, cobb::xml::document& doc, int depth, std::string stem) {
+}
+void handle_type(std::filesystem::path xml, cobb::xml::document& doc, int depth, std::string stem) {
+   static std::string article_template;
+   if (article_template.empty()) {
+      read_file(L"_article.html", article_template);
+   }
+   //
+   APIType type;
+   type.load(doc);
+   //
+   // TODO: write the file using the loaded data
+   //
 }
 
 void handle_file(std::filesystem::path xml, int depth) {
@@ -202,6 +219,12 @@ void handle_file(std::filesystem::path xml, int depth) {
    auto root = doc.root_node_name();
    if (strncmp(root, "article", strlen("article")) == 0) {
       handle_article(xml, doc, depth, stem);
+   }
+   if (strncmp(root, "script-namespace", strlen("script-namespace")) == 0) {
+      handle_namespace(xml, doc, depth, stem);
+   }
+   if (strncmp(root, "script-type", strlen("script-type")) == 0) {
+      handle_type(xml, doc, depth, stem);
    }
 }
 
