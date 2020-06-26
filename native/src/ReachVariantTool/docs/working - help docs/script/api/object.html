@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Object | ReachVariantTool Documentation</title>
+      <base href="../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
+                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Types</a>
+                     <ul>
+                        <li>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Object</h1>
+An object in the game world.<p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 2 nested <a href="script/api/team.html">teams</a>, and 4 nested <a href="script/api/timer.html">timers</a> available.</p>
+<h2>Member conditions</h2>
+<dl><dt><a href="script/api/object/conditions/has_forge_label.html">has_forge_label</a></dt>
+   <dd>Check whether this object has a given Forge label.</dd>
+<dt><a href="script/api/object/conditions/is_in_use.html">is_in_use</a></dt>
+   <dd>Check whether this object is an Armor Ability currently being used by a player.</dd>
+<dt><a href="script/api/object/conditions/is_of_type.html">is_of_type</a></dt>
+   <dd>Check whether this object is of a given type.</dd>
+<dt><a href="script/api/object/conditions/is_out_of_bounds.html">is_out_of_bounds</a></dt>
+   <dd>Check whether this object is out of bounds.</dd>
+<dt><a href="script/api/object/conditions/shape_contains.html">shape_contains</a></dt>
+   <dd>Check whether this object's shape boundary contains another object.</dd>
+</dl>
+
+<h2>Member actions</h2>
+<dl><dt><a href="script/api/object/actions/add_weapon.html">add_weapon</a></dt>
+   <dd>Give a weapon to a biped, even if it isn't player-controlled.</dd>
+<dt><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></dt>
+   <dd>Animate a device machine's position over time.</dd>
+<dt><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></dt>
+   <dd>Recolor an object's shape boundary based on a player variable.</dd>
+<dt><a href="script/api/object/actions/attach_to.html">attach_to</a></dt>
+   <dd>Attaches this object to another one.</dd>
+<dt><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></dt>
+   <dd>Rotate one object to match another.</dd>
+<dt><a href="script/api/object/actions/delete.html">delete</a></dt>
+   <dd>Delete this object from the game world.</dd>
+<dt><a href="script/api/object/actions/detach.html">detach</a></dt>
+   <dd>Detaches this object from anything it is attached to.</dd>
+<dt><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></dt>
+   <dd>Sets whether a Respawn Zone is enabled and able to affect spawning.</dd>
+<dt><a href="script/api/object/actions/face_toward.html">face_toward</a></dt>
+   <dd>Rotate one object to face another.</dd>
+<dt><a href="script/api/object/actions/get_device_position.html">get_device_position</a></dt>
+   <dd>Gets the current position level of a device machine.</dd>
+<dt><a href="script/api/object/actions/get_device_power.html">get_device_power</a></dt>
+   <dd>Gets the current power level of a device machine.</dd>
+<dt><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></dt>
+   <dd>Returns the distance between this object and another.</dd>
+<dt><a href="script/api/object/actions/get_orientation.html">get_orientation</a></dt>
+   <dd>Returns a number representing the object's overall rotation.</dd>
+<dt><a href="script/api/object/actions/get_speed.html">get_speed</a></dt>
+   <dd>Returns the object's speed in feet per second.</dd>
+<dt><a href="script/api/object/actions/kill.html">kill</a></dt>
+   <dd>Kill an object.</dd>
+<dt><a href="script/api/object/actions/place_at_me.html">place_at_me</a></dt>
+   <dd>Spawn a new object at this object.</dd>
+<dt><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></dt>
+   <dd>Spawn a new object between this object and another.</dd>
+<dt><a href="script/api/object/actions/push_upward.html">push_upward</a></dt>
+   <dd>Apply a random mostly-upward force to the object.</dd>
+<dt><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></dt>
+   <dd>Remove a weapon from a biped.</dd>
+<dt><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></dt>
+   <dd>No description available.</dd>
+<dt><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></dt>
+   <dd>Sets the current animation and position of a device machine.</dd>
+<dt><a href="script/api/object/actions/set_device_position.html">set_device_position</a></dt>
+   <dd>Sets the current position level of a device machine.</dd>
+<dt><a href="script/api/object/actions/set_device_power.html">set_device_power</a></dt>
+   <dd>Sets the current power level of a device machine.</dd>
+<dt><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></dt>
+   <dd>Disables garbage collection for objects.</dd>
+<dt><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></dt>
+   <dd>Make an object invincible.</dd>
+<dt><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></dt>
+   <dd>Adjust which players can pick up a weapon.</dd>
+<dt><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></dt>
+   <dd>Set whether an object displays a progress bar, and who should be able to see it.</dd>
+<dt><a href="script/api/object/actions/set_scale.html">set_scale</a></dt>
+   <dd>Resize an object.</dd>
+<dt><a href="script/api/object/actions/set_shape.html">set_shape</a></dt>
+   <dd>Change an object's shape boundary.</dd>
+<dt><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></dt>
+   <dd>Adjust which players can see an object's shape boundary.</dd>
+<dt><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></dt>
+   <dd>Adjust which fireteam can spawn at a location.</dd>
+<dt><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></dt>
+   <dd>Adjust which players can spawn at a location.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></dt>
+   <dd>Change the icon that this waypoint displays.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_priority.html">set_waypoint_priority</a></dt>
+   <dd>Change the waypoint's visual priority.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_range.html">set_waypoint_range</a></dt>
+   <dd>Change the distances at which waypoints are visible.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_text.html">set_waypoint_text</a></dt>
+   <dd>Set the text of an object's waypoint.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></dt>
+   <dd>Change the timer that a waypoint displays.</dd>
+<dt><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></dt>
+   <dd>Adjust who can see this object's waypoint.</dd>
+<dt><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></dt>
+   <dd>Set how a weapon is picked up.</dd>
+<dt><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></dt>
+   <dd>Identify the player carrying a weapon or Armor Ability.</dd>
+</dl>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

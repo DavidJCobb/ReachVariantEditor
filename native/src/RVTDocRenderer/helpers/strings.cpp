@@ -37,7 +37,7 @@ namespace cobb {
       uint32_t s = 256;
       char* b = (char*)malloc(s);
       int32_t r = vsnprintf(b, s, format, args);
-      while (r > s) {
+      while (r + 1 > s) {
          va_copy(args, safe);
          s += 20;
          free(b);

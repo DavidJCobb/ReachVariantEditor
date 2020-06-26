@@ -1,8 +1,111 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="object-type">
-   <friendly>Object Type</friendly>
-   <blurb>A type of object that can exist in the game world.</blurb>
-   <description>
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Object Type | ReachVariantTool Documentation</title>
+      <base href="../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
+                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Types</a>
+                     <ul>
+                        <li>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Object Type</h1>
+
       <p>
          This type represents kinds of objects that can exist in the game world. It is 
          roughly analogous to "base forms" in Skyrim.
@@ -20,11 +123,11 @@
       </style>
       <dl class="object-type-list">
          <dt data-tag="bipd:objects/characters/spartans/spartans"><code>spartan</code> (Spartan Biped)</dt>
-            <dd>A Spartan biped. Use a <a href="variant-string-id">variant ID</a> to control the armor 
+            <dd>A Spartan biped. Use a <a href="script/api/variant-string-id.html">variant ID</a> to control the armor 
             permutation.</dd>
             
          <dt data-tag="bipd:objects/characters/elite/elite"><code>elite</code> (Elite Biped)</dt>
-            <dd>An Elite biped. Use a <a href="variant-string-id">variant ID</a> to control the armor 
+            <dd>An Elite biped. Use a <a href="script/api/variant-string-id.html">variant ID</a> to control the armor 
             permutation.</dd>
             
          <dt data-tag="bipd:objects/characters/monitor/monitor_editor"><code>monitor</code> (Monitor Biped)</dt>
@@ -37,16 +140,16 @@
          <dt data-tag="weap:objects/weapons/multiplayer/assault_bomb/assault_bomb"><code>bomb</code> (Bomb)</dt>
             <dd>A UNSC bomb. It can be picked up by a player, carried, and used as a melee weapon.</dd>
             
-         <dt data-tag="weap:objects/weapons/multiplayer/skull/skull"><code>skull</code> (Skull)</dt> <!-- "ball" internally -->
+         <dt data-tag="weap:objects/weapons/multiplayer/skull/skull"><code>skull</code> (Skull)</dt> 
             <dd>A skull. It can be picked up by a player, carried, and used as a melee weapon.</dd>
             
-         <dt data-tag="bloc:objects/multi/models/mp_hill_beacon/mp_hill_beacon"><code>hill_marker</code> (Hill Marker)</dt> <!-- "area" internally -->
+         <dt data-tag="bloc:objects/multi/models/mp_hill_beacon/mp_hill_beacon"><code>hill_marker</code> (Hill Marker)</dt> 
             <dd>An invisible hill marker, of the same variety as those placeable in Forge.</dd>
 
-         <dt data-tag="bloc:objects/multi/models/mp_flag_base/mp_flag_base"><code>flag_stand</code> (Flag Stand)</dt> <!-- "stand" internally -->
+         <dt data-tag="bloc:objects/multi/models/mp_flag_base/mp_flag_base"><code>flag_stand</code> (Flag Stand)</dt> 
             <dd>A flag stand. It is not solid.</dd>
             
-         <dt data-tag="bloc:objects/multi/models/mp_circle/mp_circle"><code>capture_plate</code> (Capture Plate)</dt> <!-- "destination" internally -->
+         <dt data-tag="bloc:objects/multi/models/mp_circle/mp_circle"><code>capture_plate</code> (Capture Plate)</dt> 
             <dd>A thick, olive drab plate of metal. It is not solid. It is typically used as a spawn or 
             arming point for bombs.</dd>
 
@@ -150,7 +253,7 @@
             vehicles.</dd>
             
          <dt data-tag="vehi:objects/vehicles/human/warthog/warthog"><code>warthog</code> (Warthog)</dt>
-            <dd>A Warthog. Use a <a href="variant-string-id">variant ID</a> to select a specific variety 
+            <dd>A Warthog. Use a <a href="script/api/variant-string-id.html">variant ID</a> to select a specific variety 
             of Warthog to spawn.</dd>
 
          <dt data-tag="vehi:objects/vehicles/covenant/ghost/ghost"><code>ghost</code> (Ghost)</dt>
@@ -490,7 +593,7 @@
             <dd>Defined on some Firefight maps, including Overlook. It is a Covenant weapon 
             crate. This same crate is available on some Multiplayer maps, including Forge 
             World, but it uses a different tag, and Megalo is not set up to make that tag 
-            available to scripts.</dd> <!-- crate_space_mp versus crate_space, ugh -->
+            available to scripts.</dd> 
             
          <dt data-unused="true" data-tag="eqip:"><code>eradicator_loadout</code></dt>
             <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
@@ -578,7 +681,7 @@
          <dt data-unused="true" data-tag="scen:"><code>armory_shelf</code></dt>
             <dd></dd>
             
-         <dt data-unused="true" data-tag="scen:"><code>covenant_resupply_capsule</code></dt> <!-- cov_resupply_capsule -->
+         <dt data-unused="true" data-tag="scen:"><code>covenant_resupply_capsule</code></dt> 
             <dd></dd>
             
          <dt data-tag="mach:objects/levels/multi/70_boneyard/covy_drop_pod/covy_drop_pod"><code>covenant_drop_pod</code></dt>
@@ -719,7 +822,7 @@
             
          <dt data-tag="weap:objects/weapons/pistol/target_laser/target_laser"><code>target_locator</code> (Target Locator)</dt>
             <dd>A Target Locator capable of calling down a devastating air strike. This weapon will only spawn 
-            on maps that define its tag.</dd> <!-- can't find it on any MP maps but Firefight has it -->
+            on maps that define its tag.</dd> 
             
          <dt data-unused="true" data-tag="bloc:"><code>kill_boundary_3d_model</code></dt>
             <dd>Internally, a tag named "ff_kill_zone" is used for the (Soft) Kill Boundary's 3D model, but not 
@@ -861,5 +964,8 @@
             <dd>A massive metal wall. It is usable on Forge World, but as of this writing I'm not sure yet whether it will be included in Thorage.</dd>
 
       </dl>
-   </description>
-</script-type>
+   
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

@@ -137,6 +137,12 @@ int main(int argc, char *argv[]) {
 //
 //           - You forgot to finish your sentence when writing the blurb for enums in syntax.xml.
 //
+//           - The article for general team settings should link to the article for specific team 
+//             settings; the article for general loadout settings should link to the article for 
+//             specific loadout settings; and the article for any setting category containing a 
+//             set of player traits should list those traits and link to the general article for 
+//             player traits (e.g. Respawn Settings > Respawn Traits).
+//
 //        - RENDER THE XML OUT TO HTML.
 //
 //           - Code to render "article" pages is complete.

@@ -34,7 +34,7 @@
          <dt>territory_a</dt>
             <dd>If you use this value, then you must pass a number variable or integer constant 
             as an additional argument. The lowest significant digit of that numeric value will 
-            be displayed as the icon.</dd>
+            be displayed as the icon (e.g. 15 will display as "5").</dd>
          <dt>territory_b</dt>
             <dd>Displays the number 2.</dd>
          <dt>territory_c</dt>
@@ -52,19 +52,19 @@
          <dt>territory_i</dt>
             <dd>Displays the number 9.</dd>
          <dt>supply</dt>
-            <dd></dd>
+            <dd>TBA</dd>
          <dt>supply_health</dt>
-            <dd></dd>
+            <dd>TBA</dd>
          <dt>supply_air_drop</dt>
             <dd>A small box suspended from a parachute.</dd>
          <dt>supply_ammo</dt>
-            <dd></dd>
+            <dd>TBA</dd>
          <dt>arrow</dt>
-            <dd></dd>
+            <dd>TBA</dd>
          <dt>defend</dt>
-            <dd></dd>
+            <dd>An icon indicating that a location should be defended.</dd>
          <dt>ordnance</dt>
-            <dd></dd>
+            <dd>An icon indicating that a power weapon or vehicle is available.</dd>
          <dt>inward</dt>
             <dd>Inward-pointing triangular arrows, not unlike those displayed and animated when a 
             player is waiting to respawn on you during co-op spawning.</dd>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="widget-icon">
+<script-type name="engine-icon">
    <friendly>Engine Icon</friendly>
    <blurb>An icon name</blurb>
    <description>
@@ -45,43 +45,43 @@
          <dt>headhunter</dt>
             <dd>The icon for the Headhunter gametype.</dd>
          <dt>crosshair</dt>
-            <dd></dd>
+            <dd>A crosshair.</dd>
          <dt>wheel</dt>
-            <dd></dd>
+            <dd>A wheel.</dd>
          <dt>swirl</dt>
             <dd>A swirl icon &mdash; the same icon used for what is called "Insane" in legacy Reach and "Action Sack" in MCC.</dd>
          <dt>bunker</dt>
-            <dd></dd>
+            <dd>A bunker icon.</dd>
          <dt>health_pack</dt>
-            <dd></dd>
+            <dd>A health pack icon.</dd>
          <dt>castle_defense</dt>
             <dd>A shield with a castle shape cut out of it.</dd>
          <dt>return</dt>
-            <dd></dd>
+            <dd>...</dd>
          <dt>shapes</dt>
             <dd>Line art of 3D geometric shapes.</dd>
          <dt>cartographer</dt>
             <dd>The insignia for the Silent Cartographer.</dd>
          <dt>eight_ball</dt>
-            <dd></dd>
+            <dd>An eight-ball, from billiards.</dd>
          <dt>noble</dt>
             <dd>The Noble Team insignia.</dd>
          <dt>covenant</dt>
             <dd>A Covenant insignia.</dd>
          <dt>attack</dt>
-            <dd></dd>
+            <dd>The waypoint icon used to indicate a target to attack.</dd>
          <dt>defend</dt>
-            <dd></dd>
+            <dd>The waypoint icon used to indicate an objective to defend.</dd>
          <dt>ordnance</dt>
-            <dd></dd>
+            <dd>The waypoint icon used to indicate a power weapon or vehicle to collect.</dd>
          <dt>circle</dt>
-            <dd></dd>
+            <dd>...</dd>
          <dt>recon</dt>
-            <dd></dd>
+            <dd>...</dd>
          <dt>recover</dt>
-            <dd></dd>
+            <dd>...</dd>
          <dt>ammo</dt>
-            <dd></dd>
+            <dd>The waypoint icon used to indicate an ammo pickup.</dd>
          <dt>skull</dt>
             <dd>The icon for Firefight skulls.</dd>
          <dt>forge</dt>
@@ -90,9 +90,9 @@
             <dd>These indices appear to be unused. Accordingly, they don't have names defined for them 
             in this Megalo script dialect.</dd>
          <dt>recent_games</dt>
-            <dd></dd>
+            <dd>...</dd>
          <dt>file_share</dt>
-            <dd></dd>
+            <dd>...</dd>
       </dl>
    </description>
 </script-type>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Player | ReachVariantTool Documentation</title>
+      <base href="../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
+                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Types</a>
+                     <ul>
+                        <li>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Player</h1>
+
+      <p>
+         Player variables refer to players that are participating in the match, or that have 
+         participated in the match and since quit. Note that a "player" is distinct from a 
+         "player model," or "biped:" if the game has just started and you're still selecting 
+         a loadout, then you (the player) still exist even though you're not physically 
+         present on the map (you have no biped).
+      </p>
+   <p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 4 nested <a href="script/api/team.html">teams</a>, and 4 nested <a href="script/api/timer.html">timers</a> available.</p>
+<h2>Member conditions</h2>
+<dl><dt><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></dt>
+   <dd>Checks whether one player assisted another in killing a third.</dd>
+<dt><a href="script/api/player/conditions/is_elite.html">is_elite</a></dt>
+   <dd>Checks whether a player's current species is Elite.</dd>
+<dt><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></dt>
+   <dd>This function always returns false.</dd>
+<dt><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></dt>
+   <dd>Checks whether a player's current species is Monitor.</dd>
+<dt><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></dt>
+   <dd>Checks whether a player <em>is not</em> respawning.</dd>
+<dt><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></dt>
+   <dd>Checks whether a player's current species is Spartan.</dd>
+<dt><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></dt>
+   <dd>Check what killed a player.</dd>
+</dl>
+
+<h2>Member actions</h2>
+<dl><dt><a href="script/api/player/actions/add_weapon.html">add_weapon</a></dt>
+   <dd>Give a weapon to a player.</dd>
+<dt><a href="script/api/player/actions/apply_traits.html">apply_traits</a></dt>
+   <dd>Apply a set of player traits to a player for the current tick.</dd>
+<dt><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></dt>
+   <dd>Force a player into a vehicle if any seat is available.</dd>
+<dt><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></dt>
+   <dd>Identify the player's current Armor Ability.</dd>
+<dt><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></dt>
+   <dd>Returns the index of the fireteam that a player is on.</dd>
+<dt><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></dt>
+   <dd>Get a player's position on the scoreboard.</dd>
+<dt><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></dt>
+   <dd>Get the number of players that someone has killed without dying.</dd>
+<dt><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></dt>
+   <dd>A development leftover related to a scrapped Requisition system.</dd>
+<dt><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></dt>
+   <dd>The specific function of this action is not known. Presumably it has something 
+            to do with keeping track of bad behavior in-game.</dd>
+<dt><a href="script/api/player/actions/set_biped.html">set_biped</a></dt>
+   <dd>Revoke control of a player's current biped, and grant control of another one.</dd>
+<dt><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></dt>
+   <dd>Control whether a player uses co-op spawning.</dd>
+<dt><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></dt>
+   <dd>Sets a player's current fireteam index.</dd>
+<dt><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></dt>
+   <dd>Sets which loadout palette a player can select loadouts from.</dd>
+<dt><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></dt>
+   <dd>This function appears to set a player's default respawn object, when 
+            co-op spawning is enabled.</dd>
+<dt><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></dt>
+   <dd>A development leftover related to a scrapped Requisition system.</dd>
+<dt><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></dt>
+   <dd>A development leftover related to a scrapped Requisition system.</dd>
+<dt><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></dt>
+   <dd>Change the round card's icon.</dd>
+<dt><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></dt>
+   <dd>Change the round card's icon caption.</dd>
+<dt><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></dt>
+   <dd>Change the round card's description text.</dd>
+<dt><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></dt>
+   <dd>Identify the player's current Armor Ability.</dd>
+<dt><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></dt>
+   <dd>Identify the player who killed this player.</dd>
+<dt><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></dt>
+   <dd>Identify the player who killed this player.</dd>
+<dt><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></dt>
+   <dd>Identify the player who killed this player.</dd>
+<dt><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></dt>
+   <dd>Identify the vehicle that a player is in.</dd>
+<dt><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></dt>
+   <dd>Identify the player's current weapon.</dd>
+</dl>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

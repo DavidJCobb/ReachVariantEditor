@@ -28,7 +28,7 @@
             <dd>Displays normally.</dd>
          <dt>object</dt>
             <dd>Displays the name of the object; however, most objects don't have 
-            actual names defined.</dd>
+            actual names defined and will show "unknown".</dd>
          <dt>player</dt>
             <dd>Displays the player's Xbox LIVE Gamertag.</dd>
          <dt>team</dt>

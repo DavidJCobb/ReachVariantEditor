@@ -897,7 +897,7 @@
             </description>
             <example>
                global.number[0] = current_object.get_distance_to(global.object[0])
-               if global.number[0] &lt 10 then
+               if global.number[0] &lt; 10 then
                   --
                   -- The objects are close!
                   --

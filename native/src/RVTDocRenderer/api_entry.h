@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <string>
 #include <vector>
 #include "helpers/xml.h"
@@ -50,6 +51,9 @@ class APIMethod : public APIEntry {
       bool    nodiscard = true; // only relevant if (return_value_type) is not empty
       //
       inline bool has_return_value() const noexcept { return !this->return_value_type.empty();  }
+
+      size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition);
+      void write(std::string& out, std::string stem, const std::string& type_template);
 };
 
 class APIProperty : public APIEntry {
@@ -66,6 +70,8 @@ class APIAccessor : public APIEntry {
 };
 
 class APIType : public APIEntry {
+   protected:
+      void _handle_member_nav(std::string& content, const std::string& stem);
    public:
       std::string              friendly_name;
       std::vector<APIMethod>   conditions;
@@ -74,6 +80,7 @@ class APIType : public APIEntry {
       std::vector<APIAccessor> accessors;
       bool is_variable = false;
       struct {
+         bool    defined = false;
          uint8_t numbers = 0;
          uint8_t timers  = 0;
          uint8_t teams   = 0;
@@ -81,5 +88,8 @@ class APIType : public APIEntry {
          uint8_t objects = 0;
       } scope; // if this type can be a variable scope, how many of each variable type can it hold?
 
+      const char* get_friendly_name() const noexcept;
+
       void load(cobb::xml::document& doc);
+      void write(std::filesystem::path, int depth, std::string stem, const std::string& article_template, const std::string& type_template);
 };

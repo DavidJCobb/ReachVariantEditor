@@ -44,4 +44,8 @@ namespace cobb {
    extern bool path_starts_with(const std::wstring& path, const std::wstring& prefix);
    //
    extern bool string_ends_with(const std::string& haystack, const std::string& suffix) noexcept;
+
+   extern std::string& ltrim(std::string& subject);
+   extern std::string& rtrim(std::string& subject);
+   extern std::string& trim(std::string& subject);
 }

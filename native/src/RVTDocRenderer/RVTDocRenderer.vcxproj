@@ -139,11 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="api_entry.cpp" />
+    <ClCompile Include="common.cpp" />
     <ClCompile Include="helpers\strings.cpp" />
     <ClCompile Include="helpers\xml.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="api_entry.h" />
+    <ClInclude Include="common.h" />
     <ClInclude Include="helpers\strings.h" />
     <ClInclude Include="helpers\xml.h" />
   </ItemGroup>

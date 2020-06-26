@@ -14,7 +14,7 @@ namespace cobb {
       };
       struct token {
          token(uint32_t line, token_code a) : line(line), code(a) {};
-         token(uint32_t line, token_code a, float b, const char* c, const char* d) : line(line), code(a), number(b), name(c), value(d) {};
+         token(uint32_t line, token_code a, const char* c, const char* d) : line(line), code(a), name(c), value(d) {};
 
          uint32_t    line = 0;
          token_code  code = token_code::undefined;

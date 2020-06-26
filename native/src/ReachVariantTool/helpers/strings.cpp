@@ -37,7 +37,7 @@ namespace cobb {
       uint32_t s = 256;
       char* b = (char*)malloc(s);
       int32_t r = vsnprintf(b, s, format, args);
-      while (r > s) {
+      while (r + 1 > s) {
          va_copy(args, safe);
          s += 20;
          free(b);
@@ -211,4 +211,30 @@ namespace cobb {
          return false;
       return haystack.compare(h - s, std::string::npos, suffix, 0, std::string::npos) == 0;
    }
+
+   std::string& ltrim(std::string& subject) {
+      subject.erase(
+         subject.begin(),
+         std::find_if(
+            subject.begin(),
+            subject.end(),
+            [](int c) { return !std::isspace(c); }
+         )
+      );
+      return subject;
+   };
+   std::string& rtrim(std::string& subject) {
+      subject.erase(
+         std::find_if(
+            subject.rbegin(),
+            subject.rend(),
+            [](int c) { return !std::isspace(c); }
+         ).base(),
+         subject.end()
+      );
+      return subject;
+   };
+   std::string& trim(std::string& subject) {
+      return rtrim(ltrim(subject));
+   };
 }
