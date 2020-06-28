@@ -37,8 +37,16 @@ class APIEntry {
       std::vector<relationship> related;
       //
    protected:
+      size_t _load_blurb(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem);
+      size_t _load_description(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem);
+      size_t _load_example(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem);
       size_t _load_relationship(cobb::xml::document& doc, uint32_t start_tag_token_index);
       size_t _load_note(cobb::xml::document& doc, uint32_t start_tag_token_index, std::string stem);
+      //
+      void _write_description(std::string& out) const;
+      void _write_example(std::string& out) const;
+      void _write_notes(std::string& out) const;
+      void _write_relationships(std::string& out, const std::string& member_of, api_entry_type my_type) const;
 };
 
 class APIMethod : public APIEntry {
@@ -66,6 +74,9 @@ class APIProperty : public APIEntry {
    public:
       std::string type;
       bool is_read_only = false;
+
+      size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of);
+      void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
 };
 
 class APIAccessor : public APIEntry {
@@ -100,6 +111,8 @@ class APIType : public APIEntry {
       const char* get_friendly_name() const noexcept;
       APIMethod* get_action_by_name(const std::string&);
       APIMethod* get_condition_by_name(const std::string&);
+      APIProperty* get_property_by_name(const std::string&);
+      APIAccessor* get_accessor_by_name(const std::string&);
 
       void load(cobb::xml::document& doc);
       void write(std::filesystem::path, int depth, std::string stem, const std::string& article_template, const std::string& type_template);

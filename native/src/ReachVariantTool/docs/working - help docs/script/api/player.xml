@@ -478,7 +478,6 @@
                If the vehicle is flipped, then the player will be moved to it, but will not 
                be forced into it. <!-- TODO: RECHECK THIS -->
             </note>
-            <related context="player" type="action" name="force_into_vehicle" />
          </method>
          <method name="set_biped" id="42">
             <args>
@@ -557,8 +556,8 @@
                </p>
                <p>
                   I was able to identify the beeping sound; it is defined in the following tags. These tags 
-                  seem to have been intended for the Missile Pod, a weapon present only in Halo 3; however, 
-                  a search for Missile Pod gameplay videos on YouTube failed to turn up any where this exact 
+                  seem to have been intended for the Missile Pod, a weapon present only in <i>Halo 3</i>; however, 
+                  a search for Missile Pod gameplay videos on YouTube failed to turn up anywhere this exact 
                   sound plays.
                </p>
                <ul>

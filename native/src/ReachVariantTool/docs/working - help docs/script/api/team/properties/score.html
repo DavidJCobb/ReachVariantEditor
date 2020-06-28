@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>team.score | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/team.html">Team</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/team/properties/score.html">score</a></li>
+<li><a href="script/api/team/properties/script_stat.html">script_stat</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/team/conditions/has_alliance_status.html">has_alliance_status</a></li>
+<li><a href="script/api/team/conditions/has_any_players.html">has_any_players</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/team/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/team/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/team/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>team.score</h1>
+
+            <p>
+               This property provides access to a team's score. Note that a team's score 
+               <em>is not</em> the total score of its players. Rather, both players and 
+               teams are entities that are able to "have points."
+            </p>
+            <p>
+               Suppose a match has two teams, Red and Blue, and no one (players or teams) 
+               has any points. If you set each team's score to 1, and then set a Red Team 
+               player's score to 1, then Red Team will be in the lead.
+            </p>
+         <h2>Example</h2>
+<pre>
+for each team do
+   if current_player.biped != no_object then
+      --
+      -- If the player has a biped on the map, then they must be alive.
+      --
+      current_player.team.score += 1
+   end
+end</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+            It may seem strange for teams to have distinct score values from their players, 
+            but there is a use for it. Suppose you're playing Assault, and a player arms 
+            the bomb and then quits before the bomb detonates. Normally, when a bomb 
+            detonates, a point is awarded to the player who planted it, but in this case, 
+            since the player quit, the point will be awarded to the team itself. A similar 
+            thing occurs in Stockpile, if a collected flag was placed into a team's goal 
+            by a player who quit or (perhaps accidentally) by an enemy of that team.
+         </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/properties/score.html">player.score</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

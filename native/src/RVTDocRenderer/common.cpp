@@ -2,6 +2,22 @@
 #include <cassert>
 #include "helpers/strings.h"
 
+namespace {
+   void _append_text_content(std::string& out, const std::string& text) {
+      size_t size = text.size();
+      out.reserve(out.size() + size);
+      for (size_t i = 0; i < size; ++i) {
+         char c = text[i];
+         switch (c) {
+            case '&': out += "&amp;"; continue;
+            case '<': out += "&lt;"; continue;
+            case '>': out += "&gt;"; continue;
+         }
+         out += c;
+      }
+   }
+}
+
 void handle_base_tag(std::string& html, int depth) {
    if (depth <= 0)
       return;

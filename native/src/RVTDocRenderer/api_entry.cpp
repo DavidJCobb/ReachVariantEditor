@@ -5,6 +5,29 @@
 #include "common.h"
 #include "helpers/strings.h"
 
+size_t APIEntry::_load_blurb(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem) {
+   std::string out;
+   auto extract = extract_html_from_xml(start_tag_token_index, doc, out, stem);
+   if (extract != std::string::npos)
+      std::swap(this->blurb, out);
+   return extract;
+}
+size_t APIEntry::_load_description(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem) {
+   std::string out;
+   auto extract = extract_html_from_xml(start_tag_token_index, doc, out, stem);
+   if (extract != std::string::npos)
+      std::swap(this->description, out);
+   return extract;
+}
+size_t APIEntry::_load_example(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem) {
+   std::string out;
+   auto extract = extract_html_from_xml(start_tag_token_index, doc, out, stem);
+   if (extract != std::string::npos) {
+      minimize_indent(out); // the example will be rendered in PRE tags
+      std::swap(this->example, out);
+   }
+   return extract;
+}
 size_t APIEntry::_load_relationship(cobb::xml::document& doc, uint32_t start_tag_token_index) {
    this->related.emplace_back();
    auto& rel = this->related.back();
@@ -59,7 +82,98 @@ size_t APIEntry::_load_note(cobb::xml::document& doc, uint32_t start_tag_token_i
    assert(extract != std::string::npos);
    return extract;
 }
+//
+void APIEntry::_write_description(std::string& out) const {
+   if (this->description.empty()) {
+      if (this->blurb.empty())
+         out += "<p>No description available.</p>";
+      else
+         out += this->blurb;
+   } else
+      out += this->description;
+}
+void APIEntry::_write_example(std::string& out) const {
+   if (this->example.empty())
+      return;
+   out += "<h2>Example</h2>\n<pre>";
+   out += this->example;
+   out += "</pre>\n";
+}
+void APIEntry::_write_notes(std::string& out) const {
+   if (this->notes.empty())
+      return;
+   bool has_any_named = false;
+   bool has_any_bare  = false;
+   //
+   out += "<h2>Notes</h2>\n";
+   for (auto& note : this->notes) {
+      if (note.title.empty()) {
+         has_any_bare = true;
+         continue;
+      }
+      has_any_named = true;
+      //
+      out += "<h3>";
+      if (!note.id.empty()) {
+         out += "<a name=\"";
+         out += note.id;
+         out += "\">";
+      }
+      out += note.title;
+      if (!note.id.empty())
+         out += "</a>";
+      out += "</h3>\n";
+      //
+      out += note.content;
+   }
+   if (has_any_bare) {
+      if (has_any_named)
+         out += "<h3>Other notes</h3>\n";
+      out += "<ul>\n";
+      for (auto& note : this->notes) {
+         if (!note.title.empty())
+            continue;
+         out += "   <li>";
+         out += note.content;
+         out += "</li>\n";
+      }
+      out += "</ul>";
+   }
+}
+void APIEntry::_write_relationships(std::string& out, const std::string& member_of, api_entry_type my_type) const {
+   if (this->related.empty())
+      return;
+   out += "<h2>See also</h2>\n<ul>\n";
+   for (auto& rel : this->related) {
+      out += "   <li><a href=\"script/api/";
+      //
+      std::string context = rel.context;
+      if (context.empty())
+         context = member_of;
+      //
+      out += context;
+      out += "/";
+      auto rt = rel.type;
+      if (rt == api_entry_type::same)
+         rt = my_type;
+      switch (rt) {
+         case api_entry_type::action: out += "actions/"; break;
+         case api_entry_type::condition: out += "conditions/"; break;
+         case api_entry_type::property: out += "properties/"; break;
+         case api_entry_type::accessor: out += "accessors/"; break;
+      }
+      out += rel.name;
+      out += ".html\">";
+      out += context;
+      if (!context.empty())
+         out += '.';
+      out += rel.name;
+      out += "</a></li>\n";
+   }
+   out += "</ul>\n";
+}
 
+#pragma region APIMethod 
 size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition) {
    enum class location {
       nowhere,
@@ -115,31 +229,21 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                }
                //
                if (token.name == "blurb") {
-                  std::string out;
-                  extract = extract_html_from_xml(i, doc, out, stem);
+                  extract = this->_load_blurb(doc, i, stem);
                   assert(extract != std::string::npos);
-                  std::swap(this->blurb, out);
                   i = extract;
-                  //
                   continue;
                }
                if (token.name == "description") {
-                  std::string out;
-                  extract = extract_html_from_xml(i, doc, out, stem);
+                  extract = this->_load_description(doc, i, stem);
                   assert(extract != std::string::npos);
-                  std::swap(this->description, out);
                   i = extract;
-                  //
                   continue;
                }
                if (token.name == "example") {
-                  std::string out;
-                  extract = extract_html_from_xml(i, doc, out, stem);
+                  extract = this->_load_example(doc, i, stem);
                   assert(extract != std::string::npos);
-                  minimize_indent(out); // the example will be rendered in PRE tags
-                  std::swap(this->example, out);
                   i = extract;
-                  //
                   continue;
                }
                if (token.name == "note") {
@@ -210,18 +314,15 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
    //
    handle_page_title_tag(content, full_title);
    //
-   std::string needle  = "<content-placeholder id=\"main\" />";
-   std::size_t pos     = content.find(needle.c_str());
-   std::string replace;
+   std::string needle = "<content-placeholder id=\"main\" />";
+   std::size_t pos    = content.find(needle.c_str());
    assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
    //
+   std::string replace;
    replace += "<h1>";
    replace += full_title;
    replace += "</h1>\n";
-   if (this->description.empty())
-      replace += this->blurb;
-   else
-      replace += this->description;
+   this->_write_description(replace);
    if (this->has_return_value()) {
       replace += "<p>This function returns <a href=\"script/api/";
       replace += this->return_value_type;
@@ -269,83 +370,102 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
          replace += "</dl>\n";
       }
    }
-   if (!this->example.empty()) {
-      replace += "<h2>Example</h2>\n";
-      replace += "<pre>";
-      replace += this->example;
-      replace += "</pre>\n";
-   }
-   if (!this->notes.empty()) {
-      bool has_any_named = false;
-      bool has_any_bare  = false;
-      //
-      replace += "<h2>Notes</h2>\n";
-      for (auto& note : this->notes) {
-         if (note.title.empty()) {
-            has_any_bare = true;
-            continue;
-         }
-         has_any_named = true;
-         //
-         replace += "<h3>";
-         if (!note.id.empty()) {
-            replace += "<a name=\"";
-            replace += note.id;
-            replace += "\">";
-         }
-         replace += note.title;
-         if (!note.id.empty())
-            replace += "</a>";
-         replace += "</h3>\n";
-         //
-         replace += note.content;
-      }
-      if (has_any_bare) {
-         if (has_any_named)
-            replace += "<h3>Other notes</h3>\n";
-         replace += "<ul>\n";
-         for (auto& note : this->notes) {
-            if (!note.title.empty())
-               continue;
-            replace += "   <li>";
-            replace += note.content;
-            replace += "</li>\n";
-         }
-         replace += "</ul>";
-      }
-   }
-   if (!this->related.empty()) {
-      replace += "<h2>See also</h2>\n<ul>\n";
-      for (auto& rel : this->related) {
-         replace += "   <li><a href=\"script/api/";
-         //
-         std::string context = rel.context;
-         if (context.empty())
-            context = member_of;
-         //
-         replace += context;
-         replace += "/";
-         switch (rel.type) {
-            case api_entry_type::action: replace += "actions/"; break;
-            case api_entry_type::condition: replace += "conditions/"; break;
-            case api_entry_type::property: replace += "properties/"; break;
-            case api_entry_type::accessor: replace += "accessors/"; break;
-            case api_entry_type::same:
-               replace += (this->is_action) ? "actions/" : "conditions/";
-               break;
-         }
-         replace += rel.name;
-         replace += ".html\">";
-         replace += context;
-         if (!context.empty())
-            replace += '.';
-         replace += rel.name;
-         replace += "</a></li>\n";
-      }
-      replace += "</ul>\n";
-   }
+   this->_write_example(replace);
+   this->_write_notes(replace);
+   this->_write_relationships(replace, member_of, this->is_action ? api_entry_type::action : api_entry_type::condition);
    content.replace(pos, needle.length(), replace);
 }
+#pragma endregion
+
+#pragma region APIProperty 
+size_t APIProperty::load(cobb::xml::document& doc, uint32_t root_token, std::string member_of) {
+   std::string stem;
+   cobb::sprintf(stem, "script/api/%s/properties/", member_of.c_str());
+   //
+   int32_t depth = 0;
+   size_t  extract;
+   size_t  size = doc.tokens.size();
+   for (size_t i = i = root_token + 1; i < size; ++i) {
+      auto& token = doc.tokens[i];
+      //
+      if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+         if (token.name == "name")
+            this->name = token.value;
+         else if (token.name == "name2")
+            this->name2 = token.value;
+         else if (token.name == "type")
+            this->type = token.value;
+         continue;
+      }
+      //
+      if (token.code == cobb::xml::token_code::element_close) {
+         if (depth == 0) {
+            assert(token.name == "property");
+            return i;
+         }
+         --depth;
+      }
+      if (token.code != cobb::xml::token_code::element_open)
+         continue;
+      if (depth == 0) {
+         if (token.name == "blurb") {
+            extract = this->_load_blurb(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "description") {
+            extract = this->_load_description(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "example") {
+            extract = this->_load_example(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "note") {
+            extract = this->_load_note(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "related") {
+            extract = this->_load_relationship(doc, i);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+      }
+      ++depth;
+   }
+   return std::string::npos;
+}
+void APIProperty::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
+   std::string full_title = member_of;
+   if (!full_title.empty())
+      full_title += '.';
+   full_title += this->name;
+   //
+   handle_page_title_tag(content, full_title);
+   //
+   std::string needle = "<content-placeholder id=\"main\" />";
+   std::size_t pos = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
+   //
+   replace += "<h1>";
+   replace += full_title;
+   replace += "</h1>\n";
+   this->_write_description(replace);
+   this->_write_example(replace);
+   this->_write_notes(replace);
+   this->_write_relationships(replace, member_of, api_entry_type::property);
+   content.replace(pos, needle.length(), replace);
+}
+#pragma endregion
 
 const char* APIType::get_friendly_name() const noexcept {
    if (!this->friendly_name.empty())
@@ -362,6 +482,18 @@ APIMethod* APIType::get_action_by_name(const std::string& name) {
 }
 APIMethod* APIType::get_condition_by_name(const std::string& name) {
    for (auto& member : this->conditions)
+      if (member.name == name || member.name2 == name)
+         return &member;
+   return nullptr;
+}
+APIProperty* APIType::get_property_by_name(const std::string& name) {
+   for (auto& member : this->properties)
+      if (member.name == name || member.name2 == name)
+         return &member;
+   return nullptr;
+}
+APIAccessor* APIType::get_accessor_by_name(const std::string& name) {
+   for (auto& member : this->accessors)
       if (member.name == name || member.name2 == name)
          return &member;
    return nullptr;
@@ -577,9 +709,13 @@ void APIType::load(cobb::xml::document& doc) {
             if (token.code == cobb::xml::token_code::element_open) {
                if (depth == 0) {
                   if (token.name == "property") {
+                     this->properties.emplace_back();
+                     auto& member = this->properties.back();
+                     auto  extract = member.load(doc, i, this->name);
+                     assert(extract != std::string::npos);
+                     i = extract;
                      //
-                     // TODO
-                     //
+                     continue;
                   }
                }
                ++depth;
@@ -708,14 +844,10 @@ void APIType::_mirror_member_relationships(APIType& member_of, APIEntry& member,
             target = member_of.get_action_by_name(rel.name);
             break;
          case api_entry_type::property:
-            //
-            // TODO
-            //
+            target = member_of.get_property_by_name(rel.name);
             break;
          case api_entry_type::accessor:
-            //
-            // TODO
-            //
+            target = member_of.get_accessor_by_name(rel.name);
             break;
       }
       //
@@ -904,11 +1036,19 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, this->name, type_template);
          //
-         // TODO: generate the member content
-         //
-         // TODO: export the file
-         //
+         auto pm = p.parent_path();
+         pm.append(this->name);
+         std::filesystem::create_directory(pm);
+         pm.append("properties");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/properties" and the API doesn't remember that "properties" was a directory, so we need this or the next two calls will replace "properties" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
       }
    }
    {
