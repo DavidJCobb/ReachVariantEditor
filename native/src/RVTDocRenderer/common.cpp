@@ -6,14 +6,46 @@ namespace {
    void _append_text_content(std::string& out, const std::string& text) {
       size_t size = text.size();
       out.reserve(out.size() + size);
+      //
+      bool in_entity = false;
+      std::string entity;
+      //
       for (size_t i = 0; i < size; ++i) {
          char c = text[i];
+         if (in_entity) {
+            if (isspace(c) || c == '&') { // turns out, this wasn't an HTML entity after all
+               out += "&amp;";
+               out += entity;
+               if (c != '&') {
+                  in_entity = false;
+                  out += c;
+               }
+               entity.clear();
+               continue;
+            }
+            if (c == ';') { // turns out, this was an HTML entity after all
+               out += '&';
+               out += entity;
+               out += c;
+               in_entity = false;
+               entity.clear();
+               continue;
+            }
+            entity += c;
+            continue;
+         }
          switch (c) {
-            case '&': out += "&amp;"; continue;
+            case '&':
+               in_entity = true;
+               continue;
             case '<': out += "&lt;"; continue;
             case '>': out += "&gt;"; continue;
          }
          out += c;
+      }
+      if (in_entity) {
+         out += "&amp;";
+         out += entity;
       }
    }
 }
@@ -153,7 +185,8 @@ size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std
                   break;
             }
             last_opened_tag.clear();
-            cobb::sprintf(temp, "</%s>", token.name.c_str());
+            if (token.name != "img")
+               cobb::sprintf(temp, "</%s>", token.name.c_str());
             break;
       }
       out += temp;
