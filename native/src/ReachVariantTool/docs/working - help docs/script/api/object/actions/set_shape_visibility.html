@@ -103,8 +103,22 @@ Adjust which players can see an object's shape boundary.<h2>Arguments</h2>
 for each object with label "territory" do
    current_object.set_shape_visibility(everyone)
 end</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               You cannot make objects with spherical shapes visible. Spherical shapes are 
+               only available via scripting, not in Forge, and the game apparently has no 
+               code to display them.
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/set_shape.html">object.set_shape</a></li>
+   <li><a href="script/api/object/conditions/shape_contains.html">object.shape_contains</a></li>
+   <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">object.apply_shape_color_from_player_member</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

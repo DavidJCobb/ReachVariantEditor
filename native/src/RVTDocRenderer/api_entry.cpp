@@ -5,74 +5,77 @@
 #include "common.h"
 #include "helpers/strings.h"
 
+size_t APIEntry::_load_relationship(cobb::xml::document& doc, uint32_t start_tag_token_index) {
+   this->related.emplace_back();
+   auto& rel = this->related.back();
+   //
+   uint32_t depth = 0;
+   uint32_t j     = start_tag_token_index + 1;
+   for (; j < doc.tokens.size(); ++j) {
+      auto& token = doc.tokens[j];
+      if (token.code == cobb::xml::token_code::element_open)
+         ++depth;
+      if (token.code == cobb::xml::token_code::element_close) {
+         if (depth == 0 && token.name == "related")
+            break;
+         --depth;
+      }
+      if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+         assert(!this->related.empty());
+         if (token.name == "type") {
+            if (token.value == "action")
+               rel.type = api_entry_type::action;
+            else if (token.value == "condition")
+               rel.type = api_entry_type::condition;
+            else if (token.value == "property")
+               rel.type = api_entry_type::property;
+            else if (token.value == "accessor")
+               rel.type = api_entry_type::accessor;
+         } else if (token.name == "name") {
+            rel.name = token.value;
+         } else if (token.name == "context") {
+            rel.context = token.value;
+         }
+      }
+   }
+   if (depth)
+      return std::string::npos;
+   return j;
+}
+size_t APIEntry::_load_note(cobb::xml::document& doc, uint32_t start_tag_token_index, std::string stem) {
+   this->notes.emplace_back();
+   auto& note = this->notes.back();
+   //
+   for (size_t j = start_tag_token_index + 1; j < doc.tokens.size(); ++j) {
+      auto& token = doc.tokens[j];
+      if (token.code != cobb::xml::token_code::attribute)
+         break;
+      if (token.name == "title")
+         note.title = token.value;
+      else if (token.name == "id")
+         note.id = token.value;
+   }
+   auto extract = extract_html_from_xml(start_tag_token_index, doc, note.content, stem);
+   assert(extract != std::string::npos);
+   return extract;
+}
+
 size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition) {
    enum class location {
       nowhere,
       args,
-   };
-   enum class target {
-      nothing,
-      note,
-      related,
    };
    //
    std::string stem;
    cobb::sprintf(stem, "script/api/%s/%s/", member_of.c_str(), is_condition ? "conditions" : "actions");
    //
    location where = location::nowhere;
-   target   focus = target::nothing;
    uint32_t depth = 0;
    size_t   extract;
    uint32_t i    = root_token + 1;
    size_t   size = doc.tokens.size();
    for (; i < size; ++i) {
       auto& token = doc.tokens[i];
-      //
-      switch (focus) {
-         case target::note:
-            if (token.code == cobb::xml::token_code::element_open)
-               ++depth;
-            if (token.code == cobb::xml::token_code::element_close) {
-               if (depth == 0 && token.name == "note") {
-                  focus = target::nothing;
-                  continue;
-               }
-               --depth;
-            }
-            //
-            // TODO: extract attributes for the note tag, AND get the content as HTML
-            //
-            continue;
-         case target::related:
-            if (token.code == cobb::xml::token_code::element_open)
-               ++depth;
-            if (token.code == cobb::xml::token_code::element_close) {
-               if (depth == 0 && token.name == "related") {
-                  focus = target::nothing;
-                  continue;
-               }
-               --depth;
-            }
-            if (token.code == cobb::xml::token_code::attribute && depth == 0) {
-               assert(!this->related.empty());
-               auto& rel = this->related.back();
-               if (token.name == "type") {
-                  if (token.value == "action")
-                     rel.type = api_entry_type::action;
-                  else if (token.value == "condition")
-                     rel.type = api_entry_type::condition;
-                  else if (token.value == "property")
-                     rel.type = api_entry_type::property;
-                  else if (token.value == "accessor")
-                     rel.type = api_entry_type::accessor;
-               } else if (token.name == "name") {
-                  rel.name = token.value;
-               } else if (token.name == "context") {
-                  rel.context = token.value;
-               }
-            }
-            continue;
-      }
       //
       switch (where) {
          case location::nowhere:
@@ -116,7 +119,6 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                   extract = extract_html_from_xml(i, doc, out, stem);
                   assert(extract != std::string::npos);
                   std::swap(this->blurb, out);
-                  focus = target::nothing;
                   i = extract;
                   //
                   continue;
@@ -126,7 +128,6 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                   extract = extract_html_from_xml(i, doc, out, stem);
                   assert(extract != std::string::npos);
                   std::swap(this->description, out);
-                  focus = target::nothing;
                   i = extract;
                   //
                   continue;
@@ -137,18 +138,20 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                   assert(extract != std::string::npos);
                   minimize_indent(out); // the example will be rendered in PRE tags
                   std::swap(this->example, out);
-                  focus = target::nothing;
                   i = extract;
                   //
                   continue;
                }
                if (token.name == "note") {
-                  focus = target::note;
+                  extract = this->_load_note(doc, i, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
                   continue;
                }
                if (token.name == "related") {
-                  this->related.emplace_back();
-                  focus = target::related;
+                  extract = this->_load_relationship(doc, i);
+                  assert(extract != std::string::npos);
+                  i = extract;
                   continue;
                }
             }
@@ -197,9 +200,6 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
             break;
       }
    }
-   //
-   // TODO: Sort notes: notes with names should come before all notes without names
-   //
    return std::string::npos;
 }
 void APIMethod::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
@@ -276,29 +276,42 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
       replace += "</pre>\n";
    }
    if (!this->notes.empty()) {
-      bool has_any_named = !this->notes[0].title.empty();
-      bool wrote_subhead = false;
+      bool has_any_named = false;
+      bool has_any_bare  = false;
       //
-      replace += "<h2>Notes</h2>\n<ul>\n";
+      replace += "<h2>Notes</h2>\n";
       for (auto& note : this->notes) {
          if (note.title.empty()) {
-            if (has_any_named && !wrote_subhead) {
-               wrote_subhead = true;
-               replace += "<h3>Other notes</h3>\n";
-            }
-         } else {
-            replace += "<h3>";
-            if (!note.id.empty()) {
-               replace += "<a name=\"";
-               replace += note.id;
-               replace += "\">";
-            }
-            replace += note.title;
-            if (!note.id.empty())
-               replace += "</a>";
-            replace += "</h3>\n";
+            has_any_bare = true;
+            continue;
          }
+         has_any_named = true;
+         //
+         replace += "<h3>";
+         if (!note.id.empty()) {
+            replace += "<a name=\"";
+            replace += note.id;
+            replace += "\">";
+         }
+         replace += note.title;
+         if (!note.id.empty())
+            replace += "</a>";
+         replace += "</h3>\n";
+         //
          replace += note.content;
+      }
+      if (has_any_bare) {
+         if (has_any_named)
+            replace += "<h3>Other notes</h3>\n";
+         replace += "<ul>\n";
+         for (auto& note : this->notes) {
+            if (!note.title.empty())
+               continue;
+            replace += "   <li>";
+            replace += note.content;
+            replace += "</li>\n";
+         }
+         replace += "</ul>";
       }
    }
    if (!this->related.empty()) {
@@ -341,6 +354,19 @@ const char* APIType::get_friendly_name() const noexcept {
       return this->name.c_str();
    return this->name2.c_str();
 }
+APIMethod* APIType::get_action_by_name(const std::string& name) {
+   for (auto& member : this->actions)
+      if (member.name == name || member.name2 == name)
+         return &member;
+   return nullptr;
+}
+APIMethod* APIType::get_condition_by_name(const std::string& name) {
+   for (auto& member : this->conditions)
+      if (member.name == name || member.name2 == name)
+         return &member;
+   return nullptr;
+}
+//
 void APIType::load(cobb::xml::document& doc) {
    enum class location {
       nowhere,
@@ -503,6 +529,7 @@ void APIType::load(cobb::xml::document& doc) {
                   if (token.name == "method") {
                      this->conditions.emplace_back();
                      auto& opcode  = this->conditions.back();
+                     opcode.is_action = false;
                      auto  extract = opcode.load(doc, i, this->name, true);
                      assert(extract != std::string::npos);
                      i = extract;
@@ -527,6 +554,7 @@ void APIType::load(cobb::xml::document& doc) {
                   if (token.name == "method") {
                      this->actions.emplace_back();
                      auto& opcode  = this->actions.back();
+                     opcode.is_action = true;
                      auto  extract = opcode.load(doc, i, this->name, false);
                      assert(extract != std::string::npos);
                      i = extract;
@@ -588,8 +616,7 @@ void APIType::load(cobb::xml::document& doc) {
       }
    }
    //
-   // TODO: make all relationships defined with <related/> tags bidirectional
-   //
+   this->_make_member_relationships_bidirectional();
    std::sort(this->actions.begin(), this->actions.end(), [](const APIMethod& a, const APIMethod& b) { return a.name < b.name; });
    std::sort(this->conditions.begin(), this->conditions.end(), [](const APIMethod& a, const APIMethod& b) { return a.name < b.name; });
    std::sort(this->properties.begin(), this->properties.end(), [](const APIEntry& a, const APIEntry& b) { return a.name < b.name; });
@@ -636,6 +663,9 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       //
       replace.clear();
       for (auto& prop : this->conditions) {
+         //
+         // TODO: conditions with two names should have <li/>s generated for both names
+         //
          std::string li;
          cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
@@ -649,12 +679,73 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       //
       replace.clear();
       for (auto& prop : this->actions) {
+         //
+         // TODO: actions with two names should have <li/>s generated for both names (e.g. try_get_carrier versus get_carrier)
+         //
          std::string li;
          cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
    }
+}
+void APIType::_mirror_member_relationships(APIType& member_of, APIEntry& member, api_entry_type member_type) {
+   for (auto& rel : member.related) {
+      if (rel.mirrored)
+         continue;
+      if (!rel.context.empty() && rel.context != member_of.name) // this is a relationship to something in another type
+         continue;
+      APIEntry* target = nullptr;
+      //
+      auto rt = rel.type;
+      if (rt == api_entry_type::same)
+         rt = member_type;
+      switch (rt) {
+         case api_entry_type::condition:
+            target = member_of.get_condition_by_name(rel.name);
+            break;
+         case api_entry_type::action:
+            target = member_of.get_action_by_name(rel.name);
+            break;
+         case api_entry_type::property:
+            //
+            // TODO
+            //
+            break;
+         case api_entry_type::accessor:
+            //
+            // TODO
+            //
+            break;
+      }
+      //
+      if (target == nullptr)
+         continue;
+      target->related.emplace_back();
+      auto& mirrored = target->related.back();
+      mirrored.mirrored = true;
+      mirrored.name = member.name;
+      mirrored.type = member_type;
+      //
+      for (auto& rel2 : member.related) {
+         if (&rel2 == &rel)
+            continue;
+         target->related.emplace_back();
+         auto& mirrored = target->related.back();
+         mirrored = rel2;
+         mirrored.mirrored = true;
+      }
+   }
+}
+void APIType::_make_member_relationships_bidirectional() {
+   for (auto& member : this->conditions)
+      this->_mirror_member_relationships(*this, member, api_entry_type::condition);
+   for (auto& member : this->actions)
+      this->_mirror_member_relationships(*this, member, api_entry_type::action);
+   for (auto& member : this->properties)
+      this->_mirror_member_relationships(*this, member, api_entry_type::property);
+   for (auto& member : this->accessors)
+      this->_mirror_member_relationships(*this, member, api_entry_type::accessor);
 }
 void APIType::write(std::filesystem::path p, int depth, std::string stem, const std::string& article_template, const std::string& type_template) {
    std::string content = article_template; // copy

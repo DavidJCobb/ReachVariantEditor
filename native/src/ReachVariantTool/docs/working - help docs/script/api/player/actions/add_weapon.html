@@ -88,8 +88,16 @@ Give a weapon to a player.<h2>Arguments</h2>
 <h2>Example</h2>
 <pre>
 global.player[0].add_weapon(global.object[0])</pre>
-
+<h2>Notes</h2>
+<ul>
+   <li>
+               Remember that this function works differently from <code>object.add_weapon</code>: 
+               the object function takes an object type and spawns a new weapon; while the player 
+               function takes an existing weapon object.
+            </li>
+</ul>
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

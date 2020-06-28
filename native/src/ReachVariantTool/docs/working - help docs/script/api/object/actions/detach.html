@@ -101,8 +101,53 @@
             <h2>Example</h2>
 <pre>
 current_object.detach()</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               Detaching a player's carried weapons will cause those weapons to 
+               drop into the game world. Of course, there is already a member 
+               function that can be used to achieve this effect directly.
+            </li>
+   <li>
+               If a player is occupying a vehicle, calling this function on their 
+               biped will instantly force them out of the vehicle.
+            </li>
+   <li>
+               <p>
+                  Detaching a player's equipped Armor Ability will not cause them to 
+                  drop it; however, the Armor Ability's 3D model (ordinarily visible 
+                  on the player's back) will detach and stop moving in synch with the 
+                  player. At this point, a script can move the ability independently 
+                  of the player without the player losing it (though the effects of 
+                  moving an equipped Armor Ability out of bounds have not been tested). 
+                  Armor Abilities in this state do not have physics and collision, and 
+                  will remain wherever a script places them until such time as the 
+                  player carrying them is killed: the ability will teleport back to 
+                  the player's body at that moment.
+               </p>
+               <p>
+                  A jetpack moved in this manner will show thruster animations without 
+                  moving whenever its carrier uses it. Other abilities have glowing 
+                  lights whose brightness indicates the player's ability energy (i.e. 
+                  cooldown).
+               </p>
+               <p>
+                  The most interesting side-effect of detaching an Armor Ability 
+                  occurs when Active Camo is used: the radar-jamming effect comes 
+                  from the Armor Ability's 3D model and remains centered on that, 
+                  not on the carrier. No other Armor Abilities have gameplay side-effects 
+                  from being detached, even when their visuals would imply it; Armor Lock, 
+                  for example, shows EMP surge graphics on the ability while it's held, 
+                  but the EMP itself still comes from the player.
+               </p>
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/attach_to.html">object.attach_to</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

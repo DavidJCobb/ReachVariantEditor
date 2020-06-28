@@ -22,8 +22,9 @@ class APIEntry {
       };
       struct relationship {
          std::string    context; // basis.whatever
-         api_entry_type type = api_entry_type::same;
          std::string    name;
+         api_entry_type type = api_entry_type::same;
+         bool mirrored = false;
       };
       //
       std::string name;
@@ -34,6 +35,10 @@ class APIEntry {
       //
       std::vector<note> notes;
       std::vector<relationship> related;
+      //
+   protected:
+      size_t _load_relationship(cobb::xml::document& doc, uint32_t start_tag_token_index);
+      size_t _load_note(cobb::xml::document& doc, uint32_t start_tag_token_index, std::string stem);
 };
 
 class APIMethod : public APIEntry {
@@ -73,6 +78,9 @@ class APIAccessor : public APIEntry {
 class APIType : public APIEntry {
    protected:
       void _handle_member_nav(std::string& content, const std::string& stem);
+      void _make_member_relationships_bidirectional();
+      void _mirror_member_relationships(APIType& member_of, APIEntry& member, api_entry_type member_type);
+      //
    public:
       std::string              friendly_name;
       std::vector<APIMethod>   conditions;
@@ -90,6 +98,8 @@ class APIType : public APIEntry {
       } scope; // if this type can be a variable scope, how many of each variable type can it hold?
 
       const char* get_friendly_name() const noexcept;
+      APIMethod* get_action_by_name(const std::string&);
+      APIMethod* get_condition_by_name(const std::string&);
 
       void load(cobb::xml::document& doc);
       void write(std::filesystem::path, int depth, std::string stem, const std::string& article_template, const std::string& type_template);

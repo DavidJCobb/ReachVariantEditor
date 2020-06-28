@@ -109,8 +109,21 @@ Spawn a new object between this object and another.<p>This function returns <a h
 <h2>Example</h2>
 <pre>
 global.object[0] = global.object[1].place_between_me_and(global.object[2], skull, 0)</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               Unlike <a href="script/api/object/actions/place_at_me.html">object.place_at_me</a>, 
+               this function appears to spawn objects exactly in place, provided they aren't 
+               solid or obstructed.
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/place_at_me.html">object.place_at_me</a></li>
+   <li><a href="script/api/object/actions/delete.html">object.delete</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

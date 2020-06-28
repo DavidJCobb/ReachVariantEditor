@@ -40,11 +40,30 @@ h5:last-child,
 h6:last-child,
 p:last-child{margin-bottom:0}
 
+.header-permalink{margin-left:1em;font-size:1rem;font-weight:normal}
+   .header-permalink::before{content:"🔗"}
+.header-permalink{display:none}
+*:hover>.header-permalink{display:inline}
+
+/* yellow fade when jumping to a header (TODO: wrap sections in <section/> so we can fade the whole section and not just the header) */
+@keyframes jump-to-section {
+   0% {
+      background:rgba(255, 255, 128, 0.5);
+      box-shadow:0 0 6px 6px rgba(255, 255, 128, 0.5);
+   }
+   100% { background:transparent }
+}
+a:target{animation:jump-to-section 3s ease-in 1}
+
+h2{border-bottom:1px solid #DDD}
+
 body{font-family:Calibri,Verdana,sans-serif}
 dl{}
    dt{font-weight:bold}
    dd{}
    *+dt{margin-top:1em}
+
+main ul>li+li{margin-top:.5em}
 
 code{background:#EEE}
 pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD}

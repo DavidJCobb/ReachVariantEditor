@@ -103,7 +103,13 @@ Adjust who can see this object's waypoint.<h2>Arguments</h2>
 for each object with label "race_flag" do
    current_object.set_waypoint_visibility(everyone)
 end</pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li>
+               Testing suggests that weapons cannot show waypoints if they are being carried 
+               by bipeds.
+            </li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_waypoint_icon.html">object.set_waypoint_icon</a></li>
    <li><a href="script/api/object/actions/set_waypoint_priority.html">object.set_waypoint_priority</a></li>
@@ -114,5 +120,6 @@ end</pre>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

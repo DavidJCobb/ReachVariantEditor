@@ -118,8 +118,24 @@
 <h2>Example</h2>
 <pre>
 current_object.set_scale(200) -- make the object twice as large</pre>
-
+<h2>Notes</h2>
+<ul>
+   <li>
+               Rescaling a player's biped will not necessarily change their camera 
+               position. Scaling a player up, for example, will cause their first-person 
+               legs to appear much larger to them, but will not actually move the 
+               camera upward to match the rescaled head.
+            </li>
+   <li>
+               The <code>set_scale</code> function has been observed to fail under the 
+               following conditions: the context object was created and attached to 
+               another object during the same tick as the <code>set_scale</code> call 
+               and before the <code>set_scale</code> call; and the object to which it 
+               was attached already existed before the tick on which the call was made.
+            </li>
+</ul>
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

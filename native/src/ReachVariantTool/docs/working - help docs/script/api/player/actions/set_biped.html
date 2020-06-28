@@ -106,8 +106,84 @@ for each player do
       global.object[0].delete()
    end
 end</pre>
-
+<h2>Notes</h2>
+<ul>
+   <li>
+               Holograms do not <a href="script/api/object/conditions/is_of_type.html">test</a> 
+               as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
+               passing a Hologram to <code>set_biped</code> will place the player in control 
+               of the biped.
+            </li>
+   <li>
+               <p>
+                  If necessary, you can spawn a biped inside of a vehicle by spawning the 
+                  biped, forcing a player to control it, forcing the player into the vehicle, 
+                  and then returning the player to their original biped. However, if the 
+                  player is spawned on the map at the time, then there will be a brief cut to 
+                  black for that player; they will notice the loss of control. If you need to 
+                  spawn NPC bipeds into vehicles, it is best to do this during the initial 
+                  loadout camera or while a player is waiting to respawn, if possible.
+               </p>
+               <p>
+                  NPC bipeds that occupy vehicles will behave the same as players who are not 
+                  providing any inputs; for example, an NPC-occupied Banshee will fly forward 
+                  automatically.
+               </p>
+            </li>
+   <li>
+               By default, Monitors spawn with an invisible Focus Rifle, and are capable of 
+               picking up weapons, grenades, and Armor Abilities. Monitors can fire any 
+               ranged weapon and can use any Armor Ability that does not depend on character 
+               model animations (e.g. they can use Active Camo but cannot Sprint); they 
+               cannot melee or throw grenades, though they will make melee sounds. Equipped 
+               Armor Abilities will be visible on the Monitor's body, displaying their 
+               holographic icons as if they were still lying around waiting to be picked up.
+            </li>
+   <li>
+               Once a Megalo-spawned biped has been controlled by a player, it will take on 
+               that player's appropriate armor or team color and (if it's a Spartan) its 
+               voice will match the player's chosen gender regardless of its own gender 
+               presentation. Moreover, in FFA games, the biped will appear allied to the 
+               last player who controlled it, even if it appeared as an enemy to them 
+               beforehand.
+            </li>
+   <li>
+               <p>
+                  You can force a player into a biped while the initial loadout camera is playing, and they 
+                  will be able to play early. However, if you do this, the player will hear a constant shrill 
+                  beeping, like the ring of an alarm clock. It appears that this beeping plays for every 
+                  frame that the player spends in control of a biped, if that player has never controlled a 
+                  "natural" biped before; the solution is to ensure that the player has spent at least one 
+                  frame in control of a normally-spawned biped before forcing them into a new biped.
+               </p>
+               <p>
+                  I was able to identify the beeping sound; it is defined in the following tags. These tags 
+                  seem to have been intended for the Missile Pod, a weapon present only in Halo 3; however, 
+                  a search for Missile Pod gameplay videos on YouTube failed to turn up any where this exact 
+                  sound plays.
+               </p>
+               <ul>
+                  <li>lsnd\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+                  <li>snd!\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+               </ul>
+               <p>
+                  I was unable to locate anything that could use the tag. If the usual community tools for 
+                  browsing *.MAP files allow you to search for anything that uses a tag, I haven't managed 
+                  to find that feature.
+               </p>
+            </li>
+   <li>
+               Suppose a player is given control of a biped and later has that control revoked. If at 
+               some point afterward you try to rotate the biped and give the player control over it, all 
+               on the same frame, then the rotation will fail: the biped will continue to aim in the last 
+               direction the player was aiming when they lost control over it. This can cause issues in 
+               cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
+               is to rotate the biped on one frame and then wait 'til the next to actually force the 
+               player into it.
+            </li>
+</ul>
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

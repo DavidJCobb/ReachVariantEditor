@@ -105,8 +105,27 @@ for each object with label "ffa_only" do
       current_object.delete()
    end
 end</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               Deleting a player's current biped will cause them to instantaneously respawn, 
+               without deducting from their pool of lives in limited-life game variants. 
+               Continuously deleting their biped over a span of time will cause the screen 
+               to hard-cut to black for them, with no HUD widgets visible and no game sounds 
+               audible besides some announcer voiceovers.
+            </li>
+   <li>
+               If one biped is assassinating another, deleting the victim will not interrupt 
+               the killer's assassination animation.
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/place_at_me.html">object.place_at_me</a></li>
+   <li><a href="script/api/object/actions/place_between_me_and.html">object.place_between_me_and</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

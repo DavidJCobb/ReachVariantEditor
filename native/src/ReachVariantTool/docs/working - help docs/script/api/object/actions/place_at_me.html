@@ -115,15 +115,18 @@ Spawn a new object at this object.<p>This function returns <a href="script/api/o
                </dd>
    <dt>x</dt>
       <dd>
-                  The X-coordinate of a position offset. Allowed values are -128 to 127.
+                  The X-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </dd>
    <dt>y</dt>
       <dd>
-                  The Y-coordinate of a position offset. Allowed values are -128 to 127.
+                  The Y-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </dd>
    <dt>z</dt>
       <dd>
-                  The Z-coordinate of a position offset. Allowed values are -128 to 127.
+                  The Z-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </dd>
    <dt><a href="script/api/variant-string-id.html">variant-string-id</a></dt>
       <dd>
@@ -136,7 +139,18 @@ Spawn a new object at this object.<p>This function returns <a href="script/api/o
 -- Spawn a Spartan with Kat's armor:
 --
 global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_collect, 0, 0, 0, kat)</pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li>
+               The new object will be created as close to the context object as possible. It will 
+               not be created exactly at the context object, even if one or both of the objects 
+               are non-solid. To create one object exactly at another object, 
+               <a href="script/api/object/actions/attach_to.html">attach</a> 
+               the created object to the basis object and then 
+               <a href="script/api/object/actions/detach.html">detach</a> 
+               it.
+            </li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/delete.html">object.delete</a></li>
    <li><a href="script/api/object/actions/place_between_me_and.html">object.place_between_me_and</a></li>
@@ -144,5 +158,6 @@ global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_col
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

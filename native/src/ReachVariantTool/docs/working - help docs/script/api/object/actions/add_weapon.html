@@ -114,8 +114,30 @@ Give a weapon to a biped, even if it isn't player-controlled.<h2>Arguments</h2>
 <h2>Example</h2>
 <pre>
 global.object[0].add_weapon(assault_rifle, force)</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               If the biped is player-controlled and the player's Weapon Pickup trait is set to 
+               Disabled, then you must use the "force" mode to add the weapon.
+            </li>
+   <li>
+               Remember that this function works differently from <code>player.add_weapon</code>: 
+               the object function takes an object type and spawns a new weapon; while the player 
+               function takes an existing weapon object.
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
+   <li><a href="script/api/object/actions/get_carrier.html">object.get_carrier</a></li>
+   <li><a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a></li>
+   <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">object.set_weapon_pickup_priority</a></li>
+   <li><a href="script/api/player/actions/get_armor_ability.html">player.get_armor_ability</a></li>
+   <li><a href="script/api/player/actions/add_weapon.html">player.add_weapon</a></li>
+   <li><a href="script/api/player/actions/get_weapon.html">player.get_weapon</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

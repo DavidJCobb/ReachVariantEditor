@@ -107,12 +107,26 @@ Rotate one object to match another.<h2>Arguments</h2>
 <h2>Example</h2>
 <pre>
 global.object[0].copy_rotation_from(global.object[1], true)</pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li>
+               Passing <var>true</var> as the boolean argument will perform the rotation without 
+               doing any further collision checking or physics. If the object being rotated is 
+               physics-simulated, and the rotation causes the object to clip into something else, 
+               then it may end up being launched away if something bumps it and updates its 
+               physics simulation.
+            </li>
+   <li>
+               This function can fail to do anything if it is called on an object that is attached 
+               to something else.
+            </li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/face_toward.html">object.face_toward</a></li>
 </ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

@@ -107,24 +107,37 @@
    <dt>x</dt>
       <dd>
                   The X-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </dd>
    <dt>y</dt>
       <dd>
                   The Y-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </dd>
    <dt>z</dt>
       <dd>
                   The Z-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </dd>
 </dl>
 <h2>Example</h2>
 <pre>
 global.object[0].copy_rotation_from(global.object[1], true)</pre>
+<h2>Notes</h2>
+<ul>
+   <li>
+               If you face an object toward itself, you can use the position offset to rotate it.
+            </li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/copy_rotation_from.html">object.copy_rotation_from</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>

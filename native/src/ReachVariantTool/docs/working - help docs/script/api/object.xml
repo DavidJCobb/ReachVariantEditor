@@ -143,13 +143,16 @@
                   </dl>
                </arg>
                <arg name="x" type="vector3:x">
-                  The X-coordinate of a position offset. Allowed values are -128 to 127.
+                  The X-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </arg>
                <arg name="y" type="vector3:y">
-                  The Y-coordinate of a position offset. Allowed values are -128 to 127.
+                  The Y-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </arg>
                <arg name="z" type="vector3:z">
-                  The Z-coordinate of a position offset. Allowed values are -128 to 127.
+                  The Z-coordinate of a position offset. Allowed values are integer constants 
+                  between -128 and 127, inclusive.
                </arg>
                <arg type="variant-string-id">
                   A variation to apply to the created object, if the object type supports it.
@@ -163,7 +166,7 @@
                global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_collect, 0, 0, 0, kat)
             </example>
             <note>
-               The new object will be created as close to the context object as possible. It will 
+               The new object will be created as close to the context object as possible. It may 
                not be created exactly at the context object, even if one or both of the objects 
                are non-solid. To create one object exactly at another object, 
                <a href="script/api/object/actions/attach_to">attach</a> 
@@ -591,15 +594,18 @@
                </arg>
                <arg name="x" type="vector3:x">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </arg>
                <arg name="y" type="vector3:y">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </arg>
                <arg name="z" type="vector3:z">
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </arg>
                <arg name="reference_frame">
                   Either the word <var>relative</var>, indicating that the position 
@@ -631,7 +637,7 @@
                alias basis = global.object[0]
                current_object.attach_to(basis, 0, 0, 20, relative)
             </example>
-            <note title="Anchoring">
+            <note id="anchoring" title="Anchoring">
                <p>
                   Objects appear to be attached to the nearest node on a basis object's 
                   3D model, with no apparent distance limit. For example, this piece 
@@ -671,7 +677,7 @@
                <p>
                   Attached vehicles will not play any entry/exit animations (e.g. a 
                   Banshee's canopy opening and closing), but will instantaneously 
-                  update to any animations' end stateds when detached (e.g. a Banshee's 
+                  update to any animations' end states when detached (e.g. a Banshee's 
                   canopy will instantly snap open or closed as appropriate).
                </p>
                <p>
@@ -695,7 +701,8 @@
                attachment behaviors. If you detach an Armor Ability from a player's 
                back, you can move it around or attach it without unequipping it from 
                that player; however, the Armor Ability will automatically detach 
-               itself every frame.
+               itself every frame. (Verified for Armor Abilities worn by Monitors, 
+               but not tested for Armor Abilities worn by Spartans and Elites.)
             </note>
             <note>
                Attaching a biped to an object will lock the biped in place. If the 
@@ -711,7 +718,10 @@
             </note>
             <note>
                If something is attached to a Monitor biped, it will bob up and down 
-               in synch with that biped's animation.
+               in synch with that biped's animation. All of a Monitor's nodes, 
+               including the one with the animation, are located at the same 
+               model-relative coordinate, and the one with the animation is the one 
+               that is found by the game engine when performing an attachment.
             </note>
             <note>
                It appears that attaching an object to <var>no_object</var> and then 
@@ -806,7 +816,8 @@
             </example>
             <note>
                Flags, bombs, and skulls are weapons and so can be used with this member 
-               function.
+               function. The data cores and power cores used in Invasion are similar 
+               weapons.
             </note>
             <!-- relationships only need to be specified on one end -->
          </method>
@@ -1094,15 +1105,18 @@
                </arg>
                <arg name="x" type="vector3:x">
                   The X-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </arg>
                <arg name="y" type="vector3:y">
                   The Y-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </arg>
                <arg name="z" type="vector3:z">
                   The Z-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position.
+                  <var>other</var>'s position plus the offset position. Allowed values are 
+                  integer constants between -128 and 127, inclusive.
                </arg>
             </args>
             <blurb>Rotate one object to face another.</blurb>

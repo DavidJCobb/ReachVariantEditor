@@ -119,17 +119,20 @@
    <dt>x</dt>
       <dd>
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </dd>
    <dt>y</dt>
       <dd>
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </dd>
    <dt>z</dt>
       <dd>
                   The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are -128 to 127.
+                  of the other object. Allowed values are integer constants between 
+                  -128 and 127, inclusive.
                </dd>
    <dt>reference_frame</dt>
       <dd>
@@ -143,12 +146,105 @@
 <pre>
 alias basis = global.object[0]
 current_object.attach_to(basis, 0, 0, 20, relative)</pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<h3><a name="anchoring">Anchoring</a></h3>
+
+               <p>
+                  Objects appear to be attached to the nearest node on a basis object's 
+                  3D model, with no apparent distance limit. For example, this piece 
+                  of code would create a skull and anchor that skull to a Warthog's 
+                  steering wheel:
+               </p>
+               <pre>
+alias some_warthog = ...
+--
+global.object[0] = some_warthog.place_at_me(skull, none, none, 0, 0, 0, none)
+global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
+               <p>
+                  Even though the skull is attached to a point two full Forge units 
+                  above the Warthog, it still attaches to the nearest node in the 
+                  Warthog's 3D model, which happens to be the steering wheel. If a 
+                  player enters the driver's seat and turns to the left or right, 
+                  the skull will move and rotate in an arc above them, in synch with 
+                  the steering wheel. Different offsets would anchor the skull to 
+                  other nodes in the Warthog's 3D model, such as its tires.
+               </p>
+               <p>
+                  Most objects have a node defined at their origins, and that can 
+                  be used to avoid this behavior: spawn an extra object, have it 
+                  copy the rotation of the basis, and then attach it to the basis 
+                  with offset (0, 0, 0); then, attach the rest of your objects to 
+                  that extra object.
+               </p>
+            <h3><a name="vehicle-attachment">Effects of attaching vehicles to other objects</a></h3>
+
+               <p>
+                  Attaching a vehicle to an object will lock the vehicle in place. The 
+                  pilot will be able to look around at any angle, but the vehicle will 
+                  not turn, and the vehicle's weapons fire will be constrained to the 
+                  weapon's turn radius.
+               </p>
+               <p>
+                  Attached vehicles will not play any entry/exit animations (e.g. a 
+                  Banshee's canopy opening and closing), but will instantaneously 
+                  update to any animations' end states when detached (e.g. a Banshee's 
+                  canopy will instantly snap open or closed as appropriate).
+               </p>
+               <p>
+                  Bipeds in an attached vehicle will lose mose animations. Passengers' 
+                  hands may move slightly (and incorrectly) while reloading their weapon; 
+                  though they have no reloading or weapon swap animations, appropriate 
+                  sounds still play, and they cannot fire their animations while the 
+                  animations would be taking place. Some animations have player model 
+                  jiggle physics; these jiggle physics remain functional even though 
+                  the rest of the animation does not. 
+               </p>
+               <p>
+                  If a Banshee is performing an evasive maneuver at the moment it is 
+                  attached, the maneuver will end instantly; no such maneuvers can be 
+                  performed once the vehicle is attached.
+               </p>
+            <h3>Other notes</h3>
+<ul>
+   <li>
+               Armor Abilities equipped by other players are an exception to normal 
+               attachment behaviors. If you detach an Armor Ability from a player's 
+               back, you can move it around or attach it without unequipping it from 
+               that player; however, the Armor Ability will automatically detach 
+               itself every frame. (Verified for Armor Abilities worn by Monitors, 
+               but not tested for Armor Abilities worn by Spartans and Elites.)
+            </li>
+   <li>
+               Attaching a biped to an object will lock the biped in place. If the 
+               biped is controlled by the player, they will be able to turn but not 
+               to move, and their first-person legs will desynch from their upper 
+               body.
+            </li>
+   <li>
+               When a biped enters a vehicle, it is considered attached to that 
+               vehicle. Scripts cannot attach it to something else while it is in 
+               the vehicle. Weapons being carried by a biped are expected to behave 
+               similarly.
+            </li>
+   <li>
+               If something is attached to a Monitor biped, it will bob up and down 
+               in synch with that biped's animation. All of a Monitor's nodes, 
+               including the one with the animation, are located at the same 
+               model-relative coordinate, and the one with the animation is the one 
+               that is found by the game engine when performing an attachment.
+            </li>
+   <li>
+               It appears that attaching an object to <var>no_object</var> and then 
+               detaching it will teleport it to the world origin. On Forge World, 
+               this is a point out by the canyon's beach.
+            </li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/detach.html">object.detach</a></li>
 </ul>
 
       </main>
       <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
    </body>
 </html>
