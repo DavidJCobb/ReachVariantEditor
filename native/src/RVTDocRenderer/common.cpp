@@ -144,7 +144,7 @@ size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std
                //
                minimize_indent(token.value);
             }
-            out += token.value;
+            _append_text_content(out, token.value);
             break;
          case token_code::element_close:
             if (token.name == name) {

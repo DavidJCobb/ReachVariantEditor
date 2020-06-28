@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>object.try_get_carrier | ReachVariantTool Documentation</title>
+      <title>object.shieldsshields | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -98,38 +98,26 @@
          </ul>
       </nav>
       <main>
-         <h1>object.try_get_carrier</h1>
+         <h1>object.shields</h1>
 
-               <p>
-                  When called on a weapon or Armor Ability, this function returns the 
-                  player carrying the item.
-               </p>
-               <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the player variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_carrier</code> will compile in an 
-                  assignment to <var>no_player</var> before the call, while calling 
-                  the function with the name <code>try_get_carrier</code> will not.
-               </p>
-            <p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p>
+            <p>
+               This accessor holds the object's current shields. A value of 100 
+               represents 100% shields.
+            </p>
+         <p>This accessor supports read and write access.</p>
 <h2>Example</h2>
 <pre>
-for each object with label "awful_gun" do
-   global.player[0] = current_object.get_carrier()
-   if global.player[0] != no_player then
-      global.player[0].kill(false)
+for each player do
+   global.number[0] = current_player.biped.shields
+   if global.number[0] &gt; 100 then -- the player has overshields
+      current_player.biped.shields /= 2
    end
 end</pre>
 <h2>See also</h2>
 <ul>
-   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
-   <li><a href="script/api/object/actions/add_weapon.html">object.add_weapon</a></li>
-   <li><a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a></li>
-   <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">object.set_weapon_pickup_priority</a></li>
-   <li><a href="script/api/player/actions/get_armor_ability.html">player.get_armor_ability</a></li>
-   <li><a href="script/api/player/actions/add_weapon.html">player.add_weapon</a></li>
-   <li><a href="script/api/player/actions/get_weapon.html">player.get_weapon</a></li>
+   <li><a href="script/api/object/accessors/health.html">object.health</a></li>
+   <li><a href="script/api/object/accessors/max_shields.html">object.max_shields</a></li>
+   <li><a href="script/api/object/accessors/max_health.html">object.max_health</a></li>
 </ul>
 
       </main>

@@ -467,6 +467,109 @@ void APIProperty::write(std::string& content, std::string stem, std::string memb
 }
 #pragma endregion
 
+#pragma region APIAccessor 
+size_t APIAccessor::load(cobb::xml::document& doc, uint32_t root_token, std::string member_of) {
+   std::string stem;
+   cobb::sprintf(stem, "script/api/%s/accessors/", member_of.c_str());
+   //
+   int32_t depth = 0;
+   size_t  extract;
+   size_t  size = doc.tokens.size();
+   for (size_t i = i = root_token + 1; i < size; ++i) {
+      auto& token = doc.tokens[i];
+      //
+      if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+         if (token.name == "name")
+            this->name = token.value;
+         else if (token.name == "name2")
+            this->name2 = token.value;
+         else if (token.name == "type")
+            this->type = token.value;
+         else if (token.name == "getter")
+            this->getter = true;
+         else if (token.name == "setter")
+            this->setter = true;
+         continue;
+      }
+      //
+      if (token.code == cobb::xml::token_code::element_close) {
+         if (depth == 0) {
+            assert(token.name == "accessor");
+            return i;
+         }
+         --depth;
+      }
+      if (token.code != cobb::xml::token_code::element_open)
+         continue;
+      if (depth == 0) {
+         if (token.name == "blurb") {
+            extract = this->_load_blurb(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "description") {
+            extract = this->_load_description(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "example") {
+            extract = this->_load_example(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "note") {
+            extract = this->_load_note(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "related") {
+            extract = this->_load_relationship(doc, i);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+      }
+      ++depth;
+   }
+   return std::string::npos;
+}
+void APIAccessor::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
+   std::string full_title = member_of;
+   if (!full_title.empty())
+      full_title += '.';
+   full_title += this->name;
+   //
+   handle_page_title_tag(content, full_title);
+   //
+   std::string needle = "<content-placeholder id=\"main\" />";
+   std::size_t pos = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
+   //
+   replace += "<h1>";
+   replace += full_title;
+   replace += "</h1>\n";
+   this->_write_description(replace);
+   if (this->getter) {
+      if (this->setter) {
+         replace += "<p>This accessor supports read and write access.</p>\n";
+      } else {
+         replace += "<p>This accessor supports read access only.</p>\n"; // should never happen; accessors should only be used when the "set" opcode allows arbitrary mathematical operators
+      }
+   } else {
+      replace += "<p>This accessor supports write access only; you cannot read an existing value.</p>\n";
+   }
+   this->_write_example(replace);
+   this->_write_notes(replace);
+   this->_write_relationships(replace, member_of, api_entry_type::accessor);
+   content.replace(pos, needle.length(), replace);
+}
+#pragma endregion
+
 const char* APIType::get_friendly_name() const noexcept {
    if (!this->friendly_name.empty())
       return this->friendly_name.c_str();
@@ -733,9 +836,13 @@ void APIType::load(cobb::xml::document& doc) {
             if (token.code == cobb::xml::token_code::element_open) {
                if (depth == 0) {
                   if (token.name == "accessor") {
+                     this->accessors.emplace_back();
+                     auto& member = this->accessors.back();
+                     auto  extract = member.load(doc, i, this->name);
+                     assert(extract != std::string::npos);
+                     i = extract;
                      //
-                     // TODO
-                     //
+                     continue;
                   }
                }
                ++depth;
@@ -1059,11 +1166,19 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
          handle_base_tag(content, depth + 2);
          handle_page_title_tag(content, member.name);
          this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, this->name, type_template);
          //
-         // TODO: generate the member content
-         //
-         // TODO: export the file
-         //
+         auto pm = p.parent_path();
+         pm.append(this->name);
+         std::filesystem::create_directory(pm);
+         pm.append("accessors");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/accessors" and the API doesn't remember that "accessors" was a directory, so we need this or the next two calls will replace "accessors" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
       }
    }
 }

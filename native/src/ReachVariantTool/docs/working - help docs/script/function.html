@@ -156,7 +156,7 @@ function spawn_skulls()
    global.object[1].push_upward()
    --
    global.number[0] -= 1
-   if global.number[0] > 0 then
+   if global.number[0] &gt; 0 then
       spawn_skulls()
    end
 end
@@ -185,7 +185,7 @@ spawn_skulls()</pre>
       
       <h2>Availability</h2>
       <p>
-         User-defined functions are supported by Megalo's bytecode &mdash; that is, the format 
+         User-defined functions are supported by Megalo's bytecode &amp;mdash; that is, the format 
          that Megalo is compiled into. However, they did not exist in Bungie's actual design 
          for the Megalo language. Nobody outside of Bungie and 343 Industries has ever seen 
          Megalo in its "true" form, but in the past, Bungie described the language as being 

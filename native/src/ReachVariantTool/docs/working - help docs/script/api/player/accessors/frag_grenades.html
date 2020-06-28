@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>player.apply_traits | ReachVariantTool Documentation</title>
+      <title>player.frag_grenadesfrag_grenades | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -87,29 +87,12 @@
          </ul>
       </nav>
       <main>
-         <h1>player.apply_traits</h1>
-
-               <p>
-                  This function applies a set of player traits to the context player until 
-                  the next time the script runs. There is no function to stop applying 
-                  traits to a player; rather, you call this function for every tick that 
-                  the player should have a given set of traits, and then revoke those 
-                  traits by no longer calling this function.
-               </p>
-            <h2>Arguments</h2>
-<dl>
-   <dt><a href="script/api/traits.html">traits</a></dt>
-      <dd>The player traits to apply.</dd>
-</dl>
+         <h1>player.frag_grenades</h1>
+The player's current frag grenade count.<p>This accessor supports write access only; you cannot read an existing value.</p>
 <h2>Example</h2>
 <pre>
-alias is_zombie     = player.number[0]
-alias zombie_traits = script_traits[0]
-
 for each player do
-   if current_player.is_zombie == 0 then
-      current_player.apply_traits(zombie_traits)
-   end
+   current_player.frag_grenades += 1
 end</pre>
 
       </main>

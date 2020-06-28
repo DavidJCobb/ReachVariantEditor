@@ -71,7 +71,7 @@ do
    --
    lowest = 32767
    for each object with label "defend_res_zone" do
-      if current_object.spawn_sequence < lowest then
+      if current_object.spawn_sequence &lt; lowest then
          lowest = current_object.spawn_sequence
          team[0].set_primary_respawn_object(current_object)
       end

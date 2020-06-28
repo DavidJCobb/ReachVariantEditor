@@ -64,7 +64,7 @@ class APIMethod : public APIEntry {
       bool    nodiscard = true; // only relevant if (return_value_type) is not empty
       bool    is_action = false;
       //
-      inline bool has_return_value() const noexcept { return !this->return_value_type.empty();  }
+      inline bool has_return_value() const noexcept { return !this->return_value_type.empty(); }
 
       size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition);
       void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
@@ -84,6 +84,9 @@ class APIAccessor : public APIEntry {
       std::string type;
       bool getter = false;
       bool setter = false;
+
+      size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of);
+      void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
 };
 
 class APIType : public APIEntry {
