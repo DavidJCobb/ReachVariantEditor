@@ -118,7 +118,9 @@
 </dl>
 <h2>Example</h2>
 <pre>
-alias expire_timer = object.timer[0]
+alias has_been_carried = object.number[0]
+alias expire_timer     = object.timer[0]
+declare object.has_been_carried with network priority low = 0
 declare object.expire_timer = 60
 
 -- pretend this is a Forge label with no name, targeted to Rocket Launchers:
@@ -133,12 +135,14 @@ for each object with label all_rockets do
       current_object.set_garbage_collection_disabled(0)
       current_object.expire_timer.set_rate(0%)
       current_object.expire_timer.reset()
+      current_object.has_been_carried = 1
    end
-   if global.player[0] == no_player then
+   if current_object.has_been_carried == 1 and global.player[0] == no_player then
       current_object.set_garbage_collection_disabled(1)
       current_object.expire_timer.set_rate(-100%)
       if current_object.expire_timer.is_zero() then
          current_object.set_garbage_collection_disabled(0)
+         current_object.has_been_carried = 0
       end
    end
 end</pre>

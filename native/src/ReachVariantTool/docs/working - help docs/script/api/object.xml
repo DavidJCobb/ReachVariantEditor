@@ -144,15 +144,15 @@
                </arg>
                <arg name="x" type="vector3:x">
                   The X-coordinate of a position offset. Allowed values are integer constants 
-                  between -128 and 127, inclusive.
+                  between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
                   The Y-coordinate of a position offset. Allowed values are integer constants 
-                  between -128 and 127, inclusive.
+                  between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
                   The Z-coordinate of a position offset. Allowed values are integer constants 
-                  between -128 and 127, inclusive.
+                  between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg type="variant-string-id">
                   A variation to apply to the created object, if the object type supports it.
@@ -319,7 +319,7 @@
                         <dd>The object will have a shape with four dimensions: a width, length, top, and bottom.</dd>
                   </dl>
                </arg>
-               <arg name="..." type="number">
+               <arg name="dimensions..." type="number">
                   Zero or more dimensions for the shape, as appropriate for the given type. 
                   A value of 10 represents one Forge unit.
                </arg>
@@ -506,8 +506,8 @@
                end
             </example>
             <note>
-               You cannot make objects with spherical shapes visible. Spherical shapes are 
-               only available via scripting, not in Forge, and the game apparently has no 
+               You cannot make spherical shapes visible. Spherical shapes are only 
+               available via scripting, not in Forge, and the game apparently has no 
                code to display them.
             </note>
             <!-- relationships only need to be specified on one end -->
@@ -573,6 +573,11 @@
                   --
                end
             </example>
+            <note>
+               This function may not work on all object types, or its efficacy may depend 
+               on an object's physics. It works on vehicles, but phased-physics objects 
+               that have been pre-rotated in Forge seem to always test as being upright.
+            </note>
          </method>
          <method name="get_speed" id="30" returns="number">
             <blurb>Returns the object's speed in feet per second.</blurb>
@@ -595,17 +600,17 @@
                <arg name="x" type="vector3:x">
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
-                  -128 and 127, inclusive.
+                  -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
-                  -128 and 127, inclusive.
+                  -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
-                  -128 and 127, inclusive.
+                  -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="reference_frame">
                   Either the word <var>relative</var>, indicating that the position 
@@ -1026,7 +1031,9 @@
                </p>
             </description>
             <example>
-               alias expire_timer = object.timer[0]
+               alias has_been_carried = object.number[0]
+               alias expire_timer     = object.timer[0]
+               declare object.has_been_carried with network priority low = 0
                declare object.expire_timer = 60
                
                -- pretend this is a Forge label with no name, targeted to Rocket Launchers:
@@ -1041,12 +1048,14 @@
                      current_object.set_garbage_collection_disabled(0)
                      current_object.expire_timer.set_rate(0%)
                      current_object.expire_timer.reset()
+                     current_object.has_been_carried = 1
                   end
-                  if global.player[0] == no_player then
+                  if current_object.has_been_carried == 1 and global.player[0] == no_player then
                      current_object.set_garbage_collection_disabled(1)
                      current_object.expire_timer.set_rate(-100%)
                      if current_object.expire_timer.is_zero() then
                         current_object.set_garbage_collection_disabled(0)
+                        current_object.has_been_carried = 0
                      end
                   end
                end
@@ -1106,17 +1115,20 @@
                <arg name="x" type="vector3:x">
                   The X-coordinate of an offset-position. The object will rotate to face 
                   <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive.
+                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
                   The Y-coordinate of an offset-position. The object will rotate to face 
                   <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive.
+                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
                   The Z-coordinate of an offset-position. The object will rotate to face 
                   <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive.
+                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  one Forge unit.
                </arg>
             </args>
             <blurb>Rotate one object to face another.</blurb>

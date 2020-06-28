@@ -4,6 +4,9 @@
 
 namespace {
    void _append_text_content(std::string& out, const std::string& text) {
+      //
+      // Appends the content of (text) to (out), substituting HTML entities where appropriate.
+      //
       size_t size = text.size();
       out.reserve(out.size() + size);
       //
@@ -13,6 +16,9 @@ namespace {
       for (size_t i = 0; i < size; ++i) {
          char c = text[i];
          if (in_entity) {
+            //
+            // We previously found a '&' which may or may not be an HTML entity.
+            //
             if (isspace(c) || c == '&') { // turns out, this wasn't an HTML entity after all
                out += "&amp;";
                out += entity;

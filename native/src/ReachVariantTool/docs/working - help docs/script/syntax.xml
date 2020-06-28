@@ -16,8 +16,16 @@
       <h2>Statements</h2>
       <p>
          Statements in a Megalo script can be divided into three categories: conditions, actions, 
-         and blocks.
+         and blocks. There is no statement separator character; statements are separated with 
+         whitespace, and the allowed syntax is limited in order to enable this. Expressions are 
+         not supported; for example, the following statement is interpreted as an assignment 
+         (<code>a = b</code>) followed by an unexpected operator:
       </p>
+      <pre>
+         a = b + c
+         
+         -- The above is interpreted as two statements: "a = b" and "+ c".
+      </pre>
       
       <h3>Blocks</h3>
       <p>
@@ -27,7 +35,7 @@
          <dt>do ... end</dt>
             <dd>A generic block.</dd>
          <dt>enum ... end</dt>
-            <dd>An <a href="enum">enum definition</a></dd>
+            <dd>An <a href="enum">user-defined enum definition</a>.</dd>
          <dt>for ... do ... end</dt>
             <dd>A piece of code which should be executed multiple times in a row, 
             with specific information made available each time.</dd>
@@ -53,15 +61,6 @@
          <li><code>variable = function(...)</code></li>
          <li><code>variable = value</code></li>
       </ul>
-      <p>
-         This particular Megalo dialect does not support expressions; for example, the following 
-         statement is interpreted as an assignment followed by an unexpected operator:
-      </p>
-      <pre>
-         a = b + c
-         
-         -- The above is interpreted as two statements: "a = b" and "+ c".
-      </pre>
       <p>
          You can call user-defined functions or hardcoded "action" functions. You cannot call 
          hardcoded "condition" functions.
@@ -165,7 +164,8 @@
          functions in cases where the internal setter takes the same range of assignment 
          operators as an assignment statement. Although the parser as currently designed could 
          accept an assignment operator as an argument (e.g. <code>foo.set_bar(+=, 5)</code>), 
-         it seems best to use operators only in statements.
+         this was avoided for consistency with almost every other programming language ever 
+         made.
       </p>
    </body>
 </article>

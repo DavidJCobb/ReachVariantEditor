@@ -188,6 +188,7 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
    size_t   extract;
    uint32_t i    = root_token + 1;
    size_t   size = doc.tokens.size();
+   size_t   args_at = std::string::npos;
    for (; i < size; ++i) {
       auto& token = doc.tokens[i];
       //
@@ -224,7 +225,8 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                continue;
             if (depth == 0) {
                if (token.name == "args") {
-                  where = location::args;
+                  args_at = i;
+                  where   = location::args;
                   continue;
                }
                //
@@ -262,36 +264,61 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
             ++depth;
             break;
          case location::args:
-            if (token.code == cobb::xml::token_code::text_content && this->bare_argument_text.empty()) {
-               if (token.value.find_first_not_of(" \r\n\t\v") != std::string::npos) {
-                  this->bare_argument_text += token.value;
+            if (this->args.empty()) {
+               if (token.code == cobb::xml::token_code::text_content && this->bare_argument_text.empty()) {
+                  if (token.value.find_first_not_of(" \r\n\t\v") == std::string::npos)
+                     //
+                     // This text content is just leading whitespace. Ignore it.
+                     //
+                     continue;
+                  assert(args_at != std::string::npos);
+                  std::string out;
+                  auto result = extract_html_from_xml(args_at, doc, out, stem);
+                  assert(result != std::string::npos);
+                  std::swap(this->bare_argument_text, out);
+                  i       = result;
+                  args_at = std::string::npos;
+                  where   = location::nowhere;
                   continue;
                }
             }
             if (token.code == cobb::xml::token_code::element_open) {
-               if (depth == 0 && token.name == "arg") {
-                  this->args.emplace_back();
-                  auto& arg = this->args.back();
-                  //
-                  // Get attributes:
-                  //
-                  for (uint32_t j = i + 1; j < size; ++j) {
-                     auto& token = doc.tokens[j];
-                     if (token.code != cobb::xml::token_code::attribute)
-                        break;
-                     if (token.name == "name")
-                        arg.name = token.value;
-                     else if (token.name == "type")
-                        arg.type = token.value;
+               if (depth == 0) {
+                  if (token.name == "arg") {
+                     this->args.emplace_back();
+                     auto& arg = this->args.back();
+                     //
+                     // Get attributes:
+                     //
+                     for (uint32_t j = i + 1; j < size; ++j) {
+                        auto& token = doc.tokens[j];
+                        if (token.code != cobb::xml::token_code::attribute)
+                           break;
+                        if (token.name == "name")
+                           arg.name = token.value;
+                        else if (token.name == "type")
+                           arg.type = token.value;
+                     }
+                     //
+                     // Get argument content:
+                     //
+                     extract = extract_html_from_xml(i, doc, arg.content, stem);
+                     assert(extract != std::string::npos);
+                     i = extract;
+                     //
+                     continue;
                   }
-                  //
-                  // Get argument content:
-                  //
-                  extract = extract_html_from_xml(i, doc, arg.content, stem);
-                  assert(extract != std::string::npos);
-                  i = extract;
-                  //
-                  continue;
+                  if (this->bare_argument_text.empty()) {
+                     assert(args_at != std::string::npos);
+                     std::string out;
+                     auto result = extract_html_from_xml(args_at, doc, out, stem);
+                     assert(result != std::string::npos);
+                     std::swap(this->bare_argument_text, out);
+                     i       = result;
+                     args_at = std::string::npos;
+                     where   = location::nowhere;
+                     continue;
+                  }
                }
                ++depth;
             } else if (token.code == cobb::xml::token_code::element_close) {
@@ -1164,7 +1191,6 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
       for (auto& member : this->accessors) {
          content = type_template;
          handle_base_tag(content, depth + 2);
-         handle_page_title_tag(content, member.name);
          this->_handle_member_nav(content, stem_member);
          member.write(content, stem, this->name, type_template);
          //

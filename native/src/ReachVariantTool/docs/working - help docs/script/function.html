@@ -63,7 +63,7 @@
                   <li>
                      <a>Namespaces</a>
                      <ul>
-                        <li><a href="script/api/ns_unnamed.html">Unnamed</a></li>
+                        <li><a href="script/api/ns_unnamed.html">Content not in any namespace</a></li>
                         <li><a href="script/api/ns_enums.html">enums</a></li>
                         <li><a href="script/api/ns_game.html">game</a></li>
                         <li><a href="script/api/ns_global.html">global</a></li>
@@ -189,7 +189,9 @@ spawn_skulls()</pre>
          that Megalo is compiled into. However, they did not exist in Bungie's actual design 
          for the Megalo language. Nobody outside of Bungie and 343 Industries has ever seen 
          Megalo in its "true" form, but in the past, Bungie described the language as being 
-         similar to BASIC, with no loops, functions, or other jumps.
+         similar to BASIC, with no loops, functions, or other jumps. Nested blocks are compiled 
+         as disconnected units, with the outer block "calling" the inner block; user-defined 
+         functions are just blocks that are called from (or "nested under") multiple places.
       </p>
       <p>
          As such, you won't see user-defined functions in official content, and other 

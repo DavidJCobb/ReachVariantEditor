@@ -3,7 +3,7 @@
    <title>Forge Settings</title>
    <body>
       <p>
-         The <b>forge settings</b> page allows you to edit options related to Forge. 
+         The <b>Forge settings</b> page allows you to edit options related to Forge. 
          It only appears when opening a Forge variant file.
       </p>
       <img src="forge.png" />

@@ -1,13 +1,14 @@
 html{
    --sidebar-back: #EEE;
-   --line-height: 1.215em; /*take the firefox default for Calibri and make it explicit, so we can position other things relative to it*/
+   --line-height: 1.215em; /*take the firefox default for Calibri and make it explicit, so we can size/position other things relative to it*/
 }
 *{line-height:var(--line-height)} 
 
+/* core layout: */
 html{background:#888;margin:0;padding:0}
 body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row nowrap;max-width:1600px;margin:0 auto;padding:0}
    body>*{box-sizing:border-box;height:100vh;overflow-y:auto}
-   #sidebar{width:25%;min-width:18em;padding:1rem;font-size:.875rem;flex:0 0 auto}
+   #sidebar{width:25%;min-width:18em;padding:.5rem 1rem;font-size:.875rem;flex:0 0 auto}
       #sidebar ul{margin:0;padding:0 0 0 1.5em}
          #sidebar li{list-style:none;position:relative}
             #sidebar li a{display:block;background:#FFF;padding:.25em .5em;text-decoration:none;border-radius:.2rem}
@@ -25,6 +26,14 @@ body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row 
       #sidebar ul hr{border:0;border-top:1px solid #BBB}
    main{background:#FFF;padding:1rem;flex:1 1 auto}
 
+/* Firefox bug: #sidebar does not scroll to the bottom padding when overflow-y:auto 
+   kicks in i.e. there effectively is no bottom padding */
+#sidebar{padding-bottom:0} /* remove the padding-bottom so we don't double-pad for other browsers */
+   #sidebar::after{height:.5rem;content:" ";display:block} /* use a pseudo-element instead of padding */
+main{padding-bottom:0} /* this bug affects main, too */
+   main::after{height:.5rem;content:" ";display:block}
+
+/* manage initial/final margins: */
 h1:first-child,
 h2:first-child,
 h3:first-child,

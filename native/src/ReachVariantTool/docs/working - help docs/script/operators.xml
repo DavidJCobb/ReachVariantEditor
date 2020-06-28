@@ -51,7 +51,7 @@
             dividing the lefthand value by the righthand value.</dd>
          <dt>&amp;=</dt>
             <dd><dfn>Binary-AND-assign.</dfn> Modifies each bit in the variable on the lefthand 
-            side: bits will be set to zero if the corresponding bit in the righthan value is 
+            side: bits will be set to zero if the corresponding bit in the righthand value is 
             zero; otherwise, bits will be left unchanged.</dd>
          <dt>|=</dt>
             <dd><dfn>Binary-OR-assign.</dfn> Modifies each bit in the variable on the lefthand 
@@ -64,7 +64,7 @@
          <dt>~=</dt>
             <dd><dfn>Binary-NOT-assign.</dfn> Modifies each bit in the variable on the lefthand 
             side: bits will be set to zero if the corresponding bit in the righthand value is 
-            one, or left unchanged otherwise. This is equivalent to <code>a &= ~b</code>.</dd>
+            one, or left unchanged otherwise. This is equivalent to <code>a &amp;= ~b</code>.</dd>
       </dl>
    </body>
 </article>

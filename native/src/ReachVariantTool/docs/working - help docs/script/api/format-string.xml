@@ -9,7 +9,8 @@
          Halo: Reach's scripting engine supports the display of "format strings." A 
          format string can be a simple piece of text, but it can also include little 
          placeholders that can be replaced with other values when the string is 
-         displayed.
+         displayed. Up to two additional values can be provided after the format 
+         string itself.
       </p>
       <p>
          The known format codes are:

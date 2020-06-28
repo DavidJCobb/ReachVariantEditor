@@ -51,9 +51,9 @@
                <p>For example, in Capture the Flag, if an attacker is standing on top of 
                the flag when the round time limit is reached, then they will be granted 
                Sudden Death time. If the attacker is killed before Sudden Death runs out, 
-               then the Grace Period timer will begin. If the attackers reach the flag 
-               within that time, then Sudden Death will continue from where it left off, 
-               while the Grace Period resets.</p>
+               then Sudden Death will stop and the Grace Period timer will begin. If the 
+               attackers reach the flag within that time, then Sudden Death will continue 
+               from where it left off, while the Grace Period resets.</p>
             </dd>
       </dl>
    </body>

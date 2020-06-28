@@ -18,11 +18,17 @@ namespace cobb {
 
          uint32_t    line = 0;
          token_code  code = token_code::undefined;
-         std::string name;
-         std::string value;
+         std::string name;  // element name or attribute name
+         std::string value; // attribute value or text content
       };
       //
       struct document {
+         //
+         // This class can be used to load an XML file and generate a flat list of "tokens" describing the file. 
+         // The parse process will deal with comments and normalize self-closing tags (generating an element-close 
+         // token). You can then read the tokens in sequence and translate the data within to whatever format you 
+         // need it to have in memory.
+         //
          struct custom_entity {
             std::string entity; // "&name;"
             std::string substitution;

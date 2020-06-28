@@ -119,7 +119,14 @@ if global.number[0] != 1 then
    -- object isn't upright
    --
 end</pre>
-
+<h2>Notes</h2>
+<ul>
+   <li>
+               This function may not work on all object types, or its efficacy may depend 
+               on an object's physics. It works on vehicles, but phased-physics objects 
+               that have been pre-rotated in Forge seem to always test as being upright.
+            </li>
+</ul>
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>
