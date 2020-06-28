@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>timer.reset | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/timer.html">Timer</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/timer/conditions/is_zero.html">is_zero</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/timer/actions/reset.html">reset</a></li>
+<li><a href="script/api/timer/actions/set_rate.html">set_rate</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>timer.reset</h1>
+Reset a timer to its initial value.<h2>Example</h2>
+<pre>
+--
+-- Do something every ten seconds:
+--
+declare global.timer[0] = 10
+
+do
+   global.timer[0].set_rate(-100%)
+   if global.timer[0].is_zero() then
+      global.timer[0].reset()
+      --
+      -- ...and do the thing here
+      --
+   end
+end</pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

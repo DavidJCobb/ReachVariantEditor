@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>team.set_co_op_spawning | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/team.html">Team</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/team/conditions/has_alliance_status.html">has_alliance_status</a></li>
+<li><a href="script/api/team/conditions/has_any_players.html">has_any_players</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/team/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/team/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/team/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>team.set_co_op_spawning</h1>
+
+               <p>
+                  This function controls whether players use co-op spawning, an alternate 
+                  spawning system that allows players to spawn at their teammates or at 
+                  any object on the map that has been appropriately configured. This is 
+                  the spawning system used in Invasion and Buddy Slayer (formerly called 
+                  "Bro Slayer").
+               </p>
+            <h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/bool.html">enable</a></dt>
+      <dd>No description available.</dd>
+</dl>
+<h2>Example</h2>
+<pre>
+for each team do
+   current_team.set_co_op_spawning(true) -- enable it
+end</pre>
+<h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/actions/set_co_op_spawning.html">player.set_co_op_spawning</a></li>
+   <li><a href="script/api/object/actions/set_spawn_location_fireteam.html">object.set_spawn_location_fireteam</a></li>
+   <li><a href="script/api/object/actions/set_spawn_location_permissions.html">object.set_spawn_location_permissions</a></li>
+   <li><a href="script/api/player/actions/set_primary_respawn_object.html">player.set_primary_respawn_object</a></li>
+   <li><a href="script/api/team/actions/set_primary_respawn_object.html">team.set_primary_respawn_object</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

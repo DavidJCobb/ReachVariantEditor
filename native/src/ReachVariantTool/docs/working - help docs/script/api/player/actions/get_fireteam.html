@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>player.get_fireteam | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/player.html">Player</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></li>
+<li><a href="script/api/player/conditions/is_elite.html">is_elite</a></li>
+<li><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></li>
+<li><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></li>
+<li><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></li>
+<li><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></li>
+<li><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
+<li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
+<li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
+<li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
+<li><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></li>
+<li><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></li>
+<li><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></li>
+<li><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></li>
+<li><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></li>
+<li><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></li>
+<li><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>player.get_fireteam</h1>
+Returns the index of the fireteam that a player is on.<p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p>
+<h2>Example</h2>
+<pre>
+--
+-- Excerpt from Invasion:
+--
+for each object with label "inv_res_p1" do
+   --
+   -- Ensure that Phase 1 respawn zones cannot be picked up or destroyed:
+   --
+   current_object.set_spawn_location_permissions(no_one)
+   current_object.set_invincibility(1)
+   current_object.set_pickup_permissions(no_one)
+   --
+   if global.number[2] == 1 then -- current phase is Phase 1?
+      --
+      -- Control which fireteams are allowed to spawn at this respawn zone:
+      --
+      for each object with label "inv_res_p1" do
+         if current_object.spawn_sequence == 0 then 
+            current_object.set_spawn_location_fireteams(0)
+         end
+      end
+      for each object with label "inv_res_p1" do
+         if current_object.spawn_sequence == 1 then 
+            current_object.set_spawn_location_fireteams(1)
+         end
+      end
+      for each object with label "inv_res_p1" do
+         if current_object.spawn_sequence == 2 then 
+            current_object.set_spawn_location_fireteams(2)
+         end
+      end
+      for each object with label "inv_res_p1" do
+         if current_object.spawn_sequence > 2 then 
+            current_object.set_spawn_location_fireteams(all)
+         end
+      end
+      --
+      -- Use the respawn zone's Spawn Sequence to determine which fireteam 
+      -- should use it as their default spawn:
+      --
+      current_object.set_spawn_location_permissions(allies)
+      for each player do
+         if current_object.team == current_player.team then 
+            global.number[8] = 0
+            global.number[8] = current_player.get_fireteam()
+            if current_object.spawn_sequence == global.number[8] then 
+               current_player.set_primary_respawn_object(current_object)
+            end
+         end
+      end
+   end
+end</pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>widget.set_text | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/widget.html">HUD Widget</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/widget/actions/set_icon.html">set_icon</a></li>
+<li><a href="script/api/widget/actions/set_meter_params.html">set_meter_params</a></li>
+<li><a href="script/api/widget/actions/set_text.html">set_text</a></li>
+<li><a href="script/api/widget/actions/set_value_text.html">set_value_text</a></li>
+<li><a href="script/api/widget/actions/set_visibility.html">set_visibility</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>widget.set_text</h1>
+Set the HUD widget's text.<h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/format-string.html">text</a></dt>
+      <dd>No description available.</dd>
+</dl>
+<h2>Example</h2>
+<pre>
+for each player do
+   script_widget[0].set_visibility(current_player, false)
+   if current_player.number[0] == 1 then
+      script_widget[0].set_visibility(current_player, true)
+      script_widget[0].set_text("You are a zombie!")
+   end
+end</pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

@@ -11,14 +11,15 @@ body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row 
       #sidebar ul{margin:0;padding:0 0 0 1.5em}
          #sidebar li{list-style:none;position:relative}
             #sidebar li a{display:block;background:#FFF;padding:.25em .5em;text-decoration:none;border-radius:.2rem}
+            #sidebar li a{text-overflow:ellipsis;overflow-x:hidden}
             #sidebar li a{margin:4px 0} /*spacing*/
             #sidebar li a.you-are-here{font-weight:bold}
          #sidebar li.collapsed ul{display:none}
       #sidebar>ul{list-style:none;margin:0;padding:0}
          #sidebar>ul>li{list-style:none}
-            #sidebar .toggle{all:unset;position:absolute;right:100%;top:0;text-align:center;width:1.5ch;height:var(--line-height);padding:.25em 0;background:#CCC;color:#000;border-radius:.2rem 0 0 .2rem}
+            #sidebar .toggle{all:unset;position:absolute;right:100%;top:0;text-align:center;width:1.5ch;height:var(--line-height);padding:.25em 0;background:#CCC;color:#000;border-radius:.2rem 0 0 .2rem;cursor:default}
             #sidebar .toggle{margin:0} /* Edge doesn't understand "all:unset" */
-               #sidebar .toggle::before{content:"-"}
+               #sidebar .toggle::before{content:"-";cursor:default}
                #sidebar li.collapsed>.toggle::before{content:"+"}
             #sidebar .toggle+a{border-radius:0 .2rem .2rem 0}
       #sidebar ul hr{border:0;border-top:1px solid #BBB}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>team.get_scoreboard_pos | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/team.html">Team</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/team/conditions/has_alliance_status.html">has_alliance_status</a></li>
+<li><a href="script/api/team/conditions/has_any_players.html">has_any_players</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/team/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/team/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/team/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>team.get_scoreboard_pos</h1>
+
+               <p>
+                  This function returns a team's position on the scoreboard. A value 
+                  of 1 represents 1st place, while a value of 0 results if the function 
+                  is called on <var>no_player</var>.
+               </p>
+            <p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p>
+<h2>Example</h2>
+<pre>
+alias leader = global.team[0]
+
+for each team do
+   leader = no_team
+   global.number[0] = current_team.get_scoreboard_pos()
+   if global.number[0] == 1 then
+      leader = current_team
+   end
+end</pre>
+<h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/actions/get_scoreboard_pos.html">player.get_scoreboard_pos</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>object.kill | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/object.html">Object</a>
+               <ul>
+                  <li>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/object/conditions/has_forge_label.html">has_forge_label</a></li>
+<li><a href="script/api/object/conditions/is_in_use.html">is_in_use</a></li>
+<li><a href="script/api/object/conditions/is_of_type.html">is_of_type</a></li>
+<li><a href="script/api/object/conditions/is_out_of_bounds.html">is_out_of_bounds</a></li>
+<li><a href="script/api/object/conditions/shape_contains.html">shape_contains</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
+<li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+<li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
+<li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
+<li><a href="script/api/object/actions/delete.html">delete</a></li>
+<li><a href="script/api/object/actions/detach.html">detach</a></li>
+<li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
+<li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+<li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
+<li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
+<li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
+<li><a href="script/api/object/actions/get_orientation.html">get_orientation</a></li>
+<li><a href="script/api/object/actions/get_speed.html">get_speed</a></li>
+<li><a href="script/api/object/actions/kill.html">kill</a></li>
+<li><a href="script/api/object/actions/place_at_me.html">place_at_me</a></li>
+<li><a href="script/api/object/actions/place_between_me_and.html">place_between_me_and</a></li>
+<li><a href="script/api/object/actions/push_upward.html">push_upward</a></li>
+<li><a href="script/api/object/actions/remove_weapon.html">remove_weapon</a></li>
+<li><a href="script/api/object/actions/set_device_actual_position.html">set_device_actual_position</a></li>
+<li><a href="script/api/object/actions/set_device_animation_position.html">set_device_animation_position</a></li>
+<li><a href="script/api/object/actions/set_device_position.html">set_device_position</a></li>
+<li><a href="script/api/object/actions/set_device_power.html">set_device_power</a></li>
+<li><a href="script/api/object/actions/set_garbage_collection_disabled.html">set_garbage_collection_disabled</a></li>
+<li><a href="script/api/object/actions/set_invincibility.html">set_invincibility</a></li>
+<li><a href="script/api/object/actions/set_pickup_permissions.html">set_pickup_permissions</a></li>
+<li><a href="script/api/object/actions/set_progress_bar.html">set_progress_bar</a></li>
+<li><a href="script/api/object/actions/set_scale.html">set_scale</a></li>
+<li><a href="script/api/object/actions/set_shape.html">set_shape</a></li>
+<li><a href="script/api/object/actions/set_shape_visibility.html">set_shape_visibility</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_fireteams.html">set_spawn_location_fireteams</a></li>
+<li><a href="script/api/object/actions/set_spawn_location_permissions.html">set_spawn_location_permissions</a></li>
+<li><a href="script/api/object/actions/set_waypoint_icon.html">set_waypoint_icon</a></li>
+<li><a href="script/api/object/actions/set_waypoint_priority.html">set_waypoint_priority</a></li>
+<li><a href="script/api/object/actions/set_waypoint_range.html">set_waypoint_range</a></li>
+<li><a href="script/api/object/actions/set_waypoint_text.html">set_waypoint_text</a></li>
+<li><a href="script/api/object/actions/set_waypoint_timer.html">set_waypoint_timer</a></li>
+<li><a href="script/api/object/actions/set_waypoint_visibility.html">set_waypoint_visibility</a></li>
+<li><a href="script/api/object/actions/set_weapon_pickup_priority.html">set_weapon_pickup_priority</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">try_get_carrier</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>object.kill</h1>
+Kill an object.<h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/bool.html">silent</a></dt>
+      <dd>
+                  Controls whether the object's death counts toward any statistics.
+               </dd>
+</dl>
+<h2>Example</h2>
+<pre>
+for each object with label "avoid_me" do
+   for each player do
+      if current_object.shape_contains(current_player.biped) then
+         current_player.biped.kill(false)
+      end
+   end
+end</pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+   </body>
+</html>

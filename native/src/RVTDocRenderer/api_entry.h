@@ -15,12 +15,12 @@ enum class api_entry_type {
 
 class APIEntry {
    public:
-      class note {
+      struct note {
          std::string title; // optional; generates sub-heading
          std::string id;    // if there is a title, then this is the <a name="..."> identifier
          std::string content;
       };
-      class relationship {
+      struct relationship {
          std::string    context; // basis.whatever
          api_entry_type type = api_entry_type::same;
          std::string    name;
@@ -38,7 +38,7 @@ class APIEntry {
 
 class APIMethod : public APIEntry {
    public:
-      class argument {
+      struct argument {
          std::string name;
          std::string type; // optional
          std::string content; // optional
@@ -49,11 +49,12 @@ class APIMethod : public APIEntry {
       std::vector<argument> args;
       int32_t opcode_id = -1;
       bool    nodiscard = true; // only relevant if (return_value_type) is not empty
+      bool    is_action = false;
       //
       inline bool has_return_value() const noexcept { return !this->return_value_type.empty();  }
 
       size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition);
-      void write(std::string& out, std::string stem, const std::string& type_template);
+      void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
 };
 
 class APIProperty : public APIEntry {

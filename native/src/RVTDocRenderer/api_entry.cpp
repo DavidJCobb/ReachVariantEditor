@@ -12,7 +12,6 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
    };
    enum class target {
       nothing,
-      arg,
       note,
       related,
    };
@@ -24,25 +23,12 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
    target   focus = target::nothing;
    uint32_t depth = 0;
    size_t   extract;
-   uint32_t i = root_token + 1;
-   for (; i < doc.tokens.size(); ++i) {
+   uint32_t i    = root_token + 1;
+   size_t   size = doc.tokens.size();
+   for (; i < size; ++i) {
       auto& token = doc.tokens[i];
       //
       switch (focus) {
-         case target::arg:
-            if (token.code == cobb::xml::token_code::element_open)
-               ++depth;
-            if (token.code == cobb::xml::token_code::element_close) {
-               if (depth == 0 && token.name == "arg") {
-                  focus = target::nothing;
-                  continue;
-               }
-               --depth;
-            }
-            //
-            // TODO
-            //
-            continue;
          case target::note:
             if (token.code == cobb::xml::token_code::element_open)
                ++depth;
@@ -67,9 +53,24 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                }
                --depth;
             }
-            //
-            // TODO: extract attributes; ignore content
-            //
+            if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+               assert(!this->related.empty());
+               auto& rel = this->related.back();
+               if (token.name == "type") {
+                  if (token.value == "action")
+                     rel.type = api_entry_type::action;
+                  else if (token.value == "condition")
+                     rel.type = api_entry_type::condition;
+                  else if (token.value == "property")
+                     rel.type = api_entry_type::property;
+                  else if (token.value == "accessor")
+                     rel.type = api_entry_type::accessor;
+               } else if (token.name == "name") {
+                  rel.name = token.value;
+               } else if (token.name == "context") {
+                  rel.context = token.value;
+               }
+            }
             continue;
       }
       //
@@ -146,6 +147,7 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                   continue;
                }
                if (token.name == "related") {
+                  this->related.emplace_back();
                   focus = target::related;
                   continue;
                }
@@ -161,7 +163,27 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
             }
             if (token.code == cobb::xml::token_code::element_open) {
                if (depth == 0 && token.name == "arg") {
-                  focus = target::arg;
+                  this->args.emplace_back();
+                  auto& arg = this->args.back();
+                  //
+                  // Get attributes:
+                  //
+                  for (uint32_t j = i + 1; j < size; ++j) {
+                     auto& token = doc.tokens[j];
+                     if (token.code != cobb::xml::token_code::attribute)
+                        break;
+                     if (token.name == "name")
+                        arg.name = token.value;
+                     else if (token.name == "type")
+                        arg.type = token.value;
+                  }
+                  //
+                  // Get argument content:
+                  //
+                  extract = extract_html_from_xml(i, doc, arg.content, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
+                  //
                   continue;
                }
                ++depth;
@@ -175,9 +197,141 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
             break;
       }
    }
+   //
+   // TODO: Sort notes: notes with names should come before all notes without names
+   //
    return std::string::npos;
 }
-void APIMethod::write(std::string& out, std::string stem, const std::string& type_template) {
+void APIMethod::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
+   std::string full_title = member_of;
+   if (!full_title.empty())
+      full_title += '.';
+   full_title += this->name;
+   //
+   handle_page_title_tag(content, full_title);
+   //
+   std::string needle  = "<content-placeholder id=\"main\" />";
+   std::size_t pos     = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
+   //
+   replace += "<h1>";
+   replace += full_title;
+   replace += "</h1>\n";
+   if (this->description.empty())
+      replace += this->blurb;
+   else
+      replace += this->description;
+   if (this->has_return_value()) {
+      replace += "<p>This function returns <a href=\"script/api/";
+      replace += this->return_value_type;
+      replace += ".html\">";
+      replace += this->return_value_type;
+      replace += "</a>.";
+      if (this->nodiscard)
+         replace += " Calling this function without storing its return value in a variable is an error.";
+      replace += "</p>\n";
+   }
+   if (this->args.size() || !this->bare_argument_text.empty()) {
+      replace += "<h2>Arguments</h2>\n";
+      if (!this->bare_argument_text.empty()) {
+         replace += this->bare_argument_text;
+      } else {
+         replace += "<dl>\n";
+         for (auto& arg : this->args) {
+            bool has_type = !arg.type.empty() && arg.type.find_first_of(':') == std::string::npos;
+            //
+            replace += "   <dt>";
+            if (has_type) {
+               replace += "<a href=\"script/api/";
+               replace += arg.type;
+               replace += ".html\">";
+            }
+            if (!arg.name.empty()) {
+               replace += arg.name;
+            } else {
+               replace += arg.type;
+            }
+            if (has_type)
+               replace += "</a>";
+            replace += "</dt>\n      <dd>";
+            if (arg.content.empty())
+               //
+               // TODO: if (has_type), then this should use the blurb or description for that type, preferring 
+               // the blurb. This requires loading ALL types into memory before being able to export HTML for 
+               // any of them.
+               //
+               replace += "No description available.";
+            else
+               replace += arg.content;
+            replace += "</dd>\n";
+         }
+         replace += "</dl>\n";
+      }
+   }
+   if (!this->example.empty()) {
+      replace += "<h2>Example</h2>\n";
+      replace += "<pre>";
+      replace += this->example;
+      replace += "</pre>\n";
+   }
+   if (!this->notes.empty()) {
+      bool has_any_named = !this->notes[0].title.empty();
+      bool wrote_subhead = false;
+      //
+      replace += "<h2>Notes</h2>\n<ul>\n";
+      for (auto& note : this->notes) {
+         if (note.title.empty()) {
+            if (has_any_named && !wrote_subhead) {
+               wrote_subhead = true;
+               replace += "<h3>Other notes</h3>\n";
+            }
+         } else {
+            replace += "<h3>";
+            if (!note.id.empty()) {
+               replace += "<a name=\"";
+               replace += note.id;
+               replace += "\">";
+            }
+            replace += note.title;
+            if (!note.id.empty())
+               replace += "</a>";
+            replace += "</h3>\n";
+         }
+         replace += note.content;
+      }
+   }
+   if (!this->related.empty()) {
+      replace += "<h2>See also</h2>\n<ul>\n";
+      for (auto& rel : this->related) {
+         replace += "   <li><a href=\"script/api/";
+         //
+         std::string context = rel.context;
+         if (context.empty())
+            context = member_of;
+         //
+         replace += context;
+         replace += "/";
+         switch (rel.type) {
+            case api_entry_type::action: replace += "actions/"; break;
+            case api_entry_type::condition: replace += "conditions/"; break;
+            case api_entry_type::property: replace += "properties/"; break;
+            case api_entry_type::accessor: replace += "accessors/"; break;
+            case api_entry_type::same:
+               replace += (this->is_action) ? "actions/" : "conditions/";
+               break;
+         }
+         replace += rel.name;
+         replace += ".html\">";
+         replace += context;
+         if (!context.empty())
+            replace += '.';
+         replace += rel.name;
+         replace += "</a></li>\n";
+      }
+      replace += "</ul>\n";
+   }
+   content.replace(pos, needle.length(), replace);
 }
 
 const char* APIType::get_friendly_name() const noexcept {
@@ -446,7 +600,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
    std::size_t pos     = content.find(needle.c_str());
    std::string replace;
    assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"self-link\" />)");
-   cobb::sprintf(replace, "<a href=\"%s%s.xml\">%s</a>", stem.c_str(), this->name.c_str(), this->get_friendly_name());
+   cobb::sprintf(replace, "<a href=\"script/api/%s.html\">%s</a>", this->name.c_str(), this->get_friendly_name());
    content.replace(pos, needle.length(), replace);
    //
    {
@@ -457,7 +611,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       replace.clear();
       for (auto& prop : this->properties) {
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"%sscript/api/%s/properties/%s.html\">%s</a></li>\n", stem.c_str(), this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/properties/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -470,7 +624,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       replace.clear();
       for (auto& prop : this->accessors) {
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"%sscript/api/%s/accessors/%s.html\">%s</a></li>\n", stem.c_str(), this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/accessors/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -483,7 +637,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       replace.clear();
       for (auto& prop : this->conditions) {
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"%sscript/api/%s/conditions/%s.html\">%s</a></li>\n", stem.c_str(), this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -496,7 +650,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       replace.clear();
       for (auto& prop : this->actions) {
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"%sscript/api/%s/actions/%s.html\">%s</a></li>\n", stem.c_str(), this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -615,11 +769,19 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, this->name, type_template);
          //
-         // TODO: generate the member content
-         //
-         // TODO: export the file
-         //
+         auto pm = p.parent_path();
+         pm.append(this->name);
+         std::filesystem::create_directory(pm);
+         pm.append("conditions");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/conditions" and the API doesn't remember that "conditions" was a directory, so we need this or the next two calls will replace "conditions" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
       }
    }
    {
@@ -629,11 +791,19 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, this->name, type_template);
          //
-         // TODO: generate the member content
-         //
-         // TODO: export the file
-         //
+         auto pm = p.parent_path();
+         pm.append(this->name);
+         std::filesystem::create_directory(pm);
+         pm.append("actions");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/actions" and the API doesn't remember that "actions" was a directory, so we need this or the next two calls will replace "actions" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
       }
    }
    {
