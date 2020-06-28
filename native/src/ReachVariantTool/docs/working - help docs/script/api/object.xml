@@ -416,8 +416,10 @@
                next_checkpoint.set_spawn_location_permissions(mod_player, current_player, 1)
             </example>
             <related context="player" type="action" name="set_co_op_spawning" />
+            <related context="team"   type="action" name="set_co_op_spawning" />
             <related type="action" name="set_spawn_location_fireteams" />
             <related context="player" type="action" name="set_primary_respawn_object" />
+            <related context="team"   type="action" name="set_primary_respawn_object" />
          </method>
          <method name="set_spawn_location_fireteams" id="14">
             <args>

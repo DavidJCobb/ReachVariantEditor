@@ -56,6 +56,18 @@ namespace {
    }
 }
 
+void ensure_paragraph(std::string& text) {
+   size_t start = 0;
+   size_t size  = text.size();
+   for (; start < size; ++start)
+      if (!isspace(text[start]))
+         break;
+   if (text[start] == '<') // text likely already starts with a tag
+      return;
+   text.insert(0, "<p>");
+   text += "</p>";
+}
+
 void handle_base_tag(std::string& html, int depth) {
    if (depth <= 0)
       return;

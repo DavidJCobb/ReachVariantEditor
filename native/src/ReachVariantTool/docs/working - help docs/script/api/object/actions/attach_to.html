@@ -53,12 +53,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -212,38 +214,38 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
                </p>
             <h3>Other notes</h3>
 <ul>
-   <li>
+   <li><p>
                Armor Abilities equipped by other players are an exception to normal 
                attachment behaviors. If you detach an Armor Ability from a player's 
                back, you can move it around or attach it without unequipping it from 
                that player; however, the Armor Ability will automatically detach 
                itself every frame. (Verified for Armor Abilities worn by Monitors, 
                but not tested for Armor Abilities worn by Spartans and Elites.)
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                Attaching a biped to an object will lock the biped in place. If the 
                biped is controlled by the player, they will be able to turn but not 
                to move, and their first-person legs will desynch from their upper 
                body.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                When a biped enters a vehicle, it is considered attached to that 
                vehicle. Scripts cannot attach it to something else while it is in 
                the vehicle. Weapons being carried by a biped are expected to behave 
                similarly.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                If something is attached to a Monitor biped, it will bob up and down 
                in synch with that biped's animation. All of a Monitor's nodes, 
                including the one with the animation, are located at the same 
                model-relative coordinate, and the one with the animation is the one 
                that is found by the game engine when performing an attachment.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                It appears that attaching an object to <var>no_object</var> and then 
                detaching it will teleport it to the world origin. On Forge World, 
                this is a point out by the canyon's beach.
-            </li>
+            </p></li>
 </ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/detach.html">object.detach</a></li>

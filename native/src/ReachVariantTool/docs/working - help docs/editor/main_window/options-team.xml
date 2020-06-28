@@ -4,7 +4,8 @@
    <body>
       <p>
          The <b>team settings</b> page allows you to edit settings related to team scoring 
-         and configuration.
+         and configuration. To edit settings for individual teams, refer to 
+         <a href="options-team-specific.html">this page</a>.
       </p>
       <img src="options-team.png" />
       <p>

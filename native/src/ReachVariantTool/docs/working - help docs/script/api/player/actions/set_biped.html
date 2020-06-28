@@ -57,10 +57,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -116,12 +122,12 @@ for each player do
 end</pre>
 <h2>Notes</h2>
 <ul>
-   <li>
+   <li><p>
                Holograms do not <a href="script/api/object/conditions/is_of_type.html">test</a> 
                as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
                passing a Hologram to <code>set_biped</code> will place the player in control 
                of the biped.
-            </li>
+            </p></li>
    <li>
                <p>
                   If necessary, you can spawn a biped inside of a vehicle by spawning the 
@@ -138,7 +144,7 @@ end</pre>
                   automatically.
                </p>
             </li>
-   <li>
+   <li><p>
                By default, Monitors spawn with an invisible Focus Rifle, and are capable of 
                picking up weapons, grenades, and Armor Abilities. Monitors can fire any 
                ranged weapon and can use any Armor Ability that does not depend on character 
@@ -146,15 +152,15 @@ end</pre>
                cannot melee or throw grenades, though they will make melee sounds. Equipped 
                Armor Abilities will be visible on the Monitor's body, displaying their 
                holographic icons as if they were still lying around waiting to be picked up.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                Once a Megalo-spawned biped has been controlled by a player, it will take on 
                that player's appropriate armor or team color and (if it's a Spartan) its 
                voice will match the player's chosen gender regardless of its own gender 
                presentation. Moreover, in FFA games, the biped will appear allied to the 
                last player who controlled it, even if it appeared as an enemy to them 
                beforehand.
-            </li>
+            </p></li>
    <li>
                <p>
                   You can force a player into a biped while the initial loadout camera is playing, and they 
@@ -180,7 +186,7 @@ end</pre>
                   to find that feature.
                </p>
             </li>
-   <li>
+   <li><p>
                Suppose a player is given control of a biped and later has that control revoked. If at 
                some point afterward you try to rotate the biped and give the player control over it, all 
                on the same frame, then the rotation will fail: the biped will continue to aim in the last 
@@ -188,7 +194,7 @@ end</pre>
                cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
                is to rotate the biped on one frame and then wait 'til the next to actually force the 
                player into it.
-            </li>
+            </p></li>
 </ul>
       </main>
       <script src="resources/sidebar.js"></script>

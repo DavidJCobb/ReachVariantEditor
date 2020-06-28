@@ -61,8 +61,9 @@ class APIMethod : public APIEntry {
       std::string return_value_type;  // optional
       std::vector<argument> args;
       int32_t opcode_id = -1;
-      bool    nodiscard = true; // only relevant if (return_value_type) is not empty
+      bool    nodiscard = true;  // only relevant if (return_value_type) is not empty
       bool    is_action = false;
+      bool    is_stub   = false; // used to simplify the sidebar listing both names for an opcode with two names: we just create a dummy entry whose name is the same as the real entry's name2
       //
       inline bool has_return_value() const noexcept { return !this->return_value_type.empty(); }
 

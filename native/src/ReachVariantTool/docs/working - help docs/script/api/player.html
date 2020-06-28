@@ -21,8 +21,18 @@
                   <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
                   <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
                   <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
-                  <li><a href="editor/main_window/options-team.html">Team Settings</a></li>
-                  <li><a href="editor/main_window/options-loadout.html">Loadout Settings</a></li>
+                  <li>
+                     <a href="editor/main_window/options-team.html">Team Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                     </ul>
+                  </li>
+                  <li>
+                     <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                     </ul>
+                  </li>
                   <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
                   <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
                   <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
@@ -55,6 +65,7 @@
                   <li><a href="script/operators.html">Operators</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
+                  <li><a href="script/snippets.html">Useful code snippets</a></li>
                </ul>
             </li>
             <li>
@@ -116,96 +127,96 @@
    <p>This type contains nested variables. There are 8 nested <a href="script/api/number.html">numbers</a>, 4 nested <a href="script/api/object.html">objects</a>, 4 nested <a href="script/api/player.html">players</a>, 4 nested <a href="script/api/team.html">teams</a>, and 4 nested <a href="script/api/timer.html">timers</a> available.</p>
 <h2>Properties</h2>
 <dl><dt><a href="script/api/player/properties/biped.html">biped</a></dt>
-   <dd>The player's current biped.</dd>
+   <dd><p>The player's current biped.</p></dd>
 <dt><a href="script/api/player/properties/rating.html">rating</a></dt>
-   <dd>The player's Arena rating.</dd>
+   <dd><p>The player's Arena rating.</p></dd>
 <dt><a href="script/api/player/properties/score.html">score</a></dt>
-   <dd>The player's current score.</dd>
+   <dd><p>The player's current score.</p></dd>
 <dt><a href="script/api/player/properties/script_stat.html">script_stat</a></dt>
-   <dd>The value of a scripted Post-Game Carnage Report stat for this player.</dd>
+   <dd><p>The value of a scripted Post-Game Carnage Report stat for this player.</p></dd>
 <dt><a href="script/api/player/properties/team.html">team</a></dt>
-   <dd>The player's owner team.</dd>
+   <dd><p>The player's owner team.</p></dd>
 <dt><a href="script/api/player/properties/unknown_09.html">unknown_09</a></dt>
-   <dd>Unknown. Possibly the player's requisition money.</dd>
+   <dd><p>Unknown. Possibly the player's requisition money.</p></dd>
 </dl>
 
 <h2>Accessors</h2>
 <dl><dt><a href="script/api/player/accessors/frag_grenades.html">frag_grenades</a></dt>
-   <dd>The player's current frag grenade count.</dd>
+   <dd><p>The player's current frag grenade count.</p></dd>
 <dt><a href="script/api/player/accessors/plasma_grenades.html">plasma_grenades</a></dt>
-   <dd>The player's current plasma grenade count.</dd>
+   <dd><p>The player's current plasma grenade count.</p></dd>
 </dl>
 
 <h2>Member conditions</h2>
 <dl><dt><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></dt>
-   <dd>Checks whether one player assisted another in killing a third.</dd>
+   <dd><p>Checks whether one player assisted another in killing a third.</p></dd>
 <dt><a href="script/api/player/conditions/is_elite.html">is_elite</a></dt>
-   <dd>Checks whether a player's current species is Elite.</dd>
+   <dd><p>Checks whether a player's current species is Elite.</p></dd>
 <dt><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></dt>
-   <dd>This function always returns false.</dd>
+   <dd><p>This function always returns false.</p></dd>
 <dt><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></dt>
-   <dd>Checks whether a player's current species is Monitor.</dd>
+   <dd><p>Checks whether a player's current species is Monitor.</p></dd>
 <dt><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></dt>
-   <dd>Checks whether a player <em>is not</em> respawning.</dd>
+   <dd><p>Checks whether a player <em>is not</em> respawning.</p></dd>
 <dt><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></dt>
-   <dd>Checks whether a player's current species is Spartan.</dd>
+   <dd><p>Checks whether a player's current species is Spartan.</p></dd>
 <dt><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></dt>
-   <dd>Check what killed a player.</dd>
+   <dd><p>Check what killed a player.</p></dd>
 </dl>
 
 <h2>Member actions</h2>
 <dl><dt><a href="script/api/player/actions/add_weapon.html">add_weapon</a></dt>
-   <dd>Give a weapon to a player.</dd>
+   <dd><p>Give a weapon to a player.</p></dd>
 <dt><a href="script/api/player/actions/apply_traits.html">apply_traits</a></dt>
-   <dd>Apply a set of player traits to a player for the current tick.</dd>
+   <dd><p>Apply a set of player traits to a player for the current tick.</p></dd>
 <dt><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></dt>
-   <dd>Force a player into a vehicle if any seat is available.</dd>
+   <dd><p>Force a player into a vehicle if any seat is available.</p></dd>
 <dt><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></dt>
-   <dd>Identify the player's current Armor Ability.</dd>
+   <dd><p>Identify the player's current Armor Ability.</p></dd>
 <dt><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></dt>
-   <dd>Returns the index of the fireteam that a player is on.</dd>
+   <dd><p>Returns the index of the fireteam that a player is on.</p></dd>
 <dt><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></dt>
-   <dd>Get a player's position on the scoreboard.</dd>
+   <dd><p>Get a player's position on the scoreboard.</p></dd>
 <dt><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></dt>
-   <dd>Get the number of players that someone has killed without dying.</dd>
+   <dd><p>Get the number of players that someone has killed without dying.</p></dd>
 <dt><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></dt>
-   <dd>A development leftover related to a scrapped Requisition system.</dd>
+   <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
 <dt><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></dt>
-   <dd>The specific function of this action is not known. Presumably it has something 
-            to do with keeping track of bad behavior in-game.</dd>
+   <dd><p>The specific function of this action is not known. Presumably it has something 
+            to do with keeping track of bad behavior in-game.</p></dd>
 <dt><a href="script/api/player/actions/set_biped.html">set_biped</a></dt>
-   <dd>Revoke control of a player's current biped, and grant control of another one.</dd>
+   <dd><p>Revoke control of a player's current biped, and grant control of another one.</p></dd>
 <dt><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></dt>
-   <dd>Control whether a player uses co-op spawning.</dd>
+   <dd><p>Control whether a player uses co-op spawning.</p></dd>
 <dt><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></dt>
-   <dd>Sets a player's current fireteam index.</dd>
+   <dd><p>Sets a player's current fireteam index.</p></dd>
 <dt><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></dt>
-   <dd>Sets which loadout palette a player can select loadouts from.</dd>
+   <dd><p>Sets which loadout palette a player can select loadouts from.</p></dd>
 <dt><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></dt>
-   <dd>This function appears to set a player's default respawn object, when 
-            co-op spawning is enabled.</dd>
+   <dd><p>This function appears to set a player's default respawn object, when 
+            co-op spawning is enabled.</p></dd>
 <dt><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></dt>
-   <dd>A development leftover related to a scrapped Requisition system.</dd>
+   <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
 <dt><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></dt>
-   <dd>A development leftover related to a scrapped Requisition system.</dd>
+   <dd><p>A development leftover related to a scrapped Requisition system.</p></dd>
 <dt><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></dt>
-   <dd>Change the round card's icon.</dd>
+   <dd><p>Change the round card's icon.</p></dd>
 <dt><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></dt>
-   <dd>Change the round card's icon caption.</dd>
+   <dd><p>Change the round card's icon caption.</p></dd>
 <dt><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></dt>
-   <dd>Change the round card's description text.</dd>
-<dt><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></dt>
-   <dd>Identify the player's current Armor Ability.</dd>
-<dt><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></dt>
-   <dd>Identify the player who killed this player.</dd>
-<dt><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></dt>
-   <dd>Identify the player who killed this player.</dd>
-<dt><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></dt>
-   <dd>Identify the player who killed this player.</dd>
-<dt><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></dt>
-   <dd>Identify the vehicle that a player is in.</dd>
-<dt><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></dt>
-   <dd>Identify the player's current weapon.</dd>
+   <dd><p>Change the round card's description text.</p></dd>
+<dt><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability &nbsp; a.k.a. &nbsp; get_armor_ability</a></dt>
+   <dd><p>Identify the player's current Armor Ability.</p></dd>
+<dt><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod &nbsp; a.k.a. &nbsp; get_death_damage_mod</a></dt>
+   <dd><p>Identify the player who killed this player.</p></dd>
+<dt><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type &nbsp; a.k.a. &nbsp; get_death_damage_type</a></dt>
+   <dd><p>Identify the player who killed this player.</p></dd>
+<dt><a href="script/api/player/actions/try_get_killer.html">try_get_killer &nbsp; a.k.a. &nbsp; get_killer</a></dt>
+   <dd><p>Identify the player who killed this player.</p></dd>
+<dt><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle &nbsp; a.k.a. &nbsp; get_vehicle</a></dt>
+   <dd><p>Identify the vehicle that a player is in.</p></dd>
+<dt><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon &nbsp; a.k.a. &nbsp; get_weapon</a></dt>
+   <dd><p>Identify the player's current weapon.</p></dd>
 </dl>
 
       </main>

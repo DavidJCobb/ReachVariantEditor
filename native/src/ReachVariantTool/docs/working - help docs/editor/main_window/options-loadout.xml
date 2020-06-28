@@ -4,7 +4,8 @@
    <body>
       <p>
          The <b>loadout settings</b> page allows you to edit baseline settings that apply 
-         to all loadouts.
+         to all loadouts. To edit settings for individual loadout palettes, refer to 
+         <a href="options-loadout-specific.html">this page</a>.
       </p>
       <img src="options-loadout.png" />
       <p>

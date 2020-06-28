@@ -53,12 +53,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -99,7 +101,7 @@
       </nav>
       <main>
          <h1>object.add_weapon</h1>
-Give a weapon to a biped, even if it isn't player-controlled.<h2>Arguments</h2>
+<p>Give a weapon to a biped, even if it isn't player-controlled.</p><h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object-type.html">weapon</a></dt>
       <dd>No description available.</dd>
@@ -122,15 +124,15 @@ Give a weapon to a biped, even if it isn't player-controlled.<h2>Arguments</h2>
 global.object[0].add_weapon(assault_rifle, force)</pre>
 <h2>Notes</h2>
 <ul>
-   <li>
+   <li><p>
                If the biped is player-controlled and the player's Weapon Pickup trait is set to 
                Disabled, then you must use the "force" mode to add the weapon.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                Remember that this function works differently from <code>player.add_weapon</code>: 
                the object function takes an object type and spawns a new weapon; while the player 
                function takes an existing weapon object.
-            </li>
+            </p></li>
 </ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>

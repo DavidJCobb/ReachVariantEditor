@@ -53,12 +53,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
+<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
+<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -99,7 +101,7 @@
       </nav>
       <main>
          <h1>object.copy_rotation_from</h1>
-Rotate one object to match another.<h2>Arguments</h2>
+<p>Rotate one object to match another.</p><h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object.html">other</a></dt>
       <dd>
@@ -115,17 +117,17 @@ Rotate one object to match another.<h2>Arguments</h2>
 global.object[0].copy_rotation_from(global.object[1], true)</pre>
 <h2>Notes</h2>
 <ul>
-   <li>
+   <li><p>
                Passing <var>true</var> as the boolean argument will perform the rotation without 
                doing any further collision checking or physics. If the object being rotated is 
                physics-simulated, and the rotation causes the object to clip into something else, 
                then it may end up being launched away if something bumps it and updates its 
                physics simulation.
-            </li>
-   <li>
+            </p></li>
+   <li><p>
                This function can fail to do anything if it is called on an object that is attached 
                to something else.
-            </li>
+            </p></li>
 </ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/face_toward.html">object.face_toward</a></li>

@@ -8,8 +8,10 @@
 size_t APIEntry::_load_blurb(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem) {
    std::string out;
    auto extract = extract_html_from_xml(start_tag_token_index, doc, out, stem);
-   if (extract != std::string::npos)
+   if (extract != std::string::npos) {
+      ensure_paragraph(out);
       std::swap(this->blurb, out);
+   }
    return extract;
 }
 size_t APIEntry::_load_description(cobb::xml::document& doc, uint32_t start_tag_token_index, const std::string& stem) {
@@ -80,6 +82,7 @@ size_t APIEntry::_load_note(cobb::xml::document& doc, uint32_t start_tag_token_i
    }
    auto extract = extract_html_from_xml(start_tag_token_index, doc, note.content, stem);
    assert(extract != std::string::npos);
+   ensure_paragraph(note.content);
    return extract;
 }
 //
@@ -348,6 +351,15 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
    std::string replace;
    replace += "<h1>";
    replace += full_title;
+   if (!this->name2.empty()) {
+      replace += "<span class=\"a-k-a\">a.k.a. ";
+      if (!member_of.empty()) {
+         replace += member_of;
+         replace += '.';
+      }
+      replace += this->name2;
+      replace += "</span>";
+   }
    replace += "</h1>\n";
    this->_write_description(replace);
    if (this->has_return_value()) {
@@ -605,15 +617,21 @@ const char* APIType::get_friendly_name() const noexcept {
    return this->name2.c_str();
 }
 APIMethod* APIType::get_action_by_name(const std::string& name) {
-   for (auto& member : this->actions)
+   for (auto& member : this->actions) {
+      if (member.is_stub)
+         continue;
       if (member.name == name || member.name2 == name)
          return &member;
+   }
    return nullptr;
 }
 APIMethod* APIType::get_condition_by_name(const std::string& name) {
-   for (auto& member : this->conditions)
+   for (auto& member : this->conditions) {
+      if (member.is_stub)
+         continue;
       if (member.name == name || member.name2 == name)
          return &member;
+   }
    return nullptr;
 }
 APIProperty* APIType::get_property_by_name(const std::string& name) {
@@ -734,21 +752,15 @@ void APIType::load(cobb::xml::document& doc) {
                }
                //
                if (token.name == "blurb") {
-                  std::string out;
-                  auto result = extract_html_from_xml(i, doc, out, stem);
-                  assert(result != std::string::npos);
-                  std::swap(this->blurb, out);
-                  i = result;
-                  //
+                  auto extract = this->_load_blurb(doc, i, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
                   continue;
                }
                if (token.name == "description") {
-                  std::string out;
-                  auto result = extract_html_from_xml(i, doc, out, stem);
-                  assert(result != std::string::npos);
-                  std::swap(this->description, out);
-                  i = result;
-                  //
+                  auto extract = this->_load_description(doc, i, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
                   continue;
                }
                if (token.name == "friendly") {
@@ -796,6 +808,14 @@ void APIType::load(cobb::xml::document& doc) {
                      assert(extract != std::string::npos);
                      i = extract;
                      //
+                     if (!opcode.name2.empty()) {
+                        this->conditions.emplace_back();
+                        auto& stub   = this->conditions.back();
+                        auto& source = this->conditions[this->conditions.size() - 2]; // can't use (opcode) if (emplace_back) ends up invalidating iterators
+                        stub.is_stub = true;
+                        stub.name    = source.name2;
+                     }
+                     //
                      continue;
                   }
                }
@@ -820,6 +840,14 @@ void APIType::load(cobb::xml::document& doc) {
                      auto  extract = opcode.load(doc, i, this->name, false);
                      assert(extract != std::string::npos);
                      i = extract;
+                     //
+                     if (!opcode.name2.empty()) {
+                        this->actions.emplace_back();
+                        auto& stub   = this->actions.back();
+                        auto& source = this->actions[this->actions.size() - 2]; // can't use (opcode) if (emplace_back) ends up invalidating iterators
+                        stub.is_stub = true;
+                        stub.name    = source.name2;
+                     }
                      //
                      continue;
                   }
@@ -933,9 +961,18 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       //
       replace.clear();
       for (auto& prop : this->conditions) {
-         //
-         // TODO: conditions with two names should have <li/>s generated for both names
-         //
+         if (prop.is_stub) {
+            //
+            // Conditions with two names should have menu items generated for both names.
+            //
+            auto* target = this->get_condition_by_name(prop.name);
+            if (target) {
+               std::string li;
+               cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), target->name.c_str(), prop.name.c_str());
+               replace += li;
+            }
+            continue;
+         }
          std::string li;
          cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
@@ -949,9 +986,18 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       //
       replace.clear();
       for (auto& prop : this->actions) {
-         //
-         // TODO: actions with two names should have <li/>s generated for both names (e.g. try_get_carrier versus get_carrier)
-         //
+         if (prop.is_stub) {
+            //
+            // Actions with two names should have menu items generated for both names.
+            //
+            auto* target = this->get_action_by_name(prop.name);
+            if (target) {
+               std::string li;
+               cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), target->name.c_str(), prop.name.c_str());
+               replace += li;
+            }
+            continue;
+         }
          std::string li;
          cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
          replace += li;
@@ -1073,12 +1119,18 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
    if (this->conditions.size()) {
       replace += "\n<h2>Member conditions</h2>\n<dl>";
       for (auto& prop : this->conditions) {
+         if (prop.is_stub)
+            continue;
          replace += "<dt><a href=\"script/api/";
          replace += this->name;
          replace += "/conditions/";
          replace += prop.name;
          replace += ".html\">";
          replace += prop.name;
+         if (!prop.name2.empty()) {
+            replace += " &nbsp; a.k.a. &nbsp; ";
+            replace += prop.name2;
+         }
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1091,12 +1143,18 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
    if (this->actions.size()) {
       replace += "\n<h2>Member actions</h2>\n<dl>";
       for (auto& prop : this->actions) {
+         if (prop.is_stub)
+            continue;
          replace += "<dt><a href=\"script/api/";
          replace += this->name;
          replace += "/actions/";
          replace += prop.name;
          replace += ".html\">";
          replace += prop.name;
+         if (!prop.name2.empty()) {
+            replace += " &nbsp; a.k.a. &nbsp; ";
+            replace += prop.name2;
+         }
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1123,6 +1181,8 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
       std::string stem_member = stem + this->name;
       stem_member += "/conditions/";
       for (auto& member : this->conditions) {
+         if (member.is_stub)
+            continue;
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
@@ -1145,6 +1205,8 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
       std::string stem_member = stem + this->name;
       stem_member += "/actions/";
       for (auto& member : this->actions) {
+         if (member.is_stub)
+            continue;
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
