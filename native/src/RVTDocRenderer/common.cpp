@@ -85,8 +85,23 @@ void handle_page_title_tag(std::string& html, std::string title) {
    std::string needle = "<title>";
    std::size_t pos    = html.find(needle.c_str());
    if (pos != std::string::npos) {
-      std::string replace;
-      cobb::sprintf(replace, "<title>%s", title.c_str());
+      std::string replace = "<title>";
+      replace.reserve(8 + title.size());
+      //
+      bool in_tag = false;
+      for (size_t i = 0; i < title.size(); ++i) {
+         char c = title[i];
+         if (in_tag) {
+            if (c == '>')
+               in_tag = false;
+            continue;
+         }
+         if (c == '<') {
+            in_tag = true;
+            continue;
+         }
+         replace += c;
+      }
       html.replace(pos, needle.length(), replace);
    }
 }

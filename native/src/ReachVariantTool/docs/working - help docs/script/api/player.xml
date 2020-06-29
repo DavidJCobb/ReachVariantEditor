@@ -232,7 +232,7 @@
                   representing their cause of death. This number can represent any 
                   cause of death that can be listed in a Post-Game Carnage Report,
                   including weapons and vehicles. The potential values are listed and 
-                  named in the <a href="script/api/enums/damage_reporting_type">damage 
+                  named in the <a href="script/api/ns_enums/damage_reporting_type">damage 
                   reporting type enum</a>.
                </p>
                <p>
@@ -271,7 +271,7 @@
                   representing a modifier for their cause of death. This number 
                   complements the "damage reporting types" that can be listed in a 
                   Post-Game Carnage Report. The potential values are listed and 
-                  named in the <a href="script/api/enums/damage_reporting_mod">damage 
+                  named in the <a href="script/api/ns_enums/damage_reporting_mod">damage 
                   reporting modifier enum</a>.
                </p>
                <p>

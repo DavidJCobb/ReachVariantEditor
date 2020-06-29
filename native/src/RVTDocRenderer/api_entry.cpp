@@ -433,7 +433,7 @@ size_t APIProperty::load(cobb::xml::document& doc, uint32_t root_token, std::str
    int32_t depth = 0;
    size_t  extract;
    size_t  size = doc.tokens.size();
-   for (size_t i = i = root_token + 1; i < size; ++i) {
+   for (size_t i = root_token + 1; i < size; ++i) {
       auto& token = doc.tokens[i];
       //
       if (token.code == cobb::xml::token_code::attribute && depth == 0) {
@@ -443,6 +443,8 @@ size_t APIProperty::load(cobb::xml::document& doc, uint32_t root_token, std::str
             this->name2 = token.value;
          else if (token.name == "type")
             this->type = token.value;
+         else if (token.name == "indexed")
+            this->is_indexed = token.value == "true";
          continue;
       }
       //
@@ -496,6 +498,8 @@ void APIProperty::write(std::string& content, std::string stem, std::string memb
    if (!full_title.empty())
       full_title += '.';
    full_title += this->name;
+   if (this->is_indexed)
+      full_title += "[<var>n</var>]";
    //
    handle_page_title_tag(content, full_title);
    //
@@ -946,8 +950,11 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
       //
       replace.clear();
       for (auto& prop : this->properties) {
+         std::string display = prop.name;
+         if (prop.is_indexed)
+            display += "[<var>n</var>]";
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/%s/properties/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/properties/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1103,6 +1110,8 @@ void APIType::write(const std::string& article_template, const std::string& type
          replace += prop.name;
          replace += ".html\">";
          replace += prop.name;
+         if (prop.is_indexed)
+            replace += "[<var>n</var>]";
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1664,8 +1673,11 @@ void APINamespace::_handle_member_nav(std::string& content, const std::string& s
       //
       replace.clear();
       for (auto& prop : this->members) {
+         std::string display = prop.name;
+         if (prop.is_indexed)
+            display += "[<var>n</var>]";
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1794,6 +1806,8 @@ void APINamespace::write(const std::string& article_template, const std::string&
          replace += prop.name;
          replace += ".html\">";
          replace += prop.name;
+         if (prop.is_indexed)
+            replace += "[<var>n</var>]";
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";

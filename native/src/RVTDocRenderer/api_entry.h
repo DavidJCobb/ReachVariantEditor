@@ -77,6 +77,7 @@ class APIProperty : public APIEntry {
    public:
       std::string type;
       bool is_read_only = false;
+      bool is_indexed   = false;
 
       size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of);
       void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);

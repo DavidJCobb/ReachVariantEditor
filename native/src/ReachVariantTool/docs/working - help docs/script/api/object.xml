@@ -564,7 +564,7 @@
                </p>
                <p>
                   The different values are available in the 
-                  <a href="script/api/enums/orientation">orientation enum</a>.
+                  <a href="script/api/ns_enums/orientation">orientation enum</a>.
                </p>
             </description>
             <example>
