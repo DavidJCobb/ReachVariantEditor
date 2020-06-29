@@ -36,6 +36,29 @@ const std::string& get_type_template() {
    }
    return article_template;
 }
+const std::string& get_ns_member_template() {
+   static std::string article_template;
+   if (article_template.empty()) {
+      read_file(L"_ns_member.html", article_template);
+   }
+   return article_template;
+}
+
+void print_xml_errors(const cobb::xml::document& doc) {
+   if (!doc.errors.empty()) {
+      std::cout << "WARNING: " << doc.errors.size() << " errors detected.\n";
+      for (auto& e : doc.errors) {
+         std::cout << " - ";
+         if (e.line != e.no_line_number) {
+            std::cout << "Line " << e.line;
+            if (e.col != e.no_col_number)
+               std::cout << " col " << e.col;
+            std::cout << ": ";
+         }
+         std::cout << e.text.c_str() << '\n';
+      }
+   }
+}
 
 void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int depth, std::string stem) {
    std::string title;
@@ -60,29 +83,6 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    file.write(content.c_str(), content.size());
    file.close();
 }
-void handle_namespace(std::filesystem::path xml, cobb::xml::document& doc) {
-   //
-   // TODO: everything
-   //
-}
-void handle_type(std::filesystem::path xml, cobb::xml::document& doc) {
-   if (!doc.errors.empty()) {
-      std::cout << "WARNING: " << doc.errors.size() << " errors detected.\n";
-      for (auto& e : doc.errors) {
-         std::cout << " - ";
-         if (e.line != e.no_line_number) {
-            std::cout << "Line " << e.line;
-            if (e.col != e.no_col_number)
-               std::cout << " col " << e.col;
-            std::cout << ": ";
-         }
-         std::cout << e.text.c_str() << '\n';
-      }
-   }
-   //
-   auto& type = APIRegistry::get().make_type(xml);
-   type.load(doc);
-}
 
 void handle_file(std::filesystem::path xml, int depth) {
    std::string stem;
@@ -97,15 +97,14 @@ void handle_file(std::filesystem::path xml, int depth) {
       cobb::xml::parse(doc, raw);
       raw.clear();
    }
+   print_xml_errors(doc);
    auto root = doc.root_node_name();
    if (strncmp(root, "article", strlen("article")) == 0) {
       handle_article(xml, doc, depth, stem);
-   }
-   if (strncmp(root, "script-namespace", strlen("script-namespace")) == 0) {
-      handle_namespace(xml, doc);
-   }
-   if (strncmp(root, "script-type", strlen("script-type")) == 0) {
-      handle_type(xml, doc);
+   } else if (strncmp(root, "script-namespace", strlen("script-namespace")) == 0) {
+      APIRegistry::get().load_namespace(xml, doc);
+   } else if (strncmp(root, "script-type", strlen("script-type")) == 0) {
+      APIRegistry::get().load_type(xml, doc);
    }
 }
 
@@ -145,5 +144,8 @@ int main(int argc, char* argv[]) {
    }
    for (auto* type : registry.types) {
       type->write(get_article_template(), get_type_template());
+   }
+   for (auto* ns : registry.namespaces) {
+      ns->write(get_article_template(), get_ns_member_template());
    }
 }

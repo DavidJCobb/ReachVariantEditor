@@ -1,425 +1,147 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-namespace name="">
+<script-namespace name="unnamed">
    <blurb>Contains various utility functions.</blurb>
+   <friendly>Content not in any namespace</friendly>
    <members>
-      <member name="betrayal_booting" type="number" read-only="true">
-         <blurb>Whether Betrayal Booting is enabled.</blurb>
-         <description>
-            <p>
-               This value indicates whether Betrayal Booting is enabled (1) or disabled (0).
-            </p>
-         </description>
-      </member>
-      <member name="betrayal_penalty" type="number" read-only="true">
-         <blurb>The betrayal penalty time for respawning players, in seconds.</blurb>
-      </member>
-      <member name="current_round" type="number">
-         <blurb>The current round number.</blurb>
-         <description>
-            <p>
-               This value indicates the current round. The first round is 0.
-            </p>
-         </description>
-         <example>
-            global.number[0]  = game.round_limit
-            global.number[0] -= 1
-            if game.current_round == global.number[0] then
-               --
-               -- This is the final round!
-               --
-            end
-         </example>
-      </member>
-      <member name="dead_players_can_talk" type="number" read-only="true">
-         <blurb>Whether dead players can talk.</blurb>
-         <description>
-            <p>
-               This value is 1 if dead players can talk, or 0 otherwise.
-            </p>
-         </description>
-      </member>
       <member name="death_event_damage_type" type="number" read-only="true">
          <blurb>The damage reporting type for an object death event.</blurb>
       </member>
-      <member name="dont_team_restrict_chat" type="number" read-only="true">
-         <blurb>Whether chat is team-restricted.</blurb>
+      <member name="no_object" type="object" none="true">
+         <blurb>A value which represents "none," usable where an object variable can 
+         appear.</blurb>
+         <related name="no_player" />
+         <related name="no_team"   />
+         <related name="no_widget" />
+      </member>
+      <member name="no_player" type="object" none="true">
+         <blurb>A value which represents "none," usable where an player variable can 
+         appear.</blurb>
+      </member>
+      <member name="no_team" type="object" none="true">
+         <blurb>A value which represents "none," usable where a team variable can 
+         appear. It is not the same as <var>neutral_team</var>.</blurb>
+      </member>
+      <member name="no_widget" type="widget" none="true">
+         <blurb>A value which represents "none," usable where a HUD widget can appear.</blurb>
+      </member>
+      <member name="current_object" type="object" read-only="true">
+         <blurb>The current object in a <code>for each object</code> or <code>for 
+         each object with label</code> loop.</blurb>
+         <related name="current_player" />
+         <related name="current_team"   />
+      </member>
+      <member name="current_player" type="player" read-only="true">
+         <blurb>The current player in a <code>for each player</code> or <code>for 
+         each player randomly</code> loop.</blurb>
+      </member>
+      <member name="current_team" type="team" read-only="true">
+         <blurb>The current team in a <code>for each team</code> loop.</blurb>
+      </member>
+      <member name="neutral_team" type="team" read-only="true">
+         <blurb>A value that can be used to refer to Neutral Team.</blurb>
+      </member>
+      <member name="hud_target_object" type="object" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
          <description>
             <p>
-               This value indicates whether chat is team-restricted (0) or not (1).
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to a "HUD 
+               target object" of some kind, testing has failed to determine any specifics.
+            </p>
+         </description>
+         <related name="hud_target_player" />
+         <related name="hud_player" />
+         <related name="hud_player_team" />
+         <related name="hud_target_player_team" />
+      </member>
+      <member name="hud_target_player" type="player" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
+         <description>
+            <p>
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to a "HUD 
+               target player" of some kind, testing has failed to determine any specifics.
             </p>
          </description>
       </member>
-      <member name="fireteams_enabled" type="number" read-only="true">
-         <blurb>Whether fireteams are enabled.</blurb>
-         <description>
-            <p>
-               This value is 0 if fireteams are disabled, or 1 if they are enabled.
-            </p>
-         </description>
-      </member>
-      <member name="friendly_fire" type="number" read-only="true">
-         <blurb>Whether Friendly Fire is enabled.</blurb>
-         <description>
-            <p>
-               This value indicates whether Friendly Fire is enabled (1) or disabled (0).
-            </p>
-         </description>
-      </member>
-      <member name="grace_period_time" type="number" read-only="true">
-         <blurb>The amount of Grace Period time.</blurb>
-      </member>
-      <member name="grace_period_timer" type="timer">
-         <blurb>The current round's remaining Grace Period time.</blurb>
-         <description>
-            <p>
-               This timer is used for the grace period. The grace period is a 
-               period during which Sudden Death can reactivate. The initial 
-               value of the grace period timer is the grace period embedded 
-               in the game variant.
-            </p>
-            <p>
-               Typically, Sudden Death will activate if, at the end of the round, a player is 
-               in a position where they can attempt to complete the objective. For example, 
-               during CTF, Sudden Death will activate if a player is standing very close to a 
-               flag that they can pick up and capture.
-            </p>
-            <p>
-               Typically, the Grace Period is used to complement Sudden Death. 
-               Sudden Death activates when a player is able to further an 
-               objective match; for example, it will enable if any player is 
-               standing close to a flag that they can pick up and score. In 
-               that scenario, if Sudden Death begins and then the conditions 
-               for it are no longer met (the player stops being near the flag), 
-               then the match will end after the Grace Period ends. Sudden 
-               Death never resets (if a player comes near the flag again, the 
-               timer will continue from where it left off), but the Grace 
-               Period does.
-            </p>
-         </description>
+      <member name="hud_player" type="player" read-only="true">
+         <blurb>This value can be used with HUD widgets and object waypoints to display 
+         different information for each player. It refers to the player that the widget 
+         or waypoint is being shown to.</blurb>
          <example>
-            alias sudden_death_enabled   = global.number[0]
-            alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
-            
-            if not game.round_timer.is_zero() then 
-               game.grace_period_timer = 0
-            end
-            if game.round_time_limit > 0 then 
-               if not game.round_timer.is_zero() then 
-                  announced_sudden_death = 0
-               end
-               if game.round_timer.is_zero() then 
-                  if sudden_death_enabled == 1 then 
-                     game.sudden_death_timer.set_rate(-100%)
-                     game.grace_period_timer.reset()
-                     if announced_sudden_death == 0 then 
-                        send_incident(sudden_death, all_players, all_players)
-                        announced_sudden_death = 1
-                     end
-                     if game.sudden_death_time > 0 and game.grace_period_timer > game.sudden_death_timer then 
-                        game.grace_period_timer = game.sudden_death_timer
-                     end
-                  end
-                  if sudden_death_enabled == 0 then 
-                     game.grace_period_timer.set_rate(-100%)
-                     if game.grace_period_timer.is_zero() then 
-                        game.end_round()
-                     end
-                  end
-                  if game.sudden_death_timer.is_zero() then 
-                     game.end_round()
-                  end
-               end
-            end
-         </example>
-      </member>
-      <member name="grenades_enabled" type="number" read-only="true">
-         <blurb>Whether Grenades on Map is enabled or not.</blurb>
-         <description>
-            <p>
-               This value indicates whether Grenades on Map is enabled (1) or disabled (0).
-            </p>
-         </description>
-      </member>
-      <member name="indestructible_vehicles" type="number" read-only="true">
-         <blurb>Whether Indestructible Vehicles are enabled or not.</blurb>
-         <description>
-            <p>
-               This value indicates whether Indestructible Vehicles are enabled (1) or disabled (0).
-            </p>
-         </description>
-      </member>
-      <member name="lives_per_round" type="number" read-only="true">
-         <blurb>The number of lives each player has per round, as set in the Custom Game options.</blurb>
-      </member>
-      <member name="loadout_cam_time" type="number" read-only="true">
-         <blurb>The Initial Loadout Camera duration.</blurb>
-         <description>
-            <p>
-               This is the Initial Loadout Camera duration, as specified in the game variant 
-               settings.
-            </p>
-            <p>
-               Script execution &mdash; and the Initial Loadout Camera period &mdash; begins 
-               about three seconds before the Initial Loadout Camera view is actually visible, 
-               while the screen is still fully black.
-            </p>
-         </description>
-      </member>
-      <member name="perfection_enabled" type="number" read-only="true">
-         <blurb>Indicates whether it is possible to earn a Perfection Medal in this game variant.</blurb>
-         <description>
-            <p>
-               This value is 1 if it is possible to earn a Perfection Medal in this game variant, 
-               or 0 otherwise.
-            </p>
-         </description>
-      </member>
-      <member name="powerup_duration_red" type="number" read-only="true">
-         <blurb>The duration of the Red Powerup (overshields), in seconds.</blurb>
-      </member>
-      <member name="powerup_duration_blue" type="number" read-only="true">
-         <blurb>The duration of the Blue Powerup (active camo), in seconds.</blurb>
-      </member>
-      <member name="powerup_duration_yellow" type="number" read-only="true">
-         <blurb>The duration of the Yellow Powerup (custom), in seconds.</blurb>
-      </member>
-      <member name="proximity_voice" type="number" read-only="true">
-         <blurb>Whether Proximity Voice is enabled.</blurb>
-         <description>
-            <p>
-               This value indicates whether Proximity Voice is enabled (1) or disabled (0).
-            </p>
-         </description>
-      </member>
-      <member name="respawn_growth" type="number" read-only="true">
-         <blurb>The base respawn growth time for all players, in seconds.</blurb>
-      </member>
-      <member name="respawn_time" type="number" read-only="true">
-         <blurb>The base respawn time for all players, in seconds.</blurb>
-      </member>
-      <member name="respawn_traits_time" type="number" read-only="true">
-         <blurb>The number of seconds a player has Respawn Traits for.</blurb>
-      </member>
-      <member name="round_limit" type="number" read-only="true">
-         <blurb>The number of rounds.</blurb>
-         <description>
-            <p>
-               This value indicates the maximum number of rounds. If there is no round 
-               limit, then this value will be 0.
-            </p>
-         </description>
-         <example>
-            global.number[0]  = game.round_limit
-            global.number[0] -= 1
-            if game.current_round == global.number[0] then
-               --
-               -- This is the final round!
-               --
-            end
-         </example>
-      </member>
-      <member name="round_timer" type="timer">
-         <blurb>The current round's remaining time.</blurb>
-         <description>
-            <p>
-               This timer is the round timer; it is displayed on the HUD. By default, it is 
-               set to the round time selected in the Custom Game options; however, scripts 
-               can assign a value to it. The game will automatically make announcements as 
-               the timer's value approaches zero; however, the game will not automatically 
-               end the round when the timer hits zero.
-            </p>
-            <p>
-               The round timer's behavior appears to exist in order to enable Invasion to 
-               use it to display the current phase's remaining time.
-            </p>
-         </description>
-         <example>
-            if game.round_time_limit > 0 and game.round_timer.is_zero() then
-               game.end_round()
-            end
-         </example>
-         <note>
-            If you want to implement Sudden Death, you should use the <code>sudden_death_timer</code> 
-            and the <code>grace_period_timer</code> in conjunction with the <code>round_timer</code>.
-         </note>
-      </member>
-      <member name="round_time_limit" type="number" read-only="true">
-         <blurb>The round time limit.</blurb>
-         <description>
-            <p>
-               This value is the round time limit set in the Custom Game options. If there 
-               is no round time limit, then this value is 0 or negative.
-            </p>
-         </description>
-         <example>
-            if game.round_time_limit > 0 and game.round_timer.is_zero() then
-               game.end_round()
-            end
-         </example>
-         <note>
-            The round does not automatically end when the round time limit is reached. Refer to the 
-            <a href="script/api/unnamed/members/round_timer">round_timer</a> documentation for more 
-            information.
-         </note>
-      </member>
-      <member name="rounds_to_win" type="number" read-only="true">
-         <blurb>The number of rounds that a player or team must win in order to win the match.</blurb>
-      </member>
-      <member name="sudden_death_time" type="number" read-only="true">
-         <blurb>The amount of Sudden Death time.</blurb>
-      </member>
-      <member name="sudden_death_timer" type="timer">
-         <blurb>The current round's remaining Sudden Death time.</blurb>
-         <description>
-            <p>
-               This timer is used for Sudden Death; it is displayed on the HUD when appropriate.
-            </p>
-            <p>
-               Typically, Sudden Death will activate if, at the end of the round, a player is 
-               in a position where they can attempt to complete the objective. For example, 
-               during CTF, Sudden Death will activate if a player is standing very close to a 
-               flag that they can pick up and capture.
-            </p>
-            <p>
-               Typically, the Grace Period is used to complement Sudden Death. 
-               Sudden Death activates when a player is able to further an 
-               objective match; for example, it will enable if any player is 
-               standing close to a flag that they can pick up and score. In 
-               that scenario, if Sudden Death begins and then the conditions 
-               for it are no longer met (the player stops being near the flag), 
-               then the match will end after the Grace Period ends. Sudden 
-               Death never resets (if a player comes near the flag again, the 
-               timer will continue from where it left off), but the Grace 
-               Period does.
-            </p>
-         </description>
-         <example>
-            alias sudden_death_enabled   = global.number[0]
-            alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
-            
-            if not game.round_timer.is_zero() then 
-               game.grace_period_timer = 0
-            end
-            if game.round_time_limit > 0 then 
-               if not game.round_timer.is_zero() then 
-                  announced_sudden_death = 0
-               end
-               if game.round_timer.is_zero() then 
-                  if sudden_death_enabled == 1 then 
-                     game.sudden_death_timer.set_rate(-100%)
-                     game.grace_period_timer.reset()
-                     if announced_sudden_death == 0 then 
-                        send_incident(sudden_death, all_players, all_players)
-                        announced_sudden_death = 1
-                     end
-                     if game.sudden_death_time > 0 and game.grace_period_timer > game.sudden_death_timer then 
-                        game.grace_period_timer = game.sudden_death_timer
-                     end
-                  end
-                  if sudden_death_enabled == 0 then 
-                     game.grace_period_timer.set_rate(-100%)
-                     if game.grace_period_timer.is_zero() then 
-                        game.end_round()
-                     end
-                  end
-                  if game.sudden_death_timer.is_zero() then 
-                     game.end_round()
-                  end
-               end
-            end
-         </example>
-         <note>
-            If you want to implement Sudden Death, you should use the <code>sudden_death_timer</code> 
-            and the <code>grace_period_timer</code> in conjunction with the <code>round_timer</code>.
-         </note>
-      </member>
-      <member name="suicide_penalty" type="number" read-only="true">
-         <blurb>The suicide penalty time for respawning players, in seconds.</blurb>
-      </member>
-      <member name="score_to_win" type="number" read-only="true">
-         <blurb>The score to win.</blurb>
-         <description>
-            <p>
-               This value indicates the number of points that a player or team must be 
-               accumulate to win.
-            </p>
-         </description>
-         <example>
-            -- Code borrowed from Territories, with slight modifications: play announcer 
-            -- voiceovers when the player approaches the score to win.
-            
-            alias announced_30s_win = player.number[0]
-            alias announced_60s_win = player.number[1]
-            
+            alias speed_raw = player.number[0]
+            alias speed_kph = player.number[1]
+            declare player.speed_raw with network priority local
+            declare player.speed_kph with network priority local
+            --
+            -- Allow each player to see how fast they're moving.
+            --
             for each player do
-               alias threshold_30s = temp_int_00
-               alias threshold_60s = temp_int_02
-               --
-               threshold_30s = game.score_to_win
-               threshold_60s = game.score_to_win
-               threshold_30s -= 30
-               threshold_60s -= 60
-               if current_player.score >= threshold_60s and current_player.announced_60s_win == 0 and game.score_to_win > 60 then 
-                  send_incident(one_minute_team_win, current_player, all_players)
-                  current_player.announced_60s_win = 1
-               end
-               if current_player.score >= threshold_30s and current_player.announced_30s_win == 0 and game.score_to_win > 30 then 
-                  send_incident(half_minute_team_win, current_player, all_players)
-                  current_player.announced_30s_win = 1
-               end
+               script_widget[0].set_text("%n KPH", hud_player.speed_kph)
             end
-         </example>
-         <note>
-            The round will automatically end if a player or team reaches the score to win.
-         </note>
-      </member>
-      <member name="symmetry" type="number">
-         <blurb>Whether this match is symmetryic.</blurb>
-         <description>
-            <p>
-               This value indicates whether the current match is symmetric (1) or asymmetric (0). 
-               This value can be changed, but only during a "pre-game" trigger.
-            </p>
-         </description>
-         <example>
-            -- Code taken from CTF TU:
-            
-            enum sides
-               multi
-               one
-               neutral
-               three
-            end
-
-            alias opt_symmetry = script_option[0]
-
-            on pregame: do
-               game.symmetry = 1
-               if opt_sides == sides.one then 
-                  game.symmetry = 0
-               end
+            on local: for each player do
+               current_player.speed_raw = current_player.biped.get_speed()
+               current_player.speed_kph = current_player.speed_raw
+               current_player.speed_kph *= 109
+               current_player.speed_kph /= 100 -- to KPH
             end
          </example>
       </member>
-      <member name="symmetry_get" type="number" read-only="true">
-         <blurb>Whether this match is symmetryic.</blurb>
+      <member name="hud_player_team" type="team" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
          <description>
             <p>
-               This value indicates whether the current match is symmetric (1) or asymmetric (0). 
-               The value is read-only.
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to the 
+               team that <a href="hud_player.html">hud_player</a> belongs to, testing has 
+               failed to verify this.
             </p>
          </description>
       </member>
-      <member name="team_lives_per_round" type="number" read-only="true">
-         <blurb>The number of lives each team has per round, as set in the Custom Game options.</blurb>
-      </member>
-      <member name="teams_enabled" type="number" read-only="true">
-         <blurb>Whether teams are enabled.</blurb>
+      <member name="hud_target_player_team" type="team" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
          <description>
             <p>
-               This value is 0 if teams are disabled, or 1 if they are enabled.
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to the 
+               team that <a href="hud_taret_player.html">hud_target_player</a> belongs to, 
+               testing has failed to verify this.
             </p>
          </description>
+      </member>
+      <member name="unk_14_team" type="team">
+         <blurb>Unknown, and potentially unused.</blurb>
+         <related name="unk_15_team" />
+      </member>
+      <member name="unk_15_team" type="team">
+         <blurb>Unknown, and potentially unused.</blurb>
+      </member>
+      <member name="script_option" type="number" indexed="true" read-only="true">
+         <blurb>Allows scripts to access the value of scripted Custom Game options.</blurb>
       </member>
    </members>
    <methods>
@@ -433,6 +155,9 @@
             <example>
                debug_print("This function doesn't do anything! :D")
             </example>
+            <related type="action" name="debug_break" />
+            <related type="action" name="debug_force_player_view_count" />
+            <related type="action" name="debug_set_tracing_enabled" />
          </method>
          <method name="rand" id="25" returns="number">
             <args>

@@ -15,7 +15,7 @@
             the "Invulnerable" value will not protect a player from level boundaries 
             or scripted damage.</dd>
          <dt>Health Multiplier</dt>
-            <dd>The player's max health.</dt>
+            <dd>The player's max health.</dd>
          <dt>Health Regen Rate</dt>
             <dd>How fast the player's health regenerates.</dd>
          <dt>Shield Multiplier</dt>

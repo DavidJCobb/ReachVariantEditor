@@ -153,9 +153,9 @@ void APIEntry::_write_relationships(std::string& out, const std::string& member_
       std::string context = rel.context;
       if (context.empty())
          context = member_of;
-      //
       out += context;
       out += "/";
+      //
       auto rt = rel.type;
       if (rt == api_entry_type::same)
          rt = my_type;
@@ -167,6 +167,10 @@ void APIEntry::_write_relationships(std::string& out, const std::string& member_
       }
       out += rel.name;
       out += ".html\">";
+      if (context == "ns_unnamed")
+         context.clear();
+      else if (strncmp(context.data(), "ns_", 3) == 0)
+         context.erase(0, 3);
       out += context;
       if (!context.empty())
          out += '.';
@@ -338,6 +342,10 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
 }
 void APIMethod::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
    std::string full_title = member_of;
+   if (full_title == "ns_unnamed")
+      full_title.clear();
+   else if (strncmp(full_title.data(), "ns_", 3) == 0)
+      full_title.erase(0, 3);
    if (!full_title.empty())
       full_title += '.';
    full_title += this->name;
@@ -1076,10 +1084,7 @@ void APIType::write(const std::string& article_template, const std::string& type
    assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
    //
    cobb::sprintf(replace, "<h1>%s</h1>\n", this->get_friendly_name());
-   if (this->description.empty())
-      replace += this->blurb;
-   else
-      replace += this->description;
+   this->_write_description(replace);
    if (this->scope.defined) {
       std::string temp;
       cobb::sprintf(
@@ -1281,6 +1286,656 @@ void APIType::write(const std::string& article_template, const std::string& type
 }
 #pragma endregion
 
+#pragma region APINamespaceMember
+size_t APINamespaceMember::load(cobb::xml::document& doc, uint32_t root_token, std::string member_of) {
+   std::string stem;
+   cobb::sprintf(stem, "script/api/ns_%s/", member_of.c_str());
+   //
+   int32_t depth = 0;
+   size_t  extract;
+   size_t  size = doc.tokens.size();
+   for (size_t i = i = root_token + 1; i < size; ++i) {
+      auto& token = doc.tokens[i];
+      //
+      if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+         if (token.name == "name")
+            this->name = token.value;
+         else if (token.name == "name2")
+            this->name2 = token.value;
+         else if (token.name == "type")
+            this->type = token.value;
+         else if (token.name == "read-only")
+            this->is_read_only = (token.value == "true");
+         else if (token.name == "none")
+            this->is_none = (token.value == "true");
+         else if (token.name == "indexed")
+            this->is_indexed = (token.value == "true");
+         continue;
+      }
+      //
+      if (token.code == cobb::xml::token_code::element_close) {
+         if (depth == 0) {
+            assert(token.name == "member");
+            return i;
+         }
+         --depth;
+      }
+      if (token.code != cobb::xml::token_code::element_open)
+         continue;
+      if (depth == 0) {
+         if (token.name == "blurb") {
+            extract = this->_load_blurb(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "description") {
+            extract = this->_load_description(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "example") {
+            extract = this->_load_example(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "note") {
+            extract = this->_load_note(doc, i, stem);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+         if (token.name == "related") {
+            extract = this->_load_relationship(doc, i);
+            assert(extract != std::string::npos);
+            i = extract;
+            continue;
+         }
+      }
+      ++depth;
+   }
+   return std::string::npos;
+}
+void APINamespaceMember::write(std::string& content, std::string stem, std::string member_of, const std::string& type_template) {
+   std::string full_title = member_of;
+   if (full_title == "ns_unnamed")
+      full_title.clear();
+   if (!full_title.empty())
+      full_title += '.';
+   full_title += this->name;
+   if (this->is_indexed)
+      full_title += "[<var>n</var>]";
+   //
+   handle_page_title_tag(content, full_title);
+   //
+   std::string needle = "<content-placeholder id=\"main\" />";
+   std::size_t pos = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
+   //
+   replace += "<h1>";
+   replace += full_title;
+   if (!this->type.empty()) {
+      replace += "<span class=\"type\">Type: <a href=\"script/api/";
+      replace += this->type;
+      replace += ".html\">";
+      //
+      auto type = APIRegistry::get().get_type(this->type);
+      if (type)
+         replace += type->get_friendly_name();
+      else
+         replace += this->type;
+      replace += "</a></span>";
+   }
+   replace += "</h1>\n";
+   this->_write_description(replace);
+   if (this->is_indexed) {
+      assert(!this->is_none && "how can a namespace member be none AND indexed?!");
+      if (this->is_read_only)
+         replace += "<p>These values are read-only.</p>";
+   } else {
+      if (this->is_none)
+         replace += "<p>This is a \"none\" value, so you cannot assign to it or access members on it.</p>";
+      else if (this->is_read_only)
+         replace += "<p>This value is read-only.</p>";
+   }
+   this->_write_example(replace);
+   this->_write_notes(replace);
+   this->_write_relationships(replace, member_of, api_entry_type::generic);
+   content.replace(pos, needle.length(), replace);
+}
+#pragma endregion
+
+#pragma region APINamespace
+const char* APINamespace::get_friendly_name() const noexcept {
+   if (!this->friendly_name.empty())
+      return this->friendly_name.c_str();
+   if (!this->name.empty())
+      return this->name.c_str();
+   return this->name2.c_str();
+}
+APIMethod* APINamespace::get_action_by_name(const std::string& name) {
+   for (auto& member : this->actions) {
+      if (member.is_stub)
+         continue;
+      if (member.name == name || member.name2 == name)
+         return &member;
+   }
+   return nullptr;
+}
+APIMethod* APINamespace::get_condition_by_name(const std::string& name) {
+   for (auto& member : this->conditions) {
+      if (member.is_stub)
+         continue;
+      if (member.name == name || member.name2 == name)
+         return &member;
+   }
+   return nullptr;
+}
+APINamespaceMember* APINamespace::get_member_by_name(const std::string& name) {
+   for (auto& member : this->members)
+      if (member.name == name || member.name2 == name)
+         return &member;
+   return nullptr;
+}
+//
+void APINamespace::load(cobb::xml::document& doc) {
+   enum class location {
+      nowhere,
+      methods,
+      conditions,
+      actions,
+      members,
+   };
+   enum class target {
+      nothing,
+      friendly,
+   };
+   //
+   int32_t root = doc.find_element("script-namespace");
+   if (root < 0)
+      return;
+   //
+   std::string stem;
+   APIRegistry::get().make_stem(this->loaded_from, stem);
+   //
+   location where = location::nowhere;
+   target   focus = target::nothing;
+   uint32_t depth = 0; // how many unrecognized tags are we currently nested under?
+   for (uint32_t i = root + 1; i < doc.tokens.size(); ++i) {
+      auto& token = doc.tokens[i];
+      //
+      switch (focus) {
+         case target::friendly:
+            //
+            // NOTE: Ignores nested tags; only reads text content not nested in any tag
+            //
+            if (token.code == cobb::xml::token_code::element_open)
+               ++depth;
+            else if (token.code == cobb::xml::token_code::element_close) {
+               if (token.name == "friendly") {
+                  focus = target::nothing;
+                  continue;
+               }
+               --depth;
+            } else if (token.code == cobb::xml::token_code::text_content)
+               this->friendly_name += token.value;
+            continue;
+      }
+      //
+      switch (where) {
+         case location::nowhere:
+            if (token.code == cobb::xml::token_code::attribute && depth == 0) {
+               if (token.name == "name")
+                  this->name = token.value;
+               else if (token.name == "name2")
+                  this->name2 = token.value;
+               continue;
+            }
+            //
+            if (token.code == cobb::xml::token_code::element_close)
+               --depth;
+            if (token.code != cobb::xml::token_code::element_open)
+               continue;
+            if (depth == 0) {
+               if (token.name == "methods") {
+                  where = location::methods;
+                  continue;
+               }
+               if (token.name == "members") {
+                  where = location::members;
+                  continue;
+               }
+               //
+               if (token.name == "blurb") {
+                  auto extract = this->_load_blurb(doc, i, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
+                  continue;
+               }
+               if (token.name == "description") {
+                  auto extract = this->_load_description(doc, i, stem);
+                  assert(extract != std::string::npos);
+                  i = extract;
+                  continue;
+               }
+               if (token.name == "friendly") {
+                  focus = target::friendly;
+                  continue;
+               }
+            }
+            ++depth;
+            break;
+         case location::methods:
+            if (token.code == cobb::xml::token_code::element_open) {
+               if (depth == 0) {
+                  if (token.name == "conditions") {
+                     where = location::conditions;
+                     continue;
+                  }
+                  if (token.name == "actions") {
+                     where = location::actions;
+                     continue;
+                  }
+               }
+               ++depth;
+            } else if (token.code == cobb::xml::token_code::element_close) {
+               if (depth == 0) {
+                  if (token.name == "methods") {
+                     where = location::nowhere;
+                     continue;
+                  }
+               }
+               --depth;
+            }
+            break;
+         case location::conditions:
+            if (token.code == cobb::xml::token_code::element_open) {
+               if (depth == 0) {
+                  if (token.name == "method") {
+                     this->conditions.emplace_back();
+                     auto& opcode = this->conditions.back();
+                     opcode.is_action = false;
+                     auto  extract = opcode.load(doc, i, this->name, true);
+                     assert(extract != std::string::npos);
+                     i = extract;
+                     //
+                     if (!opcode.name2.empty()) {
+                        this->conditions.emplace_back();
+                        auto& stub = this->conditions.back();
+                        auto& source = this->conditions[this->conditions.size() - 2]; // can't use (opcode) if (emplace_back) ends up invalidating iterators
+                        stub.is_stub = true;
+                        stub.name = source.name2;
+                     }
+                     //
+                     continue;
+                  }
+               }
+               ++depth;
+            } else if (token.code == cobb::xml::token_code::element_close) {
+               if (depth == 0) {
+                  if (token.name == "conditions") {
+                     where = location::methods;
+                     continue;
+                  }
+               }
+               --depth;
+            }
+            break;
+         case location::actions:
+            if (token.code == cobb::xml::token_code::element_open) {
+               if (depth == 0) {
+                  if (token.name == "method") {
+                     this->actions.emplace_back();
+                     auto& opcode = this->actions.back();
+                     opcode.is_action = true;
+                     auto  extract = opcode.load(doc, i, this->name, false);
+                     assert(extract != std::string::npos);
+                     i = extract;
+                     //
+                     if (!opcode.name2.empty()) {
+                        this->actions.emplace_back();
+                        auto& stub = this->actions.back();
+                        auto& source = this->actions[this->actions.size() - 2]; // can't use (opcode) if (emplace_back) ends up invalidating iterators
+                        stub.is_stub = true;
+                        stub.name = source.name2;
+                     }
+                     //
+                     continue;
+                  }
+               }
+               ++depth;
+            } else if (token.code == cobb::xml::token_code::element_close) {
+               if (depth == 0) {
+                  if (token.name == "actions") {
+                     where = location::methods;
+                     continue;
+                  }
+               }
+               --depth;
+            }
+            break;
+         case location::members:
+            if (token.code == cobb::xml::token_code::element_open) {
+               if (depth == 0) {
+                  if (token.name == "member") {
+                     this->members.emplace_back();
+                     auto& member = this->members.back();
+                     auto  extract = member.load(doc, i, this->name);
+                     assert(extract != std::string::npos);
+                     i = extract;
+                     //
+                     continue;
+                  }
+               }
+               ++depth;
+            } else if (token.code == cobb::xml::token_code::element_close) {
+               if (depth == 0) {
+                  if (token.name == "members") {
+                     where = location::nowhere;
+                     continue;
+                  }
+               }
+               --depth;
+            }
+            break;
+      }
+   }
+   //
+   this->_make_member_relationships_bidirectional();
+   std::sort(this->actions.begin(), this->actions.end(), [](const APIMethod& a, const APIMethod& b) { return a.name < b.name; });
+   std::sort(this->conditions.begin(), this->conditions.end(), [](const APIMethod& a, const APIMethod& b) { return a.name < b.name; });
+   std::sort(this->members.begin(), this->members.end(), [](const APINamespaceMember& a, const APINamespaceMember& b) { return a.name < b.name; });
+}
+void APINamespace::_handle_member_nav(std::string& content, const std::string& stem) {
+   std::string needle = "<content-placeholder id=\"nav-self-link\" />";
+   std::size_t pos = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"self-link\" />)");
+   cobb::sprintf(replace, "<a href=\"script/api/ns_%s.html\">%s</a>", this->name.c_str(), this->get_friendly_name());
+   content.replace(pos, needle.length(), replace);
+   //
+   {
+      needle = "<content-placeholder id=\"nav-members\" />";
+      pos = content.find(needle.c_str());
+      assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"nav-members\" />)");
+      //
+      replace.clear();
+      for (auto& prop : this->members) {
+         std::string li;
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         replace += li;
+      }
+      content.replace(pos, needle.length(), replace);
+   }
+   {
+      needle = "<content-placeholder id=\"nav-conditions\" />";
+      pos = content.find(needle.c_str());
+      assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"nav-conditions\" />)");
+      //
+      replace.clear();
+      for (auto& prop : this->conditions) {
+         if (prop.is_stub) {
+            //
+            // Conditions with two names should have menu items generated for both names.
+            //
+            auto* target = this->get_condition_by_name(prop.name);
+            if (target) {
+               std::string li;
+               cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), target->name.c_str(), prop.name.c_str());
+               replace += li;
+            }
+            continue;
+         }
+         std::string li;
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         replace += li;
+      }
+      content.replace(pos, needle.length(), replace);
+   }
+   {
+      needle = "<content-placeholder id=\"nav-actions\" />";
+      pos = content.find(needle.c_str());
+      assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"nav-actions\" />)");
+      //
+      replace.clear();
+      for (auto& prop : this->actions) {
+         if (prop.is_stub) {
+            //
+            // Actions with two names should have menu items generated for both names.
+            //
+            auto* target = this->get_action_by_name(prop.name);
+            if (target) {
+               std::string li;
+               cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), target->name.c_str(), prop.name.c_str());
+               replace += li;
+            }
+            continue;
+         }
+         std::string li;
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         replace += li;
+      }
+      content.replace(pos, needle.length(), replace);
+   }
+}
+void APINamespace::_mirror_member_relationships(APINamespace& member_of, APIEntry& member, api_entry_type member_type) {
+   for (auto& rel : member.related) {
+      if (rel.mirrored)
+         continue;
+      if (!rel.context.empty() && rel.context != member_of.name) // this is a relationship to something in another type
+         continue;
+      APIEntry* target = nullptr;
+      //
+      auto rt = rel.type;
+      if (rt == api_entry_type::same)
+         rt = member_type;
+      switch (rt) {
+         case api_entry_type::condition:
+            target = member_of.get_condition_by_name(rel.name);
+            break;
+         case api_entry_type::action:
+            target = member_of.get_action_by_name(rel.name);
+            break;
+         case api_entry_type::generic:
+            target = member_of.get_member_by_name(rel.name);
+            break;
+      }
+      //
+      if (target == nullptr)
+         continue;
+      target->related.emplace_back();
+      auto& mirrored = target->related.back();
+      mirrored.mirrored = true;
+      mirrored.name = member.name;
+      mirrored.type = member_type;
+      //
+      for (auto& rel2 : member.related) {
+         if (&rel2 == &rel)
+            continue;
+         target->related.emplace_back();
+         auto& mirrored = target->related.back();
+         mirrored = rel2;
+         mirrored.mirrored = true;
+      }
+   }
+}
+void APINamespace::_make_member_relationships_bidirectional() {
+   for (auto& member : this->conditions)
+      this->_mirror_member_relationships(*this, member, api_entry_type::condition);
+   for (auto& member : this->actions)
+      this->_mirror_member_relationships(*this, member, api_entry_type::action);
+   for (auto& member : this->members)
+      this->_mirror_member_relationships(*this, member, api_entry_type::generic);
+}
+void APINamespace::write(const std::string& article_template, const std::string& type_template) {
+   auto& registry = APIRegistry::get();
+   auto p     = this->loaded_from;
+   auto depth = registry.depth_of(p);
+   std::string stem;
+   registry.make_stem(p, stem);
+   //
+   std::string content = article_template; // copy
+   std::string needle  = "<content-placeholder id=\"main\" />";
+   std::size_t pos     = content.find(needle.c_str());
+   std::string replace;
+   assert(pos != std::string::npos && "Missing placeholder (<content-placeholder id=\"main\" />)");
+   //
+   cobb::sprintf(replace, "<h1>%s</h1>\n", this->get_friendly_name());
+   this->_write_description(replace);
+   if (this->members.size()) {
+      replace += "\n<h2>Members</h2>\n<dl>";
+      for (auto& prop : this->members) {
+         replace += "<dt><a href=\"script/api/ns_";
+         replace += this->name;
+         replace += "/";
+         replace += prop.name;
+         replace += ".html\">";
+         replace += prop.name;
+         replace += "</a></dt>\n   <dd>";
+         if (prop.blurb.empty())
+            replace += "No description available.";
+         else
+            replace += prop.blurb;
+         replace += "</dd>\n";
+      }
+      replace += "</dl>\n";
+   }
+   if (this->conditions.size()) {
+      replace += "\n<h2>Member conditions</h2>\n<dl>";
+      for (auto& prop : this->conditions) {
+         if (prop.is_stub)
+            continue;
+         replace += "<dt><a href=\"script/api/ns_";
+         replace += this->name;
+         replace += "/conditions/";
+         replace += prop.name;
+         replace += ".html\">";
+         replace += prop.name;
+         if (!prop.name2.empty()) {
+            replace += " &nbsp; a.k.a. &nbsp; ";
+            replace += prop.name2;
+         }
+         replace += "</a></dt>\n   <dd>";
+         if (prop.blurb.empty())
+            replace += "No description available.";
+         else
+            replace += prop.blurb;
+         replace += "</dd>\n";
+      }
+      replace += "</dl>\n";
+   }
+   if (this->actions.size()) {
+      replace += "\n<h2>Member actions</h2>\n<dl>";
+      for (auto& prop : this->actions) {
+         if (prop.is_stub)
+            continue;
+         replace += "<dt><a href=\"script/api/ns_";
+         replace += this->name;
+         replace += "/actions/";
+         replace += prop.name;
+         replace += ".html\">";
+         replace += prop.name;
+         if (!prop.name2.empty()) {
+            replace += " &nbsp; a.k.a. &nbsp; ";
+            replace += prop.name2;
+         }
+         replace += "</a></dt>\n   <dd>";
+         if (prop.blurb.empty())
+            replace += "No description available.";
+         else
+            replace += prop.blurb;
+         replace += "</dd>\n";
+      }
+      replace += "</dl>\n";
+   }
+   content.replace(pos, needle.length(), replace);
+   //
+   handle_base_tag(content, depth);
+   handle_page_title_tag(content, this->get_friendly_name());
+   //
+   p.replace_filename("ns_" + this->name);
+   p.replace_extension(".html");
+   std::ofstream file(p.c_str());
+   file.write(content.c_str(), content.size());
+   file.close();
+   //
+   // Now generate the pages for members:
+   //
+   std::string prefixed_name = "ns_" + this->name;
+   {
+      std::string stem_member = stem + this->name;
+      stem_member += "/conditions/";
+      for (auto& member : this->conditions) {
+         if (member.is_stub)
+            continue;
+         content = type_template;
+         handle_base_tag(content, depth + 2);
+         this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, prefixed_name, type_template);
+         //
+         auto pm = p.parent_path();
+         pm.append(prefixed_name);
+         std::filesystem::create_directory(pm);
+         pm.append("conditions");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/conditions" and the API doesn't remember that "conditions" was a directory, so we need this or the next two calls will replace "conditions" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
+      }
+   }
+   {
+      std::string stem_member = stem + this->name;
+      stem_member += "/actions/";
+      for (auto& member : this->actions) {
+         if (member.is_stub)
+            continue;
+         content = type_template;
+         handle_base_tag(content, depth + 2);
+         this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, prefixed_name, type_template);
+         //
+         auto pm = p.parent_path();
+         pm.append(prefixed_name);
+         std::filesystem::create_directory(pm);
+         pm.append("actions");
+         std::filesystem::create_directory(pm);
+         pm.append(""); // the above line produced "some/path/actions" and the API doesn't remember that "actions" was a directory, so we need this or the next two calls will replace "actions" with the filename
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
+      }
+   }
+   {
+      std::string stem_member = stem + this->name;
+      stem_member += "/";
+      for (auto& member : this->members) {
+         content = type_template;
+         handle_base_tag(content, depth + 1);
+         this->_handle_member_nav(content, stem_member);
+         member.write(content, stem, prefixed_name, type_template);
+         //
+         auto pm = p.parent_path();
+         pm.append(prefixed_name);
+         std::filesystem::create_directory(pm);
+         pm.append("");
+         pm.replace_filename(member.name); // this api sucks
+         pm.replace_extension(".html");
+         std::ofstream file(pm.c_str());
+         file.write(content.c_str(), content.size());
+         file.close();
+      }
+   }
+}
+#pragma endregion
+
 APIRegistry::~APIRegistry() {
    this->clear();
 }
@@ -1296,11 +1951,17 @@ APIType* APIRegistry::get_type(const std::string& name) {
          return t;
    return nullptr;
 }
-APIType& APIRegistry::make_type(const std::filesystem::path& source_file) {
+void APIRegistry::load_type(const std::filesystem::path& source_file, cobb::xml::document& doc) {
    this->types.push_back(new APIType);
    auto* type = this->types.back();
    type->loaded_from = source_file;
-   return *type;
+   type->load(doc);
+}
+void APIRegistry::load_namespace(const std::filesystem::path& source_file, cobb::xml::document& doc) {
+   this->namespaces.push_back(new APINamespace);
+   auto* item = this->namespaces.back();
+   item->loaded_from = source_file;
+   item->load(doc);
 }
 int APIRegistry::depth_of(std::filesystem::path path) {
    int depth = 0;

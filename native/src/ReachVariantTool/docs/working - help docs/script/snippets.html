@@ -127,7 +127,8 @@
       <ul id="toc">
          <li><a href="script/snippets.html#dlc-achievements">DLC Achievements</a></li>
          <li><a href="script/snippets.html#loadout-palettes">Loadout palette code</a></li>
-         <li><a href="script/snippets.html#round-timer">Round timer code</a></li>
+         <li><a href="script/snippets.html#round-timer">Round timer code (basic)</a></li>
+         <li><a href="script/snippets.html#round-timer-sd">Round timer code (with Sudden Death)</a></li>
          <li><a href="script/snippets.html#super-shields">Super Shields</a></li>
       </ul>
       
@@ -269,7 +270,7 @@ for each player do -- loadout palettes
    end
 end</pre>
       
-      <h2><a name="round-timer">Round timer code</a></h2>
+      <h2><a name="round-timer">Round timer code (basic)</a></h2>
       <p>
          <i>Halo: Reach</i> does not automatically end the round when the round timer 
          expires. Instead, Megalo has near-total authority over when the round ends.
@@ -277,6 +278,63 @@ end</pre>
       <pre>
 if game.round_time_limit &gt; 0 and game.round_timer.is_zero() then
    game.end_round()
+end</pre>
+      
+      <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
+      <p>
+         The code for a round timer with Sudden Death is a bit more complicated.
+      </p>
+      <p>
+         Typically, Sudden Death will activate if, at the end of the round, a player is 
+         in a position where they can attempt to complete the objective. For example, 
+         during CTF, Sudden Death will activate if a player is standing very close to a 
+         flag that they can pick up and capture.
+      </p>
+      <p>
+         Typically, the Grace Period is used to complement Sudden Death. 
+         Sudden Death activates when a player is able to further an 
+         objective match; for example, it will enable if any player is 
+         standing close to a flag that they can pick up and score. In 
+         that scenario, if Sudden Death begins and then the conditions 
+         for it are no longer met (the player stops being near the flag), 
+         then the match will end after the Grace Period ends. Sudden 
+         Death never resets (if a player comes near the flag again, the 
+         timer will continue from where it left off), but the Grace 
+         Period does.
+      </p>
+      <pre>
+alias sudden_death_enabled   = global.number[0]
+alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+
+if not game.round_timer.is_zero() then 
+   game.grace_period_timer = 0
+end
+if game.round_time_limit &gt; 0 then 
+   if not game.round_timer.is_zero() then 
+      announced_sudden_death = 0
+   end
+   if game.round_timer.is_zero() then 
+      if sudden_death_enabled == 1 then 
+         game.sudden_death_timer.set_rate(-100%)
+         game.grace_period_timer.reset()
+         if announced_sudden_death == 0 then 
+            send_incident(sudden_death, all_players, all_players)
+            announced_sudden_death = 1
+         end
+         if game.sudden_death_time &gt; 0 and game.grace_period_timer &gt; game.sudden_death_timer then 
+            game.grace_period_timer = game.sudden_death_timer
+         end
+      end
+      if sudden_death_enabled == 0 then 
+         game.grace_period_timer.set_rate(-100%)
+         if game.grace_period_timer.is_zero() then 
+            game.end_round()
+         end
+      end
+      if game.sudden_death_timer.is_zero() then 
+         game.end_round()
+      end
+   end
 end</pre>
       
       <h2><a name="super-shields">Super Shields</a></h2>

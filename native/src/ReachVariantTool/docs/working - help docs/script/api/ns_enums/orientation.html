@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>ns_enums.orientation | ReachVariantTool Documentation</title>
+      <base href="../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/ns_enums.html">enums</a>
+               <ul>
+                  <li>
+                     <a>Members</a>
+                     <ul>
+                        <li><a href="script/api/ns_enums/damage_reporting_modifier.html">damage_reporting_modifier</a></li>
+<li><a href="script/api/ns_enums/damage_reporting_type.html">damage_reporting_type</a></li>
+<li><a href="script/api/ns_enums/orientation.html">orientation</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>ns_enums.orientation</h1>
+
+            <p>
+               This enum contains values that can be returned by the 
+               <a href="script/api/object/actions/get_orientation.html">object.get_orientation</a> 
+               function. Each value indicates which of the object's local vectors most 
+               closely matches world up.
+            </p>
+            <p>
+               In layman's terms: imagine a cube enclosing the object, and imagine that the 
+               cube rotates to match the object. Now imagine an arrow sticking directly out 
+               of each side of the cube. Each arrow represents a "local direction" for the 
+               enclosed object: local up, local forward, local backward, and so on. The 
+               <a href="script/api/object/actions/get_orientation.html">object.get_orientation</a> 
+               function tells you which of these local directions is pointing "up." Note that 
+               by design, you can't check the object's heading; you essentially can only 
+               react to pitch and roll rotations.
+            </p>
+            <dl>
+               <dt>up_is_up</dt>
+               <dt>upright</dt>
+                  <dd>The object's local "up" vector most closely matches world up; the 
+                  object is upright.</dd>
+               <dt>right_is_up</dt>
+                  <dd>The object's local "right" vector most closely matches world up; the 
+                  object is turned on its side.</dd>
+               <dt>backward_is_up</dt>
+               <dt>nose_down</dt>
+                  <dd>The object's local "backward" vector most closely matches world up; 
+                  the object is nose-down.</dd>
+               <dt>forward_is_up</dt>
+               <dt>nose_up</dt>
+                  <dd>The object's local "forward" vector most closely matches world up; 
+                  the object is nose-up.</dd>
+               <dt>left_is_up</dt>
+                  <dd>The object's local "left" vector most closely matches world left; 
+                  the object is turned on its side.</dd>
+               <dt>down_is_up</dt>
+               <dt>upside_down</dt>
+                  <dd>The object's local "down" vector most closely matches world up; the 
+                  object is upside-down.</dd>
+            </dl>
+         
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

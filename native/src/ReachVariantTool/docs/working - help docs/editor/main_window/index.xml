@@ -13,9 +13,9 @@
          The pages in this window are:
       </p>
       <dl>
-         <dt><a href="metadata">Metadata</a></a></dt>
+         <dt><a href="metadata">Metadata</a></dt>
             <dd>Edit a game variant's title, description, and category.</dd>
-         <dt><a href="options-general">General Settings</a></a></dt>
+         <dt><a href="options-general">General Settings</a></dt>
             <dd>Edit basic settings related to scoring and time limits.</dd>
          <dt><a href="options-respawn">Respawn Settings</a></dt>
             <dd>Edit respawn times.</dd>

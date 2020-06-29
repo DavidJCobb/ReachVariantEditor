@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>Main Window | ReachVariantTool Documentation</title>
+      <title>game | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -115,56 +115,86 @@
          </ul>
       </nav>
       <main>
-         <h1>Main Window</h1>
+         <h1>game</h1>
+<p>Contains game state values and functions for managing game state.</p>
+<h2>Members</h2>
+<dl><dt><a href="script/api/ns_game/betrayal_booting.html">betrayal_booting</a></dt>
+   <dd><p>Whether Betrayal Booting is enabled.</p></dd>
+<dt><a href="script/api/ns_game/betrayal_penalty.html">betrayal_penalty</a></dt>
+   <dd><p>The betrayal penalty time for respawning players, in seconds.</p></dd>
+<dt><a href="script/api/ns_game/current_round.html">current_round</a></dt>
+   <dd><p>The current round number.</p></dd>
+<dt><a href="script/api/ns_game/dead_players_can_talk.html">dead_players_can_talk</a></dt>
+   <dd><p>Whether dead players can talk.</p></dd>
+<dt><a href="script/api/ns_game/dont_team_restrict_chat.html">dont_team_restrict_chat</a></dt>
+   <dd><p>Whether chat is team-restricted.</p></dd>
+<dt><a href="script/api/ns_game/fireteams_enabled.html">fireteams_enabled</a></dt>
+   <dd><p>Whether fireteams are enabled.</p></dd>
+<dt><a href="script/api/ns_game/friendly_fire.html">friendly_fire</a></dt>
+   <dd><p>Whether Friendly Fire is enabled.</p></dd>
+<dt><a href="script/api/ns_game/grace_period_time.html">grace_period_time</a></dt>
+   <dd><p>The amount of Grace Period time.</p></dd>
+<dt><a href="script/api/ns_game/grace_period_timer.html">grace_period_timer</a></dt>
+   <dd><p>The current round's remaining Grace Period time.</p></dd>
+<dt><a href="script/api/ns_game/grenades_enabled.html">grenades_enabled</a></dt>
+   <dd><p>Whether Grenades on Map is enabled or not.</p></dd>
+<dt><a href="script/api/ns_game/indestructible_vehicles.html">indestructible_vehicles</a></dt>
+   <dd><p>Whether Indestructible Vehicles are enabled or not.</p></dd>
+<dt><a href="script/api/ns_game/lives_per_round.html">lives_per_round</a></dt>
+   <dd><p>The number of lives each player has per round, as set in the Custom Game options.</p></dd>
+<dt><a href="script/api/ns_game/loadout_cam_time.html">loadout_cam_time</a></dt>
+   <dd><p>The Initial Loadout Camera duration.</p></dd>
+<dt><a href="script/api/ns_game/perfection_enabled.html">perfection_enabled</a></dt>
+   <dd><p>Indicates whether it is possible to earn a Perfection Medal in this game variant.</p></dd>
+<dt><a href="script/api/ns_game/powerup_duration_blue.html">powerup_duration_blue</a></dt>
+   <dd><p>The duration of the Blue Powerup (active camo), in seconds.</p></dd>
+<dt><a href="script/api/ns_game/powerup_duration_red.html">powerup_duration_red</a></dt>
+   <dd><p>The duration of the Red Powerup (overshields), in seconds.</p></dd>
+<dt><a href="script/api/ns_game/powerup_duration_yellow.html">powerup_duration_yellow</a></dt>
+   <dd><p>The duration of the Yellow Powerup (custom), in seconds.</p></dd>
+<dt><a href="script/api/ns_game/proximity_voice.html">proximity_voice</a></dt>
+   <dd><p>Whether Proximity Voice is enabled.</p></dd>
+<dt><a href="script/api/ns_game/respawn_growth.html">respawn_growth</a></dt>
+   <dd><p>The base respawn growth time for all players, in seconds.</p></dd>
+<dt><a href="script/api/ns_game/respawn_time.html">respawn_time</a></dt>
+   <dd><p>The base respawn time for all players, in seconds.</p></dd>
+<dt><a href="script/api/ns_game/respawn_traits_time.html">respawn_traits_time</a></dt>
+   <dd><p>The number of seconds a player has Respawn Traits for.</p></dd>
+<dt><a href="script/api/ns_game/round_limit.html">round_limit</a></dt>
+   <dd><p>The number of rounds.</p></dd>
+<dt><a href="script/api/ns_game/round_time_limit.html">round_time_limit</a></dt>
+   <dd><p>The round time limit.</p></dd>
+<dt><a href="script/api/ns_game/round_timer.html">round_timer</a></dt>
+   <dd><p>The current round's remaining time.</p></dd>
+<dt><a href="script/api/ns_game/rounds_to_win.html">rounds_to_win</a></dt>
+   <dd><p>The number of rounds that a player or team must win in order to win the match.</p></dd>
+<dt><a href="script/api/ns_game/score_to_win.html">score_to_win</a></dt>
+   <dd><p>The score to win.</p></dd>
+<dt><a href="script/api/ns_game/sudden_death_time.html">sudden_death_time</a></dt>
+   <dd><p>The amount of Sudden Death time.</p></dd>
+<dt><a href="script/api/ns_game/sudden_death_timer.html">sudden_death_timer</a></dt>
+   <dd><p>The current round's remaining Sudden Death time.</p></dd>
+<dt><a href="script/api/ns_game/suicide_penalty.html">suicide_penalty</a></dt>
+   <dd><p>The suicide penalty time for respawning players, in seconds.</p></dd>
+<dt><a href="script/api/ns_game/symmetry.html">symmetry</a></dt>
+   <dd><p>Whether this match is symmetryic.</p></dd>
+<dt><a href="script/api/ns_game/symmetry_get.html">symmetry_get</a></dt>
+   <dd><p>Whether this match is symmetryic.</p></dd>
+<dt><a href="script/api/ns_game/team_lives_per_round.html">team_lives_per_round</a></dt>
+   <dd><p>The number of lives each team has per round, as set in the Custom Game options.</p></dd>
+<dt><a href="script/api/ns_game/teams_enabled.html">teams_enabled</a></dt>
+   <dd><p>Whether teams are enabled.</p></dd>
+</dl>
 
-      <p>
-         The <b>main window</b> offers access to <i>Halo: Reach</i>'s most basic settings.
-      </p>
-      <img src="editor/main_window/tu1.png">
-      <p>
-         The pane on the left can be used to select a page to view.
-      </p>
-      <p>
-         The pages in this window are:
-      </p>
-      <dl>
-         <dt><a href="editor/main_window/metadata.html">Metadata</a></dt>
-            <dd>Edit a game variant's title, description, and category.</dd>
-         <dt><a href="editor/main_window/options-general.html">General Settings</a></dt>
-            <dd>Edit basic settings related to scoring and time limits.</dd>
-         <dt><a href="editor/main_window/options-respawn.html">Respawn Settings</a></dt>
-            <dd>Edit respawn times.</dd>
-         <dt>Respawn Traits</dt>
-            <dd>Edit the <a href="editor/main_window/traits.html">traits</a> that players are briefly given after they respawn.</dd>
-         <dt><a href="editor/main_window/options-social.html">Social Settings</a></dt>
-            <dd>Edit settings related to chat and teamplay.</dd>
-         <dt><a href="editor/main_window/options-map.html">Map and Game Settings</a></dt>
-            <dd>Edit settings related to the map and powerups.</dd>
-         <dt>Base Player Traits</dt>
-            <dd>Edit the baseline <a href="editor/main_window/traits.html">traits</a> that apply to all players.</dd>
-         <dt>Red Powerup Traits</dt>
-            <dd>Edit the <a href="editor/main_window/traits.html">traits</a> conferred by the Overshield powerup.</dd>
-         <dt>Blue Powerup Traits</dt>
-            <dd>Edit the <a href="editor/main_window/traits.html">traits</a> conferred by the Active Camo powerup.</dd>
-         <dt>Yellow Powerup Traits</dt>
-            <dd>Edit the <a href="editor/main_window/traits.html">traits</a> conferred by the Custom Powerup.</dd>
-         <dt><a href="editor/main_window/options-team.html">Team Settings</a></dt>
-            <dd>Edit basic settings and internal configuration for teams.</dd>
-         <dt><a href="editor/main_window/options-team-specific.html">Team #</a></dt>
-            <dd>Edit internal configuration for each individual team.</dd>
-         <dt><a href="editor/main_window/options-loadout.html">Loadout Settings</a></dt>
-            <dd>Edit baseline settings for loadouts.</dd>
-         <dt><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></dt>
-            <dd>Edit settings specific to each gametype.</dd>
-         <dt><a href="editor/main_window/option-visibility.html">Option Visibility</a></dt>
-            <dd>Control which options are visible in the in-game menus.</dd>
-         <dt><a href="editor/main_window/tu1.html">Title Update Settings</a></dt>
-            <dd>Edit configuration information for Title Update 1.</dd>
-         <dt><a href="editor/main_window/forge.html">Forge Settings</a></dt>
-            <dd>Edit Forge-related options. This only appears when loading a Forge 
-            game variant.</dd>
-      </dl>
-   
+<h2>Member actions</h2>
+<dl><dt><a href="script/api/ns_game/actions/end_round.html">end_round</a></dt>
+   <dd><p>Ends the round.</p></dd>
+<dt><a href="script/api/ns_game/actions/play_sound_for.html">play_sound_for</a></dt>
+   <dd><p>Play a sound.</p></dd>
+<dt><a href="script/api/ns_game/actions/show_message_to.html">show_message_to</a></dt>
+   <dd><p>Display a message in the kill feed.</p></dd>
+</dl>
+
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>

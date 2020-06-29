@@ -125,6 +125,39 @@ class APIType : public APIEntry {
       void write(const std::string& article_template, const std::string& type_template);
 };
 
+class APINamespaceMember : public APIEntry {
+   public:
+      std::string type;
+      bool is_indexed   = false;
+      bool is_read_only = false;
+      bool is_none      = false;
+
+      size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of);
+      void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
+};
+
+class APINamespace : public APIEntry {
+   protected:
+      void _handle_member_nav(std::string& content, const std::string& stem);
+      void _make_member_relationships_bidirectional();
+      void _mirror_member_relationships(APINamespace& member_of, APIEntry& member, api_entry_type member_type);
+      //
+   public:
+      std::filesystem::path  loaded_from;
+      std::string            friendly_name;
+      std::vector<APIMethod> conditions;
+      std::vector<APIMethod> actions;
+      std::vector<APINamespaceMember> members;
+
+      const char* get_friendly_name() const noexcept;
+      APIMethod* get_action_by_name(const std::string&);
+      APIMethod* get_condition_by_name(const std::string&);
+      APINamespaceMember* get_member_by_name(const std::string&);
+
+      void load(cobb::xml::document& doc);
+      void write(const std::string& article_template, const std::string& type_template);
+};
+
 class APIRegistry {
    private:
       APIRegistry() {}
@@ -137,10 +170,12 @@ class APIRegistry {
       //
       std::filesystem::path root_path;
       std::vector<APIType*> types;
+      std::vector<APINamespace*> namespaces;
       //
       void clear();
       APIType* get_type(const std::string& name);
-      APIType& make_type(const std::filesystem::path& source_file);
+      void load_type(const std::filesystem::path& source_file, cobb::xml::document& doc);
+      void load_namespace(const std::filesystem::path& source_file, cobb::xml::document& doc);
       //
       int  depth_of(std::filesystem::path path);
       void make_stem(std::filesystem::path path, std::string& out);

@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>ns_game.sudden_death_timer | ReachVariantTool Documentation</title>
+      <base href="../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/ns_game.html">game</a>
+               <ul>
+                  <li>
+                     <a>Members</a>
+                     <ul>
+                        <li><a href="script/api/ns_game/betrayal_booting.html">betrayal_booting</a></li>
+<li><a href="script/api/ns_game/betrayal_penalty.html">betrayal_penalty</a></li>
+<li><a href="script/api/ns_game/current_round.html">current_round</a></li>
+<li><a href="script/api/ns_game/dead_players_can_talk.html">dead_players_can_talk</a></li>
+<li><a href="script/api/ns_game/dont_team_restrict_chat.html">dont_team_restrict_chat</a></li>
+<li><a href="script/api/ns_game/fireteams_enabled.html">fireteams_enabled</a></li>
+<li><a href="script/api/ns_game/friendly_fire.html">friendly_fire</a></li>
+<li><a href="script/api/ns_game/grace_period_time.html">grace_period_time</a></li>
+<li><a href="script/api/ns_game/grace_period_timer.html">grace_period_timer</a></li>
+<li><a href="script/api/ns_game/grenades_enabled.html">grenades_enabled</a></li>
+<li><a href="script/api/ns_game/indestructible_vehicles.html">indestructible_vehicles</a></li>
+<li><a href="script/api/ns_game/lives_per_round.html">lives_per_round</a></li>
+<li><a href="script/api/ns_game/loadout_cam_time.html">loadout_cam_time</a></li>
+<li><a href="script/api/ns_game/perfection_enabled.html">perfection_enabled</a></li>
+<li><a href="script/api/ns_game/powerup_duration_blue.html">powerup_duration_blue</a></li>
+<li><a href="script/api/ns_game/powerup_duration_red.html">powerup_duration_red</a></li>
+<li><a href="script/api/ns_game/powerup_duration_yellow.html">powerup_duration_yellow</a></li>
+<li><a href="script/api/ns_game/proximity_voice.html">proximity_voice</a></li>
+<li><a href="script/api/ns_game/respawn_growth.html">respawn_growth</a></li>
+<li><a href="script/api/ns_game/respawn_time.html">respawn_time</a></li>
+<li><a href="script/api/ns_game/respawn_traits_time.html">respawn_traits_time</a></li>
+<li><a href="script/api/ns_game/round_limit.html">round_limit</a></li>
+<li><a href="script/api/ns_game/round_time_limit.html">round_time_limit</a></li>
+<li><a href="script/api/ns_game/round_timer.html">round_timer</a></li>
+<li><a href="script/api/ns_game/rounds_to_win.html">rounds_to_win</a></li>
+<li><a href="script/api/ns_game/score_to_win.html">score_to_win</a></li>
+<li><a href="script/api/ns_game/sudden_death_time.html">sudden_death_time</a></li>
+<li><a href="script/api/ns_game/sudden_death_timer.html">sudden_death_timer</a></li>
+<li><a href="script/api/ns_game/suicide_penalty.html">suicide_penalty</a></li>
+<li><a href="script/api/ns_game/symmetry.html">symmetry</a></li>
+<li><a href="script/api/ns_game/symmetry_get.html">symmetry_get</a></li>
+<li><a href="script/api/ns_game/team_lives_per_round.html">team_lives_per_round</a></li>
+<li><a href="script/api/ns_game/teams_enabled.html">teams_enabled</a></li>
+
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member conditions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/ns_game/actions/end_round.html">end_round</a></li>
+<li><a href="script/api/ns_game/actions/play_sound_for.html">play_sound_for</a></li>
+<li><a href="script/api/ns_game/actions/show_message_to.html">show_message_to</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>ns_game.sudden_death_timer<span class="type">Type: <a href="script/api/timer.html">Timer</a></span></h1>
+
+            <p>
+               This timer is used for Sudden Death; it is displayed on the HUD when appropriate.
+            </p>
+            <p>
+               Typically, Sudden Death will activate if, at the end of the round, a player is 
+               in a position where they can attempt to complete the objective. For example, 
+               during CTF, Sudden Death will activate if a player is standing very close to a 
+               flag that they can pick up and capture.
+            </p>
+            <p>
+               Typically, the Grace Period is used to complement Sudden Death. 
+               Sudden Death activates when a player is able to further an 
+               objective match; for example, it will enable if any player is 
+               standing close to a flag that they can pick up and score. In 
+               that scenario, if Sudden Death begins and then the conditions 
+               for it are no longer met (the player stops being near the flag), 
+               then the match will end after the Grace Period ends. Sudden 
+               Death never resets (if a player comes near the flag again, the 
+               timer will continue from where it left off), but the Grace 
+               Period does.
+            </p>
+         <h2>Example</h2>
+<pre>
+alias sudden_death_enabled   = global.number[0]
+alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+
+if not game.round_timer.is_zero() then 
+   game.grace_period_timer = 0
+end
+if game.round_time_limit &gt; 0 then 
+   if not game.round_timer.is_zero() then 
+      announced_sudden_death = 0
+   end
+   if game.round_timer.is_zero() then 
+      if sudden_death_enabled == 1 then 
+         game.sudden_death_timer.set_rate(-100%)
+         game.grace_period_timer.reset()
+         if announced_sudden_death == 0 then 
+            send_incident(sudden_death, all_players, all_players)
+            announced_sudden_death = 1
+         end
+         if game.sudden_death_time &gt; 0 and game.grace_period_timer &gt; game.sudden_death_timer then 
+            game.grace_period_timer = game.sudden_death_timer
+         end
+      end
+      if sudden_death_enabled == 0 then 
+         game.grace_period_timer.set_rate(-100%)
+         if game.grace_period_timer.is_zero() then 
+            game.end_round()
+         end
+      end
+      if game.sudden_death_timer.is_zero() then 
+         game.end_round()
+      end
+   end
+end</pre>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+            If you want to implement Sudden Death, you should use the <code>sudden_death_timer</code> 
+            and the <code>grace_period_timer</code> in conjunction with the <code>round_timer</code>.
+         </p></li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/ns_game/grace_period_time.html">game.grace_period_time</a></li>
+   <li><a href="script/api/ns_game/grace_period_timer.html">game.grace_period_timer</a></li>
+   <li><a href="script/api/ns_game/round_time_limit.html">game.round_time_limit</a></li>
+   <li><a href="script/api/ns_game/round_timer.html">game.round_timer</a></li>
+   <li><a href="script/api/ns_game/sudden_death_time.html">game.sudden_death_time</a></li>
+</ul>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>
