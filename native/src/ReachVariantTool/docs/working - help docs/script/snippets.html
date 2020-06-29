@@ -123,6 +123,13 @@
          will probably have to ensure that your own script doesn't use the same variable 
          for anything important.
       </p>
+      <p>
+         These snippets include both "common" behaviors, which can be omitted from very 
+         specialized gametypes (e.g. chess does not need to award DLC achievements for 
+         kills), and "standard" behaviors, which the user would expect all gametypes to 
+         have (e.g. ending the round when the round timer runs out, which, yes, you have 
+         to do manually).
+      </p>
       
       <ul id="toc">
          <li><a href="script/snippets.html#dlc-achievements">DLC Achievements</a></li>
@@ -161,98 +168,98 @@
          with unnamed Forge labels, as 343i does).
       </p>
       <pre>
-alias ach_top_shot_count        = player.number[0]
-alias ach_license_to_kill_count = player.number[1]
-alias ach_paper_beats_rock_vuln_timer = player.timer[0]
-declare player.ach_top_shot_count        with network priority low
-declare player.ach_license_to_kill_count with network priority low
+<span class="keyword">alias</span> ach_top_shot_count        = player.number[0]
+<span class="keyword">alias</span> ach_license_to_kill_count = player.number[1]
+<span class="keyword">alias</span> ach_paper_beats_rock_vuln_timer = player.timer[0]
+<span class="keyword">declare</span> player.ach_top_shot_count        with network priority low
+<span class="keyword">declare</span> player.ach_license_to_kill_count with network priority low
 
-for each player do -- award Dive Bomber achievement as appropriate
-   alias killer    = global.player[0]
-   alias killer_aa = global.object[0]
-   alias death_mod = global.number[0]
-   if current_player.killer_type_is(kill) then 
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> killer_aa = global.object[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
       killer    = current_player.get_killer()
       death_mod = current_player.get_death_damage_mod()
-      if death_mod == enums.damage_reporting_modifier.assassination then
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span>
          killer_aa = killer.get_armor_ability()
-         if killer_aa.is_of_type(jetpack) and killer_aa.is_in_use() then 
+         <span class="keyword">if</span> killer_aa.is_of_type(jetpack) <span class="keyword">and</span> killer_aa.is_in_use() <span class="keyword">then</span> 
             send_incident(dlc_achieve_2, killer, killer, 65)
-         end
-      end
-   end
-end
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
-for each player do -- award From Hell's Heart achievement as appropriate
-   alias death_mod = global.number[0]
-   alias killer    = global.player[0]
-   if current_player.killer_type_is(kill) then
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award From Hell's Heart achievement as appropriate</span>
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
       death_mod = current_player.get_death_damage_mod()
-      if death_mod == enums.damage_reporting_modifier.sticky then
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.sticky <span class="keyword">then</span>
          killer = current_player.get_killer()
-         if killer.killer_type_is(suicide) then 
+         <span class="keyword">if</span> killer.killer_type_is(suicide) <span class="keyword">then</span> 
             send_incident(dlc_achieve_2, current_player, current_player, 68)
-         end
-      end
-   end
-end
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
-for each player do -- manage and award Top Shot achievement as appropriate
-   alias killer    = global.player[0]
-   alias death_mod = global.number[0]
-   if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then 
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage and award Top Shot achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) <span class="keyword">then</span> 
       current_player.ach_top_shot_count = 0
-      if current_player.killer_type_is(kill) then 
+      <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
          killer    = current_player.get_killer()
          death_mod = current_player.get_death_damage_mod()
-         if death_mod != enums.damage_reporting_modifier.headshot then 
+         <span class="keyword">if</span> death_mod != enums.damage_reporting_modifier.headshot <span class="keyword">then</span> 
             killer.ach_top_shot_count = 0
-         end
-         if death_mod == enums.damage_reporting_modifier.headshot then 
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.headshot <span class="keyword">then</span> 
             killer.ach_top_shot_count += 1
-         end
-         if killer.ach_top_shot_count &gt; 2 then 
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> killer.ach_top_shot_count &gt; 2 <span class="keyword">then</span> 
             send_incident(dlc_achieve_2, killer, killer, 62)
-         end
-      end
-   end
-end
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
-for each player do -- manage and award License To Kill achievement as appropriate
-   alias killer    = global.player[0]
-   alias death_mod = global.number[0]
-   if current_player.killer_type_is(kill) then 
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage and award License To Kill achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
       killer    = current_player.get_killer()
       death_mod = current_player.get_death_damage_mod()
-      if death_mod == enums.damage_reporting_modifier.splatter then 
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.splatter <span class="keyword">then</span> 
          killer.ach_license_to_kill_count += 1
-         if killer.ach_license_to_kill_count &gt; 4 then 
+         <span class="keyword">if</span> killer.ach_license_to_kill_count &gt; 4 <span class="keyword">then</span> 
             send_incident(dlc_achieve_2, killer, killer, 66)
-         end
-      end
-   end
-end
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
-for each player do -- manage timing for the Paper Beats Rock achievement
-   alias current_ability = global.object[0]
-   --
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage timing for the Paper Beats Rock achievement</span>
+   <span class="keyword">alias</span> current_ability = global.object[0]
+   <span class="comment">--</span>
    current_ability = current_player.get_armor_ability()
-   if current_ability.is_of_type(armor_lock) and current_ability.is_in_use() then 
+   <span class="keyword">if</span> current_ability.is_of_type(armor_lock) <span class="keyword">and</span> current_ability.is_in_use() <span class="keyword">then</span> 
       current_player.ach_paper_beats_rock_vuln_timer = 3
       current_player.ach_paper_beats_rock_vuln_timer.set_rate(-100%)
-   end
-end
-for each player do -- award Paper Beats Rock achievement as appropriate
-   alias killer    = global.player[0]
-   alias death_mod = global.number[0]
-   if current_player.killer_type_is(kill) and not current_player.ach_paper_beats_rock_vuln_timer.is_zero() then 
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Paper Beats Rock achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">and</span> <span class="keyword">not</span> current_player.ach_paper_beats_rock_vuln_timer.is_zero() <span class="keyword">then</span> 
       death_mod = current_player.get_death_damage_mod()
-      if death_mod == enums.damage_reporting_modifier.assassination then
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span>
          killer = current_player.get_killer()
          send_incident(dlc_achieve_2, killer, killer, 60)
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
       
       <h2><a name="loadout-palettes">Loadout palette code</a></h2>
       <p>
@@ -261,24 +268,25 @@ end</pre>
          1 and Elite Tier 1 palettes depending on their species.
       </p>
       <pre>
-for each player do -- loadout palettes
-   if current_player.is_elite() then 
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- loadout palettes</span>
+   <span class="keyword">if</span> current_player.is_elite() <span class="keyword">then</span> 
       current_player.set_loadout_palette(elite_tier_1)
-   end
-   if not current_player.is_elite() then 
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> <span class="keyword">not</span> current_player.is_elite() <span class="keyword">then</span> 
       current_player.set_loadout_palette(spartan_tier_1)
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
       
       <h2><a name="round-timer">Round timer code (basic)</a></h2>
       <p>
          <i>Halo: Reach</i> does not automatically end the round when the round timer 
-         expires. Instead, Megalo has near-total authority over when the round ends.
+         expires. Instead, it's up to Megalo script. The round timer likely behaves this 
+         way so that Invasion can use it for individual phases.
       </p>
       <pre>
-if game.round_time_limit &gt; 0 and game.round_timer.is_zero() then
+<span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">and</span> game.round_timer.is_zero() <span class="keyword">then</span>
    game.end_round()
-end</pre>
+<span class="keyword">end</span></pre>
       
       <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
       <p>
@@ -303,39 +311,39 @@ end</pre>
          Period does.
       </p>
       <pre>
-alias sudden_death_enabled   = global.number[0]
-alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+<span class="keyword">alias</span> sudden_death_enabled   = global.number[0] <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
+<span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
 
-if not game.round_timer.is_zero() then 
+<span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
    game.grace_period_timer = 0
-end
-if game.round_time_limit &gt; 0 then 
-   if not game.round_timer.is_zero() then 
+<span class="keyword">end</span>
+<span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">then</span> 
+   <span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
       announced_sudden_death = 0
-   end
-   if game.round_timer.is_zero() then 
-      if sudden_death_enabled == 1 then 
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.round_timer.is_zero() <span class="keyword">then</span> 
+      <span class="keyword">if</span> sudden_death_enabled == 1 <span class="keyword">then</span> 
          game.sudden_death_timer.set_rate(-100%)
          game.grace_period_timer.reset()
-         if announced_sudden_death == 0 then 
+         <span class="keyword">if</span> announced_sudden_death == 0 <span class="keyword">then</span> 
             send_incident(sudden_death, all_players, all_players)
             announced_sudden_death = 1
-         end
-         if game.sudden_death_time &gt; 0 and game.grace_period_timer &gt; game.sudden_death_timer then 
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> game.sudden_death_time &gt; 0 <span class="keyword">and</span> game.grace_period_timer &gt; game.sudden_death_timer <span class="keyword">then</span> 
             game.grace_period_timer = game.sudden_death_timer
-         end
-      end
-      if sudden_death_enabled == 0 then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> sudden_death_enabled == 0 <span class="keyword">then</span> 
          game.grace_period_timer.set_rate(-100%)
-         if game.grace_period_timer.is_zero() then 
+         <span class="keyword">if</span> game.grace_period_timer.is_zero() <span class="keyword">then</span> 
             game.end_round()
-         end
-      end
-      if game.sudden_death_timer.is_zero() then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> game.sudden_death_timer.is_zero() <span class="keyword">then</span> 
          game.end_round()
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
       
       <h2><a name="super-shields">Super Shields</a></h2>
       <p>
@@ -346,35 +354,35 @@ end</pre>
          fire particles on these players.
       </p>
       <pre>
-alias opt_super_shields = script_option[12]
-alias lifespan = object.timer[0]
+<span class="keyword">alias</span> opt_super_shields = script_option[12]
+<span class="keyword">alias</span> lifespan = object.timer[0]
 
--- This should be the index of a nameless Forge label whose object type 
--- is the fire particle emitter:
-alias all_fire_particles = 7
+<span class="comment">-- This should be the index of a nameless Forge label whose object type </span>
+<span class="comment">-- is the fire particle emitter:</span>
+<span class="keyword">alias</span> all_fire_particles = 7
 
-for each player do -- handle super shields VFX
-   if opt_super_shields == 1 then 
-      alias current_shields = global.number[0]
-      alias outcome = global.number[1]
-      --
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- handle super shields VFX</span>
+   <span class="keyword">if</span> opt_super_shields == 1 <span class="keyword">then</span> 
+      <span class="keyword">alias</span> current_shields = global.number[0]
+      <span class="keyword">alias</span> outcome = global.number[1]
+      <span class="comment">--</span>
       current_shields = 0
       current_shields = current_player.biped.shields
-      if current_shields &gt; 100 then 
+      <span class="keyword">if</span> current_shields &gt; 100 <span class="keyword">then</span> 
          outcome = 0
          outcome = rand(10)
-         if outcome &lt;= 2 then -- 30% chance to spawn a particle emitter
+         <span class="keyword">if</span> outcome &lt;= 2 <span class="keyword">then</span> <span class="comment">-- 30% chance to spawn a particle emitter</span>
             current_player.biped.place_at_me(particle_emitter_fire, none, never_garbage_collect, 0, 0, 0, none)
-         end
-      end
-   end
-end
-for each object with label all_fire_particles do -- clean up super shields VFX
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each object with label all_fire_particles <span class="keyword">do</span> <span class="comment">-- clean up super shields VFX</span>
    current_object.lifespan.set_rate(-100%)
-   if current_object.lifespan.is_zero() then 
+   <span class="keyword">if</span> current_object.lifespan.is_zero() <span class="keyword">then</span> 
       current_object.delete()
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
    
       </main>
       <script src="resources/sidebar.js"></script>

@@ -121,15 +121,15 @@
 </dl>
 <h2>Example</h2>
 <pre>
-alias owner = object.player[1]
+<span class="keyword">alias</span> owner = object.player[1]
 
-for each object with label "koth_hill" do
-   --
-   -- The next two lines do the exact same thing:
-   --
+<span class="keyword">for</span> each object with label <span class="string">"koth_hill</span>" <span class="keyword">do</span>
+   <span class="comment">--</span>
+   <span class="comment">-- The next two lines do the exact same thing:</span>
+   <span class="comment">--</span>
    current_object.apply_shape_color_from_player_member(1)
    current_object.apply_shape_color_from_player_member(object.owner)
-end</pre>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_shape.html">object.set_shape</a></li>

@@ -115,13 +115,13 @@
 </dl>
 <h2>Example</h2>
 <pre>
-alias current_checkpoint = global.object[0]
-alias next_checkpoint    = global.object[1]
---
--- Let's pretend that this is Race, and a player just reached next_checkpoint. 
--- We want the player to be able to respawn at the last checkpoint they've 
--- reached.
---
+<span class="keyword">alias</span> current_checkpoint = global.object[0]
+<span class="keyword">alias</span> next_checkpoint    = global.object[1]
+<span class="comment">--</span>
+<span class="comment">-- Let's pretend that this is Race, and a player just reached next_checkpoint. </span>
+<span class="comment">-- We want the player to be able to respawn at the last checkpoint they've </span>
+<span class="comment">-- reached.</span>
+<span class="comment">--</span>
 current_checkpoint.set_spawn_location_permissions(mod_player, current_player, 0)
 next_checkpoint.set_spawn_location_permissions(mod_player, current_player, 1)</pre>
 <h2>See also</h2>

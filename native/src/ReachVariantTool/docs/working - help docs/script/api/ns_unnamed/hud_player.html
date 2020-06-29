@@ -73,22 +73,22 @@
          different information for each player. It refers to the player that the widget 
          or waypoint is being shown to.</p><p>This value is read-only.</p><h2>Example</h2>
 <pre>
-alias speed_raw = player.number[0]
-alias speed_kph = player.number[1]
-declare player.speed_raw with network priority local
-declare player.speed_kph with network priority local
---
--- Allow each player to see how fast they're moving.
---
-for each player do
-   script_widget[0].set_text("%n KPH", hud_player.speed_kph)
-end
-on local: for each player do
+<span class="keyword">alias</span> speed_raw = player.number[0]
+<span class="keyword">alias</span> speed_kph = player.number[1]
+<span class="keyword">declare</span> player.speed_raw with network priority local
+<span class="keyword">declare</span> player.speed_kph with network priority local
+<span class="comment">--</span>
+<span class="comment">-- Allow each player to see how fast they're moving.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   script_widget[0].set_text(<span class="string">"%n KPH</span>", hud_player.speed_kph)
+<span class="keyword">end</span>
+<span class="keyword">on</span> local: <span class="keyword">for</span> each player <span class="keyword">do</span>
    current_player.speed_raw = current_player.biped.get_speed()
    current_player.speed_kph = current_player.speed_raw
    current_player.speed_kph *= 109
-   current_player.speed_kph /= 100 -- to KPH
-end</pre>
+   current_player.speed_kph /= 100 <span class="comment">-- to KPH</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></li>

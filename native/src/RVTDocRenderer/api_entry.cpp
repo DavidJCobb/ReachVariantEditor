@@ -99,7 +99,9 @@ void APIEntry::_write_example(std::string& out) const {
    if (this->example.empty())
       return;
    out += "<h2>Example</h2>\n<pre>";
-   out += this->example;
+   std::string html;
+   syntax_highlight_in_html(this->example, html);
+   out += html;
    out += "</pre>\n";
 }
 void APIEntry::_write_notes(std::string& out) const {

@@ -117,12 +117,12 @@
             <p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p>
 <h2>Example</h2>
 <pre>
-for each object with label "awful_gun" do
+<span class="keyword">for</span> each object with label <span class="string">"awful_gun</span>" <span class="keyword">do</span>
    global.player[0] = current_object.get_carrier()
-   if global.player[0] != no_player then
+   <span class="keyword">if</span> global.player[0] != no_player <span class="keyword">then</span>
       global.player[0].kill(false)
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>

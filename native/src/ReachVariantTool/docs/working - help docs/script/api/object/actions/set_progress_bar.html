@@ -114,20 +114,20 @@
 </dl>
 <h2>Example</h2>
 <pre>
-for each object with label "koth_hill" do
+<span class="keyword">for</span> each object with label <span class="string">"koth_hill</span>" <span class="keyword">do</span>
    current_object.set_progress_bar(everyone, 3)
-end
+<span class="keyword">end</span>
 
-alias capture_timer = object.timer[0]
-for each object with label "territory" do
-   for each player do
+<span class="keyword">alias</span> capture_timer = object.timer[0]
+<span class="keyword">for</span> each object with label <span class="string">"territory</span>" <span class="keyword">do</span>
+   <span class="keyword">for</span> each player <span class="keyword">do</span>
       current_object.set_progress_bar(mod_player, current_player, 1, object.capture_timer)
-   end
-end
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
-for each object with label "ignore_me" do
+<span class="keyword">for</span> each object with label <span class="string">"ignore_me</span>" <span class="keyword">do</span>
    current_object.set_progress_bar(everyone, none)
-end</pre>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

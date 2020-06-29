@@ -103,16 +103,16 @@
          <h1>object.delete</h1>
 <p>Delete this object from the game world.</p><h2>Example</h2>
 <pre>
-for each object with label "team_only" do
-   if game.teams_enabled == 0 then
+<span class="keyword">for</span> each object with label <span class="string">"team_only</span>" <span class="keyword">do</span>
+   <span class="keyword">if</span> game.teams_enabled == 0 <span class="keyword">then</span>
       current_object.delete()
-   end
-end
-for each object with label "ffa_only" do
-   if game.teams_enabled != 0 then
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each object with label <span class="string">"ffa_only</span>" <span class="keyword">do</span>
+   <span class="keyword">if</span> game.teams_enabled != 0 <span class="keyword">then</span>
       current_object.delete()
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

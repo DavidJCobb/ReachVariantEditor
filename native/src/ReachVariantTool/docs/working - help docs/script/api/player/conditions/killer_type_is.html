@@ -123,25 +123,25 @@
 </dl>
 <h2>Example</h2>
 <pre>
-alias opt_kill_points = script_option[1]
-alias opt_spree_bonus = script_option[0]
+<span class="keyword">alias</span> opt_kill_points = script_option[1]
+<span class="keyword">alias</span> opt_spree_bonus = script_option[0]
 
-for each player do
-   if current_player.killer_type_is(kill) then
-      alias killer = global.player[0]
-      --
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      <span class="keyword">alias</span> killer = global.player[0]
+      <span class="comment">--</span>
       killer = current_player.get_killer()
       killer.score += opt_kill_points
       global.number[0]  = killer.get_spree_count()
       global.number[0] %= 5
-      if global.number[0] == 0 then
-         --
-         -- This is the player's 5th, 10th, 15th, etc., kill.
-         --
+      <span class="keyword">if</span> global.number[0] == 0 <span class="keyword">then</span>
+         <span class="comment">--</span>
+         <span class="comment">-- This is the player's 5th, 10th, 15th, etc., kill.</span>
+         <span class="comment">--</span>
          killer.score += opt_spree_bonus
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/player/actions/try_get_killer.html">player.try_get_killer</a></li>

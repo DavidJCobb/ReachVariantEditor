@@ -112,18 +112,18 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Do not allow Elites to pick up Assault Rifles.
---
-for each player do
-   if current_player.biped.is_of_type(elite) then
-      for each object do
-         if current_object.is_of_type(assault_rifle) then
+<span class="comment">--</span>
+<span class="comment">-- Do not allow Elites to pick up Assault Rifles.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.biped.is_of_type(elite) <span class="keyword">then</span>
+      <span class="keyword">for</span> each object <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.is_of_type(assault_rifle) <span class="keyword">then</span>
             current_object.set_pickup_permissions(mod_player, current_player, 0)
-         end
-      end
-   end
-end</pre>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

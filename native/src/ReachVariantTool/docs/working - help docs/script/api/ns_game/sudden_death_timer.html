@@ -103,39 +103,39 @@
             </p>
          <h2>Example</h2>
 <pre>
-alias sudden_death_enabled   = global.number[0]
-alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+<span class="keyword">alias</span> sudden_death_enabled   = global.number[0]
+<span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
 
-if not game.round_timer.is_zero() then 
+<span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
    game.grace_period_timer = 0
-end
-if game.round_time_limit &gt; 0 then 
-   if not game.round_timer.is_zero() then 
+<span class="keyword">end</span>
+<span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">then</span> 
+   <span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
       announced_sudden_death = 0
-   end
-   if game.round_timer.is_zero() then 
-      if sudden_death_enabled == 1 then 
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.round_timer.is_zero() <span class="keyword">then</span> 
+      <span class="keyword">if</span> sudden_death_enabled == 1 <span class="keyword">then</span> 
          game.sudden_death_timer.set_rate(-100%)
          game.grace_period_timer.reset()
-         if announced_sudden_death == 0 then 
+         <span class="keyword">if</span> announced_sudden_death == 0 <span class="keyword">then</span> 
             send_incident(sudden_death, all_players, all_players)
             announced_sudden_death = 1
-         end
-         if game.sudden_death_time &gt; 0 and game.grace_period_timer &gt; game.sudden_death_timer then 
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> game.sudden_death_time &gt; 0 <span class="keyword">and</span> game.grace_period_timer &gt; game.sudden_death_timer <span class="keyword">then</span> 
             game.grace_period_timer = game.sudden_death_timer
-         end
-      end
-      if sudden_death_enabled == 0 then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> sudden_death_enabled == 0 <span class="keyword">then</span> 
          game.grace_period_timer.set_rate(-100%)
-         if game.grace_period_timer.is_zero() then 
+         <span class="keyword">if</span> game.grace_period_timer.is_zero() <span class="keyword">then</span> 
             game.end_round()
-         end
-      end
-      if game.sudden_death_timer.is_zero() then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> game.sudden_death_timer.is_zero() <span class="keyword">then</span> 
          game.end_round()
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

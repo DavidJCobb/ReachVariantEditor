@@ -139,7 +139,7 @@
       <pre>
 a = b + c
 
--- The above is interpreted as two statements: "a = b" and "+ c".</pre>
+<span class="comment">-- The above is interpreted as two statements: "a = b" and "+ c".</span></pre>
       
       <h3>Blocks</h3>
       <p>
@@ -216,9 +216,9 @@ a = b + c
          depth:
       </p>
       <pre>
-global.player[0]                     -- valid
-global.player[0].player[1]           -- valid
-global.player[0].player[1].player[2] -- invalid</pre>
+global.player[0]                     <span class="comment">-- valid</span>
+global.player[0].player[1]           <span class="comment">-- valid</span>
+global.player[0].player[1].player[2] <span class="comment">-- invalid</span></pre>
       <p>
          In this particular Megalo dialect, you cannot define your own variables; there are a 
          fixed number available. However, you can <a href="script/alias.html">give names to variables</a>.
@@ -231,19 +231,19 @@ global.player[0].player[1].player[2] -- invalid</pre>
          properties through a property.
       </p>
       <pre>
-current_player.team                 -- valid
-current_player.biped.spawn_sequence -- invalid (var.property.property)
-current_player.team.number[0]       -- invalid (var.property.var)</pre>
+current_player.team                 <span class="comment">-- valid</span>
+current_player.biped.spawn_sequence <span class="comment">-- invalid (var.property.property)</span>
+current_player.team.number[0]       <span class="comment">-- invalid (var.property.var)</span></pre>
       <p>
          Most properties cannot be accessed through a nested variable. The <var>biped</var> 
          property on player variables is an exception.
       </p>
       <pre>
-current_player.team            -- valid   (var.property)
-current_player.player[0].team  -- invalid (var.var.property)
+current_player.team            <span class="comment">-- valid   (var.property)</span>
+current_player.player[0].team  <span class="comment">-- invalid (var.var.property)</span>
 
-current_player.biped           -- valid (var.biped)
-current_player.player[0].biped -- valid (var.var.biped)</pre>
+current_player.biped           <span class="comment">-- valid (var.biped)</span>
+current_player.player[0].biped <span class="comment">-- valid (var.var.biped)</span></pre>
       <p>
          Most properties do not have indices. There is one exception: the <var>script_stat</var> 
          property on players and teams. There, you must use an index to specify the target stat:
@@ -258,15 +258,15 @@ current_player.script_stat[0]</pre>
          As such, you can use accessors on variables and properties.
       </p>
       <pre>
-current_object.shields       += 50 -- valid; access through variable
-current_player.biped.shields += 50 -- valid; access through property</pre>
+current_object.shields       += 50 <span class="comment">-- valid; access through variable</span>
+current_player.biped.shields += 50 <span class="comment">-- valid; access through property</span></pre>
       <p>
          Most accessors have both getters and setters. Some do not, which means that they can 
          only appear on the appropriate side of an assignment statement.
       </p>
       <pre>
-current_object.max_shields += 50              -- valid; there is a setter for this
-global.number[0] = current_object.max_shields -- invalid; there is no getter for this</pre>
+current_object.max_shields += 50              <span class="comment">-- valid; there is a setter for this</span>
+global.number[0] = current_object.max_shields <span class="comment">-- invalid; there is no getter for this</span></pre>
       <p>
          From a language design standpoint, accessors were preferred over getter/setter 
          functions in cases where the internal setter takes the same range of assignment 

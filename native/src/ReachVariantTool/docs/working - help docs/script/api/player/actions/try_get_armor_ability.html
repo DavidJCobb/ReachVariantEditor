@@ -110,16 +110,16 @@
             <p>This function returns <a href="script/api/object.html">object</a>. Calling this function without storing its return value in a variable is an error.</p>
 <h2>Example</h2>
 <pre>
---
--- Don't allow players to use Armor Lock:
---
-for each player do
+<span class="comment">--</span>
+<span class="comment">-- Don't allow players to use Armor Lock:</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
    global.object[0] = current_player.get_armor_ability()
-   if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+   <span class="keyword">if</span> global.object[0].is_of_type(armor_lock) <span class="keyword">and</span> global.object[0].is_in_use() <span class="keyword">then</span>
       global.object[0].delete()
-      game.show_message_to(current_player, none, "nope")
-   end
-end</pre>
+      game.show_message_to(current_player, none, <span class="string">"nope</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

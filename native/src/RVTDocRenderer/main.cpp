@@ -8,6 +8,17 @@
 #include "common.h"
 #include "api_entry.h"
 
+//
+// This is a very, very quick-and-dirty tool used to export XML-formatted documentation as HTML. 
+// Writing the documentation in XML and using a tool like this is faster than hand-writing all 
+// of the documentation in HTML. It also allows us to shortcut some tasks. For example, the 
+// page for a given Megalo function may have a "See also" section linking to other, related, 
+// functions. In XML, we can define the list of related functions on just one of those functions, 
+// and the code to actually load and interpret that XML can then mirror that list onto all of the 
+// other functions (i.e. only A has to be told that it's related to B; the loader then tells B 
+// that it's related to A).
+//
+
 bool read_file(const wchar_t* path, std::string& out) {
    std::ifstream in(path, std::ios::in);
    if (!in)
@@ -22,6 +33,11 @@ bool read_file(const wchar_t* path, std::string& out) {
    return true;
 }
 
+//
+// Read the contents of the HTML template files. These files contain <content-placeholder /> 
+// elements that we find and replace (via a string search, not parsing) with content that we've 
+// loaded from XML and formatted into HTML.
+//
 const std::string& get_article_template() {
    static std::string article_template;
    if (article_template.empty()) {

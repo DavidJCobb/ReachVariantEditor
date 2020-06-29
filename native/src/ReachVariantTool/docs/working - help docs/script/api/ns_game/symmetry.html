@@ -85,23 +85,23 @@
             </p>
          <h2>Example</h2>
 <pre>
--- Code taken from CTF TU:
+<span class="comment">-- Code taken from CTF TU:</span>
 
 enum sides
    multi
    one
    neutral
    three
-end
+<span class="keyword">end</span>
 
-alias opt_symmetry = script_option[0]
+<span class="keyword">alias</span> opt_symmetry = script_option[0]
 
-on pregame: do
+<span class="keyword">on</span> pregame: <span class="keyword">do</span>
    game.symmetry = 1
-   if opt_sides == sides.one then 
+   <span class="keyword">if</span> opt_sides == sides.one <span class="keyword">then</span> 
       game.symmetry = 0
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/ns_game/symmetry_get.html">game.symmetry_get</a></li>

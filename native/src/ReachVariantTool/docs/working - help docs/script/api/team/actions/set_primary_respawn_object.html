@@ -63,20 +63,20 @@
 </dl>
 <h2>Example</h2>
 <pre>
--- Set a team's primary respawn object to the object with a specific label 
--- and the lowest spawn sequence on the map.
+<span class="comment">-- Set a team's primary respawn object to the object with a specific label </span>
+<span class="comment">-- and the lowest spawn sequence on the map.</span>
 
-do
-   alias lowest = global.number[0]
-   --
+<span class="keyword">do</span>
+   <span class="keyword">alias</span> lowest = global.number[0]
+   <span class="comment">--</span>
    lowest = 32767
-   for each object with label "defend_res_zone" do
-      if current_object.spawn_sequence &lt; lowest then
+   <span class="keyword">for</span> each object with label <span class="string">"defend_res_zone</span>" <span class="keyword">do</span>
+      <span class="keyword">if</span> current_object.spawn_sequence &lt; lowest <span class="keyword">then</span>
          lowest = current_object.spawn_sequence
          team[0].set_primary_respawn_object(current_object)
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/team/actions/set_co_op_spawning.html">team.set_co_op_spawning</a></li>

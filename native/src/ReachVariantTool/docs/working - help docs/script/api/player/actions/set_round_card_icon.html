@@ -110,21 +110,21 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Relevant code from Invasion:
---
-for each player do
-   if current_player.team == team[1] then 
+<span class="comment">--</span>
+<span class="comment">-- Relevant code from Invasion:</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.team == team[1] <span class="keyword">then</span> 
       current_player.set_round_card_icon(covenant)
-      current_player.set_round_card_text("Elite")
-   end
-end
-for each player do
-   if current_player.team == team[0] then 
+      current_player.set_round_card_text(<span class="string">"Elite</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.team == team[0] <span class="keyword">then</span> 
       current_player.set_round_card_icon(noble)
-      current_player.set_round_card_text("Spartan")
-   end
-end</pre>
+      current_player.set_round_card_text(<span class="string">"Spartan</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

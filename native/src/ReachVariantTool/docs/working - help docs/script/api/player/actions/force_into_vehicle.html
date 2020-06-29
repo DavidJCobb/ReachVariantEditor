@@ -101,21 +101,21 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Force players into Sabres.
---
-for each player do
-   --
-   -- First, let's make sure the player is actually spawned on the map.
-   --
-   if current_player.biped != no_object then
+<span class="comment">--</span>
+<span class="comment">-- Force players into Sabres.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="comment">--</span>
+   <span class="comment">-- First, let's make sure the player is actually spawned on the map.</span>
+   <span class="comment">--</span>
+   <span class="keyword">if</span> current_player.biped != no_object <span class="keyword">then</span>
       global.object[0] = current_player.get_vehicle()
-      if global.object[0] == no_object then
+      <span class="keyword">if</span> global.object[0] == no_object <span class="keyword">then</span>
          global.object[0] = current_player.biped.place_at_me(sabre, none, none, 0, 0, 0, none)
          current_player.force_into_vehicle(global.object[0])
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

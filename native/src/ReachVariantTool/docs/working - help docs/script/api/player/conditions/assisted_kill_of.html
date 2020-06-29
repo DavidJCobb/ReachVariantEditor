@@ -106,25 +106,25 @@
 </dl>
 <h2>Example</h2>
 <pre>
-alias opt_kill_points   = script_option[0]
-alias opt_assist_points = script_option[1]
+<span class="keyword">alias</span> opt_kill_points   = script_option[0]
+<span class="keyword">alias</span> opt_assist_points = script_option[1]
 
-for each player do
-   if current_player.killer_type_is(kill) then
-      alias killer = global.player[0]
-      alias victim = global.player[1]
-      --
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      <span class="keyword">alias</span> killer = global.player[0]
+      <span class="keyword">alias</span> victim = global.player[1]
+      <span class="comment">--</span>
       victim = current_player
       killer = current_player.get_killer()
       killer.score += opt_kill_points
-      --
-      for each player do
-         if current_player != victim and current_player.assisted_kill_of(victim) then
+      <span class="comment">--</span>
+      <span class="keyword">for</span> each player <span class="keyword">do</span>
+         <span class="keyword">if</span> current_player != victim <span class="keyword">and</span> current_player.assisted_kill_of(victim) <span class="keyword">then</span>
             current_player.score += opt_assist_points
-         end
-      end
-   end
-end</pre>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

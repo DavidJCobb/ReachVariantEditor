@@ -109,17 +109,17 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Force players into Monitors.
---
-for each player do
-   if current_player.biped != no_object and not current_player.biped.is_of_type(monitor) then
+<span class="comment">--</span>
+<span class="comment">-- Force players into Monitors.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.biped != no_object <span class="keyword">and</span> <span class="keyword">not</span> current_player.biped.is_of_type(monitor) <span class="keyword">then</span>
       global.object[0] = current_player.biped
       global.object[1] = current_player.biped.place_at_me(monitor, none, none, 0, 0, 0, none)
       current_player.set_biped(global.object[1])
       global.object[0].delete()
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

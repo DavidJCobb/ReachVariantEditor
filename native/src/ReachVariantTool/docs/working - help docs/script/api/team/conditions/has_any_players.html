@@ -62,22 +62,22 @@
                </p>
             <h2>Example</h2>
 <pre>
--- From CTF: delete a team's flag if all of their players quit and their flag is 
--- at home.
+<span class="comment">-- From CTF: delete a team's flag if all of their players quit and their flag is </span>
+<span class="comment">-- at home.</span>
 
-alias state = object.number[0]
-alias flag  = team.object[1]
+<span class="keyword">alias</span> state = object.number[0]
+<span class="keyword">alias</span> flag  = team.object[1]
 
-for each team do
-   alias current_flag = global.object[0]
-   if current_team != neutral_team and not current_team.has_any_players() and current_team.flag != no_object then 
+<span class="keyword">for</span> each team <span class="keyword">do</span>
+   <span class="keyword">alias</span> current_flag = global.object[0]
+   <span class="keyword">if</span> current_team != neutral_team <span class="keyword">and</span> <span class="keyword">not</span> current_team.has_any_players() <span class="keyword">and</span> current_team.flag != no_object <span class="keyword">then</span> 
       current_flag = current_team.flag
-      if current_flag.state == 0 then 
+      <span class="keyword">if</span> current_flag.state == 0 <span class="keyword">then</span> 
          current_team.flag.delete()
          current_team.flag = no_object
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

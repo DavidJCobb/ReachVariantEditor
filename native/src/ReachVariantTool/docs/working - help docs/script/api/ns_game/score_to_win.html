@@ -85,29 +85,29 @@
             </p>
          <p>This value is read-only.</p><h2>Example</h2>
 <pre>
--- Code borrowed from Territories, with slight modifications: play announcer 
--- voiceovers when the player approaches the score to win.
+<span class="comment">-- Code borrowed from Territories, with slight modifications: play announcer </span>
+<span class="comment">-- voiceovers when the player approaches the score to win.</span>
 
-alias announced_30s_win = player.number[0]
-alias announced_60s_win = player.number[1]
+<span class="keyword">alias</span> announced_30s_win = player.number[0]
+<span class="keyword">alias</span> announced_60s_win = player.number[1]
 
-for each player do
-   alias threshold_30s = temp_int_00
-   alias threshold_60s = temp_int_02
-   --
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">alias</span> threshold_30s = temp_int_00
+   <span class="keyword">alias</span> threshold_60s = temp_int_02
+   <span class="comment">--</span>
    threshold_30s = game.score_to_win
    threshold_60s = game.score_to_win
    threshold_30s -= 30
    threshold_60s -= 60
-   if current_player.score &gt;= threshold_60s and current_player.announced_60s_win == 0 and game.score_to_win &gt; 60 then 
+   <span class="keyword">if</span> current_player.score &gt;= threshold_60s <span class="keyword">and</span> current_player.announced_60s_win == 0 <span class="keyword">and</span> game.score_to_win &gt; 60 <span class="keyword">then</span> 
       send_incident(one_minute_team_win, current_player, all_players)
       current_player.announced_60s_win = 1
-   end
-   if current_player.score &gt;= threshold_30s and current_player.announced_30s_win == 0 and game.score_to_win &gt; 30 then 
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> current_player.score &gt;= threshold_30s <span class="keyword">and</span> current_player.announced_30s_win == 0 <span class="keyword">and</span> game.score_to_win &gt; 30 <span class="keyword">then</span> 
       send_incident(half_minute_team_win, current_player, all_players)
       current_player.announced_30s_win = 1
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

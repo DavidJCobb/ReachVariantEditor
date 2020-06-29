@@ -110,26 +110,26 @@
             <p>This function returns <a href="script/api/object.html">object</a>. Calling this function without storing its return value in a variable is an error.</p>
 <h2>Example</h2>
 <pre>
---
--- Award points for killing an enemy using a sniper rifle while riding in a revenant.
---
-for each player do
-   alias killer  = global.player[0]
-   alias vehicle = global.object[0]
-   if current_player.killer_type_is(kill) then
-      --
-      -- The player is dead.
-      --
+<span class="comment">--</span>
+<span class="comment">-- Award points for killing an enemy using a sniper rifle while riding in a revenant.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">alias</span> killer  = global.player[0]
+   <span class="keyword">alias</span> vehicle = global.object[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      <span class="comment">--</span>
+      <span class="comment">-- The player is dead.</span>
+      <span class="comment">--</span>
       global.number[0] = current_player.get_death_damage_type()
-      if global.number[0] == enums.damage_reporting_type.sniper_rifle then
+      <span class="keyword">if</span> global.number[0] == enums.damage_reporting_type.sniper_rifle <span class="keyword">then</span>
          killer  = current_player.get_killer()
          vehicle = killer.get_vehicle()
-         if vehicle.is_of_type(revenant) then
+         <span class="keyword">if</span> vehicle.is_of_type(revenant) <span class="keyword">then</span>
             killer.score += 1
-         end
-      end
-   end
-end</pre>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
    <li><p>

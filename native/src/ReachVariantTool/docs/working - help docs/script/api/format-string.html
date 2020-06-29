@@ -156,20 +156,20 @@
          limit.
       </p>
       <pre>
-for each player do -- round card
-   if game.score_to_win != 0 and game.teams_enabled == 1 then 
-      current_player.set_round_card_title("Kill players on the enemy team.\r\n%n points to win.", game.score_to_win)
-   end
-   if game.score_to_win != 0 and game.teams_enabled == 0 then 
-      current_player.set_round_card_title("Score points by killing other players.\r\n%n points to win.", game.score_to_win)
-   end
-   if game.score_to_win == 0 and game.teams_enabled == 1 then 
-      current_player.set_round_card_title("Kill players on the enemy team.")
-   end
-   if game.score_to_win == 0 and game.teams_enabled == 0 then 
-      current_player.set_round_card_title("Score points by killing other players.")
-   end
-end</pre>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- round card</span>
+   <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">and</span> game.teams_enabled == 1 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Kill players on the enemy team.\r\n%n points to win.</span>", game.score_to_win)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">and</span> game.teams_enabled == 0 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Score points by killing other players.\r\n%n points to win.</span>", game.score_to_win)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">and</span> game.teams_enabled == 1 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Kill players on the enemy team.</span>")
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">and</span> game.teams_enabled == 0 <span class="keyword">then</span> 
+      current_player.set_round_card_title(<span class="string">"Score points by killing other players.</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
    
       </main>
       <script src="resources/sidebar.js"></script>

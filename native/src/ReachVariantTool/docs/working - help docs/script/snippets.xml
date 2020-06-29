@@ -8,6 +8,13 @@
          will probably have to ensure that your own script doesn't use the same variable 
          for anything important.
       </p>
+      <p>
+         These snippets include both "common" behaviors, which can be omitted from very 
+         specialized gametypes (e.g. chess does not need to award DLC achievements for 
+         kills), and "standard" behaviors, which the user would expect all gametypes to 
+         have (e.g. ending the round when the round timer runs out, which, yes, you have 
+         to do manually).
+      </p>
       
       <ul id="toc">
          <li><a href="snippets.html#dlc-achievements">DLC Achievements</a></li>
@@ -160,7 +167,8 @@
       <h2><a name="round-timer">Round timer code (basic)</a></h2>
       <p>
          <i>Halo: Reach</i> does not automatically end the round when the round timer 
-         expires. Instead, Megalo has near-total authority over when the round ends.
+         expires. Instead, it's up to Megalo script. The round timer likely behaves this 
+         way so that Invasion can use it for individual phases.
       </p>
       <pre>
          if game.round_time_limit > 0 and game.round_timer.is_zero() then
@@ -191,7 +199,7 @@
          Period does.
       </p>
       <pre>
-         alias sudden_death_enabled   = global.number[0]
+         alias sudden_death_enabled   = global.number[0] -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
          alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
 
          if not game.round_timer.is_zero() then 

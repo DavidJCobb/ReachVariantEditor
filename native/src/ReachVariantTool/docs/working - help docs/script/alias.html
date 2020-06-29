@@ -123,15 +123,15 @@
          alias can be used in any context where the original variable could be used.
       </p>
       <pre>
-alias is_zombie = player.number[0]
+<span class="keyword">alias</span> is_zombie = player.number[0]
 
-for each player do
-   if current_player.is_zombie == 1 then
-      --
-      -- ...
-      --
-   end
-end</pre>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.is_zombie == 1 <span class="keyword">then</span>
+      <span class="comment">--</span>
+      <span class="comment">-- ...</span>
+      <span class="comment">--</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
       <p>
          Aliases can be "absolute" or "relative." An absolute alias refers to an integer 
          constant or to a global value, while a relative alias refers to a nested variable.
@@ -143,42 +143,42 @@ end</pre>
          block-scoped.
       </p>
       <pre>
--- Let's mark a variable for temporary use, with an alias.
-alias temp_int_00 = global.number[0]
+<span class="comment">-- Let's mark a variable for temporary use, with an alias.</span>
+<span class="keyword">alias</span> temp_int_00 = global.number[0]
 
-for each player do
-   if current_player.killer_type_is(kill) then
-      alias death_type = temp_int_00
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      <span class="keyword">alias</span> death_type = temp_int_00
       
       death_type = current_player.get_death_damage_type()
-      if death_type == enums.damage_reporting_type.dmr then
-         --
-         -- (current_player) was killed with a DMR.
-         --
-      end
-   end
-end
+      <span class="keyword">if</span> death_type == enums.damage_reporting_type.dmr <span class="keyword">then</span>
+         <span class="comment">--</span>
+         <span class="comment">-- (current_player) was killed with a DMR.</span>
+         <span class="comment">--</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
 
--- The "death_type" alias isn't available here, so it doesn't make a mess.</pre>
+<span class="comment">-- The "death_type" alias isn't available here, so it doesn't make a mess.</span></pre>
       <p>
          You can also alias certain values that are specific to argument types, such as 
          object types:
       </p>
       <pre>
-alias temp_int_00   = global.number[0]
-alias objective_obj = flag
+<span class="keyword">alias</span> temp_int_00   = global.number[0]
+<span class="keyword">alias</span> objective_obj = flag
 
-for each team do
-   alias created = temp_int_00
-   --
+<span class="keyword">for</span> each team <span class="keyword">do</span>
+   <span class="keyword">alias</span> created = temp_int_00
+   <span class="comment">--</span>
    created = 0
-   for each object with label "ctf_return" do
-      if created == 0 and current_object.team == current_team then
+   <span class="keyword">for</span> each object with label <span class="string">"ctf_return</span>" <span class="keyword">do</span>
+      <span class="keyword">if</span> created == 0 <span class="keyword">and</span> current_object.team == current_team <span class="keyword">then</span>
          current_object.place_at_me(objective_obj, none, never_garbage_collect, 0, 0, 0, none)
          created = 1
-      end
-   end
-end</pre>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
    
       </main>
       <script src="resources/sidebar.js"></script>

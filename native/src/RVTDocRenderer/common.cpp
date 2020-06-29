@@ -148,6 +148,120 @@ void minimize_indent(std::string& text) {
    text = replace;
 }
 
+namespace {
+   std::string _keywords[] = {
+      "alias",
+      "alt",
+      "altif",
+      "and",
+      "declare",
+      "do",
+      "end",
+      "for",
+      "function",
+      "if",
+      "not",
+      "on",
+      "or",
+      "then",
+   };
+   bool _is_operator_char(char c) {
+      return strchr("=<>!+-*/%&|~^", c) != nullptr;
+   }
+   bool _is_quote_char(char c) {
+      return strchr("`'\"", c) != nullptr;
+   }
+   bool _is_syntax_char(char c) {
+      return strchr("(),:", c) != nullptr;
+   }
+}
+void syntax_highlight_in_html(const std::string& in, std::string& out) {
+   out.clear();
+   size_t size = in.size();
+   out.reserve(size);
+   //
+   std::string in_keyword;
+   size_t      keyword_done = 0;
+   std::string last_keyword; // TODO: use teal for words "attached" to a keyword, e.g. "[blue]for[/blue] [teal]each object with label[/teal]" or "[blue]declare[/blue] varname [teal]with network priority low[/teal]"
+   bool        in_comment   = false;
+   char        in_string    = '\0';
+   for (size_t i = 0; i < size; ++i) {
+      char c = in[i];
+      if (in_string) {
+         if (c == in_string) {
+            in_string = '\0';
+            out += "</span>";
+         }
+         out += c;
+         continue;
+      }
+      if (in_comment) {
+         if (c == '\r' || c == '\n') {
+            in_comment = false;
+            out += "</span>";
+         }
+         out += c;
+         continue;
+      }
+      if (_is_quote_char(c)) {
+         in_string = c;
+         out += "<span class=\"string\">";
+      }
+      if (c == '-' && i + 1 < size) {
+         char d = in[i + 1];
+         if (d == '-') {
+            in_comment = true;
+            out += "<span class=\"comment\">";
+         }
+      }
+      //
+      if (in_keyword.empty()) {
+         bool can_start = i == 0;
+         if (i > 0)
+            can_start = isspace(in[i - 1]);
+         //
+         if (can_start) {
+            for (auto& k : _keywords) {
+               if (strncmp(in.data() + i, k.data(), k.size()) == 0) {
+                  in_keyword = k;
+                  keyword_done = 0;
+                  break;
+               }
+            }
+            if (!in_keyword.empty()) {
+               bool ends = false;
+               if (i + in_keyword.size() == in.size())
+                  ends = true;
+               else if (i + in_keyword.size() < in.size()) {
+                  char d = in[i + in_keyword.size()];
+                  ends = _is_quote_char(d) || _is_syntax_char(d) || isspace(d) || _is_operator_char(d);
+               }
+               if (ends)
+                  out += "<span class=\"keyword\">";
+               else
+                  in_keyword.clear();
+            }
+         }
+         if (in_keyword.empty())
+            last_keyword.clear();
+      } else if (++keyword_done == in_keyword.size()) {
+         last_keyword.clear();
+         std::swap(last_keyword, in_keyword);
+         out += "</span>";
+      }
+      //
+      out += c;
+   }
+   if (!in_keyword.empty() || in_comment || in_string) {
+      out += "</span>";
+   }
+}
+void syntax_highlight_in_html(std::string& out) {
+   std::string content;
+   syntax_highlight_in_html(out, content);
+   out.swap(content);
+}
+
 size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std::string& out, std::string stem) {
    using namespace cobb::xml;
    //
@@ -204,10 +318,12 @@ size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std
             break;
          case token_code::text_content:
             if (last_opened_tag == "pre") {
-               //
-               // De-indent the tag.
-               //
-               minimize_indent(token.value);
+               std::string html;
+               _append_text_content(html, token.value);
+               minimize_indent(html);
+               syntax_highlight_in_html(html);
+               out += html;
+               break;
             }
             _append_text_content(out, token.value);
             break;

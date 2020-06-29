@@ -102,57 +102,57 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Excerpt from Invasion:
---
-for each object with label "inv_res_p1" do
-   --
-   -- Ensure that Phase 1 respawn zones cannot be picked up or destroyed:
-   --
+<span class="comment">--</span>
+<span class="comment">-- Excerpt from Invasion:</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each object with label <span class="string">"inv_res_p1</span>" <span class="keyword">do</span>
+   <span class="comment">--</span>
+   <span class="comment">-- Ensure that Phase 1 respawn zones cannot be picked up or destroyed:</span>
+   <span class="comment">--</span>
    current_object.set_spawn_location_permissions(no_one)
    current_object.set_invincibility(1)
    current_object.set_pickup_permissions(no_one)
-   --
-   if global.number[2] == 1 then -- current phase is Phase 1?
-      --
-      -- Control which fireteams are allowed to spawn at this respawn zone:
-      --
-      for each object with label "inv_res_p1" do
-         if current_object.spawn_sequence == 0 then 
+   <span class="comment">--</span>
+   <span class="keyword">if</span> global.number[2] == 1 <span class="keyword">then</span> <span class="comment">-- current phase is Phase 1?</span>
+      <span class="comment">--</span>
+      <span class="comment">-- Control which fireteams are allowed to spawn at this respawn zone:</span>
+      <span class="comment">--</span>
+      <span class="keyword">for</span> each object with label <span class="string">"inv_res_p1</span>" <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.spawn_sequence == 0 <span class="keyword">then</span> 
             current_object.set_spawn_location_fireteams(0)
-         end
-      end
-      for each object with label "inv_res_p1" do
-         if current_object.spawn_sequence == 1 then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">for</span> each object with label <span class="string">"inv_res_p1</span>" <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.spawn_sequence == 1 <span class="keyword">then</span> 
             current_object.set_spawn_location_fireteams(1)
-         end
-      end
-      for each object with label "inv_res_p1" do
-         if current_object.spawn_sequence == 2 then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">for</span> each object with label <span class="string">"inv_res_p1</span>" <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.spawn_sequence == 2 <span class="keyword">then</span> 
             current_object.set_spawn_location_fireteams(2)
-         end
-      end
-      for each object with label "inv_res_p1" do
-         if current_object.spawn_sequence &gt; 2 then 
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">for</span> each object with label <span class="string">"inv_res_p1</span>" <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.spawn_sequence &gt; 2 <span class="keyword">then</span> 
             current_object.set_spawn_location_fireteams(all)
-         end
-      end
-      --
-      -- Use the respawn zone's Spawn Sequence to determine which fireteam 
-      -- should use it as their default spawn:
-      --
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="comment">--</span>
+      <span class="comment">-- Use the respawn zone's Spawn Sequence to determine which fireteam </span>
+      <span class="comment">-- should use it as their default spawn:</span>
+      <span class="comment">--</span>
       current_object.set_spawn_location_permissions(allies)
-      for each player do
-         if current_object.team == current_player.team then 
+      <span class="keyword">for</span> each player <span class="keyword">do</span>
+         <span class="keyword">if</span> current_object.team == current_player.team <span class="keyword">then</span> 
             global.number[8] = 0
             global.number[8] = current_player.get_fireteam()
-            if current_object.spawn_sequence == global.number[8] then 
+            <span class="keyword">if</span> current_object.spawn_sequence == global.number[8] <span class="keyword">then</span> 
                current_player.set_primary_respawn_object(current_object)
-            end
-         end
-      end
-   end
-end</pre>
+            <span class="keyword">end</span>
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/player/actions/set_co_op_spawning.html">player.set_co_op_spawning</a></li>

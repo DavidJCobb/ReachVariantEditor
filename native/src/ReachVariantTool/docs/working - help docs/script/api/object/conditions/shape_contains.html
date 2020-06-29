@@ -121,14 +121,14 @@
 </dl>
 <h2>Example</h2>
 <pre>
---
--- Drain the shields of all players in the hill.
---
-for each player do
-   if current_hill.shape_contains(current_player.biped) then
+<span class="comment">--</span>
+<span class="comment">-- Drain the shields of all players in the hill.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_hill.shape_contains(current_player.biped) <span class="keyword">then</span>
       current_player.biped.shields = 0
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_shape.html">object.set_shape</a></li>

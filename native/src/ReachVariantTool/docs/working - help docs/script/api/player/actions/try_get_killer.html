@@ -110,15 +110,15 @@
             <p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p>
 <h2>Example</h2>
 <pre>
-for each player do
-   if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then
-      --
-      -- The player is dead.
-      --
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) <span class="keyword">then</span>
+      <span class="comment">--</span>
+      <span class="comment">-- The player is dead.</span>
+      <span class="comment">--</span>
       global.player[0] = current_player.get_killer()
       global.player[0].score += 1
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/player/conditions/killer_type_is.html">player.killer_type_is</a></li>

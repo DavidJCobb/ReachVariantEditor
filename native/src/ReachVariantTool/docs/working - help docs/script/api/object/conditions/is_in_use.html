@@ -103,13 +103,13 @@
          <h1>object.is_in_use</h1>
 <p>Check whether this object is an Armor Ability currently being used by a player.</p><h2>Example</h2>
 <pre>
-for each player do
+<span class="keyword">for</span> each player <span class="keyword">do</span>
    global.object[0] = current_player.get_armor_ability()
-   if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+   <span class="keyword">if</span> global.object[0].is_of_type(armor_lock) <span class="keyword">and</span> global.object[0].is_in_use() <span class="keyword">then</span>
       global.object[0].delete()
-      game.show_message_to(current_player, none, "don't do that")
-   end
-end</pre>
+      game.show_message_to(current_player, none, <span class="string">"don't do that</span>")
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

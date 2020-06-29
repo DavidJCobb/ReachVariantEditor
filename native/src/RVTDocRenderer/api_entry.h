@@ -16,13 +16,16 @@ enum class api_entry_type {
 class APIRegistry;
 
 class APIEntry {
+   //
+   // Common fields and code for most/all of the "things" we can define in XML.
+   //
    public:
       struct note {
          std::string title; // optional; generates sub-heading
          std::string id;    // if there is a title, then this is the <a name="..."> identifier
          std::string content;
       };
-      struct relationship {
+      struct relationship { // list items in a "see also" section of the page
          std::string    context; // basis.whatever
          std::string    name;
          api_entry_type type = api_entry_type::same;
@@ -52,6 +55,9 @@ class APIEntry {
 };
 
 class APIMethod : public APIEntry {
+   //
+   // A member function of an APIType or APINamespace.
+   //
    public:
       struct argument {
          std::string name;
@@ -137,6 +143,9 @@ class APINamespaceMember : public APIEntry {
       void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
 };
 
+//
+// NOTE: Namespace files and paths are prefixed with "ns_" and "ns_unnamed"/"unnamed" is a special-case namespace name.
+//
 class APINamespace : public APIEntry {
    protected:
       void _handle_member_nav(std::string& content, const std::string& stem);
@@ -160,6 +169,13 @@ class APINamespace : public APIEntry {
 };
 
 class APIRegistry {
+   //
+   // Used to load and retain all types and namespaces. Instead of exporting them to HTML one by one, we want 
+   // to retain them all and then export them all at once, because some pages may refer to data in other pages. 
+   // The main case where this occurs is an APIMethod that has an argument with no description: we would look 
+   // at that argument's type, pull the blurb from that APIType, and use that blurb as the description -- which 
+   // of course means that that APIType needs to be in memory at the time we export the APIMethod as HTML.
+   //
    private:
       APIRegistry() {}
    public:

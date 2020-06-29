@@ -53,20 +53,20 @@
          <h1>timer.reset</h1>
 <p>Reset a timer to its initial value.</p><h2>Example</h2>
 <pre>
---
--- Do something every ten seconds:
---
-declare global.timer[0] = 10
+<span class="comment">--</span>
+<span class="comment">-- Do something every ten seconds:</span>
+<span class="comment">--</span>
+<span class="keyword">declare</span> global.timer[0] = 10
 
-do
+<span class="keyword">do</span>
    global.timer[0].set_rate(-100%)
-   if global.timer[0].is_zero() then
+   <span class="keyword">if</span> global.timer[0].is_zero() <span class="keyword">then</span>
       global.timer[0].reset()
-      --
-      -- ...and do the thing here
-      --
-   end
-end</pre>
+      <span class="comment">--</span>
+      <span class="comment">-- ...and do the thing here</span>
+      <span class="comment">--</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

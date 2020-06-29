@@ -103,14 +103,14 @@
             <p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p>
 <h2>Example</h2>
 <pre>
-alias leader_traits = script_traits[0]
+<span class="keyword">alias</span> leader_traits = script_traits[0]
 
-for each player do
+<span class="keyword">for</span> each player <span class="keyword">do</span>
    global.number[0] = current_player.get_scoreboard_pos()
-   if global.number[0] == 1 then
+   <span class="keyword">if</span> global.number[0] == 1 <span class="keyword">then</span>
       current_player.apply_traits(leader_traits)
-   end
-end</pre>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/team/actions/get_scoreboard_pos.html">team.get_scoreboard_pos</a></li>
