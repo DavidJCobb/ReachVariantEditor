@@ -18,7 +18,7 @@
             <li data-disallow-collapse>
                <a href="script/api/ns_game.html">game</a>
                <ul>
-                  <li>
+                  <li data-delete-if-empty>
                      <a>Members</a>
                      <ul>
                         <li><a href="script/api/ns_game/betrayal_booting.html">betrayal_booting</a></li>
@@ -57,13 +57,13 @@
 
                      </ul>
                   </li>
-                  <li>
+                  <li data-delete-if-empty>
                      <a>Member conditions</a>
                      <ul>
                         
                      </ul>
                   </li>
-                  <li>
+                  <li data-delete-if-empty>
                      <a>Member actions</a>
                      <ul>
                         <li><a href="script/api/ns_game/actions/end_round.html">end_round</a></li>
@@ -80,7 +80,8 @@
          <h1>ns_game.sudden_death_timer<span class="type">Type: <a href="script/api/timer.html">Timer</a></span></h1>
 
             <p>
-               This timer is used for Sudden Death; it is displayed on the HUD when appropriate.
+               This timer is used for Sudden Death; it is displayed on the HUD when appropriate. 
+               Its initial value is the <a href="script/api/ns_game/sudden_death_time.html">sudden_death_time</a>.
             </p>
             <p>
                Typically, Sudden Death will activate if, at the end of the round, a player is 

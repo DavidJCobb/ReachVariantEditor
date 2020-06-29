@@ -20,6 +20,12 @@
       // Set up expand/collapse buttons:
       //
       let sub = item.querySelector("ul");
+      if (item.hasAttribute("data-delete-if-empty")) {
+         if (!sub || !sub.children.length) {
+            item.parentNode.removeChild(item);
+            continue;
+         }
+      }
       if (!sub)
          continue;
       let toggle = document.createElement("a");
