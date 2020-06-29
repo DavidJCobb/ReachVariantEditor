@@ -60,12 +60,12 @@ void handle_article(std::filesystem::path xml, cobb::xml::document& doc, int dep
    file.write(content.c_str(), content.size());
    file.close();
 }
-void handle_namespace(std::filesystem::path xml, cobb::xml::document& doc, int depth, std::string stem) {
+void handle_namespace(std::filesystem::path xml, cobb::xml::document& doc) {
    //
    // TODO: everything
    //
 }
-void handle_type(std::filesystem::path xml, cobb::xml::document& doc, int depth, std::string stem) {
+void handle_type(std::filesystem::path xml, cobb::xml::document& doc) {
    if (!doc.errors.empty()) {
       std::cout << "WARNING: " << doc.errors.size() << " errors detected.\n";
       for (auto& e : doc.errors) {
@@ -80,20 +80,13 @@ void handle_type(std::filesystem::path xml, cobb::xml::document& doc, int depth,
       }
    }
    //
-   APIType type;
+   auto& type = APIRegistry::get().make_type(xml);
    type.load(doc);
-   type.write(xml, depth, stem, get_article_template(), get_type_template());
 }
 
 void handle_file(std::filesystem::path xml, int depth) {
    std::string stem;
-   {
-      auto path = xml;
-      for (auto temp = depth; temp; --temp) {
-         path = path.parent_path();
-         stem = path.filename().u8string() + '/' + stem;
-      }
-   }
+   APIRegistry::get().make_stem(xml, stem);
    //
    cobb::xml::document doc;
    doc.case_insensitive = true;
@@ -109,10 +102,10 @@ void handle_file(std::filesystem::path xml, int depth) {
       handle_article(xml, doc, depth, stem);
    }
    if (strncmp(root, "script-namespace", strlen("script-namespace")) == 0) {
-      handle_namespace(xml, doc, depth, stem);
+      handle_namespace(xml, doc);
    }
    if (strncmp(root, "script-type", strlen("script-type")) == 0) {
-      handle_type(xml, doc, depth, stem);
+      handle_type(xml, doc);
    }
 }
 
@@ -127,6 +120,9 @@ int main(int argc, char* argv[]) {
    } else {
       out_path = argv[1];
    }
+   //
+   auto& registry = APIRegistry::get();
+   registry.root_path = out_path;
    //
    std::error_code err;
    for (auto di = fs_rdi(out_path, err); di != fs_rdi(); ++di) {
@@ -146,5 +142,8 @@ int main(int argc, char* argv[]) {
             handle_file(path, depth);
          }
       }
+   }
+   for (auto* type : registry.types) {
+      type->write(get_article_template(), get_type_template());
    }
 }

@@ -395,14 +395,15 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
             if (has_type)
                replace += "</a>";
             replace += "</dt>\n      <dd>";
-            if (arg.content.empty())
-               //
-               // TODO: if (has_type), then this should use the blurb or description for that type, preferring 
-               // the blurb. This requires loading ALL types into memory before being able to export HTML for 
-               // any of them.
-               //
-               replace += "No description available.";
-            else
+            if (arg.content.empty()) {
+               APIType* target = nullptr;
+               if (has_type)
+                  target = APIRegistry::get().get_type(arg.type);
+               if (target)
+                  replace += target->blurb;
+               else
+                  replace += "No description available.";
+            } else
                replace += arg.content;
             replace += "</dd>\n";
          }
@@ -609,6 +610,7 @@ void APIAccessor::write(std::string& content, std::string stem, std::string memb
 }
 #pragma endregion
 
+#pragma region APIType
 const char* APIType::get_friendly_name() const noexcept {
    if (!this->friendly_name.empty())
       return this->friendly_name.c_str();
@@ -666,7 +668,8 @@ void APIType::load(cobb::xml::document& doc) {
    if (root < 0)
       return;
    //
-   std::string stem = "script/api/";
+   std::string stem;
+   APIRegistry::get().make_stem(this->loaded_from, stem);
    //
    location where = location::nowhere;
    target   focus = target::nothing;
@@ -1059,7 +1062,13 @@ void APIType::_make_member_relationships_bidirectional() {
    for (auto& member : this->accessors)
       this->_mirror_member_relationships(*this, member, api_entry_type::accessor);
 }
-void APIType::write(std::filesystem::path p, int depth, std::string stem, const std::string& article_template, const std::string& type_template) {
+void APIType::write(const std::string& article_template, const std::string& type_template) {
+   auto& registry = APIRegistry::get();
+   auto p     = this->loaded_from;
+   auto depth = registry.depth_of(p);
+   std::string stem;
+   registry.make_stem(p, stem);
+   //
    std::string content = article_template; // copy
    std::string needle  = "<content-placeholder id=\"main\" />";
    std::size_t pos     = content.find(needle.c_str());
@@ -1268,5 +1277,49 @@ void APIType::write(std::filesystem::path p, int depth, std::string stem, const 
          file.write(content.c_str(), content.size());
          file.close();
       }
+   }
+}
+#pragma endregion
+
+APIRegistry::~APIRegistry() {
+   this->clear();
+}
+void APIRegistry::clear() {
+   for (auto* t : this->types)
+      if (t)
+         delete t;
+   this->types.clear();
+}
+APIType* APIRegistry::get_type(const std::string& name) {
+   for (auto* t : this->types)
+      if (t->name == name || t->name2 == name)
+         return t;
+   return nullptr;
+}
+APIType& APIRegistry::make_type(const std::filesystem::path& source_file) {
+   this->types.push_back(new APIType);
+   auto* type = this->types.back();
+   type->loaded_from = source_file;
+   return *type;
+}
+int APIRegistry::depth_of(std::filesystem::path path) {
+   int depth = 0;
+   if (path.has_extension())
+      path = path.parent_path();
+   for (; !std::filesystem::equivalent(path, this->root_path); ++depth) {
+      if (!path.has_parent_path())
+         return -1;
+      path = path.parent_path();
+   }
+   return depth;
+}
+void APIRegistry::make_stem(std::filesystem::path path, std::string& out) {
+   out.clear();
+   auto depth = this->depth_of(path);
+   if (depth < 0)
+      return;
+   for (auto temp = depth; temp; --temp) {
+      path = path.parent_path();
+      out  = path.filename().u8string() + '/' + out;
    }
 }

@@ -13,6 +13,8 @@ enum class api_entry_type {
    accessor,
 };
 
+class APIRegistry;
+
 class APIEntry {
    public:
       struct note {
@@ -97,6 +99,7 @@ class APIType : public APIEntry {
       void _mirror_member_relationships(APIType& member_of, APIEntry& member, api_entry_type member_type);
       //
    public:
+      std::filesystem::path    loaded_from;
       std::string              friendly_name;
       std::vector<APIMethod>   conditions;
       std::vector<APIMethod>   actions;
@@ -119,5 +122,26 @@ class APIType : public APIEntry {
       APIAccessor* get_accessor_by_name(const std::string&);
 
       void load(cobb::xml::document& doc);
-      void write(std::filesystem::path, int depth, std::string stem, const std::string& article_template, const std::string& type_template);
+      void write(const std::string& article_template, const std::string& type_template);
+};
+
+class APIRegistry {
+   private:
+      APIRegistry() {}
+   public:
+      static APIRegistry& get() {
+         static APIRegistry instance;
+         return instance;
+      }
+      ~APIRegistry();
+      //
+      std::filesystem::path root_path;
+      std::vector<APIType*> types;
+      //
+      void clear();
+      APIType* get_type(const std::string& name);
+      APIType& make_type(const std::filesystem::path& source_file);
+      //
+      int  depth_of(std::filesystem::path path);
+      void make_stem(std::filesystem::path path, std::string& out);
 };
