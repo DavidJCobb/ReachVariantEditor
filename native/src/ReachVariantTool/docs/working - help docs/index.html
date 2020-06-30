@@ -8,6 +8,7 @@
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
       </noscript>
+      <script src="resources/head.js"></script>
    </head>
    <body>
       <nav id="sidebar">
@@ -21,13 +22,13 @@
                   <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
                   <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
                   <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
-                  <li>
+                  <li data-dont-default-collapse>
                      <a href="editor/main_window/options-team.html">Team Settings</a>
                      <ul>
                         <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
                      </ul>
                   </li>
-                  <li>
+                  <li data-dont-default-collapse>
                      <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
                      <ul>
                         <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
@@ -71,7 +72,7 @@
             <li>
                <a href="script/api/index.html">Script API reference</a>
                <ul>
-                  <li>
+                  <li data-dont-default-collapse>
                      <a>Namespaces</a>
                      <ul>
                         <li><a href="script/api/ns_unnamed.html">Content not in any namespace</a></li>
@@ -80,10 +81,10 @@
                         <li><a href="script/api/ns_global.html">global</a></li>
                      </ul>
                   </li>
-                  <li>
+                  <li data-dont-default-collapse>
                      <a>Types</a>
                      <ul>
-                        <li>
+                        <li data-dont-default-collapse>
                            <a>Variables</a>
                            <ul>
                               <li><a href="script/api/number.html">Number</a></li>
@@ -93,7 +94,7 @@
                               <li><a href="script/api/timer.html">Timer</a></li>
                            </ul>
                         </li>
-                        <li>
+                        <li data-dont-default-collapse>
                            <a>Misc</a>
                            <ul>
                               <li><a href="script/api/bool.html">Bool</a></li>
@@ -120,7 +121,9 @@
          <h1>Index</h1>
          <p>
             Here, you can find documentation on ReachVariantTool's UI, and on its scripting 
-            language. Use the sidebar to navigate.
+            language. You can use the sidebar to navigate the documentation. Some entries 
+            in the sidebar can be expanded or collapsed by clicking the grey buttons on 
+            their left ends.
          </p>
          <hr />
          <p>

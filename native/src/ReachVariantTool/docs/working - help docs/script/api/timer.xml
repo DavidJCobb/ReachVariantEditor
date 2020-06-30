@@ -23,6 +23,10 @@
          then they will compare properly even if the differences in their values are 
          less than one second.
       </p>
+      <p>
+         There are eight global timer variables, numbered from 0 to 7, which can 
+         be accessed as <code>global.timer[<var>n</var>]</code>.
+      </p>
    </description>
    <methods>
       <conditions>

@@ -8,6 +8,7 @@
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
       </noscript>
+      <script src="resources/head.js"></script>
    </head>
    <body>
       <nav id="sidebar">
@@ -18,25 +19,25 @@
             <li data-disallow-collapse>
                <content-placeholder id="nav-self-link" />
                <ul>
-                  <li data-delete-if-empty>
+                  <li data-delete-if-empty data-dont-default-collapse>
                      <a>Properties</a>
                      <ul>
                         <content-placeholder id="nav-properties" />
                      </ul>
                   </li>
-                  <li data-delete-if-empty>
+                  <li data-delete-if-empty data-dont-default-collapse>
                      <a>Accessors</a>
                      <ul>
                         <content-placeholder id="nav-accessors" />
                      </ul>
                   </li>
-                  <li data-delete-if-empty>
+                  <li data-delete-if-empty data-dont-default-collapse>
                      <a>Member conditions</a>
                      <ul>
                         <content-placeholder id="nav-conditions" />
                      </ul>
                   </li>
-                  <li data-delete-if-empty>
+                  <li data-delete-if-empty data-dont-default-collapse>
                      <a>Member actions</a>
                      <ul>
                         <content-placeholder id="nav-actions" />

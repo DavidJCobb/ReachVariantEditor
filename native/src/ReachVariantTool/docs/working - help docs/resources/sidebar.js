@@ -43,4 +43,34 @@
       let item = toggle.parentNode;
       item.classList.toggle("collapsed");
    });
+   //
+   if (window.page_load_start_time && found) {
+      if (found.parentNode.closest("li") || found.querySelector("ul")) {
+         //
+         // Auto-collapse sidebar navigation elements that we're not "in," 
+         // but only if the following conditions are met:
+         //
+         //  - The page loaded quickly.
+         //  - We know where in the nav we are.
+         //  - The place we're at is a child, OR it has children.
+         //
+         let done = Date.now();
+         if (done - window.page_load_start_time < 1000) {
+            for(let item of items) {
+               if (item == found)
+                  continue;
+               if (item.hasAttribute("data-dont-default-collapse"))
+                  continue;
+               if (item.hasAttribute("data-disallow-collapse"))
+                  continue;
+               let sub = item.querySelector("ul");
+               if (!sub)
+                  continue;
+               if (item.contains(found) || found.contains(item))
+                  continue;
+               item.classList.add("collapsed");
+            }
+         }
+      }
+   }
 })();

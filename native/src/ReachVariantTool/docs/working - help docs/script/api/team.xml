@@ -9,6 +9,15 @@
       players="4"
       objects="6"
    />
+   <description>
+      <p>
+         A team is a group which may contain zero or more players.
+      </p>
+      <p>
+         There are eight global team variables, numbered from 0 to 7, which can 
+         be accessed as <code>global.team[<var>n</var>]</code>.
+      </p>
+   </description>
    <methods>
       <conditions>
          <method name="has_alliance_status" id="4">

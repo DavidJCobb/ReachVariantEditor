@@ -17,6 +17,10 @@
          a loadout, then you (the player) still exist even though you're not physically 
          present on the map (you have no biped).
       </p>
+      <p>
+         There are eight global player variables, numbered from 0 to 7, which can 
+         be accessed as <code>global.player[<var>n</var>]</code>.
+      </p>
    </description>
    <methods>
       <conditions>

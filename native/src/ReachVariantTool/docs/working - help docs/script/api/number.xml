@@ -8,5 +8,9 @@
          numbers in question are signed with allowed values ranging from -32768 
          to 32767.
       </p>
+      <p>
+         There are twelve global number variables, numbered from 0 to 11, which can 
+         be accessed as <code>global.number[<var>n</var>]</code>.
+      </p>
    </description>
 </script-type>

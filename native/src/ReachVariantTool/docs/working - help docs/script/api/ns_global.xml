@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-namespace name="global">
+   <blurb>Contains global variables.</blurb>
+   <members>
+      <member name="number" type="number" indexed="true">
+         <blurb>Globally scoped numbers. Twelve are available, numbered from 0 to 11.</blurb>
+      </member>
+      <member name="object" type="object" indexed="true">
+         <blurb>Globally scoped objects. Sixteen are available, numbered from 0 to 15.</blurb>
+      </member>
+      <member name="player" type="player" indexed="true">
+         <blurb>Globally scoped players. Eight are available, numbered from 0 to 7.</blurb>
+      </member>
+      <member name="team" type="team" indexed="true">
+         <blurb>Globally scoped teams. Eight are available, numbered from 0 to 7.</blurb>
+      </member>
+      <member name="timer" type="timer" indexed="true">
+         <blurb>Globally scoped timers. Eight are available, numbered from 0 to 7.</blurb>
+      </member>
+   </members>
+</script-namespace>

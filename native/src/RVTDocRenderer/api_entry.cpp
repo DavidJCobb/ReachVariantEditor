@@ -1415,6 +1415,8 @@ void APINamespaceMember::write(std::string& content, std::string stem, std::stri
    std::string full_title = member_of;
    if (full_title == "ns_unnamed")
       full_title.clear();
+   else if (strncmp(full_title.data(), "ns_", 3) == 0)
+      full_title.erase(0, 3);
    if (!full_title.empty())
       full_title += '.';
    full_title += this->name;

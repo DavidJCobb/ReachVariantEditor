@@ -9,6 +9,16 @@
       players="4"
       objects="4"
    />
+   <description>
+      <p>
+         Object variables refer to objects that are currently present on the map. Objects 
+         that have not spawned do not count.
+      </p>
+      <p>
+         There are sixteen global object variables, numbered from 0 to 15, which can 
+         be accessed as <code>global.object[<var>n</var>]</code>.
+      </p>
+   </description>
    <methods>
       <conditions>
          <method name="shape_contains" id="2">
