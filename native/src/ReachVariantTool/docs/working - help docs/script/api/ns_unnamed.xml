@@ -235,7 +235,7 @@
                end
             </example>
          </method>
-         <method name="send_incident" id="76">
+         <method name="send_incident" id="76" overload-name="with integer" overload-id="int">
             <args>
                <arg type="incident" />
                <arg name="cause">

@@ -58,7 +58,7 @@
 <li><a href="script/api/ns_unnamed/actions/insert_theater_film_marker.html">insert_theater_film_marker</a></li>
 <li><a href="script/api/ns_unnamed/actions/rand.html">rand</a></li>
 <li><a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a></li>
-<li><a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a></li>
+<li><a href="script/api/ns_unnamed/actions/send_incident__int.html">send_incident (with integer)</a></li>
 <li><a href="script/api/ns_unnamed/actions/set_scenario_interpolator_state.html">set_scenario_interpolator_state</a></li>
 
                      </ul>
@@ -78,7 +78,7 @@
             <h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/incident.html">incident</a></dt>
-      <dd>No description available.</dd>
+      <dd><p>The ID of an event that the game engine can be told about.</p></dd>
    <dt>cause</dt>
       <dd>
                   The cause of the incident: a <a href="script/api/player.html">player</a> or 
@@ -89,33 +89,21 @@
                   The target of the incident: a <a href="script/api/player.html">player</a> or 
                   <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
                </dd>
-   <dt><a href="script/api/number.html">detail</a></dt>
-      <dd><p>A numeric constant or variable.</p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="comment">--</span>
-<span class="comment">-- Code for awarding the "Dive Bomber" DLC achievement, which you earn by </span>
-<span class="comment">-- killing a player with an assassination while they're using a jetpack:</span>
+<span class="comment">-- Typical code for announcing the start of a round:</span>
 <span class="comment">--</span>
-<span class="comment">-- (Assumes Forge Label #0 is an unnamed label referring to jetpacks.)</span>
-<span class="comment">--</span>
-<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
-   <span class="keyword">alias</span> killer    = global.player[0]
-   <span class="keyword">alias</span> killer_aa = global.object[0]
-   <span class="keyword">alias</span> death_mod = global.number[2]
-   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
-      killer    = no_player
-      killer    = current_player.try_get_killer()
-      death_mod = 0
-      death_mod = current_player.try_get_death_damage_mod()
-      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span> 
-         killer_aa = no_object
-         killer_aa = killer.try_get_armor_ability()
-         <span class="keyword">if</span> killer_aa.has_forge_label(0) <span class="keyword">and</span> killer_aa.is_in_use() <span class="keyword">then</span> 
-            send_incident(dlc_achieve_2, killer, killer, 65)
-         <span class="keyword">end</span>
-      <span class="keyword">end</span>
+<span class="keyword">alias</span> announced_game_start = player.number[0]
+<span class="keyword">alias</span> announce_start_timer = player.timer[0]
+
+<span class="keyword">declare</span> player.announce_start_timer = 5
+
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_game_start_timer.is_zero() <span class="keyword">then</span> 
+      send_incident(race_game_start, current_player, no_player)
+      current_player.announced_game_start = 1
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
 

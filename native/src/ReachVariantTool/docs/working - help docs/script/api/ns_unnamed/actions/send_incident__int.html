@@ -2,8 +2,8 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>hud_target_player | ReachVariantTool Documentation</title>
-      <base href="../../../" />
+      <title>send_incident | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
@@ -68,24 +68,56 @@
          </ul>
       </nav>
       <main>
-         <h1>hud_target_player<span class="type">Type: <a href="script/api/player.html">Player</a></span></h1>
+         <h1>send_incident</h1>
 
-            <p>
-               Community reverse-engineering indicates that this value is one of several 
-               that can be used with HUD widgets and object waypoints to display different 
-               information to each player. When setting a widget or waypoint's text, you 
-               would pass this value (or a member variable on it) as a 
-               <a href="script/api/format-string.html">format string</a> parameter. However, 
-               while community reverse-engineering indicates that this would refer to a "HUD 
-               target player" of some kind, testing has failed to determine any specifics.
-            </p>
-         <p>This value is read-only.</p><h2>See also</h2>
-<ul>
-   <li><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></li>
-   <li><a href="script/api/ns_unnamed/hud_player.html">hud_player</a></li>
-   <li><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></li>
-   <li><a href="script/api/ns_unnamed/hud_target_player_team.html">hud_target_player_team</a></li>
-</ul>
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            <h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/incident.html">incident</a></dt>
+      <dd><p>The ID of an event that the game engine can be told about.</p></dd>
+   <dt>cause</dt>
+      <dd>
+                  The cause of the incident: a <a href="script/api/player.html">player</a> or 
+                  <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
+               </dd>
+   <dt>target</dt>
+      <dd>
+                  The target of the incident: a <a href="script/api/player.html">player</a> or 
+                  <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
+               </dd>
+   <dt><a href="script/api/number.html">detail</a></dt>
+      <dd><p>A numeric constant or variable.</p></dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- Code for awarding the "Dive Bomber" DLC achievement, which you earn by </span>
+<span class="comment">-- killing a player with an assassination while they're using a jetpack:</span>
+<span class="comment">--</span>
+<span class="comment">-- (Assumes Forge Label #0 is an unnamed label referring to jetpacks.)</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> killer_aa = global.object[0]
+   <span class="keyword">alias</span> death_mod = global.number[2]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
+      killer    = no_player
+      killer    = current_player.try_get_killer()
+      death_mod = 0
+      death_mod = current_player.try_get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span> 
+         killer_aa = no_object
+         killer_aa = killer.try_get_armor_ability()
+         <span class="keyword">if</span> killer_aa.has_forge_label(0) <span class="keyword">and</span> killer_aa.is_in_use() <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, killer, killer, 65)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
 
       </main>
       <script src="resources/sidebar.js"></script>

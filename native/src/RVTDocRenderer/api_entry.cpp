@@ -210,6 +210,10 @@ size_t APIMethod::load(cobb::xml::document& doc, uint32_t root_token, std::strin
                   this->name2 = token.value;
                else if (token.name == "returns")
                   this->return_value_type = token.value;
+               else if (token.name == "overload-name")
+                  this->overload_name = token.value;
+               else if (token.name == "overload-id")
+                  this->overload_id = token.value;
                else if (token.name == "nodiscard") {
                   if (token.value == "true")
                      this->nodiscard = true;
@@ -424,6 +428,27 @@ void APIMethod::write(std::string& content, std::string stem, std::string member
    this->_write_notes(replace);
    this->_write_relationships(replace, member_of, this->is_action ? api_entry_type::action : api_entry_type::condition);
    content.replace(pos, needle.length(), replace);
+}
+//
+void APIMethod::append_filename(std::string& out) {
+   out += this->name;
+   if (!this->overload_id.empty()) {
+      out += "__";
+      out += this->overload_id;
+   }
+   out += ".html";
+}
+void APIMethod::append_friendly_name(std::string& out, bool include_name2) {
+   out += this->name;
+   if (!this->overload_name.empty()) {
+      out += " (";
+      out += this->overload_name;
+      out += ")";
+   }
+   if (include_name2 && !this->name2.empty()) {
+      out += " <span class=\"a-k-a\">a.k.a.</span> ";
+      out += this->name2;
+   }
 }
 #pragma endregion
 
@@ -955,6 +980,7 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
          std::string display = prop.name;
          if (prop.is_indexed)
             display += "[<var>n</var>]";
+         //
          std::string li;
          cobb::sprintf(li, "<li><a href=\"script/api/%s/properties/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), display.c_str());
          replace += li;
@@ -993,8 +1019,13 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
             }
             continue;
          }
+         //
+         std::string display;
+         std::string file;
+         prop.append_filename(file);
+         prop.append_friendly_name(display, false);
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/conditions/%s\">%s</a></li>\n", this->name.c_str(), file.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1018,8 +1049,13 @@ void APIType::_handle_member_nav(std::string& content, const std::string& stem) 
             }
             continue;
          }
+         //
+         std::string display;
+         std::string file;
+         prop.append_filename(file);
+         prop.append_friendly_name(display, false);
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/%s/actions/%s\">%s</a></li>\n", this->name.c_str(), file.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1149,13 +1185,9 @@ void APIType::write(const std::string& article_template, const std::string& type
          replace += "<dt><a href=\"script/api/";
          replace += this->name;
          replace += "/conditions/";
-         replace += prop.name;
-         replace += ".html\">";
-         replace += prop.name;
-         if (!prop.name2.empty()) {
-            replace += " &nbsp; a.k.a. &nbsp; ";
-            replace += prop.name2;
-         }
+         prop.append_filename(replace);
+         replace += "\">";
+         prop.append_friendly_name(replace, true);
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1173,13 +1205,9 @@ void APIType::write(const std::string& article_template, const std::string& type
          replace += "<dt><a href=\"script/api/";
          replace += this->name;
          replace += "/actions/";
-         replace += prop.name;
-         replace += ".html\">";
-         replace += prop.name;
-         if (!prop.name2.empty()) {
-            replace += " &nbsp; a.k.a. &nbsp; ";
-            replace += prop.name2;
-         }
+         prop.append_filename(replace);
+         replace += "\">";
+         prop.append_friendly_name(replace, true);
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1208,6 +1236,13 @@ void APIType::write(const std::string& article_template, const std::string& type
       for (auto& member : this->conditions) {
          if (member.is_stub)
             continue;
+         //
+         std::string outfile = member.name;
+         if (!member.overload_id.empty()) {
+            outfile += "__";
+            outfile += member.overload_id;
+         }
+         //
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
@@ -1219,7 +1254,7 @@ void APIType::write(const std::string& article_template, const std::string& type
          pm.append("conditions");
          std::filesystem::create_directory(pm);
          pm.append(""); // the above line produced "some/path/conditions" and the API doesn't remember that "conditions" was a directory, so we need this or the next two calls will replace "conditions" with the filename
-         pm.replace_filename(member.name); // this api sucks
+         pm.replace_filename(outfile); // this api sucks
          pm.replace_extension(".html");
          std::ofstream file(pm.c_str());
          file.write(content.c_str(), content.size());
@@ -1232,6 +1267,13 @@ void APIType::write(const std::string& article_template, const std::string& type
       for (auto& member : this->actions) {
          if (member.is_stub)
             continue;
+         //
+         std::string outfile = member.name;
+         if (!member.overload_id.empty()) {
+            outfile += "__";
+            outfile += member.overload_id;
+         }
+         //
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
@@ -1243,7 +1285,7 @@ void APIType::write(const std::string& article_template, const std::string& type
          pm.append("actions");
          std::filesystem::create_directory(pm);
          pm.append(""); // the above line produced "some/path/actions" and the API doesn't remember that "actions" was a directory, so we need this or the next two calls will replace "actions" with the filename
-         pm.replace_filename(member.name); // this api sucks
+         pm.replace_filename(outfile); // this api sucks
          pm.replace_extension(".html");
          std::ofstream file(pm.c_str());
          file.write(content.c_str(), content.size());
@@ -1703,8 +1745,12 @@ void APINamespace::_handle_member_nav(std::string& content, const std::string& s
             }
             continue;
          }
+         std::string display;
+         std::string file;
+         prop.append_filename(file);
+         prop.append_friendly_name(display, false);
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/conditions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/conditions/%s\">%s</a></li>\n", this->name.c_str(), file.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1728,8 +1774,12 @@ void APINamespace::_handle_member_nav(std::string& content, const std::string& s
             }
             continue;
          }
+         std::string display;
+         std::string file;
+         prop.append_filename(file);
+         prop.append_friendly_name(display, false);
          std::string li;
-         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/actions/%s.html\">%s</a></li>\n", this->name.c_str(), prop.name.c_str(), prop.name.c_str());
+         cobb::sprintf(li, "<li><a href=\"script/api/ns_%s/actions/%s\">%s</a></li>\n", this->name.c_str(), file.c_str(), display.c_str());
          replace += li;
       }
       content.replace(pos, needle.length(), replace);
@@ -1827,13 +1877,9 @@ void APINamespace::write(const std::string& article_template, const std::string&
          replace += "<dt><a href=\"script/api/ns_";
          replace += this->name;
          replace += "/conditions/";
-         replace += prop.name;
-         replace += ".html\">";
-         replace += prop.name;
-         if (!prop.name2.empty()) {
-            replace += " &nbsp; a.k.a. &nbsp; ";
-            replace += prop.name2;
-         }
+         prop.append_filename(replace);
+         replace += "\">";
+         prop.append_friendly_name(replace, true);
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1851,13 +1897,9 @@ void APINamespace::write(const std::string& article_template, const std::string&
          replace += "<dt><a href=\"script/api/ns_";
          replace += this->name;
          replace += "/actions/";
-         replace += prop.name;
-         replace += ".html\">";
-         replace += prop.name;
-         if (!prop.name2.empty()) {
-            replace += " &nbsp; a.k.a. &nbsp; ";
-            replace += prop.name2;
-         }
+         prop.append_filename(replace);
+         replace += "\">";
+         prop.append_friendly_name(replace, true);
          replace += "</a></dt>\n   <dd>";
          if (prop.blurb.empty())
             replace += "No description available.";
@@ -1887,6 +1929,13 @@ void APINamespace::write(const std::string& article_template, const std::string&
       for (auto& member : this->conditions) {
          if (member.is_stub)
             continue;
+         //
+         std::string outfile = member.name;
+         if (!member.overload_id.empty()) {
+            outfile += "__";
+            outfile += member.overload_id;
+         }
+         //
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
@@ -1898,7 +1947,7 @@ void APINamespace::write(const std::string& article_template, const std::string&
          pm.append("conditions");
          std::filesystem::create_directory(pm);
          pm.append(""); // the above line produced "some/path/conditions" and the API doesn't remember that "conditions" was a directory, so we need this or the next two calls will replace "conditions" with the filename
-         pm.replace_filename(member.name); // this api sucks
+         pm.replace_filename(outfile); // this api sucks
          pm.replace_extension(".html");
          std::ofstream file(pm.c_str());
          file.write(content.c_str(), content.size());
@@ -1911,6 +1960,13 @@ void APINamespace::write(const std::string& article_template, const std::string&
       for (auto& member : this->actions) {
          if (member.is_stub)
             continue;
+         //
+         std::string outfile = member.name;
+         if (!member.overload_id.empty()) {
+            outfile += "__";
+            outfile += member.overload_id;
+         }
+         //
          content = type_template;
          handle_base_tag(content, depth + 2);
          this->_handle_member_nav(content, stem_member);
@@ -1922,7 +1978,7 @@ void APINamespace::write(const std::string& article_template, const std::string&
          pm.append("actions");
          std::filesystem::create_directory(pm);
          pm.append(""); // the above line produced "some/path/actions" and the API doesn't remember that "actions" was a directory, so we need this or the next two calls will replace "actions" with the filename
-         pm.replace_filename(member.name); // this api sucks
+         pm.replace_filename(outfile); // this api sucks
          pm.replace_extension(".html");
          std::ofstream file(pm.c_str());
          file.write(content.c_str(), content.size());

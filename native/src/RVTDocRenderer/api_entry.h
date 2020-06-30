@@ -65,6 +65,8 @@ class APIMethod : public APIEntry {
          std::string content; // optional
       };
       //
+      std::string overload_name;
+      std::string overload_id;
       std::string bare_argument_text; // some methods use <args>some text here</args> instead of <args> <arg/> </args>
       std::string return_value_type;  // optional
       std::vector<argument> args;
@@ -77,6 +79,9 @@ class APIMethod : public APIEntry {
 
       size_t load(cobb::xml::document& doc, uint32_t root_token, std::string member_of, bool is_condition);
       void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
+
+      void append_filename(std::string& out);
+      void append_friendly_name(std::string& out, bool include_name2);
 };
 
 class APIProperty : public APIEntry {
@@ -100,6 +105,15 @@ class APIAccessor : public APIEntry {
 };
 
 class APIType : public APIEntry {
+   //
+   // A class which represents a type in the Megalo scripting language; it loads data from an XML 
+   // file whose root element is <script-type/>.
+   //
+   // The class assumes that the value of the "name" attribute on that root element is the same as 
+   // the filename it will be exporting to. It exports to an HTML file whose path is determined 
+   // based on the (loaded_from) member. Its members will have HTML files exported to subfolders 
+   // named after the type.
+   //
    protected:
       void _handle_member_nav(std::string& content, const std::string& stem);
       void _make_member_relationships_bidirectional();
@@ -143,10 +157,18 @@ class APINamespaceMember : public APIEntry {
       void write(std::string& out, std::string stem, std::string member_of, const std::string& type_template);
 };
 
-//
-// NOTE: Namespace files and paths are prefixed with "ns_" and "ns_unnamed"/"unnamed" is a special-case namespace name.
-//
 class APINamespace : public APIEntry {
+   //
+   // A class which represents a namespace in the Megalo scripting language; it loads data from an 
+   // XML file whose root element is <script-namespace/>.
+   //
+   // The class exports to an HTML file whose path is determined based on the (loaded_from) member 
+   // and the value of the "name" attribute on the root element. The namespace's final filename 
+   // will be of the form "ns_[name].html", and a bit like APIType, its members will go inside of 
+   // a subfolder with the same name.
+   //
+   // The namespace "unnamed" (and therefore also "ns_unnamed") is a special case.
+   //
    protected:
       void _handle_member_nav(std::string& content, const std::string& stem);
       void _make_member_relationships_bidirectional();

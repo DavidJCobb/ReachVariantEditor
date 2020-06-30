@@ -1,0 +1,935 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="incident">
+   <friendly>Incident</friendly>
+   <blurb>The ID of an event that the game engine can be told about.</blurb>
+   <description>
+      <p>
+         This type represents events that can occur in a match. You can 
+         <a href="script/api/ns_unnamed/actions/send_incident">"send" incidents</a> to 
+         the game engine in order to award medals, play announceover voiceovers, and 
+         more. Note that while many of these incidents correspond to medals and some 
+         correspond to Achievements, sending them won't necessarily award those medals 
+         or Achievements; among other things, incident responses can be configured on 
+         a per-game-mode basis, with distinctions between Matchmaking and Custom Games.
+      </p>
+      <p>
+         <i>Halo: The Master Chief Collection</i> may respond to incidents in its own 
+         ways, which may not be evident through examination of <i>Halo: Reach</i>'s 
+         game files. 343 Industries seems to be mindful of this; for example, when a 
+         Freeze Tag round begins its Neutral Flag phase, 343i imitates the effect of 
+         the <code>announce_ctf_start</code> incident (by manually writing a message 
+         to the kill feed and playing the announcer sound) instead of sending it 
+         directly. In general, if an incident that seems purely cosmetic also seems 
+         to have been intended for a particular purpose, it may be best to use it 
+         primarily for that purpose.
+      </p>
+      <p>
+         Internally, incidents and their effects are defined within each *.MAP file. 
+         The <code>ingd</code> (incident globals definition) tags define the incidents 
+         themselves. When an incident has an event name listed, that name is one of 
+         the "Engine Events" listed in the map's <code>gegl</code> (game engine globals) 
+         tag. Some incidents only exist to facilitate "spree" medals; for example, the 
+         <code>wingman_spawn</code> incident doesn't do anything in and of itself, but 
+         the <code>wingman_5x</code>, <code>wingman_10x</code>, and <code>wingman_15x</code> 
+         incidents all trigger automatically when <code>wingman_spawn</code> has occurred 
+         a certain number of times.
+      </p>
+      
+      <style>
+         .incidents dt[data-internal]::after{content:" (internally: " attr(data-internal) ")";margin-left:1em;color:#666}
+      </style>
+      <h2>All incidents</h2>
+      <dl class="incidents">
+         <dt>kill</dt>
+            <dd>The cause player has killed the target player.</dd>
+         <dt>grenade_kill</dt>
+            <dd>The cause player has killed the target player with a grenade.</dd>
+         <dt>guardian_kill</dt>
+            <dd>The target player was killed by the Guardians.</dd>
+         <dt>death</dt>
+            <dd>The target player has died at the cause player's hands.</dd>
+         <dt>assist</dt>
+            <dd>Yet to be determined.</dd> <!-- who assisted and who was assisted? -->
+         <dt>suicide</dt>
+            <dd>Yet to be determined.</dd>
+         <dt>fell_to_death</dt>
+            <dd>Yet to be determined.</dd>
+         <dt>kill_betrayal</dt>
+            <dd>The cause player has betrayed the target player.</dd>
+         <dt>melee_kill</dt>
+            <dd>The cause player has melee'd the target player to death, earning a 
+            Pummel medal.</dd>
+         <dt>assassination_kill</dt>
+            <dd>The cause player has melee'd the target player in the back, killing 
+            them instantly and earning a Beatdown medal.</dd>
+         <dt>finishing_move_kill</dt>
+            <dd>The cause player has assassinated the target player (i.e. a special 
+            assassination animation was played), earning an Assassination medal.</dd>
+         <dt>terminal_velocity_assassination</dt>
+            <dd>Yet to be determined.</dd>
+         <dt>recharge_health</dt>
+            <dd>Yet to be determined. Examination of the incident definition in the 
+            game files suggests that the incident is sent by the game engine when a 
+            player restores health with a Health Pack, and that the incident itself 
+            triggers the "Doctor, Doctor" Achievement.</dd>
+         <dt>wildlife_kill</dt>
+            <dd>A Campaign-exclusive incident which presumably awards the H. Ryan 
+            Memorial medal.</dd>
+         <dt>headshot_kill</dt>
+            <dd>The cause player has killed the target player with a headshot.</dd>
+         <dt>sniper_headshot_kill</dt>
+            <dd>The cause player has sniped the target player with a headshot.</dd>
+         <dt>emp_assist</dt>
+            <dd>Yet to be determined.</dd>
+         <dt>supercombine_kill</dt>
+            <dd>The cause player has killed the target player with a supercombine 
+            explosion from a Needler or Needle Rifle.</dd>
+         <dt>sniper_kill</dt>
+            <dd>The cause player has killed the target player with a body shot from a 
+            Sniper Rifle.</dd>
+         <dt>laser_kill</dt>
+            <dd>The cause player has killed the target player with a Spartan Laser.</dd>
+         <dt>rocket_kill</dt>
+            <dd>The cause player has killed the target player with a Rocket Launcher.</dd>
+         <dt>shotgun_kill</dt>
+            <dd>The cause player has killed the target player with a Shotgun.</dd>
+         <dt>hammer_kill</dt>
+            <dd>The cause player has killed the target player with a Gravity Hammer.</dd>
+         <dt>small_arms_kill</dt>
+            <dd>The cause player has killed the target player with a Magnum or a Plasma 
+            Pistol.</dd>
+         <dt>auto_kill</dt>
+            <dd>The cause player has killed the target player with an Assault Rifle, 
+            Needler, Plasma Repeater, Plasma Rifle, or Spiker.</dd>
+         <dt>precision_kill</dt>
+            <dd>The cause player has killed the target player with a DMR, Focus Rifle, 
+            Needle Rifle, or Sniper Rifle.</dd>
+         <dt>launcher_kill</dt>
+            <dd>The cause player has killed the target with a Grenade Launcher.</dd>
+         <dt>pistol_kill</dt>
+            <dd>The cause player has killed the target player with a Magnum.</dd>
+         <dt>blamite_kill</dt>
+            <dd>The cause player has killed the target player with a Needler or 
+            Needle Rifle.</dd>
+         <dt>dmr_kill</dt>
+            <dd>The cause player has killed the target player with a DMR.</dd>
+         <dt>enemy_vehicle_kill</dt>
+            <dd>No description available.</dd>
+         <dt>sword_kill</dt>
+            <dd>The cause player has killed the target player with an Energy Sword.</dd>
+         <dt>airstrike_kill</dt>
+            <dd>The cause player has killed the target player with a Target Locator.</dd>
+         <dt>airstrike_vehicle_kill</dt>
+            <dd>No description available.</dd>
+         <dt>sticky_grenade_kill</dt>
+            <dd>The cause player has killed the target player with a stuck grenade, 
+            earning a Grenade Stick medal.</dd>
+         <dt>splatter_kill</dt>
+            <dd>The cause player has killed the target player with a splatter, earning 
+            a Splatter medal.</dd>
+         <dt>zombie_kill_kill</dt>
+            <dd>Sending this incident awards a Zombie Kill medal: the cause player 
+            is a survivor and has killed the target player, a zombie.</dd>
+         <dt>infection_kill</dt>
+            <dd>Sending this incident awards an Infection medal: the cause player is 
+            a zombie and has killed and infected the target player, a survivor.</dd>
+         <dt>kill_elite</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled Elite.</dd>
+         <dt>kill_grunt</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled Grunt.</dd>
+         <dt>kill_elite_bob</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled BOB Elite.</dd>
+         <dt>kill_enemy_leader</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled Elite.</dd>
+         <dt>kill_enemy_infantry</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled Grunt, Drone, or "Mule."</dd>
+         <dt>kill_enemy_specialist</dt>
+            <dd>Exclusive to Campaign and Firefight. This incident fires when a 
+            player kills an AI-controlled Brute, Engineer, Hunter, Jackal, or 
+            Skirmisher.</dd>
+         <dt>kill_from_the_grave</dt>
+            <dd>The cause player killed the target player while dead.</dd>
+         <dt>ordnance_kill</dt>
+            <dd>The cause player has killed the target player with a Concussion Rifle, 
+            Fuel Rod Gun, Grenade Launcher, Plasma Launcher, Rocket Launcher, Spartan 
+            Laser, or Target Locator.</dd>
+         <dt>vehicle_kill</dt>
+            <dd>No description available.</dd>
+         <dt>shade_aa_kill</dt>
+            <dd>The cause player has destroyed a Shade turret.</dd>
+         <dt>driver_assist_gunner</dt>
+            <dd>The cause player was driving a vehicle while an allied player in 
+            another seat killed an enemy, earning the driver a Wheelman medal.</dd>
+         <dt>highjack</dt>
+            <dd>No description available.</dd>
+         <dt>skyjack</dt>
+            <dd>No description available.</dd>
+         <dt data-internal="shotgun_kill_sword">bulltrue</dt>
+            <dd>No description available.</dd>
+         <dt>killjoy</dt>
+            <dd>No description available.</dd>
+         <dt>survival_wave_completed_deathless</dt>
+            <dd>A Firefight incident which signals the completion of a wave without 
+            any defenders dying.</dd>
+         <dt>survival_wave_completed</dt>
+            <dd>A Firefight incident which signals the completion of a wave.</dd>
+         <dt>survival_set_completed</dt>
+            <dd>A Firefight incident which signals the completion of a set.</dd>
+         <dt>survival_set_completed_deathless</dt>
+            <dd>A Firefight incident which signals the completion of a set without 
+            any defenders dying.</dd>
+         <dt>survival_full_round_completed</dt>
+            <dd>A Firefight incident which signals the completion of a round.</dd>
+         <dt>survival_full_round_completed_deathless</dt>
+            <dd>A Firefight incident which signals the completion of a round 
+            without any defenders dying.</dd>
+         <dt>campaign_level_completed</dt>
+            <dd>A Campaign-exclusive incident which signals the completion of a level. 
+            It appears to also be responsible for awarding the "We're Just Getting 
+            Started" Achievement.</dd>
+         <dt>flagcarrier_kill</dt>
+            <dd>Sending this incident awards a Flag Carrier Kill medal: the cause 
+            player has killed the target player, who was a Flag Carrier.</dd>
+         <dt>kill_with_oddball</dt>
+            <dd>Sending this incident awards an Oddball Kill medal to the cause 
+            player for killing the target player.</dd>
+         <dt>bomb_carrier_kill</dt>
+            <dd>Sending this incident awards a Bomb Carrier Kill medal to the 
+            cause player for killing the target player, who was a Bomb Carrier.</dd>
+         <dt>juggernaut_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Juggernaut 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>kill_as_juggernaut</dt>
+            <dd>Sending this incident signals that the cause player, a Juggernaut, 
+            has killed an enemy.</dd>
+         <dt>juggernaut_new</dt>
+            <dd>Sending this incident announces the selection of a new Juggernaut.</dd>
+         <dt>juggernaut_kill</dt>
+            <dd>Sending this incident signals that the cause player has killed the 
+            target player, a Juggernaut.</dd>
+         <dt>vip_kill</dt>
+            <dd>Sending this incident awards a VIP Kill medal to the cause player 
+            for killing the target player, an enemy VIP.</dd>
+         <dt>koth_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a King of the 
+            Hill match. An appropriate announcer voiceover will play.</dd>
+         <dt>hill_controlled</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a hill is now controlled.</dd>
+         <dt>hill_contested</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a hill is now contested.</dd>
+         <dt>hill_controlled_team</dt>
+            <dd>No description available.</dd>
+         <dt>hill_contested_team</dt>
+            <dd>No description available.</dd>
+         <dt>hill_moved</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a hill has moved.</dd>
+         <dt>kill_within_hill</dt>
+            <dd>No description available.</dd>
+         <dt>ball_game_start</dt>
+            <dd>Sending this incident signals the start of a round in an Oddball 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>ball_taken</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a ball has been taken.</dd>
+         <dt>ball_dropped</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a ball has been dropped.</dd>
+         <dt>ball_taken_team</dt>
+            <dd>No description available.</dd>
+         <dt>ball_dropped_team</dt>
+            <dd>No description available.</dd>
+         <dt>ball_spawned</dt>
+            <dd>No description available.</dd>
+         <dt>ball_reset</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that a ball has been reset.</dd>
+         <dt>ball_carrier_kill</dt>
+            <dd>Sending this incident signals that the cause player has killed 
+            the target player, a Ball Carrier.</dd>
+         <dt>assault_game_start</dt>
+            <dd>Sending this incident signals the start of a round in an Assault 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>bomb_planted</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_taken</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_dropped</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_armed</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_reset_neutral</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_returned</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_disarmed</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_arming</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_detonated</dt>
+            <dd>No description available.</dd>
+         <dt>bomb_reset</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>terr_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Territories 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>terr_captured</dt>
+            <dd>No description available.</dd>
+         <dt>terr_contested</dt>
+            <dd>No description available.</dd>
+         <dt>teleporter_used</dt>
+            <dd>Sending this incident plays a sound for the cause player. It is the 
+            same sound that plays when entering a teleporter normally.</dd>
+         <dt>race_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Race 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>rally_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Rally 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>checkpoint_reached</dt>
+            <dd>Sending this incident triggers the "Checkpoint reached!" announcer 
+            voiceover and kill feed message for the cause player.</dd>
+         <dt>checkpoint_reached_team</dt>
+            <dd>Sending this incident triggers the "Checkpoint reached!" announcer 
+            voiceover and kill feed message for the cause team.</dd>
+         <dt>lap_complete</dt>
+            <dd>Sending this incident triggers the "Lap complete!" announcer voiceover 
+            and kill feed message for the cause player.</dd>
+         <dt>final_lap</dt>
+            <dd>Sending this incident triggers the "Final lap!" announcer voiceover 
+            for the cause player, and a kill feed message for all players.</dd>
+         <dt>final_lap_team</dt>
+            <dd>Sending this incident triggers the "Final lap!" announcer voiceover 
+            for the cause team, and a kill feed message for all players.</dd>
+         <dt>rocket_race_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Rocket Race  
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>ctf_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Capture the             
+            Flag match. An appropriate announcer voiceover will play.</dd>
+         <dt>ctf_team</dt>
+            <dd>No description available.</dd>
+         <dt>flag_grabbed</dt>
+            <dd>No description available.</dd>
+         <dt>flag_dropped_neutral</dt>
+            <dd>No description available.</dd>
+         <dt>flag_dropped</dt>
+            <dd>No description available.</dd>
+         <dt>flag_grabbed_neutral</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>flag_scored</dt>
+            <dd>No description available.</dd>
+         <dt>flag_reset_neutral</dt>
+            <dd>No description available.</dd>
+         <dt>flag_reset</dt>
+            <dd>No description available.</dd>
+         <dt>flag_recovered</dt>
+            <dd>No description available.</dd>
+         <dt>kill_with_flag</dt>
+            <dd>No description available.</dd>
+         <dt>team_offense</dt>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message indicating that the cause player is on Offense. It is 
+            usually sent at the start of the round during asymmetric team games, 
+            immediately after the incident to announce the start of a gametype 
+            round.</dd>
+         <dt>team_defense</dt>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message indicating that the cause player is on Defense. It is 
+            usually sent at the start of the round during asymmetric team games, 
+            immediately after the incident to announce the start of a gametype 
+            round.</dd>
+         <dt>headhunter_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Headhunter 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>skulls_taken</dt>
+            <dd>No description available.</dd>
+         <dt>skulls_scored</dt>
+            <dd>No description available.</dd>
+         <dt>skulls_dropped</dt>
+            <dd>No description available.</dd>
+         <dt>skullamanjaro</dt>
+            <dd>Sending this incident awards a Skullamanjaro medal to the cause 
+            player.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>infection_game_start</dt>
+            <dd>Sending this incident signals the start of a round in an Infection 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>inf_new_alpha</dt>
+            <dd>Sending this incident displays a kill feed message for the cause 
+            player telling them that they are an Alpha Zombie.</dd>
+         <dt>inf_new_infection</dt>
+            <dd>Sending this incident displays a kill feed message to all players 
+            informing them that the cause player infected the target player.</dd>
+         <dt>inf_new_zombie</dt>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message for the cause player telling them that they are a new 
+            zombie.</dd>
+         <dt>inf_last_man</dt>
+            <dd>Sending this incident awards the Last Man Standing medal to the 
+            cause player. The cause player hears an announceover voiceover, and 
+            all players see a kill feed message identifying the cause player as 
+            the last man standing.</dd>
+         <dt>infection_survivor_win</dt>
+            <dd>Sending this incident triggers a kill feed message for all players 
+            informing them that the survivors have won.</dd>
+         <dt>infection_zombie_win</dt>
+            <dd>ending this incident triggers a kill feed message for all players 
+            informing them that the zombies have won.</dd>
+         <dt>stockpile_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Stockpile 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>stock_flags_collected</dt>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling all players that flags have been collected.</dd>
+         <dt>stock_flag_reset</dt>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling all players that a flag has been reset.</dd>
+         <dt>swat_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a SWAT 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>action_sack_game_start</dt>
+            <dd>Sending this incident signals the start of a round. An announcer 
+            voiceover will say, "Action Sack."</dd>
+         <dt>bumper_cars_game_start</dt>
+            <dd>Sending this incident signals the start of a round. An announcer 
+            voiceover will say, "Bumper Cars."</dd>
+         <dt>custom_game_start</dt>
+            <dd>Sending this incident signals the start of a round. An announcer 
+            voiceover will say, "Custom."</dd>
+         <dt>dogfight_game_start</dt>
+            <dd>No description available.</dd>
+         <dt>fiesta_game_start</dt>
+            <dd>Sending this incident signals the start of a round. An announcer 
+            voiceover will say, "Fiesta."</dd>
+         <dt>golf_game_start</dt>
+            <dd>No description available.</dd>
+         <dt>grifball_game_start</dt>
+            <dd>Sending this incident signals the start of a round in a Grifball 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>hogpile_game_start</dt>
+            <dd>No description available.</dd>
+         <dt>pinata_game_start</dt>
+            <dd>No description available.</dd>
+         <dt>soccer_game_start</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>new_juggernaut</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>revenge_kill</dt>
+            <dd>No description available.</dd>
+         <dt>close_call</dt>
+            <dd>No description available.</dd>
+         <dt>opportunist_kill</dt>
+            <dd>The incident for the "Reload This!" medal.</dd>
+         <dt>first_blood</dt>
+            <dd>No description available.</dd>
+         <dt>wingman_spawn</dt>
+            <dd>Examination of the incident definition in the game files suggests that 
+            this incident "powers" the various Wingman spree medals.</dd>
+         <dt>sprinting_kill</dt>
+            <dd>No description available.</dd>
+         <dt>pull_kill</dt>
+            <dd>No description available.</dd>
+         <dt>perfection</dt>
+            <dd>No description available.</dd>
+         <dt>showstopper</dt>
+            <dd>No description available.</dd>
+         <dt>yoink</dt>
+            <dd>No description available.</dd>
+         <dt>second_wind</dt>
+            <dd>No description available.</dd>
+         <dt>avenged</dt>
+            <dd>No description available.</dd>
+         <dt>avenger</dt>
+            <dd>No description available.</dd>
+         <dt>life_saved</dt>
+            <dd>No description available.</dd>
+         <dt>lifesaver</dt>
+            <dd>No description available.</dd>
+         <dt>firebird</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>extermination</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x2</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x3</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x4</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x5</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x6</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x7</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x8</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x9</dt>
+            <dd>No description available.</dd>
+         <dt>multikill_x10</dt>
+            <dd>No description available.</dd>
+         <dt>5_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>10_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>15_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>20_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>25_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>30_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>35_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt>40_in_a_row</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>assist_5x</dt>
+            <dd>The incident for the "Assist Spree" medal.</dd>
+         <dt>assist_10x</dt>
+            <dd>The incident for the "Sidekick" medal.</dd>
+         <dt>assist_15x</dt>
+            <dd>The incident for the "Second Gunman" medal.</dd>
+         <dt>wheelman_5x</dt>
+            <dd>No description available.</dd>
+         <dt>wheelman_10x</dt>
+            <dd>No description available.</dd>
+         <dt>wheelman_15x</dt>
+            <dd>No description available.</dd>
+         <dt>shotgun_5x</dt>
+            <dd>No description available.</dd>
+         <dt>shotgun_10x</dt>
+            <dd>No description available.</dd>
+         <dt>shotgun_15x</dt>
+            <dd>No description available.</dd>
+         <dt>sniper_5x</dt>
+            <dd>No description available.</dd>
+         <dt>sniper_10x</dt>
+            <dd>No description available.</dd>
+         <dt>sniper_15x</dt>
+            <dd>No description available.</dd>
+         <dt>sword_5x</dt>
+            <dd>No description available.</dd>
+         <dt>sword_10x</dt>
+            <dd>No description available.</dd>
+         <dt>sword_15x</dt>
+            <dd>No description available.</dd>
+         <dt>sticky_grenade_5x</dt>
+            <dd>No description available.</dd>
+         <dt>sticky_grenade_10x</dt>
+            <dd>No description available.</dd>
+         <dt>sticky_grenade_15x</dt>
+            <dd>No description available.</dd>
+         <dt>laser_5x</dt>
+            <dd>No description available.</dd>
+         <dt>laser_10x</dt>
+            <dd>No description available.</dd>
+         <dt>laser_15x</dt>
+            <dd>No description available.</dd>
+         <dt>gravity_hammer_5x</dt>
+            <dd>No description available.</dd>
+         <dt>gravity_hammer_10x</dt>
+            <dd>No description available.</dd>
+         <dt>gravity_hammer_15x</dt>
+            <dd>No description available.</dd>
+         <dt>splatter_5x</dt>
+            <dd>No description available.</dd>
+         <dt>splatter_10x</dt>
+            <dd>No description available.</dd>
+         <dt>splatter_15x</dt>
+            <dd>No description available.</dd>
+         <dt>juggernaut_5x</dt>
+            <dd>No description available.</dd>
+         <dt>juggernaut_10x</dt>
+            <dd>No description available.</dd>
+         <dt>juggernaut_15x</dt>
+            <dd>No description available.</dd>
+         <dt>infection_5x</dt>
+            <dd>The incident for the "Infection Spree" medal. Infection scripts do 
+            not send this incident manually; the game seems to automatically detect 
+            it based on the number of single infection incidents sent.</dd>
+         <dt>infection_10x</dt>
+            <dd>The incident for the "Mmmm... Brains" medal. Infection scripts do 
+            not send this incident manually; the game seems to automatically detect 
+            it based on the number of single infection incidents sent.</dd>
+         <dt>infection_15x</dt>
+            <dd>The incident for the "Thriller" medal. Infection scripts do 
+            not send this incident manually; the game seems to automatically detect 
+            it based on the number of single infection incidents sent.</dd>
+         <dt>zombie_kill_5x</dt>
+            <dd>The incident for the "Zombie Killing Spree" medal. Infection scripts 
+            do not send this incident manually; the game seems to automatically 
+            detect it based on the number of single zombie kill incidents sent.</dd>
+         <dt>zombie_kill_10x</dt>
+            <dd>The incident for the "Hell's Janitor" medal. Infection scripts do 
+            not send this incident manually; the game seems to automatically detect 
+            it based on the number of single zombie kill incidents sent.</dd>
+         <dt>zombie_kill_15x</dt>
+            <dd>The incident for the "Hell's Jerome" medal. Infection scripts do 
+            not send this incident manually; the game seems to automatically detect 
+            it based on the number of single zombie kill incidents sent.</dd>
+         <dt>infection_survive</dt>
+            <dd>Awards the cause player a medal for surviving an Infection round.</dd>
+         <dt>koth_spree</dt>
+            <dd>No description available.</dd>
+         <dt>wingman_5x</dt>
+            <dd>No description available.</dd>
+         <dt>wingman_10x</dt>
+            <dd>No description available.</dd>
+         <dt>wingman_15x</dt>
+            <dd>No description available.</dd>
+         <dt>invasion_game_start</dt>
+            <dd>No description available.</dd>
+         <dt>invasion_game_start_c</dt>
+            <dd>No description available.</dd>
+         <dt>inv_spartan_win</dt>
+            <dd>No description available.</dd>
+         <dt>inv_spartans_win_rd1</dt>
+            <dd>No description available.</dd>
+         <dt>inv_spartans_win_rd2</dt>
+            <dd>No description available.</dd>
+         <dt>inv_elite_win</dt>
+            <dd>No description available.</dd>
+         <dt>inv_elites_win_rd1</dt>
+            <dd>No description available.</dd>
+         <dt>invasion_elites_win_rd2</dt>
+            <dd>No description available.</dd>
+         <dt>inv_core_grabbed</dt>
+            <dd>No description available.</dd>
+         <dt>inv_core_stolen</dt>
+            <dd>No description available.</dd>
+         <dt>inv_core_dropped</dt>
+            <dd>No description available.</dd>
+         <dt>inv_core_captured</dt>
+            <dd>No description available.</dd>
+         <dt>inv_core_reset</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_ph1_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_ph1_intro</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_ph2_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_ph2_victory</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_ph3_victory</dt>
+            <dd>No description available.</dd>
+         <dt>bone_cv_victory</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph1_intro</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph1_victory</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph2_intro</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph2_victory</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph3_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph3_intro</dt>
+            <dd>No description available.</dd>
+         <dt>bone_sp_ph3_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph1_intro</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph1_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph2_intro</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph2_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph3_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph3_intro</dt>
+            <dd>No description available.</dd>
+         <dt>isle_cv_ph3_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph1_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph1_extra</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph1_intro</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph1_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph2_defeat</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph2_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_ph3_victory</dt>
+            <dd>No description available.</dd>
+         <dt>isle_sp_victory</dt>
+            <dd>No description available.</dd>
+         <dt>invasion_slayer_start</dt>
+            <dd>Sending this incident signals the start of a round in an Invasion 
+            Slayer match. An appropriate announcer voiceover will play.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>game_start_slayer</dt>
+            <dd>Sending this incident signals the start of a round in a Slayer 
+            match. An appropriate announcer voiceover will play.</dd>
+         <dt>team_game_start</dt>
+            <dd>Examination of the incident definition in the game files indicates 
+            that this incident does absolutely nothing.</dd>
+         <dt>one_minute_win</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            the player that they are one minute from winning. It is typically 
+            used in modes that award points over time, such as King of the Hill.</dd>
+         <dt>one_minute_team_win</dt>
+            <dd>No description available.</dd>
+         <dt>half_minute_win</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            the player that they are thirty seconds from winning. It is typically 
+            used in modes that award points over time, such as King of the Hill.</dd>
+         <dt>half_minute_team_win</dt>
+            <dd>No description available.</dd>
+         <dt>30_minutes_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>15_minutes_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>5_minutes_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>1_minute_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>30_seconds_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>10_seconds_remaining</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>round_over</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>sudden_death</dt>
+            <dd>Sending this incident triggers an announcer voiceover telling 
+            players that Sudden Death time has begun. Official gametypes only 
+            send it when Sudden Death begins; if Sudden Death pauses and later 
+            resumes, the incident is not sent again.</dd>
+         <dt>game_over</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>gained_lead</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>gained_team_lead</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>lost_lead</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>lost_team_lead</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>tied_leader</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>tied_team_leader</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>player_joined</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>player_switched_team</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>player_rejoined</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>player_quit</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>player_booted_player</dt>
+            <dd>No official gametypes send this incident.</dd>
+         <dt>respawn_tick</dt>
+            <dd>Sending this incident plays a sound for the cause player: one of 
+            the beeps in the respawn countdown.</dd>
+         <dt>respawn_tick_final</dt>
+            <dd>Sending this incident plays a sound for the cause player: one of 
+            the final beep in the respawn countdown.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>multikill_comm</dt>
+            <dd>No description available.</dd>
+         <dt>spree_comm</dt>
+            <dd>No description available.</dd>
+         <dt>assist_comm</dt>
+            <dd>No description available.</dd>
+         <dt>technician_comm</dt>
+            <dd>No description available.</dd>
+         <dt>wheelman_comm</dt>
+            <dd>No description available.</dd>
+         <dt>auto_comm</dt>
+            <dd>No description available.</dd>
+         <dt>small_arms_comm</dt>
+            <dd>No description available.</dd>
+         <dt>ordnance_comm</dt>
+            <dd>No description available.</dd>
+         <dt>vehicle_comm</dt>
+            <dd>No description available.</dd>
+         <dt>grenades_comm</dt>
+            <dd>No description available.</dd>
+         <dt>precision_comm</dt>
+            <dd>No description available.</dd>
+         <dt>finishing_move_comm</dt>
+            <dd>No description available.</dd>
+         <dt>cqc_comm</dt>
+            <dd>No description available.</dd>
+         <dt>set_clear_comm</dt>
+            <dd>No description available.</dd>
+         <dt>deathless_round_comm</dt>
+            <dd>No description available.</dd>
+         <dt>kill_leader_comm</dt>
+            <dd>No description available.</dd>
+         <dt>kill_infantry_comm</dt>
+            <dd>No description available.</dd>
+         <dt>kill_specialist_comm</dt>
+            <dd>No description available.</dd>
+         <dt>destroy_vehicle_comm</dt>
+            <dd>No description available.</dd>
+         <dt>clear_a_mission_comm</dt>
+            <dd>No description available.</dd>
+         <dt>campaign_level_completed_deathless</dt>
+            <dd>No description available.</dd>
+         <dt>player_kills_spartan</dt>
+            <dd>Examination of the game's incident definitions suggests that this 
+            incident triggers automatically when an Elite player kills a Spartan 
+            player. If this incident fires five times in a row, it automatically 
+            triggers the <code>player_kill_spartan_achieve</code> incident.</dd>
+         <dt>player_kill_spartan_achieve</dt>
+            <dd>Examination of the game's incident definitions suggests that this 
+            incident is responsible for the "Knife to a Gun Fight" Achievement, 
+            awarded for playing Firefight as an Elite and killing five Spartans. 
+            The Achievement could theoretically be earned in Multiplayer, but it 
+            is Matchmaking-only, and it's not known whether the 
+            <code>player_kills_spartan</code> incident is a <em>requirement</em> 
+            or merely a <em>trigger</em>.</dd>
+         <dt>core_killed_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>m45_elite_pod</dt>
+            <dd>No description available.</dd>
+         <dt>dmr_acheive</dt>
+            <dd>No description available.</dd>
+         <dt>supercombine_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>pistol_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>wingman_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>3kiva_clear</dt>
+            <dd>No description available.</dd>
+         <dt>leg_set_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>2_for_1_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>cruiser_fast_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>firebird_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>tank_survive_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>race_m20</dt>
+            <dd>No description available.</dd>
+         <dt>race_m20_fast</dt>
+            <dd>No description available.</dd>
+         <dt>terminal_vel_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>wildlife_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>skunked_achieve</dt>
+            <dd>No description available.</dd>
+         <dt>m52_aa_kill</dt>
+            <dd>No description available.</dd>
+         <dt>zealot_achieve</dt>
+            <dd>No description available.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+         <dt>dlc_achieve_1</dt>
+            <dd>Sending this achievement awards the Return to Sender Achievement (from 
+            the Defiant Map Pack) to the cause player if they are also the target 
+            player. It is intended to be awarded for returning two flags during a 
+            Capture the Flag match (even if on different rounds).</dd>
+         <dt>dlc_achieve_2</dt>
+            <dd>
+               <p>
+                  Sending this incident awards a DLC Achievement to the player if they 
+                  are specified as both the cause and the target. The incident must be 
+                  sent 
+                  <a href="script/api/ns_unnamed/actions/send_incident__int.html">with 
+                  an integer</a> whose value determines which achievement is awarded:
+               </p>
+               <dl>
+                  <dt>59: Don't Touch That!</dt>
+                     <dd>Prevent the attacking team from touching the flag in any round during 
+                     a One Flag CTF match.</dd>
+                  <dt>60: Paper Beats Rock</dt>
+                     <dd>Assassinate an enemy player no more than three seconds after they stop 
+                     using Armor Lock.</dd>
+                  <dt>62: Top Shot</dt>
+                     <dd>Score three headshot kills in a row without dying.</dd>
+                  <dt>64: Stick It To The Man!</dt>
+                     <dd>Kill a flag carrier with a stuck plasma grenade.</dd>
+                  <dt>65: Dive Bomber</dt>
+                     <dd>Assassinate an enemy player while using a Jetpack.</dd>
+                  <dt>66: License to Kill</dt>
+                     <dd>Splatter five enemy players during a single match.</dd>
+                  <dt>68: From Hell's Heart</dt>
+                     <dd>After being stuck with a plasma grenade, make sure that the player who 
+                     stuck you dies in the blast with you.</dd>
+               </dl>
+            </dd>
+         <dt>dlc_achieve_3</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_4</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_5</dt>
+            <dd>Sending this incident awards the Cross-Mappin' Achievement (from the 
+            Noble Map Pack) to the cause player. It is intended to be awarded for 
+            killing the target player at long range with a DMR.</dd>
+         <dt>dlc_achieve_6</dt>
+            <dd>Sending this achievement awards the You Ate All The Chips Achievement 
+            (from the Noble Map Pack) to the cause player. It is intended to be awarded 
+            for collecting all of the flags on the map at once during a Stockpile match. 
+            The incident is sent for each player on the relevant team individually.</dd>
+         <dt>dlc_achieve_7</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_8</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_9</dt>
+            <dd>No description available.</dd>
+         <dt>dlc_achieve_10</dt>
+            <dd>Sending this achievement awards the Offensive Driver Achievement (from 
+            the Noble Map Pack) to the cause player for killing the target player. It 
+            is intended to be awarded for earning a kill in a Rocket (Hog) Race match.</dd>
+         <dt><i>[unused]</i></dt>
+            <dd>This incident ID is unused.</dd>
+      </dl>
+   </description>
+</script-type>

@@ -17,12 +17,36 @@
       </p>
       
       <ul id="toc">
+         <li><a href="snippets.html#announce-game-start">Announce game start</a></li>
          <li><a href="snippets.html#dlc-achievements">DLC Achievements</a></li>
          <li><a href="snippets.html#loadout-palettes">Loadout palette code</a></li>
          <li><a href="snippets.html#round-timer">Round timer code (basic)</a></li>
          <li><a href="snippets.html#round-timer-sd">Round timer code (with Sudden Death)</a></li>
          <li><a href="snippets.html#super-shields">Super Shields</a></li>
       </ul>
+      
+      <h2><a name="announce-game-start">Announce game start</a></h2>
+      <p>
+         Most official gametypes announce their names at the start of each round. They do 
+         this by <dfn>sending an incident</dfn>: they use the 
+         <a href="script/api/ns_unnamed/actions/send_incident">send_incident</a> function 
+         to tell the game that some event (such as the start of a round) has occurred. Each 
+         base gametype has its own incident.
+      </p>
+      <pre>
+         alias announced_game_start = player.number[0]
+         alias announce_start_timer = player.timer[0]
+         
+         declare player.announced_game_start with network priority low = 0
+         declare player.announce_start_timer = 5
+         
+         for each player do
+            if current_player.announced_game_start == 0 and current_player.announce_game_start_timer.is_zero() then 
+               send_incident(race_game_start, current_player, no_player)
+               current_player.announced_game_start = 1
+            end
+         end
+      </pre>
       
       <h2><a name="dlc-achievements">DLC Achievements</a></h2>
       <p>
