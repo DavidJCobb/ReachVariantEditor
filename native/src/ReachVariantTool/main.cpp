@@ -116,46 +116,7 @@ int main(int argc, char *argv[]) {
 //
 //        - We should test if object.place_between_me_and also has this behavior.
 //
-//     = I'VE BEEN INFORMED THAT THE TWO UNKNOWN TEAM VALUES MAY BE hud_team AND hud_target_team. 
-//       I SHOULD TEST THIS.
-//
-//        - Testing was inconclusive even with other players present.
-//
-//     - CAN WE TEST THE VALUES OF THE "OVERSHIELD REGEN RATE" AND SHIELD DECAY RATES BY USING A 
-//       SCRIPT WIDGET TO DISPLAY OUR SHIELDS AS NUMBERS IN REAL-TIME, AND USING SCRIPT TO MEASURE 
-//       THE REGEN RATES AS POINTS PER SECOND?
-//
-//        - Shield Vampirism doesn't work on NPC bipeds.
-//
 //     = DOCUMENTATION
-//
-//        - REMAINING XML:
-//
-//           - Write a root "article" page for the Scripting API Reference.
-//
-//           - List all globally-accessible variables on each variable type page.
-//
-//           - You forgot to finish your sentence when writing the blurb for enums in syntax.xml.
-//
-//           - The article for general team settings should link to the article for specific team 
-//             settings; the article for general loadout settings should link to the article for 
-//             specific loadout settings; and the article for any setting category containing a 
-//             set of player traits should list those traits and link to the general article for 
-//             player traits (e.g. Respawn Settings > Respawn Traits).
-//
-//        - RENDER THE XML OUT TO HTML.
-//
-//           - Code to render "article" pages is complete.
-//
-//           - Namespaces
-//
-//              - Members
-//
-//           - Types
-//
-//              - Members
-//
-//              - Member functions
 //
 //        - We need to decompile all official gametypes and decode them as much as we can, and 
 //          provide aliases for them. We should provide these as "source scripts."
@@ -166,6 +127,7 @@ int main(int argc, char *argv[]) {
 //                 - Speedflag
 //              - Freeze Tag
 //              - Headhunter TU
+//              - Infection (Alpha Zombies)
 //              - Invasion
 //              - Invasion Slayer
 //              - Juggernaut
@@ -184,8 +146,6 @@ int main(int argc, char *argv[]) {
 //
 //           - PENDING:
 //              - Halo Chess (high-complexity; low-priority)
-//              - Infection
-//                 - Alpha Zombies
 //              - Invasion: Boneyard
 //              - Invasion: Breakpoint
 //              - Invasion: Spire

@@ -620,7 +620,7 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('weap', "objects/weapons/multiplayer/unsc_data_core/unsc_data_core"),
             DetailedEnumValueInfo::make_description("A UNSC data core, used as the \"capture the flag\" objective in Invasion: Boneyard. It can be picked up and carried by a player, reducing their speed and preventing them from attacking.")
          ),
-         DetailedEnumValue("danger_zone", // TODO: what is this?
+         DetailedEnumValue("danger_zone",
             DetailedEnumValueInfo::make_friendly_name("Danger Zone"),
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/multi/spawning/danger_zone"),
             DetailedEnumValueInfo::make_description("Analysis of this object's map tag is inconclusive but suggests that it influences spawning when a shape is set on it. It doesn't really matter, though, because only Tempest has the Megalo object tag list specify the tag as of this writing.")

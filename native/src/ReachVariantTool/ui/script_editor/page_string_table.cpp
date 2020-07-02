@@ -93,7 +93,6 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
       uint32_t flags = 0;
       if (table.is_at_count_limit())
          flags |= ReachStringFlags::DisallowSaveAsNew;
-      // TODO: Set (Flags::SingleLanguageString) if the string is in use by any Forge label
       if (LocalizedStringEditorModal::editString(this, flags, &string)) {
          //
          // The string had changes saved, which will cause us to receive a signal from ReachEditorState 

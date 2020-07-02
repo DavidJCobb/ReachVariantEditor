@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>enums.damage_reporting_type | ReachVariantTool Documentation</title>
+      <base href="../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/ns_enums.html">enums</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Members</a>
+                     <ul>
+                        <li><a href="script/api/ns_enums/damage_reporting_modifier.html">damage_reporting_modifier</a></li>
+<li><a href="script/api/ns_enums/damage_reporting_type.html">damage_reporting_type</a></li>
+<li><a href="script/api/ns_enums/orientation.html">orientation</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>enums.damage_reporting_type</h1>
+
+            <p>
+               This enum contains values that can be returned by the 
+               <a href="script/api/player/actions/try_get_death_damage_type.html">player.get_death_damage_type</a> 
+               function.
+            </p>
+            <dl>
+               <dt>unknown</dt>
+                  <dd>Cause of death is unknown. The UI displays this as "The Guardians."</dd>
+               <dt>guardians</dt>
+                  <dd>The UI displays this as "The Guardians."</dd>
+               <dt>script</dt>
+                  <dd>The player was killed by a script. The UI displays this as "The Guardians."</dd>
+               <dt>ai_suicide</dt>
+                  <dd>Unknown. This never displays in the UI.</dd>
+               <dt>magnum</dt>
+                  <dd>The player was killed with a Magnum pistol.</dd>
+               <dt>assault_rifle</dt>
+                  <dd>The player was killed with an Assault Rifle.</dd>
+               <dt>dmr</dt>
+                  <dd>The player was killed with a DMR.</dd>
+               <dt>shotgun</dt>
+                  <dd>The player was killed with a Shotgun.</dd>
+               <dt>sniper_rifle</dt>
+                  <dd>The player was killed with a Sniper Rifle.</dd>
+               <dt>rocket_launcher</dt>
+                  <dd>The player was killed with a Rocket Launcher.</dd>
+               <dt>spartan_laser</dt>
+                  <dd>The player was killed with a Spartan Laser.</dd>
+               <dt>frag_grenade</dt>
+                  <dd>The player was killed with a Frag Grenade.</dd>
+               <dt>grenade_launcher</dt>
+                  <dd>The player was killed with a Grenade Launcher.</dd>
+               <dt>plasma_pistol</dt>
+                  <dd>The player was killed with a Plasma Pistol.</dd>
+               <dt>needler</dt>
+                  <dd>The player was killed with a Needler.</dd>
+               <dt>plasma_rifle</dt>
+                  <dd>The player was killed with a Plasma Rifle.</dd>
+               <dt>plasma_repeater</dt>
+                  <dd>The player was killed with a Plasma Repeater.</dd>
+               <dt>needle_rifle</dt>
+                  <dd>The player was killed with a Needle Rifle.</dd>
+               <dt>spiker</dt>
+                  <dd>The player was killed with a Spiker.</dd>
+               <dt>plasma_launcher</dt>
+                  <dd>The player was killed with a Plasma Launcher.</dd>
+               <dt>gravity_hammer</dt>
+                  <dd>The player was killed with a Gravity Hammer or Golf Club.</dd>
+               <dt>energy_sword</dt>
+                  <dd>The player was killed with an Energy Sword whose battery is not depleted.</dd>
+               <dt>plasma_grenade</dt>
+                  <dd>The player was killed with a Plasma Grenade.</dd>
+               <dt>concussion_rifle</dt>
+                  <dd>The player was killed with a Concussion Rifle.</dd>
+               <dt>ghost</dt>
+                  <dd>The player was killed by a Ghost. This includes both the cannons and splatters; 
+                  use the damage reporting modifier to tell the two apart.</dd>
+               <dt>revenant</dt>
+                  <dd>The player was killed by a Revenant. This includes both mortars and splatters; 
+                  use the damage reporting modifier to tell the two apart.</dd>
+               <dt>revenant_gunner</dt>
+                  <dd>The player was killed by a Revenant passenger.</dd>
+               <dt>wraith</dt>
+                  <dd>The player was killed by a Wraith. This includes both mortars and splatters; 
+                  use the damage reporting modifier to tell the two apart.</dd>
+               <dt>wraith_anti_infantry</dt>
+                  <dd>The player was killed by a Wraith's anti-infantry plasma turret.</dd>
+               <dt>banshee</dt>
+                  <dd>The player was killed by a Banshee's plasma cannons or a splatter. Use the 
+                  damage reporting modifier to tell the two apart.</dd>
+               <dt>banshee_bomb</dt>
+                  <dd>The player was killed by a Banshee's fuel rod bombs.</dd>
+               <dt>seraph</dt>
+                  <dd>The player was killed with a Seraph.</dd>
+               <dt>mongoose</dt>
+                  <dd>The player was splattered by a Mongoose.</dd>
+               <dt>warthog</dt>
+                  <dd>The player was splattered by a Warthog.</dd>
+               <dt>warthog_turret_chaingun</dt>
+                  <dd>The player was killed by a Warthog's chaingun.</dd>
+               <dt>warthog_turret_gauss</dt>
+                  <dd>The player was killed by a Warthog's gauss turret.</dd>
+               <dt>warthog_turret_rocket</dt>
+                  <dd>The player was killed by a Warthog's rocket turret.</dd>
+               <dt>scorpion</dt>
+                  <dd>The player was killed by a Scorpion. This includes both the cannon and splatters; 
+                  use the damage reporting modifier to tell the two apart.</dd>
+               <dt>scorpion_anti_infantry</dt>
+                  <dd>The player was killed by a Scorpion's anti-infantry chaingun.</dd>
+               <dt>falcon</dt>
+                  <dd>The player was killed by a Falcon. This includes any driver-accessible weapon 
+                  (though multiplayer Falcons don't typically have one) and splatters; use the damage 
+                  reporting modifier to tell the two apart.</dd>
+               <dt>falcon_gunner</dt>
+                  <dd>The player was killed by a Falcon's door gunner.</dd>
+               <dt>fall_damage</dt>
+                  <dd>The player died from fall damage.</dd>
+               <dt>collision_damage</dt>
+                  <dd>The player died from collision damage not attributable to any specific cause.</dd>
+               <dt>melee_generic</dt>
+                  <dd>The player was killed by a melee attack.</dd>
+               <dt>explosion_generic</dt>
+                  <dd>The player was killed by an explosion.</dd>
+               <dt>explosion_birthday_party</dt>
+                  <dd>The player was killed by a Grunt Birthday Party explosion. This cause of death 
+                  can normally only occur in Campaign and Firefight; the "Birthday Party" Armor Effect 
+                  available to players is purely cosmetic.</dd>
+               <dt>melee_flag</dt>
+                  <dd>The player was melee'd to death with a flag.</dd>
+               <dt>melee_bomb</dt>
+                  <dd>The player was melee'd to death with a bomb.</dd>
+               <dt>explosion_bomb</dt>
+                  <dd>The player was killed by a bomb's detonation. Bombs detonate when killed by 
+                  script.</dd>
+               <dt>melee_skull</dt>
+                  <dd>The player was melee'd to death with a skull.</dd>
+               <dt>teleporter</dt>
+                  <dd>Unknown. This may be a leftover from past Halo games, which allowed players to 
+                  "telefrag" each other.</dd>
+               <dt>shifted_blame</dt>
+                  <dd>Unknown. It's called "Shifted Blame" in the UI and "transfer_damage" internally; 
+                  there is no information online about what it is, though some players incorrectly 
+                  had deaths attributed to it during the <i>Halo: Reach</i> beta.</dd>
+               <dt>armor_lock_crush</dt>
+                  <dd>The player was killed when they tried to splatter someone who was using 
+                  Armor Lock.</dd>
+               <dt>target_locator</dt>
+                  <dd>The player was killed with a Target Locator.</dd>
+               <dt>machine_gun_turret</dt>
+                  <dd>The player was killed by a Machine Gun Turret. This includes mounted and carried 
+                  turrets.</dd>
+               <dt>plasma_cannon</dt>
+                  <dd>The player was killed by a Plasma Cannon. This includes mounted and carried 
+                  turrets.</dd>
+               <dt>plasma_mortar</dt>
+                  <dd>Unknown. This may be a leftover from before <i>Halo 3</i>.</dd>
+               <dt>plasma_turret</dt>
+                  <dd>Unknown. This value <em>is not</em> used by the Plasma Cannon.</dd>
+               <dt>shade_turret</dt>
+                  <dd>The player was killed with a Shade.</dd>
+               <dt>sabre</dt>
+                  <dd>The player was killed with a Sabre.</dd>
+               <dt>smg</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>carbine</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>battle_rifle</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd> 
+               <dt>focus_rifle</dt>
+                  <dd>The player was killed with a Focus Rifle, or with the invisible weapon that Monitor 
+                  bipeds spawn with.</dd>
+               <dt>fuel_rod_gun</dt>
+                  <dd>The player was killed with a Fuel Rod Gun.</dd>
+               <dt>missile_pod</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>brute_shot</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>flamethrower</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>sentinel_gun</dt>
+                  <dd>Unknown. Possibly a development leftover from <i>Halo 3</i>.</dd>
+               <dt>spike_grenade</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>firebomb_grenade</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>elephant_turret</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>spectre_driver</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 2</i>.</dd>
+               <dt>spectre_gunner</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 2</i>.</dd>
+               <dt>tank</dt>
+                  <dd>Unknown.</dd>
+               <dt>chopper</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>hornet</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>mantis</dt>
+                  <dd>Unused. This is a development leftover.</dd>
+               <dt>prowler</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>sentinel_beam</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>.</dd>
+               <dt>sentinel_rpg</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 2</i> and was 
+                  unused even in that game.</dd>
+               <dt>tripmine</dt>
+                  <dd>Unused. This is a development leftover from <i>Halo 3</i>; the "landmine" 
+                  object in <i>Halo: Reach</i> just reports a generic explosion.</dd>
+            </dl>
+         
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

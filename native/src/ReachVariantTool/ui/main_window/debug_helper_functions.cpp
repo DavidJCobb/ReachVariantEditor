@@ -118,12 +118,4 @@ namespace DebugHelperFunctions {
          out << "\r\n";
       }
    }
-   //
-   void export_documentation(QWidget* parentWindow) {
-
-      //
-      // TODO
-      //
-
-   }
 }

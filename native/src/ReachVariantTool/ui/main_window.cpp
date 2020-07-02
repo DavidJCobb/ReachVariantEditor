@@ -1,6 +1,8 @@
 #include "main_window.h"
 #include <cassert>
 #include <filesystem>
+#include <QDebug>
+#include <QDesktopServices>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileDialog>
@@ -173,6 +175,46 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       this->ui.actionDebugExportStringsText->setEnabled(false);
       this->ui.actionDebugExportStringsText->setVisible(false);
    #endif
+   {
+      auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // ughhhhh
+      auto dir  = QDir(path);
+      if (!dir.exists()) {
+         this->ui.actionHelpWeb->setEnabled(false);
+         this->ui.actionHelpWeb->setToolTip(tr("The documentation folder is missing!", ""));
+         this->ui.actionHelpFolder->setEnabled(false);
+         this->ui.actionHelpFolder->setToolTip(tr("The documentation folder is missing!", ""));
+      }
+      QObject::connect(this->ui.actionHelpWeb, &QAction::triggered, [this]() {
+         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/index.html"; // gotta do weird stuff to normalize the application path ughhhhh
+         if (!QDesktopServices::openUrl(QString("file:///") + path)) {
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
+            return;
+         }
+         /*//
+         auto path   = dir.filePath("index.html").toStdWString();
+         auto result = (uint32_t)ShellExecuteW(0, 0, path.c_str(), 0, 0, SW_NORMAL);
+         if (result <= 32) {
+            QString text;
+            switch (result) {
+               case 0:
+               case SE_ERR_OOM:
+                  text = "The operating system is out of memory or resources.";
+                  break;
+               case ERROR_FILE_NOT_FOUND:
+               case ERROR_PATH_NOT_FOUND:
+                  text = "The documentation folders or files have gone missing.";
+                  break;
+            }
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. ") + text);
+         }
+         //*/
+      });
+      QObject::connect(this->ui.actionHelpFolder, &QAction::triggered, [this]() {
+         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // gotta do weird stuff to normalize the application path ughhhhh
+         if (!QDesktopServices::openUrl(QString("file:///") + path))
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
+      });
+   }
    //
    this->ui.MainContentView->setCurrentIndex(0); // Qt Designer makes the last page you were looking at in the editor the default page; let's just switch to the first page here
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::currentItemChanged, this, &ReachVariantTool::onSelectedPageChanged);

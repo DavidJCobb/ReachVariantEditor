@@ -1060,7 +1060,7 @@
           <number>-1</number>
          </property>
          <property name="maximum">
-          <number>511</number>
+          <number>400</number>
          </property>
          <property name="value">
           <number>-1</number>

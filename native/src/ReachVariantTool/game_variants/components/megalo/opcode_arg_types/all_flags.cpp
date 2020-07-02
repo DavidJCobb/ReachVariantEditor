@@ -35,7 +35,7 @@ namespace Megalo {
          DetailedFlagsValue("alive_equipment"),
          DetailedFlagsValue("alive_vehicles"),
          DetailedFlagsValue("dead_weapons"),
-         DetailedFlagsValue("dead_equipment") // TODO: previous versions of KSoft only listed four flags; we should double-check this
+         DetailedFlagsValue("dead_equipment")
       });
    }
 

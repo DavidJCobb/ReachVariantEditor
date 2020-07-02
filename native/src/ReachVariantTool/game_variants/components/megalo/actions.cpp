@@ -192,7 +192,7 @@ namespace Megalo {
       ),
       ActionFunction( // 17
          "Set Timer Rate",
-         "Modify the rate at which a timer's value changes, and whether the value increases or decreases. If you set the timer to decrease, then its rate will automatically switch to 0% when it reaches zero. If you set the timer to increase, then it will not increase past its initial value (TODO: does this apply if the initial value is zero?).",
+         "Modify the rate at which a timer's value changes, and whether the value increases or decreases. If you set the timer to decrease, then its rate will automatically switch to 0% when it reaches zero. If you set the timer to increase, then it will not increase past its initial value unless its initial value is zero.",
          "Have %1 tick at rate %2.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
@@ -492,7 +492,7 @@ namespace Megalo {
       ),
       ActionFunction( // 48
          "Set Meter Parameters",
-         "Modify meter options for a HUD widget. Any variables specified as part of the meter parameters will be passed by reference: the meter will update as their values change, even if this action isn't run again.", // TODO: VERIFY THIS BEHAVIOR
+         "Modify meter options for a HUD widget. Any variables specified as part of the meter parameters appear to be passed by reference, which would mean that the meter will update as their values change, even if this action isn't run again.",
          "Set meter parameters for %1 to %2.",
          {
             OpcodeArgBase("widget",     OpcodeArgValueWidget::typeinfo),

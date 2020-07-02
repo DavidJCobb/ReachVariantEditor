@@ -45,7 +45,7 @@ uint32_t AllocationMeter::total() const noexcept {
 bool AllocationMeter::event(QEvent* event) {
    if (event->type() == QEvent::ToolTip) {
       QHelpEvent* helpEvent = static_cast<QHelpEvent*>(event);
-      int index = this->segmentAt(helpEvent->pos()); // TODO: find the part of the bar we're hovering over
+      int index = this->segmentAt(helpEvent->pos()); // find the part of the bar we're hovering over
       if (index != -1) {
          //QToolTip::showText(helpEvent->globalPos(), this->_segments[index].tooltip);
          auto& seg = this->_segments[index];

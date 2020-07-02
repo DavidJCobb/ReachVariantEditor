@@ -65,6 +65,7 @@ namespace Megalo {
             NamespaceMember::make_scope_member("script_option", OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::option),
             //
             NamespaceMember::make_bare_member("all_players", OpcodeArgValuePlayerOrGroup::typeinfo),
+            NamespaceMember::make_scope_member("death_event_damage_type", OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::death_event_damage_type),
             //
             NamespaceMember::make_bare_member("no_widget", OpcodeArgValueWidget::typeinfo),
          });
@@ -73,7 +74,6 @@ namespace Megalo {
             NamespaceMember::make_scope_member("betrayal_booting",        OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::betrayal_booting),
             NamespaceMember::make_scope_member("betrayal_penalty",        OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::betrayal_penalty),
             NamespaceMember::make_scope_member("current_round",           OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::current_round),
-            NamespaceMember::make_scope_member("death_event_damage_type", OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::death_event_damage_type),
             NamespaceMember::make_scope_member("friendly_fire",           OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::friendly_fire),
             NamespaceMember::make_scope_member("grace_period",            OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::grace_period),
             NamespaceMember::make_scope_member("grenades_on_map",         OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::grenades_on_map),

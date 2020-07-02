@@ -76,7 +76,6 @@ namespace Megalo {
          DetailedEnumValue("grifball"),
          DetailedEnumValue("soccer"),
          DetailedEnumValue("headhunter"),
-         // TODO: verify all below icons
          DetailedEnumValue("crosshair"),
          DetailedEnumValue("wheel"),
          DetailedEnumValue("swirl"),

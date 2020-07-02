@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>player.add_weapon | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/player.html">Player</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/player/properties/biped.html">biped</a></li>
+<li><a href="script/api/player/properties/rating.html">rating</a></li>
+<li><a href="script/api/player/properties/score.html">score</a></li>
+<li><a href="script/api/player/properties/script_stat.html">script_stat[<var>n</var>]</a></li>
+<li><a href="script/api/player/properties/team.html">team</a></li>
+<li><a href="script/api/player/properties/unknown_09.html">unknown_09</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        <li><a href="script/api/player/accessors/frag_grenades.html">frag_grenades</a></li>
+<li><a href="script/api/player/accessors/plasma_grenades.html">plasma_grenades</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></li>
+<li><a href="script/api/player/conditions/is_elite.html">is_elite</a></li>
+<li><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></li>
+<li><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></li>
+<li><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></li>
+<li><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></li>
+<li><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
+<li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
+<li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
+<li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
+<li><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></li>
+<li><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></li>
+<li><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></li>
+<li><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></li>
+<li><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></li>
+<li><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></li>
+<li><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>player.add_weapon</h1>
+<p>Give a weapon to a player.</p><h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/object.html">weapon</a></dt>
+      <dd><p>An object in the game world.</p></dd>
+</dl>
+<h2>Example</h2>
+<pre>
+global.player[0].add_weapon(global.object[0])</pre>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               Remember that this function works differently from <code>object.add_weapon</code>: 
+               the object function takes an object type and spawns a new weapon; while the player 
+               function takes an existing weapon object.
+            </p></li>
+</ul>
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

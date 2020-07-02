@@ -38,6 +38,20 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
    return bitcount;
 }
 
+ReachMegaloOption::~ReachMegaloOption() {
+   if (this->rangeDefault) {
+      delete this->rangeDefault;
+      this->rangeDefault = nullptr;
+   }
+   if (this->rangeMin) {
+      delete this->rangeMin;
+      this->rangeMin = nullptr;
+   }
+   if (this->rangeMax) {
+      delete this->rangeMax;
+      this->rangeMax = nullptr;
+   }
+}
 void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
    this->is_defined = true;
    //

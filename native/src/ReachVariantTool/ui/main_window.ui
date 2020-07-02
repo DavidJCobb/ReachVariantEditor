@@ -348,8 +348,16 @@
     <addaction name="actionDebugExportStringsText"/>
     <addaction name="actionDebugMisc"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelpWeb"/>
+    <addaction name="actionHelpFolder"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -417,6 +425,16 @@
   <action name="actionDebugExportStringsText">
    <property name="text">
     <string>Debug: Export strings to text</string>
+   </property>
+  </action>
+  <action name="actionHelpWeb">
+   <property name="text">
+    <string>View Help (in browser)</string>
+   </property>
+  </action>
+  <action name="actionHelpFolder">
+   <property name="text">
+    <string>View Help (in folder)</string>
    </property>
   </action>
  </widget>

@@ -535,7 +535,7 @@ namespace Megalo {
                #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS
                if (cnd->function == &_get_comparison_opcode()) {
                   //
-                  // TODO: I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
+                  // I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
                   //
                   auto arg = dynamic_cast<OpcodeArgValueCompareOperatorEnum*>(cnd->arguments[2]);
                   if (arg) {

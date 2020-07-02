@@ -41,12 +41,14 @@ class ReachMegaloOptionValueEntry {
 
 class ReachMegaloOption : public indexed_list_item {
    public:
+      ~ReachMegaloOption();
+      //
       MegaloStringRef name;
       MegaloStringRef desc;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       cobb::bitbool isRange;
-      ReachMegaloOptionValueEntry* rangeDefault = nullptr; // TODO: ownership; destroy these when the ReachMegaloOption is destroyed
+      ReachMegaloOptionValueEntry* rangeDefault = nullptr;
       ReachMegaloOptionValueEntry* rangeMin = nullptr;
       ReachMegaloOptionValueEntry* rangeMax = nullptr;
       cobb::pointer_list<ReachMegaloOptionValueEntry> values = decltype(values)(true);

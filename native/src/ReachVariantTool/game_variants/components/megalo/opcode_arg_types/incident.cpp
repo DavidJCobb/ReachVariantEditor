@@ -104,7 +104,7 @@ namespace Megalo {
          DetailedEnumValue("skyjack",
             DetailedEnumValueInfo::make_friendly_name("Medal: Skyjack")
          ),
-         DetailedEnumValue("shotgun_kill_sword"),
+         DetailedEnumValue("bulltrue"), // internally: shotgun_kill_sword
          DetailedEnumValue("killjoy",
             DetailedEnumValueInfo::make_friendly_name("Medal: Killjoy")
          ),

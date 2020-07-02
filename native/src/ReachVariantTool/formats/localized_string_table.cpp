@@ -3,6 +3,7 @@ extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 #include "../game_variants/errors.h"
+#include "../game_variants/warnings.h"
 #include "../helpers/strings.h"
 
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1 // Only optimize single-language strings (Bungie approach)
@@ -301,7 +302,8 @@ bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
       #if _DEBUG
          __debugbreak();
       #endif
-      count = this->max_count; // TODO: WARN
+      GameEngineVariantLoadWarningLog::get().push_back(QString("String table's maximum count is %1 strings; table claims to have %2 strings.").arg(this->max_count).arg(count));
+      count = this->max_count;
    }
    this->strings.reserve(count);
    for (size_t i = 0; i < count; i++) {
@@ -412,7 +414,7 @@ ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
    }
    stream.write(uncompressed_size, this->buffer_size_bitlength);
    //
-   bool should_compress = uncompressed_size >= 0x80; // TODO: better logic
+   bool should_compress = uncompressed_size >= 0x80;
    stream.write(should_compress, 1);
    //
    if (!should_compress) {

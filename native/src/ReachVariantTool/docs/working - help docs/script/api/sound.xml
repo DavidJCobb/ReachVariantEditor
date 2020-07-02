@@ -9,9 +9,9 @@
       
       <h2>All sounds (unsorted)</h2>
       <style>
-.sound-list q{display:block;font-style:italic;margin-top:.125em}
-   .sound-list q::before,
-   .sound-list q::after{content:'"'}
+.sound-list q{display:block;font-style:italic;margin-top:.125em;quotes: "“" "”" "‘" "’"}
+   .sound-list q::before{content:open-quote}
+   .sound-list q::after{content:close-quote}
 
 .sound-list dt[data-unused],
 .sound-list dt[data-unused]+dd{opacity:0.6}
