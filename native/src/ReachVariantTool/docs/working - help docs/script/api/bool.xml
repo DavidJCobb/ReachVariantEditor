@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="bool">
+   <friendly>Bool</friendly>
+   <blurb>The word <var>true</var> or the word <var>false</var>.</blurb>
+   <description>
+      <p>
+         A boolean value is either the word <var>true</var> or the word <var>false</var>. 
+         These values are typically used in cases where you need to specify whether 
+         something is "on" or "off," or "yes" or "no."
+      </p>
+      <p>
+         In Megalo, you can also use an integer constant. Non-zero values are interpreted 
+         as "true," while zero values are interpreted as "false."
+      </p>
+   </description>
+</script-type>

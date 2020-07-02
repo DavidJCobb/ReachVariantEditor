@@ -1,0 +1,190 @@
+[mongoose]
+name=Mongoose
+cate=vehicle
+desc=The name of a two-seater ATV used by the UNSC.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=Mongoose
+jp=マングース
+de=Mongoose
+fr=Mongoose
+es=Mongoose
+mx=Mongoose
+it=Mongoose
+ko=몽구스
+zh=貓鼬號
+pt=Mongoose
+
+[warthog]
+name=Warthog
+cate=vehicle
+desc=The name of a UNSC truck with an infantry-operated turret mounted on the truck bed.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=Warthog
+jp=ワートホグ
+de=Warthog
+fr=Warthog
+es=Warthog
+mx=Warthog
+it=Warthog
+ko=워트호그
+zh=疣豬號
+pt=Warthog
+
+[ghost]
+name=Ghost
+cate=vehicle
+desc=The name of a single-occupant Covenant land vehicle capable of strafing and rapid boosts.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=Ghost
+jp=ゴースト
+de=Ghost
+fr=Ghost
+es=Ghost
+mx=Ghost
+it=Ghost
+ko=고스트
+zh=幽靈號
+pt=Ghost
+
+[banshee]
+name=Banshee
+cate=vehicle
+desc=The name of a single-occupant Covenant air vehicle capable of evasive maneuvers.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=Banshee
+jp=バンシー
+de=Banshee
+fr=Banshee
+es=Banshee
+mx=Banshee
+it=Banshee
+ko=밴시
+zh=妖姬號
+pt=Banshee
+
+[revenant]
+name=Revenant
+cate=vehicle
+desc=The name of a two-seater Covenant land vehicle with a small mortar launcher operable by the driver.
+source=ui\cui\strings\forge_strings\revenant
+sourcetype=map
+en=Revenant
+jp=レヴナント
+de=Revenant
+fr=Revenant
+es=Revenant
+mx=Revenant
+it=Revenant
+ko=레버넌트
+zh=幽魂號
+pt=Revenant
+
+[scorpion]
+name=Scorpion
+cate=vehicle
+desc=The name of a UNSC tank, with a main cannon operable by the driver and a chaingun turret operable by a passenger.
+source=ui\cui\strings\forge_strings\scorpion
+sourcetype=map
+en=Scorpion
+jp=スコーピオン
+de=Scorpion
+fr=Scorpion
+es=Scorpion
+mx=Scorpion
+it=Scorpion
+ko=스콜피온
+zh=天蠍號
+pt=Scorpion
+
+[wraith]
+name=Wraith
+cate=vehicle
+desc=The name of a Covenant tank, with a mortar launcher operable by the driver and a chaingun turret operable by a passenger.
+source=ui\cui\strings\forge_strings\wraith
+sourcetype=map
+en=Wraith
+jp=レイス
+de=Wraith
+fr=Apparition
+es=Wraith
+mx=Wraith
+it=Wraith
+ko=레이스
+zh=亡魂號
+pt=Wraith
+
+[falcon]
+name=Falcon
+cate=vehicle
+desc=The name of a UNSC air vehicle with room for two door gunners.
+source=ui\cui\strings\forge_strings\falcon
+sourcetype=map
+en=Falcon
+jp=ファルコン
+de=Falcon
+fr=Falcon
+es=Falcon
+mx=Falcon
+it=Falcon
+ko=팰콘
+zh=獵鷹號
+pt=Falcon
+
+[shade]
+name=Shade Turret
+cate=vehicle
+desc=The name of a stationary Covenant plasma turret.
+source=ui\cui\strings\forge_strings\shade
+sourcetype=map
+en=Shade Turret
+jp=シェイドタレット
+de=Shade-Geschütz
+fr=Tourelle Spectre
+es=Torreta Shade
+mx=Torreta Shade
+it=Torretta Shade
+ko=셰이드 포탑
+zh=暗影砲塔
+pt=Torreta Shade
+
+[sabre]
+name=Sabre
+cate=vehicle
+desc=The name of a UNSC space fighter.
+source=ui\global_strings\damage_strings\excavator
+sourcetype=map
+en=Sabre
+jp=セイバー
+de=Sabre
+fr=Sabre
+es=Sabre
+mx=Sabre
+it=Sabre
+ko=세이버
+zh=軍刀號
+pt=Sabre
+
+[seraph]
+name=Seraph
+cate=vehicle
+desc=The name of a Covenant space fighter.
+source=ui\global_strings\damage_strings\seraph
+sourcetype=map
+en=Seraph
+jp=セラフ
+de=Seraph
+fr=Seraph
+es=Seraph
+mx=Seraph
+it=Seraph
+ko=세라프
+zh=天使號
+pt=Seraph

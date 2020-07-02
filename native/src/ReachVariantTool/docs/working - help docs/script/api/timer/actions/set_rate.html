@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>timer.set_rate | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/timer.html">Timer</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/timer/conditions/is_zero.html">is_zero</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/timer/actions/reset.html">reset</a></li>
+<li><a href="script/api/timer/actions/set_rate.html">set_rate</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>timer.set_rate</h1>
+<p>Set the rate and direction in which the timer advances.</p><h2>Arguments</h2>
+<dl>
+   <dt>rate</dt>
+      <dd>
+                  <p>The rate and direction at which the timer should advance. Positive 
+                  values will make the timer's value increase away from zero, while 
+                  negative values will make the timer's value decrease to (but not 
+                  past) zero. You may use any of the following rates (prefixed with 
+                  a minus sign for negative values):</p>
+                  <ul>
+                     <li>0%</li>
+                     <li>10%</li>
+                     <li>25%</li>
+                     <li>50%</li>
+                     <li>75%</li>
+                     <li>100%</li>
+                     <li>125%</li>
+                     <li>150%</li>
+                     <li>175%</li>
+                     <li>200%</li>
+                     <li>300%</li>
+                     <li>400%</li>
+                     <li>500%</li>
+                     <li>1000%</li>
+                  </ul>
+               </dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- A common use of timers is to announce the gametype name at the </span>
+<span class="comment">-- start of a round, by "sending an incident" a few seconds after </span>
+<span class="comment">-- script processing begins.</span>
+<span class="comment">--</span>
+<span class="keyword">alias</span> announced_start = player.number[0]
+<span class="keyword">alias</span> announced_timer = player.timer[0]
+<span class="keyword">declare</span> player.announced_timer = 5
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.announced_start == 0 <span class="keyword">then</span>
+      current_player.announced_timer.set_rate(-100%)
+      <span class="keyword">if</span> current_player.announced_timer.is_zero() <span class="keyword">then</span>
+         current_player.announced_start = 1
+         send_incident(action_sack_game_start, current_player, no_player)
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

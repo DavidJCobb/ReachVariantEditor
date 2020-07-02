@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Required Object Types</title>
+   <body>
+      <p>
+         The <b>required object types</b> page allows you to determine which object 
+         types must be implemented on a map in order for a game variant to be compatible.
+      </p>
+      <img src="required-object-types.png" />
+      <p>
+         If any object type in this list has its checkbox checked, then <i>Halo: Reach</i> 
+         will not allow players to play this game variant on any base map that does not 
+         define that object. For example, if the "Covenant Bomb" object is checked, then 
+         players will not be able to play the game variant on any map other than Breakpoint, 
+         which is the only one to define the Covenant Bomb.
+      </p>
+      <p>
+         The list includes several object type names that aren't actually implemented in 
+         <i>Halo: Reach</i>, such as the Chopper, Brute Shot, and other <i>Halo 3</i> 
+         leftovers. No, there's no way to magically spawn these in the game.
+      </p>
+   </body>
+</article>

@@ -50,7 +50,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->index);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueObjectTimerVariable::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueObjectTimerVariable::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
             auto word = arg.extract_word();
@@ -82,9 +82,15 @@ namespace Megalo {
                // Look for an absolute alias of an integer.
                //
                auto alias = compiler.lookup_absolute_alias(word);
-               if (!alias || !alias->is_integer_constant())
-                  return arg_compile_result::failure();
-               index = alias->get_integer_constant();
+               if (alias && alias->is_integer_constant()) {
+                  index = alias->get_integer_constant();
+               } else {
+                  //
+                  // Look for an enum value.
+                  //
+                  if (!compiler.try_decode_enum_reference(word, index))
+                     return arg_compile_result::failure();
+               }
             }
          }
          //
@@ -157,7 +163,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->playerIndex);
          out.write(temp);
       }
-      arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+      arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
             auto word = arg.extract_word();
@@ -185,9 +191,15 @@ namespace Megalo {
                // Look for an absolute alias of an integer.
                //
                auto alias = compiler.lookup_absolute_alias(word);
-               if (!alias || !alias->is_integer_constant())
-                  return arg_compile_result::failure();
-               index = alias->get_integer_constant();
+               if (alias && alias->is_integer_constant()) {
+                  index = alias->get_integer_constant();
+               } else {
+                  //
+                  // Look for an enum value.
+                  //
+                  if (!compiler.try_decode_enum_reference(word, index))
+                     return arg_compile_result::failure();
+               }
             }
          }
          //

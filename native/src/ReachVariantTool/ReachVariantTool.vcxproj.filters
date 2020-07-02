@@ -322,9 +322,6 @@
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_variants\components\megalo\compiler\string_scanner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="helpers\qt\string.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -359,6 +356,39 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\timer_rate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\generic\QListWidgetEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\localization_library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\localized_string_library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\string_scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\editor_file_block.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\io_process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\main_window\debug_helper_functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\compiler\enums.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\fireteam_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\qt\widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -480,6 +510,15 @@
     <QtMoc Include="ui\script_editor\bottom_bar.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\script_editor\compiler_unresolved_strings.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\generic\QListWidgetEx.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\localized_string_library.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
@@ -569,9 +608,15 @@
     <QtUic Include="ui\script_editor\bottom_bar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="ui\script_editor\compiler_unresolved_strings.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\localized_string_library.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="ui\main_window.qrc">
+    <QtRcc Include="Resources\main_window.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>
@@ -873,9 +918,6 @@
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_variants\components\megalo\compiler\string_scanner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="helpers\qt\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -903,6 +945,30 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\timer_rate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="services\localization_library.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\string_scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\io_process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\editor_file_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\main_window\debug_helper_functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\compiler\enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\fireteam_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\widget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -910,5 +976,7 @@
   <ItemGroup>
     <Text Include="README.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
+    <Text Include="docs\saving files that exceed file format limits.txt" />
+    <Text Include="docs\plans - true else(if) statements.txt" />
   </ItemGroup>
 </Project>

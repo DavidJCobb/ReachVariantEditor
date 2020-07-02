@@ -35,16 +35,20 @@ class ReachMegaloOptionValueEntry {
       void read(cobb::ibitreader&, ReachMegaloOption& owner) noexcept;
       void postprocess_string_indices(ReachStringTable& table) noexcept;
       void write(cobb::bitwriter& stream, const ReachMegaloOption& owner) noexcept;
+      //
+      static uint32_t bitcount() noexcept;
 };
 
 class ReachMegaloOption : public indexed_list_item {
    public:
+      ~ReachMegaloOption();
+      //
       MegaloStringRef name;
       MegaloStringRef desc;
       MegaloStringIndex nameIndex;
       MegaloStringIndex descIndex;
       cobb::bitbool isRange;
-      ReachMegaloOptionValueEntry* rangeDefault = nullptr; // TODO: ownership; destroy these when the ReachMegaloOption is destroyed
+      ReachMegaloOptionValueEntry* rangeDefault = nullptr;
       ReachMegaloOptionValueEntry* rangeMin = nullptr;
       ReachMegaloOptionValueEntry* rangeMax = nullptr;
       cobb::pointer_list<ReachMegaloOptionValueEntry> values = decltype(values)(true);
@@ -59,4 +63,8 @@ class ReachMegaloOption : public indexed_list_item {
       ReachMegaloOptionValueEntry* add_value() noexcept;
       void delete_value(ReachMegaloOptionValueEntry*) noexcept;
       void make_range() noexcept;
+      void swap_values(size_t a, size_t b) noexcept;
+      bool uses_string(ReachString*) const noexcept;
+      //
+      uint32_t bitcount() const noexcept;
 };

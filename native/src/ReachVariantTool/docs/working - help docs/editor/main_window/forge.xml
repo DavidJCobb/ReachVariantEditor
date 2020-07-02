@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Forge Settings</title>
+   <body>
+      <p>
+         The <b>Forge settings</b> page allows you to edit options related to Forge. 
+         It only appears when opening a Forge variant file.
+      </p>
+      <img src="forge.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Enable Open-Channel Voice</dt>
+            <dd>Unknown.</dd>
+         <dt>Unknown Flag 1</dt>
+            <dd>Unknown.</dd>
+         <dt>Editor Respawn Time</dt>
+            <dd>Presumably controls how long it takes for players to respawn if they 
+            die while in Edit Mode; however, testing suggests it may not be used.</dd>
+         <dt>Edit Mode Access</dt>
+            <dd>Unknown.</dd>
+      </dl>
+   </body>
+</article>

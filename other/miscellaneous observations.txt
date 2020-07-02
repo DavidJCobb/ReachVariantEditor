@@ -1,3 +1,16 @@
+A "for each team" loop also iterates over neutral_team, judging by a look at Freeze Tag's 
+script.
+
+If a timer's rate is negative and the timer reaches zero, then the timer's rate will be 
+changed to 0%.
+
+If a timer's rate is positive, it will count up to its initial value and then stop... 
+unless its initial value is zero, in which case it will count up indefinitely.
+
+Analysis of Invasion Slayer's script indicates that if a timer's rate is positive, the 
+timer will be capped at its declared initial value. Unknown whether that changes if the 
+initial value is zero. Manually assigning a number may allow you to circumvent the cap.
+
 If a player is forced into a Monitor biped and then given a weapon, they will be able 
 to fire that weapon if it is a ranged weapon, and they will be able to swap it out 
 with any other weapon. Ranged weapons can do damage and kill, though this may only be 
@@ -36,4 +49,214 @@ round timer to display the current phase's remaining time.
 The object.shape_contains condition only checks the pivot point for the target object. 
 For example, if you try to check whether a shape contains a Warthog, the check will only 
 pass if the Warthog's centerpoint is inside of the shape.
+
+Deleting the player's current biped will cause them to instantly respawn.
+
+When a biped enters a vehicle, it is considered to be attached to that vehicle. This 
+means that a biped cannot be attached to another object if it is occupying a vehicle, 
+and detaching a biped will instantly force it out of any vehicle it is currently using.
+
+Detaching a player's held weapons will remove those weapons from them.
+
+---
+
+Detaching a player's equipped Armor Ability will not remove it from them; however, it 
+will stop moving in synch with them. At this point it can be moved independently of them 
+without them losing it (though I've not tested independently moving it out of bounds); 
+they do not have physics or collision and will remain fixed at whatever spot a script 
+moves them to. The armor abilities will be teleported back to their carrying player if 
+their carrying player dies.
+
+ - A jetpack moved in this manner will show thruster animations without moving whenever 
+   its carrying player uses it.
+
+ - An active camo moved in this manner will no longer turn invisible with its carrying 
+   player. The radar-jamming effect comes from the armor ability object itself, so 
+   detaching the ability from the player's back will cause the radar jammer to no longer 
+   follow their movement.
+
+---
+
+Attaching a biped to an object will lock the biped in place. If the biped is controlled 
+by the player, they will be able to turn but not to move, and their first-person legs 
+will desynch from their upper body.
+
+Attaching a vehicle to an object will lock the vehicle in place. The pilot will be able 
+to look around in any angle, but the vehicle will not turn, and any vehicle weapons fire 
+will be constrained to the weapon's turn radius. Attached vehicles will not play any 
+entry/exit animations (e.g. a Banshee's canopy opening on exit) while attached, but will 
+instantaneously update to any animations end states when detached (i.e. a Banshee's 
+canopy will instantly snap open or closed as appropriate). If a Banshee is performing an 
+evasive maneuver at the moment it is attached, the maneuver will end instantaneously; no 
+such maneuvers can be performed once the vehicle is attached. Spartans in an attached 
+vehicle will lose most animations; passengers' hands may move slightly (and incorrectly) 
+when reloading their weapon; though passengers have no reloading or weapon swap 
+animations, appropriate sounds still play, and they cannot fire their weapons while the 
+non-animations are taking place. Some animations have player model jiggle physics (I 
+swear I'm not making that up) which will remain functional even though the rest of the 
+animation does not.
+
+Megalo script actions can be used to get and modify a vehicle's current health. Actions 
+for modifying the maximum health seem to affect the current health only. Modifying a 
+vehicle's health via script will not affect its visual appearance (i.e. damage graphics 
+won't appear or disappear); however, the next time a vehicle takes damage normally, it 
+will gain all damage graphics associated with its current health (though it will not 
+lose any damage graphics present if it has health restored and then takes damage). A 
+vehicle will be destroyed normally and with appropriate visuals when its health is set 
+to zero.
+
+Damaged vehicles will regenerate health if left alone. This doesn't seem to occur 
+consistently if Megalo script is used to cause the damage, and regeneration only occurs 
+up to specific thresholds. Observed thresholds are: 20, 50.
+
+Halo Chess uses object.face_toward and object.copy_rotation_from to get the chess pieces 
+facing in the right directions.
+
+Whenever a number is used as a coordinate, e.g. in a vector3 argument, the unit of 
+measurement is 0.1 Forge units.
+
+In FFA games, the player doesn't appear to be considered part of team[0]. However, Forge 
+labels set to target all Team 1 objects will also target players in FFA and any rockets, 
+grenades, and other iterable projectiles that they create.
+
+Attaching an object to a Hill Marker will render that object mostly incorporeal: it will 
+turn invisible and lose all collision and physics. Attached vehicles will still offer 
+activation prompts, allowing players to enter and exit the vehicle.
+
+Attaching an object to a non-solid target, such as a Flag Stand, will render the attached 
+object non-solid as well.
+
+The set_waypoint_range opcode will hide waypoints, but not disable them. If you're adding 
+waypoints to very many objects, this opcode will not prevent the UI from misbehaving, 
+with observed problems including flickering waypoints, some objects failing to show 
+waypoints, and the game preferring to show waypoints on the closest objects (yet also 
+preferring to show waypoints on some object types rather than others). This can be 
+worked around by manually checking object distances and adjusting who can see the way-
+points based on those distances.
+
+I need to test to confirm this explicitly, but it seems like the game can only render 64 
+shape boundaries at a time, regardless of which ones are in the field of view. The game 
+likewise seems to be capped to displaying scripted waypoints for about 20 objects.
+
+In one of my tests, the "object death" event did not trigger when blowing up Fusion Coils, 
+but did trigger when a player biped died. It's possible that only certain types of objects 
+can "die," as opposed to being deleted with an explosion.
+
+The object.set_scale action can fail if the following conditions are met: you have created 
+the subject object and attached it to another object in the same game tick; and the other 
+object already existed at the start of this tick.
+
+The object.copy_rotation_to action can fail if the subject object is attached to another 
+object when the opcode is called.
+
+---
+
+There is no easily discoverable limit to the script engine's call depth. I wrote a test 
+script which would recursively decrement a counter to zero when some trigger condition 
+was activated, and which allowed me to control the value of the counter in-game. I wrote 
+checks which were designed to catch the following failure modes:
+
+ - The game halts script execution when the max call depth is reached. The counter will 
+   retain a non-zero value at the start of the next script execution.
+
+ - The game refuses to perform any further calls when the max call depth is reached, but 
+   otherwise continues script execution. The counter will have a non-zero value directly 
+   after the recursive call was made.
+
+Neither failure mode was caught when testing counter values up to 5000.
+
+---
+
+If you attempt to attach an object to a Warthog, it may instead attach to the nearest 
+animated part of the Warthog and rotate with that individual part. Observed attachments 
+include all four tires and the Warthog's steering wheel. Distance didn't appear to 
+affect the result; in my tests, a bomb attached to exactly 2.0 Forge units (20 Megalo 
+units) above a Warthog anchored to the Warthog's steering wheel. My recommendation is to 
+attach a "basis" object to (0, 0, 0) on the vehicle, and then attach all relative objects 
+to that basis.
+
+I set up a test to measure how many times per second a Megalo script runs. When run on my 
+machine, locally, as part of a simple test variant, it registered 61 executions per second, 
+though it's possible the first second of gameplay had one or two extra.
+
+---
+
+You can force a player into a biped while the initial loadout camera is playing, and they 
+will be able to play early. However, if you do this, the player will hear a constant shrill 
+beeping, like the ring of an alarm clock. It appears that this beeping plays for every 
+frame that the player spends in control of a biped, if that player has never controlled a 
+"natural" biped before; the solution is to ensure that the player has spent at least one 
+frame in control of a normally-spawned biped before forcing them into a new biped.
+
+I was able to identify the beeping sound; it is defined in the following tags. These tags 
+seem to have been intended for the Missile Pod, a weapon present only in Halo 3; however, 
+a search for Missile Pod gameplay videos on YouTube failed to turn up any where this exact 
+sound plays.
+
+   lsnd\sound\weapons\missile_launcher\tracking_locking\locking\loop
+   snd!\sound\weapons\missile_launcher\tracking_locking\locking\loop
+
+I was unable to locate anything that could use the tag. If the usual community tools for 
+browsing *.MAP files allow you to search for anything that uses a tag, I haven't managed 
+to find that feature.
+
+---
+
+If necessary, you can spawn a biped inside of a vehicle by spawning the biped, forcing a 
+player to control it, forcing the player into the vehicle, and then returning the player 
+to their original biped. However, there will be a brief cut to black for that player; they 
+will notice the loss of control.
+
+When a player attempts to enter an unoccupied seat in a vehicle, they perform an animation, 
+but as far as the game is concerned, their position is instantly moved to that of the seat. 
+If you write a script to delete any player biped that enters a volume, and place the volume 
+to cover the turret on a Warthog, a player will be deleted and respawned the very instant 
+they interact with the turret, before any animation can play.
+
+Moving an Initial Loadout Camera object during the loadout camera period will not update 
+the game camera's position in real-time; you can't animate the loadout camera.
+
+It appears that attaching an object to no_object and detaching it will teleport it to the 
+world origin. Per tests, on Forge World, this is a point out by Hemorrhage's beach.
+
+Teams cannot be displayed in format strings; you may expect "%s" to display the team name, 
+but it instead displays nothing.
+
+If one biped is assassinating another, deleting the victim will not interrupt the killer's 
+assassination animation.
+
+When a host migration occurs, script-spawned bipeds may be duplicated (with the originals 
+dying even if the biped had invincibility set) or other oddities may occur. Halo Chess 
+deletes all spawned bipeds upon host migration, and crucially, it does so without trying 
+to reference them through script variables (i.e. it uses a for-each-object loop and just 
+yeets all Spartans and Elites out of existence). In my own experience with this issue, 
+trying to delete affected bipeds through script variables does nothing; tests for a brute-
+force deletion a la Halo Chess are pending as of this writing.
+
+If a team is not present in a match, then attempting to assign it to a team variable will 
+not change that team variable's value; if the team variable had previously referred to a 
+different team then it will continue to refer to that different team. The workaround is 
+to set the team variable to (no_team) before assigning a team that you're not sure is in 
+the match.
+
+If a player quits, and a player variable refers to that player, then the variable may not 
+be cleared out. A (for each player) loop will only iterate players that are currently 
+present in the match, so in the worst case scenario, you can use that loop to check if a 
+given player-variable's player is still present in the match.
+
+Testing suggests that weapons cannot show waypoints if they are being carried by bipeds.
+
+If, during an FFA game, a player is granted control of a scripted biped and then has that 
+control revoked, the scripted biped will retain that player's armor color and alliance, 
+i.e. that player will see a green reticle when aiming at the biped even if they had seen 
+a red one prior to taking control of the biped.
+
+Suppose a player is given control of a biped and later has that control revoked. If at 
+some point afterward you try to rotate the biped and give the player control over it, all 
+on the same frame, then the rotation will fail: the biped will continue to aim in the last 
+direction the player was aiming when they lost control over it. This can cause issues in 
+cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
+is to rotate the biped on one frame and then wait 'til the next to actually force the 
+player into it.
+
 

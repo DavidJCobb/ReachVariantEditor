@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>player.set_biped | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/player.html">Player</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Properties</a>
+                     <ul>
+                        <li><a href="script/api/player/properties/biped.html">biped</a></li>
+<li><a href="script/api/player/properties/rating.html">rating</a></li>
+<li><a href="script/api/player/properties/score.html">score</a></li>
+<li><a href="script/api/player/properties/script_stat.html">script_stat[<var>n</var>]</a></li>
+<li><a href="script/api/player/properties/team.html">team</a></li>
+<li><a href="script/api/player/properties/unknown_09.html">unknown_09</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Accessors</a>
+                     <ul>
+                        <li><a href="script/api/player/accessors/frag_grenades.html">frag_grenades</a></li>
+<li><a href="script/api/player/accessors/plasma_grenades.html">plasma_grenades</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        <li><a href="script/api/player/conditions/assisted_kill_of.html">assisted_kill_of</a></li>
+<li><a href="script/api/player/conditions/is_elite.html">is_elite</a></li>
+<li><a href="script/api/player/conditions/is_fireteam_leader.html">is_fireteam_leader</a></li>
+<li><a href="script/api/player/conditions/is_monitor.html">is_monitor</a></li>
+<li><a href="script/api/player/conditions/is_not_respawning.html">is_not_respawning</a></li>
+<li><a href="script/api/player/conditions/is_spartan.html">is_spartan</a></li>
+<li><a href="script/api/player/conditions/killer_type_is.html">killer_type_is</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
+<li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
+<li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
+<li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
+<li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
+<li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
+<li><a href="script/api/player/actions/set_co_op_spawning.html">set_co_op_spawning</a></li>
+<li><a href="script/api/player/actions/set_fireteam.html">set_fireteam</a></li>
+<li><a href="script/api/player/actions/set_loadout_palette.html">set_loadout_palette</a></li>
+<li><a href="script/api/player/actions/set_primary_respawn_object.html">set_primary_respawn_object</a></li>
+<li><a href="script/api/player/actions/set_req_purchase_modes.html">set_req_purchase_modes</a></li>
+<li><a href="script/api/player/actions/set_requisition_palette.html">set_requisition_palette</a></li>
+<li><a href="script/api/player/actions/set_round_card_icon.html">set_round_card_icon</a></li>
+<li><a href="script/api/player/actions/set_round_card_text.html">set_round_card_text</a></li>
+<li><a href="script/api/player/actions/set_round_card_title.html">set_round_card_title</a></li>
+<li><a href="script/api/player/actions/try_get_armor_ability.html">try_get_armor_ability</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_mod.html">try_get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/try_get_death_damage_type.html">try_get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/try_get_killer.html">try_get_killer</a></li>
+<li><a href="script/api/player/actions/try_get_vehicle.html">try_get_vehicle</a></li>
+<li><a href="script/api/player/actions/try_get_weapon.html">try_get_weapon</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>player.set_biped</h1>
+
+               <p>
+                  If this function is passed a valid biped, it forces the context player to 
+                  abandon control of their current biped and take control of the passed-in 
+                  biped. If this function is not passed a valid biped, then it does nothing. 
+                  Either way, the player's old biped is not deleted from the map; it simply 
+                  becomes an inactive NPC.
+               </p>
+            <h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/object.html">biped</a></dt>
+      <dd>The biped to force the player into.</dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- Force players into Monitors.</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.biped != no_object <span class="keyword">and</span> <span class="keyword">not</span> current_player.biped.is_of_type(monitor) <span class="keyword">then</span>
+      global.object[0] = current_player.biped
+      global.object[1] = current_player.biped.place_at_me(monitor, none, none, 0, 0, 0, none)
+      current_player.set_biped(global.object[1])
+      global.object[0].delete()
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               Holograms do not <a href="script/api/object/conditions/is_of_type.html">test</a> 
+               as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
+               passing a Hologram to <code>set_biped</code> will place the player in control 
+               of the biped.
+            </p></li>
+   <li>
+               <p>
+                  If necessary, you can spawn a biped inside of a vehicle by spawning the 
+                  biped, forcing a player to control it, forcing the player into the vehicle, 
+                  and then returning the player to their original biped. However, if the 
+                  player is spawned on the map at the time, then there will be a brief cut to 
+                  black for that player; they will notice the loss of control. If you need to 
+                  spawn NPC bipeds into vehicles, it is best to do this during the initial 
+                  loadout camera or while a player is waiting to respawn, if possible.
+               </p>
+               <p>
+                  NPC bipeds that occupy vehicles will behave the same as players who are not 
+                  providing any inputs; for example, an NPC-occupied Banshee will fly forward 
+                  automatically.
+               </p>
+            </li>
+   <li><p>
+               By default, Monitors spawn with an invisible Focus Rifle, and are capable of 
+               picking up weapons, grenades, and Armor Abilities. Monitors can fire any 
+               ranged weapon and can use any Armor Ability that does not depend on character 
+               model animations (e.g. they can use Active Camo but cannot Sprint); they 
+               cannot melee or throw grenades, though they will make melee sounds. Equipped 
+               Armor Abilities will be visible on the Monitor's body, displaying their 
+               holographic icons as if they were still lying around waiting to be picked up.
+            </p></li>
+   <li><p>
+               Once a Megalo-spawned biped has been controlled by a player, it will take on 
+               that player's appropriate armor or team color and (if it's a Spartan) its 
+               voice will match the player's chosen gender regardless of its own gender 
+               presentation. Moreover, in FFA games, the biped will appear allied to the 
+               last player who controlled it, even if it appeared as an enemy to them 
+               beforehand.
+            </p></li>
+   <li>
+               <p>
+                  You can force a player into a biped while the initial loadout camera is playing, and they 
+                  will be able to play early. However, if you do this, the player will hear a constant shrill 
+                  beeping, like the ring of an alarm clock. It appears that this beeping plays for every 
+                  frame that the player spends in control of a biped, if that player has never controlled a 
+                  "natural" biped before; the solution is to ensure that the player has spent at least one 
+                  frame in control of a normally-spawned biped before forcing them into a new biped.
+               </p>
+               <p>
+                  I was able to identify the beeping sound; it is defined in the following tags. These tags 
+                  seem to have been intended for the Missile Pod, a weapon present only in <i>Halo 3</i>; however, 
+                  a search for Missile Pod gameplay videos on YouTube failed to turn up anywhere this exact 
+                  sound plays.
+               </p>
+               <ul>
+                  <li>lsnd\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+                  <li>snd!\sound\weapons\missile_launcher\tracking_locking\locking\loop</li>
+               </ul>
+               <p>
+                  I was unable to locate anything that could use the tag. If the usual community tools for 
+                  browsing *.MAP files allow you to search for anything that uses a tag, I haven't managed 
+                  to find that feature.
+               </p>
+            </li>
+   <li><p>
+               Suppose a player is given control of a biped and later has that control revoked. If at 
+               some point afterward you try to rotate the biped and give the player control over it, all 
+               on the same frame, then the rotation will fail: the biped will continue to aim in the last 
+               direction the player was aiming when they lost control over it. This can cause issues in 
+               cases where you want to switch a player between multiple bipeds, seamlessly; the solution 
+               is to rotate the biped on one frame and then wait 'til the next to actually force the 
+               player into it.
+            </p></li>
+</ul>
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

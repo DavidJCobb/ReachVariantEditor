@@ -54,7 +54,7 @@ namespace Megalo {
          cobb::sprintf(out, "script traits %u", f->index);
          return;
       }
-      out = f->name->english();
+      out = f->name->get_content(reach::language::english);
    }
    void OpcodeArgValuePlayerTraits::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       if (!this->value) {
@@ -68,7 +68,7 @@ namespace Megalo {
       cobb::sprintf(temp, "script_traits[%u]", this->value->index);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValuePlayerTraits::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValuePlayerTraits::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       //
       // Detour through the VariableReference overload because we want to allow the user to 
       // refer to player traits by way of an alias.

@@ -67,6 +67,8 @@ namespace cobb {
       }
       this->_buffer = buf;
       this->_size   = size;
+      if (this->_bitpos > size * 8)
+         this->_bitpos = size * 8;
       if (old)
          free(old);
       this->_sync_shared_buffer();
@@ -128,5 +130,18 @@ namespace cobb {
       if (result > max_encoded)
          result = max_encoded;
       this->write(result, bitcount);
+   }
+   void bitwriter::write_stream(const bitwriter& other) noexcept {
+      this->_ensure_room_for(other.get_bitpos());
+      //
+      uint32_t size = other.get_bytepos();
+      for (uint32_t i = 0; i < size; ++i) {
+         auto current = other._buffer[i];
+         this->write(current);
+      }
+      if (auto shift = other.get_bitshift()) {
+         auto current = other._buffer[size] >> (8 - shift);
+         this->write(current, shift);
+      }
    }
 }

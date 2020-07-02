@@ -55,4 +55,10 @@ namespace Megalo {
       arg->index = 0;
       return arg;
    }
+   bool OpcodeArgValuePlayer::set_to_zero_or_none() noexcept {
+      this->scope = &variable_scope_indicators::player::global_player;
+      this->which = variable_which_values::player::no_player.as_integer();
+      this->index = 0;
+      return true;
+   }
 }

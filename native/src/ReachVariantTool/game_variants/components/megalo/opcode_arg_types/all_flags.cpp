@@ -30,12 +30,12 @@ namespace Megalo {
             DetailedFlagsValueInfo::make_description("Used when a player's biped dies as a result of the player quitting the match.")
          )
       });
-      auto player_unused_mode = DetailedFlags({
+      auto player_req_purchase_mode = DetailedFlags({
          DetailedFlagsValue("alive_weapons"),
          DetailedFlagsValue("alive_equipment"),
          DetailedFlagsValue("alive_vehicles"),
          DetailedFlagsValue("dead_weapons"),
-         DetailedFlagsValue("dead_equipment") // TODO: previous versions of KSoft only listed four flags; we should double-check this
+         DetailedFlagsValue("dead_equipment")
       });
    }
 
@@ -88,7 +88,7 @@ namespace Megalo {
          out = "none";
       decompiler.write(out);
    }
-   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueFlagsSuperclass::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       this->value = 0;
       //
       auto prior = arg.backup_stream_state();
@@ -144,7 +144,7 @@ namespace Megalo {
       flags_masks::killer_type
    ).import_names({ "none" });
    //
-   OpcodeArgValuePlayerReqPurchaseModes::OpcodeArgValuePlayerReqPurchaseModes() : OpcodeArgValueFlagsSuperclass(flags_masks::player_unused_mode) {}
+   OpcodeArgValuePlayerReqPurchaseModes::OpcodeArgValuePlayerReqPurchaseModes() : OpcodeArgValueFlagsSuperclass(flags_masks::player_req_purchase_mode) {}
    OpcodeArgTypeinfo OpcodeArgValuePlayerReqPurchaseModes::typeinfo = OpcodeArgTypeinfo(
       "_player_req_purchase_modes",
       "Player Requisition Purchase Modes",
@@ -152,6 +152,6 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValuePlayerReqPurchaseModes>,
-      flags_masks::player_unused_mode
+      flags_masks::player_req_purchase_mode
    ).import_names({ "none" });
 }

@@ -70,7 +70,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="main_window.qrc">:/ReachVariantTool/Resources/icon_128px.png</pixmap>
+           <pixmap resource="../Resources/main_window.qrc">:/ReachVariantTool/icon_128px.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool v1.0.6</string>
+           <string>ReachVariantTool v2.0.0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -348,8 +348,16 @@
     <addaction name="actionDebugExportStringsText"/>
     <addaction name="actionDebugMisc"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelpWeb"/>
+    <addaction name="actionHelpFolder"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -417,6 +425,16 @@
   <action name="actionDebugExportStringsText">
    <property name="text">
     <string>Debug: Export strings to text</string>
+   </property>
+  </action>
+  <action name="actionHelpWeb">
+   <property name="text">
+    <string>View Help (in browser)</string>
+   </property>
+  </action>
+  <action name="actionHelpFolder">
+   <property name="text">
+    <string>View Help (in folder)</string>
    </property>
   </action>
  </widget>
@@ -517,7 +535,8 @@
   <tabstop>optionTogglesEngine</tabstop>
  </tabstops>
  <resources>
-  <include location="main_window.qrc"/>
+  <include location="../Resources/main_window.qrc"/>
+  <include location="../Resources/main_window.qrc"/>
  </resources>
  <connections/>
 </ui>

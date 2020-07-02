@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>All Other Strings</title>
+   <body>
+      <p>
+         The <b>string table</b> page can be used to edit all of the strings used by a 
+         gametype's script. Each entry consists of several translations into different 
+         languages.
+      </p>
+      <img src="string-table.png" />
+      <p>
+         You can edit an entry, create new entries, or delete entries that aren't in use 
+         by the gametype script. You can also copy the English-language content of the 
+         entry as either normal text, a string literal suitable for use in gametype code, 
+         or an index in the string table.
+      </p>
+      <p>
+         Internally, the string table is serialized as a <dfn>buffer</dfn> &mdash; a 
+         blob of data consisting of all localizations, back to back, separated with null 
+         terminators. Each localization stores the offset of the start of its string 
+         content; the game loads localizations by copying data from that offset to the 
+         next null terminator.
+      </p>
+      <p>
+         The string table is subject to the following limits:
+      </p>
+      <ul>
+         <li>There can be no more than 112 entries.</li>
+         <li>The total size of the buffer, including null terminators at the ends of 
+         strings, cannot be more than 19456 bytes (whether compressed or uncompressed).</li>
+      </ul>
+      <p>
+         Compared to Bungie's own development tools, ReachVariantTool applies a minor 
+         optimization: if any two localizations are exactly identical, even across 
+         different entries, then they are only written into the buffer once, and the 
+         two localizations share string content. Bungie only applies this optimization 
+         in the case of all localizations in a single entry being exactly identical; 
+         in practice this only occurs for Forge labels and team name overrides (which 
+         are stored in a different string table anyway).
+      </p>
+   </body>
+</article>

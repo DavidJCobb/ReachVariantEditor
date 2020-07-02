@@ -16,7 +16,7 @@ class ReachEditorState : public QObject {
          return instance;
       }
       //
-      ReachEditorState() {}
+      ReachEditorState();
       ReachEditorState(const ReachEditorState& other) = delete; // no copy
       //
    private:

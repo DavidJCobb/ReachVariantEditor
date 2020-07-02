@@ -180,5 +180,48 @@ namespace cobb {
             }
             return -1;
          }
+         //
+         void remove(uint32_t index) noexcept {
+            //
+            // Let's pretend for a second we're using 8-bit chunks. The indices are laid out like this:
+            //
+            //    76543210 FEDCBA98
+            //
+            // If we want to remove bit 5, then our goal is to produce this result:
+            //
+            //    87643210 xFEDCBA9
+            //
+            // We'll take care of this as follows:
+            //
+            //  - Use a test-and-modify loop for the bits of the first chunk we need to edit, because 
+            //    right now I can't work out in my head how to "cut" a DWORD in two at an arbitrary bit.
+            //
+            //  - Use bitwise operators to deal with all subsequent chunks, if any.
+            //
+            uint32_t cap = index - (index % bits_per_chunk) + bits_per_chunk;
+            if (cap >= count) {
+               cap = count;
+               for (; index + 1 < cap; ++index)
+                  this->modify(index, this->test(index + 1));
+               this->reset(index);
+               return;
+            }
+            //
+            uint32_t ci = index / bits_per_chunk;
+            for (; index + 1 < cap; ++index) // 76543210 FEDCBA98 -> remove 5 -> 77643210 FEDCBA98
+               this->modify(index, this->test(index + 1));
+            this->modify(index, this->test(index + 1)); // 76543210 FEDCBA98 -> remove 5 -> 87643210 FEDCBA98
+            ++ci;
+            for (; ci + 1 < chunk_count; ++ci) {
+               this->data[ci] >>= 1;
+               this->data[ci] |= (this->data[ci + 1] & 1) ? 1 : 0;
+            }
+         }
+         void swap_bits(uint32_t a, uint32_t b) noexcept {
+            bool x = this->test(a);
+            bool y = this->test(b);
+            this->modify(a, y);
+            this->modify(b, x);
+         }
    };
 };

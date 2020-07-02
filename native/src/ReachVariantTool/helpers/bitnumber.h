@@ -53,7 +53,7 @@ namespace cobb {
          static constexpr int  bitcount        = bitcount;
          static constexpr bool uses_offset     = offset;
          static constexpr bool has_presence    = !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
-         static constexpr int  max_bitcount    = bitcount + (has_presence) ? 1 : 0;
+         static constexpr int  max_bitcount    = bitcount + (has_presence ? 1 : 0);
          //
          underlying_type value = underlying_type();
          //

@@ -10,9 +10,15 @@ class ScriptEditorBottomPane : public QWidget {
    protected:
       Ui::ScriptEditorBottomPane ui;
       //
+      static GameVariantDataMultiplayer* _get_mp(GameVariant* variant);
+      //
       void updateFromVariant(GameVariant* variant = nullptr);
+      void updateFixedLengthAreas();
+      void updateScriptSize(GameVariant* variant = nullptr);
+      //
       struct _SegmentIndexList {
          int header;
+         int header_strings;
          int cg_options;
          int team_config;
          int script_traits;
@@ -23,5 +29,7 @@ class ScriptEditorBottomPane : public QWidget {
          int script_stats;
          int script_widgets;
          int forge_labels;
+         int title_update_1;
       } indices;
+      ReachMPSizeData sizeData;
 };

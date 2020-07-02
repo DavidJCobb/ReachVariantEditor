@@ -203,7 +203,7 @@
   <tabstop>position</tabstop>
  </tabstops>
  <resources>
-  <include location="../main_window.qrc"/>
+  <include location="../../Resources/main_window.qrc"/>
  </resources>
  <connections/>
 </ui>

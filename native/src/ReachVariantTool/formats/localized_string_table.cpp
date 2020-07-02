@@ -3,12 +3,13 @@ extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
 }
 #include "../game_variants/errors.h"
+#include "../game_variants/warnings.h"
+#include "../helpers/strings.h"
 
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_BUNGIE     1 // Only optimize single-language strings (Bungie approach)
 #define MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES 2 // If two strings are exactly identical in their entirety, overlap them
-#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // If one string is exactly identical to the end of another, overlap them (my approach; needs revision for performance)
+#define MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP    3 // [not supported by MCC] If one string is exactly identical to the end of another, overlap them
 #define MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD  MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
-
 
 //
 // Notes on Bungie's string table compression:
@@ -26,10 +27,16 @@ extern "C" {
 
 namespace reach {
    extern bool language_is_optional(language l) noexcept {
-      return l == language::polish;
+      return l == language::polish || l == language::chinese_simplified; // Bungie doesn't define strings for either of these, and KSoft explicitly describes the former as optional
    }
 };
 
+#pragma region ReachString
+void ReachString::_set_dirty() noexcept {
+   this->dirty = true;
+   if (this->owner)
+      this->owner->set_dirty();
+}
 void ReachString::read_offsets(cobb::ibitreader& stream, ReachStringTable& table) noexcept {
    this->is_defined = true;
    for (size_t i = 0; i < this->offsets.size(); i++) {
@@ -84,7 +91,7 @@ void ReachString::write_strings(std::string& out) noexcept {
       // NOTE: DO NOT serialize empty strings with a -1 offset; Bungie doesn't do that and I assume it's for a 
       // reason.
       //
-      if (this->offsets[i] == -1) // string was absent when we read it, so keep it absent (in lieu of the above)
+      if (s.empty() && this->offsets[i] == -1) // string was absent when we read it, so keep it absent (in lieu of the above)
          continue;
       #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
          //
@@ -113,46 +120,22 @@ void ReachString::write_strings(std::string& out) noexcept {
             continue;
          }
       #endif
-      #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
-         //
-         // If one string is identical to the end of another string, then they can be overlapped: 
-         // the longer string can be encoded in the string table, and the shorter string can 
-         // reference its end.
-         //
-         // In practice, we can't do that from here; what we would have to do instead is gather 
-         // every string into a pool with a reference to the (offsets) value in its owner, and 
-         // then compare every string to see which strings are suffixes of other strings. This 
-         // is necessary to avoid situations where the shorter string is written to the buffer 
-         // first and therefore misses out on optimization.
-         //
-         // Moreover, the performance on this is really bad as-is precisely because we're just 
-         // scanning into a buffer, blindly, and we can only even do a string comparison once 
-         // we find a null char.
-         //
-         this->offsets[i] = -1;
-         size_t j = 0; // current  null char index
-         size_t k = 0; // previous null char index
-         size_t size = s.size();
-         for (; j < out.size(); j++) {
-            if (out[j] != '\0')
-               continue;
-            if (j - k >= size) {
-               const char* start = out.data() + j - size;
-               if (strncmp(s.data(), start, size) == 0) {
-                  this->offsets[i] = j - s.size();
-                  break;
-               }
-            }
-            k = j;
-         }
-         if (this->offsets[i] >= 0) {
-            continue;
-         }
-      #endif
       this->offsets[i] = out.size();
       out += s;
       out += '\0';
    }
+}
+void ReachString::set_content(reach::language lang, const std::string& text) noexcept {
+   this->strings[(size_t)lang] = text;
+   this->_set_dirty();
+}
+void ReachString::set_content(reach::language lang, const char* text) noexcept {
+   this->strings[(size_t)lang] = text;
+   this->_set_dirty();
+}
+void ReachString::set_content(reach::language lang, std::string&& text) noexcept {
+   std::swap(text, this->strings[(size_t)lang]);
+   this->_set_dirty();
 }
 bool ReachString::can_be_forge_label() const noexcept {
    auto& first = this->strings[0];
@@ -169,7 +152,99 @@ bool ReachString::empty() const noexcept {
    }
    return true;
 }
+ReachString& ReachString::operator=(const ReachString& other) noexcept {
+   this->offsets = other.offsets;
+   this->strings = other.strings;
+   this->_set_dirty();
+   return *this;
+}
+#pragma endregion
 
+
+int ReachStringTable::_sort_pair::compare(const _sort_pair& other) const noexcept {
+   constexpr int before = -1;
+   constexpr int equal  =  0;
+   constexpr int after  =  1;
+   //
+   // -1 = put us before the other
+   //  0 = we equal the other
+   //  1 = put us after the other
+   //
+   // Goal: Sort strings alphabetically but with a reverse iterator over the string 
+   // content; if one string is exactly equal to the end of another string, put the 
+   // substring last.
+   //
+   if (!this->entry)
+      return -1;
+   if (!other.entry)
+      return  1;
+   auto&  a  = this->entry->get_content(this->language);
+   auto&  b  = other.entry->get_content(other.language);
+   size_t sa = a.size();
+   size_t sb = b.size();
+   if (sa == 0)
+      return after;
+   if (sb == 0)
+      return before;
+   size_t s = sa <= sb ? sa : sb;
+   for (size_t i = 0; i < s; ++i) {
+      QChar ca = a[sa - i - 1];
+      QChar cb = b[sb - i - 1];
+      if (ca < cb)
+         return before;
+      if (ca > cb)
+         return after;
+   }
+   if (sa == sb)
+      return equal;
+   if (sa < sb)
+      return after;
+   return before;
+}
+
+void ReachStringTable::_remove_from_sorted_pairs(ReachString* target) {
+   auto& list = this->cached_export.pairs;
+   list.erase(std::remove_if(list.begin(), list.end(), [target](const _sort_pair& p) { return p.entry == target; }), list.end());
+}
+void ReachStringTable::_ensure_sort_pairs_for(ReachString* subject) {
+   constexpr uint8_t  max_language = reach::language_count - 1;
+   constexpr uint16_t all = cobb::bitmax(cobb::bitcount(max_language));
+   //
+   uint16_t mask = 0;
+   static_assert(max_language <= cobb::bits_in<decltype(all)>,  "Use a larger type to hold (all).");
+   static_assert(max_language <= cobb::bits_in<decltype(mask)>, "Use a larger type to hold (mask).");
+   //
+   for (auto& pair : this->cached_export.pairs) {
+      if (pair.entry != subject)
+         continue;
+      mask |= 1 << (uint8_t)pair.language;
+   }
+   if (mask == all)
+      return;
+   //
+   for (uint8_t i = 0; i < reach::language_count; ++i) {
+      if (mask & (1 << i))
+         continue;
+      this->cached_export.pairs.emplace_back(subject, (reach::language)i);
+   }
+}
+void ReachStringTable::_ensure_sort_pairs_for_all_strings() {
+   for (auto& str : this->strings)
+      this->_ensure_sort_pairs_for(&str);
+}
+void ReachStringTable::_sort_all_pairs() {
+   auto& list = this->cached_export.pairs;
+   std::sort(list.begin(), list.end(), [](const _sort_pair& a, const _sort_pair& b) { return a.compare(b) < 0; });
+}
+
+bool ReachStringTable::_check_dirty() const noexcept {
+   if (this->dirty)
+      return true;
+   for (auto& str : this->strings)
+      if (str.is_dirty())
+         return true;
+   return false;
+}
 void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    uint32_t uncompressed_size = stream.read_bits(this->buffer_size_bitlength);
    bool     is_compressed     = stream.read_bits(1) != 0;
@@ -216,13 +291,19 @@ void* ReachStringTable::_make_buffer(cobb::ibitreader& stream) const noexcept {
    }
    return buffer;
 }
+void ReachStringTable::_set_not_dirty() noexcept {
+   this->dirty = false;
+   for (auto& str : this->strings)
+      str.dirty = false;
+}
 bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
    size_t count = stream.read_bits(this->count_bitlength);
    if (count > this->max_count) {
       #if _DEBUG
          __debugbreak();
       #endif
-      count = this->max_count; // TODO: WARN
+      GameEngineVariantLoadWarningLog::get().push_back(QString("String table's maximum count is %1 strings; table claims to have %2 strings.").arg(this->max_count).arg(count));
+      count = this->max_count;
    }
    this->strings.reserve(count);
    for (size_t i = 0; i < count; i++) {
@@ -238,79 +319,303 @@ bool ReachStringTable::read(cobb::ibitreader& stream) noexcept {
       } else
          return false;
    }
+   this->set_dirty();
    return true;
 }
-void ReachStringTable::write(cobb::bitwriter& stream) noexcept {
+ReachStringTable::save_error ReachStringTable::generate_export_data() noexcept {
+   if (!this->_check_dirty() && this->cached_export.raw.get_bitpos() > 0)
+      return save_error::none;
+   //
+   // The format for a string table in the file is as follows:
+   //
+   //  - First, the number of ReachStrings.
+   //
+   //  - Then, the offsets for each localization in each ReachString.
+   //
+   //     - Each offset is written as a presence bit followed, if the bit is 1, by the offset 
+   //       value.
+   //
+   //  - Then, the size of the uncompressed data in the next bullet point.
+   //
+   //  - Then, a buffer containing all of the content of all localizations of all ReachStrings. 
+   //    This buffer may optionally be zlib-compressed. The ReachString offsets mentioned above 
+   //    are relative to the start of this buffer's uncompressed content.
+   //
+   auto& stream = this->cached_export.raw;
+   stream.resize(0); // clear the cached data
+   this->cached_export.uncompressed_size = 0;
+   //
    stream.write(this->strings.size(), this->count_bitlength);
-   if (this->strings.size()) {
-      std::string combined; // UTF-8 buffer holding all string data including null terminators
+   std::string combined; // UTF-8 buffer holding all string data including null terminators
+   if (!this->strings.size()) {
+      this->_set_not_dirty();
+      return save_error::none;
+   }
+   //
+   #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
+      //
+      // If one string is identical to the end of another string, then they can be overlapped: 
+      // the longer string can be encoded in the string table, and the shorter string can 
+      // reference its end. For example, "15 points" and "5 points" can share buffer space.
+      //
+      // Applying this optimization requires that we pre-sort strings to ensure that the 
+      // longest strings get written first. Since we have to sort strings, we may as well do 
+      // a "real" sort by content, not just by length; this will ensure that each "suffix" 
+      // string is directly next to the string that it is a suffix of, making it easier to 
+      // actually write the strings out once the sort is complete.
+      //
+      this->_ensure_sort_pairs_for_all_strings();
+      this->_sort_all_pairs();
+      //
+      std::string last_written;
+      int32_t     last_offset = -1;
+      for (auto& pair : this->cached_export.pairs) {
+         auto& entry  = *pair.entry;
+         auto& text   = entry.get_content(pair.language);
+         auto& offset = entry.offsets[(size_t)pair.language];
+         if (text.empty() && offset == -1) // don't write empty strings for optional languages
+            continue;
+         #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_DUPLICATES
+            if (last_written == text) {
+               offset = last_offset;
+               continue;
+            }
+         #else
+            #if MEGALO_STRING_TABLE_USE_COLLAPSE_METHOD == MEGALO_STRING_TABLE_COLLAPSE_METHOD_OVERLAP
+               if (cobb::string_ends_with(last_written, text)) { // last_written.ends_with(text)
+                  offset = last_offset + (last_written.size() - text.size());
+                  continue;
+               }
+            #endif
+         #endif
+         offset = combined.size();
+         combined += text;
+         combined += '\0';
+         last_written = text;
+         last_offset  = offset;
+      }
+      for (auto& string : this->strings) {
+         string.write_offsets(stream, *this);
+      }
+   #else
       for (auto& string : this->strings) {
          string.write_strings(combined);
          string.write_offsets(stream, *this);
       }
-      uint32_t uncompressed_size = combined.size();
-      if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
-         printf("WARNING: TOTAL STRING DATA IS TOO LARGE\n");
-         #if _DEBUG
-            __debugbreak();
-         #endif
-         assert(false && "String table cannot hold data this large");
-      }
-      stream.write(uncompressed_size, this->buffer_size_bitlength);
+   #endif
+   //
+   uint32_t uncompressed_size = combined.size();
+   this->cached_export.uncompressed_size = uncompressed_size;
+   if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      return save_error::data_too_large;
+   }
+   stream.write(uncompressed_size, this->buffer_size_bitlength);
+   //
+   bool should_compress = uncompressed_size >= 0x80;
+   stream.write(should_compress, 1);
+   //
+   if (!should_compress) {
       //
-      bool should_compress = uncompressed_size >= 0x80; // TODO: better logic
-      stream.write(should_compress, 1);
-      if (should_compress) {
-         auto bound = compressBound(uncompressed_size);
-         auto buffer = malloc(bound);
-         if (!buffer) {
-            printf("WARNING: FAILED TO ALLOCATE STORAGE FOR COMPRESSED STRING DATA!");
-            __debugbreak();
-            assert(false && "Insufficient memory to compress string data.");
+      // Write uncompressed data to the stream.
+      //
+      for (size_t i = 0; i < uncompressed_size; i++)
+         stream.write((uint8_t)combined[i]);
+      this->_set_not_dirty();
+      return save_error::none;
+   }
+   //
+   // Compress the data with zlib, and then write it to the stream.
+   //
+   auto bound  = compressBound(uncompressed_size);
+   auto buffer = malloc(bound);
+   if (!buffer) {
+      #if _DEBUG
+         __debugbreak();
+      #endif
+      return save_error::out_of_memory;
+   }
+   uint32_t compressed_size = bound;
+   int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+   switch (result) {
+      case Z_OK:
+         break;
+      case Z_MEM_ERROR:
+         return save_error::zlib_memory_error;
+      case Z_BUF_ERROR:
+         return save_error::zlib_buffer_error;
+   }
+   stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
+   static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
+   stream.write(uncompressed_size); // redundant uncompressed size
+   for (size_t i = 0; i < compressed_size; i++)
+      stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+   free(buffer);
+   this->_set_not_dirty();
+   return save_error::none;
+}
+uint32_t ReachStringTable::get_size_to_save() noexcept {
+   this->generate_export_data();
+   return this->cached_export.raw.get_bitpos();
+}
+bool ReachStringTable::write(cobb::bitwriter& stream) noexcept {
+   if (this->generate_export_data() != save_error::none)
+      return false;
+   stream.write_stream(this->cached_export.raw);
+   return true;
+}
+void ReachStringTable::write_placeholder(cobb::bitwriter& stream) noexcept {
+   auto prior = stream.get_bitpos();
+   //
+   auto count = this->strings.size();
+   stream.write(count, this->count_bitlength);
+   if (!count)
+      return;
+   std::string combined;
+   std::string temp;
+   int32_t     first_null = -1;
+   for (size_t i = 0; i < count; ++i) {
+      uint32_t offset = combined.size();
+      auto&    string = this->strings[i];
+      if (string.empty()) {
+         if (first_null < 0) {
+            first_null = combined.size();
+            combined += '\0';
          }
-         uint32_t compressed_size = bound;
-         int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
-         switch (result) {
-            case Z_OK:
-               break;
-            case Z_MEM_ERROR:
-               assert(false && "Memory error occurred when trying to compress string table.");
-               break;
-            case Z_BUF_ERROR:
-               assert(false && "Insufficient buffer space when trying to compress string table.");
-               break;
-         }
-         stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
-         static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
-         stream.write(uncompressed_size); // redundant uncompressed size
-         for (size_t i = 0; i < compressed_size; i++)
-            stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
-         free(buffer);
+         offset = first_null;
       } else {
-         for (size_t i = 0; i < uncompressed_size; i++)
-            stream.write((uint8_t)combined[i]);
+         cobb::sprintf(temp, "str%03d", i);
+         combined += temp;
+         combined += '\0';
+      }
+      for (size_t j = 0; j < string.offsets.size(); ++j) {
+         if (string.offsets[j] < 0 && string.strings[j].empty()) {
+            stream.write(0, 1);
+            continue;
+         }
+         stream.write(1, 1);
+         stream.write(offset, this->offset_bitlength);
+      }
+   }
+   uint32_t uncompressed_size = combined.size();
+   //
+   // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+   // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+   // failure. If we ever do devise a way to recover, we should use stream.go_to_bitpos(prior) to 
+   // rewind the stream to before we wrote anything.
+   //
+   assert(uncompressed_size < cobb::bitmax(this->buffer_size_bitlength) && "At present, the design of this program means that a failure in ReachStringTable::write_placeholder is irrecoverable. Uncompressed size is too large to be represented using the buffer size bitlength.");
+   stream.write(uncompressed_size, this->buffer_size_bitlength);
+   //
+   bool should_compress = uncompressed_size >= 0x40;
+   stream.write(should_compress, 1);
+   if (!should_compress) {
+      //
+      // Write uncompressed data to the stream.
+      //
+      for (size_t i = 0; i < uncompressed_size; i++)
+         stream.write((uint8_t)combined[i]);
+      return;
+   }
+   //
+   // Compress the data with zlib, and then write it to the stream.
+   //
+   auto bound = compressBound(uncompressed_size);
+   auto buffer = malloc(bound);
+   assert(buffer != nullptr && "At present, the design of this program means that a failure in ReachStringTable::write_placeholder is irrecoverable. Unable to allocate memory for the compressed data buffer.");
+   uint32_t compressed_size = bound;
+   int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+   switch (result) {
+      case Z_OK:
+         break;
+      case Z_MEM_ERROR:
+      case Z_BUF_ERROR:
+         //
+         // NOTE: Currently, a failure to save placeholder data is irrecoverable; to recover from it 
+         // we'd have to fudge string indices for basically the entire file. As such, we don't signal 
+         // failure (and should probably assert, actually).
+         //
+         stream.go_to_bitpos(prior);
+         return;
+   }
+   stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
+   static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
+   stream.write(uncompressed_size); // redundant uncompressed size
+   for (size_t i = 0; i < compressed_size; i++)
+      stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+   free(buffer);
+}
+void ReachStringTable::read_fallback_data(cobb::generic_buffer& buffer) noexcept {
+   uint32_t size = buffer.size();
+   uint8_t* base = buffer.data();
+   uint32_t si   = 0;
+   uint32_t li   = 0;
+   ReachString* string = nullptr;
+   for (uint32_t offset = 0; offset < size; ++offset) {
+      if (li >= reach::language_count) {
+         li = 0;
+         ++si;
+         string = nullptr;
+      }
+      if (!string) {
+         string = this->get_entry(si);
+         if (!string) {
+            string = this->add_new();
+            assert(string);
+         }
+      }
+      //
+      auto c = base[offset];
+      if (c == '\0') {
+         ++li;
+         continue;
+      }
+      string->strings[li] += c;
+   }
+}
+void ReachStringTable::write_fallback_data(cobb::generic_buffer& out) noexcept {
+   out.allocate(0);
+   uint32_t size = 0;
+   for (auto& string : this->strings)
+      for (auto& localization : string.strings)
+         size += localization.size() + 1; // don't forget the null terminator
+   out.allocate(size);
+   //
+   auto   base = out.data();
+   size_t pos  = 0;
+   for (auto& string : this->strings) {
+      for (auto& localization : string.strings) {
+         size_t size = localization.size();
+         memcpy(base + pos, localization.data(), size);
+         pos += size;
+         base[pos] = '\0';
+         ++pos;
       }
    }
 }
+//
 ReachString* ReachStringTable::add_new() noexcept {
    if (this->is_at_count_limit())
       return nullptr;
    auto& string = *this->strings.push_back(new ReachString(*this));
+   this->set_dirty();
    return &string;
 }
 void ReachStringTable::remove(size_t index) noexcept {
    if (index >= this->size())
       return;
-   if (this->strings[index].get_refcount())
+   auto target = &this->strings[index];
+   if (target->get_refcount())
       return;
    this->strings.erase(index);
+   this->set_dirty();
+   this->_remove_from_sorted_pairs(target);
 }
 uint32_t ReachStringTable::total_bytecount() noexcept {
-   std::string combined; // UTF-8 buffer holding all string data including null terminators
-   for (auto& string : this->strings) {
-      string.write_strings(combined);
-   }
-   return combined.size();
+   this->generate_export_data();
+   return this->cached_export.uncompressed_size;
 }
 ReachString* ReachStringTable::get_empty_entry() const noexcept {
    for (auto& string : this->strings) {
@@ -323,7 +628,7 @@ ReachString* ReachStringTable::lookup(const QString& english, bool& matched_mult
    matched_multiple = false;
    ReachString* match = nullptr;
    for (auto& string : this->strings) {
-      QString current = QString::fromUtf8(string.english().c_str());
+      QString current = QString::fromUtf8(string.get_content(reach::language::english).c_str());
       if (current == english) {
          if (match) {
             matched_multiple = true;

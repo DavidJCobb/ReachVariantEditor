@@ -13,6 +13,7 @@ namespace Megalo {
          bool is_const_zero() const noexcept;
          void set_to_const_zero() noexcept;
          virtual Variable* create_zero_or_none() const noexcept override;
+         virtual bool set_to_zero_or_none() noexcept override;
    };
    namespace variable_scope_indicators {
       namespace number {

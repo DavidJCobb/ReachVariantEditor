@@ -1,0 +1,418 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Useful code snippets | ReachVariantTool Documentation</title>
+      <base href="../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li data-dont-default-collapse>
+                     <a href="editor/main_window/options-team.html">Team Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                     </ul>
+                  </li>
+                  <li data-dont-default-collapse>
+                     <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+                  <li><a href="script/snippets.html">Useful code snippets</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li data-dont-default-collapse>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Content not in any namespace</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li data-dont-default-collapse>
+                     <a>Types</a>
+                     <ul>
+                        <li data-dont-default-collapse>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li data-dont-default-collapse>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/incident.html">Incident</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/sound.html">Sound</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Useful code snippets</h1>
+
+      <p>
+         The following code snippets are likely to be useful when making new gametypes 
+         from scratch. Note that if a code snippet requires the use of a variable, you 
+         will probably have to ensure that your own script doesn't use the same variable 
+         for anything important.
+      </p>
+      <p>
+         These snippets include both "common" behaviors, which can be omitted from very 
+         specialized gametypes (e.g. chess does not need to award DLC achievements for 
+         kills), and "standard" behaviors, which the user would expect all gametypes to 
+         have (e.g. ending the round when the round timer runs out, which, yes, you have 
+         to do manually).
+      </p>
+      
+      <ul id="toc">
+         <li><a href="script/snippets.html#announce-game-start">Announce game start</a></li>
+         <li><a href="script/snippets.html#dlc-achievements">DLC Achievements</a></li>
+         <li><a href="script/snippets.html#loadout-palettes">Loadout palette code</a></li>
+         <li><a href="script/snippets.html#round-timer">Round timer code (basic)</a></li>
+         <li><a href="script/snippets.html#round-timer-sd">Round timer code (with Sudden Death)</a></li>
+         <li><a href="script/snippets.html#super-shields">Super Shields</a></li>
+      </ul>
+      
+      <h2><a name="announce-game-start">Announce game start</a></h2>
+      <p>
+         Most official gametypes announce their names at the start of each round. They do 
+         this by <dfn>sending an incident</dfn>: they use the 
+         <a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a> function 
+         to tell the game that some event (such as the start of a round) has occurred. Each 
+         base gametype has its own incident.
+      </p>
+      <pre>
+<span class="keyword">alias</span> announced_game_start = player.number[0]
+<span class="keyword">alias</span> announce_start_timer = player.timer[0]
+
+<span class="keyword">declare</span> player.announced_game_start with network priority low = 0
+<span class="keyword">declare</span> player.announce_start_timer = 5
+
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_game_start_timer.is_zero() <span class="keyword">then</span> 
+      send_incident(race_game_start, current_player, no_player)
+      current_player.announced_game_start = 1
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      
+      <h2><a name="dlc-achievements">DLC Achievements</a></h2>
+      <p>
+         Several DLC achievements are awarded by Megalo script instead of being hardcoded 
+         into the game. These include:
+      </p>
+      <dl>
+         <dt>Dive Bomber</dt>
+            <dd>Assassinate an enemy player while using a Jetpack.</dd>
+         <dt>From Hell's Heart</dt>
+            <dd>After being stuck with a plasma grenade, make sure that the player who 
+            stuck you dies in the blast with you.</dd>
+         <dt>Top Shot</dt>
+            <dd>Score three headshot kills in a row without dying.</dd>
+         <dt>License to Kill</dt>
+            <dd>Splatter five enemy players during a single match.</dd>
+         <dt>Paper Beats Rock</dt>
+            <dd>Assassinate an enemy player no more than three seconds after they stop 
+            using Armor Lock.</dd>
+      </dl>
+      <p>
+         This code was taken from official gametypes. In some cases, small adjustments 
+         were made in order to avoid dependencies that you can't easily copy and paste 
+         (e.g. using the
+         <a href="script/api/object/conditions/is_of_type.html">object.is_of_type</a> 
+         condition instead of using 
+         <a href="script/api/object/conditions/has_forge_label.html">object.has_forge_label</a> 
+         with unnamed Forge labels, as 343i does).
+      </p>
+      <pre>
+<span class="keyword">alias</span> ach_top_shot_count        = player.number[0]
+<span class="keyword">alias</span> ach_license_to_kill_count = player.number[1]
+<span class="keyword">alias</span> ach_paper_beats_rock_vuln_timer = player.timer[0]
+<span class="keyword">declare</span> player.ach_top_shot_count        with network priority low
+<span class="keyword">declare</span> player.ach_license_to_kill_count with network priority low
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> killer_aa = global.object[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
+      killer    = current_player.get_killer()
+      death_mod = current_player.get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span>
+         killer_aa = killer.get_armor_ability()
+         <span class="keyword">if</span> killer_aa.is_of_type(jetpack) <span class="keyword">and</span> killer_aa.is_in_use() <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, killer, killer, 65)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award From Hell's Heart achievement as appropriate</span>
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
+      death_mod = current_player.get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.sticky <span class="keyword">then</span>
+         killer = current_player.get_killer()
+         <span class="keyword">if</span> killer.killer_type_is(suicide) <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, current_player, current_player, 68)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage and award Top Shot achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) <span class="keyword">then</span> 
+      current_player.ach_top_shot_count = 0
+      <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
+         killer    = current_player.get_killer()
+         death_mod = current_player.get_death_damage_mod()
+         <span class="keyword">if</span> death_mod != enums.damage_reporting_modifier.headshot <span class="keyword">then</span> 
+            killer.ach_top_shot_count = 0
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.headshot <span class="keyword">then</span> 
+            killer.ach_top_shot_count += 1
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> killer.ach_top_shot_count &gt; 2 <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, killer, killer, 62)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage and award License To Kill achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
+      killer    = current_player.get_killer()
+      death_mod = current_player.get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.splatter <span class="keyword">then</span> 
+         killer.ach_license_to_kill_count += 1
+         <span class="keyword">if</span> killer.ach_license_to_kill_count &gt; 4 <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, killer, killer, 66)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- manage timing for the Paper Beats Rock achievement</span>
+   <span class="keyword">alias</span> current_ability = global.object[0]
+   <span class="comment">--</span>
+   current_ability = current_player.get_armor_ability()
+   <span class="keyword">if</span> current_ability.is_of_type(armor_lock) <span class="keyword">and</span> current_ability.is_in_use() <span class="keyword">then</span> 
+      current_player.ach_paper_beats_rock_vuln_timer = 3
+      current_player.ach_paper_beats_rock_vuln_timer.set_rate(-100%)
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Paper Beats Rock achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> death_mod = global.number[0]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">and</span> <span class="keyword">not</span> current_player.ach_paper_beats_rock_vuln_timer.is_zero() <span class="keyword">then</span> 
+      death_mod = current_player.get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span>
+         killer = current_player.get_killer()
+         send_incident(dlc_achieve_2, killer, killer, 60)
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      
+      <h2><a name="loadout-palettes">Loadout palette code</a></h2>
+      <p>
+         Players will not have access to any loadout palette unless you give them access 
+         to loadout palettes. Standard gametypes grant players access to the Spartan Tier 
+         1 and Elite Tier 1 palettes depending on their species.
+      </p>
+      <pre>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- loadout palettes</span>
+   <span class="keyword">if</span> current_player.is_elite() <span class="keyword">then</span> 
+      current_player.set_loadout_palette(elite_tier_1)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> <span class="keyword">not</span> current_player.is_elite() <span class="keyword">then</span> 
+      current_player.set_loadout_palette(spartan_tier_1)
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      
+      <h2><a name="round-timer">Round timer code (basic)</a></h2>
+      <p>
+         <i>Halo: Reach</i> does not automatically end the round when the round timer 
+         expires. Instead, it's up to Megalo script. The round timer likely behaves this 
+         way so that Invasion can use it for individual phases.
+      </p>
+      <pre>
+<span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">and</span> game.round_timer.is_zero() <span class="keyword">then</span>
+   game.end_round()
+<span class="keyword">end</span></pre>
+      
+      <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
+      <p>
+         The code for a round timer with Sudden Death is a bit more complicated.
+      </p>
+      <p>
+         Typically, Sudden Death will activate if, at the end of the round, a player is 
+         in a position where they can attempt to complete the objective. For example, 
+         during CTF, Sudden Death will activate if a player is standing very close to a 
+         flag that they can pick up and capture.
+      </p>
+      <p>
+         Typically, the Grace Period is used to complement Sudden Death. 
+         Sudden Death activates when a player is able to further an 
+         objective match; for example, it will enable if any player is 
+         standing close to a flag that they can pick up and score. In 
+         that scenario, if Sudden Death begins and then the conditions 
+         for it are no longer met (the player stops being near the flag), 
+         then the match will end after the Grace Period ends. Sudden 
+         Death never resets (if a player comes near the flag again, the 
+         timer will continue from where it left off), but the Grace 
+         Period does.
+      </p>
+      <pre>
+<span class="keyword">alias</span> sudden_death_enabled   = global.number[0] <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
+<span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
+
+<span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
+   game.grace_period_timer = 0
+<span class="keyword">end</span>
+<span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">then</span> 
+   <span class="keyword">if</span> <span class="keyword">not</span> game.round_timer.is_zero() <span class="keyword">then</span> 
+      announced_sudden_death = 0
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.round_timer.is_zero() <span class="keyword">then</span> 
+      <span class="keyword">if</span> sudden_death_enabled == 1 <span class="keyword">then</span> 
+         game.sudden_death_timer.set_rate(-100%)
+         game.grace_period_timer.reset()
+         <span class="keyword">if</span> announced_sudden_death == 0 <span class="keyword">then</span> 
+            send_incident(sudden_death, all_players, all_players)
+            announced_sudden_death = 1
+         <span class="keyword">end</span>
+         <span class="keyword">if</span> game.sudden_death_time &gt; 0 <span class="keyword">and</span> game.grace_period_timer &gt; game.sudden_death_timer <span class="keyword">then</span> 
+            game.grace_period_timer = game.sudden_death_timer
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> sudden_death_enabled == 0 <span class="keyword">then</span> 
+         game.grace_period_timer.set_rate(-100%)
+         <span class="keyword">if</span> game.grace_period_timer.is_zero() <span class="keyword">then</span> 
+            game.end_round()
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+      <span class="keyword">if</span> game.sudden_death_timer.is_zero() <span class="keyword">then</span> 
+         game.end_round()
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      
+      <h2><a name="super-shields">Super Shields</a></h2>
+      <p>
+         Like the original <i>Halo: Combat Evolved</i>, <i>Halo: Reach</i> doesn't 
+         display any extra graphics on players that have overshields. The 
+         "<abbr title="Title Update">TU</abbr>" versions of many gametypes include 
+         a new option called "Super Shields" which works around this, by spawning 
+         fire particles on these players.
+      </p>
+      <pre>
+<span class="keyword">alias</span> opt_super_shields = script_option[12]
+<span class="keyword">alias</span> lifespan = object.timer[0]
+
+<span class="comment">-- This should be the index of a nameless Forge label whose object type </span>
+<span class="comment">-- is the fire particle emitter:</span>
+<span class="keyword">alias</span> all_fire_particles = 7
+
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- handle super shields VFX</span>
+   <span class="keyword">if</span> opt_super_shields == 1 <span class="keyword">then</span> 
+      <span class="keyword">alias</span> current_shields = global.number[0]
+      <span class="keyword">alias</span> outcome = global.number[1]
+      <span class="comment">--</span>
+      current_shields = 0
+      current_shields = current_player.biped.shields
+      <span class="keyword">if</span> current_shields &gt; 100 <span class="keyword">then</span> 
+         outcome = 0
+         outcome = rand(10)
+         <span class="keyword">if</span> outcome &lt;= 2 <span class="keyword">then</span> <span class="comment">-- 30% chance to spawn a particle emitter</span>
+            current_player.biped.place_at_me(particle_emitter_fire, none, never_garbage_collect, 0, 0, 0, none)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> each object with label all_fire_particles <span class="keyword">do</span> <span class="comment">-- clean up super shields VFX</span>
+   current_object.lifespan.set_rate(-100%)
+   <span class="keyword">if</span> current_object.lifespan.is_zero() <span class="keyword">then</span> 
+      current_object.delete()
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+   
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

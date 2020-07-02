@@ -2,6 +2,10 @@
 *.bin
 *.mvar
 
+# ...unless it's custom and we're uploading it for demonstrative purposes.
+!/other/*/*.bin
+!/other/*/*.mvar
+
 # Don't upload compiled/linked/etc. files
 *.obj
 

@@ -1,7 +1,16 @@
 #include "decompiler.h"
-#include "../compiler/string_scanner.h"
 #include "../../../types/multiplayer.h"
+#include "../../../../helpers/string_scanner.h"
 
+namespace {
+   int _index_of(const std::vector<int16_t>& v, int16_t e) {
+      size_t size = v.size();
+      for (size_t i = 0; i < size; ++i)
+         if (v[i] == e)
+            return i;
+      return -1;
+   }
+}
 namespace Megalo {
    void Decompiler::decompile() {
       auto mp = this->variant.get_multiplayer_data();
@@ -15,13 +24,32 @@ namespace Megalo {
          declarations.team.decompile(*this);
          this->write_line("");
       }
-      auto& triggers = mp->scriptContent.triggers;
+      //
+      auto&  triggers = mp->scriptContent.triggers;
+      size_t count    = triggers.size();
+      for (size_t i = 0; i < count; ++i)
+         triggers[i].decompile_state.clear(&triggers[i], i);
+      for (auto& trigger : triggers)
+         trigger.decompile_state.setup_callees(triggers, &trigger);
+      for (auto& trigger : triggers)
+         trigger.decompile_state.check_if_is_function();
+      //
       for (auto& trigger : triggers) {
-         if (trigger.entryType == Megalo::entry_type::subroutine)
+         if (!trigger.decompile_state.is_function)
             continue;
          trigger.decompile(*this);
          this->write_line("");
       }
+      for (auto& trigger : triggers) {
+         if (trigger.entryType == Megalo::entry_type::subroutine)
+            continue;
+         if (trigger.decompile_state.is_function)
+            continue;
+         trigger.decompile(*this);
+         this->write_line("");
+      }
+      for (size_t i = 0; i < count; ++i)
+         triggers[i].decompile_state.clear();
    }
    //
    void Decompiler::modify_indent_count(int16_t nesting) noexcept {
@@ -68,13 +96,13 @@ namespace Megalo {
       this->write(content);
    }
    void Decompiler::write_string_literal(const char* content) {
-      QString t = Script::string_scanner::escape(QString::fromUtf8(content), '"');
+      QString t = cobb::string_scanner::escape(QString::fromUtf8(content), '"');
       this->write('"');
       this->write(t);
       this->write('"');
    }
    void Decompiler::write_string_literal(std::string& content) {
-      QString t = Script::string_scanner::escape(QString::fromStdString(content), '"');
+      QString t = cobb::string_scanner::escape(QString::fromStdString(content), '"');
       this->write('"');
       this->write(t);
       this->write('"');

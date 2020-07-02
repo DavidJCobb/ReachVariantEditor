@@ -30,15 +30,34 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
       this->target = nullptr;
       this->updateTraitsListFromVariant();
    });
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle trait set name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_traits = false;
+      for (auto& traits : mp->scriptData.traits) {
+         if (traits.uses_string(str)) {
+            is_traits = true;
+            break;
+         }
+      }
+      if (is_traits)
+         this->updateTraitsListFromVariant();
+   });
    //
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptTraits::selectTraits);
    //
    QObject::connect(this->ui.name, &ReachStringPicker::selectedStringChanged, [this]() {
       this->updateTraitsListFromVariant();
-      ReachEditorState::get().scriptTraitsModified(this->target);
    });
-   QObject::connect(this->ui.desc, &ReachStringPicker::selectedStringChanged, [this]() {
-      ReachEditorState::get().scriptTraitsModified(this->target); // main window shows descriptions as tooltips
+   QObject::connect(this->ui.name, &ReachStringPicker::selectedStringSwitched, [this]() {
+      ReachEditorState::get().scriptTraitsModified(this->target); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+   });
+   QObject::connect(this->ui.desc, &ReachStringPicker::selectedStringSwitched, [this]() {
+      ReachEditorState::get().scriptTraitsModified(this->target); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
    });
    //
    QObject::connect(this->ui.buttonNew, &QPushButton::clicked, [this]() {
@@ -52,6 +71,7 @@ ScriptEditorPageScriptTraits::ScriptEditorPageScriptTraits(QWidget* parent) {
          return;
       }
       this->target = list.emplace_back();
+      this->target->is_defined = true;
       {  // If possible, default the new trait-set's name and description to an empty string
          auto str = mp->scriptData.strings.get_empty_entry();
          if (str) {
@@ -162,7 +182,7 @@ void ScriptEditorPageScriptTraits::updateTraitsListFromVariant(GameVariant* vari
       auto& traits = list[i];
       auto  item = new QListWidgetItem;
       if (traits.name)
-         item->setText(QString::fromUtf8(traits.name->english().c_str()));
+         item->setText(QString::fromUtf8(traits.name->get_content(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed traits %1>", "scripted traits editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&traits));

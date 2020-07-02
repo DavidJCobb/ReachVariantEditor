@@ -142,7 +142,7 @@ namespace Megalo {
    void OpcodeArgValueStringTokens2::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachString* format = this->string;
       if (format) {
-         std::string english = format->english();
+         std::string english = format->get_content(reach::language::english);
          out.write_string_literal(english);
       } else {
          out.write("none");
@@ -153,7 +153,7 @@ namespace Megalo {
          this->tokens[i].decompile(out, flags);
       }
    }
-   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, Script::string_scanner& arg_text, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueStringTokens2::compile(Compiler& compiler, cobb::string_scanner& arg_text, uint8_t part) noexcept {
       if (part == 0) {
          //
          // Get the format string.

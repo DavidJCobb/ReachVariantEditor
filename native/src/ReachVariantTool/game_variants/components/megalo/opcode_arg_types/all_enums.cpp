@@ -51,10 +51,11 @@ namespace Megalo {
          DetailedEnumValue("&=", DetailedEnumValueInfo::make_friendly_name("bitwise-AND with")),
          DetailedEnumValue("|=", DetailedEnumValueInfo::make_friendly_name("bitwise-OR with")),
          DetailedEnumValue("^=", DetailedEnumValueInfo::make_friendly_name("bitwise-XOR with")),
-         DetailedEnumValue("~=", DetailedEnumValueInfo::make_friendly_name("bitwise-NOT with")),
-         DetailedEnumValue("<<=",  DetailedEnumValueInfo::make_friendly_name("bitshift left by")),
-         DetailedEnumValue(">>=",  DetailedEnumValueInfo::make_friendly_name("bitshift right by")),
-         DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("arith? shift left by")),
+         DetailedEnumValue("~=", DetailedEnumValueInfo::make_friendly_name("bitwise-NOT with")), // (a ~= b) == (a &= ~b)
+         //
+         DetailedEnumValue("+=",  DetailedEnumValueInfo::make_friendly_name("add(?)")), // KSoft calls this <<= but it acts like addition in MCC-Reach tests
+         //DetailedEnumValue("",  DetailedEnumValueInfo::make_friendly_name("crash the game with")), // KSoft calls this >>= but it crashes in tests
+         //DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("untested-operation with")),
       });
       auto pickup_priority = DetailedEnum({
          DetailedEnumValue("normal"),
@@ -73,8 +74,8 @@ namespace Megalo {
          DetailedEnumValue("blink"),
       });
       auto weapon_slot = DetailedEnum({
-         DetailedEnumValue("primary"),
          DetailedEnumValue("secondary"),
+         DetailedEnumValue("primary"),
       });
    }
 
@@ -114,7 +115,7 @@ namespace Megalo {
          cobb::sprintf(temp, "%u", this->value);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueEnumSuperclass::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       auto word  = arg.extract_word();
       if (word.isEmpty()) {
          //

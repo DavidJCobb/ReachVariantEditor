@@ -1,7 +1,7 @@
 #include "opcode.h"
 #include <cassert>
 #include "actions.h"
-#include "compiler/string_scanner.h"
+#include "opcode_arg_types/variables/base.h"
 
 namespace Megalo {
    bool OpcodeBase::context_is(const OpcodeArgTypeinfo& type) const noexcept {
@@ -40,6 +40,12 @@ namespace Megalo {
                size_t count = list.size();
                for (size_t i = 0; i < count; ++i) {
                   if (list[i].is_out_variable) {
+                     if (mapping.flags & OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded) {
+                        auto var = dynamic_cast<Variable*>(args[i]);
+                        if (var && var->is_none()) {
+                           break;
+                        }
+                     }
                      args[i]->decompile(out);
                      out.write(" = ");
                      break;
@@ -157,7 +163,7 @@ namespace Megalo {
       return -1;
    }
 
-   arg_compile_result Opcode::compile_argument(Compiler& compiler, Script::string_scanner& arg, uint8_t arg_index, uint8_t part) noexcept {
+   arg_compile_result Opcode::compile_argument(Compiler& compiler, cobb::string_scanner& arg, uint8_t arg_index, uint8_t part) noexcept {
       if (!this->arguments[arg_index]) {
          auto base = this->function->arguments[arg_index];
          this->arguments[arg_index] = (base.typeinfo.factory)();
@@ -278,7 +284,7 @@ namespace Megalo {
             continue;
          //
          arg.reset((type->factory)());
-         if (arg->compile(compiler, Script::string_scanner(name), 0).is_success())
+         if (arg->compile(compiler, cobb::string_scanner(name), 0).is_success())
             return &entry;
       }
       return nullptr;

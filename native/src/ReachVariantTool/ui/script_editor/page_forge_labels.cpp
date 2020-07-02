@@ -22,7 +22,7 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
          return;
       auto& list  = mp->scriptContent.forgeLabels;
       auto& label = *list.emplace_back();
-      label.index = list.size() - 1;
+      label.is_defined = true;
       this->updateListFromVariant(ReachEditorState::get().variant());
       this->selectLabel(label.index);
    });
@@ -76,7 +76,14 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       if (index < 0)
          return;
       mp->scriptContent.forgeLabels.erase(index);
-      this->ui.name->clearTarget();
+      size_t size = list.size();
+      if (size) {
+         if (index >= size)
+            index = size - 1;
+         this->selectLabel(index);
+      } else {
+         this->selectLabel(-1);
+      }
       this->updateListFromVariant();
    });
    //
@@ -119,6 +126,10 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
 }
 void ScriptEditorPageForgeLabels::selectLabel(int32_t labelIndex) {
    this->currentForgeLabel = labelIndex;
+   //
+   const QSignalBlocker blocker(this->ui.list);
+   this->ui.list->setCurrentRow(this->currentForgeLabel);
+   //
    this->updateLabelFromVariant();
 }
 Megalo::ReachForgeLabel* ScriptEditorPageForgeLabels::getLabel() const noexcept {
@@ -150,7 +161,7 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
       auto  item  = new QListWidgetItem;
       auto& label = list[i];
       if (label.name) {
-         item->setText(QString::fromUtf8(label.name->english().c_str()));
+         item->setText(QString::fromUtf8(label.name->get_content(reach::language::english).c_str()));
       } else {
          item->setText(tr("<unnamed label %1>").arg(i));
       }
@@ -160,6 +171,7 @@ void ScriptEditorPageForgeLabels::updateListFromVariant(GameVariant* variant) {
    container->setCurrentRow(sel);
 }
 void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
+   this->ui.name->clearTarget();
    if (!variant) {
       variant = ReachEditorState::get().variant();
       if (!variant)
@@ -169,8 +181,19 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    if (!mp)
       return;
    auto& labels = mp->scriptContent.forgeLabels;
-   if (this->currentForgeLabel >= labels.size())
+   if (this->currentForgeLabel < 0 || this->currentForgeLabel >= labels.size()) {
+      this->ui.reqFlagNumber->setChecked(false);
+      this->ui.reqFlagObjectType->setChecked(false);
+      this->ui.reqFlagTeam->setChecked(false);
+      //
+      this->ui.reqNumber->setDisabled(true);
+      this->ui.reqObjectType->setCurrentIndex(-1);
+      this->ui.reqObjectType->setDisabled(true);
+      this->ui.reqTeam->setCurrentIndex(-1);
+      this->ui.reqTeam->setDisabled(true);
+      //
       return;
+   }
    auto& label = labels[this->currentForgeLabel];
    //
    const QSignalBlocker blocker1(this->ui.reqFlagNumber);
@@ -180,19 +203,28 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
    const QSignalBlocker blocker5(this->ui.reqObjectType);
    const QSignalBlocker blocker6(this->ui.reqTeam);
    const QSignalBlocker blocker7(this->ui.minCount);
-   this->ui.reqFlagNumber->setChecked(label.requires_number());
-   this->ui.reqFlagObjectType->setChecked(label.requires_object_type());
-   this->ui.reqFlagTeam->setChecked(label.requires_assigned_team());
+   bool req_num  = label.requires_number();
+   bool req_type = label.requires_object_type();
+   bool req_team = label.requires_assigned_team();
+   this->ui.reqFlagNumber->setChecked(req_num);
+   this->ui.reqFlagObjectType->setChecked(req_type);
+   this->ui.reqFlagTeam->setChecked(req_team);
    this->ui.reqNumber->setValue(label.requiredNumber);
-   this->ui.reqObjectType->setValue(label.requiredObjectType);
-   this->ui.reqTeam->setValue(label.requiredTeam);
+   if (req_type)
+      this->ui.reqObjectType->setValue(label.requiredObjectType);
+   else
+      this->ui.reqObjectType->setCurrentIndex(-1);
+   if (req_team)
+      this->ui.reqTeam->setValue(label.requiredTeam);
+   else
+      this->ui.reqTeam->setCurrentIndex(-1);
    this->ui.minCount->setValue(label.mapMustHaveAtLeast);
    //
-   this->ui.reqNumber->setDisabled(!label.requires_number());
-   this->ui.reqObjectType->setDisabled(!label.requires_object_type());
-   this->ui.reqTeam->setDisabled(!label.requires_assigned_team());
+   this->ui.reqNumber->setDisabled(!req_num);
+   this->ui.reqObjectType->setDisabled(!req_type);
+   this->ui.reqTeam->setDisabled(!req_team);
    //
-   {
+   {  // Do not allow multiple Forge labels to be set to use the same name.
       QList<QString> others;
       for (size_t i = 0; i < labels.size(); i++) {
          if (i == this->currentForgeLabel)
@@ -200,7 +232,7 @@ void ScriptEditorPageForgeLabels::updateLabelFromVariant(GameVariant* variant) {
          auto& other = labels[i];
          if (!other.name)
             continue;
-         others.push_back(QString::fromUtf8(other.name->english().c_str()));
+         others.push_back(QString::fromUtf8(other.name->get_content(reach::language::english).c_str()));
       }
       this->ui.name->setBlacklistedStrings(std::move(others));
    }

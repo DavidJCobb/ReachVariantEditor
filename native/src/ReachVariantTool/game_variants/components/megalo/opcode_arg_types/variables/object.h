@@ -26,5 +26,6 @@ namespace Megalo {
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          //
          virtual Variable* create_zero_or_none() const noexcept override;
+         virtual bool set_to_zero_or_none() noexcept override;
    };
 }

@@ -35,7 +35,7 @@ namespace Megalo {
       if (base.text_false)
          this->baseStringFalse = base.text_false;
    }
-   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueConstBool::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
          return arg_compile_result::failure();
       //
@@ -109,21 +109,13 @@ namespace Megalo {
       cobb::sprintf(temp, "%d", this->value);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueConstSInt8::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part > 0)
          return arg_compile_result::failure();
       //
       int32_t v = 0;
-      if (!arg.extract_integer_literal(v)) {
-         //
-         // Try to resolve the argument as an alias.
-         //
-         auto word  = arg.extract_word();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (!alias || !alias->is_integer_constant())
-            return arg_compile_result::failure();
-         v = alias->get_integer_constant();
-      }
+      if (!compiler.try_get_integer(arg, v))
+         return arg_compile_result::failure();
       if (!cobb::integral_type_can_hold<int8_t>(v)) {
          compiler.raise_warning(QString("Value %1 cannot be held in a signed 8-bit integer; value %2 has been stored instead.").arg(v).arg((uint8_t)v));
       }

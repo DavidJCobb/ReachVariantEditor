@@ -1,0 +1,495 @@
+[wpn_assaultrifle]
+name=Assault Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\assault_rifle
+sourcetype=map
+en=Assault Rifle
+jp=アサルトライフル
+de=Sturmgewehr
+fr=Fusil d'assaut
+es=Rifle de asalto
+mx=Rifle de asalto
+it=Fucile d'assalto
+ko=어썰트 라이플
+zh=衝鋒槍
+pt=Fuzil de assalto
+
+[wpn_dmr]
+name=DMR
+cate=weapons
+source=ui\cui\strings\forge_strings\dmr
+sourcetype=map
+en=DMR
+jp=DMR
+de=DMR
+fr=DMR
+es=DMR
+mx=DMR
+it=DMR
+ko=DMR
+zh=神射手步槍
+pt=DMR
+
+[wpn_beamrifle]
+name=Beam Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\beam_rifle
+sourcetype=map
+en=Beam Rifle
+jp=ビームライフル
+de=Strahlengewehr
+fr=Fusil sniper
+es=Rifle de haz
+mx=Rifle de haz
+it=Fucile particellare
+ko=빔 라이플
+zh=光束步槍
+pt=Rifle de raios
+
+[wpn_concussionrifle]
+name=Concussion Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\concussion_rifle
+sourcetype=map
+en=Concussion Rifle
+jp=コンカッションライフル
+de=Erschütterungsgewehr
+fr=Fusil à concussion
+es=Rifle de conmoción
+mx=Rifle de conmoción
+it=Fucile a concussione
+ko=충격 라이플
+zh=衝擊步槍
+pt=Rifle de abalo
+
+[wpn_needlerifle]
+name=Needle Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\needle_rifle
+sourcetype=map
+en=Needle Rifle
+jp=ニードルライフル
+de=Nadelgewehr
+fr=Fusil à aiguilles
+es=Rifle aguijón
+mx=Rifle aguijón
+it=Fucile ad aghi
+ko=니들 라이플
+zh=刺針步槍
+pt=Rifle Needle
+
+[wpn_energysword]
+name=Energy Sword
+cate=weapons
+source=ui\cui\strings\forge_strings\energy_sword
+sourcetype=map
+en=Energy Sword
+jp=エナジーソード
+de=Partikelschwert
+fr=Épée à énergie
+es=Espada de energía
+mx=Espada de energía
+it=Lama energetica
+ko=에너지 검
+zh=能量劍
+pt=Espada de energia
+
+[wpn_plasmarepeater]
+name=Plasma Repeater
+cate=weapons
+source=ui\cui\strings\forge_strings\plasma_repeater
+sourcetype=map
+en=Plasma Repeater
+jp=プラズマリピーター
+de=Plasmarepetierer
+fr=Répéteur plasma
+es=Repetidor de plasma
+mx=Repetidor de plasma
+it=Ripetitore al plasma
+ko=플라즈마 연사기
+zh=電漿連發槍
+pt=Repetidor de plasma
+
+[wpn_gravityhammer]
+name=Gravity Hammer
+cate=weapons
+source=ui\cui\strings\forge_strings\gravity_hammer
+sourcetype=map
+en=Gravity Hammer
+jp=グラビティハンマー
+de=Gravitationshammer
+fr=Marteau antigrav
+es=Martillo gravitatorio
+mx=Martillo gravitatorio
+it=Martello gravitazionale
+ko=중력 해머
+zh=重力鎚
+pt=Martelo de gravidade
+
+[wpn_grenadelauncher]
+name=Grenade Launcher
+cate=weapons
+source=ui\cui\strings\forge_strings\grenade_launcher
+sourcetype=map
+en=Grenade Launcher
+jp=グレネードランチャー
+de=Granatwerfer
+fr=Lance-grenade
+es=Lanzagranadas
+mx=Lanzagranadas
+it=Lanciagranate
+ko=유탄 발사기
+zh=榴彈槍
+pt=Lança-granadas
+
+[wpn_magnum]
+name=Magnum
+cate=weapons
+source=ui\cui\strings\forge_strings\magnum
+sourcetype=map
+en=Magnum
+jp=ハンドガン
+de=Magnum
+fr=Magnum
+es=Magnum
+mx=Magnum
+it=Magnum
+ko=매그넘
+zh=麥格農手槍
+pt=Magnum
+
+[wpn_focusrifle]
+name=Focus Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\focus_rifle
+sourcetype=map
+en=Focus Rifle
+jp=フォーカスライフル
+de=Fokusgewehr
+fr=Fusil de précision
+es=Rifle de rastreo
+mx=Rifle de rastreo
+it=Fucile da cecchino
+ko=포커스 라이플
+zh=瞄準步槍
+pt=Rifle de foco
+
+[wpn_needler]
+name=Needler
+cate=weapons
+source=ui\cui\strings\forge_strings\needler
+sourcetype=map
+en=Needler
+jp=ニードラー
+de=Nadelwerfer
+fr=Needler
+es=Aguijoneador
+mx=Aguijoneador
+it=Pistola ad aghi
+ko=니들러
+zh=刺針槍
+pt=Needler
+
+[wpn_plasmapistol]
+name=Plasma Pistol
+cate=weapons
+source=ui\cui\strings\forge_strings\plasma_pistol
+sourcetype=map
+en=Plasma Pistol
+jp=プラズマガン
+de=Plasmapistole
+fr=Pistolet à plasma
+es=Pistola de plasma
+mx=Pistola de plasma
+it=Pistola al plasma
+ko=플라즈마 피스톨
+zh=電漿手槍
+pt=Pistola de plasma
+
+[wpn_plasmarifle]
+name=Plasma Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\plasma_rifle
+sourcetype=map
+en=Plasma Rifle
+jp=プラズマライフル
+de=Plasmagewehr
+fr=Fusil à plasma
+es=Rifle de plasma
+mx=Rifle de plasma
+it=Fucile al plasma
+ko=플라즈마 라이플
+zh=電漿槍
+pt=Rifle de plasma
+
+[wpn_rocketlauncher]
+name=Rocket Launcher
+cate=weapons
+source=ui\cui\strings\forge_strings\rocket_launcher
+sourcetype=map
+en=Rocket Launcher
+jp=ロケットランチャー
+de=Bazooka
+fr=Lance-roquette
+es=Lanzacohetes
+mx=Lanzacohetes
+it=Lanciarazzi
+ko=로켓 발사기
+zh=火箭發射筒
+pt=Lança-foguetes
+
+[wpn_shotgun]
+name=Shotgun
+cate=weapons
+source=ui\cui\strings\forge_strings\shotgun
+sourcetype=map
+en=Shotgun
+jp=ショットガン
+de=Schrotgewehr
+fr=Fusil à pompe
+es=Escopeta
+mx=Escopeta
+it=Doppietta
+ko=샷건
+zh=霰彈槍
+pt=Espingarda
+
+[wpn_sniperrifle]
+name=Sniper Rifle
+cate=weapons
+source=ui\cui\strings\forge_strings\sniper_rifle
+sourcetype=map
+en=Sniper Rifle
+jp=スナイパーライフル
+de=Scharfschützengewehr
+fr=Fusil sniper
+es=Rifle de precisión
+mx=Rifle de precisión
+it=Fucile di precisione
+ko=스나이퍼 라이플
+zh=狙擊步槍
+pt=Rifle de precisão
+
+[wpn_spartanlaser]
+name=Spartan Laser
+cate=weapons
+source=ui\cui\strings\forge_strings\spartan_laser
+sourcetype=map
+en=Spartan Laser
+jp=スパルタンレーザー
+de=Spartan-Laser
+fr=Laser spartan
+es=Láser Spartan
+mx=Láser Spartan
+it=Laser Spartan
+ko=스파르탄 레이저
+zh=斯巴達雷射
+pt=Laser Spartan
+
+[wpn_spiker]
+name=Spiker
+cate=weapons
+source=ui\cui\strings\forge_strings\spike_rifle
+sourcetype=map
+en=Spiker
+jp=スパイカー
+de=Stachler
+fr=Spiker
+es=Spiker
+mx=Spiker
+it=Spuntoni
+ko=스파이커
+zh=釘槍
+pt=Spiker
+
+[wnp_targetlocator]
+name=Target Designator
+cate=weapons
+source=ui\cui\strings\forge_strings\wep_targetlaser
+sourcetype=map
+en=Target Designator
+jp=ターゲットロケーター
+de=Ziel-Designator
+fr=Marqueur laser
+es=Localizador de blancos
+mx=Localizador de blancos
+it=Sistema di puntamento
+ko=목표 조준기
+zh=目標瞄準器
+pt=Designador de alvo
+
+[wpn_fuelrodgun]
+name=Fuel Rod Gun
+cate=weapons
+source=ui\cui\strings\forge_strings\wep_flakcannon
+sourcetype=map
+en=Fuel Rod Gun
+jp=ロッドガン
+de=Flakgeschütz
+fr=Pistolet à combustible
+es=Cañón de combustible
+mx=Cañón de combustible
+it=Fucile a combustibile
+ko=퓨얼 로드 건
+zh=燃料槍
+pt=Arma de combustível
+
+[wpn_plasmalauncher]
+name=Plasma Launcher
+cate=weapons
+source=ui\cui\strings\forge_strings\wep_plasmalauncher
+sourcetype=map
+en=Plasma Launcher
+jp=プラズマランチャー
+de=Plasmawerfer
+fr=Lance-plasma
+es=Lanzador de plasma
+mx=Lanzador de plasma
+it=Lanciacariche al plasma
+ko=플라즈마 발사기
+zh=電漿發射器
+pt=Lançador de plasma
+
+[fraggrenade]
+name=Frag Grenade
+cate=weapons
+source=ui\cui\strings\forge_strings\wep_nade_frag
+sourcetype=map
+en=Frag Grenade
+jp=フラググレネード
+de=Splittergranate
+fr=Grenade à fragmentation
+es=Granada de fragmentación
+mx=Granada de fragmentación
+it=Granata a framm.
+ko=파편 수류탄
+zh=破片手榴彈
+pt=Granada de frag.
+
+[plasmagrenade]
+name=Plasma Grenade
+cate=weapons
+source=ui\cui\strings\forge_strings\wep_nade_plasma
+sourcetype=map
+en=Plasma Grenade
+jp=プラズマグレネード
+de=Plasmagranate
+fr=Grenade à plasma
+es=Granada de plasma
+mx=Granada de plasma
+it=Granata al plasma
+ko=플라즈마 수류탄
+zh=電漿手榴彈
+pt=Granada de plasma
+
+[aa_activecamo]
+name=Active Camo (Armor Ability)
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_camo
+sourcetype=map
+en=Active Camouflage
+jp=アクティブ カモフラージュ
+de=Aktive Tarnung
+fr=Camouflage actif
+es=Camuflaje activo
+mx=Camuflaje activo
+it=Invisibilità attiva
+ko=위장 장치
+zh=行動隱身衣
+pt=Camuflagem ativa
+
+[aa_armorlock]
+name=Armor Lock
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_lock
+sourcetype=map
+en=Armor Lock
+jp=アーマーロック
+de=Panzerungsschild
+fr=Carapace
+es=Bloqueo de armadura
+mx=Bloqueo de armadura
+it=Blocco armatura
+ko=부동 방어
+zh=護甲鎖
+pt=Travamento de armadura
+
+[aa_dropshield]
+name=Drop Shield
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_dropshield
+sourcetype=map
+en=Drop Shield
+jp=ドロップシールド
+de=Schutzschild
+fr=Bulle curative
+es=Escudo parcial
+mx=Escudo parcial
+it=Scudo portatile
+ko=방울 방어막
+zh=天盾
+pt=Escudo móvel
+
+[aa_evade]
+name=Evade
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_evade
+sourcetype=map
+en=Evade
+jp=エスケープ
+de=Ausweichen
+fr=Esquive
+es=Evadirse
+mx=Evadirse
+it=Schivata
+ko=회피
+zh=躲避
+pt=Escapar
+
+[aa_hologram]
+name=Hologram
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_hologram
+sourcetype=map
+en=Hologram
+jp=ホログラム
+de=Hologramm
+fr=Hologramme
+es=Holograma
+mx=Holograma
+it=Ologramma
+ko=홀로그램
+zh=全像術
+pt=Holograma
+
+[aa_jetpack]
+name=Jet Pack
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_jetpack
+sourcetype=map
+en=Jet Pack
+jp=ジェットパック
+de=Jetpack
+fr=Jet pack
+es=Mochila cohete
+mx=Mochila cohete
+it=Jetpack
+ko=제트팩
+zh=噴射推進器
+pt=Jet Pack
+
+[aa_sprint]
+name=Sprint
+cate=armor-abilities
+source=ui\cui\strings\forge_strings\arm_sprint
+sourcetype=map
+en=Sprint
+jp=スプリント
+de=Sprint
+fr=Sprint
+es=Esprintar
+mx=Esprintar
+it=Scatto
+ko=질주
+zh=衝刺
+pt=Correr

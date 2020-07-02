@@ -6,6 +6,7 @@
 #include "../helpers/sha1.h"
 
 #include "types/multiplayer.h"
+#include "io_process.h"
 #include "errors.h"
 
 bool BlamHeader::read(reach_block_stream& stream) noexcept {
@@ -198,6 +199,15 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    uint32_t offset_after_hashable;
    //
    if (!this->header.read(reader.bytes)) {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
+      if (this->header.found.signature == this->header.expected.signature && this->header.found.version == block_header_version::halo_2_annie) {
+         //
+         // Note: This won't catch all Halo 2 Anniversary variants; some use a new file chunk, "athr", 
+         // so those trip the "no 'chdr' block" check instead.
+         //
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::unsupported_game;
+         error_report.detail = GameEngineVariantLoadError::load_failure_detail::game_is_halo_2_anniversary;
+      }
       return false;
    }
    auto& stream = reader.bits;
@@ -217,12 +227,11 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       case ReachGameEngine::campaign:
          // fall through
       case ReachGameEngine::firefight:
+         // fall through
+      default:
          error_report.state         = GameEngineVariantLoadError::load_state::failure;
          error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;
          error_report.extra[0]      = (int32_t)this->type;
-         return false;
-      default:
-         printf("Variant has unknown type. Can't load it.\n"); // TODO: Ask the user what type we should use.
          return false;
    }
    if (!this->data->read(reader)) {
@@ -267,10 +276,11 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
    //
    return true;
 }
-void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
-   auto& bytes = writer.bytes;
-   auto& bits  = writer.bits;
-   auto& wd    = this->writeData;
+void ReachBlockMPVR::write(GameVariantSaveProcess& save_process) noexcept {
+   auto& writer = save_process.writer;
+   auto& bytes  = writer.bytes;
+   auto& bits   = writer.bits;
+   auto& wd     = this->writeData;
 
    uint32_t offset_of_hash;
    uint32_t offset_before_hashable;
@@ -300,7 +310,7 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
       this->type.write(bits);
 
    if (this->data)
-      this->data->write(writer);
+      this->data->write(save_process);
 
    wd.offset_after_hashable = bits.get_bytespan();
    //
@@ -311,13 +321,14 @@ void ReachBlockMPVR::write(cobb::bit_or_byte_writer& writer) noexcept {
    //
    writer.synchronize();
 }
-void ReachBlockMPVR::write_last_minute_fixup(cobb::bit_or_byte_writer& writer) const noexcept {
-   auto& wd    = this->writeData;
-   auto& bytes = writer.bytes;
+void ReachBlockMPVR::write_last_minute_fixup(GameVariantSaveProcess& save_process) const noexcept {
+   auto& writer = save_process.writer;
+   auto& wd     = this->writeData;
+   auto& bytes  = writer.bytes;
    writer.synchronize();
    //
    if (this->data)
-      this->data->write_last_minute_fixup(writer);
+      this->data->write_last_minute_fixup(save_process);
    {  // SHA-1 hash
       auto hasher = cobb::sha1();
       uint32_t size = wd.offset_after_hashable - wd.offset_before_hashable;
@@ -357,6 +368,8 @@ bool GameVariant::read(cobb::mapped_file& file) {
    bool chdr   = false;
    bool mpvr   = false;
    bool _eof   = false;
+   bool stop   = false;
+   RVTEditorBlock editor_block;
    while (auto block = blocks.next()) {
       if (!blam) {
          //
@@ -417,10 +430,17 @@ bool GameVariant::read(cobb::mapped_file& file) {
             this->eofBlock.read(block);
             _eof = true;
             break;
+         case 'xRVT':
+            editor_block.read(block);
+            break;
          default:
+            if (_eof) { // some files have a TON of empty padding space at their ends
+               stop = true;
+               break;
+            }
             this->unknownBlocks.emplace_back().read(block);
       }
-      if (_eof) // some files have a TON of empty padding space at their ends
+      if (stop)
          break;
    }
    if (!chdr) {
@@ -435,19 +455,37 @@ bool GameVariant::read(cobb::mapped_file& file) {
       error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
       return false;
    }
+   if (auto mp = this->get_multiplayer_data()) {
+      for (auto*& sub : editor_block.subrecords) {
+         if (mp->receive_editor_data(sub))
+            sub = nullptr;
+      }
+      if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
+         return false;
+      }
+   }
    return true;
 }
-void GameVariant::write(cobb::bit_or_byte_writer& writer) noexcept {
+void GameVariant::write(GameVariantSaveProcess& save_process) noexcept {
+   auto& writer = save_process.writer;
+   //
    this->blamHeader.write(writer.bytes);
    this->contentHeader.write(writer.bytes);
    writer.synchronize();
-   this->multiplayer.write(writer);
+   this->multiplayer.write(save_process);
    for (auto& unknown : this->unknownBlocks)
       unknown.write(writer.bytes);
    this->eofBlock.write(writer.bytes);
    //
    this->contentHeader.write_last_minute_fixup(writer.bytes);
-   this->multiplayer.write_last_minute_fixup(writer);
+   this->multiplayer.write_last_minute_fixup(save_process);
+   //
+   if (save_process.has_subrecords()) {
+      RVTEditorBlock editor_block;
+      editor_block.adopt(save_process.xrvt_subrecords);
+      if (editor_block.has_subrecords())
+         editor_block.write(writer.bytes);
+   }
 }
 void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
    printf("Testing our hashing algorithm on this game variant...\n");

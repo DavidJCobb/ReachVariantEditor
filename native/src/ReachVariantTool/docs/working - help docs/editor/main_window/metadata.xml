@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Metadata</title>
+   <body>
+      <p>
+         The <b>metadata tab</b> allows you to edit a file's title, description, timestamps, 
+         and authorship data.
+      </p>
+      <img src="metadata.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Name</dt>
+            <dd>The filename displayed in-game for this game variant.</dd>
+         <dt>Description</dt>
+            <dd>The description displayed in-game for this game variant.</dd>
+         <dt>Category Icon</dt>
+            <dd>In <i>Halo: Reach</i>'s original Xbox 360 release, this icon was shown 
+            in the game's menus when looking at a game variant. In all releases of 
+            <i>Halo: Reach</i>, this also determines the default icon for a game 
+            variant's round title card.</dd>
+         <dt>Category Name</dt>
+            <dd>
+               <p>This determines which gametype "folder" the game variant will be placed 
+               under.</p>
+               <p>The original Xbox 360 release of <i>Halo: Reach</i> allowed mod 
+               authors to create new folders by taking advantage of unused category 
+               values, but Halo: The Master Chief Collection does not support this. If you 
+               load a file that uses a custom category name, ReachVariantTool will correct 
+               its category name to one that the MCC recognizes.</p>
+            </dd>
+         <dt>Author</dt>
+            <dd>
+               <p>Game variants embed the Xbox LIVE gamertag and Xbox User ID (XUID) of the 
+               player who created them. However, Halo: The Master Chief Collection does not 
+               make use of the embedded gamertag if you are connected to Xbox LIVE. A file 
+               that has an embedded gamertag but no XUID will be displayed as having been 
+               created by 343 Industries.</p>
+               <p>Embedded gamertags are limited to 15 ASCII characters. The special character 
+               <code>¦</code> is used to denote a game variant created by Bungie or 343 
+               Industries.</p>
+               <p>A button is provided to let you strip out the author XUID embedded in the 
+               file. However, you are not able to associate a file with arbitrary XUIDs. If 
+               you wish to add your own gamertag as an author, you'll have to resave the file 
+               in-game.</p>
+            </dd>
+         <dt>Created At</dt>
+            <dd>The date and time at which the file was created.</dd>
+         <dt>Editor</dt>
+            <dd>Game variants embed the Xbox LIVE gamertag and Xbox User ID (XUID) of the 
+            player who edited them (if anyone did) after they were created. This data works 
+            the same as authorship data.</dd>
+         <dt>Edited At</dt>
+            <dd>The date and time at which the file was edited.</dd>
+      </dl>
+      
+      <h2>Notes</h2>
+      <p>
+         Official game variants may have descriptions that look like <code>$hr_gvar_Assault_desc</code>. 
+         These descriptions are special codes that Halo: The Master Chief Collection can detect and 
+         replace with its own text. 343 Industries uses this functionality to retain a greater degree 
+         of control over how gametype descriptions are translated into different languages.
+      </p>
+   </body>
+</article>

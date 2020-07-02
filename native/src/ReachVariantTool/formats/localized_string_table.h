@@ -4,6 +4,7 @@
 #include "../helpers/bitwise.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/indexed_list.h"
+#include "../helpers/memory.h"
 #include "../helpers/refcounting.h"
 #include "../helpers/stream.h"
 #include "../helpers/standalones/unique_pointer.h"
@@ -24,6 +25,8 @@ namespace reach {
       chinese_simplified,
       portugese,
       polish, // optional
+      //
+      not_a_language = -1
    };
    constexpr int language_count = (int)language::polish + 1;
    //
@@ -47,6 +50,7 @@ using MegaloStringIndexOptional = cobb::bitnumber<cobb::bitcount(112), uint8_t, 
 using MegaloStringRef           = cobb::refcount_ptr<ReachString>;
 
 class ReachString : public indexed_list_item {
+   friend ReachStringTable;
    public:
       //
       // (offsets) is the offset into the string table's raw content (i.e. the content 
@@ -61,33 +65,60 @@ class ReachString : public indexed_list_item {
       //
       // Strings are encoded as UTF-8.
       //
-      ReachString(ReachStringTable& o) : owner(o) {}
-      //
-      ReachStringTable& owner;
-      std::array<int, reach::language_count>         offsets;
+   protected:
+      ReachStringTable* owner = nullptr;
+      std::array<int,         reach::language_count> offsets;
       std::array<std::string, reach::language_count> strings; // UTF-8
+      bool dirty = true;
+      //
+      void _set_dirty() noexcept;
+      //
+   public:
+      ReachString() {}
+      ReachString(ReachStringTable& o) : owner(&o) {}
+      //
+      using language_list_t = std::array<std::string, reach::language_count>;
       //
       void read_offsets(cobb::ibitreader&, ReachStringTable& table) noexcept;
       void read_strings(void* buffer) noexcept;
       void write_offsets(cobb::bitwriter& stream, const ReachStringTable& table) const noexcept;
       void write_strings(std::string& out) noexcept;
       //
-      std::string& english() noexcept {
-         return this->strings[(int)reach::language::english];
+      inline const std::string& get_content(reach::language l) const noexcept {
+         return this->strings[(int)l];
       }
-      const std::string& english() const noexcept {
-         return this->strings[(int)reach::language::english];
+      inline const language_list_t& languages() const noexcept { return this->strings; }
+      //
+      void set_content(reach::language, const std::string& text) noexcept;
+      void set_content(reach::language, const char* text) noexcept;
+      void set_content(reach::language, std::string&& text) noexcept;
+      //
+      inline std::string& get_write_access(reach::language l) noexcept {
+         this->_set_dirty();
+         return this->strings[(int)l];
       }
+      //
       bool operator==(const ReachString& other) const noexcept {
          return this->strings == other.strings;
       }
       bool operator!=(const ReachString& other) const noexcept { return !(*this == other); }
+      ReachString& operator=(const ReachString& other) noexcept;
       //
       bool can_be_forge_label() const noexcept;
       bool empty() const noexcept;
+      inline bool is_dirty() const noexcept { return this->dirty; }
 };
 
 class ReachStringTable {
+   public:
+      enum class save_error {
+         none,
+         data_too_large,
+         out_of_memory,
+         zlib_memory_error,
+         zlib_buffer_error,
+      };
+      //
    public:
       const int max_count;
       const int max_buffer_size;
@@ -113,11 +144,40 @@ class ReachStringTable {
       cobb::indexed_list<ReachString> strings;
       //
    protected:
-      void* _make_buffer(cobb::ibitreader&) const noexcept;
+      bool dirty = true;
+      //
+      bool  _check_dirty() const noexcept;
+      void* _make_buffer(cobb::ibitreader&) const noexcept; // for reading
+      void  _set_not_dirty() noexcept;
+      //
+      struct _sort_pair {
+         ReachString*    entry    = nullptr;
+         reach::language language = reach::language::not_a_language;
+         //
+         _sort_pair() {}
+         _sort_pair(ReachString* s, reach::language l) : entry(s), language(l) {}
+         int compare(const _sort_pair& other) const noexcept;
+      };
+      struct {
+         cobb::bitwriter raw;
+         std::vector<_sort_pair> pairs;
+         uint32_t uncompressed_size = 0;
+      } cached_export;
+      //
+      void _remove_from_sorted_pairs(ReachString*);
+      void _ensure_sort_pairs_for(ReachString*);
+      void _ensure_sort_pairs_for_all_strings();
+      void _sort_all_pairs();
+      //
    public:
       bool read(cobb::ibitreader&) noexcept;
-      void write(cobb::bitwriter& stream) noexcept;
+      bool write(cobb::bitwriter& stream) noexcept;
+      void write_placeholder(cobb::bitwriter& stream) noexcept; // writes all strings as "str000", "str001", etc.
+      void read_fallback_data(cobb::generic_buffer&) noexcept;
+      void write_fallback_data(cobb::generic_buffer& out) noexcept;
       //
+      save_error generate_export_data() noexcept; // returns success bool
+      uint32_t get_size_to_save() noexcept;
       ReachString* get_empty_entry() const noexcept;
       ReachString* get_entry(size_t index) const noexcept {
          if (index < this->strings.size())
@@ -134,4 +194,7 @@ class ReachStringTable {
       void remove(size_t index) noexcept;
       //
       uint32_t total_bytecount() noexcept; // number of bytes it would take to store all strings (accounting for overlapping and other optimizations)
+      //
+      inline bool is_dirty() const noexcept { return this->dirty; }
+      inline void set_dirty() noexcept { this->dirty = true; }; // for ReachString
 };

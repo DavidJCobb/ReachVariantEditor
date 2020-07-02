@@ -34,22 +34,22 @@ namespace Megalo {
       ),
       ActionFunction( // 2
          "Create Object",
-         "Create an object.",
+         "Creates an object. Note that even if the new object and/or the basis are non-solid, the new object may not be created exactly at the desired position. Attaching and detaching after the object is created is a more reliable way to ensure exact positioning when exact positioning is needed.",
          "Create %1 at offset %6 from %3 with Forge label %4, settings (%5), and name %7. Store a reference to it in %2.",
          {
-            OpcodeArgBase("type",        OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("result",      OpcodeArgValueObject::typeinfo, true),
-            OpcodeArgBase("spawn point", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("label",       OpcodeArgValueForgeLabel::typeinfo),
-            OpcodeArgBase("flags",       OpcodeArgValueCreateObjectFlags::typeinfo),
-            OpcodeArgBase("offset",      OpcodeArgValueVector3::typeinfo),
-            OpcodeArgBase("name",        OpcodeArgValueVariantStringID::typeinfo),
+            OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
+            OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
+            OpcodeArgBase("basis",  OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("label",  OpcodeArgValueForgeLabel::typeinfo),
+            OpcodeArgBase("flags",  OpcodeArgValueCreateObjectFlags::typeinfo),
+            OpcodeArgBase("offset", OpcodeArgValueVector3::typeinfo),
+            OpcodeArgBase("name",   OpcodeArgValueVariantStringID::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2)
+         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2, OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded)
       ),
       ActionFunction( // 3
          "Delete Object",
-         "Delete an object.",
+         "Delete an object. If the deleted object is a player's current biped, then the player will respawn instantly; in limited-life game variants, they will not lose a life as a result of the deletion. Deleting a player's biped repeatedly for a prolonged period of time will cause the screen to cut to black for them; no HUD widgets will be visible, and most sounds will not be audible.",
          "Delete %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -159,14 +159,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
       ),
       ActionFunction( // 14
-         "Set Spawn Location Fireteam",
-         "Limit which fireteam can spawn at an object.",
-         "Only allow fireteam #%2 to spawn at %1.",
+         "Set Spawn Location Fireteams",
+         "Limit which fireteams can spawn at an object.",
+         "Only allow fireteams #%2 to spawn at %1.",
          {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("fireteam",       OpcodeArgValueConstSInt8::typeinfo), // TODO: -1 == "no fireteam"
+            OpcodeArgBase("fireteams",      OpcodeArgValueFireteamList::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteam", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteams", "", {1}, 0)
       ),
       ActionFunction( // 15
          "Set Object Progress Bar",
@@ -177,7 +177,7 @@ namespace Megalo {
             OpcodeArgBase("who",    OpcodeArgValuePlayerSet::typeinfo),
             OpcodeArgBase("timer",  OpcodeArgValueObjectTimerVariable::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {1, 2}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
+         OpcodeFuncToScriptMapping::make_function("set_progress_bar", "", {2, 1}, 0) // TODO: should we make this an intrinsic instead? i.e. object_var.timer_var.set_progress_bar_visibility(who) ?
       ),
       ActionFunction( // 16
          "CHUD Message",
@@ -192,7 +192,7 @@ namespace Megalo {
       ),
       ActionFunction( // 17
          "Set Timer Rate",
-         "",
+         "Modify the rate at which a timer's value changes, and whether the value increases or decreases. If you set the timer to decrease, then its rate will automatically switch to 0% when it reaches zero. If you set the timer to increase, then it will not increase past its initial value unless its initial value is zero.",
          "Have %1 tick at rate %2.",
          {
             OpcodeArgBase("timer", OpcodeArgValueTimer::typeinfo),
@@ -211,13 +211,13 @@ namespace Megalo {
       ),
       ActionFunction( // 19
          "Get Item Carrier",
-         "Set a player variable to the owner of an object.",
+         "Set a player variable to the carrier of a weapon or Armor Ability. Testing reveals no cases where this function can fail (i.e. it behaves correctly for dropped objects, none-objects, and objects held by an NPC biped), but Bungie and 343i still manually clear the out-variable before calling it.",
          "Set %2 to the player who is carrying %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_carrier", "", {}, 0)
+         OpcodeFuncToScriptMapping::make_function("try_get_carrier", "get_carrier", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
       ),
       ActionFunction( // 20
          "Run Nested Trigger",
@@ -230,7 +230,7 @@ namespace Megalo {
       ),
       ActionFunction( // 21
          "End Round",
-         "Ends the round.",
+         "Ends the round. If the round limit is hit, ends the game as well.",
          "End the current round, and declare the player or team with the highest score the winner of the round.",
          {},
          OpcodeFuncToScriptMapping::make_function("end_round", "", {}, OpcodeFuncToScriptMapping::game_namespace)
@@ -267,7 +267,7 @@ namespace Megalo {
       ),
       ActionFunction( // 25
          "Random Number",
-         "Set a number variable to a random value.",
+         "Set a number variable to a random value greater than or equal to zero and less than the provided cap (i.e. [0, cap) as the range).",
          "Set %2 to a random number greater than or equal to 0 and less than %1.",
          {
             OpcodeArgBase("cap",    OpcodeArgValueScalar::typeinfo),
@@ -284,7 +284,7 @@ namespace Megalo {
       ),
       ActionFunction( // 27
          "Get Object Orientation",
-         "Retrieve some unknown value from an object, always between 1 and 7 inclusive. This can fail, so you should consider resetting the number variable before calling this.",
+         "Retrieve the object's orientation as an enum between 1 and 6 inclusive, indicating which side of the object is facing up. This can fail, so you should consider resetting the number variable before calling this. Testing with vehicles indicates that the orientation indicates which of the object's local vectors (up, down, etc.) is most closely aligned with world-up, with the vectors numbered from 1 to 6 being: up (i.e. object is upright), left, backward (i.e. nose down), forward (i.e. nose up), left, and down (i.e. object is upside-down). However, testing with pre-placed and pre-rotated weapons and scenery objects always returned 1.",
          "Set %2 to the \"orientation\" value on %1.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -294,7 +294,7 @@ namespace Megalo {
       ),
       ActionFunction( // 28
          "Get Speed",
-         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero. The unit of measurement seems to be feet per second; Race multiplies by 100 and then divides by 109 to convert to kilometers per hour.",
+         "Set a number variable to an object's speed. The speed is premultiplied by 10 and, if less than 0.1, returned as zero. The unit of measurement seems to be feet per second; Race multiplies by 109 and then divides by 100 to convert to kilometers per hour.",
          "Set integer %2 to the current speed of %1 multiplied by 10.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -331,14 +331,6 @@ namespace Megalo {
             OpcodeArgBase("result", OpcodeArgValueScalar::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("try_get_death_damage_mod", "get_death_damage_mod", {}, 0, OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result)
-         //
-         // Known return values:
-         // 1: pummel
-         // 2: assassination (does this include backsmacks or just stabs?)
-         // 3: splatter
-         // 4: stuck with grenade
-         // 5: headshot
-         //
       ),
       ActionFunction( // 32
          "Debugging: Enable Tracing",
@@ -351,7 +343,7 @@ namespace Megalo {
       ),
       ActionFunction( // 33
          "Attach Objects",
-         "Attach one object to another.",
+         "Attach one object to another. The subject will be moved to the target's position plus the offset before being attached. An additional parameter controls whether the offset exists in the target's reference frame (i.e. whether the target's rotation affects the subject's final position); however, the subject will not be rotated (to match the target or otherwise) even if a relative position offset is used.",
          "Attach %1 to %2 at %4 offset %3.",
          {
             OpcodeArgBase("subject",  OpcodeArgValueObject::typeinfo),
@@ -372,7 +364,7 @@ namespace Megalo {
       ),
       ActionFunction( // 35
          "Get Player Scoreboard Position",
-         "Get a player's position on the scoreboard, across all players and teams.",
+         "Get a player's position on the scoreboard, across all players and teams. This function returns 0 if the player used is (no_player).",
          "Set %2 to %1's position on the scoreboard.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -422,7 +414,7 @@ namespace Megalo {
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
-         "Sets an object variable to the vehicle that a player is currently using. Does not include boarding.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
+         "Sets an object variable to the vehicle that a player is currently using.", // does nothing if no player or no vehicle? bungie sets the out-variable to no-object before running this
          "Set %2 to the vehicle that %1 is currently using.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -432,7 +424,7 @@ namespace Megalo {
       ),
       ActionFunction( // 41
          "Force Player Into Vehicle",
-         "Forces the player into a vehicle. The player is instantly teleported in.",
+         "Forces the player into a vehicle. The player is instantly teleported in. This action will not work if the player is already in a vehicle, or if the target vehicle is destroyed. It does work if the target vehicle is overturned, but the player will be instantly ejected without ever having spent any actual time in the vehicle.",
          "Force %1 into any unoccupied seat in %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -500,7 +492,7 @@ namespace Megalo {
       ),
       ActionFunction( // 48
          "Set Meter Parameters",
-         "Modify meter options for a HUD widget. Any variables specified as part of the meter parameters will be passed by reference: the meter will update as their values change, even if this action isn't run again.", // TODO: VERIFY THIS BEHAVIOR
+         "Modify meter options for a HUD widget. Any variables specified as part of the meter parameters appear to be passed by reference, which would mean that the meter will update as their values change, even if this action isn't run again.",
          "Set meter parameters for %1 to %2.",
          {
             OpcodeArgBase("widget",     OpcodeArgValueWidget::typeinfo),
@@ -520,7 +512,7 @@ namespace Megalo {
       ),
       ActionFunction( // 50
          "Set Widget Visibility",
-         "Modify a HUD widget's icon.",
+         "Control whether a given player can see a HUD widget.",
          "%3 widget %1 for player %2.",
          {
             OpcodeArgBase("widget",  OpcodeArgValueWidget::typeinfo),
@@ -552,7 +544,7 @@ namespace Megalo {
       ),
       ActionFunction( // 53
          "Set Waypoint Text",
-         "",
+         "Sets the text of an object's waypoint. Any variables used with a format string will be passed by reference, not by value, if the variable in question doesn't have network priority \"high,\" and this may lead to results contrary to what you expect.",
          "Set %1's waypoint text to message: %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
@@ -581,7 +573,7 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_getter("health", 0)
       ),
       ActionFunction( // 56
-         "Set Objective Title for Player",
+         "Set Objective Description for Player",
          "Alters the text of the title card shown at the start of a round.",
          "Set the objective title for %1 to %2.",
          {
@@ -591,7 +583,7 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
       ),
       ActionFunction( // 57
-         "Set Objective Description for Player",
+         "Set Objective Icon Caption for Player",
          "Alters the description of the title card shown at the start of a round.",
          "Set the objective description for %1 to %2.",
          {
@@ -856,7 +848,7 @@ namespace Megalo {
       ),
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
-         "",
+         "Control whether a Respawn Zone is influencing spawning.",
          "Modify enable state for spawn zone %1: set to %2.",
          {
             OpcodeArgBase("spawn zone", OpcodeArgValueObject::typeinfo),
@@ -887,13 +879,13 @@ namespace Megalo {
       ),
       ActionFunction( // 85
          "Enable/Disable Object Garbage Collection",
-         "Set whether an object can be garbage-collected.",
-         "%2 garbage collection of %1.",
+         "Set whether an object can be garbage-collected. This does not work if the object was created with the never_garbage_collect flag.",
+         "Disable garbage collection of %1? %2.",
          {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("state",  OpcodeArgValueConstBool::typeinfo, "Enable", "Disable"),
+            OpcodeArgBase("state (treated as bool)",  OpcodeArgValueScalar::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_garbage_collection_enabled", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_garbage_collection_disabled", "", {1}, 0)
       ),
       ActionFunction( // 86
          "Get Player Target Object",
@@ -906,14 +898,14 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("get_crosshair_target", "", {}, 0)
       ),
       ActionFunction( // 87
-         "Create Object Equidistant", // TODO: KSoft.Tool now calls this "create_tunnel"; what does that mean?
-         "",
+         "Create Object Equidistant", // KSoft.Tool now calls this "create_tunnel"; I'm not sure why, because testing confirms it does what I think it does.
+         "Create an object exactly in between two other objects. Unlike object.place_at_me, this seems to create an object in an exact location, at least when the object being created is non-solid e.g. a Hill Marker.",
          "Create an instance of %3 at the exact midpoint between %1 and %2, and store it in %5. Radius: %4.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("type",   OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("radius", OpcodeArgValueScalar::typeinfo), // meaning of this arg is unknown; tested different values in-game with no visible effect
             OpcodeArgBase("result", OpcodeArgValueObject::typeinfo, true),
          },
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {1, 2, 3}, 0)
@@ -929,7 +921,7 @@ namespace Megalo {
       ),
       ActionFunction( // 89
          "Add Weapon to Player",
-         "This function attempts to add a weapon to a player, without having to access their biped.",
+         "This function attempts to add a weapon object to a player, without having to access their biped.",
          "Give weapon %2 to %1.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
@@ -949,18 +941,18 @@ namespace Megalo {
       ),
       ActionFunction( // 91
          "Copy Object Rotation",
-         "",
+         "Have one object copy another object's rotation. The boolean argument indicates whether we copy all axes of rotation (true) or just the heading (false).",
          "Have %1 copy %2's rotation. Use absolute rotations? %3.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("b", OpcodeArgValueObject::typeinfo),
-            OpcodeArgBase("absolute", OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("all_axes", OpcodeArgValueConstBool::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {2, 1}, 0)
+         OpcodeFuncToScriptMapping::make_function("copy_rotation_from", "", {1, 2}, 0)
       ),
       ActionFunction( // 92
          "Point Object Toward Object",
-         "",
+         "Makes one object face toward another. Only seems to affect the subject's heading; pitch and roll rotations don't seem to occur. If you face an object toward itself, you can use the offset position to rotate it.",
          "Make %1 point toward the location in space %3 away from %2.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
@@ -971,7 +963,7 @@ namespace Megalo {
       ),
       ActionFunction( // 93
          "Add Weapon To Biped",
-         "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor.",
+         "Give a weapon to any biped, be it a player or an inanimate script-spawned Spartan, Elite, or Monitor. If the biped's owner player has Weapon Pickup disabled in their player traits, you must use \"force\" to add the weapon.",
          "Add weapon of type %2 to %1 using mode %3.",
          {
             OpcodeArgBase("biped",  OpcodeArgValueObject::typeinfo),
@@ -993,11 +985,11 @@ namespace Megalo {
       ),
       ActionFunction( // 95
          "Set Scenario Interpolator State",
-         "",
-         "Set scenario interpolator state: %1, %2.",
+         "Modify the \"state\" value of a scenario interpolator. Each scenario interpolator is defined by a \"sirp\" tag in the map file.",
+         "Set the state of scenario interpolator %1 to %2.",
          {
-            OpcodeArgBase("a", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("b", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("which", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("state", OpcodeArgValueScalar::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_scenario_interpolator_state", "", {0, 1})
       ),

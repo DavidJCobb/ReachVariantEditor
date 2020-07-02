@@ -64,20 +64,30 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       this->targetValue  = nullptr;
       this->updateValuesListFromVariant();
    });
-   {  // Handle option/value name changes
-      //
-      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
-      // That's also the laziest way to handle things... :<
-      //
-      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle option/value name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_option  = false;
+      bool is_current = false;
+      for (auto& option : mp->scriptData.options) {
+         if (option.uses_string(str)) {
+            is_option = true;
+            if (&option == this->targetOption) {
+               is_current = true;
+               break;
+            }
+         }
+      }
+      if (is_option) {
          this->updateOptionsListFromVariant();
-         this->updateValuesListFromVariant();
-      });
-      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
-         this->updateOptionsListFromVariant();
-         this->updateValuesListFromVariant();
-      });
-   }
+         if (is_current)
+            this->updateValuesListFromVariant();
+      }
+   });
    //
    QObject::connect(this->ui.listOptions, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOption);
    QObject::connect(this->ui.listValues,  &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptOptions::selectOptionValue);
@@ -89,11 +99,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       //
       QObject::connect(this->ui.optionName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
-      QObject::connect(this->ui.optionDesc, &ReachStringPicker::selectedStringChanged, [this]() {
-         ReachEditorState::get().scriptOptionModified(this->targetOption); // main window shows descriptions as tooltips
+      QObject::connect(this->ui.optionName, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
       });
+      QObject::connect(this->ui.optionDesc, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+      });
+      //
       QObject::connect(this->ui.optionType, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
          if (!this->targetOption)
             return;
@@ -124,18 +137,8 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             QMessageBox::information(this, tr("Cannot add option"), tr("Game variants cannot have more than %1 options.").arg(Megalo::Limits::max_script_options));
             return;
          }
-         this->targetOption = list.emplace_back();
-         auto value = this->targetOption->add_value(); // enum-options must have at least one value
-         {  // If possible, default the new option's name and description to an empty string; ditto for its value
-            auto str = mp->scriptData.strings.get_empty_entry();
-            if (str) {
-               this->targetOption->name = str;
-               this->targetOption->desc = str;
-               value->name = str;
-               value->desc = str;
-            }
-         }
-         this->updateOptionFromVariant();
+         this->targetOption = mp->create_script_option();
+         this->selectOption(this->targetOption ? this->targetOption->index : -1);
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
       });
@@ -146,15 +149,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptData.options;
-         auto  index = list.index_of(this->targetOption);
-         if (index < 0)
-            return;
-         if (index == 0) // can't move the first item up
-            return;
-         list.swap_items(index, index - 1);
-         this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionsModified();
+         auto index = this->targetOption->index;
+         #if _DEBUG
+            assert(index >= 0 && "Script Editor: Options: Move Up: Target option doesn't know its index?");
+         #else
+            if (index < 0)
+               return;
+         #endif
+         if (mp->swap_script_options(index, index - 1)) {
+            this->updateOptionsListFromVariant();
+            ReachEditorState::get().scriptOptionsModified();
+         }
       });
       QObject::connect(this->ui.buttonOptionsMoveDown, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
@@ -163,15 +168,17 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  mp     = editor.multiplayerData();
          if (!mp)
             return;
-         auto& list  = mp->scriptData.options;
-         auto  index = list.index_of(this->targetOption);
-         if (index < 0)
-            return;
-         if (index == list.size() - 1) // can't move the last item down
-            return;
-         list.swap_items(index, index + 1);
-         this->updateOptionsListFromVariant();
-         ReachEditorState::get().scriptOptionsModified();
+         auto index = this->targetOption->index;
+         #if _DEBUG
+            assert(index >= 0 && "Script Editor: Options: Move Up: Target option doesn't know its index?");
+         #else
+            if (index < 0)
+               return;
+         #endif
+         if (mp->swap_script_options(index, index + 1)) {
+            this->updateOptionsListFromVariant();
+            ReachEditorState::get().scriptOptionsModified();
+         }
       });
       QObject::connect(this->ui.buttonOptionsDelete, &QPushButton::clicked, [this]() {
          if (!this->targetOption)
@@ -188,16 +195,15 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          auto  index = list.index_of(this->targetOption);
          if (index < 0)
             return;
-         list.erase(index);
+         mp->delete_script_option(this->targetOption);
          size_t size = list.size();
          if (size) {
             if (index >= size)
-               this->targetOption = &list[size - 1];
-            else
-               this->targetOption = &list[index];
-         } else
-            this->targetOption = nullptr;
-         this->updateOptionFromVariant();
+               index = size - 1;
+            this->selectOption(index);
+         } else {
+            this->selectOption(-1);
+         }
          this->updateOptionsListFromVariant();
          ReachEditorState::get().scriptOptionsModified();
       });
@@ -213,10 +219,12 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
       //
       QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringChanged, [this]() {
          this->updateValuesListFromVariant();
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
-      QObject::connect(this->ui.valueDesc, &ReachStringPicker::selectedStringChanged, [this]() {
-         ReachEditorState::get().scriptOptionModified(this->targetOption);
+      QObject::connect(this->ui.valueName, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
+      });
+      QObject::connect(this->ui.valueDesc, &ReachStringPicker::selectedStringSwitched, [this]() {
+         ReachEditorState::get().scriptOptionModified(this->targetOption); // ReachEditorState sends this for us if the string is edited, but if we select a different string, we need to send it
       });
       QObject::connect(this->ui.valueValue, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
          if (!this->targetValue)
@@ -252,6 +260,10 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
+         if (this->targetValue) {
+            const QSignalBlocker blocker(this->ui.listValues);
+            this->ui.listValues->setCurrentRow(option.values.size());
+         }
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
       QObject::connect(this->ui.buttonValuesMoveUp, &QPushButton::clicked, [this]() {
@@ -264,16 +276,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          if (index == 0) // can't move the first item up
             return;
-         option.values.swap_items(index, index - 1);
-         {
-            auto c = option.currentValueIndex;
-            if (c == index)
-               c = index - 1;
-            else if (c == index - 1)
-               c = index;
-         }
-         if (index == this->targetOption->defaultValueIndex)
-            this->targetOption->defaultValueIndex -= 1;
+         option.swap_values(index, index - 1);
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -287,16 +290,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
             return;
          if (index == option.values.size() - 1) // can't move the last item down
             return;
-         option.values.swap_items(index, index + 1);
-         {
-            auto c = option.currentValueIndex;
-            if (c == index)
-               c = index + 1;
-            else if (c == index + 1)
-               c = index;
-         }
-         if (index == this->targetOption->defaultValueIndex)
-            this->targetOption->defaultValueIndex += 1;
+         option.swap_values(index, index + 1);
          this->updateValuesListFromVariant();
          ReachEditorState::get().scriptOptionModified(this->targetOption);
       });
@@ -312,15 +306,14 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          }
          auto  index  = list.index_of(value);
          option.delete_value(value);
-         if (index > 0)
-            this->targetValue = list[index - 1];
-         else if (option.values.size())
-            this->targetValue = list[0];
-         else
+         //
+         size_t size = list.size();
+         if (size) {
+            if (index >= size)
+               index = size - 1;
+            this->targetValue = list[index];
+         } else {
             this->targetValue = nullptr;
-         if (index == this->targetOption->defaultValueIndex) {
-            int diff = (list.size() - 1) - index;
-            this->targetOption->defaultValueIndex -= diff;
          }
          this->updateValueFromVariant();
          this->updateValuesListFromVariant();
@@ -343,10 +336,9 @@ void ScriptEditorPageScriptOptions::selectOption(int32_t i) {
          return;
       this->targetOption = &list[i];
    }
-   this->targetValue = nullptr;
    this->updateOptionFromVariant();
-   this->updateValueFromVariant();
    this->updateValuesListFromVariant();
+   this->selectOptionValue(0);
 }
 void ScriptEditorPageScriptOptions::selectOptionValue(int32_t i) {
    this->targetValue = nullptr;
@@ -377,7 +369,7 @@ void ScriptEditorPageScriptOptions::updateOptionsListFromVariant(GameVariant* va
       auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
-         item->setText(QString::fromUtf8(option.name->english().c_str()));
+         item->setText(QString::fromUtf8(option.name->get_content(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed option %1>", "scripted option editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&option));
@@ -435,7 +427,7 @@ void ScriptEditorPageScriptOptions::updateValuesListFromVariant() {
       auto    item  = new QListWidgetItem;
       QString name;
       if (value.name)
-         name = QString::fromUtf8(value.name->english().c_str());
+         name = QString::fromUtf8(value.name->get_content(reach::language::english).c_str());
       else
          name = tr("<unnamed value %1>", "scripted option editor").arg(i);
       item->setText(name);

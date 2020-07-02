@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Option Visibility</title>
+   <body>
+      <p>
+         The <b>option visibility</b> page allows you to prevent users from editing 
+         the values of certain options via the in-game menus. As an example, the 
+         official Assault gametype uses this data to prevent players from disabling 
+         teams, since there is no code to handle FFA Assault.
+      </p>
+      <img src="option-visibility.png" />
+      <p>
+         In the original Xbox 360 version of <i>Halo: Reach</i>, a "disabled" option 
+         is visible in the menus but greyed out, while a "hidden" option doesn't show 
+         up in the menus at all. In Halo: The Master Chief Collection, disabled and 
+         hidden options are both completely hidden from the menus.
+      </p>
+      <p>
+         The top pane of the option visibility page allows you to control whether 
+         script-specific settings are accessible, while the bottom pane allows you to 
+         control whether non-script-specific options are accessible. 
+      </p>
+      <p>
+         Both panes support multi-selection, and both panes have a context menu that 
+         allows you to change the states of all selected options. Selecting a category 
+         of settings (e.g. "Player Traits") is equivalent to selecting all of the 
+         options in that category.
+      </p>
+      <p>
+         There are over a thousand checkboxes for non-script-specific options. The 
+         vast majority of these are unknown: we do not know what options they actually 
+         correspond to: they may not correspond to options that are in the in-game 
+         menus, or they may correspond to options from other game modes (e.g. Firefight).
+      </p>
+   </body>
+</article>

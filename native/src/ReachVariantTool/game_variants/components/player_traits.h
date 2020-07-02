@@ -8,12 +8,6 @@
 #include <QObject>
 
 namespace reach {
-   //
-   // TODO: A lot of these enums have values that aren't ever exposed in the UI; we should 
-   // try to determine those values' function through testing. Additionally, some enums are 
-   // able to hold bits past the last known value; we should see if the game engine uses 
-   // those bits, or if they're valid in general.
-   //
    enum class ability : int8_t {
       // -4: Icon is two concentric circles. Acts as Sprint.
       unchanged        = -3,
@@ -373,4 +367,6 @@ class ReachMegaloPlayerTraits : public ReachPlayerTraits, public indexed_list_it
          bitcount += MegaloStringIndex::bitcount * 2;
          return bitcount;
       }
+      //
+      bool uses_string(ReachString*) const noexcept;
 };

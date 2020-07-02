@@ -39,8 +39,26 @@ namespace Megalo {
       pregame,
       // Halo 4: incident
    };
-
+   
+   class Trigger;
    class TriggerEntryPoints;
+
+   class TriggerDecompileState {
+      public:
+         using list_t = std::vector<TriggerDecompileState*>;
+         //
+         Trigger* trigger = nullptr;
+         int16_t  index       = -1;
+         bool     is_function = false;
+         list_t   callers;
+         list_t   callees;
+         //
+         void clear(Trigger* trigger = nullptr, int16_t index_of_my_trigger = -1) noexcept;
+         void setup_callees(const std::vector<Trigger*>& allTriggers, const Trigger* mine);
+         void check_if_is_function();
+         void get_full_callee_stack(list_t& out, list_t& recursing) const noexcept;
+         bool is_downstream_from(const TriggerDecompileState* subject, const TriggerDecompileState* _checkStart = nullptr) const noexcept;
+   };
 
    class Trigger {
       public:
@@ -72,6 +90,7 @@ namespace Megalo {
          #if _DEBUG
             uint32_t bit_offset = 0;
          #endif
+         TriggerDecompileState decompile_state;
          //
          bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
@@ -111,6 +130,7 @@ namespace Megalo {
          //
          bool read(cobb::ibitreader& stream) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
+         void write_placeholder(cobb::bitwriter& stream) const noexcept;
          //
          int32_t get_index_of_event(entry_type) const noexcept;
          void set_index_of_event(entry_type, int32_t trigger_index) noexcept; // does nothing if the (entry_type) does not correspond to an event

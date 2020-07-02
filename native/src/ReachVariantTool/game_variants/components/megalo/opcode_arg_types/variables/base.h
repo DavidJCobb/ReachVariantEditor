@@ -167,7 +167,7 @@ namespace Megalo {
       protected:
          static uint32_t _global_index_to_which(const OpcodeArgTypeinfo&, uint32_t index, bool is_static) noexcept;
          //
-         void _update_object_pointer_from_index(Compiler& compiler) noexcept; // used by the compile process
+         bool _update_object_pointer_from_index(Compiler& compiler) noexcept; // used by the compile process
          //
       public:
          const VariableScopeIndicatorValueList& type;
@@ -184,7 +184,7 @@ namespace Megalo {
          virtual void to_string(std::string& out) const noexcept override;
          virtual void configure_with_base(const OpcodeArgBase&) noexcept override {}; // used for bool options so they can stringify intelligently
          virtual void decompile(Decompiler& out, Decompiler::flags_t flags = Decompiler::flags::none) noexcept override;
-         virtual arg_compile_result compile(Compiler&, Script::string_scanner&, uint8_t part) noexcept override;
+         virtual arg_compile_result compile(Compiler&, cobb::string_scanner&, uint8_t part) noexcept override;
          virtual arg_compile_result compile(Compiler&, Script::VariableReference&, uint8_t part) noexcept override;
          virtual void copy(const OpcodeArgValue*) noexcept override;
          //
@@ -218,5 +218,8 @@ namespace Megalo {
          // suitable for use as the righthand side.
          //
          virtual Variable* create_zero_or_none() const noexcept = 0;
+         virtual bool set_to_zero_or_none() noexcept = 0; // returns success
+         //
+         bool is_none() const noexcept;
    };
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Scripted HUD Widgets</title>
+   <body>
+      <p>
+         The <b>scripted HUD widgets</b> page allows you to define script-accessible 
+         HUD widgets that can be displayed and customized by the script.
+      </p>
+      <img src="script-widgets.png" />
+      <p>
+         The only attribute of a HUD widget that you can customize here is its position 
+         on-screen; the text and other visuals are set by the script code and can even 
+         be changed on the fly (though they have to be the same for all players). If 
+         two HUD widgets have the same position, they will not overlap; they will be 
+         positioned adjacent to each other in an intelligent fashion. However, some 
+         widget positions will overlap standard HUD elements such as the shield bar 
+         or motion tracker.
+      </p>
+      <p>
+         Most of the page is taken up by an image which displays where the HUD widget 
+         will appear. This preview only shows the selected widget, and it assumes that 
+         only the selected widget is showing.
+      </p>
+   </body>
+</article>

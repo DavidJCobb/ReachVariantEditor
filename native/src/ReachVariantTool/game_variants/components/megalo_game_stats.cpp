@@ -22,3 +22,8 @@ void ReachMegaloGameStat::write(cobb::bitwriter& stream) const noexcept {
    stream.write((uint8_t)this->sortOrder, 2);
    stream.write(this->groupByTeam);
 }
+bool ReachMegaloGameStat::uses_string(ReachString* str) const noexcept {
+   if (this->name == str)
+      return true;
+   return false;
+}

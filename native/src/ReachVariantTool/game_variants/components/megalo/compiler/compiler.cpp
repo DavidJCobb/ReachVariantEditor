@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include "enums.h"
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
@@ -28,9 +29,9 @@ namespace {
          "*=",
          "/=",
          "%=",
-         ">>=",
-         "<<=",
-         ">>>=",
+         //">>=",
+         //"<<=",
+         //">>>=",
          "~=",
          "^=",
          "&=",
@@ -94,8 +95,8 @@ namespace {
       switch (type) {
          case Block::Type::basic:
          case Block::Type::if_block:
-         case Block::Type::elseif_block:
-         case Block::Type::else_block:
+         case Block::Type::altif_block:
+         case Block::Type::alt_block:
             break;
          case Block::Type::for_each_object:
             return block_type::for_each_object;
@@ -138,6 +139,7 @@ namespace {
 }
 namespace Megalo {
    namespace Script {
+      #pragma region Block
       Block::~Block() {
          this->clear(true);
       }
@@ -176,7 +178,7 @@ namespace Megalo {
                return i;
          return -1;
       }
-      void Block::get_ifs_for_else(std::vector<Block*>& out) {
+      void Block::get_ifs_for_alt(std::vector<Block*>& out) {
          out.clear();
          auto parent = dynamic_cast<Block*>(this->parent);
          if (!parent)
@@ -192,25 +194,25 @@ namespace Megalo {
                break;
             switch (block->type) {
                case Type::if_block:
-               case Type::elseif_block:
-               case Type::else_block:
+               case Type::altif_block:
+               case Type::alt_block:
                   temp.push_back(block);
             }
-            if (block->type != Type::elseif_block)
+            if (block->type != Type::altif_block)
                break;
          }
          out.reserve(temp.size());
          for (auto it = temp.rbegin(); it != temp.rend(); ++it)
             out.push_back(*it);
       }
-      void Block::make_else_of(const Block& other) {
-         size_t size_e = other.conditions_else.size();
+      void Block::make_alt_of(const Block& other) {
+         size_t size_e = other.conditions_alt.size();
          size_t size_c = other.conditions.size();
-         this->conditions_else.reserve(this->conditions_else.size() + size_e + size_c);
+         this->conditions_alt.reserve(this->conditions_alt.size() + size_e + size_c);
          for (size_t i = 0; i < size_e; ++i) {
-            auto cnd   = other.conditions_else[i];
+            auto cnd   = other.conditions_alt[i];
             auto clone = cnd->clone();
-            this->conditions_else.push_back(clone);
+            this->conditions_alt.push_back(clone);
             if (i == size_e - 1)
                clone->next_is_or = false;
          }
@@ -218,7 +220,9 @@ namespace Megalo {
             auto cnd   = other.conditions[i];
             auto clone = cnd->clone();
             clone->negate();
-            this->conditions_else.push_back(clone);
+            this->conditions_alt.push_back(clone);
+            if (i == size_c - 1)
+               clone->next_is_or = false;
          }
       }
       //
@@ -245,9 +249,9 @@ namespace Megalo {
             std::swap(this->items, keep);
          }
          //
-         for (auto condition : this->conditions_else)
+         for (auto condition : this->conditions_alt)
             delete condition;
-         this->conditions_else.clear();
+         this->conditions_alt.clear();
          for (auto condition : this->conditions)
             delete condition;
          this->conditions.clear();
@@ -274,12 +278,51 @@ namespace Megalo {
          switch (this->type) {
             case Type::if_block:
             #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS != 1
-            case Type::elseif_block: // Bungie/343i don't collapse terminating else(if) blocks into their parent trigger
-            case Type::else_block:
+            case Type::altif_block: // Bungie/343i don't collapse terminating alt(if) blocks into their parent trigger?
+            case Type::alt_block:
             #endif
                return true;
          }
          return false;
+      }
+      void Block::_setup_trigger_forge_label(Compiler& compiler) {
+         //
+         // TODO: MAKE THIS AND OpcodeArgValueForgeLabel::compile SHARE SOME HELPER FUNCTION, IDEALLY 
+         // ON Compiler.
+         //
+         auto t = this->trigger;
+         //
+         if (this->label_name.isEmpty()) {
+            auto  index = this->label_index;
+            auto& list  = compiler.get_variant().scriptContent.forgeLabels;
+            if (index < 0 || index >= list.size()) {
+               compiler.raise_error(QString("Label index %1 does not exist.").arg(index));
+            } else {
+               t->forgeLabel = &list[index];
+            }
+         } else {
+            int32_t index = -1;
+            auto&   list  = compiler.get_variant().scriptContent.forgeLabels;
+            for (size_t i = 0; i < list.size(); ++i) {
+               auto& label = list[i];
+               ReachString* name = label.name;
+               if (!name)
+                  continue;
+               QString english = QString::fromUtf8(name->get_content(reach::language::english).c_str());
+               if (english == this->label_name) {
+                  if (index != -1) {
+                     QString lit = cobb::string_scanner::escape(this->label_name, '"');
+                     compiler.raise_error(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
+                  }
+                  index = i;
+               }
+            }
+            if (index == -1) {
+               QString lit = cobb::string_scanner::escape(this->label_name, '"');
+               compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+            } else
+               t->forgeLabel = &list[index];
+         }
       }
       void Block::_make_trigger(Compiler& compiler) {
          if (this->type == Type::function) {
@@ -315,6 +358,11 @@ namespace Megalo {
                   //
                   item->trigger = this->trigger; // get the inner Block to write into the function's trigger
                   this->trigger->blockType = _block_type_to_trigger_type(item->type);
+                  if (item->type == Block::Type::for_each_object_with_label) {
+                     this->label_name  = item->label_name;
+                     this->label_index = item->label_index;
+                     this->_setup_trigger_forge_label(compiler);
+                  }
                }
             }
             return;
@@ -359,46 +407,15 @@ namespace Megalo {
          switch (this->type) {
             case Type::basic:
             case Type::if_block:
-            case Type::elseif_block:
-            case Type::else_block:
+            case Type::altif_block:
+            case Type::alt_block:
                break;
             case Type::for_each_object:
                t->blockType = block_type::for_each_object;
                break;
             case Type::for_each_object_with_label:
                t->blockType = block_type::for_each_object_with_label;
-               //
-               // TODO: MAKE THIS AND OpcodeArgValueForgeLabel::compile SHARE SOME HELPER FUNCTION, IDEALLY 
-               // ON Compiler.
-               //
-               if (this->label_name.isEmpty()) {
-                  auto  index = this->label_index;
-                  auto& list  = compiler.get_variant().scriptContent.forgeLabels;
-                  if (index < 0 || index >= list.size()) {
-                     compiler.raise_error(QString("Label index %1 does not exist.").arg(index));
-                  } else {
-                     t->forgeLabel = &list[index];
-                  }
-               } else {
-                  int32_t index = -1;
-                  auto&   list  = compiler.get_variant().scriptContent.forgeLabels;
-                  for (size_t i = 0; i < list.size(); ++i) {
-                     auto& label = list[i];
-                     ReachString* name = label.name;
-                     if (!name)
-                        continue;
-                     QString english = QString::fromUtf8(name->english().c_str());
-                     if (english == this->label_name) {
-                        if (index != -1)
-                           compiler.raise_error("The specified string literal matches multiple defined Forge labels. Use an index instead.");
-                        index = i;
-                     }
-                  }
-                  if (index == -1)
-                     compiler.raise_error("The specified string literal does not match any defined Forge label.");
-                  else
-                     t->forgeLabel = &list[index];
-               }
+               this->_setup_trigger_forge_label(compiler);
                break;
             case Type::for_each_player:
                t->blockType = block_type::for_each_player;
@@ -427,7 +444,7 @@ namespace Megalo {
          this->_make_trigger(compiler);
          {
             auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
-            for (auto item : this->conditions_else) {
+            for (auto item : this->conditions_alt) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
                   this->trigger->opcodes.push_back(cnd);
@@ -458,6 +475,8 @@ namespace Megalo {
                block->compile(compiler);
                if (!block->trigger) // empty blocks get skipped
                   continue;
+               if (block->type == Block::Type::function) // don't mis-compile function definitions as function calls
+                  continue;
                if (block->trigger != this->trigger) {
                   //
                   // Create a "call nested trigger" opcode.
@@ -484,6 +503,7 @@ namespace Megalo {
             }
          }
       }
+      #pragma endregion
       //
       Statement::~Statement() {
          if (this->lhs) {
@@ -515,7 +535,7 @@ namespace Megalo {
                #if MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS
                if (cnd->function == &_get_comparison_opcode()) {
                   //
-                  // TODO: I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
+                  // I think for comparisons, Bungie flips the operator rather'n using the (inverted) flag.
                   //
                   auto arg = dynamic_cast<OpcodeArgValueCompareOperatorEnum*>(cnd->arguments[2]);
                   if (arg) {
@@ -527,6 +547,34 @@ namespace Megalo {
                cnd->inverted = !cnd->inverted;
             }
          }
+      }
+      //
+      UserDefinedEnum::~UserDefinedEnum() {
+         if (this->definition) {
+            delete this->definition;
+            this->definition = nullptr;
+         }
+      }
+      UserDefinedEnum::UserDefinedEnum(UserDefinedEnum&& other) {
+         this->definition = other.definition;
+         this->parent     = other.parent;
+         other.definition = nullptr;
+      }
+      UserDefinedEnum& UserDefinedEnum::operator=(const UserDefinedEnum& other) noexcept {
+         this->parent     = other.parent;
+         if (other.definition) {
+            this->definition = new Enum;
+            *this->definition = *other.definition;
+         } else {
+            this->definition = nullptr;
+         }
+         return *this;
+      }
+      UserDefinedEnum& UserDefinedEnum::operator=(UserDefinedEnum&& other) noexcept {
+         this->definition = other.definition;
+         this->parent     = other.parent;
+         other.definition = nullptr;
+         return *this;
       }
    }
    //
@@ -548,9 +596,140 @@ namespace Megalo {
       this->functions_in_scope.clear();
    }
    //
+   bool Compiler::try_decode_enum_reference(QString word, int32_t& out) const {
+      auto i = word.indexOf('.');
+      if (i <= 0)
+         return false;
+      auto j = word.indexOf('.', i + 1);
+      if (j <= 0)
+         j = word.size();
+      QString base = word.left(i);
+      QString prop = word.mid(i + 1, j - i - 1);
+      //
+      const Script::Enum* match = nullptr;
+      //
+      auto ns = Script::namespaces::get_by_name(base);
+      if (ns) {
+         auto member = ns->get_member(prop);
+         if (!member)
+            return false;
+         if (!member->is_enum_member())
+            return false;
+         match = member->enumeration;
+         //
+         // Move onto next part:
+         //
+         base = prop;
+         i = j;
+         j = word.indexOf('.', i + 1);
+         if (j >= 0)
+            return false; // "namespace_name.enum_name.value.something_else"
+         prop = word.right(word.size() - i - 1);
+      } else if (auto alias = this->lookup_absolute_alias(base)) {
+         if (alias->is_enumeration())
+            match = alias->get_enumeration();
+         else
+            return false;
+      } else {
+         auto* def = this->lookup_user_defined_enum(base);
+         if (!def)
+            return false;
+         match = def->definition;
+      }
+      #if _DEBUG
+         assert(match);
+      #endif
+      return match->lookup(prop, out);
+   }
+   bool Compiler::try_get_integer(string_scanner& str, int32_t& out) const {
+      if (str.extract_integer_literal(out))
+         return true;
+      auto word  = str.extract_word();
+      if (word.isEmpty())
+         return false;
+      auto alias = this->lookup_absolute_alias(word);
+      if (alias && alias->is_integer_constant()) {
+         out = alias->get_integer_constant();
+         return true;
+      }
+      if (!alias) {
+         //
+         // Okay. Maybe it's a reference to an enum value.
+         //
+         if (this->try_decode_enum_reference(word, out))
+            return true;
+      }
+      return false;
+   }
+   arg_compile_result Compiler::try_get_integer_or_word(string_scanner& str, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from, int32_t limit_int) const {
+      //
+      // This function is provided as a helper for OpcodeArgValue::compile overloads, and attempts to do the 
+      // following tasks:
+      //
+      //  - If (str) is any value that represents an integer, then extract that integer. Validate it if the 
+      //    caller wants us to; if it's valid, then send it to the caller and exit.
+      //
+      //     - Values that represent integers include: integer literals; aliases of integer constants; enum 
+      //       values; and aliases of enum values.
+      //
+      //  - If (str) is not a value that represents an integer, then provide the caller with a word...
+      //
+      //     - If the word is the name of an alias, then provide the caller with the integer constant or 
+      //       imported name that the alias refers to; if the alias refers to something else, then fail with 
+      //       an error.
+      //
+      //     - If the word is not an alias, then check if the caller wants us to constrain it to names that 
+      //       a specific type imports; if so, then apply those constraints.
+      //
+      //     - Provide the word back to the caller.
+      //
+      //  - If (str) has no word, then fail with an error.
+      //
+      // One practical example of this function's usage is the "incident" type, which accepts an incident 
+      // name, the word "none", or the integer index of an incident.
+      //
+      out_int = 0;
+      out_name.clear();
+      if (!str.extract_integer_literal(out_int)) {
+         auto word  = str.extract_word();
+         if (word.isEmpty())
+            return arg_compile_result::failure();
+         auto alias = this->lookup_absolute_alias(word);
+         if (alias) {
+            if (alias->is_integer_constant()) {
+               out_int = alias->get_integer_constant();
+            } else if (alias->is_imported_name()) {
+               out_name = alias->target_imported_name;
+            } else {
+               return arg_compile_result::failure(QString("Alias \"%1\" cannot be used here. Only integer literals, %2, and aliases of either may appear here.").arg(alias->name).arg(thing_getting));
+            }
+         } else {
+            if (this->try_decode_enum_reference(word, out_int))
+               return arg_compile_result::success();
+            if (word_must_be_imported_from) {
+               if (word_must_be_imported_from->has_imported_name(word)) {
+                  out_name = word;
+                  return arg_compile_result::success();
+               }
+               return arg_compile_result::failure();
+            }
+            out_name = word;
+            return arg_compile_result::success();
+         }
+      }
+      if (limit_int >= 0) {
+         if (out_int < 0 || out_int > limit_int)
+            return arg_compile_result::failure(QString("Integer literal %1 is out of bounds; valid integers range from 0 to %2.").arg(out_int).arg(limit_int));
+      }
+      return arg_compile_result::success();
+   }
    /*static*/ bool Compiler::is_keyword(QString s) {
       s = s.toLower();
       if (s == "alias") // declare an alias
+         return true;
+      if (s == "alt") // close an if- or altif-block and open a new block
+         return true;
+      if (s == "altif") // close an if- or altif-block and open a new block with conditions
          return true;
       if (s == "and") // bridge conditions
          return true;
@@ -558,11 +737,13 @@ namespace Megalo {
          return true;
       if (s == "do") // open a generic block
          return true;
-      if (s == "else") // close an if- or elseif-block and open a new block
+      if (s == "else") // reserved
          return true;
-      if (s == "elseif") // close an if- or elseif-block and open a new block with conditions
+      if (s == "elseif") // reserved
          return true;
       if (s == "end") // close a block
+         return true;
+      if (s == "enum") // user-defined enums
          return true;
       if (s == "for") // open a for loop block
          return true;
@@ -576,82 +757,61 @@ namespace Megalo {
          return true;
       if (s == "or") // bridge conditions
          return true;
-      if (s == "then") // close an if- or elseif-statement's conditions
+      if (s == "then") // close an if- or altif-statement's conditions
          return true;
       return false;
    }
    //
    void Compiler::_commit_unresolved_strings(Compiler::unresolved_str_list& add) {
-      auto& list = this->results.unresolved_strings;
-      list.reserve(list.size() + add.size());
-      for (auto& e : add)
-         list.push_back(e);
+      this->results.unresolved_strings += add;
       add.clear();
    }
    bool Compiler::handle_unresolved_string_references() {
-      struct _Created {
-         QString content;
-         int32_t index = -1;
-         //
-         _Created(const QString& s, int32_t i) : content(s), index(i) {}
-      };
-      std::vector<_Created> created;
-      //
       auto& string_table = this->variant.scriptData.strings;
       auto& list         = this->results.unresolved_strings;
+      //
+      std::vector<QString> to_remove;
       bool  any_unresolved = false;
-      for (auto& ref : list) {
-         if (ref.pending.action == unresolved_string_pending_action::none) {
-            any_unresolved = true;
-            continue;
-         }
-         int32_t index = ref.pending.index;
-         if (ref.pending.action == unresolved_string_pending_action::create) {
-            index = -1;
-            for (auto& c : created) {
-               if (c.content == ref.string) {
-                  index = c.index;
-                  break;
+      for (auto& key : list.uniqueKeys()) {
+         bool    string_resolved = true;
+         int32_t new_index       = -1;
+         for (auto& ref : list.values(key)) {
+            int32_t index = ref.pending.index;
+            if (ref.pending.action == unresolved_string_pending_action::create) {
+               if (new_index < 0) { // string not yet created?
+                  auto str = string_table.add_new();
+                  if (!str) {
+                     string_resolved = false;
+                     continue;
+                  }
+                  for (int i = 0; i < reach::language_count; ++i)
+                     str->get_write_access((reach::language)i) = key.toStdString();
+                  new_index = str->index;
+                  assert(new_index >= 0 && "Something went wrong. A newly-created ReachString did not have its index member set by the containing string table.");
                }
+               index = new_index;
+            } else {
+               assert(index >= 0 && "For unresolved_string_pending_action::use_existing, you must specify a valid string index to use.");
             }
-            if (index == -1) {
-               auto str = string_table.add_new();
-               if (!str) {
-                  any_unresolved = true;
-                  continue;
-               }
-               str->english() = ref.string.toStdString();
-               //
-               index = str->index;
-               created.emplace_back(ref.string, index);
+            auto arg    = string_scanner(QString("%1").arg(index));
+            auto result = ref.value->compile(*this, arg, ref.part);
+            if (result.is_unresolved_string() || result.is_failure()) {
+               string_resolved = false;
+               continue;
             }
+            ref.handled = true;
          }
-         if (index < 0) {
+         if (string_resolved)
+            to_remove.push_back(key);
+         else
             any_unresolved = true;
-            continue;
-         }
-         auto arg    = string_scanner(QString("%1").arg(index));
-         auto result = ref.value->compile(*this, arg, ref.part);
-         if (result.is_unresolved_string() || result.is_failure()) {
-            any_unresolved = true;
-            continue;
-         }
-         ref.handled = true;
       }
-      list.erase(
-         std::remove_if(
-            list.begin(),
-            list.end(),
-            [](unresolved_str& item) {
-               return item.handled;
-            }
-         ),
-         list.end()
-      );
-      return any_unresolved;
+      for (auto& key : to_remove)
+         list.remove(key);
+      return !any_unresolved;
    }
    //
-   Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) {
+   Script::Alias* Compiler::lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const {
       auto& list = this->aliases_in_scope;
       size_t size = list.size();
       if (!size)
@@ -671,7 +831,7 @@ namespace Megalo {
       }
       return nullptr;
    }
-   Script::Alias* Compiler::lookup_absolute_alias(QString name) {
+   Script::Alias* Compiler::lookup_absolute_alias(QString name) const {
       auto& list = this->aliases_in_scope;
       size_t size = list.size();
       if (!size)
@@ -689,8 +849,23 @@ namespace Megalo {
       }
       return nullptr;
    }
-   Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) {
-      auto& list = this->functions_in_scope;
+   Script::UserDefinedEnum* Compiler::lookup_user_defined_enum(QString name) const {
+      auto&  list = this->enums_in_scope;
+      size_t size = list.size();
+      if (!size)
+         return nullptr;
+      for (size_t i = 0; i < size; i++) {
+         auto& item = list[i];
+         auto& inam = item.definition->name;
+         if (inam.isEmpty()) // used for invalid enum names, when the bad names are non-fatal rather than fatal errors
+            continue;
+         if (inam.compare(name, Qt::CaseInsensitive) == 0)
+            return const_cast<Script::UserDefinedEnum*>(&item);
+      }
+      return nullptr;
+   }
+   Script::UserDefinedFunction* Compiler::lookup_user_defined_function(QString name) const {
+      auto&  list = this->functions_in_scope;
       size_t size = list.size();
       if (!size)
          return nullptr;
@@ -699,7 +874,7 @@ namespace Megalo {
          if (func.name.isEmpty()) // used for invalid function names, when the bad names are non-fatal rather than fatal errors
             continue;
          if (func.name.compare(name, Qt::CaseInsensitive) == 0)
-            return &func;
+            return const_cast<Script::UserDefinedFunction*>(&func);
       }
       return nullptr;
    }
@@ -715,6 +890,9 @@ namespace Megalo {
       for (auto& member : Script::namespaces::unnamed.members)
          if (cobb::qt::stricmp(name, member.name) == 0)
             return name_source::namespace_member;
+      for (auto& ns : Script::namespaces::list)
+         if (cobb::qt::stricmp(name, ns->name) == 0)
+            return name_source::namespace_name;
       //
       // Search the opcode lists to see if the name is in use by a non-member function:
       //
@@ -879,9 +1057,9 @@ namespace Megalo {
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
-               this->raise_error(QString("The compiled script contains %1 conditions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_conditions));
+               this->raise_error(QString("The compiled script contains %1 conditions, but only a maximum of %2 are allowed.").arg(cc).arg(Limits::max_conditions));
             if (ac > Limits::max_actions)
-               this->raise_error(QString("The compiled script contains %1 actions, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_actions));
+               this->raise_error(QString("The compiled script contains %1 actions, but only a maximum of %2 are allowed.").arg(ac).arg(Limits::max_actions));
          }
          //
          if (!this->has_errors())
@@ -912,7 +1090,26 @@ namespace Megalo {
       mp_vars.player.adopt(new_vars.player);
       mp_vars.team.adopt(new_vars.team);
    }
-
+   
+   Compiler::extract_int_result::type Compiler::extract_integer_literal_detailed(int32_t& out) {
+      auto result = string_scanner::extract_integer_literal(out);
+      if (result) {
+         if (this->extract_specific_char('.', true)) {
+            this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
+            //
+            // Extract the decimal content.
+            //
+            int32_t discard;
+            string_scanner::extract_integer_literal(discard);
+            //
+            return extract_int_result::floating_point;
+         }
+      }
+      return result ? extract_int_result::success : extract_int_result::failure;
+   }
+   bool Compiler::extract_integer_literal(int32_t& out) {
+      return this->extract_integer_literal_detailed(out) == extract_int_result::success;
+   }
    QString Compiler::extract_operator() {
       auto prior = this->backup_stream_state();
       QString word;
@@ -944,16 +1141,18 @@ namespace Megalo {
    /*static*/ Compiler::keyword_handler_t Compiler::__get_handler_for_keyword(QString word) noexcept {
       if (word == "alias")
          return &Compiler::_handleKeyword_Alias;
+      else if (word == "alt")
+         return &Compiler::_handleKeyword_Alt;
+      else if (word == "altif")
+         return &Compiler::_handleKeyword_AltIf;
       else if (word == "declare")
          return &Compiler::_handleKeyword_Declare;
       else if (word == "do")
          return &Compiler::_handleKeyword_Do;
-      else if (word == "else")
-         return &Compiler::_handleKeyword_Else;
-      else if (word == "elseif")
-         return &Compiler::_handleKeyword_ElseIf;
       else if (word == "end")
          return &Compiler::_handleKeyword_End;
+      else if (word == "enum")
+         return &Compiler::_handleKeyword_Enum;
       else if (word == "for")
          return &Compiler::_handleKeyword_For;
       else if (word == "function")
@@ -988,6 +1187,10 @@ namespace Megalo {
                   this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
                   return;
                }
+               if (word == "else" || word == "elseif") {
+                  this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
+                  return;
+               }
                if (this->extract_specific_char('(')) {
                   this->_parseFunctionCall(prior, word, false);
                   //
@@ -1007,7 +1210,11 @@ namespace Megalo {
                //
                lhs = this->__parseVariable(word, false, true);
             } else {
-               this->raise_fatal("Expected the start of a new statement.");
+               auto op = this->extract_operator();
+               if (!op.isEmpty())
+                  this->raise_fatal(QString("Statements cannot begin with an operator such as %1.").arg(op));
+               else
+                  this->raise_fatal("Expected the start of a new statement.");
                return;
             }
          #pragma endregion
@@ -1574,7 +1781,7 @@ namespace Megalo {
          if (failure) {
             bool irresolvable = result.is_irresolvable_failure();
             //
-            QString error = QString("Failed to parse script argument %1.").arg(script_arg_index);
+            QString error = QString("Failed to parse script argument %1 (type %2).").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name);
             if (!result.error.isEmpty()) {
                error.reserve(error.size() + 1 + result.error.size());
                error += ' ';
@@ -1597,10 +1804,13 @@ namespace Megalo {
          }
          if (success) {
             if (!argument.is_at_effective_end()) {
-               this->raise_error(QString("Failed to parse script argument %1. There was unexpected content at the end of the argument.").arg(script_arg_index));
+               this->raise_error(QString("Failed to parse script argument %1 (type %2). There was unexpected content at the end of the argument.").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name));
             } else {
                if (result.is_unresolved_string())
-                  unresolved_strings.emplace_back(*current_argument, result.get_unresolved_string(), opcode_arg_part);
+                  unresolved_strings.insert(
+                     result.get_unresolved_string(), // key
+                     unresolved_str(*current_argument, opcode_arg_part) // value
+                  );
             }
          }
          if (another && has_more) {
@@ -1832,12 +2042,10 @@ namespace Megalo {
             this->revert_to_log_checkpoint(check);
             if (context)
                this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-            else {
-               if (context_is_game)
-                  this->raise_error(call_start, QString("The arguments you passed to game.%1 did not match any of its function signatures.").arg(function_name));
-               else
-                  this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
-            }
+            else if (context_is_game)
+               this->raise_error(call_start, QString("The arguments you passed to %1.%2 did not match any of its function signatures.").arg("game").arg(function_name));
+            else
+               this->raise_error(call_start, QString("The arguments you passed to %1 did not match any of its function signatures.").arg(function_name));
          }
          return nullptr;
       }
@@ -1874,7 +2082,12 @@ namespace Megalo {
             }
          }
          if (index < 0) {
-            this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            if (context)
+               this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+            else if (context_is_game)
+               this->raise_error(call_start, QString("Function %1.%2 does not return a value.").arg("game").arg(function_name));
+            else
+               this->raise_error(call_start, QString("Function %1 does not return a value.").arg(function_name));
             fail = true;
          }
          //
@@ -1884,12 +2097,24 @@ namespace Megalo {
          //
          auto target_type = assign_to->get_type();
          if (&base.typeinfo != target_type) {
-            this->raise_error(call_start, QString("Function %1.%2 returns a %3, not a %4.")
-               .arg(context->get_type()->internal_name.c_str())
-               .arg(function_name)
-               .arg(base.typeinfo.internal_name.c_str())
-               .arg(target_type->internal_name.c_str())
-            );
+            QString context_name = "";
+            if (context)
+               context_name = QString("%1.").arg(context->get_type()->internal_name.c_str());
+            //
+            if (target_type) {
+               this->raise_error(call_start, QString("Function %1%2 returns a %3, not a %4.")
+                  .arg(context_name)
+                  .arg(function_name)
+                  .arg(base.typeinfo.internal_name.c_str())
+                  .arg(target_type->internal_name.c_str())
+               );
+            } else {
+               this->raise_error(call_start, QString("Function %1%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
+                  .arg(context_name)
+                  .arg(function_name)
+                  .arg(base.typeinfo.internal_name.c_str())
+               );
+            }
             fail = true;
          }
          //
@@ -1947,6 +2172,38 @@ namespace Megalo {
                   statement->opcode = blank;
                   this->block->insert_item(statement);
                }
+            }
+         }
+      } else {
+         auto index = match->index_of_out_argument();
+         if (index >= 0) {
+            //
+            // This function returns a value, but we are not calling it in an assign statement (i.e. we are discarding its 
+            // return value). We need to check whether that's allowed.
+            //
+            bool error = true;
+            if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded) {
+               //
+               // If the return value is allowed to be discarded, then handle that scenario by compiling a "none" value 
+               // as the out-argument.
+               //
+               auto& base = match->arguments[index];
+               auto  arg  = opcode->arguments[index] = (base.typeinfo.factory)();
+               auto* var  = dynamic_cast<Variable*>(arg);
+               assert(arg && "Failed to handle OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded: failed to create the argument.");
+               assert(var && "Failed to handle OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded: created argument is not a variable.");
+               if (var->set_to_zero_or_none()) {
+                  error = false;
+               }
+            }
+            //
+            if (error) {
+               if (context)
+                  this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg(context->get_type()->internal_name.c_str()).arg(function_name));
+               else if (context_is_game)
+                  this->raise_error(call_start, QString("Function %1.%2 returns a value, and that value must be assigned to a variable.").arg("game").arg(function_name));
+               else
+                  this->raise_error(call_start, QString("Function %1 returns a value, and that value must be assigned to a variable.").arg(function_name));
             }
          }
       }
@@ -2035,6 +2292,18 @@ namespace Megalo {
                this->aliases_in_scope.resize(i);
          }
       }
+      {  // The block's contained enums are going out of scope.
+         auto& list = this->enums_in_scope;
+         list.erase(std::remove_if(list.begin(), list.end(),
+            [this](Script::UserDefinedEnum& entry) {
+               auto enum_parent = entry.parent;
+               if (!enum_parent || enum_parent == this->block)
+                  return true;
+               return false;
+            }),
+            list.end()
+         );
+      }
       {  // The block's contained functions are going out of scope.
          auto& list = this->functions_in_scope;
          list.erase(std::remove_if(list.begin(), list.end(),
@@ -2083,13 +2352,19 @@ namespace Megalo {
          this->raise_fatal("Expected \"=\".");
          return;
       }
-      auto target = this->extract_word();
-      if (target.isEmpty()) {
-         this->raise_fatal("An alias declaration must supply a target.");
-         return;
-      }
+      Script::Alias* item = nullptr;
       //
-      auto item = new Script::Alias(*this, name, target);
+      int32_t value;
+      if (this->extract_integer_literal(value)) { // need to handle this separately from word parsing so that negative numbers are interpreted properly
+         item = new Script::Alias(*this, name, value);
+      } else {
+         auto target = this->extract_word();
+         if (target.isEmpty()) {
+            this->raise_fatal("An alias declaration must supply a target.");
+            return;
+         }
+         item = new Script::Alias(*this, name, target);
+      }
       if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
          delete item;
          return;
@@ -2099,6 +2374,61 @@ namespace Megalo {
       this->block->insert_item(item);
       if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
+   }
+   void Compiler::_handleKeyword_Alt() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
+               this->raise_fatal("Unexpected \"alt\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->raise_fatal("Unexpected \"alt\".");
+         return;
+      }
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"alt\".");
+         return;
+      }
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::alt_block;
+      item->set_start(this->state);
+      this->block->insert_item(item);
+      this->_openBlock(item);
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_alt(blocks);
+         for (auto block : blocks)
+            item->make_alt_of(*block);
+      }
+   }
+   void Compiler::_handleKeyword_AltIf() {
+      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
+         auto prev = this->block->item(-1);
+         auto p_bl = dynamic_cast<Script::Block*>(prev);
+         if (p_bl) {
+            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::altif_block)
+               this->raise_fatal("Unexpected \"altif\". This keyword should not be preceded by the \"end\" keyword.");
+         }
+         this->raise_fatal("Unexpected \"altif\".");
+         return;
+      }
+      if (!this->_closeCurrentBlock()) {
+         this->raise_fatal("Unexpected \"altif\".");
+         return;
+      }
+      auto item = new Script::Block;
+      item->type = Script::Block::Type::altif_block;
+      item->set_start(this->state);
+      this->block->insert_item(item);
+      this->_openBlock(item);
+      {
+         std::vector<Script::Block*> blocks;
+         item->get_ifs_for_alt(blocks);
+         for (auto block : blocks)
+            item->make_alt_of(*block);
+      }
+      this->_parseBlockConditions();
    }
    //
    void Compiler::_declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified) {
@@ -2137,11 +2467,11 @@ namespace Megalo {
          bool bad = false;
          if (initial && !decl->initial_value_is_implicit()) {
             bad = true;
-            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species an initial value even though a previous declaration already provided one.").arg(str));
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration specifies an initial value even though a previous declaration already provided one.").arg(str));
          }
          if (network_specified && !decl->networking_is_implicit()) {
             bad = true;
-            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration species a network type even though a previous declaration already provided one.").arg(str));
+            this->raise_error(QString("This is a redeclaration of variable %1. The redeclaration specifies a network type even though a previous declaration already provided one.").arg(str));
          }
          if (bad) {
             return;
@@ -2214,12 +2544,12 @@ namespace Megalo {
             //
             if (this->extract_specific_char('=')) {
                int32_t int_initial;
-               auto    result = this->extract_integer_literal(int_initial);
-               if (result == extract_result::floating_point) {
+               auto    result = this->extract_integer_literal_detailed(int_initial);
+               if (result == extract_int_result::floating_point) {
                   this->raise_error("You cannot initialize a variable to a floating-point value.");
-               } else if (result == extract_result::success) {
+               } else if (result == extract_int_result::success) {
                   str_initial = QString("%1").arg(int_initial);
-               } else if (result == extract_result::failure) {
+               } else if (result == extract_int_result::failure) {
                   str_initial = this->extract_word();
                   if (Compiler::is_keyword(str_initial)) {
                      this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));
@@ -2262,12 +2592,12 @@ namespace Megalo {
                //
                if (this->extract_specific_char('=')) {
                   int32_t int_initial;
-                  auto    result = this->extract_integer_literal(int_initial);
-                  if (result == extract_result::floating_point) {
+                  auto    result = this->extract_integer_literal_detailed(int_initial);
+                  if (result == extract_int_result::floating_point) {
                      this->raise_error("You cannot initialize a variable to a floating-point value.");
-                  } else if (result == extract_result::success) {
+                  } else if (result == extract_int_result::success) {
                      str_initial = QString("%1").arg(int_initial);
-                  } else if (result == extract_result::failure) {
+                  } else if (result == extract_int_result::failure) {
                      str_initial = this->extract_word();
                      if (Compiler::is_keyword(str_initial)) {
                         this->raise_fatal(QString("A keyword such as \"%1\" cannot be used as the initial value of a variable being declared.").arg(str_initial));
@@ -2366,64 +2696,145 @@ namespace Megalo {
       this->block->insert_item(item);
       this->_openBlock(item);
    }
-   void Compiler::_handleKeyword_Else() {
-      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
-         auto prev = this->block->item(-1);
-         auto p_bl = dynamic_cast<Script::Block*>(prev);
-         if (p_bl) {
-            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->raise_fatal("Unexpected \"else\". This keyword should not be preceded by the \"end\" keyword.");
-         }
-         this->raise_fatal("Unexpected \"else\".");
-         return;
-      }
-      if (!this->_closeCurrentBlock()) {
-         this->raise_fatal("Unexpected \"else\".");
-         return;
-      }
-      auto item = new Script::Block;
-      item->type = Script::Block::Type::else_block;
-      item->set_start(this->state);
-      this->block->insert_item(item);
-      this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_else(blocks);
-         for (auto block : blocks)
-            item->make_else_of(*block);
-      }
-   }
-   void Compiler::_handleKeyword_ElseIf() {
-      if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::elseif_block) {
-         auto prev = this->block->item(-1);
-         auto p_bl = dynamic_cast<Script::Block*>(prev);
-         if (p_bl) {
-            if (p_bl->type == Script::Block::Type::if_block || p_bl->type == Script::Block::Type::elseif_block)
-               this->raise_fatal("Unexpected \"elseif\". This keyword should not be preceded by the \"end\" keyword.");
-         }
-         this->raise_fatal("Unexpected \"elseif\".");
-         return;
-      }
-      if (!this->_closeCurrentBlock()) {
-         this->raise_fatal("Unexpected \"elseif\".");
-         return;
-      }
-      auto item = new Script::Block;
-      item->type = Script::Block::Type::elseif_block;
-      item->set_start(this->state);
-      this->block->insert_item(item);
-      this->_openBlock(item);
-      {
-         std::vector<Script::Block*> blocks;
-         item->get_ifs_for_else(blocks);
-         for (auto block : blocks)
-            item->make_else_of(*block);
-      }
-      this->_parseBlockConditions();
-   }
    void Compiler::_handleKeyword_End() {
       if (!this->_closeCurrentBlock())
          this->raise_fatal("Unexpected \"end\".");
+   }
+   void Compiler::_handleKeyword_Enum() {
+      auto name = this->extract_word();
+      {  // Validate the name.
+         if (name.isEmpty()) {
+            this->raise_fatal("Expected the name of an enum.");
+            return;
+         }
+         if (name[0].isNumber()) {
+            //
+            // Do not allow a function's name to start with a number. We want this to be consistent with 
+            // alias names, which disallow numbers at their start so that it's easier for opcode argument 
+            // compile functions to check for both integer literals and integer alias names.
+            //
+            this->raise_error("An enum's name cannot begin with a number.");
+            //
+            // This error shouldn't halt parsing. Set the function's name to empty to signal that the 
+            // Block represents a function with an invalid name.
+            //
+            name = "";
+         } else {
+            for (QChar c : name) {
+               if (QString("[].").contains(c)) {
+                  this->raise_fatal(QString("Unexpected %1 inside of an enum name.").arg(c));
+                  return;
+               }
+            }
+            if (Compiler::is_keyword(name)) {
+               this->raise_fatal(QString("Keyword \"%1\" cannot be used as the name of an enum.").arg(name));
+               return;
+            }
+         }
+         if (!name.isEmpty()) { // Run additional checks on the enum name.
+            if (this->lookup_user_defined_enum(name)) {
+               this->raise_fatal(QString("A user-defined enum named \"%1\" is already in scope. Enums cannot shadow each other.").arg(name));
+               name = "";
+            } else if (this->lookup_user_defined_function(name)) {
+               this->raise_fatal(QString("A user-defined function named \"%1\" is already in scope. Enums and functions cannot shadow each other.").arg(name));
+               name = "";
+            } else {
+               //
+               // Do not allow user-defined functions to shadow built-ins:
+               //
+               OpcodeArgTypeRegistry::type_list_t sources;
+               auto built_in_type = Compiler::check_name_is_taken(name, sources);
+               //
+               bool fail = true;
+               switch (built_in_type) {
+                  case name_source::action:
+                  case name_source::condition:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in functions such as %1.").arg(name));
+                     break;
+                  case name_source::static_typename:
+                  case name_source::variable_typename:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in type names such as %1.").arg(name));
+                     break;
+                  case name_source::namespace_member:
+                  case name_source::imported_name:
+                     this->raise_error(QString("User-defined enums cannot shadow built-in values such as %1.").arg(name));
+                     break;
+                  case name_source::none:
+                  default:
+                     fail = false;
+                     break;
+               }
+               if (fail)
+                  name = "";
+            }
+         }
+      }
+      auto def = std::make_unique<Script::Enum>(name);
+      //
+      bool    ended      = false;
+      int32_t prev_value = -1;
+      while (!this->is_at_effective_end()) {
+         auto word = this->extract_word();
+         if (word.isEmpty()) {
+            this->raise_fatal("Expected the name of an enum value, or the word \"end\" marking the end of the enum.");
+            return;
+         }
+         if (word.compare("end", Qt::CaseInsensitive) == 0) {
+            ended = true;
+            break;
+         }
+         if (Compiler::is_keyword(word)) {
+            this->raise_fatal(QString("The \"%1\" keyword cannot be used here.").arg(word));
+            return;
+         }
+         //
+         auto    value_name = word;
+         bool    is_explicit = false;
+         int32_t current_value = prev_value + 1;
+         if (this->extract_specific_char('=')) {
+            is_explicit = true;
+            if (!this->extract_integer_literal(current_value)) {
+               word = this->extract_word();
+               if (word.isEmpty()) {
+                  this->raise_fatal(QString("Expected an integer constant (or alias or enum-value reference) for enum value \"%1\".").arg(value_name));
+                  return;
+               }
+               if (!def->lookup(word, current_value)) {
+                  auto alias = this->lookup_absolute_alias(word);
+                  if (alias && alias->is_integer_constant()) {
+                     current_value = alias->get_integer_constant();
+                  } else {
+                     if (!this->try_decode_enum_reference(word, current_value)) {
+                        this->raise_error(QString("Unable to set value \"%1\" in user-defined enum \"%2\": word \"%3\" is unrecognized.")
+                           .arg(value_name)
+                           .arg(name)
+                           .arg(word)
+                        );
+                        continue;
+                     }
+                  }
+               }
+            }
+         }
+         int32_t throwaway;
+         if (def->lookup(value_name, throwaway)) {
+            this->raise_error(QString("Attempted to redefine value \"%1\" in user-defined enum \"%2\"; existing value is %3, new is %4.")
+               .arg(value_name)
+               .arg(name)
+               .arg(throwaway)
+               .arg(current_value)
+            );
+         } else {
+            def->add_value(value_name, current_value);
+         }
+         prev_value = current_value;
+      }
+      if (!ended) {
+         this->raise_fatal("Unterminated user-defined enum.");
+         return;
+      }
+      //
+      this->enums_in_scope.emplace_back(def.release(), this->block);
    }
    void Compiler::_handleKeyword_If() {
       auto item = new Script::Block;
@@ -2484,14 +2895,9 @@ namespace Megalo {
                return;
             }
             if (!this->extract_string_literal(label)) {
-               if (!this->extract_integer_literal(label_index)) {
-                  auto word  = this->extract_word();
-                  auto alias = this->lookup_absolute_alias(word);
-                  if (!alias || !alias->is_integer_constant()) {
-                     this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
-                     return;
-                  }
-                  label_index = alias->get_integer_constant();
+               if (!this->try_get_integer(*this, label_index)) {
+                  this->raise_fatal("Invalid for-each-object-with-label loop: the label must be specified as a string literal or as a numeric label index.");
+                  return;
                }
                label_is_index = true;
             }
@@ -2556,7 +2962,10 @@ namespace Megalo {
          return;
       }
       if (!name.isEmpty()) { // Run additional checks on the function name.
-         if (this->lookup_user_defined_function(name)) {
+         if (this->lookup_user_defined_enum(name)) {
+            this->raise_fatal(QString("A user-defined enum named \"%1\" is already in scope. Enums and functions cannot shadow each other.").arg(name));
+            name = "";
+         } else if (this->lookup_user_defined_function(name)) {
             this->raise_fatal(QString("A user-defined function named \"%1\" is already in scope. Functions cannot shadow each other.").arg(name));
             name = "";
          } else {

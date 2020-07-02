@@ -18,7 +18,7 @@ namespace Megalo {
       //
       OpcodeArgTypeinfo::flags::none,
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueForgeLabel>
-   );
+   ).import_names({ "none" });
    //
    bool OpcodeArgValueForgeLabel::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       if (stream.read_bits(1) != 0) { // absence bit
@@ -56,7 +56,7 @@ namespace Megalo {
          cobb::sprintf(out, "label index %u", f->index);
          return;
       }
-      out = f->name->english();
+      out = f->name->get_content(reach::language::english);
    }
    void OpcodeArgValueForgeLabel::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
       ReachForgeLabel* f = this->value;
@@ -67,7 +67,7 @@ namespace Megalo {
       std::string temp;
       if (f->name) {
          ReachString* name = f->name;
-         auto english = name->english();
+         auto english = name->get_content(reach::language::english);
          auto data    = english.c_str();
          if (!english.empty()) {
             //
@@ -81,7 +81,7 @@ namespace Megalo {
       cobb::sprintf(temp, "%u", f->index);
       out.write(temp);
    }
-   arg_compile_result OpcodeArgValueForgeLabel::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueForgeLabel::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       QString str;
       int32_t index = -1;
       //
@@ -94,15 +94,19 @@ namespace Megalo {
             ReachString* name = label.name;
             if (!name)
                continue;
-            QString english = QString::fromUtf8(name->english().c_str());
+            QString english = QString::fromUtf8(name->get_content(reach::language::english).c_str());
             if (english == str) {
-               if (index != -1)
-                  return arg_compile_result::failure("The specified string literal matches multiple defined Forge labels. Use an index instead.");
+               if (index != -1) {
+                  QString lit = cobb::string_scanner::escape(str, '"');
+                  return arg_compile_result::failure(QString("The specified string literal (\"%1\") matches multiple defined Forge labels. Use an index instead.").arg(lit));
+               }
                index = i;
             }
          }
-         if (index == -1)
-            return arg_compile_result::failure("The specified string literal does not match any defined Forge label.");
+         if (index == -1) {
+            QString lit = cobb::string_scanner::escape(str, '"');
+            return arg_compile_result::failure(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+         }
          this->value = &list[index];
          return arg_compile_result::success();
       }
@@ -110,20 +114,16 @@ namespace Megalo {
       // No string literal was specified. We also allow an integer alias, an alias of an integer index, 
       // the word "none", or an alias of the word "none".
       //
-      if (!arg.extract_integer_literal(index)) {
-         auto word  = arg.extract_word();
-         auto alias = compiler.lookup_absolute_alias(word);
-         if (alias && alias->is_imported_name())
-             word = alias->target_imported_name;
-         if (alias && alias->is_integer_constant()) {
-            index = alias->get_integer_constant();
-         } else {
-            if (word.compare("none", Qt::CaseInsensitive) == 0) {
-               this->value = nullptr;
-               return arg_compile_result::success();
-            }
-            return arg_compile_result::failure();
+      QString word;
+      auto    result = compiler.try_get_integer_or_word(arg, index, word, "", &OpcodeArgValueForgeLabel::typeinfo, -1);
+      if (result.is_failure())
+         return result;
+      if (!word.isEmpty()) {
+         if (word.compare("none", Qt::CaseInsensitive) == 0) {
+            this->value = nullptr;
+            return arg_compile_result::success();
          }
+         return arg_compile_result::failure();
       }
       if (index < 0)
          return arg_compile_result::failure("A Forge label cannot have a negative index.");

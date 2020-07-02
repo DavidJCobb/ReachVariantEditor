@@ -1,5 +1,6 @@
 #include "variable_reference.h"
 #include "../compiler.h"
+#include "../enums.h"
 #include "../namespaces.h"
 #include "../../actions.h"
 #include "../../variables_and_scopes.h"
@@ -112,7 +113,7 @@ namespace Megalo::Script {
                }
                continue;
             }
-            if (index.isEmpty() && string_scanner::is_whitespace_char(c))
+            if (index.isEmpty() && cobb::string_scanner::is_whitespace_char(c))
                continue;
             index += c;
          } else {
@@ -253,13 +254,23 @@ namespace Megalo::Script {
       QString result;
       if (top_level.which) {
          result = top_level.which->name.c_str();
-      } else {
+      } else if (top_level.type) {
          if (!top_level.is_static)
             result = "global.";
          result += top_level.type->internal_name.c_str();
          result += '[';
          result += QString("%1").arg(top_level.index);
          result += ']';
+      } else {
+         auto top_type = this->resolved.alias_basis;
+         //
+         if (!top_level.is_static)
+            result = "global.";
+         if (top_type) {
+            result += top_type->internal_name.c_str();
+         } else {
+            result += "?????";
+         }
       }
       //
       if (nested.type) {
@@ -502,10 +513,16 @@ namespace Megalo::Script {
          this->is_invalid = true;
          return false;
       }
-      if (!basis && alias->is_integer_constant()) {
-         this->resolved.top_level.is_constant = true;
-         this->resolved.top_level.index       = alias->get_integer_constant();
-         return true;
+      if (!basis) {
+         if (alias->is_integer_constant()) {
+            this->resolved.top_level.is_constant = true;
+            this->resolved.top_level.index       = alias->get_integer_constant();
+            return true;
+         }
+         if (alias->is_enumeration()) {
+            this->resolved.top_level.enumeration = alias->get_enumeration();
+            return true;
+         }
       }
       this->__transclude_alias(raw_index, *alias);
       return true;
@@ -612,6 +629,19 @@ namespace Megalo::Script {
       //
       auto member = ns->get_member(part->name);
       if (!member) {
+         //
+         // Real quick: could this be a user-defined enum?
+         //
+         auto ude = compiler.lookup_user_defined_enum(part->name);
+         if (ude) {
+            auto& res = this->resolved.top_level;
+            res.type        = &OpcodeArgValueScalar::typeinfo;
+            res.enumeration = ude->definition;
+            return ++i;
+         }
+         //
+         // Guess not. Error time! :)
+         //
          if (ns == &namespaces::unnamed)
             compiler.raise_error(QString("There are no unscoped values named \"%1\".").arg(part->name));
          else
@@ -620,6 +650,11 @@ namespace Megalo::Script {
          return 0;
       }
       auto& res = this->resolved.top_level;
+      if (member->is_enum_member()) {
+         res.type        = &OpcodeArgValueScalar::typeinfo;
+         res.enumeration = member->enumeration;
+         return ++i;
+      }
       res.type  = &member->type;
       res.which = member->which;
       res.scope = member->scope;
@@ -640,6 +675,31 @@ namespace Megalo::Script {
             res.index = part->index;
       }
       return ++i;
+   }
+   bool VariableReference::_resolve_enumeration(Compiler& compiler, size_t raw_index) {
+      auto& top  = this->resolved.top_level;
+      auto* e    = top.enumeration;
+      if (!e)
+         return false;
+      auto  part = this->_get_raw_part(raw_index);
+      auto& name = part->name;
+      //
+      top.enumeration = nullptr; // do not retain references to enums, as user-defined enums may be deleted when they go out of scope (the exception is aliases of enums, which would also go out of scope)
+      //
+      top.is_constant = true;
+      if (!e->lookup(name, top.index)) {
+         this->is_invalid = true;
+         compiler.raise_error(QString("Enumeration %1 does not have a value named \"%2\".").arg(this->to_string_from_raw(0, raw_index)).arg(name));
+         return true;
+      }
+      bool has_more = this->raw.size() > raw_index + 1;
+      if (has_more) {
+         this->is_invalid = true;
+         compiler.raise_error("You cannot access members of a constant integer.");
+         return true;
+      }
+      this->is_resolved = true;
+      return true;
    }
    bool VariableReference::_resolve_nested_variable(Compiler& compiler, size_t raw_index) {
       auto prev = this->resolved.top_level.type;
@@ -770,11 +830,18 @@ namespace Megalo::Script {
             this->is_resolved = true;
             return;
          }
+         if (this->_resolve_enumeration(compiler, 1)) // if the absolute alias was an alias of an enum, then the enum value being accessed is at index 1
+            return;
       }
       size_t i = this->_resolve_top_level(compiler, is_alias_definition);
       if (this->is_invalid)
          return;
       if (i >= this->raw.size()) {
+         if (!is_alias_definition && res.top_level.enumeration) {
+            compiler.raise_error("The names of enums cannot be used as values.");
+            this->is_invalid = true;
+            return;
+         }
          this->is_resolved = true;
          return;
       }
@@ -793,6 +860,8 @@ namespace Megalo::Script {
          this->is_invalid = true;
          return;
       }
+      if (this->_resolve_enumeration(compiler, i))
+         return;
       //
       // The basic plan is to resolve variable parts in the order they can appear: first, the top-level 
       // part; then, the nested variable; then, the property; and then, the accessor.

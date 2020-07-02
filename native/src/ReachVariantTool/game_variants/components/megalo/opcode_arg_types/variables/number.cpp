@@ -1,6 +1,7 @@
 #include "number.h"
 #include "../../../../types/multiplayer.h" // game variant class
 #include "../../compiler/compiler.h"
+#include "../../../../helpers/numeric.h"
 
 namespace {
    using namespace Megalo;
@@ -125,7 +126,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue teams_enabled           = VariableScopeIndicatorValue::make_game_value("game.teams_enabled",           "Teams Enabled", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_time_limit        = VariableScopeIndicatorValue::make_game_value("game.round_time_limit",        "Round Time Limit", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue round_limit             = VariableScopeIndicatorValue::make_game_value("game.round_limit",             "Round Limit", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue perfection_enabled      = VariableScopeIndicatorValue::make_game_value("game.perfection_enabled",      "Perfection Enabled", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue perfection_enabled      = VariableScopeIndicatorValue::make_game_value("game.perfection_enabled",      "Perfection Enabled", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue rounds_to_win           = VariableScopeIndicatorValue::make_game_value("game.rounds_to_win",           "Rounds to Win", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue sudden_death_time       = VariableScopeIndicatorValue::make_game_value("game.sudden_death_time",       "Sudden Death Time", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue grace_period            = VariableScopeIndicatorValue::make_game_value("game.grace_period",            "Grace Period", VariableScopeIndicatorValue::flags::is_readonly);
@@ -139,9 +140,9 @@ namespace Megalo {
          extern VariableScopeIndicatorValue respawn_traits_time     = VariableScopeIndicatorValue::make_game_value("game.respawn_traits_duration", "Respawn Traits Duration", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue friendly_fire           = VariableScopeIndicatorValue::make_game_value("game.friendly_fire",           "Friendly Fire", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue betrayal_booting        = VariableScopeIndicatorValue::make_game_value("game.betrayal_booting",        "Betrayal Booting", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue proximity_voice         = VariableScopeIndicatorValue::make_game_value("game.proximity_voice",         "Proximity Voice", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
-         extern VariableScopeIndicatorValue dont_team_restrict_chat = VariableScopeIndicatorValue::make_game_value("game.dont_team_restrict_chat", "Don't Team-Restrict Voice Chat", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
-         extern VariableScopeIndicatorValue dead_players_can_talk   = VariableScopeIndicatorValue::make_game_value("game.dead_players_can_talk",   "Dead Players Can Talk", VariableScopeIndicatorValue::flags::is_readonly); // TODO: IDENTIFY ME
+         extern VariableScopeIndicatorValue proximity_voice         = VariableScopeIndicatorValue::make_game_value("game.proximity_voice",         "Proximity Voice", VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue dont_team_restrict_chat = VariableScopeIndicatorValue::make_game_value("game.dont_team_restrict_chat", "Don't Team-Restrict Voice Chat", VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue dead_players_can_talk   = VariableScopeIndicatorValue::make_game_value("game.dead_players_can_talk",   "Dead Players Can Talk", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue grenades_on_map         = VariableScopeIndicatorValue::make_game_value("game.grenades_on_map",         "Grenades on Map", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue indestructible_vehicles = VariableScopeIndicatorValue::make_game_value("game.indestructible_vehicles", "Indestructible Vehicles", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue powerup_duration_r      = VariableScopeIndicatorValue::make_game_value("game.powerup_duration_red",    "Red Powerup Duration", VariableScopeIndicatorValue::flags::is_readonly);;
@@ -165,8 +166,13 @@ namespace Megalo {
       //
       if (result.code == arg_compile_result::code_t::base_class_is_expecting_override_behavior) {
          if (arg.resolved.top_level.is_constant) {
+            auto value = arg.resolved.top_level.index;
+            //
             this->set_to_const_zero();
-            this->index = arg.resolved.top_level.index;
+            this->index = value;
+            if (!cobb::integral_type_can_hold<int16_t>(value)) {
+               compiler.raise_warning(QString("Value %1 cannot be held in a signed 16-bit integer; value %2 has been stored instead.").arg(value).arg(this->index));
+            }
             return arg_compile_result::success();
          }
          return arg_compile_result::failure();
@@ -194,5 +200,9 @@ namespace Megalo {
       arg->which = 0;
       arg->index = 0;
       return arg;
+   }
+   bool OpcodeArgValueScalar::set_to_zero_or_none() noexcept {
+      this->set_to_const_zero();
+      return true;
    }
 }

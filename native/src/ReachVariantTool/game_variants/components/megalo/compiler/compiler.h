@@ -1,8 +1,9 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include <QMultiMap>
 #include <QString>
-#include "string_scanner.h"
+#include "../../../../helpers/string_scanner.h"
 #include "../opcode_arg_type_registry.h"
 #include "../trigger.h"
 #include "../variable_declarations.h"
@@ -15,6 +16,8 @@ namespace Megalo {
    class Compiler;
    //
    namespace Script {
+      class Enum;
+      //
       class Comparison;
       class Block : public ParsedItem {
          public:
@@ -22,8 +25,8 @@ namespace Megalo {
                basic, // do
                root,
                if_block,
-               elseif_block,
-               else_block,
+               altif_block, // like elseif, but not mutually exclusive with its previous-sibling branch
+               alt_block,   // like else,   but not mutually exclusive with its previous-sibling branch
                for_each_object,
                for_each_object_with_label,
                for_each_player,
@@ -51,7 +54,7 @@ namespace Megalo {
             Type     type  = Type::basic;
             Event    event = Event::none;
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
-            std::vector<Comparison*> conditions_else; // only for else(if) blocks // contents are owned by this Block and deleted in the destructor
+            std::vector<Comparison*> conditions_alt; // only for alt(if) blocks // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions; // only for if blocks // contents are owned by this Block and deleted in the destructor
             //
             ~Block();
@@ -61,8 +64,8 @@ namespace Megalo {
             void remove_item(ParsedItem*);
             int32_t index_of_item(const ParsedItem*) const noexcept;
             //
-            void get_ifs_for_else(std::vector<Block*>& out);
-            void make_else_of(const Block& other);
+            void get_ifs_for_alt(std::vector<Block*>& out);
+            void make_alt_of(const Block& other);
             //
             void clear(bool deleting = false);
             void compile(Compiler&);
@@ -73,6 +76,7 @@ namespace Megalo {
             void _get_effective_items(std::vector<ParsedItem*>& out, bool include_functions = true); // returns the list of items with only Statements and Blocks, i.e. only things that generate compiled output
             bool _is_if_block() const noexcept;
             void _make_trigger(Compiler&);
+            void _setup_trigger_forge_label(Compiler&);
       };
       class Statement : public ParsedItem {
          public:
@@ -88,6 +92,18 @@ namespace Megalo {
             //
             Comparison* clone() const noexcept; // doesn't clone (lhs) or (rhs)
             void negate() noexcept;
+      };
+      class UserDefinedEnum {
+         public:
+            Enum*  definition = nullptr; // owned by this object
+            Block* parent     = nullptr; // used so we can tell when the enum goes out of scope
+            //
+            UserDefinedEnum(Enum* d, Block* p) : definition(d), parent(p) {}
+            ~UserDefinedEnum();
+            //
+            UserDefinedEnum(UserDefinedEnum&&);
+            UserDefinedEnum& operator=(const UserDefinedEnum&) noexcept;
+            UserDefinedEnum& operator=(UserDefinedEnum&&) noexcept;
       };
       class UserDefinedFunction {
          //
@@ -107,14 +123,14 @@ namespace Megalo {
       };
    }
    //
-   class Compiler : public Script::string_scanner {
+   class Compiler : public cobb::string_scanner {
       public:
          struct LogEntry {
             QString text;
             pos     pos;
             //
             LogEntry() {}
-            LogEntry(const QString& t, Script::string_scanner::pos p) : text(t), pos(p) {}
+            LogEntry(const QString& t, cobb::string_scanner::pos p) : text(t), pos(p) {}
          };
          using log_t = std::vector<LogEntry>;
          struct log_checkpoint {
@@ -124,7 +140,6 @@ namespace Megalo {
          };
          //
          enum class unresolved_string_pending_action {
-            none,
             create,
             use_existing,
          };
@@ -158,19 +173,20 @@ namespace Megalo {
             //
             protected:
                OpcodeArgValue* value = nullptr;
-               QString string;
                uint8_t part = 0;
                bool    handled = false;
                //
             public:
+               using action = unresolved_string_pending_action;
+               //
                struct {
-                  unresolved_string_pending_action action = unresolved_string_pending_action::none;
-                  int32_t index = -1;
+                  unresolved_string_pending_action action = unresolved_string_pending_action::create;
+                  uint8_t index = 0;
                } pending;
                //
-               unresolved_str(OpcodeArgValue& v, QString s, uint8_t p) : value(&v), string(s), part(p) {}
+               unresolved_str(OpcodeArgValue& v, uint8_t p) : value(&v), part(p) {}
          };
-         using unresolved_str_list = std::vector<unresolved_str>;
+         using unresolved_str_list = QMultiMap<QString, unresolved_str>;
          //
       protected:
          using keyword_handler_t = void (Compiler::*)();
@@ -188,6 +204,7 @@ namespace Megalo {
          bool     negate_next_condition = false;
          c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
+         std::vector<Script::UserDefinedEnum> enums_in_scope;
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          GameVariantDataMultiplayer& variant;
          //
@@ -224,7 +241,7 @@ namespace Megalo {
          //
          void parse(QString text); // parse and compile the text
          void apply(); // applies compiled content to the game variant, and relinquishes ownership of it
-         bool handle_unresolved_string_references(); // handles any strings with an action set; returns true if any unresolved strings remain
+         bool handle_unresolved_string_references(); // handles any strings with an action set; returns success bool (failure if any unresolved remain)
          inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
@@ -234,10 +251,14 @@ namespace Megalo {
          inline const log_t& get_fatal_errors() const noexcept { return this->fatal_errors; }
          //
          [[nodiscard]] static bool is_keyword(QString word);
+         [[nodiscard]] bool try_decode_enum_reference(QString word, int32_t& out) const;
+         [[nodiscard]] bool try_get_integer(string_scanner&, int32_t& out) const;
+         [[nodiscard]] arg_compile_result try_get_integer_or_word(string_scanner&, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from = nullptr, int32_t limit_int = -1) const;
          //
-         [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to);
-         [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name);
-         [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name);
+         [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const;
+         [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name) const;
+         [[nodiscard]] Script::UserDefinedEnum* lookup_user_defined_enum(QString name) const;
+         [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name) const;
          //
          log_checkpoint create_log_checkpoint();
          void revert_to_log_checkpoint(log_checkpoint);
@@ -252,6 +273,7 @@ namespace Megalo {
             action,
             condition,
             imported_name,
+            namespace_name,
             namespace_member,
             static_typename,
             variable_typename,
@@ -292,12 +314,17 @@ namespace Megalo {
          void _openBlock(Script::Block*);
          bool _closeCurrentBlock();
          //
-         extract_result_t extract_integer_literal(int32_t& out) {
-            auto result = string_scanner::extract_integer_literal(out);
-            if (result == string_scanner::extract_result::floating_point)
-               this->raise_error("Unexpected decimal point. Floating-point numbers are not supported.");
-            return result;
-         }
+         struct extract_int_result {
+            extract_int_result() = delete;
+            enum type : int {
+               failure,
+               success,
+               floating_point,  // extracted an integer literal, but it ended with a decimal point
+            };
+         };
+         extract_int_result::type extract_integer_literal_detailed(int32_t& out);
+         bool extract_integer_literal(int32_t& out);
+         //
          QString extract_operator();
          //
          #pragma region Variable declaration helpers
@@ -305,11 +332,12 @@ namespace Megalo {
          #pragma endregion
          //
          void _handleKeyword_Alias();
+         void _handleKeyword_Alt();
+         void _handleKeyword_AltIf();
          void _handleKeyword_Declare(); // INCOMPLETE
          void _handleKeyword_Do();
-         void _handleKeyword_Else();
-         void _handleKeyword_ElseIf();
          void _handleKeyword_End();
+         void _handleKeyword_Enum();
          void _handleKeyword_If();
          void _handleKeyword_For();
          void _handleKeyword_Function();

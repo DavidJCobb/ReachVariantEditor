@@ -25,4 +25,5 @@ class LocalizedStringEditorModal : public QDialog {
       bool _limitToSingleLanguageStrings = false;
       //
       void updateControls();
+      void updateTextboxes(ReachString* use = nullptr);
 };

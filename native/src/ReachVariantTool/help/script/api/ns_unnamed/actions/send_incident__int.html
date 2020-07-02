@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>send_incident | ReachVariantTool Documentation</title>
+      <base href="../../../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li><a href="script/api/index.html">Script API reference</a></li>
+            <hr />
+            <li data-disallow-collapse>
+               <a href="script/api/ns_unnamed.html">Content not in any namespace</a>
+               <ul>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Members</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed/current_object.html">current_object</a></li>
+<li><a href="script/api/ns_unnamed/current_player.html">current_player</a></li>
+<li><a href="script/api/ns_unnamed/current_team.html">current_team</a></li>
+<li><a href="script/api/ns_unnamed/death_event_damage_type.html">death_event_damage_type</a></li>
+<li><a href="script/api/ns_unnamed/hud_player.html">hud_player</a></li>
+<li><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></li>
+<li><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></li>
+<li><a href="script/api/ns_unnamed/hud_target_player.html">hud_target_player</a></li>
+<li><a href="script/api/ns_unnamed/hud_target_player_team.html">hud_target_player_team</a></li>
+<li><a href="script/api/ns_unnamed/neutral_team.html">neutral_team</a></li>
+<li><a href="script/api/ns_unnamed/no_object.html">no_object</a></li>
+<li><a href="script/api/ns_unnamed/no_player.html">no_player</a></li>
+<li><a href="script/api/ns_unnamed/no_team.html">no_team</a></li>
+<li><a href="script/api/ns_unnamed/no_widget.html">no_widget</a></li>
+<li><a href="script/api/ns_unnamed/script_option.html">script_option[<var>n</var>]</a></li>
+<li><a href="script/api/ns_unnamed/unk_14_team.html">unk_14_team</a></li>
+<li><a href="script/api/ns_unnamed/unk_15_team.html">unk_15_team</a></li>
+
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member conditions</a>
+                     <ul>
+                        
+                     </ul>
+                  </li>
+                  <li data-delete-if-empty data-dont-default-collapse>
+                     <a>Member actions</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed/actions/debug_break.html">debug_break</a></li>
+<li><a href="script/api/ns_unnamed/actions/debug_force_player_view_count.html">debug_force_player_view_count</a></li>
+<li><a href="script/api/ns_unnamed/actions/debug_print.html">debug_print</a></li>
+<li><a href="script/api/ns_unnamed/actions/debug_set_tracing_enabled.html">debug_set_tracing_enabled</a></li>
+<li><a href="script/api/ns_unnamed/actions/get_random_object.html">get_random_object</a></li>
+<li><a href="script/api/ns_unnamed/actions/insert_theater_film_marker.html">insert_theater_film_marker</a></li>
+<li><a href="script/api/ns_unnamed/actions/rand.html">rand</a></li>
+<li><a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a></li>
+<li><a href="script/api/ns_unnamed/actions/send_incident__int.html">send_incident (with integer)</a></li>
+<li><a href="script/api/ns_unnamed/actions/set_scenario_interpolator_state.html">set_scenario_interpolator_state</a></li>
+
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>send_incident</h1>
+
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            <h2>Arguments</h2>
+<dl>
+   <dt><a href="script/api/incident.html">incident</a></dt>
+      <dd><p>The ID of an event that the game engine can be told about.</p></dd>
+   <dt>cause</dt>
+      <dd>
+                  The cause of the incident: a <a href="script/api/player.html">player</a> or 
+                  <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
+               </dd>
+   <dt>target</dt>
+      <dd>
+                  The target of the incident: a <a href="script/api/player.html">player</a> or 
+                  <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
+               </dd>
+   <dt><a href="script/api/number.html">detail</a></dt>
+      <dd><p>A numeric constant or variable.</p></dd>
+</dl>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- Code for awarding the "Dive Bomber" DLC achievement, which you earn by </span>
+<span class="comment">-- killing a player with an assassination while they're using a jetpack:</span>
+<span class="comment">--</span>
+<span class="comment">-- (Assumes Forge Label #0 is an unnamed label referring to jetpacks.)</span>
+<span class="comment">--</span>
+<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- award Dive Bomber achievement as appropriate</span>
+   <span class="keyword">alias</span> killer    = global.player[0]
+   <span class="keyword">alias</span> killer_aa = global.object[0]
+   <span class="keyword">alias</span> death_mod = global.number[2]
+   <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span> 
+      killer    = no_player
+      killer    = current_player.try_get_killer()
+      death_mod = 0
+      death_mod = current_player.try_get_death_damage_mod()
+      <span class="keyword">if</span> death_mod == enums.damage_reporting_modifier.assassination <span class="keyword">then</span> 
+         killer_aa = no_object
+         killer_aa = killer.try_get_armor_ability()
+         <span class="keyword">if</span> killer_aa.has_forge_label(0) <span class="keyword">and</span> killer_aa.is_in_use() <span class="keyword">then</span> 
+            send_incident(dlc_achieve_2, killer, killer, 65)
+         <span class="keyword">end</span>
+      <span class="keyword">end</span>
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

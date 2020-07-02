@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Operators</title>
+   <body>
+      <p>
+         Operators are symbols used to compare or assign values.
+      </p>
+      
+      <h2>Comparison operators</h2>
+      <dl>
+         <dt>==</dt>
+            <dd>Checks if the two values are equal. Don't confuse this with the assignment 
+            operator, which is a single equal sign.</dd>
+         <dt>!=</dt>
+            <dd>Checks if the two values are not equal.</dd>
+         <dt>&gt;</dt>
+            <dd>Checks if the lefthand value is greater than the righthand value.</dd>
+         <dt>&lt;</dt>
+            <dd>Checks if the lefthand value is less than the righthand value.</dd>
+         <dt>&gt;=</dt>
+            <dd>Checks if the lefthand value is greater than or equal to the righthand value.</dd>
+         <dt>&lt;=</dt>
+            <dd>Checks if the lefthand value is less than or equal to the righthand value.</dd>
+      </dl>
+      
+      <h2>Assignment operators</h2>
+      <p>
+         Expressions are not supported in this language; however, compound operations are 
+         available. For example, <code>a += b</code> is equivalent to the hypothetical statement 
+         <code>a = a + b</code>.
+      </p>
+      <dl>
+         <dt>=</dt>
+            <dd><dfn>Assign.</dfn> Sets the variable on the lefthand side to the value on the 
+            righthand side. Don't confuse this with the equality comparison operator, which is 
+            two equal signs.</dd>
+         <dt>+=</dt>
+            <dd><dfn>Add-assign.</dfn> Increases the variable on the lefthand side by the value 
+            on the righthand side.</dd>
+         <dt>-=</dt>
+            <dd><dfn>Subtract-assign.</dfn> Decreases the variable on the lefthand side by the 
+            value on the righthand side.</dd>
+         <dt>*=</dt>
+            <dd><dfn>Multiply-assign.</dfn> Multiplies the variable on the lefthand side by the 
+            value on the righthand side.</dd>
+         <dt>/=</dt>
+            <dd><dfn>Divide-assign.</dfn> Divides the variable on the lefthand side by the 
+            value on the righthand side. Any remainder will be discarded.</dd>
+         <dt>%=</dt>
+            <dd><dfn>Modulo-assign.</dfn> Sets the lefthand variable to the remainder of 
+            dividing the lefthand value by the righthand value.</dd>
+         <dt>&amp;=</dt>
+            <dd><dfn>Binary-AND-assign.</dfn> Modifies each bit in the variable on the lefthand 
+            side: bits will be set to zero if the corresponding bit in the righthand value is 
+            zero; otherwise, bits will be left unchanged.</dd>
+         <dt>|=</dt>
+            <dd><dfn>Binary-OR-assign.</dfn> Modifies each bit in the variable on the lefthand 
+            side: bits will be set to one if the corresponding bit in the righthand value is 
+            one; otherwise, bits will be left unchanged.</dd>
+         <dt>^=</dt>
+            <dd><dfn>Binary-OR-assign.</dfn> Modifies each bit in the variable on the lefthand 
+            side: bits will be set to one if the corresponding bit in the righthand value is 
+            the same, or set to zero otherwise.</dd>
+         <dt>~=</dt>
+            <dd><dfn>Binary-NOT-assign.</dfn> Modifies each bit in the variable on the lefthand 
+            side: bits will be set to zero if the corresponding bit in the righthand value is 
+            one, or left unchanged otherwise. This is equivalent to <code>a &amp;= ~b</code>.</dd>
+      </dl>
+   </body>
+</article>

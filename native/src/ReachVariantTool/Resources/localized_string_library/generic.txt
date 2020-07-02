@@ -1,0 +1,1099 @@
+[disabled]
+name=Disabled
+cate=option-values
+desc=The word "disabled," usable as the value of a Custom Game option. In some languages it is rendered as "deactivated" or "no."
+tags=activate,bool,disable,enable,toggle,yes,no
+source=Alpha Zombies
+sourcetype=gametype
+en=Disabled
+jp=オフ
+de=Deaktiviert
+fr=Désactivé
+es=Desactivado
+mx=Desactivado
+it=No
+ko=설정 해제됨
+zh=停用
+pt=Desabilitado
+
+[enabled]
+name=Enabled
+cate=option-values
+desc=The word "enabled," usable as the value of a Custom Game option. In some languages it is rendered as "activated," "active," or "yes."
+tags=activate,bool,disable,enable,toggle,yes,no
+source=Alpha Zombies
+sourcetype=gametype
+en=Enabled
+jp=オン
+de=Aktiviert
+fr=Activé
+es=Activado
+mx=Activado
+it=Sì
+ko=설정됨
+zh=啟用
+pt=Habilitado
+
+[no]
+name=No
+cate=option-values
+desc=The word "no," usable as the value of a Custom Game option.
+tags=activate,bool,disable,enable,toggle,yes,no
+source=Headhunter
+sourcetype=gametype
+en=No
+jp=いいえ
+de=Nein
+fr=Non
+es=No
+mx=No
+it=No
+ko=아니요
+zh=否
+pt=Não
+
+[yes]
+name=Yes
+cate=option-values
+desc=The word "yes," usable as the value of a Custom Game option.
+tags=activate,bool,disable,enable,toggle,yes,no
+source=Headhunter
+sourcetype=gametype
+en=Yes
+jp=はい
+de=Ja
+fr=Oui
+es=Sí
+mx=Sí
+it=Sì
+ko=예
+zh=是
+pt=Sim
+
+[points]
+name=x Points
+cate=option-values
+desc=A quantity of points, usable as the value of a Custom Game option.
+tags=point,score,scoring
+source=Alpha Zombies
+sourcetype=gametype
+token=integer
+en=%1 points
+jp=%1 ポイント
+de=%1 Punkte
+fr=%1 points
+es=%1 puntos
+mx=%1 puntos
+it=%1 punti
+ko=%1점
+zh=%1 分
+pt=%1 pontos
+en1=%1 point
+jp1=%1 ポイント
+de1=%1 Punkt
+fr1=%1 point
+es1=%1 punto
+mx1=%1 punto
+it1=%1 punto
+ko1=%1점
+zh1=%1 分
+pt1=%1 ponto
+en0=no points
+jp0=0 ポイント
+de0=keine Punkte
+fr0=aucun point
+es0=ningún punto
+mx0=ningún punto
+it0=nessun punto
+ko0=0점
+zh0=無分數
+pt0=nenhum ponto
+
+
+[seconds]
+name=x Seconds
+cate=option-values
+desc=A quantity of seconds, usable as the value of a Custom Game option.
+tags=second,time
+source=Alpha Zombies
+sourcetype=gametype
+token=integer
+en=%1 seconds
+jp=%1 秒
+de=%1 Sekunden
+fr=%1 secondes
+es=%1 segundos
+mx=%1 segundos
+it=%1 secondi
+ko=%1초
+zh=%1 秒
+pt=%1 segundos
+en1=%1 second
+jp1=%1 秒
+de1=%1 Sekunden
+fr1=%1 secondes
+es1=%1 segundos
+mx1=%1 segundos
+it1=%1 secondi
+ko1=%1초
+zh1=%1 秒
+pt1=%1 segundos
+
+[minutes]
+name=x Minutes
+cate=option-values
+desc=A quantity of minutes, usable as the value of a Custom Game option.
+tags=minute,time
+source=Invasion: Boneyard
+sourcetype=gametype
+token=integer
+en=%1 minutes
+jp=%1 分
+de=%1 Minuten
+fr=%1 minutes
+es=%1 minutos
+mx=%1 minutos
+it=%1 minuti
+ko=%1분
+zh=%1 分鐘
+pt=%1 minutos
+en1=%1 minute
+jp1=%1 分
+de1=%1 Minute
+fr1=%1 minute
+es1=%1 minuto
+mx1=%1 minuto
+it1=%1 minuto
+ko1=%1분
+zh1=%1 分鐘
+pt1=%1 minuto
+
+[instant]
+name=Instant
+cate=option-values
+desc=The word "instant" referring to a delay of 0 seconds, usable as the value of a Custom Game option.
+tags=time
+source=Assault
+sourcetype=gametype
+en=Instant
+jp=即時
+de=Sofort
+fr=Instantané
+es=Instantánea
+mx=Instantánea
+it=Istantaneo
+ko=즉시
+zh=立刻
+pt=Instantâneo
+
+[never]
+name=Never
+cate=option-values
+desc=The word "never," usable as the value of a Custom Game option.
+tags=time
+source=Freeze Tag
+sourcetype=gametype
+en=Never
+jp=復活しない
+de=Nie
+fr=Jamais
+es=Nunca
+mx=Nunca
+it=Mai
+ko=허용 안 함
+zh=絕不
+pt=Nunca
+
+[ballcount]
+name=x Balls
+cate=option-values
+desc=A quantity of balls, usable as the value of a Custom Game option.
+tags=ball,oddball,option
+source=Oddball
+sourcetype=gametype
+token=integer
+en=%1 balls
+jp=スカル x %1
+de=%1 Bälle
+fr=%1 crânes
+es=%1 bolas
+mx=%1 bolas
+it=%1 palle
+ko=볼 %1개
+zh=%1 個聖骸
+pt=%1 bolas
+en1=%1 ball
+jp1=スカル x %1
+de1=%1 Ball
+fr1=%1 crâne
+es1=%1 bola
+mx1=%1 bola
+it1=%1 palla
+ko1=볼 %1개
+zh1=%1 個聖骸
+pt1=%1 bola
+
+[ballcountname]
+name=Ball Count
+cate=option-names
+desc=The name of a Custom Game option used to control a quantity of balls.
+tags=ball,oddball,option
+source=Oddball
+sourcetype=gametype
+en=Ball Count
+jp=スカルの数
+de=Ball-Anzahl
+fr=Nombre de crânes
+es=Número de bolas
+mx=Número de bolas
+it=Conteggio teschio
+ko=볼 개수
+zh=法界聖骸計數
+pt=Contagem de bolas
+
+[lapcount]
+name=x Laps
+cate=option-values
+desc=A quantity of laps (as in racing), usable as the value of a Custom Game option.
+tags=race,racing,option,lap
+source=Race
+sourcetype=gametype
+token=integer
+en=%1 laps
+jp=%1 ラップ
+de=%1 Runden
+fr=%1 tours
+es=%1 vueltas
+mx=%1 vueltas
+it=%1 giri
+ko=%1바퀴
+zh=%1 圈
+pt=%1 voltas
+en1=%1 lap
+jp1=%1 ラップ
+de1=%1 Runde
+fr1=%1 tour
+es1=%1 vuelta
+mx1=%1 vuelta
+it1=%1 giro
+ko1=%1바퀴
+zh1=%1 圈
+pt1=%1 volta
+
+[lapcountname]
+name=Number of Laps
+cate=option-names
+desc=The name of a Custom Game option used to control a quantity of laps (as in racing).
+tags=race,racing,option,lap
+source=Race
+sourcetype=gametype
+en=Number of Laps
+jp=ラップ数
+de=Anzahl der Runden
+fr=Nombre de tours
+es=Número de vueltas
+mx=Número de vueltas
+it=Numero di giri
+ko=바퀴 수
+zh=圈數
+pt=Número de voltas
+
+[zombiecount]
+name=x Zombies
+cate=option-values
+desc=A quantity of zombies, usable as the value of a Custom Game option.
+tags=infection,option,undead,zombie
+source=Alpha Zombies
+sourcetype=gametype
+token=integer
+en=%1 zombies
+jp=ゾンビ x %1
+de=%1 Zombies
+fr=%1 zombies
+es=%1 zombis
+mx=%1 zombis
+it=%1 zombi
+ko=%1 좀비
+zh=%1 個殭屍
+pt=%1 zumbis
+en1=%1 zombie
+jp1=ゾンビ x %1
+de1=%1 Zombie
+fr1=%1 zombie
+es1=%1 zombi
+mx1=%1 zombi
+it1=%1 zombi
+ko1=%1 좀비
+zh1=%1 個殭屍
+pt1=%1 zumbi
+
+[offense]
+name=Offense
+cate=roles
+desc=The word "offense," in the context of a role for a team or player to play.
+tags=defense,offense,sides
+source=Assault
+sourcetype=gametype
+en=Offense
+jp=オフェンス
+de=Angriff
+fr=Attaque
+es=Ataque
+mx=Ataque
+it=Attacco
+ko=공격
+zh=進攻者
+pt=Ataque
+
+[defense]
+name=Defense
+cate=roles
+desc=The word "defense," in the context of a role for a team or player to play.
+tags=defense,offense,sides
+source=Assault
+sourcetype=gametype
+en=Defense
+jp=ディフェンス
+de=Verteidigung
+fr=Défense
+es=Defensa
+mx=Defensa
+it=Difesa
+ko=방어
+zh=防禦者
+pt=Defesa
+
+[yourturn]
+name=Your Turn!
+cate=notifications
+desc=The phrase "Your Turn!", suitable for displaying in the kill feed as a notification.
+source=Halo Chess
+sourcetype=gametype
+en=Your Turn!
+jp=プレイヤーの番です!
+de=Sie sind am Zug!
+fr=À votre tour !
+es=¡Tu turno!
+mx=¡Tu turno!
+it=È il tuo turno!
+ko=차례가 돌아옴!
+zh=該你了！
+pt=É a sua vez!
+
+[turnclock]
+name=Turn Clock
+cate=hud
+desc=Text for a turn clock HUD widget, which displays a single timer. The text for Portugese is more specific and reads, "Chess Clock: %s."
+source=Halo Chess
+sourcetype=gametype
+en=Turn Clock: %s
+jp=ターン クロック: %s
+de=Zugzeit: %s
+fr=Chrono : %s
+es=Reloj de turnos: %s
+mx=Reloj de turnos: %s
+it=Cronometro turno: %s
+ko=시계 넘기기: %s
+zh=回合時鐘：%s
+pt=Relógio de Xadrez: %s
+
+[invalidmove]
+name=Invalid Move
+cate=notifications
+desc=The phrase "Invalid move. Try another!" displayed as a reaction to a player making an incorrect move in a game like chess.
+source=Halo Chess
+sourcetype=gametype
+en=Invalid move, try another!
+jp=無効な手です
+de=Ungültiger Zug. Versuchen Sie es mit einem anderen!
+fr=Déplacement incorrect, essayez autre chose !
+es=Movimiento no válido. ¡Prueba otra cosa!
+mx=Movimiento no válido. ¡Prueba otra cosa!
+it=Mossa non valida, provane un'altra!
+ko=잘못된 수!
+zh=無效的走法，請再試一次！
+pt=Movimento inválido, tente outro!
+
+[destinationmoved]
+name=Destination Moved
+cate=notifications
+desc=Text for a notification indicating that some destination, target, or goal location has moved.
+tags=alert,goal,location,objective,target,warning
+source=Headhunter
+sourcetype=gametype
+en=Destination Moved
+jp=目的地が移動した
+de=Ziel hat sich bewegt
+fr=Destination déplacée
+es=Destino movido
+mx=Destino movido
+it=Destinazione spostata
+ko=목표 변경
+zh=目標移動
+pt=Destino movido
+
+[objectiveunderattack]
+name=Objective Under Attack
+cate=notifications
+desc=Text for a notification indicating that your objective is under attack by an enemy.
+tags=alert,objective,warning
+source=Invasion: Boneyard
+sourcetype=gametype
+en=Your objective is under attack!
+jp=ターゲットが攻撃を受けている！
+de=Ihr Ziel wird angegriffen!
+fr=Votre objectif est attaqué !
+es=¡Están atacando tu objetivo!
+mx=¡Están atacando tu objetivo!
+it=Il tuo obiettivo è sotto attacco!
+ko=목표물이 공격 당하고 있습니다!
+zh=你的目標受到攻擊！
+pt=O seu objetivo está sendo atacado!
+
+[elites]
+name=Elites
+cate=team-names
+desc=The word "Elites." In Invasion: Breakpoint, this is one value of the "Attacking Team" option.
+tags=covenant,elite,faction,sangheili,species,team
+source=Invasion: Boneyard
+sourcetype=gametype
+en=Elites
+jp=エリート
+de=Eliten
+fr=Élites
+es=Élites
+mx=Élites
+it=Elite
+ko=엘리트
+zh=精英
+pt=Elites
+
+[spartans]
+name=Spartans
+cate=team-names
+desc=The word "Spartans," specifically referring to the supersoldiers from Halo's story; in Chinese this string is "supersoldiers." In Invasion: Breakpoint, this is one value of the "Attacking Team" option.
+tags=faction,human,spartan,species,team,unsc
+source=Invasion: Boneyard
+sourcetype=gametype
+en=Spartans
+jp=スパルタン
+de=Spartans
+fr=Spartans
+es=Spartan
+mx=Spartan
+it=Spartan
+ko=스파르탄
+zh=超級戰士
+pt=Spartans
+
+[elite]
+name=Elite
+cate=roles
+desc=The word "Elite." In Invasion: Breakpoint, this is displayed in the round title card to indicate your current role.
+tags=covenant,elite,faction,sangheili,species,team
+source=Invasion: Boneyard
+sourcetype=gametype
+en=Elite
+jp=エリート
+de=Elite
+fr=Élite
+es=Élite
+mx=Élite
+it=Elite
+ko=엘리트
+zh=精英
+pt=Elite
+
+[spartan]
+name=Spartan
+cate=roles
+desc=The word "Spartan," specifically referring to the supersoldiers from Halo's story; in Chinese this string is "supersoldier." In Invasion: Breakpoint, this is displayed in the round title card to indicate your current role.
+tags=faction,human,spartan,species,team,unsc
+source=Invasion: Boneyard
+sourcetype=gametype
+en=Spartan
+jp=スパルタン
+de=Spartan
+fr=Spartan
+es=Spartan
+mx=Spartan
+it=Spartan
+ko=스파르탄
+zh=超級戰士
+pt=Spartan
+
+[meters]
+name=x Meters
+cate=hud
+desc=Text suitable for a waypoint displaying the distance to some object in meters
+tags=distance,meter
+source=Race
+sourcetype=gametype
+en=%nm
+jp=%nm
+de=%nm
+fr=%nm
+es=%n m
+mx=%n m
+it=%nm
+ko=%n미터
+zh=%nm
+pt=%nm
+
+[onfootfortoolong]
+name=On Foot For Too Long
+cate=notification
+desc=A notification displayed when the player is on foot for too long, as opposed to being in a vehicle.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=On foot for too long!
+jp=車に乗っていない時間が長すぎます！
+de=Zu lange zu Fuß unterwegs!
+fr=À pied depuis trop longtemps !
+es=¡Demasiado tiempo a pie!
+mx=¡Demasiado tiempo a pie!
+it=A piedi per troppo tempo!
+ko=너무 오래 차에 타지 않았습니다!
+zh=步行太久了！
+pt=A pé durante muito tempo!
+
+[vehicle]
+name=Vehicle
+cate=option-names
+desc=The name of an option to control what vehicle is used.
+tags=vehicle
+source=Race
+sourcetype=gametype
+en=Vehicle
+jp=乗り物
+de=Fahrzeug
+fr=Véhicule
+es=Vehículo
+mx=Vehículo
+it=Veicolo
+ko=차량
+zh=載具
+pt=Veículo
+
+[landmines]
+name=Land Mines
+cate=objects
+source=Race
+sourcetype=gametype
+en=Land Mines
+jp=地雷
+de=Landminen
+fr=Mines anti-personnel
+es=Minas terrestres
+mx=Minas terrestres
+it=Mine da terra
+ko=지뢰
+zh=地雷
+pt=Minas terrestres
+
+[teleporttime]
+name=Teleport Time
+cate=option-names
+desc=The name of a Custom Game option used to control the delay before something is teleported.
+tags=time
+source=Rocket Hog Race
+sourcetype=gametype
+en=Teleport Time
+jp=テレポート時間
+de=Teleportationszeit
+fr=Délai avant téléportation
+es=Tiempo de teletransporte
+mx=Tiempo de teletransporte
+it=Tempo di teletrasporto
+ko=텔레포트 대기 시간
+zh=傳送時間
+pt=Tempo de teleportação
+
+[flipyourvehicle]
+name=Flip your vehicle!
+cate=notification
+desc=Text for a notification or HUD widget instructing the player to flip their overturned vehicle back upright.
+tags=vehicle
+source=Rocket Hog Race
+sourcetype=gametype
+en=Flip your vehicle!
+jp=乗り物を起こせ!
+de=Drehen Sie Ihr Fahrzeug um!
+fr=Retournez votre véhicule !
+es=¡Da vueltas de campana con el vehículo!
+mx=¡Da vueltas de campana con el vehículo!
+it=Raddrizza il tuo veicolo!
+ko=차량을 뒤집으십시오!
+zh=翻轉您的載具！
+pt=Vire o seu veículo!
+
+[teleportingtovehicletimer]
+name=Teleporting to Vehicle
+cate=hud
+desc=Text for a HUD widget showing the time that must pass before the player is teleported to their vehicle.
+tags=vehicle
+source=Rocket Hog Race
+sourcetype=gametype
+en=Teleporting to Vehicle: %s
+jp=乗り物に移動中: %s
+de=Zu Fahrzeug teleportieren: %s
+fr=Téléportation vers véhicule : %s
+es=Teletransporte a vehículo: %s
+mx=Teletransporte a vehículo: %s
+it=Teletrasporto al veicolo: %s
+ko=차량으로 텔레포트 중: %s
+zh=正在傳送到載具：%s
+pt=Teleportação ao Veículo: %s
+
+[hillselection]
+name=Hill Selection
+cate=option-names
+desc=The name of a Custom Game option used to control the order in which hills become active.
+tags=hill
+source=Rocket Hog Race
+sourcetype=gametype
+en=Hill Selection
+jp=エリア選択
+de=Hügelauswahl
+fr=Sélection de la colline
+es=Selección de colina
+mx=Selección de colina
+it=Selezione collina
+ko=고지 선택
+zh=山丘選擇
+pt=Seleção do moro
+
+[hillselectiondesc]
+name=Hill Selection (Desc.)
+cate=option-descriptions
+desc=The description of a Custom Game option used to control the order in which hills become active.
+tags=hill
+source=Rocket Hog Race
+sourcetype=gametype
+en=The method for selection of hills.
+jp=エリア選択の方法
+de=Hier kann ein Hügel ausgewählt werden.
+fr=Méthode de sélection des collines.
+es=El método de selección de las colinas.
+mx=El método de selección de las colinas.
+it=Il metodo di selezione delle colline.
+ko=고지를 선택하는 방법입니다.
+zh=選擇山丘的方式。
+pt=Método para seleção dos moros
+
+[random]
+name=Random
+cate=option-values
+desc=The word "random."
+tags=hill,random
+source=Rocket Hog Race
+sourcetype=gametype
+en=Random
+jp=ランダム
+de=Zufällig
+fr=Aléatoire
+es=Aleatorio
+mx=Aleatorio
+it=Casuale
+ko=무작위
+zh=隨機
+pt=Aleatória
+
+[fair]
+name=Fair
+cate=option-values
+desc=The word "fair."
+tags=fair,hill,random
+source=Rocket Hog Race
+sourcetype=gametype
+en=Fair
+jp=フェア
+de=Fair
+fr=Équitable
+es=Justo
+mx=Justo
+it=Giusto
+ko=공평
+zh=公平
+pt=Justa
+
+[killpointsname]
+name=Kill Points
+cate=option-names
+desc=The name of a Custom Game option used to control the points earned for killing an enemy.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Kill Points
+jp=キル ポイント
+de=Volltreffer-Punkte
+fr=Points de frag
+es=Puntos por abatido
+mx=Puntos por abatido
+it=Punti uccisione
+ko=사살
+zh=殺敵分數
+pt=Pontos por abate
+
+[killpointsdesc]
+name=Kill Points (Desc.)
+cate=option-descriptions
+desc=The description of a Custom Game option used to control the points earned for killing an enemy.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Points for killing an enemy.
+jp=敵を倒すと獲得できるポイント
+de=Punkte für das ausschalten eines Gegners.
+fr=Points pour tuer un ennemi.
+es=Puntos por matar a un enemigo.
+mx=Puntos por matar a un enemigo.
+it=Punti per l'uccisione di un nemico.
+ko=적 한 명을 죽일 때 획득하는 점수입니다.
+zh=擊殺敵人所獲得的分數。
+pt=Pontos por matar o inimigo.
+
+[deathpointsname]
+name=Death Points
+cate=option-names
+desc=The name of a Custom Game option used to control the points earned for dying.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Death Points
+jp=デス ポイント
+de=Tod-Punkte
+fr=Points de décès
+es=Puntos por muerte
+mx=Puntos por muerte
+it=Punti morte
+ko=사망
+zh=死亡分數
+pt=Pontos por morte
+
+[deathpointsdesc]
+name=Death Points (Desc.)
+cate=option-descriptions
+desc=The description of a Custom Game option used to control the points earned for dying.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Points for dying.
+jp=敵に倒されると獲得できるポイント
+de=Punkte fürs Sterben.
+fr=Points pour mourir.
+es=Puntos por morir.
+mx=Puntos por morir.
+it=Punti per la morte.
+ko=사망 시 획득하는 점수입니다.
+zh=死亡所獲得的分數。
+pt=Pontos por morrer.
+
+[suicidepointsname]
+name=Suicide Points
+cate=option-names
+desc=The name of a Custom Game option used to control the points earned for dying by your own hand.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Suicide Points
+jp=自爆ポイント
+de=Selbstmord-Punkte
+fr=Points de suicide
+es=Puntos por suicidio
+mx=Puntos por suicidio
+it=Punti suicidio
+ko=자살
+zh=自殺分數
+pt=Pontos por suicídio
+
+[suicidepointsdesc]
+name=Suicide Points (Desc.)
+cate=option-descriptions
+desc=The description of a Custom Game option used to control the points earned for dying by your own hand.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Points for killing yourself.
+jp=自爆すると獲得できるポイント
+de=Punkte für einen Selbstmord.
+fr=Points pour suicide.
+es=Puntos por suicidarse.
+mx=Puntos por suicidarse.
+it=Punti per aver commesso suicidio.
+ko=자살 시 획득하는 점수입니다.
+zh=自殺所獲得的分數。
+pt=Pontos por suicidar-se.
+
+[betrayalpointsname]
+name=Betrayal Points
+cate=option-names
+desc=The name of a Custom Game option used to control the points earned for killing a teammate.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Betrayal Points
+jp=裏切りポイント
+de=Verrat-Punkte
+fr=Points de trahison
+es=Puntos por traición
+mx=Puntos por traición
+it=Punti tradimento
+ko=배신
+zh=背叛分數
+pt=Pontos por traição
+
+[betrayalpointsdesc]
+name=Betrayal Points (Desc.)
+cate=option-descriptions
+desc=The description of a Custom Game option used to control the points earned for killing a teammate.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Points for killing an ally.
+jp=味方を倒すと獲得できるポイント
+de=Punkte für das Ausschalten eines Verbündeten.
+fr=Points pour tuer un allié.
+es=Puntos por matar a un aliado.
+mx=Puntos por matar a un aliado.
+it=Punti per l'uccisione di un alleato.
+ko=아군 한 명을 죽일 때 획득하는 점수입니다.
+zh=殺死盟友所獲得的分數。
+pt=Pontos por matar um aliado.
+
+[leadertraitsname]
+name=Leader Traits
+cate=option-names
+desc=The name of a player trait set applied to players in the lead.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Leader Traits
+jp=リーダー オプション
+de=Anführer-Eigenschaften
+fr=Caractéristiques du leader
+es=Rasgos de jefe
+mx=Rasgos de jefe
+it=Elementi leader
+ko=선두 특성
+zh=領先者能力
+pt=Traços do líder
+
+[leadertraitsdesc]
+name=Leader Traits (Desc.)
+cate=option-descriptions
+desc=The description of a player trait set applied to players in the lead.
+tags=score,scoring
+source=Slayer
+sourcetype=gametype
+en=Traits applied to players in the lead.
+jp=リーダーになると適用されるオプション
+de=Auf in Führung liegende Spieler angewendete Eigenschaften.
+fr=Caractéristiques appliquées aux joueurs en tête.
+es=Rasgos aplicados a los jugadores líderes.
+mx=Rasgos aplicados a los jugadores líderes.
+it=Elementi applicati ai giocatori al comando.
+ko=선두에게 적용되는 특성입니다.
+zh=領先玩家所具有的能力。
+pt=Traços aplicados a jogadores na liderança.
+
+[observers]
+name=Observers
+cate=team-names
+desc=The word "observers" or "spectators," formatted for use as a team name.
+tags=observer,spectate,spectator
+source=multiplayer\team_names\8
+sourcetype=map
+en=Observers
+jp=オブザーバー
+de=Beobachter
+fr=Spectateurs
+es=Observadores
+mx=Observadores
+it=Osservatori
+ko=관전자
+zh=旁觀者
+pt=Observadores
+
+[default]
+name=Default
+desc=The word "default."
+source=ui\cui\strings\forge_strings\global_default
+sourcetype=map
+en=Default
+jp=デフォルト
+de=Standard
+fr=Par défaut
+es=Predeterminado
+mx=Predeterminado
+it=Predefinita
+ko=기본값
+zh=預設
+pt=Padrão
+
+[open]
+name=Open
+desc=The word "open."
+source=ui\global_strings\global_strings\open
+sourcetype=map
+en=Open
+jp=オープン
+de=Offen
+fr=Ouvert
+es=Abierto
+mx=Abierto
+it=Aperta
+ko=공개
+zh=公開
+pt=Aberto
+
+[closed]
+name=Closed
+desc=The word "closed."
+source=ui\global_strings\global_strings\closed
+sourcetype=map
+en=Closed
+jp=クローズ
+de=Geschl.
+fr=Fermé
+es=Cerrado
+mx=Cerrado
+it=Chiusa
+ko=비공개
+zh=已關閉
+pt=Fechado
+
+[block1x1flat]
+name=Block, 1x1, Flat
+desc=The name of the Forge block that measures 1.0x1.0x0.2 Forge units.
+source=ui\cui\strings\forge_strings\block_1x1_flat
+sourcetype=map
+en=Block, 1x1, Flat
+jp=ブロック 1x1 (平)
+de=Baustein, 1x1, flach
+fr=Bloc, 1x1, plat
+es=Bloque, 1x1, plano
+mx=Bloque, 1x1, plano
+it=Blocco, 1x1, piatto
+ko=1x1 납작 블록
+zh=區塊 - 1x1 - 平坦
+pt=Bloco, 1x1, chato
+
+[notif_telefragged]
+name=You were telefragged!
+cate=notification
+desc=Kill feed message shown when a player dies as a result of standing on a teleporter exit node when another player exits through the node. In modern Halo games, standing on a teleporter exit node will block the teleporter (or at least that node), but older games would instead make it a lethal risk.
+source=multiplayer\in_game_multiplayer_messages\gen_telefrag_effect_player
+en=You were telefragged!
+jp=テレフラグされた！
+de=Sie wurden Opfer eines Telefrags!
+fr=Vous avez été téléfraggé !
+es=Te han teleliquidado!
+mx=Te han teleliquidado!
+it=Sei stato ucciso durante il teletrasporto!
+ko=텔레포트 중 사망!
+zh=你被遙控手榴彈炸傷！
+pt=Você foi telefragmentado!
+
+[notif_switching_sides_soon]
+name=Changing sides in %n
+cate=notification
+desc=A message indicating that sides (i.e. which team is on offense and which is on defense) will switch during a round. The Korean localization specifies that the time displayed is measured in seconds.
+source=multiplayer\in_game_multiplayer_messages\state_switching_sides_soon
+en=Changing sides in %n
+jp=サイドチェンジまで あと %n
+de=Seitenwechsel in %n.
+fr=Changement de côté dans %n.
+es=Cambio de bando en %n
+mx=Cambio de bando en %n
+it=Cambio fazioni in %n
+ko=%n초 후 진영 바뀜
+zh=%n 後換邊
+pt=Mudando de lado em %n
+
+[forge_out_of_objects]
+name=Could not create object. Too many on map.
+cate=notification
+tags=forge
+desc=A kill feed message displayed in Forge, when attempting to spawn more objects than the map can sustain.
+source=multiplayer\in_game_multiplayer_messages\forge_error_out_of_objects
+en=Could not create object. Too many on map.
+jp=オブジェクトの数が多すぎるため作成できません
+de=Objekt konnte nicht erstellt werden. Zu viele auf der Karte.
+fr=Création impossible. Trop d'objets sur la carte.
+es=No se pudo crear el objeto. Hay demasiados en el mapa.
+mx=No se pudo crear el objeto. Hay demasiados en el mapa.
+it=Impossibile creare l'elemento. Ce ne sono troppi sulla mappa.
+ko=지도에 너무 많은 아이템이 있어서 아이템을 만들 수 없습니다.
+zh=無法建立物件，地圖上已有太多物件。
+pt=Não foi possível criar objeto. Há objetos demais no mapa.
+
+[forge_no_room]
+name=Could not create object. Not enough room.
+cate=notification
+tags=forge
+desc=A kill feed message displayed in Forge, when attempting to spawn an object in an area where there is no room.
+source=multiplayer\in_game_multiplayer_messages\forge_error_no_room
+en=Could not create object. Not enough room.
+jp=スペースが足りないためオブジェクトを作成できません
+de=Objekt konnte nicht erstellt werden. Nicht genug Platz.
+fr=Création impossible. Espace insuffisant.
+es=No se pudo crear el objeto. No hay sitio suficiente.
+mx=No se pudo crear el objeto. No hay sitio suficiente.
+it=Impossibile creare l'elemento. Spazio insufficiente.
+ko=여유 공간이 없어서 아이템을 만들 수 없습니다.
+zh=無法建立物件，空間不夠。
+pt=Não foi possível criar objeto. Não há espaço suficiente.
+
+[safetime]
+name=Safe Time
+cate=option-names
+desc=The name of an option to control the period of time in which a player is safe. In some languages, this is rendered as "Period of Invincibility."
+source=Juggernaut
+sourcetype=gametype
+en=Safe Time
+jp=セーフ タイム
+de=Sichere Zeit
+fr=Période d'invincibilité
+es=Tiempo de seguridad
+mx=Tiempo de seguridad
+it=Tempo invulnerabilità
+ko=무적 시간
+zh=安全時間
+pt=Tempo seguro
+
+[supershieldsname]
+name=Super Shields
+cate=option-names
+desc=The name of an option to control whether players with overshields have fire graphics coming out of their feet.
+source=TU Buddy Slayer
+sourcetype=gametype
+en=Super Shields
+jp=スーパー シールド
+de=Super-Schilde
+fr=Super boucliers
+es=Superescudos
+mx=Superescudos
+it=Super scudi
+ko=슈퍼 방어막
+zh=超級護盾
+pt=Super Escudo
+
+[supershieldsdesc]
+name=Super Shields (Desc.)
+cate=option-descriptions
+desc=The description of an option to control whether players with overshields have fire graphics coming out of their feet.
+source=TU Buddy Slayer
+sourcetype=gametype
+en=Players with overshields will have flaming feet
+jp=オーバーシールド状態のプレイヤーの足元が炎に包まれる
+de=Spieler mit Super-Schilden haben flammende Füße
+fr=Les joueurs munis d'armures auront les pieds enflammés.
+es=Los jugadores con sobrescudos tendrán pies llameantes.
+mx=Los jugadores con sobrescudos tendrán pies llameantes.
+it=I giocatori con sovrascudi avranno i piedi fiammeggianti
+ko=오버실드를 가진 플레이어들이 불타는 발을 갖게 됩니다.
+zh=有超能護盾的玩家，會擁有冒出火焰的雙腳
+pt=Jogadores com escudo em excesso vão ter pés ardentes
+

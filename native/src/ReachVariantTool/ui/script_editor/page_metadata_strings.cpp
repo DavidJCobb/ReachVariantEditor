@@ -11,6 +11,8 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       this->updateFromVariant();
    });
    //
+   this->ui.genericName->setAllowNoString(true);
+   //
    QObject::connect(this->ui.buttonName, &QPushButton::clicked, [this]() {
       auto mp = ReachEditorState::get().multiplayerData();
       if (!mp)
@@ -29,7 +31,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->get_content(reach::language::english);
          this->ui.labelName->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -61,7 +63,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->get_content(reach::language::english);
          this->ui.labelDesc->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -93,7 +95,7 @@ ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWid
       //
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::IsNotInStandardTable, string)) {
-         auto& english = string->english();
+         auto& english = string->get_content(reach::language::english);
          this->ui.labelCategory->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //
@@ -123,6 +125,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
       this->ui.buttonName->setDisabled(true);
       this->ui.buttonDesc->setDisabled(true);
       this->ui.buttonCategory->setDisabled(true);
+      this->ui.genericName->clearTarget();
       return;
    }
    {
@@ -133,7 +136,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.get_content(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }
@@ -145,7 +148,7 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.get_content(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }
@@ -157,8 +160,9 @@ void ScriptEditorPageMetaStrings::updateFromVariant(GameVariant* variant) {
          widget->setText("");
       } else {
          ReachString& string = table.strings[0];
-         widget->setText(QString::fromUtf8(string.english().c_str()));
+         widget->setText(QString::fromUtf8(string.get_content(reach::language::english).c_str()));
       }
       button->setDisabled(false);
    }
+   this->ui.genericName->setTarget(mp->genericName);
 }

@@ -27,19 +27,59 @@
 #include "../components/teams.h"
 #include "../components/tu1_options.h"
 
+struct ReachMPSizeData {
+   //
+   // Holds information on bit usage.
+   //
+   ReachMPSizeData();
+   struct {
+      uint32_t maximum = 0x5028 * 8;
+      //
+      uint32_t header         = 0; // we include MPVR's block header and SHA-1 stuff in this count despite that existing outside of the MP data class
+      uint32_t header_strings = 0;
+      uint32_t cg_options     = 0;
+      uint32_t team_config    = 0;
+      uint32_t script_traits  = 0;
+      uint32_t script_options = 0;
+      uint32_t script_strings = 0;
+      uint32_t option_toggles = 0;
+      uint32_t rating_params  = 0;
+      uint32_t map_perms      = 0;
+      uint32_t script_content = 0;
+      uint32_t script_stats   = 0;
+      uint32_t script_widgets = 0;
+      uint32_t forge_labels   = 0;
+      uint32_t title_update_1 = 0;
+   } bits;
+   struct {
+      uint32_t conditions = 0;
+      uint32_t actions    = 0;
+      uint32_t triggers   = 0;
+   } counts;
+   //
+   void update_from(GameVariant&);
+   void update_from(GameVariantDataMultiplayer&);
+   void update_script_from(GameVariantDataMultiplayer&);
+   //
+   uint32_t total_bits() const noexcept;
+};
+
 class GameVariantDataMultiplayer : public GameVariantData {
    protected:
       void _set_up_indexed_dummies();
       void _tear_down_indexed_dummies();
+      //
+      bool _read_script_code(cobb::ibitreader&) noexcept;
       //
    public:
       GameVariantDataMultiplayer(bool isForge) : isForge(isForge) {};
       //
       virtual ReachGameEngine get_type() const noexcept { return this->isForge ? ReachGameEngine::forge : ReachGameEngine::multiplayer; }
       virtual bool read(cobb::reader&) noexcept override;
-      virtual void write(cobb::bit_or_byte_writer&) noexcept override;
-      virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept override;
+      virtual void write(GameVariantSaveProcess&) noexcept override;
+      virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
+      virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept override;
       //
       static constexpr uint8_t encoding_version_vanilla = 0x6A;
       static constexpr uint8_t encoding_version_tu1     = 0x6B;
@@ -149,4 +189,18 @@ class GameVariantDataMultiplayer : public GameVariantData {
          cobb::bitnumber<6, uint8_t> respawnTime = 0;
          ReachPlayerTraits editorTraits;
       } forgeData;
+
+      ReachMegaloOption* create_script_option();
+      void delete_script_option(ReachMegaloOption*);
+      bool swap_script_options(int8_t index_a, int8_t index_b);
+
+      inline ReachMPSizeData get_size_data() noexcept {
+         ReachMPSizeData data;
+         data.update_from(*this);
+         return data;
+      }
+
+      Megalo::ReachForgeLabel* get_forge_label_using_string(ReachString*) const noexcept;
+      ReachMegaloOption*       get_option_using_string(ReachString*) const noexcept;
+      ReachMegaloPlayerTraits* get_traits_using_string(ReachString*) const noexcept;
 };

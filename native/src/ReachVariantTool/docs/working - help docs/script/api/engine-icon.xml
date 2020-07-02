@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="engine-icon">
+   <friendly>Engine Icon</friendly>
+   <blurb>An icon name</blurb>
+   <description>
+      <p>
+         The following is a list of icon names. Note that you can also use the word 
+         <var>none</var> to denote no icon, or the integer index of an icon.
+      </p>
+      <dl>
+         <dt>flag</dt>
+            <dd>A flag, identical to the one used as Capture the Flag's gametype icon.</dd>
+         <dt>slayer</dt>
+            <dd>The icon for the Slayer gametype.</dd>
+         <dt>oddball</dt>
+            <dd>A skull, identical to the one used as Oddball's gametype icon.</dd>
+         <dt>koth</dt>
+            <dd>The icon for the King of the Hill gametype.</dd>
+         <dt>juggernaut</dt>
+            <dd>The icon for the Juggernaut gametype.</dd>
+         <dt>territories</dt>
+            <dd>The icon for the Territories gametype.</dd>
+         <dt>assault</dt>
+            <dd>The icon for the Assault gametype.</dd>
+         <dt>infection</dt>
+            <dd>The icon for the Infection gametype.</dd>
+         <dt>vip</dt>
+            <dd>The icon for the VIP gametype.</dd>
+         <dt>invasion</dt>
+            <dd>The icon for the Invasion gametype.</dd>
+         <dt>invasion_slayer</dt>
+            <dd>The icon for the Invasion Slayer gametype.</dd>
+         <dt>stockpile</dt>
+            <dd>The icon for the Stockpile gametype.</dd>
+         <dt>action_sack</dt>
+            <dd>An Action Sack icon.</dd>
+         <dt>race</dt>
+            <dd>The icon for the Race gametype.</dd>
+         <dt>rocket_race</dt>
+            <dd>The icon for the Rocket Hog Race gametype.</dd>
+         <dt>grifball</dt>
+            <dd>The icon for the Grifball gametype.</dd>
+         <dt>soccer</dt>
+            <dd>A soccer ball.</dd>
+         <dt>headhunter</dt>
+            <dd>The icon for the Headhunter gametype.</dd>
+         <dt>crosshair</dt>
+            <dd>A crosshair.</dd>
+         <dt>wheel</dt>
+            <dd>A wheel.</dd>
+         <dt>swirl</dt>
+            <dd>A swirl icon &mdash; the same icon used for what is called "Insane" in legacy Reach and "Action Sack" in MCC.</dd>
+         <dt>bunker</dt>
+            <dd>A bunker icon.</dd>
+         <dt>health_pack</dt>
+            <dd>A health pack icon.</dd>
+         <dt>castle_defense</dt>
+            <dd>A shield with a castle shape cut out of it.</dd>
+         <dt>return</dt>
+            <dd>...</dd>
+         <dt>shapes</dt>
+            <dd>Line art of 3D geometric shapes.</dd>
+         <dt>cartographer</dt>
+            <dd>The insignia for the Silent Cartographer.</dd>
+         <dt>eight_ball</dt>
+            <dd>An eight-ball, from billiards.</dd>
+         <dt>noble</dt>
+            <dd>The Noble Team insignia.</dd>
+         <dt>covenant</dt>
+            <dd>A Covenant insignia.</dd>
+         <dt>attack</dt>
+            <dd>The waypoint icon used to indicate a target to attack.</dd>
+         <dt>defend</dt>
+            <dd>The waypoint icon used to indicate an objective to defend.</dd>
+         <dt>ordnance</dt>
+            <dd>The waypoint icon used to indicate a power weapon or vehicle to collect.</dd>
+         <dt>circle</dt>
+            <dd>...</dd>
+         <dt>recon</dt>
+            <dd>...</dd>
+         <dt>recover</dt>
+            <dd>...</dd>
+         <dt>ammo</dt>
+            <dd>The waypoint icon used to indicate an ammo pickup.</dd>
+         <dt>skull</dt>
+            <dd>The icon for Firefight skulls.</dd>
+         <dt>forge</dt>
+            <dd>The icon for Forge</dd>
+         <dt><i>icon indices 39 - 49</i></dt>
+            <dd>These indices appear to be unused. Accordingly, they don't have names defined for them 
+            in this Megalo script dialect.</dd>
+         <dt>recent_games</dt>
+            <dd>...</dd>
+         <dt>file_share</dt>
+            <dd>...</dd>
+      </dl>
+   </description>
+</script-type>

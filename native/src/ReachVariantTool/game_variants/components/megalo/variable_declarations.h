@@ -10,9 +10,9 @@
 namespace Megalo {
    enum class variable_network_priority {
       none, // offline
-      low,
-      high,
-      default,
+      low,  // survives host migration
+      high, // survives host migration
+      default, // apparently networked, but does not survive host migration
    };
    using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
    //

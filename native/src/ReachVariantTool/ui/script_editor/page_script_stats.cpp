@@ -30,18 +30,23 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
       this->target = nullptr;
       this->updateStatsListFromVariant();
    });
-   {  // Handle option/value name changes
-      //
-      // The simplest way to handle this is to just refresh both lists whenever any string in the variant changes. 
-      // That's also the laziest way to handle things... :<
-      //
-      QObject::connect(&editor, &ReachEditorState::stringModified, [this]() {
+   QObject::connect(&editor, &ReachEditorState::stringModified, [this](uint32_t index) { // Handle stat name changes from outside
+      auto mp = ReachEditorState::get().multiplayerData();
+      if (!mp)
+         return;
+      auto str = mp->scriptData.strings.get_entry(index);
+      if (!str || str->get_refcount() == 0)
+         return;
+      bool is_stat = false;
+      for (auto& stat : mp->scriptContent.stats) {
+         if (stat.uses_string(str)) {
+            is_stat = true;
+            break;
+         }
+      }
+      if (is_stat)
          this->updateStatsListFromVariant();
-      });
-      QObject::connect(&editor, &ReachEditorState::stringTableModified, [this]() {
-         this->updateStatsListFromVariant();
-      });
-   }
+   });
    //
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageScriptStats::selectStat);
    //
@@ -75,11 +80,14 @@ ScriptEditorPageScriptStats::ScriptEditorPageScriptStats(QWidget* parent) : QWid
          if (!mp)
             return;
          auto& list = mp->scriptContent.stats;
-         if (list.size() >= Megalo::Limits::max_script_options) {
+         if (list.size() >= Megalo::Limits::max_script_stats) {
             QMessageBox::information(this, tr("Cannot add stat"), tr("Game variants cannot have more than %1 stats.").arg(Megalo::Limits::max_script_stats));
             return;
          }
          this->target = list.emplace_back();
+         if (!this->target)
+            return;
+         this->target->is_defined = true;
          if (auto str = mp->scriptData.strings.get_empty_entry()) // If possible, default the new stat's name to an empty string
             this->target->name = str;
          this->updateStatFromVariant();
@@ -181,7 +189,7 @@ void ScriptEditorPageScriptStats::updateStatsListFromVariant(GameVariant* varian
       auto& option = list[i];
       auto  item   = new QListWidgetItem;
       if (option.name)
-         item->setText(QString::fromUtf8(option.name->english().c_str()));
+         item->setText(QString::fromUtf8(option.name->get_content(reach::language::english).c_str()));
       else
          item->setText(tr("<unnamed stat %1>", "scripted stat editor").arg(i));
       item->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue((void*)&option));

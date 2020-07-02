@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="UTF-8" />
+      <title>Player Traits | ReachVariantTool Documentation</title>
+      <base href="../../" />
+      <link rel="stylesheet" href="resources/main.css" />
+      <noscript>
+         <link rel="stylesheet" href="resources/noscript.css" />
+      </noscript>
+      <script src="resources/head.js"></script>
+   </head>
+   <body>
+      <nav id="sidebar">
+         <ul>
+            <li><a href="index.html">Index</a></li>
+            <li>
+               <a href="editor/main_window/index.html">Main Window</a>
+               <ul>
+                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                  <li data-dont-default-collapse>
+                     <a href="editor/main_window/options-team.html">Team Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                     </ul>
+                  </li>
+                  <li data-dont-default-collapse>
+                     <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                     <ul>
+                        <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                  <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
+                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="editor/script_window/index.html">Script Window</a>
+               <ul>
+                  <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
+                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
+                  <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
+                  <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
+                  <li><a href="editor/script_window/required-object-types.html">Required Object Types</a></li>
+                  <li><a href="editor/script_window/script-options.html">Scripted Options</a></li>
+                  <li><a href="editor/script_window/script-traits.html">Scripted Traits</a></li>
+                  <li><a href="editor/script_window/script-stats.html">Scripted Stats</a></li>
+                  <li><a href="editor/script_window/script-widgets.html">Scripted Widgets</a></li>
+                  <li><a href="editor/script_window/gametype-code.html">Gametype Code</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/syntax.html">Scripting Language</a>
+               <ul>
+                  <li><a href="script/alias.html">Aliases</a></li>
+                  <li><a href="script/events.html">Events</a></li>
+                  <li><a href="script/for.html">For-each-loops</a></li>
+                  <li><a href="script/if.html">If-/alt-statements</a></li>
+                  <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/enum.html">User-defined enums</a></li>
+                  <li><a href="script/function.html">User-defined functions</a></li>
+                  <li><a href="script/snippets.html">Useful code snippets</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="script/api/index.html">Script API reference</a>
+               <ul>
+                  <li data-dont-default-collapse>
+                     <a>Namespaces</a>
+                     <ul>
+                        <li><a href="script/api/ns_unnamed.html">Content not in any namespace</a></li>
+                        <li><a href="script/api/ns_enums.html">enums</a></li>
+                        <li><a href="script/api/ns_game.html">game</a></li>
+                        <li><a href="script/api/ns_global.html">global</a></li>
+                     </ul>
+                  </li>
+                  <li data-dont-default-collapse>
+                     <a>Types</a>
+                     <ul>
+                        <li data-dont-default-collapse>
+                           <a>Variables</a>
+                           <ul>
+                              <li><a href="script/api/number.html">Number</a></li>
+                              <li><a href="script/api/object.html">Object</a></li>
+                              <li><a href="script/api/player.html">Player</a></li>
+                              <li><a href="script/api/team.html">Team</a></li>
+                              <li><a href="script/api/timer.html">Timer</a></li>
+                           </ul>
+                        </li>
+                        <li data-dont-default-collapse>
+                           <a>Misc</a>
+                           <ul>
+                              <li><a href="script/api/bool.html">Bool</a></li>
+                              <li><a href="script/api/engine-icon.html">Engine Icon</a></li>
+                              <li><a href="script/api/forge-label.html">Forge Label</a></li>
+                              <li><a href="script/api/format-string.html">Format String</a></li>
+                              <li><a href="script/api/incident.html">Incident</a></li>
+                              <li><a href="script/api/object-type.html">Object Type</a></li>
+                              <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/sound.html">Sound</a></li>
+                              <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
+                              <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
+                              <li><a href="script/api/widget.html">Widget</a></li>
+                              <li><a href="script/api/widget-icon.html">Widget Icon</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </nav>
+      <main>
+         <h1>Player Traits</h1>
+
+      <p>
+         The pages for player traits allow you to edit traits applied to the player 
+         during certain situations.
+      </p>
+      <img src="editor/main_window/traits.png">
+      
+      <h2>Defense</h2>
+      <dl>
+         <dt>Damage Resistance</dt>
+            <dd>A multiplier which scales all damage that the player takes. Note that 
+            the "Invulnerable" value will not protect a player from level boundaries 
+            or scripted damage.</dd>
+         <dt>Health Multiplier</dt>
+            <dd>The player's max health.</dd>
+         <dt>Health Regen Rate</dt>
+            <dd>How fast the player's health regenerates.</dd>
+         <dt>Shield Multiplier</dt>
+            <dd>The player's max shields.</dd>
+         <dt>Shield Regen Rate</dt>
+            <dd>How fast the player's shields regenerate or drain. The drain values 
+            are named based on how long it takes for a player with 100% shields to 
+            fully lose their shields.</dd>
+         <dt>Overshield Regen Rate</dt>
+            <dd>How fast the player's shields regenerate or drain if they have 
+            overshields.</dd>
+         <dt>Headshot Immunity</dt>
+            <dd>Whether it is possible to instantly kill the player with a headshot 
+            from a precision weapon while their shields are drained.</dd>
+         <dt>Assassination Immunity</dt>
+            <dd>Whether it is possible to kill this player with an assassination or 
+            with a melee to the back.</dd>
+         <dt>Shield Vampirism</dt>
+            <dd>Whether this player gains shields whenever they damage an enemy 
+            player's shields.</dd>
+         <dt>Can't Die From Damage</dt>
+            <dd>Whether this player is totally immune to all forms of damage, except 
+            level boundaries.</dd>
+      </dl>
+      
+      <h2>Offense</h2>
+      <dl>
+         <dt>Weapon Damage Multiplier</dt>
+            <dd>A multiplier which scales all damage that the player deals with their 
+            weapons and grenades.</dd>
+         <dt>Melee Damage Multiplier</dt>
+            <dd>A multiplier which scales all damage that the player deals with melee 
+            attacks.</dd>
+         <dt>Primary Weapon</dt>
+            <dd>The primary weapon that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Secondary Weapon</dt>
+            <dd>The secondary weapon that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Armor Ability</dt>
+            <dd>The Armor Ability that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Grenade Count</dt>
+            <dd>The grenades that the player will spawn with, if they have this set of 
+            traits while spawning.</dd>
+         <dt>Grenade Regeneration</dt>
+            <dd>If enabled, the player will be given one frag grenade and one plasma 
+            grenade on every fifth second of the round.</dd>
+         <dt>Weapon Pickup</dt>
+            <dd>Controls whether the player is allowed to pick up weapons, grenades, 
+            and Armor Abilities.</dd>
+         <dt>Infinite Ammo</dt>
+            <dd>Controls whether the player has limited ammo, and whether they have to 
+            reload.</dd>
+         <dt>Ability Usage</dt>
+            <dd>Controls whether the player can use their equipped Armor Ability.</dd>
+         <dt>Abilities Drop on Death</dt>
+            <dd>If enabled, this player will drop their Armor Ability when killed, 
+            allowing other players to pick it up.</dd>
+         <dt>Infinite Abilities</dt>
+            <dd>Controls whether the player has an energy limit and cooldown on their 
+            Armor Ability.</dd>
+      </dl>
+      
+      <h2>Movement</h2>
+      <dl>
+         <dt>Movement Speed</dt>
+            <dd>Scales the player's movement speed.</dd>
+         <dt>Jump height</dt>
+            <dd>Scales the player's Jump Height. The "Unchanged" value is "below" zero.</dd>
+         <dt>Player Gravity</dt>
+            <dd>Scales the player's gravity.</dd>
+         <dt>Unknown</dt>
+            <dd>Community reverse-engineering efforts identify this as enabling or 
+            disabling the ability to double-jump, but testing fails to produce the 
+            expected result.</dd>
+         <dt>Vehicle Use</dt>
+            <dd>Controls whether the player can enter vehicles, and which seats they 
+            can enter.</dd>
+      </dl>
+      
+      <h2>Appearance</h2>
+      <dl>
+         <dt>Active Camo</dt>
+            <dd>Controls whether the player has Active Camo.</dd>
+         <dt>Visible Waypoint</dt>
+            <dd>Controls who, if anyone, can see a waypoint on the player. This setting 
+            is overridden by scripted waypoints.</dd>
+         <dt>Visible Name</dt>
+            <dd>Controls who, if anyone, can see the player's gamertag when aiming near 
+            them.</dd>
+         <dt>Aura</dt>
+            <dd>
+               <p>One of the following visual effects applied to the player:</p>
+               <dl>
+                  <dt>Unchanged</dt>
+                     <dd>No change.</dd>
+                  <dt>None</dt>
+                     <dd>No effect.</dd>
+                  <dt>Team Primary Color</dt>
+                     <dd>The player's primary armor color is overridden by their team 
+                     color even if a Forced Color is set. If a Forced Color is set, it 
+                     will still influence the armor's secondary color.</dd>
+                  <dt>Darken Armor Color</dt>
+                     <dd>The player's armor color will be noticeably darker.</dd>
+                  <dt>Pastel Armor Color</dt>
+                     <dd>The player's armor color will be noticeably lighter.</dd>
+                  <dt>Unknown 5</dt>
+                     <dd>Unknown. No obvious visual effect in-game.</dd>
+                  <dt>Unknown 6</dt>
+                     <dd>Unknown. No obvious visual effect in-game.</dd>
+               </dl>
+            </dd>
+         <dt>Forced Color</dt>
+            <dd>Override a player's armor color &mdash; both the one set in their 
+            customization options, and the one applied by team membership during team 
+            games.</dd>
+      </dl>
+      
+      <h2>Sensors</h2>
+      <dl>
+         <dt>Motion Tracker Mode</dt>
+            <dd>
+               <p>One of the following values:</p>
+               <dl>
+                  <dt>Unchanged</dt>
+                     <dd>No change.</dd>
+                  <dt>No Radar</dt>
+                     <dd>The player has no motion tracker.</dd>
+                  <dt>Show Only Allies</dt>
+                     <dd>Enemies do not appear on the motion tracker.</dd>
+                  <dt>Normal</dt>
+                     <dd>All players can appear on the motion tracker if they are moving 
+                     fast enough.</dd>
+                  <dt>Enhanced</dt>
+                     <dd>All players will appear on the motion tracker, regardless of 
+                     their movement speed.</dd>
+               </dl>
+            </dd>
+         <dt>Motion Tracker Range</dt>
+            <dd>Determine how far away the motion tracker can "see."</dd>
+         <dt>Directional Damage Indicator</dt>
+            <dd>Unknown. Single-player tests failed to discover this option's effect.</dd>
+      </dl>
+   
+      </main>
+      <script src="resources/sidebar.js"></script>
+      <script src="resources/header-links.js"></script>
+   </body>
+</html>

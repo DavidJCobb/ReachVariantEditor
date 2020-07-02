@@ -241,7 +241,7 @@ namespace Megalo {
                   cobb::sprintf(line, "label index %u", f->index);
                   break;
                }
-               cobb::sprintf(line, "for each object with label %s", f->name->english().c_str());
+               cobb::sprintf(line, "for each object with label %s", f->name->get_content(reach::language::english).c_str());
             }
             out += line;
             break;
@@ -348,6 +348,9 @@ namespace Megalo {
          return;
       auto& triggers = mp->scriptContent.triggers;
       auto& entry    = mp->scriptContent.entryPoints;
+      auto& state    = this->decompile_state;
+      if (state.index < 0)
+         state.index = triggers.index_of(this);
       //
       uint16_t indent_count          = 0;     // needed because if-blocks aren't "real;" we "open" one every time we encounter one or more conditions in a row, so we need to remember how many "end"s to write
       bool     is_first_opcode       = true;  // see comment for (trigger_is_if_block)
@@ -363,26 +366,13 @@ namespace Megalo {
             out.write_line("");
             break;
          case entry_type::local:
-            out.write_line(u8"on local: "); // TODO: don't put this on its own line
+            out.write_line(u8"on local: ");
             break;
          case entry_type::on_host_migration:
-            {
-               bool is_double_host_migration = false;
-               {
-                  size_t size = triggers.size();
-                  for (size_t i = 0; i < size; ++i) {
-                     if (&triggers[i] == this) {
-                        if (entry.indices.doubleHostMigrate == i)
-                           is_double_host_migration = true;
-                        break;
-                     }
-                  }
-               }
-               if (is_double_host_migration)
-                  out.write_line(u8"on double host migration: ");
-               else
-                  out.write_line(u8"on host migration: ");
-            }
+            if (state.index >= 0 && state.index == entry.indices.doubleHostMigrate)
+               out.write_line(u8"on double host migration: ");
+            else
+               out.write_line(u8"on host migration: ");
             break;
          case entry_type::on_init:
             out.write_line(u8"on init: ");
@@ -401,6 +391,11 @@ namespace Megalo {
       // Write the block type, unless it's an if-block (do...end block whose first opcode is a condition), 
       // in which case we write the block type when we hit that first opcode.
       //
+      if (this->decompile_state.is_function) {
+         out.write(QString("function trigger_%1()").arg(state.index));
+         out.modify_indent_count(1);
+         ++indent_count;
+      }
       switch (this->blockType) {
          case block_type::normal:
             {
@@ -409,12 +404,12 @@ namespace Megalo {
                   auto* cnd   = dynamic_cast<Condition*>(first);
                   if (cnd) {
                      trigger_is_if_block = true;
-                  } else {
+                  } else if (!state.is_function) {
                      out.write(u8"do");
                      out.modify_indent_count(1);
                      ++indent_count;
                   }
-               } else {
+               } else if (!state.is_function) {
                   out.write(u8"do");
                   out.modify_indent_count(1);
                   ++indent_count;
@@ -435,7 +430,7 @@ namespace Megalo {
                      cobb::sprintf(temp, "%u", f->index);
                      out.write(temp);
                   } else {
-                     auto english = f->name->english().c_str();
+                     auto english = f->name->get_content(reach::language::english).c_str();
                      out.write_string_literal(english);
                   }
 
@@ -463,9 +458,13 @@ namespace Megalo {
             ++indent_count;
             break;
          default:
-            out.write(u8"do -- unknown block type");
-            out.modify_indent_count(1);
-            ++indent_count;
+            if (state.is_function) {
+               out.write(" -- unknown block type");
+            } else {
+               out.write(u8"do -- unknown block type");
+               out.modify_indent_count(1);
+               ++indent_count;
+            }
             break;
       }
       //
@@ -479,7 +478,7 @@ namespace Megalo {
          is_first_opcode = false;
          if (condition) {
             if (is_first_condition) {
-               if (!trigger_is_if_block || !_first) // if this trigger IS an if-block and we're writing the entire block's "if", then don't write a line break because we did that above
+               if ((!trigger_is_if_block || state.is_function) || !_first) // if this trigger IS an if-block and we're writing the entire block's "if", then don't write a line break because we did that above
                   out.write_line("");
                out.write("if ");
                out.modify_indent_count(1);
@@ -503,28 +502,29 @@ namespace Megalo {
             writing_if_conditions   = false;
             is_first_condition      = true;
          }
-         auto action = dynamic_cast<const Action*>(opcode);
-         if (action) {
-            if (action->function == &actionFunction_runNestedTrigger) {
-               auto index = dynamic_cast<OpcodeArgValueTrigger*>(action->arguments[0]);
-               if (index) {
-                  auto i = index->value;
-                  if (i < 0 || i >= triggers.size()) {
-                     cobb::sprintf(line, u8"-- execute nested trigger with invalid index %d", i);
-                     out.write_line(line);
-                     continue;
-                  }
-                  triggers[i].decompile(out);
+         if (opcode->function == &actionFunction_runNestedTrigger) {
+            auto index = dynamic_cast<OpcodeArgValueTrigger*>(opcode->arguments[0]);
+            if (index) {
+               auto i = index->value;
+               if (i < 0 || i >= triggers.size()) {
+                  cobb::sprintf(line, u8"-- execute nested trigger with invalid index %d", i);
+                  out.write_line(line);
                   continue;
                }
-               out.write_line(u8"-- invalid \"execute nested trigger\" opcode");
+               auto& other = triggers[i];
+               if (other.decompile_state.is_function) {
+                  out.write_line(QString("trigger_%1()").arg(i));
+                  continue;
+               }
+               other.decompile(out);
                continue;
             }
-            out.write_line("");
-            opcode->decompile(out);
+            out.write_line(u8"-- invalid \"execute nested trigger\" opcode");
             continue;
          }
-         out.write_line(u8"-- invalid opcode type");
+         out.write_line("");
+         opcode->decompile(out);
+         continue;
       }
       if (writing_if_conditions) { // can be true if the last opcode was a condition
          out.write(u8"then ");
@@ -548,6 +548,112 @@ namespace Megalo {
          else if (dynamic_cast<const Action*>(opcode))
             ++actions;
       }
+   }
+   #pragma endregion
+   //
+   #pragma region TriggerDecompileState
+   void TriggerDecompileState::clear(Trigger* trigger, int16_t index_of_this_trigger) noexcept {
+      this->trigger = trigger;
+      this->index   = index_of_this_trigger;
+      this->callees.clear();
+      this->callers.clear();
+      this->is_function = false;
+   }
+   void TriggerDecompileState::setup_callees(const std::vector<Trigger*>& allTriggers, const Trigger* mine) {
+      for (auto opcode : mine->opcodes) {
+         if (opcode->function != &actionFunction_runNestedTrigger)
+            continue;
+         auto arg = dynamic_cast<OpcodeArgValueTrigger*>(opcode->arguments[0]);
+         if (!arg)
+            continue;
+         auto index = arg->value;
+         if (index < 0 || index > allTriggers.size()) // invalid index
+            continue;
+         auto  target = allTriggers[index];
+         auto& state  = target->decompile_state;
+         this->callees.push_back(&state);
+         state.callers.push_back(this);
+      }
+   }
+   void TriggerDecompileState::check_if_is_function() {
+      if (!this->callers.size()) {
+         //
+         // This trigger is never called from anywhere. If it's a top-level trigger, then that's 
+         // normal, but if it's a subroutine, then it must be an unused user-defined function.
+         //
+         if (this->trigger && this->trigger->entryType == entry_type::subroutine)
+            this->is_function = true; // unused "subroutine" triggers should be flagged as functions
+         return;
+      }
+      if (this->callers.size() > 1) {
+         this->is_function = true;
+         return;
+      }
+      //
+      // The only kinds of recursion that won't be caught above are user-defined functions 
+      // that recurse but are never actually called by the script. These can take two forms: 
+      // a trigger which calls itself; and a set of nested triggers in which an inner trigger 
+      // calls an outer trigger.
+      //
+      //    -- self-calling trigger: X > X
+      //    -- if anything else calls X, then it has more than one caller
+      //    function X()
+      //       action
+      //       if condition then
+      //          X()
+      //       end
+      //    end
+      //
+      //    -- recursive unused function: A > B > C > A
+      //    -- A only has one caller, C, and so is not caught above
+      //    function A() -- A
+      //       do        -- B
+      //          do     -- C
+      //             A()
+      //          end
+      //       end
+      //    end
+      //
+      list_t entries;
+      list_t recursing;
+      this->get_full_callee_stack(entries, recursing);
+      if (recursing.size()) {
+         bool all_solo = true;  // all of these have only one caller, yes?
+         bool any_func = false; // have any of these already been recognized as a recursive function?
+         for (auto state : entries) {
+            if (state->callers.size() > 1)
+               all_solo = false;
+            if (state->is_function)
+               any_func = true;
+         }
+         if (all_solo && !any_func)
+            this->is_function = true;
+      }
+   }
+   void TriggerDecompileState::get_full_callee_stack(list_t& out, list_t& recursing) const noexcept {
+      bool contains = std::find(out.begin(), out.end(), this) != out.end();
+      if (!contains)
+         out.push_back(const_cast<TriggerDecompileState*>(this));
+      for (auto callee : this->callees) {
+         contains = std::find(out.begin(), out.end(), callee) != out.end();
+         if (contains) {
+            recursing.push_back(callee);
+            continue;
+         }
+         out.push_back(callee);
+         callee->get_full_callee_stack(out, recursing);
+      }
+   }
+   bool TriggerDecompileState::is_downstream_from(const TriggerDecompileState* other, const TriggerDecompileState* _checkStart) const noexcept {
+      for (auto callee : this->callees) {
+         if (callee == other)
+            return true;
+         if (callee == _checkStart) // avoid choking on recursion e.g. A > B > C > A
+            continue;
+         if (callee->is_downstream_from(other, _checkStart ? _checkStart : this))
+            return true;
+      }
+      return false;
    }
    #pragma endregion
    //
@@ -580,6 +686,15 @@ namespace Megalo {
       _stream(stream, i.objectDeath);
       _stream(stream, i.local);
       _stream(stream, i.pregame);
+   }
+   void TriggerEntryPoints::write_placeholder(cobb::bitwriter& stream) const noexcept {
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
+      stream.write(-1 + 1, cobb::bitcount(Limits::max_triggers));
    }
    int32_t TriggerEntryPoints::get_index_of_event(entry_type et) const noexcept {
       auto& i = this->indices;

@@ -101,7 +101,7 @@
       <string>If this box is not checked, a game-engine-default color will be used.</string>
      </property>
      <property name="text">
-      <string>Set Text Color</string>
+      <string>Set Tertiary Color</string>
      </property>
     </widget>
    </item>

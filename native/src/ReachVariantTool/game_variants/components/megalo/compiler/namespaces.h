@@ -10,11 +10,13 @@ namespace Megalo {
    class VariableScopeWhichValue;
    //
    namespace Script {
+      class Enum;
       class Namespace;
+      //
       class NamespaceMember {
          //
          // What is a namespace member? Well, it's a member of one of the namespaces defined our gametype scripting language, 
-         // obviously. But what does being a namespace member entail? Well, there are three kinds of namespace members. All 
+         // obviously. But what does being a namespace member entail? Well, there are four kinds of namespace members. All 
          // represent top-level values -- that is, values that aren't nested under any other object.
          //
          // A "which" member represents a single top-level value described by a "which" value -- so, a top-level object, 
@@ -29,6 +31,8 @@ namespace Megalo {
          // member and is of type OpcodeArgValuePlayerOrGroup. That type's (compile) overload will be expected to check for 
          // the bare member and react appropriately.
          //
+         // An "enum" member represents an enum containing integer constant values.
+         //
          public:
             static constexpr VariableScopeWhichValue*     no_which = nullptr;
             static constexpr VariableScopeIndicatorValue* no_scope = nullptr;
@@ -38,6 +42,7 @@ namespace Megalo {
             const OpcodeArgTypeinfo& type;
             const VariableScopeWhichValue*     which = no_which;
             const VariableScopeIndicatorValue* scope = no_scope;
+            const Enum* enumeration = nullptr;
             //
             Namespace* owner = nullptr;
             //
@@ -51,11 +56,13 @@ namespace Megalo {
             static NamespaceMember make_bare_member(const char* n, const OpcodeArgTypeinfo& t) {
                return NamespaceMember(n, t, no_which, no_scope);
             }
+            static NamespaceMember make_enum_member(Namespace&, Enum& e); // passing the containing namespace is an unfortunate necessity here
             //
             bool has_index() const noexcept;
             inline bool is_which_member() const noexcept { return this->which != no_which; }
             inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
             inline bool is_bare_member() const noexcept { return !this->is_which_member() && !this->is_scope_member(); }
+            inline bool is_enum_member() const noexcept { return this->enumeration != nullptr; }
             bool is_read_only() const noexcept;
       };
       class Namespace {
@@ -78,8 +85,9 @@ namespace Megalo {
          extern Namespace unnamed;
          extern Namespace global;
          extern Namespace game;
+         extern Namespace enums;
          //
-         extern std::array<Namespace*, 3> list;
+         extern std::array<Namespace*, 4> list;
          extern Namespace* get_by_name(const QString&);
       }
    }

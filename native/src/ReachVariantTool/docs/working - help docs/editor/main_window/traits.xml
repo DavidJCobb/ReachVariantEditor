@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Player Traits</title>
+   <body>
+      <p>
+         The pages for player traits allow you to edit traits applied to the player 
+         during certain situations.
+      </p>
+      <img src="traits.png" />
+      
+      <h2>Defense</h2>
+      <dl>
+         <dt>Damage Resistance</dt>
+            <dd>A multiplier which scales all damage that the player takes. Note that 
+            the "Invulnerable" value will not protect a player from level boundaries 
+            or scripted damage.</dd>
+         <dt>Health Multiplier</dt>
+            <dd>The player's max health.</dd>
+         <dt>Health Regen Rate</dt>
+            <dd>How fast the player's health regenerates.</dd>
+         <dt>Shield Multiplier</dt>
+            <dd>The player's max shields.</dd>
+         <dt>Shield Regen Rate</dt>
+            <dd>How fast the player's shields regenerate or drain. The drain values 
+            are named based on how long it takes for a player with 100% shields to 
+            fully lose their shields.</dd>
+         <dt>Overshield Regen Rate</dt>
+            <dd>How fast the player's shields regenerate or drain if they have 
+            overshields.</dd>
+         <dt>Headshot Immunity</dt>
+            <dd>Whether it is possible to instantly kill the player with a headshot 
+            from a precision weapon while their shields are drained.</dd>
+         <dt>Assassination Immunity</dt>
+            <dd>Whether it is possible to kill this player with an assassination or 
+            with a melee to the back.</dd>
+         <dt>Shield Vampirism</dt>
+            <dd>Whether this player gains shields whenever they damage an enemy 
+            player's shields.</dd>
+         <dt>Can't Die From Damage</dt>
+            <dd>Whether this player is totally immune to all forms of damage, except 
+            level boundaries.</dd>
+      </dl>
+      
+      <h2>Offense</h2>
+      <dl>
+         <dt>Weapon Damage Multiplier</dt>
+            <dd>A multiplier which scales all damage that the player deals with their 
+            weapons and grenades.</dd>
+         <dt>Melee Damage Multiplier</dt>
+            <dd>A multiplier which scales all damage that the player deals with melee 
+            attacks.</dd>
+         <dt>Primary Weapon</dt>
+            <dd>The primary weapon that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Secondary Weapon</dt>
+            <dd>The secondary weapon that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Armor Ability</dt>
+            <dd>The Armor Ability that the player will spawn with, if they have this 
+            set of traits while spawning.</dd>
+         <dt>Grenade Count</dt>
+            <dd>The grenades that the player will spawn with, if they have this set of 
+            traits while spawning.</dd>
+         <dt>Grenade Regeneration</dt>
+            <dd>If enabled, the player will be given one frag grenade and one plasma 
+            grenade on every fifth second of the round.</dd>
+         <dt>Weapon Pickup</dt>
+            <dd>Controls whether the player is allowed to pick up weapons, grenades, 
+            and Armor Abilities.</dd>
+         <dt>Infinite Ammo</dt>
+            <dd>Controls whether the player has limited ammo, and whether they have to 
+            reload.</dd>
+         <dt>Ability Usage</dt>
+            <dd>Controls whether the player can use their equipped Armor Ability.</dd>
+         <dt>Abilities Drop on Death</dt>
+            <dd>If enabled, this player will drop their Armor Ability when killed, 
+            allowing other players to pick it up.</dd>
+         <dt>Infinite Abilities</dt>
+            <dd>Controls whether the player has an energy limit and cooldown on their 
+            Armor Ability.</dd>
+      </dl>
+      
+      <h2>Movement</h2>
+      <dl>
+         <dt>Movement Speed</dt>
+            <dd>Scales the player's movement speed.</dd>
+         <dt>Jump height</dt>
+            <dd>Scales the player's Jump Height. The "Unchanged" value is "below" zero.</dd>
+         <dt>Player Gravity</dt>
+            <dd>Scales the player's gravity.</dd>
+         <dt>Unknown</dt>
+            <dd>Community reverse-engineering efforts identify this as enabling or 
+            disabling the ability to double-jump, but testing fails to produce the 
+            expected result.</dd>
+         <dt>Vehicle Use</dt>
+            <dd>Controls whether the player can enter vehicles, and which seats they 
+            can enter.</dd>
+      </dl>
+      
+      <h2>Appearance</h2>
+      <dl>
+         <dt>Active Camo</dt>
+            <dd>Controls whether the player has Active Camo.</dd>
+         <dt>Visible Waypoint</dt>
+            <dd>Controls who, if anyone, can see a waypoint on the player. This setting 
+            is overridden by scripted waypoints.</dd>
+         <dt>Visible Name</dt>
+            <dd>Controls who, if anyone, can see the player's gamertag when aiming near 
+            them.</dd>
+         <dt>Aura</dt>
+            <dd>
+               <p>One of the following visual effects applied to the player:</p>
+               <dl>
+                  <dt>Unchanged</dt>
+                     <dd>No change.</dd>
+                  <dt>None</dt>
+                     <dd>No effect.</dd>
+                  <dt>Team Primary Color</dt>
+                     <dd>The player's primary armor color is overridden by their team 
+                     color even if a Forced Color is set. If a Forced Color is set, it 
+                     will still influence the armor's secondary color.</dd>
+                  <dt>Darken Armor Color</dt>
+                     <dd>The player's armor color will be noticeably darker.</dd>
+                  <dt>Pastel Armor Color</dt>
+                     <dd>The player's armor color will be noticeably lighter.</dd>
+                  <dt>Unknown 5</dt>
+                     <dd>Unknown. No obvious visual effect in-game.</dd>
+                  <dt>Unknown 6</dt>
+                     <dd>Unknown. No obvious visual effect in-game.</dd>
+               </dl>
+            </dd>
+         <dt>Forced Color</dt>
+            <dd>Override a player's armor color &mdash; both the one set in their 
+            customization options, and the one applied by team membership during team 
+            games.</dd>
+      </dl>
+      
+      <h2>Sensors</h2>
+      <dl>
+         <dt>Motion Tracker Mode</dt>
+            <dd>
+               <p>One of the following values:</p>
+               <dl>
+                  <dt>Unchanged</dt>
+                     <dd>No change.</dd>
+                  <dt>No Radar</dt>
+                     <dd>The player has no motion tracker.</dd>
+                  <dt>Show Only Allies</dt>
+                     <dd>Enemies do not appear on the motion tracker.</dd>
+                  <dt>Normal</dt>
+                     <dd>All players can appear on the motion tracker if they are moving 
+                     fast enough.</dd>
+                  <dt>Enhanced</dt>
+                     <dd>All players will appear on the motion tracker, regardless of 
+                     their movement speed.</dd>
+               </dl>
+            </dd>
+         <dt>Motion Tracker Range</dt>
+            <dd>Determine how far away the motion tracker can "see."</dd>
+         <dt>Directional Damage Indicator</dt>
+            <dd>Unknown. Single-player tests failed to discover this option's effect.</dd>
+      </dl>
+   </body>
+</article>

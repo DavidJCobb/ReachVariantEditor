@@ -5,13 +5,24 @@
 #include "helpers/endianness.h"
 #include "helpers/files.h"
 #include "helpers/stream.h"
-#include "formats/sha1.h"
 #include "services/ini.h"
+#if _DEBUG
+   #include <QDebug>
+   #include <QDirIterator>
+#endif
 
 int main(int argc, char *argv[]) {
    ReachINI::get().load();
    //
    QApplication a(argc, argv);
+   //
+   #if _DEBUG // log all qt resources to the "output" tab in the debugger
+      QDirIterator it(":", QDirIterator::Subdirectories);
+      while (it.hasNext()) {
+         qDebug() << it.next();
+      }
+   #endif
+   //
    ReachVariantTool w;
    w.show();
    return a.exec();
@@ -31,108 +42,6 @@ int main(int argc, char *argv[]) {
 //
 //  - Start work on the compiler.
 //
-//     = CAN WE FIND A BETTER NAME THAN "STATIC" FOR THINGS LIKE player[0]?
-//
-//     = REAL QUICK, WE SHOULD ADDRESS THE PROBLEM OF THE DECOMPILER NOT BEING ABLE TO 
-//       HANDLE USER-DEFINED FUNCTIONS (I.E. "SUBROUTINE" TRIGGERS CALLED FROM MULTIPLE 
-//       PLACES), ESPECIALLY RECURSION. THIS WILL BE SIGNIFICANT ONCE WE HAVE THE COMPILER 
-//       WORKING; WE DON'T WANT TO BE UNABLE TO DECOMPILE OUR OWN COMPILER OUTPUT.
-//
-//       Specifically, we need to be able to handle this:
-//
-//          function foo()
-//             action
-//             if condition then
-//                foo()
-//             end
-//             action -- this being here makes the "if" a nested trigger calling an ancestor
-//          end
-//          function bar()
-//             action
-//             if condition then -- no actions after this if, so it's the same trigger
-//                bar()
-//             end
-//          end
-//
-//       So how do we make that possible? Well,...
-//
-//        - In decompiler.cpp, we should define a class called _TriggerTreeNode:
-//
-//             struct _TriggerTreeNode {
-//                using list_t = std::vector<_TriggerTreeNode*>;
-//                
-//                int32_t index; // trigger index; -1 == root
-//                list_t  callers;
-//                list_t  callees;
-//             }
-//
-//          Before decompiling triggers, we would scan all triggers in the list to construct 
-//          a tree of _TriggerTreeNodes. Then, after the tree is fully constructed, we would 
-//          construct a std::vector<uint32_t> of trigger indices that need to be decompiled 
-//          as user-defined functions. A trigger needs to be decompiled as a user-defined 
-//          function if any of the conditions are met:
-//
-//           - The trigger has more than one caller.
-//
-//           - The trigger's callees include itself.
-//
-//           - The trigger's callees include any of its callers.
-//
-//           - The trigger's callees include any of its callers' callers, or its callers' 
-//             callers' callers, or so on.
-//
-//          (Kind of wondering whether traversing the tree to do that is the best idea; it 
-//          may be better to have a flat list of _TriggerTreeNode*s that point to each 
-//          other as appropriate, and then loop over them. Mainly, this would make it easier 
-//          to ensure that we only run the above checks once per trigger even when a trigger 
-//          is called from multiple places.)
-//
-//          User-defined functions would be decompiled in advance of all triggers, with 
-//          auto-generated names (e.g. "trigger_1"). The function to decompile an individual 
-//          Trigger object would need to accept a boolean indicating whether it should wrap 
-//          its block header in a "function" declaration (or replace the block header 
-//          entirely if it's a generic "do" block).
-//
-//           - If an event Trigger is told to decompile as a function, it should place the 
-//             event name before the "function" keyword.
-//
-//           - Consider adding a decompiler option to suffix every block-opening line with 
-//             a comment indicating the trigger's index; this would be useful for debugging 
-//             the (de)compiler and the loader.
-//
-//     - SHORT-TERM PLANS
-//
-//        - The values for "game.death_event_damage_type" are entries in what KSoft calls the 
-//          DamageReportingTypeHaloReach enum. What can we do with this knowledge?
-//
-//           - If we make it possible to define a NamespaceMember that refers to a constant 
-//             integer, then we can create a namespace of named values for this enum.
-//
-//        - Now that GameEngineVariantDataMultiplayer::isBuiltIn has been identified, add it 
-//          to the UI.
-//
-//        - Kornman00 identified some of the Forge settings, but I'm not 100% clear on what 
-//          the new names mean: https://github.com/KornnerStudios/KSoft.Blam/blob/5a81ac947990f7e817496fe32d1a1f0f16f09112/KSoft.Blam/RuntimeData/Variants/GameEngineSandboxVariant.cs
-//
-//     - When we set the "minimum count" on the Forge labels in our MOTL brute-force gametype, 
-//       MCC's menus don't enforce this. Investigate.
-//
-//     - Number variables should warn when compiling a constant that can't fit in a 16-bit 
-//       signed integer.
-//
-//     = REORDERING OPTIONS WILL CAUSE THE MEGALO OPTION TOGGLES TO DESYNCH: WE NEED TO SWAP 
-//       BITS WITHIN THOSE TOGGLES AS APPROPRIATE WHEN REORDERING AN OPTION.
-//
-//     - When creating something with a string, the default string chosen should always be 
-//       the first empty string found in the game variant (if there is one), or the first 
-//       string in the table otherwise. Right now, everything created through the UI (e.g. 
-//       script option values and so on) uses the first string in the table.
-//
-//     - String table UI: Add a "Copy" button with an arrow (y'know, like, a button and also 
-//       a dropdown). The arrow should allow you to select what to copy: the full English 
-//       content of the string; the English content as a string literal, with delimiters and 
-//       escape codes; and the string's index in the table.
-//
 //     - Don't forget to rename OpcodeFuncToScriptMapping::secondary_property_zeroes_result 
 //       to ...::secondary_name_zeroes_return_value.
 //
@@ -140,16 +49,119 @@ int main(int argc, char *argv[]) {
 //       inverts condition." Then, we could give "is_not_respawning" the more intuitive 
 //       secondary name "is_respawning" with the negate flag set.
 //
-//     = COMPILER TESTS
+//     - Decompiler: consider moving TriggerDecompileState from trigger.h to decompiler.cpp 
+//       since the trigger itself has minimal interaction with it. We could make it possible 
+//       to pass a TriggerDecompileState* to Trigger::decompile and forward-declare the class 
+//       there, but I'd like the "meat" of the decompile state to exist in the files for the 
+//       decompiler itself.
 //
-//        - When Alpha Zombies is decompiled, recompiled, and decompiled again, the second 
-//          decompile produces identical output to the first. However, the resulting file is 
-//          not binary-identical to the "resaved in Release build" version. I've addressed the 
-//          else(if) Bungie behavior and am not sure where the new discrepancy lies.
+//     - The compiler interprets "0x" and "0b" as valid integer literals.
 //
-//     - Compiler::handle_unresolved_string_references will fail to resolve "create string" 
-//       references if the string table is full, but it has no way to signal that it has run 
-//       into that problem i.e. the caller would have to run that check itself.
+//     = The compiler typically logs errors at the end of the affected object. In some cases, 
+//       this goes especially awry; for example, if a for-each-object-with-label loop refers 
+//       to an invalid trigger, the log is positioned at the end of the block rather than the 
+//       start. To fix this, we'll need to modify how ParsedItem stores its start and end 
+//       position: instead of separating values out, the start should be a string_scanner::pos 
+//       and the end should be a single offset.
+//
+//       Once that's done, we'll want to audit all error messaging and whenever possible, have 
+//       errors use the start of the relevant ParsedItem. (That still won't be perfect, since 
+//       we often don't even create a ParsedItem until we've parsed enough text to know what 
+//       we're dealing with, but it'll vastly improve certain situations like for loops having 
+//       bad labels.)
+//
+//     - A disabled team with a non-zero initial designator is invalid: MCC considers the file 
+//       corrupt. What about an enabled team with a zero initial designator?
+//
+//     = (DE)COMPILER UI
+//
+//        - Decompiler: before writing the decompiled text to the textbox, check if the content 
+//          of the checkbox is non-empty/non-whitespace and differs from the text to be written; 
+//          if so, confirm before overwriting it. (Currently needed since QTextEdit::setPlainText 
+//          apparently yeets the entire undo history into the void. If we find a way to prevent 
+//          that, then we may not need to be this careful.)
+//
+//        - Script warning/error log
+//
+//           - Add a context menu that lets the users copy all selected items or the full log. 
+//             (Yes, that'd be redundant, but I see little issue with that.)
+//
+//        - Syntax highlighting in the code editor
+//
+//     - OPENING A ZERO-BYTE FILE SHOWS AN INCORRECT ERROR MESSAGE (WinAPI code 0x3EE: the volume 
+//       for the file has been externally altered).
+//
+//     - Opening a file with an MPVR block that is too large (size > 0x5028) yields only a very 
+//       generic error message stating that "something went wrong while reading the multiplayer 
+//       data."
+//
+//        - Wonder if we should alert the user to this case and then give them the option to 
+//          open the file anyway. Would require us to implement a "load process" complimentary 
+//          to the existing "save process" so we can pass data, options, etc., down to load 
+//          code.
+//
+//     = UX FOR FILE SAVE PROCESS: Do we want to generate the file data to write before asking 
+//       the user where to save it? That would allow us to suggest a different file extension 
+//       for editor-only (i.e. xRVT) variants.
+//
+//        - If we make a custom confirmation dialog, we can do things like text formatting 
+//          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
+//          clicking "yes."
+//
+//     = THE object.place_at_me OPCODE ALLOWS ASSIGNING TO no_object AS A WAY OF CREATING AN 
+//       OBJECT WITHOUT BOTHERING TO KEEP A REFERENCE TO IT. WE NEED TO GIVE OPCODES A WAY TO 
+//       SIGNAL THAT THEY ALLOW ASSIGNING THEIR RETURN VALUES TO "NONE", AND WE NEED TO 
+//       IMPLEMENT THE SYNTAX (FOR COMPILING AND DECOMPILING) AS SIMPLY NOT USING AN ASSIGN 
+//       STATEMENT I.E. (basis.place_at_me(...)) INSTEAD OF (no_object = basis.place_at_me(...)).
+//
+//        - We should test if object.place_between_me_and also has this behavior.
+//
+//     = DOCUMENTATION
+//
+//        - We need to decompile all official gametypes and decode them as much as we can, and 
+//          provide aliases for them. We should provide these as "source scripts."
+//
+//           - DONE:
+//              - Assault
+//              - Capture the Flag TU (includes Flag Slayer)
+//                 - Speedflag
+//              - Freeze Tag
+//              - Headhunter TU
+//              - Infection (Alpha Zombies)
+//              - Invasion
+//              - Invasion Slayer
+//              - Juggernaut
+//              - King of the Hill (use TU file; I misunderstood the scoring the first time around)
+//              - Oddball
+//              - Race (but double-check it again now that we've improved our tools)
+//              - Rally
+//                 - Rocket Hog Race
+//              - Skeeball / "HaloBall"
+//              - Slayer
+//                 - Power Slayer
+//                 - Slayer TU (includes Buddy Slayer code)
+//              - Stockpile
+//                 - Speedpile
+//              - Territories
+//
+//           - PENDING:
+//              - Halo Chess (high-complexity; low-priority)
+//              - Invasion: Boneyard
+//              - Invasion: Breakpoint
+//              - Invasion: Spire
+//
+//     - The load process can't handle out-of-range indices in indexed lists for files that 
+//       use the xRVT file block, e.g. accessing widget 1 in a gametype that has no widgets. 
+//       However, we're the only ones generating files like this so malformed data like that 
+//       shouldn't occur (if it does, we screwed up and we'll take the L). This is worth noting 
+//       but not a priority to fix at present.
+//
+//        = The reason we "can't handle" this is because we do postprocess (including the code 
+//          to finalize indexed lists) immediately at the end of loading the core MP data, but 
+//          we would end up "seeing" the xRVT chunk after. If the script content is moved to 
+//          the xRVT chunk and it has an out-of-range reference to a widget or something, then 
+//          by the time we actually load that script content, we've already shrunk the indexed 
+//          lists to fit and we'll probably get a bad pointer or something.
 //
 //     = DEFERRED TASKS
 //
@@ -201,24 +213,7 @@ int main(int argc, char *argv[]) {
 //             In any case, however it plays out, we should document it in comments near the 
 //             "symmetry" VariableScopeIndicatorValue definition and/or declaration.
 //
-//     = (DE)COMPILER UI
-//
-//        - Code editor with syntax highlighting
-//
-//        - UI for showing compiler warnings and errors; should include the ability to jump 
-//          to the error location in the code
-//
-//        - UI needed for letting the script author deal with unresolved string references. 
-//          We can start with something basic ("create all strings" or "cancel") and add 
-//          full functionality to it after we're sure the compiler itself works.
-//
-//        - The string table needs a button to copy the content of a selected string as a 
-//          string literal (i.e. with escape codes), and a button to copy the index of a 
-//          selected string.
-//
 //     = AUDITING
-//
-//        - Exception safety for anything that gets heap-allocated.
 //
 //        - DO A PROJECT-WIDE SEARCH FOR THE WORD "TODO".
 //
@@ -227,9 +222,6 @@ int main(int argc, char *argv[]) {
 //          non-fatal error.
 //
 //     = RANDOM NOTES
-//
-//        - It'd be cool if the "object player variable" type accepted either the index 
-//          of an object.player variable, or a relative alias of an object.player var.
 //
 //        - Kornman00 and Assembly both identify the unknown movement option as "double jump," 
 //          but in my tests, it didn't seem to work. I even tested with Jumper Jumper disabled 
@@ -244,16 +236,37 @@ int main(int argc, char *argv[]) {
 //          (both because I want to provide such "source scripts" to script authors to learn 
 //          from, and so we can test to ensure that aliases work properly).
 //
-//        - Do user-defined functions actually work? Don't just test whether the game 
-//          can load a script that contains triggers called from multiple places; test 
-//          to ensure that if a trigger is called multiple times from multiple places in 
-//          the same tick, it will actually run each time. The file format as designed 
-//          allows for user-defined functions to exist, but it's unknown how the runtime 
-//          will actually handle them.
+//        - Test the film clip opcode, now that MCC has theater. Race+ would be a good test 
+//          candidate: saving a film checkpoint the first time each lap is completed by the 
+//          player in the lead would be useful.
 //
-//           - We should also see if user-defined functions can be event handlers and 
-//             still work. If so, that would also indicate that nested blocks can be 
-//             event handlers (something we don't currently allow).
+//        - Test what happens if script code forces a player to control a dead biped. Based 
+//          on bugs I'm seeing in Halo Chess+ I suspect this would lead to the camera angle 
+//          flipping 180, to a constant vibrating/impact noise, and to the screen being 
+//          faded to a very deep blue (almost black), with the fade mostly vanishing when 
+//          you pause the game.
+//
+//        - Test the "reset round" flags -- specifically, test what happens when they're 
+//          turned off. (This isn't related to Megalo but oh well, this is my in-game test 
+//          list now)
+//
+//        - What happens if we attach the player to an object that is destroyed or equipped 
+//          on contact (e.g. a powerup, a landmine; an armor ability or weapon when they 
+//          are not carrying one)?
+//
+//        - Re-test setting a vehicle's maximum health; use a constant like 150; see if it 
+//          still sets current health to 1 without changing max health and if so, document 
+//          that.
+//
+//        - Can you assign a player to neutral_team, or reassign their team, during a team 
+//          game?
+//
+//        - In team games, can you assign an object to a team that isn't present in a match? 
+//          Some of my tests suggest you can't.
+//
+//        - Can user-defined functions be event handlers and still work? If so, that would 
+//          indicate that nested blocks can be event handlers (something we don't currently 
+//          allow).
 //
 //        - What happens when we perform an invalid assignment, such as the assignment 
 //          of a number to an object? Be sure to check the resulting value of the target 
@@ -266,32 +279,37 @@ int main(int argc, char *argv[]) {
 //             timer (which we know from vanilla scripts is valid) and of assigning a 
 //             timer to a number (which I don't remember seeing in vanilla content).
 //
+//     = POSSIBLE COMPILER ENHANCEMENTS
+//
+//        - #pragma: region
+//          #pragma: region: [name]
+//          #pragma: endregion
+//
+//        - #pragma: same-scope alias shadowing: [warn|error] on [alias name]
+//
 //     = GAMETYPE PLANS
 //
-//        - Minesweeper
+//        - Vanilla+
 //
-//           - Horizontal board. A flag and a bomb spawn on an elevated platform that 
-//             overlooks the entire board. Drop the flag on a square to mark it with a 
-//             flag. Drop a bomb on a square to "click" it.
+//           - Infection+
 //
-//           - A teleporter provides access between the overlook and the board. Maybe 
-//             we can label each teleporter (e.g. "UP" and "DOWN") with a gametype 
-//             label e.g. "MINESWEEP_TEXT_LABEL" where the spawn sequence controls the 
-//             text.
+//              - Base on Alpha Zombies.
 //
-//           - FFA: One person solves the board. Team: One team solves the board, with 
-//             team members taking turns. In both cases there should be an option to 
-//             let people who aren't working the board see where the mines are, to 
-//             potentially add a party game aspect to things.
+//              - We can fix the bug where rounds don't end if all zombies run out of 
+//                lives, if we manually track each player's number of remaining lives 
+//                and use this as the backbone for a handler that will run when all 
+//                zombies are at the respawn screen. (The handler would end the round 
+//                immediately if it thinks that all zombies are out of lives; otherwise 
+//                it would end the round if all zombies remain dead for longer than the 
+//                base spawn time plus the suicide and betrayal penalties. The second 
+//                case is for emergencies e.g. host migration wiping the life tracker; 
+//                it could be refined e.g. by tracking whether a zombie's most recent 
+//                death was by suicide.)
 //
-//              - Another good option: control the round end condition. By default, FFA 
-//                should end the round on the first failure, and Team when all team 
-//                members are killed; an alternate mode could allow other players/teams 
-//                to continue from where a failing player/team left off, with the round 
-//                ending on victory or when all players are dead.
+//              - We can introduce Halo 3's "Next Zombie" option if we use a hidden 
+//                scoreboard stat to track cross-round state.
 //
-//  - Decompiler: work on a better text editor in-app, with horizontal scrolling, line 
-//    numbers, syntax highlighting, code folding, etc..
+//        - Tetris?
 //
 //  - Script editor window: MPVR space usage meter: we should also show absolute counts 
 //    out of maximums for triggers, conditions, actions, number of strings, and perhaps 
@@ -303,14 +321,9 @@ int main(int argc, char *argv[]) {
 //       ALTERED IN ANY WAY. BONUS POINTS IF WE ONLY UPDATE THE PART OF THE METER THAT 
 //       ACTUALLY REPRESENTS THE CHANGED DATA.
 //
-//     - Continue improving the code for the meter: add bitcount getters to more objects 
-//       so we aren't just reaching into them from outside and counting stuff ourselves. 
-//       Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
+//     - Consider adding multiple bitcount getters to the MP object e.g. header_bitcount, 
 //       standard_options_bitcount, etc., or perhaps a single getter that switch-cases on 
 //       an enum indicating what we want counted.
-//
-//  - Format string arguments: use QStrings so we have UTF-8 support, and modify the 
-//    escaping code in the decompiler to do UTF-8 printable checks.
 //
 
 // OLD PLANS BELOW
@@ -332,16 +345,9 @@ int main(int argc, char *argv[]) {
 //
 
 //
-//  - IN-GAME TESTS
-//
-//     - Some game-namespace numbers that refer to social options are unknown; identify 
-//       them.
-//
 //  - POTENTIAL EDITOR IMPROVEMENTS:
 //
 //     - String table: warn when loaded count exceeds max count
-//
-//     - String table: offer option to recover work if string buffer is too large to save
 //
 // ======================================================================================
 //
@@ -351,23 +357,7 @@ int main(int argc, char *argv[]) {
 //  - In Alpha Zombies, where are the "Humans" and "Zombies" strings near the top of the 
 //    variant used? *Are* they used?
 //
-//  - When editing single-string tables, can we use the table's max length to enforce a 
-//    max length on the UI form fields?
-//
 //  - STRING TABLE EDITING
-//
-//     - If we start editing a string that is in use by a Forge label, we should 
-//       be blocked from changing its localizations to different values. This 
-//       requires the ability to check *what* is using a string which in turn 
-//       requires that all cobb::reference_tracked_object subclasses support 
-//       dynamic casts -- we need to add a dummy virtual method to that superclass.
-//
-//     = NOTE: Some strings don't properly show up as in-use, but this is because 
-//       not all data that can use a string uses cobb::reference_tracked_object 
-//       yet. While all opcode argument types now subclass it, they don't all use 
-//       its functionality yet.
-//
-//        = URGENT; MUST BE COMPLETED BEFORE RELEASE OF ANY SCRIPT EDITOR BETA
 //
 //     - Consider having a button to prune unreferenced strings. Alternatively, 
 //       consider having a button to list them and let the user select which ones 
@@ -378,65 +368,6 @@ int main(int argc, char *argv[]) {
 //
 //        - It won't be safe to implement this until we're properly tracking all 
 //          string references.
-//
-//    - If a changed string is in use by player traits, the main window needs to 
-//      be updated (i.e. if the user renames player traits through the string 
-//      editor rather than the script traits editor). Ditto for anything else 
-//      that can show up in the main window (script options, etc.).
-//
-//  - Work on script editor
-//
-//     - String table editing - MAIN FUNCTIONALITY DONE
-//
-//        - We need to make sure that the total length of all strings falls below 
-//          the string table buffer size.
-//
-//           - When saving, we enforce this with an assert; we should come up with 
-//             an error-handling system for saving files, and possibly be willing 
-//             to devise a file format for projects-in-progress.
-//
-//        - We also need to make sure that the compressed size of the string table 
-//          leaves enough room for script content, and that's more challenging. 
-//          Essentially we either need to be able to tolerate faults when saving 
-//          (without losing user data or forcing the user to fix things before 
-//          saving again -- what if they're short on time?), OR we need to maintain 
-//          bit-aligned copies of all script-related data in memory (as if saving a 
-//          file) and show a warning in the UI when that exceeds some threshold.
-//
-//           - The size of non-scripted data can vary but not enough to matter; 
-//             some player traits and odds and ends use a presence bit, and of 
-//             course the variant metadata can be up to 127 widechars. We should 
-//             just assume the max possible length for all non-scripted data and 
-//             then measure the scripted data against the space that remains. (In 
-//             any case, we have to allow for the maximum length of the title, 
-//             description, author, and editor, or the gametype might be corrupted 
-//             when resaving it in-game with longer metadata text. Similarly we 
-//             should also assume that there will always be TU1 data, both because 
-//             we always add that when saving and because the game may possibly 
-//             add it when resaving.)
-//
-//        - It would be helpful to have something that can alert the user to any 
-//          unused strings.
-//
-//     - Script content
-//
-//        - Need to modify how we handle saving script content: we need to serialize 
-//          from the triggers. Currently we just serialize from the raw data.
-//
-//        - It would also be a good idea to give each opcode argument a pointer 
-//          to its owning opcode. The ideas above -- Use Info for Forge labels and 
-//          such -- require being able to locate a given opcode arg within the 
-//          broader script, after having collected a list of opcode args.
-//
-//           - Sadly, we cannot give nested triggers a reference to their parents, 
-//             because technically, one nested trigger can be called from multiple 
-//             containing blocks (i.e. a subroutine instead of a nested block). I 
-//             haven't paid close enough attention to know if any of Bungie's 
-//             content does this, but the format should allow it.
-//
-//             What we could do instead is have triggers maintain a list of callers. 
-//             Separately we could try and differentiate between a nested block and 
-//             a subroutine while things are in-memory.
 //
 //  - When we rebuild navigation in the main window, all tree items are expanded. 
 //    This is an ugly hack to make the fact that we don't remember and restore 

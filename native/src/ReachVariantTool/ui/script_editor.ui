@@ -433,6 +433,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../Resources/main_window.qrc"/>
+ </resources>
  <connections/>
 </ui>

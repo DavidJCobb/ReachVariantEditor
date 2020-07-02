@@ -241,3 +241,9 @@ void ReachPlayerTraits::write(cobb::bitwriter& stream) const noexcept {
    s.radarRange.write(stream);
    s.directionalDamageIndicator.write(stream);
 }
+
+bool ReachMegaloPlayerTraits::uses_string(ReachString* str) const noexcept {
+   if (this->name == str || this->desc == str)
+      return true;
+   return false;
+}

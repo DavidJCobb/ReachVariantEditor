@@ -9,6 +9,7 @@ namespace Megalo {
    class VariableScopeWhichValue;
    //
    namespace Script {
+      class Enum;
       class Property;
 
       class Alias;
@@ -60,6 +61,7 @@ namespace Megalo {
                   const VariableScopeIndicatorValue* scope = nullptr; // needed for namespace members; indicates a "dead-end" top-level value
                   const VariableScopeWhichValue*     which = nullptr; // needed for namespace members
                   const OpcodeArgTypeinfo* type = nullptr;
+                  const Enum* enumeration = nullptr;
                   int32_t index       = 0;     // always present for global variables and static variables; used to hold integer constants; for scopes, used to hold the index if the scope has an index
                   bool    is_static   = false; // if false, then we're accessing a global variable
                   bool    is_constant = false; // true if this is an integer constant
@@ -107,6 +109,7 @@ namespace Megalo {
             bool _resolve_aliases_from(Compiler&, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr); // replaces the raw part with the content of a found alias, unless it's an absolute alias that resolves to a constant integer, in which case: sets resolved.top_level
             //
             size_t _resolve_top_level(Compiler&, bool is_alias_definition = false);
+            bool   _resolve_enumeration(Compiler&, size_t raw_index); // identifies what value we're accessing, after _resolve_top_level gets the enum itself; returns true if an enum was detected, even if we ran into an error trying to deal with it
             bool   _resolve_nested_variable(Compiler&, size_t raw_index);
             bool   _resolve_property(Compiler&, size_t raw_index);
             bool   _resolve_accessor(Compiler&, size_t raw_index);

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-type name="format-string">
+   <friendly>Format String</friendly>
+   <blurb>A string literal or an integer constant denoting a string index, optionally 
+   followed by up to two variables passed as additional arguments, which will be 
+   substituted into the string when it is displayed.</blurb>
+   <description>
+      <p>
+         Halo: Reach's scripting engine supports the display of "format strings." A 
+         format string can be a simple piece of text, but it can also include little 
+         placeholders that can be replaced with other values when the string is 
+         displayed. Up to two additional values can be provided after the format 
+         string itself.
+      </p>
+      <p>
+         The known format codes are:
+      </p>
+      <dl>
+         <dt>%n</dt>
+            <dd>Placeholder for a number.</dd>
+         <dt>%s</dt>
+            <dd>Placeholder for any other value that should display as text.</dd>
+      </dl>
+      <p>
+         Variables with the following types can be substituted into the string:
+      </p>
+      <dl>
+         <dt>number</dt>
+            <dd>Displays normally.</dd>
+         <dt>object</dt>
+            <dd>Displays the name of the object; however, most objects don't have 
+            actual names defined and will show "unknown".</dd>
+         <dt>player</dt>
+            <dd>Displays the player's Xbox LIVE Gamertag.</dd>
+         <dt>team</dt>
+            <dd>Displays as a blank, zero-length value.</dd>
+         <dt>timer</dt>
+            <dd>Displays minutes and seconds, separated with a colon and each padded 
+            to two digits.</dd>
+      </dl>
+      <p>
+         Here's an example of how to use format strings: this code, taken from Slayer, 
+         displays the number of points needed to win if the game variant has a score 
+         limit.
+      </p>
+      <pre>
+         for each player do -- round card
+            if game.score_to_win != 0 and game.teams_enabled == 1 then 
+               current_player.set_round_card_title("Kill players on the enemy team.\r\n%n points to win.", game.score_to_win)
+            end
+            if game.score_to_win != 0 and game.teams_enabled == 0 then 
+               current_player.set_round_card_title("Score points by killing other players.\r\n%n points to win.", game.score_to_win)
+            end
+            if game.score_to_win == 0 and game.teams_enabled == 1 then 
+               current_player.set_round_card_title("Kill players on the enemy team.")
+            end
+            if game.score_to_win == 0 and game.teams_enabled == 0 then 
+               current_player.set_round_card_title("Score points by killing other players.")
+            end
+         end
+      </pre>
+   </description>
+</script-type>

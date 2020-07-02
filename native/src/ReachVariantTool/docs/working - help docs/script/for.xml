@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>For-loops</title>
+   <body>
+      <p>
+         A "for-each loop" allows you to execute a piece of code multiple times, with it 
+         able to access and process some object in a collection each time. Megalo offers 
+         a few types of for-each loops:
+      </p>
+      <dl>
+         <dt>for each object</dt>
+            <dd>Process every object on the map.</dd>
+         <dt>for each object with label ...</dt>
+            <dd>Process every object on the map that matches a given Forge label.</dd>
+         <dt>for each player</dt>
+            <dd>Process every player currently participating in the match.</dd>
+         <dt>for each player randomly</dt>
+            <dd>Process every player in a random order.</dd>
+         <dt>for each team</dt>
+            <dd>Process every team defined in the gametype, as well as Neutral Team.</dd>
+      </dl>
+      
+      <h2>For each object</h2>
+      <p>
+         This block loops over every object on the map. You can access the object being 
+         processed using <var>current_object</var>.
+      </p>
+      
+      <h2>For each object with label</h2>
+      <p>
+         This block loops over every object on the map that matches a given Forge label. 
+         The label can be specified as a string literal containing the label's name, or as 
+         an integer constant denoting the index of the Forge label in the game variant's 
+         Forge label list. You can access the object being processed using 
+         <var>current_object</var>.
+      </p>
+      
+      <h2>For each player</h2>
+      <p>
+         This block loops over every player currently in the match. You can access the 
+         player being processed using <var>current_player</var>.
+      </p>
+      
+      <h2>For each player randomly</h2>
+      <p>
+         This block loops over every player currently in the match, in a random order. 
+         You can access the player being processed using <var>current_player</var>.
+      </p>
+      
+      <h2>For each team</h2>
+      <p>
+         This block loops over every team currently in the match. You can access the 
+         team being processed using <var>current_team</var>.
+      </p>
+   </body>
+</article>

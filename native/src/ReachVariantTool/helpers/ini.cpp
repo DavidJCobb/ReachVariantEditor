@@ -344,10 +344,10 @@ namespace cobb {
             }
          }
          oFile.close();
-         bool success = ReplaceFile(this->filePath.c_str(), this->workingFilePath.c_str(), this->backupFilePath.c_str(), 0, 0, 0);
+         bool success = ReplaceFileW(this->filePath.c_str(), this->workingFilePath.c_str(), this->backupFilePath.c_str(), 0, 0, 0);
          if (!success) {
             //if (!PathFileExists(_getINIPath().c_str())) {
-               success = MoveFileEx(this->workingFilePath.c_str(), this->filePath.c_str(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+               success = MoveFileExW(this->workingFilePath.c_str(), this->filePath.c_str(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
             //}
          }
       }

@@ -30,7 +30,28 @@ void ReachMegaloOptionValueEntry::write(cobb::bitwriter& stream, const ReachMega
       this->descIndex.write(stream);
    }
 }
+/*static*/ uint32_t ReachMegaloOptionValueEntry::bitcount() noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(value)::max_bitcount;
+   bitcount += decltype(nameIndex)::max_bitcount;
+   bitcount += decltype(descIndex)::max_bitcount;
+   return bitcount;
+}
 
+ReachMegaloOption::~ReachMegaloOption() {
+   if (this->rangeDefault) {
+      delete this->rangeDefault;
+      this->rangeDefault = nullptr;
+   }
+   if (this->rangeMin) {
+      delete this->rangeMin;
+      this->rangeMin = nullptr;
+   }
+   if (this->rangeMax) {
+      delete this->rangeMax;
+      this->rangeMax = nullptr;
+   }
+}
 void ReachMegaloOption::read(cobb::ibitreader& stream) noexcept {
    this->is_defined = true;
    //
@@ -115,10 +136,17 @@ void ReachMegaloOption::delete_value(ReachMegaloOptionValueEntry* target) noexce
    if (!target)
       return;
    auto& list = this->values;
+   if (list.size() == 1) // options must always have at least one value
+      return;
    auto  it   = std::find(list.begin(), list.end(), target);
    if (it == list.end())
       return;
+   auto dist = std::distance(list.begin(), it);
    list.erase(it);
+   if (dist <= this->defaultValueIndex)
+      this->defaultValueIndex -= 1;
+   if (dist <= this->currentValueIndex)
+      this->currentValueIndex -= 1;
 }
 void ReachMegaloOption::make_range() noexcept {
    int16_t min = 65535;
@@ -161,4 +189,45 @@ void ReachMegaloOption::make_range() noexcept {
    }
    this->rangeCurrent = this->rangeDefault->value;
    this->isRange = true;
+}
+void ReachMegaloOption::swap_values(size_t a, size_t b) noexcept {
+   auto& list = this->values;
+   if (a >= list.size() || b >= list.size())
+      return;
+   list.swap_items(a, b);
+   //
+   if (this->defaultValueIndex == a)
+      this->defaultValueIndex = b;
+   else if (this->defaultValueIndex == b)
+      this->defaultValueIndex = a;
+   //
+   if (this->currentValueIndex == a)
+      this->currentValueIndex = b;
+   else if (this->currentValueIndex == b)
+      this->currentValueIndex = a;
+}
+bool ReachMegaloOption::uses_string(ReachString* str) const noexcept {
+   if (this->name == str || this->desc == str)
+      return true;
+   for (auto* value : this->values)
+      if (value->name == str || value->desc == str)
+         return true;
+   return false;
+}
+//
+uint32_t ReachMegaloOption::bitcount() const noexcept {
+   uint32_t bitcount = 0;
+   bitcount += decltype(nameIndex)::max_bitcount;
+   bitcount += decltype(descIndex)::max_bitcount;
+   bitcount += decltype(isRange)::max_bitcount;
+   if (this->isRange) {
+      bitcount += ReachMegaloOptionValueEntry::bitcount() * 3; // range default, min, and max
+      bitcount += decltype(rangeCurrent)::max_bitcount;
+   } else {
+      bitcount += decltype(defaultValueIndex)::max_bitcount;
+      bitcount += 8;
+      bitcount += ReachMegaloOptionValueEntry::bitcount() * this->values.size();
+      bitcount += decltype(currentValueIndex)::max_bitcount;
+   }
+   return bitcount;
 }

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<script-namespace name="unnamed">
+   <blurb>Contains various utility functions.</blurb>
+   <friendly>Content not in any namespace</friendly>
+   <members>
+      <member name="death_event_damage_type" type="number" read-only="true">
+         <blurb>The damage reporting type for an object death event.</blurb>
+      </member>
+      <member name="no_object" type="object" none="true">
+         <blurb>A value which represents "none," usable where an object variable can 
+         appear.</blurb>
+         <related name="no_player" />
+         <related name="no_team"   />
+         <related name="no_widget" />
+      </member>
+      <member name="no_player" type="object" none="true">
+         <blurb>A value which represents "none," usable where an player variable can 
+         appear.</blurb>
+      </member>
+      <member name="no_team" type="object" none="true">
+         <blurb>A value which represents "none," usable where a team variable can 
+         appear. It is not the same as <var>neutral_team</var>.</blurb>
+      </member>
+      <member name="no_widget" type="widget" none="true">
+         <blurb>A value which represents "none," usable where a HUD widget can appear.</blurb>
+      </member>
+      <member name="current_object" type="object" read-only="true">
+         <blurb>The current object in a <code>for each object</code> or <code>for 
+         each object with label</code> loop.</blurb>
+         <related name="current_player" />
+         <related name="current_team"   />
+      </member>
+      <member name="current_player" type="player" read-only="true">
+         <blurb>The current player in a <code>for each player</code> or <code>for 
+         each player randomly</code> loop.</blurb>
+      </member>
+      <member name="current_team" type="team" read-only="true">
+         <blurb>The current team in a <code>for each team</code> loop.</blurb>
+      </member>
+      <member name="neutral_team" type="team" read-only="true">
+         <blurb>A value that can be used to refer to Neutral Team.</blurb>
+      </member>
+      <member name="hud_target_object" type="object" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
+         <description>
+            <p>
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to a "HUD 
+               target object" of some kind, testing has failed to determine any specifics.
+            </p>
+         </description>
+         <related name="hud_target_player" />
+         <related name="hud_player" />
+         <related name="hud_player_team" />
+         <related name="hud_target_player_team" />
+      </member>
+      <member name="hud_target_player" type="player" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
+         <description>
+            <p>
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to a "HUD 
+               target player" of some kind, testing has failed to determine any specifics.
+            </p>
+         </description>
+      </member>
+      <member name="hud_player" type="player" read-only="true">
+         <blurb>This value can be used with HUD widgets and object waypoints to display 
+         different information for each player. It refers to the player that the widget 
+         or waypoint is being shown to.</blurb>
+         <example>
+            alias speed_raw = player.number[0]
+            alias speed_kph = player.number[1]
+            declare player.speed_raw with network priority local
+            declare player.speed_kph with network priority local
+            --
+            -- Allow each player to see how fast they're moving.
+            --
+            for each player do
+               script_widget[0].set_text("%n KPH", hud_player.speed_kph)
+            end
+            on local: for each player do
+               current_player.speed_raw = current_player.biped.get_speed()
+               current_player.speed_kph = current_player.speed_raw
+               current_player.speed_kph *= 109
+               current_player.speed_kph /= 100 -- to KPH
+            end
+         </example>
+      </member>
+      <member name="hud_player_team" type="team" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
+         <description>
+            <p>
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to the 
+               team that <a href="hud_player.html">hud_player</a> belongs to, testing has 
+               failed to verify this.
+            </p>
+         </description>
+      </member>
+      <member name="hud_target_player_team" type="team" read-only="true">
+         <blurb>This value's precise meaning is unknown, but it can presumably be used 
+         with HUD widgets and object waypoints to display different information for each 
+         player.</blurb>
+         <description>
+            <p>
+               Community reverse-engineering indicates that this value is one of several 
+               that can be used with HUD widgets and object waypoints to display different 
+               information to each player. When setting a widget or waypoint's text, you 
+               would pass this value (or a member variable on it) as a 
+               <a href="script/api/format-string.html">format string</a> parameter. However, 
+               while community reverse-engineering indicates that this would refer to the 
+               team that <a href="hud_taret_player.html">hud_target_player</a> belongs to, 
+               testing has failed to verify this.
+            </p>
+         </description>
+      </member>
+      <member name="unk_14_team" type="team">
+         <blurb>Unknown, and potentially unused.</blurb>
+         <related name="unk_15_team" />
+      </member>
+      <member name="unk_15_team" type="team">
+         <blurb>Unknown, and potentially unused.</blurb>
+      </member>
+      <member name="script_option" type="number" indexed="true" read-only="true">
+         <blurb>Allows scripts to access the value of scripted Custom Game options.</blurb>
+      </member>
+   </members>
+   <methods>
+      <actions>
+         <method name="debug_print" id="18">
+            <args>
+               <arg name="text"  type="format-string">The text to print.</arg>
+            </args>
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably writes a message to some log file.</blurb>
+            <example>
+               debug_print("This function doesn't do anything! :D")
+            </example>
+            <related type="action" name="debug_break" />
+            <related type="action" name="debug_force_player_view_count" />
+            <related type="action" name="debug_set_tracing_enabled" />
+         </method>
+         <method name="rand" id="25" returns="number">
+            <args>
+               <arg name="cap"  type="number">
+                  The generated number will not be equal to or greater than this value.
+               </arg>
+            </args>
+            <blurb>Generates a random number.</blurb>
+            <description>
+               <p>
+                  This function generates a random integer, which is greater than or 
+                  equal to zero, and less than the <var>cap</var> value.
+               </p>
+            </description>
+            <example>
+               global.number[0] = rand(7)
+            </example>
+         </method>
+         <method name="debug_break" id="28">
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably broke into a debugger.</blurb>
+            <example>
+               alias this_should_not_be_1 = global.number[0]
+               --
+               if this_should_not_be_1 == 1 then
+                  debug_break()
+               end
+            </example>
+         </method>
+         <method name="debug_set_tracing_enabled" id="32">
+            <args>
+               <arg name="enable" type="bool">A <var>true</var> or <var>false</var> value 
+               indicating whether to enable or disable tracing.</arg>
+            </args>
+            <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
+            this probably set whether tracing was enabled.</blurb>
+            <example>
+               debug_set_tracing_enabled(true)
+            </example>
+         </method>
+         <method name="send_incident" id="75">
+            <args>
+               <arg type="incident" />
+               <arg name="cause">
+                  The cause of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="target">
+                  The target of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+            </args>
+            <blurb>Send an incident.</blurb>
+            <description>
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            </description>
+            <example>
+               --
+               -- Typical code for announcing the start of a round:
+               --
+               alias announced_game_start = player.number[0]
+               alias announce_start_timer = player.timer[0]
+               
+               declare player.announce_start_timer = 5
+               
+               for each player do
+                  if current_player.announced_game_start == 0 and current_player.announce_game_start_timer.is_zero() then 
+                     send_incident(race_game_start, current_player, no_player)
+                     current_player.announced_game_start = 1
+                  end
+               end
+            </example>
+         </method>
+         <method name="send_incident" id="76" overload-name="with integer" overload-id="int">
+            <args>
+               <arg type="incident" />
+               <arg name="cause">
+                  The cause of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="target">
+                  The target of the incident: a <a href="script/api/player">player</a> or 
+                  <a href="script/api/team">team</a> , or the value <var>all_players</var>.
+               </arg>
+               <arg name="detail" type="number" />
+            </args>
+            <blurb>Send an incident.</blurb>
+            <description>
+               <p>
+                  This function sends an "incident" to the game engine. Incidents can be 
+                  announcer voiceovers, medals (to be awarded to the "cause" player), or 
+                  even triggers for unlocking achievements.
+               </p>
+            </description>
+            <example>
+               --
+               -- Code for awarding the "Dive Bomber" DLC achievement, which you earn by 
+               -- killing a player with an assassination while they're using a jetpack:
+               --
+               -- (Assumes Forge Label #0 is an unnamed label referring to jetpacks.)
+               --
+               for each player do -- award Dive Bomber achievement as appropriate
+                  alias killer    = global.player[0]
+                  alias killer_aa = global.object[0]
+                  alias death_mod = global.number[2]
+                  if current_player.killer_type_is(kill) then 
+                     killer    = no_player
+                     killer    = current_player.try_get_killer()
+                     death_mod = 0
+                     death_mod = current_player.try_get_death_damage_mod()
+                     if death_mod == enums.damage_reporting_modifier.assassination then 
+                        killer_aa = no_object
+                        killer_aa = killer.try_get_armor_ability()
+                        if killer_aa.has_forge_label(0) and killer_aa.is_in_use() then 
+                           send_incident(dlc_achieve_2, killer, killer, 65)
+                        end
+                     end
+                  end
+               end
+            </example>
+         </method>
+         <method name="insert_theater_film_marker" id="81">
+            <args>
+               <arg name="number" type="number">Unknown.</arg>
+               <arg name="text" type="format-string">Unknown.</arg>
+            </args>
+            <blurb>Unknown.</blurb>
+         </method>
+         <method name="debug_force_player_view_count" id="88">
+            <args>
+               <arg name="number" type="number">Unknown.</arg>
+            </args>
+            <blurb>A non-functional debugging tool.</blurb>
+         </method>
+         <method name="set_scenario_interpolator_state" id="95">
+            <args>
+               <arg name="which" type="number">The index of the scenario interpolator to set.</arg>
+               <arg name="state" type="number">The state value to set.</arg>
+            </args>
+            <blurb>Set the state value for a map-defined "scenario interpolator."</blurb>
+            <description>
+               <p>
+                  Maps can define "scenario interpolators," and assets in a map can query the state 
+                  values of these interpolators. Multiplayer maps have three scenario interpolators 
+                  defined. The first two are used to control whether the "sound emitter" obejcts 
+                  available on these maps emit sound. The function of the third is unknown.
+               </p>
+            </description>
+            <example>
+               -- Make all script-spawned sound emitters play sound.
+               
+               set_scenario_interpolator_state(1, 1)
+               set_scenario_interpolator_state(2, 1)
+            </example>
+         </method>
+         <method name="get_random_object" id="96" returns="object">
+            <args>
+               <arg name="label"   type="forge-label">The name of a Forge label as a string literal, 
+               or the index of a Forge label as an integer constant.</arg>
+               <arg name="exclude" type="object">If this value is not <var>no_object</var>, then the 
+               function is not allowed to return this object.</arg>
+            </args>
+            <blurb>Get a random object on the map with the specified Forge label.</blurb>
+            <description>
+               <p>
+                  This function looks at every object on the map with a specified label (except the 
+                  object passed in, if any) and returns one of them at random. If no objects are 
+                  available (whether because there are none with the label, or because the only 
+                  labeled object is the one passed in as an argument), then the function will 
+                  return <var>no_object</var>.
+               </p>
+            </description>
+            <example>
+               alias current_hill = global.object[0]
+               
+               current_hill = get_random_object("koth_hill", current_hill)
+            </example>
+         </method>
+      </actions>
+   </methods>
+</script-namespace>

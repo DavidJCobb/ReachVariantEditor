@@ -10,6 +10,7 @@
 #include "../helpers/bytewriter.h"
 #include "../helpers/files.h"
 #include "../helpers/stream.h"
+#include "editor_file_block.h"
 
 enum class ReachGameEngine : uint8_t {
    none,
@@ -30,15 +31,17 @@ enum class ReachFileType : int8_t {
    playlist,
 };
 
+class GameVariantSaveProcess; // io_process.h
 
 class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
       virtual ReachGameEngine get_type() const noexcept { return ReachGameEngine::none; }
       virtual bool read(cobb::reader&) noexcept = 0;
-      virtual void write(cobb::bit_or_byte_writer&) noexcept = 0;
-      virtual void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept {};
+      virtual void write(GameVariantSaveProcess&) noexcept = 0;
+      virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
+      virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept { return false; }; // return true to indicate that you've accepted the subrecord
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
          switch (this->get_type()) {
@@ -48,14 +51,6 @@ class GameVariantData {
          }
          return nullptr;
       }
-};
-
-class IGameVariantDataObjectNeedingPostprocess {
-   //
-   // TODO: Use this to semi-automate postprocess fixup for MPVR
-   //
-   public:
-      virtual bool postprocess(GameVariantData*) = 0;
 };
 
 class BlamHeader {
@@ -143,6 +138,14 @@ class ReachBlockCHDR {
 
 class ReachBlockMPVR {
    public:
+      struct block_header_version {
+         block_header_version() = delete;
+         enum type : uint16_t {
+            halo_reach   = 0x0032,
+            halo_2_annie = 0x0089,
+         };
+      };
+      //
       ReachFileBlock header = ReachFileBlock('mpvr', 0x5028);
       uint8_t  hashSHA1[0x14];
       cobb::bitnumber<4, ReachGameEngine> type;
@@ -157,8 +160,8 @@ class ReachBlockMPVR {
       } writeData;
       //
       bool read(reach_block_stream&);
-      void write(cobb::bit_or_byte_writer&) noexcept;
-      void write_last_minute_fixup(cobb::bit_or_byte_writer&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
+      void write(GameVariantSaveProcess&) noexcept;
+      void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept; // call after all file content has been written; writes variant header's file length, SHA-1 hash, etc.
       void cloneTo(ReachBlockMPVR&) const noexcept; // deep copy, accounting for pointers
 };
 
@@ -171,7 +174,7 @@ class GameVariant {
       std::vector<ReachFileBlockUnknown> unknownBlocks;
       //
       bool read(cobb::mapped_file& file);
-      void write(cobb::bit_or_byte_writer& writer) noexcept;
+      void write(GameVariantSaveProcess&) noexcept;
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //

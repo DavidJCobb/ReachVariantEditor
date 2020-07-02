@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LocalizedStringLibraryDialog</class>
+ <widget class="QDialog" name="LocalizedStringLibraryDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>668</width>
+    <height>449</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>String Library</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3" rowstretch="1,0">
+   <item row="0" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="widget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="search">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="placeholderText">
+          <string>Search...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QListWidget" name="list">
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="4" column="0">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="description">
+         <property name="text">
+          <string>This is a description of the localized string library entry that you are currently viewing.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPlainTextEdit" name="preview">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>80</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QStackedWidget" name="stringOptionsPane">
+         <widget class="QWidget" name="stringOptionsPageNone">
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>No additional options available for this string.</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="stringOptionsPageInteger">
+          <layout class="QGridLayout" name="gridLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="stringOptionInteger_Value">
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="minimum">
+              <number>-32768</number>
+             </property>
+             <property name="maximum">
+              <number>32767</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Use number:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="buttonLanguageLeft">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>Previous Language</string>
+           </property>
+           <property name="text">
+            <string>&lt;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="previewLanguageName">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>English</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="buttonLanguageRight">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="accessibleName">
+            <string>Next Language</string>
+           </property>
+           <property name="text">
+            <string>&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="0">
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonApply">
+       <property name="text">
+        <string>Replace string being edited</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../Resources/main_window.qrc"/>
+ </resources>
+ <connections/>
+</ui>

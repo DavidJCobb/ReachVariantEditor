@@ -34,7 +34,7 @@ namespace Megalo {
       ),
       ConditionFunction( // 2
          "Object In Boundary",
-         "Checks whether one object is inside of another object's Shape. Note that this is a centerpoint check. If, for example, you check whether a shape contains a Warthog, the check will pass only when the Warthog's centerpoint is inside of the shape.",
+         "Checks whether one object is inside of another object's Shape. Note that this is a centerpoint check. If, for example, you check whether a shape contains a Warthog, the check will pass only when the Warthog's centerpoint is inside of the shape. If this check is run on an attached object, it will instead test the centerpoint of the parent object; for example, if A is attached to B, then A will only count as being in C's shape when B's centerpoint is in C's shape, regardless of the position of A's centerpoint.",
          "%1 %v inside of %2's shape.",
          {
             OpcodeArgBase("a", OpcodeArgValueObject::typeinfo),
@@ -182,7 +182,7 @@ namespace Megalo {
       ),
       ConditionFunction( // 17
          "In Forge",
-         "This condition is believed to test whether the current match is taking place in Forge.",
+         "This condition is believed to test whether the current match is taking place in Forge. However, there is no known way to get gametype scripts to actually run in Forge.",
          "This match %v taking place in Forge.",
          {},
          OpcodeFuncToScriptMapping::make_function("is_in_forge", "", {}, OpcodeFuncToScriptMapping::game_namespace)

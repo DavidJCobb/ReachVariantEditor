@@ -3,8 +3,20 @@
 #include <QFont>
 #include "../../editor_state.h"
 #include "../localized_string_editor.h"
+#include "../../helpers/qt/widget.h"
 
 ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(parent) {
+   #if _DEBUG
+      //
+      // ReachStringPicker can crash if you forget to call (clearTarget) on it before 
+      // deleting some object that contains a MegaloStringRef that the string picker 
+      // was working with. These crashes are really, really nasty to debug if you're 
+      // dynamically linking Qt -- you can't easily check the widget's data, such as 
+      // its parent widgets, to see what's going on.
+      //
+      this->_debug_hierarchy = cobb::qt::dump_ancestors(this);
+   #endif
+   //
    this->_limitToSingleLanguageStrings = flags & Flags::SingleLanguageString;
    //
    auto layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
@@ -38,6 +50,7 @@ ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(
          return;
       ref = &table.strings[index];
       //
+      emit selectedStringSwitched();
       emit selectedStringChanged();
    });
    QObject::connect(this->_button, &QPushButton::clicked, [this]() {
@@ -108,7 +121,7 @@ void ReachStringPicker::refreshList() {
          if (!allSame)
             continue;
       //
-      QString text = QString::fromUtf8(string.english().c_str());
+      QString text = QString::fromUtf8(string.get_content(reach::language::english).c_str());
       if (this->_blacklist.size()) {
          bool skip = false;
          if (allSame) {
@@ -120,7 +133,7 @@ void ReachStringPicker::refreshList() {
             }
          } else {
             for (auto& bl : this->_blacklist) {
-               for (auto& tl : string.strings) {
+               for (auto& tl : string.languages()) {
                   if (QString::fromUtf8(tl.c_str()) == text) {
                      skip = true;
                      break;
@@ -139,8 +152,10 @@ void ReachStringPicker::refreshList() {
    this->refreshSelection();
 }
 void ReachStringPicker::refreshSelection() {
-   if (!this->_targetRef)
+   if (!this->_targetRef) {
+      this->_combobox->setCurrentIndex(-1);
       return;
+   }
    auto& ptr = *this->_targetRef;
    int32_t i = -1;
    if (ptr) {
@@ -167,7 +182,7 @@ void ReachStringPicker::refreshListItem(uint32_t index) {
    auto& table = mp->scriptData.strings;
    if (index >= table.strings.size())
       return;
-   auto text      = QString::fromUtf8(table.strings[index].english().c_str());
+   auto text      = QString::fromUtf8(table.strings[index].get_content(reach::language::english).c_str());
    auto itemIndex = this->_combobox->findData(index);
    if (itemIndex >= 0)
       this->_combobox->setItemText(itemIndex, text);

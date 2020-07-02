@@ -9,9 +9,9 @@ namespace Megalo {
          //
          DetailedEnumValue("speaker"),
          DetailedEnumValue("dead_teammate_marker"),
-         DetailedEnumValue("lightning_bolt", DetailedEnumValueInfo::make_friendly_name("lightning bolt")),
+         DetailedEnumValue("lightning_bolt", DetailedEnumValueInfo::make_friendly_name("lightning bolt")), // invisible during testing?
          DetailedEnumValue("bullseye"),
-         DetailedEnumValue("destination"),
+         DetailedEnumValue("diamond"),
          DetailedEnumValue("bomb"),
          DetailedEnumValue("flag"),
          DetailedEnumValue("skull"),
@@ -19,25 +19,49 @@ namespace Megalo {
          DetailedEnumValue("vip"),
          DetailedEnumValue("padlock"),
          DetailedEnumValue("territory_a",
-            DetailedEnumValueInfo::make_friendly_name("territory A"),
-            DetailedEnumValueInfo::make_description("Displays the value of a number variable.") // should we rename it, then?
+            DetailedEnumValueInfo::make_friendly_name("numeric"),
+            DetailedEnumValueInfo::make_description("Displays the value of a number variable, truncated to the lowest significant digit.") // should we rename it, then?
          ),
-         DetailedEnumValue("territory_b",    DetailedEnumValueInfo::make_friendly_name("territory B")),
-         DetailedEnumValue("territory_c",    DetailedEnumValueInfo::make_friendly_name("territory C")),
-         DetailedEnumValue("territory_d",    DetailedEnumValueInfo::make_friendly_name("territory D")),
-         DetailedEnumValue("territory_e",    DetailedEnumValueInfo::make_friendly_name("territory E")),
-         DetailedEnumValue("territory_f",    DetailedEnumValueInfo::make_friendly_name("territory F")),
-         DetailedEnumValue("territory_g",    DetailedEnumValueInfo::make_friendly_name("territory G")),
-         DetailedEnumValue("territory_h",    DetailedEnumValueInfo::make_friendly_name("territory H")),
-         DetailedEnumValue("territory_i",    DetailedEnumValueInfo::make_friendly_name("territory I")),
+         DetailedEnumValue("territory_b",
+            DetailedEnumValueInfo::make_friendly_name("territory B"),
+            DetailedEnumValueInfo::make_description("Displays the number 2.")
+         ),
+         DetailedEnumValue("territory_c",
+            DetailedEnumValueInfo::make_friendly_name("territory C"),
+            DetailedEnumValueInfo::make_description("Displays the number 3.")
+         ),
+         DetailedEnumValue("territory_d",
+            DetailedEnumValueInfo::make_friendly_name("territory D"),
+            DetailedEnumValueInfo::make_description("Displays the number 4.")
+         ),
+         DetailedEnumValue("territory_e",
+            DetailedEnumValueInfo::make_friendly_name("territory E"),
+            DetailedEnumValueInfo::make_description("Displays the number 5.")
+         ),
+         DetailedEnumValue("territory_f",
+            DetailedEnumValueInfo::make_friendly_name("territory F"),
+            DetailedEnumValueInfo::make_description("Displays the number 6.")
+         ),
+         DetailedEnumValue("territory_g",
+            DetailedEnumValueInfo::make_friendly_name("territory G"),
+            DetailedEnumValueInfo::make_description("Displays the number 7.")
+         ),
+         DetailedEnumValue("territory_h",
+            DetailedEnumValueInfo::make_friendly_name("territory H"),
+            DetailedEnumValueInfo::make_description("Displays the number 8.")
+         ),
+         DetailedEnumValue("territory_i",
+            DetailedEnumValueInfo::make_friendly_name("territory I"),
+            DetailedEnumValueInfo::make_description("Displays the number 9.")
+         ),
          DetailedEnumValue("supply"),
          DetailedEnumValue("supply_health",   DetailedEnumValueInfo::make_friendly_name("supply (health)")),
          DetailedEnumValue("supply_air_drop", DetailedEnumValueInfo::make_friendly_name("supply (air drop)")),
          DetailedEnumValue("supply_ammo",     DetailedEnumValueInfo::make_friendly_name("supply (ammo)")),
          DetailedEnumValue("arrow"),
          DetailedEnumValue("defend"),
-         DetailedEnumValue("unk_26"),
-         DetailedEnumValue("unk_27"),
+         DetailedEnumValue("ordnance"),
+         DetailedEnumValue("inward"),
       });
    }
    //
@@ -108,7 +132,7 @@ namespace Megalo {
          this->number.decompile(out, flags);
       }
    }
-   arg_compile_result OpcodeArgValueWaypointIcon::compile(Compiler& compiler, Script::string_scanner& arg, uint8_t part) noexcept {
+   arg_compile_result OpcodeArgValueWaypointIcon::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
       if (part == 1)
          return ((OpcodeArgValue*)&this->number)->compile(compiler, arg, part); // need to access it this way because the overloads and overrides together are confusing MSVC
       if (part > 1)

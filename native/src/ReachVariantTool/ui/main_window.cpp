@@ -1,12 +1,15 @@
 #include "main_window.h"
 #include <cassert>
 #include <filesystem>
+#include <QDebug>
+#include <QDesktopServices>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QProcess>
+#include <QSaveFile>
 #include <QString>
 #include <QTextCodec>
 #include <QTextStream>
@@ -14,6 +17,7 @@
 #include <QWidget>
 #include "../editor_state.h"
 #include "../game_variants/base.h"
+#include "../game_variants/io_process.h"
 #include "../game_variants/errors.h"
 #include "../game_variants/warnings.h"
 #include "../helpers/ini.h"
@@ -24,6 +28,8 @@
 
 #include "options_window.h"
 #include "script_editor.h"
+
+#include "main_window/debug_helper_functions.h"
 
 namespace {
    ReachVariantTool* _window = nullptr;
@@ -121,14 +127,14 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       ReachString* name = traits->name;
       QString text;
       if (name) {
-         text = QString::fromUtf8(name->english().c_str());
+         text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
       } else {
          text = QString("Unnamed Traits %1").arg(index);
       }
       target->setText(0, text);
       ReachString* desc = traits->desc;
       if (desc)
-         target->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+         target->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
       else
          target->setToolTip(0, "");
    });
@@ -143,14 +149,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
-   #if _DEBUG
-      QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
-         (new MegaloScriptEditorWindow(this))->exec();
-      });
-   #else
-      this->ui.actionEditScript->setEnabled(false);
-      this->ui.actionEditScript->setVisible(false);
-   #endif
+   QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
+      (new MegaloScriptEditorWindow(this))->exec();
+   });
    #if _DEBUG
       QObject::connect(this->ui.actionDebugMisc, &QAction::triggered, [this]() {
          //
@@ -163,121 +164,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       this->ui.actionDebugMisc->setVisible(false);
    #endif
    #if _DEBUG
-      QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, []() {
-         auto variant = ReachEditorState::get().variant();
-         __debugbreak();
-      });
-      QObject::connect(this->ui.actionDebugExportTriggersText, &QAction::triggered, [this]() {
-         auto variant = ReachEditorState::get().variant();
-         if (!variant)
-            return;
-         auto mp = variant->get_multiplayer_data();
-         if (!mp)
-            return;
-         QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Triggers as Text"), // window title
-            "",
-            tr("Text File (*.txt);;All Files (*)") // filetype filters
-         );
-         if (fileName.isEmpty())
-            return;
-         QFile file(fileName);
-         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
-            return;
-         }
-         QTextStream out(&file);
-         out << QString::fromUtf16(mp->variantHeader.title);
-         out << "\r\n\r\n";
-         //
-         {  // Scripted traits
-            out << "SCRIPTED TRAITS:\r\n";
-            auto& list = mp->scriptData.traits;
-            auto  size = list.size();
-            for (size_t i = 0; i < size; i++) {
-               auto& item      = list[i];
-               auto  formatted = QString("%1: %2\r\n").arg(i);
-               if (item.name) {
-                  formatted = formatted.arg(QString::fromUtf8(item.name->english().c_str()));
-               } else {
-                  formatted = formatted.arg("");
-               }
-               out << formatted;
-            }
-            out << "\r\n";
-         }
-         {  // Forge labels
-            out << "FORGE LABELS:\r\n";
-            auto& list = mp->scriptContent.forgeLabels;
-            auto  size = list.size();
-            for (size_t i = 0; i < size; i++) {
-               auto& label     = list[i];
-               auto  formatted = QString("%1: %2\r\n").arg(i);
-               if (label.name) {
-                  formatted = formatted.arg(QString::fromUtf8(label.name->english().c_str()));
-               } else {
-                  formatted = formatted.arg("");
-               }
-               out << formatted;
-            }
-            out << "\r\n";
-         }
-         auto& triggers = mp->scriptContent.triggers;
-         for (size_t i = 0; i < triggers.size(); ++i) {
-            auto& trigger = triggers[i];
-            if (trigger.entryType == Megalo::entry_type::subroutine)
-               continue;
-            std::string formatted;
-            cobb::sprintf(formatted, "TRIGGER #%d:\r\n", i);
-            out << formatted.c_str();
-            formatted.clear();
-            trigger.to_string(triggers, formatted);
-            out << formatted.c_str();
-            out << "\r\n";
-         }
-      });
-      QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() {
-         auto variant = ReachEditorState::get().variant();
-         if (!variant)
-            return;
-         auto mp = variant->get_multiplayer_data();
-         if (!mp)
-            return;
-         QString fileName = QFileDialog::getSaveFileName(
-            this,
-            tr("Save Strings as Text"), // window title
-            "",
-            tr("Text File (*.txt);;All Files (*)") // filetype filters
-         );
-         if (fileName.isEmpty())
-            return;
-         QFile file(fileName);
-         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
-            return;
-         }
-         bool write_offsets = true;
-         if (QMessageBox::No == QMessageBox::question(this, tr("Write offsets?"), tr("Write each string's offset within the string table's buffer? (Note: Data refers to the last file that was loaded OR SAVED.)"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No)) {
-            write_offsets = false;
-         }
-         QTextStream out(&file);
-         out.setCodec(QTextCodec::codecForName("UTF-8"));
-         out << QString::fromUtf16(mp->variantHeader.title);
-         out << "\r\n\r\n";
-         auto& table = mp->scriptData.strings;
-         for (size_t i = 0; i < table.strings.size(); i++) {
-            auto& string = table.strings[i];
-            out << "STRING #" << i << ":\r\n";
-            for (size_t j = 0; j < string.offsets.size(); j++) {
-               out << "   ";
-               if (write_offsets)
-                  out << string.offsets[j] << ": ";
-               out << QString::fromUtf8(string.strings[j].c_str()) << "\r\n";
-            }
-            out << "\r\n";
-         }
-      });
+      QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, DebugHelperFunctions::break_on_variant);
+      QObject::connect(this->ui.actionDebugExportTriggersText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_triggers_english(this); });
+      QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_strings(this); });
    #else
       this->ui.actionDebugbreak->setEnabled(false);
       this->ui.actionDebugbreak->setVisible(false);
@@ -286,6 +175,46 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       this->ui.actionDebugExportStringsText->setEnabled(false);
       this->ui.actionDebugExportStringsText->setVisible(false);
    #endif
+   {
+      auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // ughhhhh
+      auto dir  = QDir(path);
+      if (!dir.exists()) {
+         this->ui.actionHelpWeb->setEnabled(false);
+         this->ui.actionHelpWeb->setToolTip(tr("The documentation folder is missing!", ""));
+         this->ui.actionHelpFolder->setEnabled(false);
+         this->ui.actionHelpFolder->setToolTip(tr("The documentation folder is missing!", ""));
+      }
+      QObject::connect(this->ui.actionHelpWeb, &QAction::triggered, [this]() {
+         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/index.html"; // gotta do weird stuff to normalize the application path ughhhhh
+         if (!QDesktopServices::openUrl(QString("file:///") + path)) {
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
+            return;
+         }
+         /*//
+         auto path   = dir.filePath("index.html").toStdWString();
+         auto result = (uint32_t)ShellExecuteW(0, 0, path.c_str(), 0, 0, SW_NORMAL);
+         if (result <= 32) {
+            QString text;
+            switch (result) {
+               case 0:
+               case SE_ERR_OOM:
+                  text = "The operating system is out of memory or resources.";
+                  break;
+               case ERROR_FILE_NOT_FOUND:
+               case ERROR_PATH_NOT_FOUND:
+                  text = "The documentation folders or files have gone missing.";
+                  break;
+            }
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. ") + text);
+         }
+         //*/
+      });
+      QObject::connect(this->ui.actionHelpFolder, &QAction::triggered, [this]() {
+         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // gotta do weird stuff to normalize the application path ughhhhh
+         if (!QDesktopServices::openUrl(QString("file:///") + path))
+            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
+      });
+   }
    //
    this->ui.MainContentView->setCurrentIndex(0); // Qt Designer makes the last page you were looking at in the editor the default page; let's just switch to the first page here
    QObject::connect(this->ui.MainTreeview, &QTreeWidget::currentItemChanged, this, &ReachVariantTool::onSelectedPageChanged);
@@ -485,10 +414,33 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    } else {
       fileName = QString::fromWCharArray(editor.variantFilePath());
    }
-   QFile file(fileName);
+   QSaveFile file(fileName);
    if (!file.open(QIODevice::WriteOnly)) {
       QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
       return;
+   }
+   //
+   GameVariantSaveProcess save_process;
+   editor.variant()->write(save_process);
+   if (save_process.variant_is_editor_only()) {
+      auto text = tr("Your game variant exceeds the limits of Halo: Reach's game variant file format. As such, the following data will have to be embedded in a non-standard way to avoid data loss:\n\n");
+      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_scripts))
+         text += tr(" - All script code\n");
+      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_strings))
+         text += tr(" - All script strings\n");
+      text += tr("\nThis data is still visible to this editor; you will not lose any of your work. However, the data is invisible to the game; moreover, if you resave this file through Halo: Reach or the Master Chief Collection, the data will then be lost.\n\nDo you still wish to save this file to <%1>?").arg(fileName);
+      //
+      QMessageBox::StandardButton result = QMessageBox::warning(
+         this,
+         tr("Incomplete game variant"),
+         text,
+         QMessageBox::Yes | QMessageBox::No,
+         QMessageBox::Yes // default button
+      );
+      if (result == QMessageBox::StandardButton::No) {
+         file.cancelWriting();
+         return;
+      }
    }
    if (saveAs) {
       std::wstring temp = fileName.toStdWString();
@@ -497,10 +449,8 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    }
    QDataStream out(&file);
    out.setVersion(QDataStream::Qt_4_5);
-   //
-   cobb::bit_or_byte_writer writer;
-   editor.variant()->write(writer);
-   out.writeRawData((const char*)writer.bytes.data(), writer.bytes.get_bytespan());
+   out.writeRawData((const char*)save_process.writer.bytes.data(), save_process.writer.bytes.get_bytespan());
+   file.commit();
 }
 
 namespace {
@@ -624,14 +574,14 @@ void ReachVariantTool::regenerateNavigation() {
                ReachString* name = traits.name;
                QString text;
                if (name) {
-                  text = QString::fromUtf8(name->english().c_str());
+                  text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
                } else {
                   text = QString("Unnamed Traits %1").arg(i);
                }
                auto item = _makeNavItemMegaloTraits(script, text, i);
                ReachString* desc = traits.desc;
                if (desc)
-                  item->setToolTip(0, QString::fromUtf8(desc->english().c_str()));
+                  item->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
             }
          }
       }
