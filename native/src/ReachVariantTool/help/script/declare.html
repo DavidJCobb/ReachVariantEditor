@@ -2,8 +2,8 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>HUD Widget | ReachVariantTool Documentation</title>
-      <base href="../../" />
+      <title>Variable declarations | ReachVariantTool Documentation</title>
+      <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
@@ -120,21 +120,52 @@
          </ul>
       </nav>
       <main>
-         <h1>HUD Widget</h1>
-<p>A script-defined HUD widget.</p>
-<h2>Member actions</h2>
-<dl><dt><a href="script/api/widget/actions/set_icon.html">set_icon</a></dt>
-   <dd><p>Set the HUD widget's icon.</p></dd>
-<dt><a href="script/api/widget/actions/set_meter_params.html">set_meter_params</a></dt>
-   <dd><p>Set the HUD widget's meter parameters.</p></dd>
-<dt><a href="script/api/widget/actions/set_text.html">set_text</a></dt>
-   <dd><p>Set the HUD widget's text.</p></dd>
-<dt><a href="script/api/widget/actions/set_value_text.html">set_value_text</a></dt>
-   <dd><p>Set the HUD widget's value text.</p></dd>
-<dt><a href="script/api/widget/actions/set_visibility.html">set_visibility</a></dt>
-   <dd><p>Control whether a player can see this HUD widget.</p></dd>
-</dl>
+         <h1>Variable declarations</h1>
 
+      <p>
+         Variable declarations allow you to specify a variable's networking priority and its 
+         initial value. They aren't required &mdash; you can use a variable straightaway, 
+         without declaring it &mdash; but because Megalo's default variable networking priority 
+         can't survive host migrations, you'll probably want to use them.
+      </p>
+      <p>
+         Variable declarations look like this:
+      </p>
+      <pre>
+<span class="keyword">declare</span> SOME_VARIABLE
+<span class="keyword">declare</span> SOME_VARIABLE = SOME_NUMBER
+<span class="keyword">declare</span> SOME_VARIABLE with network priority SOME_PRIORITY
+<span class="keyword">declare</span> SOME_VARIABLE with network priority SOME_PRIORITY = SOME_NUMBER</pre>
+      <p>
+         When specifying the variable to declare, you are allowed to use an <a href="script/alias.html">alias</a>.
+      </p>
+      <p>
+         Only number and timer variables can be given initial values. These values can be any 
+         number except for another variable. If you do not specify an initial value (or if you 
+         don't declare the variable at all), then the initial value used is zero.
+      </p>
+      <p>
+         All variable types except for timers can have a networking priority set. The network 
+         priority values are:
+      </p>
+      <dl>
+         <dt>default</dt>
+            <dd>The meaning of this value is unclear. Testing has established that a variable's 
+            value will be lost after a host migration if its network priority was the default.</dd>
+         <dt>low</dt>
+            <dd>Testing has established that low-priority variables can survive a host migration.</dd>
+         <dt>high</dt>
+            <dd>Testing has established that high-priority variables can survive a host migration. 
+            If you wish to display a player variable in the UI, it must be high-priority.</dd>
+         <dt>local</dt>
+            <dd>Variables with this network priority aren't sent over the network at all.</dd>
+      </dl>
+      <p>
+         Declaring a variable multiple times generates a compiler warning if the declarations 
+         don't conflict ith each other or contain redundant information (e.g. multiple initial 
+         values), or a compiler error otherwise.
+      </p>
+   
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>
