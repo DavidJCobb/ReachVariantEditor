@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<script-type name="forge-label">
-   <friendly>Forge Label</friendly>
-   <blurb>A string literal containing the name of a Forge label, or an integer constant 
-   denoting the index of a Forge label in the game variant's label list.</blurb>
-</script-type>

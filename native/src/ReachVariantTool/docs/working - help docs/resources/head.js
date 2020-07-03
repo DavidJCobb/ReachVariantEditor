@@ -1,1 +1,0 @@
-window.page_load_start_time = Date.now();
