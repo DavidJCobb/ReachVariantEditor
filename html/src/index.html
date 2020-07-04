@@ -5,7 +5,8 @@
    </head>
    <body>
       <input type="file" id="gvar-file" />
-      <input type="button" id="read" value="Read" />
+      <input type="button" id="read-gv" value="Read game variant" />
+      <input type="button" id="read-mv" value="Read map variant" />
       <script src="third-party/pako/pako.js"></script>
       <script src="utils.js"></script>
       <script src="enums-and-flags.js"></script>
@@ -28,8 +29,9 @@
       <script src="raw/game_variant_blam.js"></script>
       <script src="raw/game_variant_chdr.js"></script>
       <script src="raw/game_variant_mpvr.js"></script>
+      <script src="raw/map_variant_mvar.js"></script>
       <script>
-document.getElementById("read").onclick = async function() {
+document.getElementById("read-gv").onclick = async function() {
    let node = document.getElementById("gvar-file");
    let file = node.files[0];
    if (!file) {
@@ -43,6 +45,31 @@ document.getElementById("read").onclick = async function() {
    blocks["_blf"] = new GameVariantBlamHeader(stream);
    blocks["chdr"] = new GameVariantContentHeader(stream);
    blocks["mpvr"] = new GameVariantMultiplayerData(stream);
+   console.log(blocks);
+   //
+   let variant = new ReachGameVariant();
+   stream.backToStart();
+   try {
+      variant.parse(stream);
+   } catch (e) {
+      console.error(e);
+   }
+   console.log(variant);
+};
+document.getElementById("read-mv").onclick = async function() {
+   let node = document.getElementById("gvar-file");
+   let file = node.files[0];
+   if (!file) {
+      console.warn("No file selected.");
+      return;
+   }
+   let buffer = await file.arrayBuffer();
+   //
+   let stream = new Bitstream(buffer);
+   let blocks = {};
+   blocks["_blf"] = new GameVariantBlamHeader(stream);
+   blocks["chdr"] = new GameVariantContentHeader(stream);
+   blocks["mvar"] = new MapVariant(stream);
    console.log(blocks);
    //
    let variant = new ReachGameVariant();
