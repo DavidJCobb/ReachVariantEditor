@@ -1,4 +1,11 @@
 function _sub4DC8E0(bitcount, mapBounds, out) {
+   function highest_bit_set(value) {
+      let r = 0;
+      while (value >>= 1)
+         ++r;
+      return r;
+   }
+   
    let rsp20 = [
       mapBounds.x.max - mapBounds.x.min,
       mapBounds.y.max - mapBounds.y.min,
@@ -50,23 +57,8 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
          let ecx = -1;
          if (edx) { // asm: TEST EDX, EDX; JE
             ecx = 31;
-            let eax = 0x80000000;
-            if (edx >= 0) { // asm: JS
-               //
-               // Decrement (ecx) until we find the most significant bit in (edx).
-               //
-               do {
-                  --ecx;
-                  //
-                  // JavaScript needs Math.abs since it uses int32_t, not an unsigned type 
-                  // or a larger type.
-                  //
-                  eax = Math.abs(eax >> 1);
-               } while ((edx & eax) == 0);
-               //
-               // TODO: rephrase this in terms of cobb::bitmax or something like that
-               //
-            }
+            if (edx >= 0) // asm: JS
+               ecx = highest_bit_set(edx);
          }
          let r8 = 0;
          if (ecx != -1) {
@@ -116,6 +108,7 @@ class LoadedForgeObject {
       this.unk08 = stream.readBits(rbp60[0], false); // compressed float
       this.unk0C = stream.readBits(rbp60[1], false); // compressed float
       this.unk10 = stream.readBits(rbp60[2], false); // compressed float
+this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];      
       //
       let range = mapBounds.x.max - mapBounds.x.min;
       /*//
@@ -160,6 +153,131 @@ class LoadedForgeObject {
       // we missing bits beforehand?
       //
    }
+   loadUnk20Floats(stream) {
+      //
+      // this is supposed to produce floats, but JS stores all numbers as doubles, 
+      // so there will be *slight* inaccuracies
+      //
+      function normalizeVector(coords) {
+         let xmm2 = Math.sqrt(Math.fround(coords[0]*coords[0] + coords[1]*coords[1] + coords[2]*coords[2]));
+         let xmm1 = Math.abs(xmm2);
+         if (0.0001 <= xmm1) {
+            xmm1 = 1.0 / xmm2;
+            coords[0] *= xmm1;
+            coords[1] *= xmm1;
+            coords[2] *= xmm1;
+            for(let i = 0; i < 3; ++i)
+               coords[i] = Math.fround(coords[i]);
+         }
+      }
+      //
+      const lookup_table = [
+         [0x0000A, 0x002], [0x00015, 0x003],
+         [0x0002A, 0x005], [0x00055, 0x008],
+         [0x000AA, 0x00C], [0x00155, 0x011],
+         [0x002AA, 0x019], [0x00555, 0x023],
+         [0x00AAA, 0x033], [0x01555, 0x048],
+         [0x02AAA, 0x067], [0x05555, 0x092],
+         [0x0AAAA, 0x0D0], [0x15555, 0x126],
+         [0x2AAAA, 0x1A1], [0x55555, 0x24E],
+         [0xAAAAA, 0x343], [0x155555, 0x9D04],
+         [0xAAAAAA, 0x687], [0x555555, 0x93B],
+         [0x2AAAAAA, 0x1A1F], [0x5555555, 0x24F4],
+         [0xAAAAAAA, 0x3440]
+      ];
+      const bitcount = 20;
+      //
+      let bits = stream.readBits(bitcount, false);
+      //
+      let r9   = bitcount - 6;
+      let r11  = Math.floor(bits / lookup_table[r9][0]);
+      let r8   = lookup_table[r9][0] * r11;
+      let ebx  = bits - r8;
+      //
+      let eax = Math.floor(ebx / lookup_table[r9][1]);
+      let ecx = lookup_table[r9][1] * eax;
+      let xmm2 = eax;
+      eax *= 2;
+      ebx -= ecx;
+      ecx = lookup_table[r9][1] - 1;
+      let xmm0 = ecx;
+      --ecx;
+      //
+      let xmm1 = Math.fround(2.0 / xmm0);
+      xmm2 = Math.fround(xmm2 * xmm1 - 1.0);
+      xmm1 *= 0.5;
+      xmm2 += xmm1;
+      { // JS uses doubles but these calculations are singles
+         xmm0 = Math.fround(xmm0);
+         xmm1 = Math.fround(xmm1);
+         xmm2 = Math.fround(xmm2);
+      }
+      if (eax == ecx)
+         xmm2 = 0;
+      //
+      ecx  = lookup_table[r9][1] - 1;
+      xmm1 = ebx;
+      xmm0 = ecx;
+      eax = ebx * 2;
+      --ecx;
+      let xmm3 = Math.fround(2.0 / xmm0);
+      xmm1 *= xmm3;
+      xmm3 *= 0.5;
+      xmm1 -= 1.0;
+      xmm1 += xmm3;
+      { // JS uses doubles but these calculations are singles
+         xmm0 = Math.fround(xmm0);
+         xmm1 = Math.fround(xmm1);
+         xmm2 = Math.fround(xmm2);
+         xmm3 = Math.fround(xmm3);
+      }
+      if (eax == ecx)
+         xmm1 = 0;
+      //
+      let vector = [this.unk20, this.unk24, this.unk28];
+      if (r11 <= 5) {
+         switch (r11) {
+            case 0:
+               vector[0] = 1;
+               vector[1] = xmm2;
+               vector[2] = xmm1;
+               break;
+            case 3:
+               vector[0] = -1;
+               vector[1] = xmm2;
+               vector[2] = xmm1;
+               break;
+            case 1:
+               vector[0] = xmm2;
+               vector[1] = 1;
+               vector[2] = xmm1;
+               break;
+            case 4:
+               vector[0] = xmm2;
+               vector[1] = -1;
+               vector[2] = xmm1;
+               break;
+            case 2:
+               vector[0] = xmm2;
+               vector[1] = xmm1;
+               vector[2] = 1;
+               break;
+            case 5:
+               vector[0] = xmm2;
+               vector[1] = xmm1;
+               vector[2] = -1;
+               break;
+            default:
+               vector[0] = 0;
+               vector[1] = 0;
+               vector[2] = 1;
+         }
+      }
+      normalizeVector(vector);
+      this.unk20 = vector[0];
+      this.unk24 = vector[1];
+      this.unk28 = vector[2];
+   }
    constructor(stream, mapBounds) {
       this.loaded = false;
       this.unk00 = 0;
@@ -196,8 +314,7 @@ class LoadedForgeObject {
          return;
       this.loaded = true;
       this.unk00 = stream.readBits(2, false);
-      presence = stream.readBits(1);
-      if (presence)
+      if (!stream.readBits(1))
          this.unk02 = stream.readBits(8, false);
       let absence = stream.readBits(1);
       if (!absence)
@@ -206,20 +323,16 @@ class LoadedForgeObject {
          this.unk2E = 0xFF; // -1
       this.loadPosition(stream, mapBounds);
       if (stream.readBits(1)) {
-         //
-         // ??? no bits ???
-         //
+         this.unk20 = 0;
+         this.unk24 = 0;
+         this.unk28 = 1;
       } else {
-         let x = stream.readBits(20, false);
-         //
-         // ...
-         //
+         this.loadUnk20Floats(stream);
       }
-      absence = stream.readBits(1);
-      if (!absence)
-         this.unk20 = stream.readBits(20, false);
-      let a = stream.readBits(14, false);
-      let b = stream.readBits(10, false);
+// Everything up to this point is correct for our test-case: the first defined Forge 
+// object in the "Headstrong" variant of Breakneck.
+      let a = stream.readBits(14, false); // TODO: processing
+      let b = stream.readBits(10, false) - 1; // TODO: processing
    }
 }
 
@@ -322,40 +435,44 @@ class MapVariant {
                continue;
             _fl.strings[i].offset = stream.readBits(12, false);
          }
-         let dataLength   = stream.readBits(13, false) * 8; // encoded value is number of qwords
-         _fl.dataLength = dataLength;
-         let isCompressed = stream.readBits(1);
-         _fl.isCompressed = isCompressed;
-         let buffer = [];
-         if (isCompressed) {
-            let compressed = [];
-            let compSize   = stream.readBits(13, false) * 8; // encoded value is number of qwords
-            for(let i = 0; i < compSize; i++)
-               compressed[i] = stream.readByte();
-            if (pako) {
-               //let bin  = new Uint8Array(compressed);
-               let bin  = new Uint8Array(compressed.slice(4)); // skip the zlib header's uncompressed size
+         if (_fl.stringCount > 0) {
+            let dataLength   = stream.readBits(13, false);
+            _fl.dataLength = dataLength;
+            let isCompressed = stream.readBits(1);
+            _fl.isCompressed = isCompressed;
+            let buffer = [];
+            if (isCompressed) {
+               let compressed = [];
+               let compSize   = stream.readBits(13, false);
+               for(let i = 0; i < compSize; i++)
+                  compressed[i] = stream.readByte();
+               if (pako) {
+                  //let bin  = new Uint8Array(compressed);
+                  let bin  = new Uint8Array(compressed.slice(4)); // skip the zlib header's uncompressed size
 try {
-               let data = pako.inflate(bin);
-               //console.log(`inflated data to ${data.length} bytes; ${uncompressedSize} expected`);
-               buffer = data;
+                  let data = pako.inflate(bin);
+                  //console.log(`inflated data to ${data.length} bytes; ${uncompressedSize} expected`);
+                  buffer = data;
+                  if (buffer.length != dataLength)
+                     console.warn(`Expected ~${dataLength} bytes; got ${buffer.length} (compressed into ${compSize})`);
 } catch (e) { console.log(e); return; }
-            } else
-               buffer = null;
-         } else {
-            for(let i = 0; i < dataLength; i++)
-               buffer[i] = stream.readByte();
-            buffer = new Uint8Array(buffer);
-         }
-         _fl.buffer = buffer;
-         if (buffer) {
-            let size = buffer.length;
-            for(let i = 0; i < _fl.stringCount; ++i) {
-               let s = _fl.strings[i];
-               for(let k = s.offset; k < size; ++k) {
-                  if (buffer[k] == 0)
-                     break;
-                  s.content += String.fromCharCode(buffer[k]);
+               } else
+                  buffer = null;
+            } else {
+               for(let i = 0; i < dataLength; i++)
+                  buffer[i] = stream.readByte();
+               buffer = new Uint8Array(buffer);
+            }
+            _fl.buffer = buffer;
+            if (buffer) {
+               let size = buffer.length;
+               for(let i = 0; i < _fl.stringCount; ++i) {
+                  let s = _fl.strings[i];
+                  for(let k = s.offset; k < size; ++k) {
+                     if (buffer[k] == 0)
+                        break;
+                     s.content += String.fromCharCode(buffer[k]);
+                  }
                }
             }
          }
@@ -363,8 +480,8 @@ try {
       //
       // everything above confirmed accurate via memory inspection of haloreach.dll
       //
-      if (this.unk2B4 > 0x100)
-         console.warn("unk2B4 > 0x100; Halo: Reach would abort with a load failure at this point");
+      if (this.unk2B2 > 0x100)
+         console.warn("unk2B2 > 0x100; Halo: Reach would abort with a load failure at this point");
       this.forgeObjects = [];
       for(let i = 0; i < 0x28B; ++i) {
          this.forgeObjects[i] = new LoadedForgeObject(stream, this.boundingBox);
