@@ -75,7 +75,7 @@ document.getElementById("read-mv").onclick = async function() {
    let variant = new ReachGameVariant();
    stream.backToStart();
    try {
-      variant.parse(stream);
+      variant.parse(stream); // this will error
    } catch (e) {
       console.error(e);
    }

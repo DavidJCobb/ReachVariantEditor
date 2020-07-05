@@ -1,30 +1,164 @@
+function _sub4DC8E0(bitcount, mapBounds, out) {
+   let rsp20 = [
+      mapBounds.x.max - mapBounds.x.min,
+      mapBounds.y.max - mapBounds.y.min,
+      mapBounds.z.max - mapBounds.z.min
+   ];
+   out[0] = bitcount;
+   out[1] = bitcount;
+   out[2] = bitcount;
+   //
+   // Meaning of the next float constant isn't clear, but if you treat it as 
+   // a number of gradians (not a typo), then it converts to 0.0075 degrees. 
+   // Treat it as a number of degrees and it converts to 0.01 gradians. Never 
+   // heard of 'em before but apparently gradians are useful for dealing with 
+   // right angles, and after Halo 3's rotation issues I can see how that 
+   // might have been appealing to Bungie.
+   //
+   // Except... isn't this codepath used for positions?
+   //
+   // I assumed that the (mapBounds) object was, well, an AABB for the map's 
+   // Forge objects. But what if it's an angle range instead? There are 400 
+   // gradians in a circle; the default map bounds are -20000 to 20000; that 
+   // gives us a range of 40000; and 400 / 40000 = 0.01. Maybe these are 
+   // rotations and the constant is the minimum possible change in degrees?
+   //
+   let xmm6;
+   const SOME_FLOAT_OF_SIGNIFICANCE = 0.00833333376795;  // hex 0x3C088889
+   const SOME_IMPORTANT_THRESHOLD   = 9.99999974738e-05; // hex 0x38D1B717
+   if (bitcount > 0x10) {
+      //
+      // something to do with the "extra" bits; if bitcount == 0x10 then xmm6 is just the constant
+      //
+      xmm6 = SOME_FLOAT_OF_SIGNIFICANCE;
+      let ecx  = bitcount -= 0x10; // (ecx = (dword)bitcount + 0xFFFFFFF0) i.e. (ecx = bitcount + -10)
+      let xmm0 = 1 << (ecx & 0xFF);
+      xmm6 /= xmm0;
+   } else {
+      //
+      // something to do with the "missing" bits; if bitcount == 0x10 then xmm6 is just the constant
+      //
+      xmm6 = 1 << (0x10 - bitcount);
+      xmm6 *= SOME_FLOAT_OF_SIGNIFICANCE;
+   }
+   if (xmm6 >= SOME_IMPORTANT_THRESHOLD) {
+      xmm6 *= 2;
+      for(let i = 0; i < 3; ++i) {
+         let xmm0 = Math.ceil(rsp20[i] / xmm6);
+         let edx  = Math.floor(xmm0); // truncate to integer
+         edx = Math.min(0x800000, edx);
+         let ecx = -1;
+         if (edx) { // asm: TEST EDX, EDX; JE
+            ecx = 31;
+            let eax = 0x80000000;
+            if (edx >= 0) { // asm: JS
+               //
+               // Decrement (ecx) until we find the most significant bit in (edx).
+               //
+               do {
+                  --ecx;
+                  //
+                  // JavaScript needs Math.abs since it uses int32_t, not an unsigned type 
+                  // or a larger type.
+                  //
+                  eax = Math.abs(eax >> 1);
+               } while ((edx & eax) == 0);
+               //
+               // TODO: rephrase this in terms of cobb::bitmax or something like that
+               //
+            }
+         }
+         let r8 = 0;
+         if (ecx != -1) {
+            let eax = (1 << ecx) - 1;
+            r8  = ecx + (((edx & eax) != 0) ? 1 : 0);
+         }
+         let eax = Math.min(26, r8);
+         out[i] = eax;
+      }
+   } else {
+      for(let i = 0; i < 3; ++i)
+         out[i] = 26;
+   }
+   if (out[0] != 0x17)
+      console.warn("using bitcount " + out[0] + "; expected " + 0x17 + " based on debugging and memory inspection");
+}
+
 class LoadedForgeObject {
    loadPosition(stream, mapBounds) {
+      const bitcount = 21;
+      //
+      let rbp60 = [0, 0, 0];
       let a = stream.readBits(1); // can't understand how this is used
-      this.unk08 = stream.readBits(21, false); // compressed float
-      this.unk0C = stream.readBits(21, false); // compressed float
-      this.unk10 = stream.readBits(21, false); // compressed float
+      if (a) {
+         if (mapBounds) {
+            _sub4DC8E0(bitcount, mapBounds, rbp60);
+         } else {
+            //
+            // TODO: initialize rbp60 to some static values set by sub$+4DC4F0, which is 
+            // ultimately called by a virtual member function somewhere
+            //
+         }
+      } else {
+         if (mapBounds) {
+            _sub4DC8E0(bitcount, mapBounds, rbp60);
+         } else {
+            if (!stream.readBits(1)) {
+               let b = stream.readBits(2, false);
+               if (b != -1) {
+                  //
+                  // TODO: call _sub4DC8E0 but with different args than usual
+                  //
+               }
+            }
+         }
+      }
+      this.unk08 = stream.readBits(rbp60[0], false); // compressed float
+      this.unk0C = stream.readBits(rbp60[1], false); // compressed float
+      this.unk10 = stream.readBits(rbp60[2], false); // compressed float
       //
       let range = mapBounds.x.max - mapBounds.x.min;
-      let xmm3 = range / (1 << 21);
+      /*//
+      let xmm3 = range / (1 << rbp60[0]);
       let xmm1 = this.unk08 * xmm3;
-      xmm3 *= 1.0;
+      xmm3 *= 0.5;
       xmm1 += mapBounds.x.min + xmm3;
       this.unk08 = xmm1;
+      //*/
+      // this.unk08 = (this.unk08 * range / (1 << rbp60[0])) + mapBounds.x.min + (range / (1 << rbp60[0]) / 2);
+      // a = (raw * range / (1 << b)) + (range / (1 << b) * 0.5) + min
+      // a - min = (raw * range / (1 << b)) + (range / (1 << b) * 0.5)
+      // a = (0.5 + raw) * (range / (1 << b)) + min
+      let xmm3, xmm1;
+      this.unk08__raw = this.unk08;
+      this.unk08 = (0.5 + this.unk08) * (range / (1 << rbp60[0])) + mapBounds.x.min;
       //
       range = mapBounds.y.max - mapBounds.y.min;
-      xmm3 = range / (1 << 21);
+      /*//
+      xmm3 = range / (1 << rbp60[1]);
       xmm1 = this.unk0C * xmm3;
-      xmm3 *= 1.0;
+      xmm3 *= 0.5;
       xmm1 += mapBounds.y.min + xmm3;
       this.unk0C = xmm1;
+      //*/
+      this.unk0C = (0.5 + this.unk0C) * (range / (1 << rbp60[1])) + mapBounds.y.min;
       //
       range = mapBounds.z.max - mapBounds.z.min;
-      xmm3 = range / (1 << 21);
+      /*//
+      xmm3 = range / (1 << rbp60[2]);
       xmm1 = this.unk10 * xmm3;
-      xmm3 *= 1.0;
+      xmm3 *= 0.5;
       xmm1 += mapBounds.z.min + xmm3;
       this.unk10 = xmm1;
+      //*/
+      this.unk10 = (0.5 + this.unk10) * (range / (1 << rbp60[2])) + mapBounds.z.min;
+      
+      //
+      // TODO: data shown in the JS prototype doesnt match data seen when inspecting 
+      // process memory for MCC. we are reading the right bitcount for these values, 
+      // and this float unpack code is consistent with floats in game variants; are 
+      // we missing bits beforehand?
+      //
    }
    constructor(stream, mapBounds) {
       this.loaded = false;
@@ -76,8 +210,9 @@ class LoadedForgeObject {
          // ??? no bits ???
          //
       } else {
+         let x = stream.readBits(20, false);
          //
-         // ??? no bits ???
+         // ...
          //
       }
       absence = stream.readBits(1);
