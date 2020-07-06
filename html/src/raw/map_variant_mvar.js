@@ -30,23 +30,60 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
    // gives us a range of 40000; and 400 / 40000 = 0.01. Maybe these are 
    // rotations and the constant is the minimum possible change in degrees?
    //
+   // The thing that complicates this theory is, later in the object load 
+   // code, we grab a unit vector -- with an optimization made for if the 
+   // unit vector is world-up. I can't see why we'd do that unless rotations 
+   // are axis-angle (which would explain both the presence of the unit 
+   // vector itself, and the optimization for world-up: axis-angle with a 
+   // world-up vector is just a yaw rotation, which will be the most common 
+   // case if you're using palette objects only and exactly as designed).
+   //
+   // The floats loaded here could still be a position if Bungie wanted a 
+   // really weird step value (0.0083...) for some reason. It looks like 
+   // that step value is very roughly 0.00002% of the 40000-unit range, so 
+   // maybe that step value isn't as weird as it looks, although it doesn't 
+   // look like that "roughness" is attributable to floating-point precision. 
+   // 
+   // (0.00833333333 / 40000 == 0.00000020833333325, but 0.0000002 can be 
+   // represented as 0.0000002000000023372194846160709857940673828125. 
+   // Going in the opposite direction, 40000 * 0.0000002, just gets us 0.008, 
+   // which is representable as 0.008000000379979610443115234375.)
+   //
+   // There are two more values after the unit vector. I guess we won't know 
+   // for sure what's what until we have the code ready to load those. Then, 
+   // I can write code to more easily browse the objects in a map variant; 
+   // if I have a map variant on hand with a minimum of content (and I think 
+   // I do: the Halo Chessboard), then I should be able to step through that 
+   // and compare it to what I see in-game, and THAT will solve this mystery 
+   // once and for all.
+   //
    let xmm6;
-   const SOME_FLOAT_OF_SIGNIFICANCE = 0.00833333376795;  // hex 0x3C088889
-   const SOME_IMPORTANT_THRESHOLD   = 9.99999974738e-05; // hex 0x38D1B717
+   const SOME_FLOAT_OF_SIGNIFICANCE = 0.00833333333; // hex 0x3C088889 == 0.00833333376795F
+   const SOME_IMPORTANT_THRESHOLD   = 0.0001;        // hex 0x38D1B717 == 9.99999974738e-05
    if (bitcount > 0x10) {
       //
       // something to do with the "extra" bits; if bitcount == 0x10 then xmm6 is just the constant
       //
       xmm6 = SOME_FLOAT_OF_SIGNIFICANCE;
-      let ecx  = bitcount -= 0x10; // (ecx = (dword)bitcount + 0xFFFFFFF0) i.e. (ecx = bitcount + -10)
-      let xmm0 = 1 << (ecx & 0xFF);
+      let ecx  = bitcount - 0x10; // (ecx = (dword)bitcount + 0xFFFFFFF0) i.e. (ecx = bitcount + -10)
+      let xmm0 = 1 << ecx; // 1 << cl
       xmm6 /= xmm0;
+      //
+      // I think that xmm6 is something like our "effective precision," where 
+      // the target is 16 bits (0x10) for 0.01-gradian steps, and if we have 
+      // more bits, then we can use smaller steps with xmm6 being the step 
+      // size...
+      //
    } else {
       //
       // something to do with the "missing" bits; if bitcount == 0x10 then xmm6 is just the constant
       //
       xmm6 = 1 << (0x10 - bitcount);
       xmm6 *= SOME_FLOAT_OF_SIGNIFICANCE;
+      //
+      // ...whereas if we have fewer than 16 bits, then we need to use a larger 
+      // (i.e. less precise) step size.
+      //
    }
    if (xmm6 >= SOME_IMPORTANT_THRESHOLD) {
       xmm6 *= 2;
@@ -283,15 +320,15 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
       this.unk00 = 0;
       this.unk02 = 0xFFFF;
       this.unk04 = 0xFFFFFFFF;
-      this.unk08 = 0; // float // x?
-      this.unk0C = 0; // float // y?
-      this.unk10 = 0; // float // z?
+      this.unk08 = 0; // float // x? rotation in gradians?
+      this.unk0C = 0; // float // y? rotation in gradians?
+      this.unk10 = 0; // float // z? rotation in gradians?
       this.unk14 = 0; // float
       this.unk18 = 0; // float
       this.unk1C = 0; // float
-      this.unk20 = 0; // float
-      this.unk24 = 0; // float
-      this.unk28 = 0; // float
+      this.unk20 = 0; // float // unit vector x... but axis-angle doesnt make sense if unk08 and friends are gradians
+      this.unk24 = 0; // float // unit vector y
+      this.unk28 = 0; // float // unit vector z
       this.unk2C = 0xFFFF;
       this.unk2E = 0;
       this.unk2F = 0;
@@ -326,6 +363,10 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
          this.unk20 = 0;
          this.unk24 = 0;
          this.unk28 = 1;
+         //
+         // if this is an axis-angle unit vector, then this would mean that the angle 
+         // is just yaw.
+         //
       } else {
          this.loadUnk20Floats(stream);
       }
