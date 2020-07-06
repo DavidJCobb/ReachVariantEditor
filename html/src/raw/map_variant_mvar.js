@@ -77,6 +77,10 @@ function _sub10A8A0(a, b, c) {
 }
 
 function _sub4DC8E0(bitcount, mapBounds, out) {
+   //
+   // Determines the proper bitcounts to use for object position coordinates, given the 
+   // map bounds and the baseline bitcount specified.
+   //
    function highest_bit_set(value) {
       let r = 0;
       while (value >>= 1)
@@ -84,7 +88,7 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
       return r;
    }
    
-   let rsp20 = [
+   let rangesByAxis = [
       mapBounds.x.max - mapBounds.x.min,
       mapBounds.y.max - mapBounds.y.min,
       mapBounds.z.max - mapBounds.z.min
@@ -92,81 +96,37 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
    out[0] = bitcount;
    out[1] = bitcount;
    out[2] = bitcount;
-   //
-   // Meaning of the next float constant isn't clear, but if you treat it as 
-   // a number of gradians (not a typo), then it converts to 0.0075 degrees. 
-   // Treat it as a number of degrees and it converts to 0.01 gradians. Never 
-   // heard of 'em before but apparently gradians are useful for dealing with 
-   // right angles, and after Halo 3's rotation issues I can see how that 
-   // might have been appealing to Bungie.
-   //
-   // Except... isn't this codepath used for positions?
-   //
-   // I assumed that the (mapBounds) object was, well, an AABB for the map's 
-   // Forge objects. But what if it's an angle range instead? There are 400 
-   // gradians in a circle; the default map bounds are -20000 to 20000; that 
-   // gives us a range of 40000; and 400 / 40000 = 0.01. Maybe these are 
-   // rotations and the constant is the minimum possible change in degrees?
-   //
-   // The thing that complicates this theory is, later in the object load 
-   // code, we grab a unit vector -- with an optimization made for if the 
-   // unit vector is world-up. I can't see why we'd do that unless rotations 
-   // are axis-angle (which would explain both the presence of the unit 
-   // vector itself, and the optimization for world-up: axis-angle with a 
-   // world-up vector is just a yaw rotation, which will be the most common 
-   // case if you're using palette objects only and exactly as designed).
-   //
-   // The floats loaded here could still be a position if Bungie wanted a 
-   // really weird step value (0.0083...) for some reason. It looks like 
-   // that step value is very roughly 0.00002% of the 40000-unit range, so 
-   // maybe that step value isn't as weird as it looks, although it doesn't 
-   // look like that "roughness" is attributable to floating-point precision. 
-   // 
-   // (0.00833333333 / 40000 == 0.00000020833333325, but 0.0000002 can be 
-   // represented as 0.0000002000000023372194846160709857940673828125. 
-   // Going in the opposite direction, 40000 * 0.0000002, just gets us 0.008, 
-   // which is representable as 0.008000000379979610443115234375.)
-   //
-   // There are two more values after the unit vector. I guess we won't know 
-   // for sure what's what until we have the code ready to load those. Then, 
-   // I can write code to more easily browse the objects in a map variant; 
-   // if I have a map variant on hand with a minimum of content (and I think 
-   // I do: the Halo Chessboard), then I should be able to step through that 
-   // and compare it to what I see in-game, and THAT will solve this mystery 
-   // once and for all.
-   //
-   let xmm6;
-   const SOME_FLOAT_OF_SIGNIFICANCE = 0.00833333333; // hex 0x3C088889 == 0.00833333376795F
-   const SOME_IMPORTANT_THRESHOLD   = 0.0001;        // hex 0x38D1B717 == 9.99999974738e-05
+   let min_step; // register XMM6 // minimum possible representable distance
+   const MINIMUM_UNIT_16BIT = 0.00833333333; // hex 0x3C088889 == 0.00833333376795F
    if (bitcount > 0x10) {
       //
-      // something to do with the "extra" bits; if bitcount == 0x10 then xmm6 is just the constant
+      // something to do with the "extra" bits; if bitcount == 0x10 then min_step is just the constant
       //
-      xmm6 = SOME_FLOAT_OF_SIGNIFICANCE;
+      min_step = MINIMUM_UNIT_16BIT;
       let ecx  = bitcount - 0x10; // (ecx = (dword)bitcount + 0xFFFFFFF0) i.e. (ecx = bitcount + -10)
       let xmm0 = 1 << ecx; // 1 << cl
-      xmm6 /= xmm0;
+      min_step /= xmm0;
       //
-      // I think that xmm6 is something like our "effective precision," where 
+      // I think that min_step is something like our "effective precision," where 
       // the target is 16 bits (0x10) for 0.01-gradian steps, and if we have 
-      // more bits, then we can use smaller steps with xmm6 being the step 
+      // more bits, then we can use smaller steps with min_step being the step 
       // size...
       //
    } else {
       //
-      // something to do with the "missing" bits; if bitcount == 0x10 then xmm6 is just the constant
+      // something to do with the "missing" bits; if bitcount == 0x10 then min_step is just the constant
       //
-      xmm6 = 1 << (0x10 - bitcount);
-      xmm6 *= SOME_FLOAT_OF_SIGNIFICANCE;
+      min_step = 1 << (0x10 - bitcount);
+      min_step *= MINIMUM_UNIT_16BIT;
       //
       // ...whereas if we have fewer than 16 bits, then we need to use a larger 
       // (i.e. less precise) step size.
       //
    }
-   if (xmm6 >= SOME_IMPORTANT_THRESHOLD) {
-      xmm6 *= 2;
+   if (min_step >= 0.0001) { // hex 0x38D1B717 == 9.99999974738e-05
+      min_step *= 2;
       for(let i = 0; i < 3; ++i) {
-         let xmm0 = Math.ceil(rsp20[i] / xmm6);
+         let xmm0 = Math.ceil(rangesByAxis[i] / min_step);
          let edx  = Math.floor(xmm0); // truncate to integer
          edx = Math.min(0x800000, edx);
          let ecx = -1;
@@ -273,38 +233,35 @@ class LFOUnk30 { // sizeof >= 0x1C
       this.unk0C = xmm1;
    }
    constructor(stream) {
-      this.unk00 = 0; // float
-      this.unk04 = 0; // float
-      this.unk08 = 0; // float
-      this.unk0C = 0; // float
-      this.unk10 = 0; // byte
-      this.unk11 = 0; // byte
+      this.unk00 = 0; // float (shape dimension 0? width or length)
+      this.unk04 = 0; // float (shape dimension 1? width or length)
+      this.unk08 = 0; // float (shape dimension 2? top or bottom)
+      this.unk0C = 0; // float (shape dimension 3? top or bottom)
+      this.unk10 = 0; // byte  (shape type?)
+      this.spawnSequence = 0; // 11 // aaaasigned byte; UI clamps this to [-100, 100]
       this.unk12 = 0; // byte
       this.unk13 = 0; // byte
-      this.unk14 = 0; // word
-      this.unk16 = 0; // byte
+      this.forgeLabelIndex = -1; // 14 // word
+      this.unk16 = 0; // byte // flags? maybe?
       this.unk17 = 0; // byte
       this.unk18 = 0; // qword
-      this.unk10 = 0; // byte
-      this.unk13 = 0; // byte
       this.unk1A = 0xFF; // byte
-      this.unk14 = 0xFFFF; // word
       this.unk17 = 8; // byte
       if (!stream)
          return;
-      this.sub6078F0(stream);
+      this.sub6078F0(stream); // read shape
       //
       let eax = stream.readBits(8);
       if (eax & 0x80000000) // test if signed
          eax |= 0xFFFFFF00;
-      this.unk11 = eax & 0xFF;
+      this.spawnSequence = eax & 0xFF;
       //
       this.unk12 = stream.readBits(8);
       this.unk13 = stream.readBits(5);
       if (stream.readBits(1)) { // absence bit
-         this.unk14 = 0xFFFF; // word
+         this.forgeLabelIndex = -1; // word
       } else {
-         this.unk14 = stream.readBits(8); // word
+         this.forgeLabelIndex = stream.readBits(8); // word
       }
       this.unk16 = stream.readBits(8); // byte
       //
@@ -358,53 +315,19 @@ class LoadedForgeObject {
             }
          }
       }
-      this.unk08 = stream.readBits(rbp60[0], false); // compressed float
-      this.unk0C = stream.readBits(rbp60[1], false); // compressed float
-      this.unk10 = stream.readBits(rbp60[2], false); // compressed float
-this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];      
+      this.position.x = stream.readBits(rbp60[0], false); // compressed float
+      this.position.y = stream.readBits(rbp60[1], false); // compressed float
+      this.position.z = stream.readBits(rbp60[2], false); // compressed float   
       //
       let range = mapBounds.x.max - mapBounds.x.min;
-      /*//
-      let xmm3 = range / (1 << rbp60[0]);
-      let xmm1 = this.unk08 * xmm3;
-      xmm3 *= 0.5;
-      xmm1 += mapBounds.x.min + xmm3;
-      this.unk08 = xmm1;
-      //*/
-      // this.unk08 = (this.unk08 * range / (1 << rbp60[0])) + mapBounds.x.min + (range / (1 << rbp60[0]) / 2);
-      // a = (raw * range / (1 << b)) + (range / (1 << b) * 0.5) + min
-      // a - min = (raw * range / (1 << b)) + (range / (1 << b) * 0.5)
-      // a = (0.5 + raw) * (range / (1 << b)) + min
       let xmm3, xmm1;
-      this.unk08__raw = this.unk08;
-      this.unk08 = (0.5 + this.unk08) * (range / (1 << rbp60[0])) + mapBounds.x.min;
+      this.position.x = (0.5 + this.position.x) * (range / (1 << rbp60[0])) + mapBounds.x.min;
       //
       range = mapBounds.y.max - mapBounds.y.min;
-      /*//
-      xmm3 = range / (1 << rbp60[1]);
-      xmm1 = this.unk0C * xmm3;
-      xmm3 *= 0.5;
-      xmm1 += mapBounds.y.min + xmm3;
-      this.unk0C = xmm1;
-      //*/
-      this.unk0C = (0.5 + this.unk0C) * (range / (1 << rbp60[1])) + mapBounds.y.min;
+      this.position.y = (0.5 + this.position.y) * (range / (1 << rbp60[1])) + mapBounds.y.min;
       //
       range = mapBounds.z.max - mapBounds.z.min;
-      /*//
-      xmm3 = range / (1 << rbp60[2]);
-      xmm1 = this.unk10 * xmm3;
-      xmm3 *= 0.5;
-      xmm1 += mapBounds.z.min + xmm3;
-      this.unk10 = xmm1;
-      //*/
-      this.unk10 = (0.5 + this.unk10) * (range / (1 << rbp60[2])) + mapBounds.z.min;
-      
-      //
-      // TODO: data shown in the JS prototype doesnt match data seen when inspecting 
-      // process memory for MCC. we are reading the right bitcount for these values, 
-      // and this float unpack code is consistent with floats in game variants; are 
-      // we missing bits beforehand?
-      //
+      this.position.z = (0.5 + this.position.z) * (range / (1 << rbp60[2])) + mapBounds.z.min;
    }
    loadUnk20Floats(stream) {
       //
@@ -534,11 +457,23 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
    constructor(stream, mapBounds) {
       this.loaded = false;
       this.unk00 = 0;
-      this.unk02 = 0xFFFF;
+      //
+      // objectSubcatIndex
+      //    In the MAP file, look at the SCNR (scenario) tag's Sandbox Palette. This 
+      //    structure defines categories (Sandbox Palette), subcategories (Entries), 
+      //    and objects in subcategories (Entry Variants); when an object is nested 
+      //    directly under a category, this works by having a subcategory with a name 
+      //    and only a single contained object. Forge count and price limits are 
+      //    defined per subcategory. Treat the categories and subcategories as a flat 
+      //    array, and objectSubcatIndex is the index of a subcategory.
+      //
+      // Some quick values:
+      // TEMPEST | 61 | Hill Marker
+      //
+      this.objectSubcatIndex = 0xFFFF; // 02
+      //
       this.unk04 = 0xFFFFFFFF;
-      this.unk08 = 0; // float // x? rotation in gradians?
-      this.unk0C = 0; // float // y? rotation in gradians?
-      this.unk10 = 0; // float // z? rotation in gradians?
+      this.position = new MVVector(); // 08, 0C, 10
       this.unk14 = 0; // float
       this.unk18 = 0; // float
       this.unk1C = 0; // float
@@ -571,10 +506,10 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
       this.loaded = true;
       this.unk00 = stream.readBits(2, false);
       if (!stream.readBits(1))
-         this.unk02 = stream.readBits(8, false);
+         this.objectSubcatIndex = stream.readBits(8, false);
       let absence = stream.readBits(1);
       if (!absence)
-         this.unk2E = stream.readBits(5, false);
+         this.unk2E = stream.readBits(5, false); // value in the range of [0, 31]
       else
          this.unk2E = 0xFF; // -1
       this.loadPosition(stream, mapBounds);
@@ -691,7 +626,7 @@ class MapVariant {
       {
          let _fl = this.forgeLabels;
          //
-         _fl.stringCount = stream.readBits(9, false);
+         _fl.stringCount = stream.readBits(9, false); // value in the range of [0, 511], though there may be a lower limit
          for(let i = 0; i < _fl.stringCount; ++i) {
             _fl.strings[i] = { offset: 0, content: "" };
             let presence = stream.readBits(1);
