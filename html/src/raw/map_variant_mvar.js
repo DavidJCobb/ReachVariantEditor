@@ -233,19 +233,19 @@ class LFOUnk30 { // sizeof >= 0x1C
       this.unk0C = xmm1;
    }
    constructor(stream) {
-      this.unk00 = 0; // float (shape dimension 0? width or length)
+      this.unk00 = 0; // float (shape dimension 0? width or length; radius for cylinder)
       this.unk04 = 0; // float (shape dimension 1? width or length)
-      this.unk08 = 0; // float (shape dimension 2? top or bottom)
-      this.unk0C = 0; // float (shape dimension 3? top or bottom)
-      this.unk10 = 0; // byte  (shape type?)
-      this.spawnSequence = 0; // 11 // aaaasigned byte; UI clamps this to [-100, 100]
-      this.unk12 = 0; // byte
+      this.unk08 = 0; // float (shape dimension 2? top or bottom; top for cylinder)
+      this.unk0C = 0; // float (shape dimension 3? top or bottom; bottom for cylinder)
+      this.unk10 = 0; // byte  (shape type)
+      this.spawnSequence = 0; // 11 // byte; UI clamps this to [-100, 100]
+      this.respawnTime  = 0; // 12 // byte
       this.unk13 = 0; // byte
       this.forgeLabelIndex = -1; // 14 // word
       this.unk16 = 0; // byte // flags? maybe?
       this.unk17 = 0; // byte
       this.unk18 = 0; // qword
-      this.unk1A = 0xFF; // byte
+      this.team = -1; // 1A // byte
       this.unk17 = 8; // byte
       if (!stream)
          return;
@@ -256,20 +256,19 @@ class LFOUnk30 { // sizeof >= 0x1C
          eax |= 0xFFFFFF00;
       this.spawnSequence = eax & 0xFF;
       //
-      this.unk12 = stream.readBits(8);
-      this.unk13 = stream.readBits(5);
+      this.respawnTime = stream.readBits(8);
+      this.unk13 = stream.readBits(5); // teleporter channel? 's got the right number of bits
       if (stream.readBits(1)) { // absence bit
          this.forgeLabelIndex = -1; // word
       } else {
          this.forgeLabelIndex = stream.readBits(8); // word
       }
       this.unk16 = stream.readBits(8); // byte
-      //
-      eax = this.unk17 = stream.readBits(4) - 1;
+      this.unk17 = stream.readBits(4) - 1; // object color?
       if (!stream.readBits(1)) {
-         this.unk1A = stream.readBits(3); // byte
+         this.team = stream.readBits(3); // byte
       } else {
-         this.unk1A = 0xFF; // byte
+         this.team = -1; // byte
       }
       //
       if (this.unk13 == 1) {
@@ -469,7 +468,7 @@ class LoadedForgeObject {
       //
       this.objectSubcat = 0xFFFF; // 02
       //
-      this.unk04 = 0xFFFFFFFF;
+      this.unk04 = -1; // dword
       this.position = new MVVector(); // 08, 0C, 10
       this.unk14 = 0; // float
       this.unk18 = 0; // float
@@ -477,7 +476,7 @@ class LoadedForgeObject {
       this.unk20 = 0; // float // unit vector x, for axis-angle rotations
       this.unk24 = 0; // float // unit vector y
       this.unk28 = 0; // float // unit vector z
-      this.unk2C = 0xFFFF; // probably axis-angle angle but I don't have code to load it yet
+      this.unk2C = -1; // word // probably axis-angle angle but I don't have code to load it yet
       //
       // objectSubtype
       //    Index of an object within a subcategory.
@@ -485,7 +484,7 @@ class LoadedForgeObject {
       //    As an example, Coliseum Walls on Tempest have objectSubcat 71 and 
       //    objectSubtype 8.
       //
-      this.objectType = 0;
+      this.objectType = 0; // 2E
       //
       this.unk2F = 0; // padding?
       this.unk30 = null; // struct; all remaining fields are its members
