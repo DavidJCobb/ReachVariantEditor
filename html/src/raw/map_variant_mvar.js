@@ -1,3 +1,81 @@
+class MVVector {
+   constructor(a, b, c) {
+      this[0] = 0;
+      this[1] = 0;
+      this[2] = 0;
+      if (a instanceof Array || a instanceof MVVector) {
+         this[0] = a[0] || 0;
+         this[1] = a[1] || 0;
+         this[2] = a[2] || 0;
+      } else if (+a === a) {
+         this[0] = a || 0;
+         this[1] = b || 0;
+         this[2] = c || 0;
+      }
+   }
+   get x() { return this[0]; }
+   get y() { return this[1]; }
+   get z() { return this[2]; }
+   set x(v) { return this[0] = v; }
+   set y(v) { return this[1] = v; }
+   set z(v) { return this[2] = v; }
+   enforce_single_precision() {
+      for(let i = 0; i < 3; ++i)
+         this[i] = Math.fround(this[i]);
+   }
+   length() { return Math.sqrt(Math.fround(coords[0]*coords[0] + coords[1]*coords[1] + coords[2]*coords[2])); }
+   normalize() {
+      let l = this.length();
+      let a = Math.abs(l);
+      if (0.0001 <= a) {
+         a = 1.0 / l;
+         this[0] *= a;
+         this[1] *= a;
+         this[2] *= a;
+         this.enforce_single_precision();
+      }
+   }
+}
+
+function _sub10A8A0(a, b, c) {
+   let xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+   //
+   xmm5 = a.y;
+   xmm0 = 0;
+   xmm4 = a.z;
+   xmm7 = a.z * xmm0;
+   xmm8 = a.x;
+   xmm6 = a.x * xmm0;
+   xmm0 = a.x + a.y + xmm7;
+   xmm1 = xmm6 + a.y + xmm7;
+   if (Math.abs(xmm1) > Math.abs(xmm0)) {
+      xmm0 = xmm6 - a.y;
+      b.y = a.z - xmm6;
+      b.x = a.y - xmm7;
+   } else {
+      xmm6 -= xmm7;
+      xmm0 = a.y - a.x;
+      b.y = xmm6;
+      b.x = a.z - a.y;
+   }
+   b.z = xmm0;
+   b.normalize();
+   xmm5 = a.x;
+   xmm1 = b.x;
+   xmm3 = a.z;
+   xmm0 = a.y;
+   xmm8 = a.x * b.y - a.y;
+   xmm3 *= b.y;
+   xmm2 = xmm3 * b.x;
+   xmm0 = b.z * a.x;
+   xmm4 = b.z * a.y - xmm3;
+   c.z = xmm8;
+   xmm2 -= xmm0;
+   c.x = xmm4;
+   c.y = xmm2;
+   c.normalize();
+}
+
 function _sub4DC8E0(bitcount, mapBounds, out) {
    function highest_bit_set(value) {
       let r = 0;
@@ -109,8 +187,146 @@ function _sub4DC8E0(bitcount, mapBounds, out) {
       for(let i = 0; i < 3; ++i)
          out[i] = 26;
    }
-   if (out[0] != 0x17)
-      console.warn("using bitcount " + out[0] + "; expected " + 0x17 + " based on debugging and memory inspection");
+}
+
+class LFOUnk30 { // sizeof >= 0x1C
+   sub6078F0(stream) {
+      let sw = stream.readBits(2);
+      this.unk10 = sw;
+      let xmm3 = 0.0977517142892;
+      let xmm0 = 0;
+      let xmm4 = 0.0488758571446;
+      let xmm2 = 200;
+      let xmm1;
+      switch (sw) {
+         case 1: {
+            let a = stream.readBits(0xB);
+            if (!a) {
+               this.unk00 = 0;
+            } else {
+               if (a == 0x7FF) {
+                  this.unk00 = 200; // float
+               } else {
+                  --a;
+                  a *= 0.0977517142892;
+                  a += 0.0488758571446;
+                  this.unk00 = a;
+               }
+            }
+         }; return;
+         //
+         case 3: {
+            let eax = stream.readBits(sw + 8);
+            if (!eax) {
+               xmm1 = xmm0;
+            } else if (eax == 0x7FF) {
+               xmm1 = xmm2;
+            } else {
+               xmm1 = (eax - 1) * xmm3 + xmm4;
+            }
+            this.unk00 = xmm1;
+            eax = stream.readBits(0xB);
+            if (eax == 0) {
+               xmm1 = xmm0;
+               this.unk04 = xmm1;
+            } else if (eax == 0x7FF) {
+               xmm1 = xmm2;
+               this.unk04 = xmm1;
+            } else {
+               xmm1 = (eax - 1) * xmm3 + xmm4;
+               this.unk04 = xmm1;
+            }
+         }; break;
+         //
+         case 2: {
+            let eax = stream.readBits(0xB);
+            if (!eax) {
+               xmm1 = xmm0;
+            } else if (eax == 0x7FF) {
+               xmm1 = xmm2;
+            } else {
+               xmm1 = (eax - 1) * xmm3 + xmm4;
+            }
+            this.unk00 = xmm1;
+         }; break;
+         //
+         default:
+            return;
+      }
+      let eax = stream.readBits(0xB);
+      if (!eax) {
+         xmm1 = xmm0;
+      } else if (eax == 0x7FF) {
+         xmm1 = xmm2;
+      } else {
+         xmm1 = (eax - 1) * xmm3 + xmm4;
+      }
+      this.unk08 = xmm1;
+      eax = stream.readBits(0xB);
+      if (!eax) {
+         xmm1 = xmm0;
+      } else if (eax == 0x7FF) {
+         xmm1 = xmm2;
+      } else {
+         xmm1 = (eax - 1) * xmm3 + xmm4;
+      }
+      this.unk0C = xmm1;
+   }
+   constructor(stream) {
+      this.unk00 = 0; // float
+      this.unk04 = 0; // float
+      this.unk08 = 0; // float
+      this.unk0C = 0; // float
+      this.unk10 = 0; // byte
+      this.unk11 = 0; // byte
+      this.unk12 = 0; // byte
+      this.unk13 = 0; // byte
+      this.unk14 = 0; // word
+      this.unk16 = 0; // byte
+      this.unk17 = 0; // byte
+      this.unk18 = 0; // qword
+      this.unk10 = 0; // byte
+      this.unk13 = 0; // byte
+      this.unk1A = 0xFF; // byte
+      this.unk14 = 0xFFFF; // word
+      this.unk17 = 8; // byte
+      if (!stream)
+         return;
+      this.sub6078F0(stream);
+      //
+      let eax = stream.readBits(8);
+      if (eax & 0x80000000) // test if signed
+         eax |= 0xFFFFFF00;
+      this.unk11 = eax & 0xFF;
+      //
+      this.unk12 = stream.readBits(8);
+      this.unk13 = stream.readBits(5);
+      if (stream.readBits(1)) { // absence bit
+         this.unk14 = 0xFFFF; // word
+      } else {
+         this.unk14 = stream.readBits(8); // word
+      }
+      this.unk16 = stream.readBits(8); // byte
+      //
+      eax = this.unk17 = stream.readBits(4) - 1;
+      if (!stream.readBits(1)) {
+         this.unk1A = stream.readBits(3); // byte
+      } else {
+         this.unk1A = 0xFF; // byte
+      }
+      //
+      if (this.unk13 == 1) {
+         this.unk18 = stream.readBits(8); // byte
+         return;
+      } else if (this.unk13 <= 0xB) {
+         return;
+      } else if (this.unk13 <= 0xE) {
+         this.unk18 = stream.readBits(5); // byte
+         this.unk19 = stream.readBits(5); // byte
+      } else if (this.unk13 == 0x13) {
+         this.unk18 = stream.readBits(8) - 1; // byte
+      }
+   }
 }
 
 class LoadedForgeObject {
@@ -332,6 +548,8 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
       this.unk2C = 0xFFFF;
       this.unk2E = 0;
       this.unk2F = 0;
+      this.unk30 = null; // struct; all remaining fields are its members
+      /*//
       this.unk30 = 0; // int64?
       this.unk38 = 0; // int64?
       this.unk40 = 0;
@@ -343,6 +561,7 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
       this.unk48 = 0;
       this.unk4A = 0xFF;
       this.unk4B = 0;
+      //*/
       if (!stream)
          return;
       //
@@ -373,7 +592,11 @@ this.unk08_rawArr = [this.unk08, this.unk0C, this.unk10];
 // Everything up to this point is correct for our test-case: the first defined Forge 
 // object in the "Headstrong" variant of Breakneck.
       let a = stream.readBits(14, false); // TODO: processing
-      let b = stream.readBits(10, false) - 1; // TODO: processing
+      this.unk2C = stream.readBits(10, false) - 1;
+      this.unk30 = new LFOUnk30(stream);
+      //
+      // TODO: a member function which reads bits
+      //
    }
 }
 
