@@ -458,31 +458,36 @@ class LoadedForgeObject {
       this.loaded = false;
       this.unk00 = 0;
       //
-      // objectSubcatIndex
+      // objectSubcat
       //    In the MAP file, look at the SCNR (scenario) tag's Sandbox Palette. This 
       //    structure defines categories (Sandbox Palette), subcategories (Entries), 
       //    and objects in subcategories (Entry Variants); when an object is nested 
       //    directly under a category, this works by having a subcategory with a name 
       //    and only a single contained object. Forge count and price limits are 
-      //    defined per subcategory. Treat the categories and subcategories as a flat 
-      //    array, and objectSubcatIndex is the index of a subcategory.
+      //    defined per subcategory. Treat all this as a flat array of subcategories, 
+      //    and this is the index of a subcategory.
       //
-      // Some quick values:
-      // TEMPEST | 61 | Hill Marker
-      //
-      this.objectSubcatIndex = 0xFFFF; // 02
+      this.objectSubcat = 0xFFFF; // 02
       //
       this.unk04 = 0xFFFFFFFF;
       this.position = new MVVector(); // 08, 0C, 10
       this.unk14 = 0; // float
       this.unk18 = 0; // float
       this.unk1C = 0; // float
-      this.unk20 = 0; // float // unit vector x... but axis-angle doesnt make sense if unk08 and friends are gradians
+      this.unk20 = 0; // float // unit vector x, for axis-angle rotations
       this.unk24 = 0; // float // unit vector y
       this.unk28 = 0; // float // unit vector z
-      this.unk2C = 0xFFFF;
-      this.unk2E = 0;
-      this.unk2F = 0;
+      this.unk2C = 0xFFFF; // probably axis-angle angle but I don't have code to load it yet
+      //
+      // objectSubtype
+      //    Index of an object within a subcategory.
+      //
+      //    As an example, Coliseum Walls on Tempest have objectSubcat 71 and 
+      //    objectSubtype 8.
+      //
+      this.objectType = 0;
+      //
+      this.unk2F = 0; // padding?
       this.unk30 = null; // struct; all remaining fields are its members
       /*//
       this.unk30 = 0; // int64?
@@ -506,12 +511,12 @@ class LoadedForgeObject {
       this.loaded = true;
       this.unk00 = stream.readBits(2, false);
       if (!stream.readBits(1))
-         this.objectSubcatIndex = stream.readBits(8, false);
+         this.objectSubcat = stream.readBits(8, false);
       let absence = stream.readBits(1);
       if (!absence)
-         this.unk2E = stream.readBits(5, false); // value in the range of [0, 31]
+         this.objectType = stream.readBits(5, false); // value in the range of [0, 31]
       else
-         this.unk2E = 0xFF; // -1
+         this.objectType = 0xFF; // -1
       this.loadPosition(stream, mapBounds);
       if (stream.readBits(1)) {
          this.unk20 = 0;
@@ -524,14 +529,9 @@ class LoadedForgeObject {
       } else {
          this.loadUnk20Floats(stream);
       }
-// Everything up to this point is correct for our test-case: the first defined Forge 
-// object in the "Headstrong" variant of Breakneck.
       let a = stream.readBits(14, false); // TODO: processing
       this.unk2C = stream.readBits(10, false) - 1;
       this.unk30 = new LFOUnk30(stream);
-      //
-      // TODO: a member function which reads bits
-      //
    }
 }
 
@@ -581,7 +581,6 @@ class MapVariant {
          stream.endianness = ENDIAN_BIG; // KSoft.Tool always uses big-endian, but MCC may be little-endian for this?
          o.title       = stream.readWidecharString(128, true);
          o.description = stream.readWidecharString(128, true);
-         //o.unk280 = stream.readSInt32(); // probably engine icon
          if (o.activity == 2)
             o.hopperID = stream.readUInt16(); // TODO: TEST ME (how?)
          else
@@ -676,16 +675,18 @@ try {
             }
          }
       }
-      //
-      // everything above confirmed accurate via memory inspection of haloreach.dll
-      //
       if (this.unk2B2 > 0x100)
          console.warn("unk2B2 > 0x100; Halo: Reach would abort with a load failure at this point");
       this.forgeObjects = [];
       for(let i = 0; i < 0x28B; ++i) {
          this.forgeObjects[i] = new LoadedForgeObject(stream, this.boundingBox);
       }
-      
+      //
+      // everything above confirmed accurate via memory inspection of haloreach.dll
+      //
+      //
+      // TODO: remaining data
+      //
       
    }
 }
