@@ -552,7 +552,7 @@ class MapVariant {
       this.hashSHA1 = stream.readBytes(0x14);
       this.hashContentLength = stream.readBytes(0x4);
       //
-      {  // header - same data as CHDR but fields aren't byte-aligned here
+      {  // GameVariantHeader // header - same data as CHDR but fields aren't byte-aligned here
          let o = this.header = {};
          o.type       = stream.readBits(4, BIT_ORDER_UNKNOWN) - 1; // gvar_content_type
             // ^ "None" is encoded as 0 instead of -1 in mpvr; the whole enum is shifted up by 1

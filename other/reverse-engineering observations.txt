@@ -72,3 +72,6 @@ FIREFIGHT
 
 NOTES:
  - There are thirteen skulls available per round
+ - The struct that we call GameVariantHeader is also used for map variants; refer to our 
+   map variant JS prototype for full details and branches; we should amend our source 
+   code to reflect this.
