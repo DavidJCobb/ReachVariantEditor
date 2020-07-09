@@ -7,46 +7,45 @@ FIREFIGHT
 	// type above, and immediately calls a virtual load method; for Firefight, that 
 	// method does this: 
 	//
-	Same struct as GameVariantDataMultiplayer::options
-	5 bits // probably Wave Limit or Time Limit
-	3 bits // probably Scenario Settings flags
+	UGC header, same as game variants
+	1 bit  // isBuiltIn, same as game variants, though i don't know if it's functional
+	Same struct as GameVariantDataMultiplayer::options // Friendly Fire and Betrayal Booting are in here
+	5 bits // probably Time Limit?
+	3 bits
 	8 bits
-	4 bits // probably Turn Count
+	4 bits // Wave Limit
 	15 bits
-	15 bits
+	15 bits // Turn Count // verify this, because 15 bits is just extravagant
 	7 bits; subtract 1 after loading
 	7 bits; subtract 1 after loading
 	15 bits
 	7 bits; subtract 1 after loading
-	2 bits
+	2 bits // Generator Count
 	a set of player traits, same as MP // probably base elite or base spartan traits
 	a set of player traits, same as MP // probably base elite or base spartan traits
-	struct UnknownStruct01 // most likely wave traits
+	struct FFWaveTraitsStruct // base wave traits?
 		3 bits
 		2 bits
 		3 bits
-		2 bits
-		2 bits
+		2 bits // Shootiness
+		2 bits // Grenades
 		2 bits
 		2 bits
 		2 bits
 		4 bits
 		4 bits
-	struct[3] // probably custom skull settings
+	struct[3] // custom skull settings
 		a set of player traits, same as MP
 		a set of player traits, same as MP
-		an UnknownStruct01
+		a FFWaveTraitsStruct
 	Same struct as GameVariantDataMultiplayer::options::respawn
 	struct[3] // probably wave properties for non-bonus rounds; three of this struct, probably one per round
 		18 bits // probably enabled skulls as a flags mask, with some unused bits
 		// probably Initial Wave:
-		1 bit // probably Uses Dropship or Squad Selection Order
-		1 bit // probably Uses Dropship or Squad Selection Order
-		4 bits
-		struct[12]
-			// probably enemy squads, but why 12 bytes when you can only select 3 different squads? 
-			// is each squad like a combination of several of several values? is the value that the 
-			// menu displays as "Jackal Patrol" actually multiple "jackal" and "grunt" values?
+		1 bit // Uses Dropship
+		1 bit // Squad Selection Order; 0 = random, 1 = ordered
+		4 bits // squad count
+		struct[12] // squad types
 			8 bits; subtract 1 after loading
 		// probably Main Waves:
 		1 bit
@@ -61,14 +60,36 @@ FIREFIGHT
 		struct[12]
 			8 bits; subtract 1 after loading
 	// probably bonus wave properties:
-	12 bits // probably bonus wave duration
+	12 bits // bonus wave duration
 	18 bits // probably consistent with wave properties above
-	1 bit // probably Uses Dropship or Squad Selection Order
-	1 bit // probably Uses Dropship or Squad Selection Order
-	4 bits
-	struct[12]
+	1 bit // Uses Dropship
+	1 bit // Squad Selection Order; 0 = random, 1 = ordered
+	4 bits // squad count
+	struct[12] // squad types
 		8 bits; subtract 1 after loading
 
+SQUAD ENUM
+ 0 = Brutes
+ 1 = Brute Kill Team
+ 2 = Brute Patrol
+ 3 = Brute Infantry
+ 6 = Elites
+ 7 = Elite Patrol
+ 8 = Elite Infantry
+13 = Elite Generals
+14 = Grunts
+15 = Hunter Kill Team
+17 = Hunter Strike Team
+18 = Jackal Patrol
+19 = Elite Strike Team
+20 = Skirmisher Patrol
+21 = Hunters
+23 = Jackals
+24 = Hunter Infantry
+26 = Skirmishers
+28 = Skirmisher Infantry
+30 = Heretic Snipers
+31 = Heretic Heavy
 
 NOTES:
  - There are thirteen skulls available per round
