@@ -22,7 +22,7 @@ class ReachTeamData {
       cobb::bitnumber<1, uint8_t> spartanOrElite;
       cobb::bytenumber<int32_t>   colorPrimary; // xRGB
       cobb::bytenumber<int32_t>   colorSecondary; // xRGB
-      cobb::bytenumber<int32_t>   colorText; // xRGB
+      cobb::bytenumber<int32_t>   colorText; // ARGB or RGBA // actually UI background color
       cobb::bitnumber<5, uint8_t> fireteamCount = 1;
       //
       void read(cobb::ibitreader&) noexcept;

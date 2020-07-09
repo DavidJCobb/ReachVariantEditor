@@ -1,26 +1,104 @@
-const FIREFIGHT_SQUAD_TYPES = {
+const FIREFIGHT_SQUAD_TYPES = { // these correspond to the Waves list in the SMDT (Survival Mode Globals) tag
    BRUTES:               0, // Brutes only
    BRUTE_KILL_TEAM:      1, // Brutes led by a chieftain
    BRUTE_PATROL:         2, // Brutes and Grunts
    BRUTE_INFANTRY:       3, // Brutes and Jackals
+   BRUTE_TACTICAL:       4, // Brutes and Skirmishers
+   BRUTE_CHIEFTAINS:     5, // Brute chieftains only
    ELITES:               6, // Elites only
    ELITE_PATROL:         7, // Elites and Grunts
    ELITE_INFANTRY:       8, // Elites and Jackals
+   ELITE_AIRBORNE:       9, // Elites only, with jetpacks
+   ELITE_TACTICAL:      10, // Elites and Skirmishers
+   ELITE_SPEC_OPS:      11, // Elite spec-ops only
+   ENGINEERS:           12, // a single Engineer (not in UI)
    ELITE_GENERALS:      13, // Elite generals only
    GRUNT:               14,
-   HUNTER_KILL_TEAM:    15, // Hunters and Elites
+   HUNTER_KILL_TEAM:    15, // Hunters and Elites and Grunts
+   HUNTER_PATROL:       16, // Hunters and Grunts
    HUNTER_STRIKE_TEAM:  17, // Hunters and Elites led by a general
    JACKAL_PATROL:       18, // Jackals and Grunts
    ELITE_STRIKE_TEAM:   19, // Elites led by a general
    SKIRMISHER_PATROL:   20, // Skirmishers and Grunts
    HUNTERS:             21, // Hunters only
+   JACKAL_SNIPERS:      22, // Jackals with Needle Rifles and Focus Rifles
    JACKALS:             23, // Jackals only
    HUNTER_INFANTRY:     24, // Hunters and Jackals
+   GUTA:                25, // a single Guta ("Mule" internally) (only on supported maps, and none seem to) (not in UI)
    SKIRMISHERS:         26, // Skirmishers only
+   HUNTER_TACTICAL:     27, // Hunters and Skirmishers
    SKIRMISHER_INFANTRY: 28, // Skirmishers and Jackals
+   HERETICS:            29, // Elites wielding human weapons, varying with difficulty (assault rifle, DMR, grenade launcher, magnum, shotgun)
    HERETIC_SNIPERS:     30, // Elites wielding human sniper rifles
    HERETIC_HEAVY:       31, // Elites wielding human explosive weaponry
 };
+
+const FF_WAVE_DAMAGE_MODIFIER = [
+    -1, // unchanged
+     0, // 0%
+    25, // 25%
+    50, // 50%
+    75, // 75%
+    90, // 90%
+   100,
+   110,
+   125,
+   150,
+   200,
+   300
+];
+const FF_WAVE_DAMAGE_RESISTANCE = [
+     -1, // unchanged
+     10, // 10%
+     50, // 50%
+     90,
+    100,
+    110,
+    150,
+    200,
+    300,
+    500,
+   1000,
+   2000,
+   Infinity // invulnerable
+];
+const FF_WAVE_GRENADES = [
+   "Unchanged",
+   "Normal",
+   "None",
+   "Catch"
+];
+const FF_WAVE_HEARING = [
+   "Unchanged",
+   "Normal",
+   "Deaf",
+   "Sharp"
+];
+const FF_WAVE_LUCK = [
+   "Unchanged",
+   "Normal",
+   "Unlucky",
+   "Lucky",
+   "Leprechaun"
+];
+const FF_WAVE_SHOOTINESS = [
+   "Unchanged",
+   "Normal",
+   "Marksman",
+   "Trigger Happy"
+];
+const FF_WAVE_VISION = [
+   "Unchanged",
+   "Normal",
+   "Blind", // not normally visible in the UI
+   "Nearsighted",
+   "Eagle Eye"
+];
+const FF_WAVE_TRAIT_BOOL = [
+   "Unchanged",
+   "Disabled",
+   "Enabled"
+];
 
 class CustomGameRespawnOptions {
    constructor(stream) {
@@ -94,17 +172,16 @@ class CustomGameOptions {
 
 class FirefightWaveTraits {
    constructor(stream) {
-      // shootiness, vision, hearing, luck
-      this.unk00 = stream.readBits(3, false); // max value is 4; if greater, treated as 0 // luck?
-      this.unk01 = stream.readBits(2, false); // max value is 3; if greater, treated as 0 // vision/hearing?
-      this.unk02 = stream.readBits(3, false); // max value is 4; if greater, treated as 0 // luck?
-      this.unk03 = stream.readBits(2, false); // max value is 3; if greater, treated as 0 // shootiness
-      this.unk04 = stream.readBits(2, false); // max value is 3; if greater, treated as 0 // grenades?
-      this.unk05 = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // unchanged/enabled/disabled?
-      this.unk06 = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // unchanged/enabled/disabled?
-      this.unk07 = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // unchanged/enabled/disabled?
-      this.unk08 = stream.readBits(4, false);
-      this.unk09 = stream.readBits(4, false);
+      this.vision     = stream.readBits(3, false); // max value is 4; if greater, treated as 0
+      this.hearing    = stream.readBits(2, false); // max value is 3; if greater, treated as 0
+      this.luck       = stream.readBits(3, false); // max value is 4; if greater, treated as 0
+      this.shootiness = stream.readBits(2, false); // max value is 3; if greater, treated as 0
+      this.grenades   = stream.readBits(2, false); // max value is 3; if greater, treated as 0
+      this.dontDropEquipment = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // it's the opposite of how the UI displays it
+      this.assassinImmunity  = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // unchanged/enabled/disabled
+      this.headshotImmunity  = stream.readBits(2, false); // max value is 2; if greater, treated as 0 // unchanged/enabled/disabled
+      this.damageResistance  = stream.readBits(4, false); // enum
+      this.damageModifier    = stream.readBits(4, false); // enum
    }
 }
 class FirefightVariantData {
@@ -112,28 +189,28 @@ class FirefightVariantData {
       this.header    = new UGCHeader(stream);
       this.isBuiltIn = stream.readBits(1);
       this.options   = new CustomGameOptions(stream); // Friendly Fire and Betrayal Booting are in here
-      this.unkW  = stream.readBits(5, false); // scenario flags?!
+      this.unkW = stream.readBits(5, false); // scenario flags?!
       this.unkX = stream.readBits(3, false);
       this.unkA = stream.readBits(8, false);
       this.waveLimit = stream.readBits(4, false);
-      this.unkB = stream.readBits(15, false);
+      this.unkB = stream.readBits(15, false); // a quantity of points
       this.turnCount = stream.readBits(15, false); // verify this, because 15 bits is absurd when the UI only goes up to the value "3"
       this.unkD = stream.readBits(7, false) - 1;
       this.unkE = stream.readBits(7, false) - 1;
       this.unkF = stream.readBits(15, false);
-      this.unkG = stream.readBits(7, false) - 1;
+      this.unkG = stream.readBits(7, false) - 1; // Spartan max lives?
       this.generatorCount = stream.readBits(2, false);
       this.baseTraitsSpartan = new GameVariantPlayerTraits(stream); // assumed
       this.baseTraitsElite   = new GameVariantPlayerTraits(stream); // assumed
       this.waveTraits = new FirefightWaveTraits(stream);
-      this.skulls = [];
+      this.skulls = []; // red, yellow, blue
       for(let i = 0; i < 3; ++i) {
          let current = this.skulls[i] = {};
          current.traitsSpartan = new GameVariantPlayerTraits(stream); // assumed
          current.traitsElite   = new GameVariantPlayerTraits(stream); // assumed
          current.waveTraits = new FirefightWaveTraits(stream);
       }
-      this.respawnSettings = new CustomGameRespawnOptions(stream);
+      this.respawnSettings = new CustomGameRespawnOptions(stream); // most likely for Elites
       this.rounds = [];
       for(let i = 0; i < 3; ++i) {
          let current = this.rounds[i] = {
