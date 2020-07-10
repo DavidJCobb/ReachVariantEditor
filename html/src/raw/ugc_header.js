@@ -5,12 +5,10 @@ class UGCHeader {
          //   when written to the file.
       // Note: As of the previous field, we are byte-aligned again.
       this.fileLength = _byteswap_ulong(stream.readUInt32());
-      stream.reportOffset();
       this.unk08      = _byteswap_uint64(stream.readUInt64());
       this.unk10      = _byteswap_uint64(stream.readUInt64());
       this.unk18      = _byteswap_uint64(stream.readUInt64());
       this.unk20      = _byteswap_uint64(stream.readUInt64());
-      stream.reportOffset();
       this.activity   = stream.readBits(3, false) - 1;
          // ^ "None" is encoded as 0 instead of -1 in mpvr; the whole enum is shifted up by 1
          //   when written to the file.

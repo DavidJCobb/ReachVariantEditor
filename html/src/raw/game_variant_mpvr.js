@@ -13,7 +13,7 @@ const FIREFIGHT_SQUAD_TYPES = { // these correspond to the Waves list in the SMD
    ELITE_SPEC_OPS:      11, // Elite spec-ops only
    ENGINEERS:           12, // a single Engineer (not in UI)
    ELITE_GENERALS:      13, // Elite generals only
-   GRUNT:               14,
+   GRUNTS:              14, // Grunts only
    HUNTER_KILL_TEAM:    15, // Hunters and Elites and Grunts
    HUNTER_PATROL:       16, // Hunters and Grunts
    HUNTER_STRIKE_TEAM:  17, // Hunters and Elites led by a general
@@ -99,6 +99,33 @@ const FF_WAVE_TRAIT_BOOL = [
    "Disabled",
    "Enabled"
 ];
+
+const FF_SKULLS = {
+   BLACK_EYE:  0x00002,
+   TOUGH_LUCK: 0x00004,
+   CATCH:      0x00008,
+   FOG:        0x00010,
+   FAMINE:     0x00020,
+   TILT:       0x00080,
+   MYTHIC:     0x00100,
+   COWBELL:    0x00800,
+   GRUNT_BIRTHDAY_PARTY: 0x01000,
+   IWHBYD:     0x02000,
+   RED:        0x04000,
+   YELLOW:     0x08000,
+   BLUE:       0x10000,
+};
+
+const FF_SCENARIO_FLAGS = {
+   MASK_GENERATOR:  0x06, // 00110
+   MASK_SCENARIO:   0x19, // 11001
+   //
+   HAZARDS_ENABLED:      0x01, // 00001
+   MUST_KEEP_ALL_GENS:   0x02, // 00010 // Generator Defense: fail if any generator is destroyed
+   RANDOM_GEN_SPAWNS:    0x04, // 00100 // Generator Defense: use random generator locations if fewer than 3 generators
+   WEAPON_DROPS_ENABLED: 0x08, // 01000
+   AMMO_CRATES_ENABLED:  0x10, // 10000
+};
 
 class CustomGameRespawnOptions {
    constructor(stream) {
@@ -188,20 +215,20 @@ class FirefightVariantData {
    constructor(stream) {
       this.header    = new UGCHeader(stream);
       this.isBuiltIn = stream.readBits(1);
-      this.options   = new CustomGameOptions(stream); // Friendly Fire and Betrayal Booting are in here
-      this.unkW = stream.readBits(5, false); // scenario flags?!
+      this.options   = new CustomGameOptions(stream); // contains: Betrayal Booting; Friendly Fire; Respawn Time (Spartans); Time Limit
+      this.scenarioFlags = stream.readBits(5, false); // FF_SCENARIO_FLAGS
       this.unkX = stream.readBits(3, false);
       this.unkA = stream.readBits(8, false);
       this.waveLimit = stream.readBits(4, false);
       this.unkB = stream.readBits(15, false); // a quantity of points
-      this.turnCount = stream.readBits(15, false); // verify this, because 15 bits is absurd when the UI only goes up to the value "3"
-      this.unkD = stream.readBits(7, false) - 1;
-      this.unkE = stream.readBits(7, false) - 1;
-      this.unkF = stream.readBits(15, false);
-      this.unkG = stream.readBits(7, false) - 1; // Spartan max lives?
+      this.eliteKillBonus = stream.readBits(15, false); // lives that Spartans earn for killing player-controlled Elites
+      this.spartanStartingLives = stream.readBits(7, false) - 1; // Spartan Starting Lives? -1 == unlimited, 0 = none
+      this.eliteStartingLives   = stream.readBits(7, false) - 1; // Elite Starting Lives
+      this.unkF = stream.readBits(15, false); // blind speculation: this is a spartanKillBonus
+      this.maxSpartanExtraLives = stream.readBits(7, false) - 1;
       this.generatorCount = stream.readBits(2, false);
-      this.baseTraitsSpartan = new GameVariantPlayerTraits(stream); // assumed
-      this.baseTraitsElite   = new GameVariantPlayerTraits(stream); // assumed
+      this.baseTraitsSpartan = new GameVariantPlayerTraits(stream);
+      this.baseTraitsElite   = new GameVariantPlayerTraits(stream);
       this.waveTraits = new FirefightWaveTraits(stream);
       this.skulls = []; // red, yellow, blue
       for(let i = 0; i < 3; ++i) {
@@ -210,7 +237,7 @@ class FirefightVariantData {
          current.traitsElite   = new GameVariantPlayerTraits(stream); // assumed
          current.waveTraits = new FirefightWaveTraits(stream);
       }
-      this.respawnSettings = new CustomGameRespawnOptions(stream); // most likely for Elites
+      this.eliteRespawnSettings = new CustomGameRespawnOptions(stream);
       this.rounds = [];
       for(let i = 0; i < 3; ++i) {
          let current = this.rounds[i] = {

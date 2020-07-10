@@ -51,11 +51,16 @@ document.getElementById("read-gv").onclick = async function() {
    let variant = new ReachGameVariant();
    stream.backToStart();
    try {
-      variant.parse(stream);
+      variant.parse(stream); // for Firefight, this is wrong
    } catch (e) {
       console.error(e);
    }
    console.log(variant);
+   let mpvr = blocks["mpvr"];
+   if (mpvr && mpvr.data && (mpvr.data.header instanceof UGCHeader)) {
+      console.log(mpvr.data.header.title);
+      console.log(mpvr.data.header.description);
+   }
 };
 document.getElementById("read-mv").onclick = async function() {
    let node = document.getElementById("gvar-file");

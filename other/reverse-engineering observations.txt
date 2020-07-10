@@ -9,31 +9,31 @@ FIREFIGHT
 	//
 	UGC header, same as game variants
 	1 bit  // isBuiltIn, same as game variants, though i don't know if it's functional
-	Same struct as GameVariantDataMultiplayer::options // Friendly Fire and Betrayal Booting are in here
-	5 bits // probably Time Limit?
+	Same struct as GameVariantDataMultiplayer::options // contains: Betrayal Booting; Friendly Fire; Respawn Time (Spartans); Time Limit
+	5 bits // scenario and generator flags
 	3 bits
 	8 bits
 	4 bits // Wave Limit
 	15 bits
-	15 bits // Turn Count // verify this, because 15 bits is just extravagant
-	7 bits; subtract 1 after loading
-	7 bits; subtract 1 after loading
+	15 bits // Elite Kill Bonus
+	7 bits; subtract 1 after loading // Spartan Starting Lives
+	7 bits; subtract 1 after loading // Elite Starting Lives
 	15 bits
-	7 bits; subtract 1 after loading
+	7 bits; subtract 1 after loading // Max Spartan Extra Lives
 	2 bits // Generator Count
-	a set of player traits, same as MP // probably base elite or base spartan traits
-	a set of player traits, same as MP // probably base elite or base spartan traits
+	a set of player traits, same as MP // base spartan traits
+	a set of player traits, same as MP // base elite traits
 	struct FFWaveTraitsStruct // base wave traits?
-		3 bits
-		2 bits
-		3 bits
+		3 bits // Vision
+		2 bits // Hearing
+		3 bits // Luck
 		2 bits // Shootiness
 		2 bits // Grenades
-		2 bits
-		2 bits
-		2 bits
-		4 bits
-		4 bits
+		2 bits // Don't Drop Equipment
+		2 bits // Assassination Immunity
+		2 bits // Headshot Immunity
+		4 bits // Damage Resistance (enum)
+		4 bits // Damage Modifier (enum)
 	struct[3] // custom skull settings
 		a set of player traits, same as MP
 		a set of player traits, same as MP

@@ -20,7 +20,7 @@ function _byteswap_uint64(n) {
       bytes[i] = str.substring(j, j + 2);
    }
    bytes = "0x" + bytes.reverse().join("");
-   console.log(bytes);
+   //console.log(bytes);
    return BigInt(bytes);
 }
 
