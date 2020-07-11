@@ -184,7 +184,12 @@ void ReachBlockMPVR::write_last_minute_fixup(GameVariantSaveProcess& save_proces
    {  // SHA-1 hash
       auto hasher = cobb::sha1();
       uint32_t size = wd.offset_after_hashable - wd.offset_before_hashable;
-      bytes.write_to_offset(wd.offset_of_hashable_length, size, cobb::endian::little);
+      //
+      auto length_endian = cobb::endian::little;
+      if (this->data)
+         length_endian = this->data->sha1_length_endianness();
+      bytes.write_to_offset(wd.offset_of_hashable_length, size, length_endian);
+      //
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
       auto     buffer   = (const uint8_t*)bytes.data();
       auto     buffer32 = (const uint32_t*)buffer;
@@ -377,6 +382,9 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
    for (int i = 0; i < 5; i++)
       printf("   %08X\n", hasher.hash[i]);
    printf("Test done.\n");
+}
+GameVariantDataFirefight* GameVariant::get_firefight_data() const noexcept {
+   return dynamic_cast<GameVariantDataFirefight*>(this->multiplayer.data);
 }
 GameVariantDataMultiplayer* GameVariant::get_multiplayer_data() const noexcept {
    auto d = this->multiplayer.data;

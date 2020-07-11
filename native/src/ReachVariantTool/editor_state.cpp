@@ -59,6 +59,12 @@ void ReachEditorState::takeVariant(GameVariant* other, const wchar_t* path) noex
    emit switchedMultiplayerTeam(this->currentVariant, this->currentMPTeam, this->multiplayerTeam());
 }
 
+GameVariantDataFirefight* ReachEditorState::firefightData() noexcept {
+   auto v = this->currentVariant;
+   if (!v)
+      return nullptr;
+   return dynamic_cast<GameVariantDataFirefight*>(v->multiplayer.data);
+}
 GameVariantDataMultiplayer* ReachEditorState::multiplayerData() noexcept {
    auto v = this->currentVariant;
    if (!v)

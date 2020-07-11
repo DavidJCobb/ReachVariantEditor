@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>16</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -177,7 +177,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="PageGameVariantHeader">
+      <widget class="QWidget" name="PageGameVariantMPMetadata">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="PageMPMetadata" name="pageContentMetadata" native="true"/>
@@ -312,6 +312,20 @@
        <layout class="QGridLayout" name="gridLayout_22">
         <item row="0" column="0">
          <widget class="PageForgeSettingsGeneral" name="pageContentForgeGeneral" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageGameVariantFFMetadata">
+       <layout class="QGridLayout" name="gridLayout_12">
+        <item row="0" column="0">
+         <widget class="PageFFMetadata" name="pageContentFFMetadata" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightScenario">
+       <layout class="QGridLayout" name="gridLayout_13">
+        <item row="0" column="0">
+         <widget class="PageFFScenario" name="pageContentFFScenario" native="true"/>
         </item>
        </layout>
       </widget>
@@ -527,6 +541,18 @@
    <class>EngineOptionToggleTree</class>
    <extends>QTreeView</extends>
    <header>widgets/option_toggles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PageFFMetadata</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_metadata.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFScenario</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_scenario.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -29,6 +29,26 @@ int main(int argc, char *argv[]) {
 }
 
 //
+// FIREFIGHT PLANS
+//
+//  - We need to decode the "athr" file block; official and built-in Firefight variants use 
+//    that instead of "chdr".
+//
+//  - Finish adding UI for all Firefight options.
+//
+//     - Custom Game options
+//
+//        - "Spartan Respawn Settings" instead of standard; should also include starting 
+//          lives, max lives, and lives earned for killing elite players
+//
+//        - "Elite Respawn Settings"
+//
+//     - Rounds
+//
+//     - Bonus Wave
+//
+
+//
 // CURRENT PLANS:
 //
 //  = [OPTIONAL] Consider renaming all of the opcode arg types: instead of using classnames 

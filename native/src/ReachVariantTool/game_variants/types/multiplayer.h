@@ -77,6 +77,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO: DOES NOT WORK
       virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept override;
+      virtual cobb::endian_t sha1_length_endianness() const noexcept override { return cobb::endian::little; }
       //
       static constexpr uint8_t encoding_version_vanilla = 0x6A;
       static constexpr uint8_t encoding_version_tu1     = 0x6B;

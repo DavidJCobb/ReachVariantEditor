@@ -4,6 +4,7 @@
 #include "game_variants/components/loadouts.h"
 #include "game_variants/components/player_traits.h"
 #include "game_variants/components/teams.h"
+#include "game_variants/types/firefight.h"
 #include "game_variants/types/multiplayer.h"
 
 class ReachMegaloOption;
@@ -54,6 +55,7 @@ class ReachEditorState : public QObject {
       void takeVariant(GameVariant* other, const wchar_t* path) noexcept;
       //
    public: // getters
+      GameVariantDataFirefight* firefightData() noexcept;
       inline ReachLoadoutPalette* loadoutPalette() noexcept { return this->currentLoadoutPalette; }
       GameVariantDataMultiplayer* multiplayerData() noexcept;
       ReachTeamData* multiplayerTeam() noexcept;

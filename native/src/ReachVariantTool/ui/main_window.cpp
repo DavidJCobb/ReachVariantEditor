@@ -55,6 +55,15 @@ namespace {
       mp_title_update_1,
       forge_options_general,
       //
+      ff_metadata,
+      ff_respawn_elite,
+      ff_scenario,
+      ff_base_player_traits,
+      ff_base_wave_traits,
+      ff_custom_skull,
+      ff_round,
+      ff_bonus_wave,
+      //
       redirect_to_first_child = 0x1000,
    };
    enum class _traits_builtin {
@@ -190,24 +199,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
             QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
             return;
          }
-         /*//
-         auto path   = dir.filePath("index.html").toStdWString();
-         auto result = (uint32_t)ShellExecuteW(0, 0, path.c_str(), 0, 0, SW_NORMAL);
-         if (result <= 32) {
-            QString text;
-            switch (result) {
-               case 0:
-               case SE_ERR_OOM:
-                  text = "The operating system is out of memory or resources.";
-                  break;
-               case ERROR_FILE_NOT_FOUND:
-               case ERROR_PATH_NOT_FOUND:
-                  text = "The documentation folders or files have gone missing.";
-                  break;
-            }
-            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. ") + text);
-         }
-         //*/
       });
       QObject::connect(this->ui.actionHelpFolder, &QAction::triggered, [this]() {
          auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // gotta do weird stuff to normalize the application path ughhhhh
@@ -516,7 +507,7 @@ void ReachVariantTool::regenerateNavigation() {
       const QSignalBlocker blocker(widget);
       widget->clear();
       auto variant = editor.variant();
-      if (!variant || !variant->multiplayer.data) {
+      if (!variant) {
          auto item = new QTreeWidgetItem(widget);
          item->setText(0, tr("Welcome", "main window navigation pane"));
          item->setData(0, Qt::ItemDataRole::UserRole, (uint)_page::welcome);
@@ -524,72 +515,80 @@ void ReachVariantTool::regenerateNavigation() {
          return;
       }
       auto mp = variant->get_multiplayer_data();
-      if (!mp) {
+      auto ff = variant->get_firefight_data();
+      if (mp) {
+         defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::mp_metadata);
+         {  // Options
+            auto options = _makeNavItem(widget, tr("Options", "main window navigation pane"), _page::redirect_to_first_child);
+            {
+               _makeNavItem(options, tr("General Settings", "main window navigation pane"), _page::mp_options_general);
+               //
+               auto respawn = _makeNavItem(options, tr("Respawn Settings", "main window navigation pane"), _page::mp_options_respawn);
+               _makeNavItemMPTraits(respawn, tr("Respawn Traits", "main window navigation pane"), _traits_builtin::respawn);
+               //
+               _makeNavItem(options, tr("Social Settings", "main window navigation pane"), _page::mp_options_social);
+               //
+               auto map = _makeNavItem(options, tr("Map and Game Settings", "main window navigation pane"), _page::mp_options_map);
+               _makeNavItemMPTraits(map, tr("Base Player Traits", "main window navigation pane"), _traits_builtin::base);
+               _makeNavItemMPTraits(map, tr("Red Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_red);
+               _makeNavItemMPTraits(map, tr("Blue Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_blue);
+               _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_yellow);
+               //
+               auto team = _makeNavItem(options, tr("Team Settings", "main window navigation pane"), _page::mp_options_team);
+               for (uint8_t i = 0; i < 8; i++) {
+                  _makeNavItemTeamConfig(team, tr("Team %1", "main window navigation pane").arg(i + 1), i);
+               }
+               //
+               auto loadout = _makeNavItem(options, tr("Loadout Settings", "main window navigation pane"), _page::mp_options_loadout);
+               for (uint8_t i = 0; i < 3; i++) {
+                  auto t = new QTreeWidgetItem(loadout);
+                  t->setText(0, tr("Spartan Tier %1", "main window navigation pane").arg(i + 1));
+                  t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+                  t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2);
+               }
+               for (uint8_t i = 0; i < 3; i++) {
+                  auto t = new QTreeWidgetItem(loadout);
+                  t->setText(0, tr("Elite Tier %1", "main window navigation pane").arg(i + 1));
+                  t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+                  t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2 + 1);
+               }
+               //
+               auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);
+               if (priorScriptTraits >= 0)
+                  defaultFallback = script;
+               auto& t = mp->scriptData.traits;
+               for (size_t i = 0; i < t.size(); i++) {
+                  auto& traits = t[i];
+                  ReachString* name = traits.name;
+                  QString text;
+                  if (name) {
+                     text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
+                  } else {
+                     text = QString("Unnamed Traits %1").arg(i);
+                  }
+                  auto item = _makeNavItemMegaloTraits(script, text, i);
+                  ReachString* desc = traits.desc;
+                  if (desc)
+                     item->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
+               }
+            }
+         }
+         _makeNavItem(widget, tr("Option Visibility", "main window navigation pane"), _page::mp_option_visibility);
+         _makeNavItem(widget, tr("Title Update Settings", "main window navigation pane"), _page::mp_title_update_1);
+         if (mp->get_type() == ReachGameEngine::forge) {
+            auto item = _makeNavItem(widget, tr("Forge Settings", "main window navigation pane"), _page::forge_options_general);
+            _makeNavItemMPTraits(item, tr("Editor Traits", "main window navigation pane"), _traits_builtin::forge_editor);
+         }
+      } else if (ff) {
+         defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::ff_metadata);
+         _makeNavItem(widget, tr("Scenario Settings", "main window navigation pane"), _page::ff_scenario);
+         //
+         // TODO
+         //
+      } else {
          auto item = _makeNavItem(widget, tr("Welcome", "main window navigation pane"), _page::unknown_variant_type);
          widget->setCurrentItem(item);
          return;
-      }
-      defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::mp_metadata);
-      {  // Options
-         auto options = _makeNavItem(widget, tr("Options", "main window navigation pane"), _page::redirect_to_first_child);
-         {
-            _makeNavItem(options, tr("General Settings", "main window navigation pane"), _page::mp_options_general);
-            //
-            auto respawn = _makeNavItem(options, tr("Respawn Settings", "main window navigation pane"), _page::mp_options_respawn);
-            _makeNavItemMPTraits(respawn, tr("Respawn Traits", "main window navigation pane"), _traits_builtin::respawn);
-            //
-            _makeNavItem(options, tr("Social Settings", "main window navigation pane"), _page::mp_options_social);
-            //
-            auto map = _makeNavItem(options, tr("Map and Game Settings", "main window navigation pane"), _page::mp_options_map);
-            _makeNavItemMPTraits(map, tr("Base Player Traits", "main window navigation pane"), _traits_builtin::base);
-            _makeNavItemMPTraits(map, tr("Red Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_red);
-            _makeNavItemMPTraits(map, tr("Blue Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_blue);
-            _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_yellow);
-            //
-            auto team = _makeNavItem(options, tr("Team Settings", "main window navigation pane"), _page::mp_options_team);
-            for (uint8_t i = 0; i < 8; i++) {
-               _makeNavItemTeamConfig(team, tr("Team %1", "main window navigation pane").arg(i + 1), i);
-            }
-            //
-            auto loadout = _makeNavItem(options, tr("Loadout Settings", "main window navigation pane"), _page::mp_options_loadout);
-            for (uint8_t i = 0; i < 3; i++) {
-               auto t = new QTreeWidgetItem(loadout);
-               t->setText(0, tr("Spartan Tier %1", "main window navigation pane").arg(i + 1));
-               t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
-               t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2);
-            }
-            for (uint8_t i = 0; i < 3; i++) {
-               auto t = new QTreeWidgetItem(loadout);
-               t->setText(0, tr("Elite Tier %1", "main window navigation pane").arg(i + 1));
-               t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
-               t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2 + 1);
-            }
-            //
-            auto script = _makeNavItem(options, tr("Script-Specific Settings", "main window navigation pane"), _page::mp_options_scripted);
-            if (priorScriptTraits >= 0)
-               defaultFallback = script;
-            auto& t = mp->scriptData.traits;
-            for (size_t i = 0; i < t.size(); i++) {
-               auto& traits = t[i];
-               ReachString* name = traits.name;
-               QString text;
-               if (name) {
-                  text = QString::fromUtf8(name->get_content(reach::language::english).c_str());
-               } else {
-                  text = QString("Unnamed Traits %1").arg(i);
-               }
-               auto item = _makeNavItemMegaloTraits(script, text, i);
-               ReachString* desc = traits.desc;
-               if (desc)
-                  item->setToolTip(0, QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
-            }
-         }
-      }
-      _makeNavItem(widget, tr("Option Visibility", "main window navigation pane"), _page::mp_option_visibility);
-      _makeNavItem(widget, tr("Title Update Settings", "main window navigation pane"), _page::mp_title_update_1);
-      if (mp->get_type() == ReachGameEngine::forge) {
-         auto item = _makeNavItem(widget, tr("Forge Settings", "main window navigation pane"), _page::forge_options_general);
-         _makeNavItemMPTraits(item, tr("Editor Traits", "main window navigation pane"), _traits_builtin::forge_editor);
       }
    }
    //
@@ -649,7 +648,7 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             stack->setCurrentWidget(this->ui.PageMessageForUnknownType);
             return;
          case _page::mp_metadata:
-            stack->setCurrentWidget(this->ui.PageGameVariantHeader);
+            stack->setCurrentWidget(this->ui.PageGameVariantMPMetadata);
             return;
          case _page::mp_options_general:
             stack->setCurrentWidget(this->ui.PageOptionsGeneral);
@@ -732,6 +731,12 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             return;
          case _page::forge_options_general:
             stack->setCurrentWidget(this->ui.PageForge);
+            return;
+         case _page::ff_metadata:
+            stack->setCurrentWidget(this->ui.PageGameVariantFFMetadata);
+            return;
+         case _page::ff_scenario:
+            stack->setCurrentWidget(this->ui.PageFirefightScenario);
             return;
       }
    }

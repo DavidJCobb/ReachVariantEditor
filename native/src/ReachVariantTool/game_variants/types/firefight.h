@@ -12,6 +12,16 @@ class GameVariantDataFirefight : public GameVariantData {
          yellow,
          blue,
       };
+      struct scenario_flags {
+         scenario_flags() = delete;
+         enum {
+            hazards_enabled             = 0x01,
+            all_generators_must_survive = 0x02,
+            random_generator_spawns     = 0x04,
+            weapon_drops_enabled        = 0x08,
+            ammo_crates_enabled         = 0x10,
+         };
+      };
       //
       GameVariantDataFirefight() {};
       //
@@ -20,6 +30,7 @@ class GameVariantDataFirefight : public GameVariantData {
       virtual void write(GameVariantSaveProcess&) noexcept override;
       virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept override;
       virtual GameVariantData* clone() const noexcept override; // TODO
+      virtual cobb::endian_t sha1_length_endianness() const noexcept override { return cobb::endian::big; }
       //
       ReachUGCHeader variantHeader;
       cobb::bitbool  isBuiltIn;

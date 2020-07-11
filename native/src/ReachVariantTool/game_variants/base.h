@@ -23,6 +23,7 @@ enum class ReachGameEngine : uint8_t {
 
 class GameVariantSaveProcess; // io_process.h
 
+class GameVariantDataFirefight;
 class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
@@ -32,6 +33,7 @@ class GameVariantData {
       virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
       virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept { return false; }; // return true to indicate that you've accepted the subrecord
+      virtual cobb::endian_t sha1_length_endianness() const noexcept { return cobb::endian::little; }
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
          switch (this->get_type()) {
@@ -126,6 +128,7 @@ class GameVariant {
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //
+      GameVariantDataFirefight* get_firefight_data() const noexcept;
       GameVariantDataMultiplayer* get_multiplayer_data() const noexcept;
       //
       GameVariant* clone() const noexcept;
