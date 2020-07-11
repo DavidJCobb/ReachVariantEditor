@@ -5,6 +5,7 @@
 #include "../formats/sha1.h"
 #include "../helpers/sha1.h"
 
+#include "types/firefight.h"
 #include "types/multiplayer.h"
 #include "io_process.h"
 #include "errors.h"
@@ -42,156 +43,6 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.write(uint8_t(0));
 }
 
-bool GameVariantHeader::read(cobb::ibitreader& stream) noexcept {
-   this->build.major = 0; // not in mpvr
-   this->build.minor = 0; // not in mpvr
-   this->contentType.read(stream);
-   this->fileLength.read(stream);
-   this->unk08.read(stream);
-   this->unk10.read(stream);
-   this->unk18.read(stream);
-   this->unk20.read(stream);
-   this->activity.read(stream);
-   this->gameMode.read(stream);
-   this->engine.read(stream);
-   this->unk2C.read(stream);
-   this->engineCategory.read(stream);
-   this->createdBy.read(stream);
-   this->modifiedBy.read(stream);
-   stream.read_u16string(this->title, 128); // big-endian
-   this->title[127] = '\0';
-   stream.read_u16string(this->description, 128); // big-endian
-   this->description[127] = '\0';
-   if (this->contentType == ReachFileType::game_variant) {
-      this->engineIcon.read(stream);
-   }
-   if (this->activity == 2)
-      stream.skip(16); // TODO: hopper ID
-   return true;
-}
-bool GameVariantHeader::read(cobb::ibytereader& stream) noexcept {
-   this->build.major.read(stream);
-   this->build.minor.read(stream);
-   this->contentType.read(stream);
-   stream.pad(3);
-   this->fileLength.read(stream);
-   this->unk08.read(stream);
-   this->unk10.read(stream);
-   this->unk18.read(stream);
-   this->unk20.read(stream);
-   this->activity.read(stream);
-   this->gameMode.read(stream);
-   this->engine.read(stream);
-   stream.pad(1);
-   this->unk2C.read(stream);
-   this->engineCategory.read(stream);
-   stream.pad(4);
-   this->createdBy.read(stream);
-   this->modifiedBy.read(stream);
-   stream.read_u16string(this->title, 128);
-   this->title[127] = '\0';
-   stream.read_u16string(this->description, 128);
-   this->description[127] = '\0';
-   this->engineIcon.read(stream);
-   stream.read(this->unk284);
-   return true;
-}
-void GameVariantHeader::write(cobb::bitwriter& stream) const noexcept {
-   this->contentType.write(stream);
-   this->writeData.offset_of_file_length = stream.get_bitpos();
-   this->fileLength.write(stream); // handled fully in the write_last_minute_fixup member function
-   this->unk08.write(stream);
-   this->unk10.write(stream);
-   this->unk18.write(stream);
-   this->unk20.write(stream);
-   this->activity.write(stream);
-   this->gameMode.write(stream);
-   this->engine.write(stream);
-   this->unk2C.write(stream);
-   this->engineCategory.write(stream);
-   this->createdBy.write(stream);
-   this->modifiedBy.write(stream);
-   stream.write_u16string(this->title,       128); // big-endian
-   stream.write_u16string(this->description, 128); // big-endian
-   if (this->contentType == ReachFileType::game_variant) {
-      this->engineIcon.write(stream);
-   }
-   if (this->activity == 2)
-      assert(false && "Hopper ID writing not implemented!"); // TODO: hopper ID
-}
-void GameVariantHeader::write(cobb::bytewriter& stream) const noexcept {
-   this->build.major.write(stream);
-   this->build.minor.write(stream);
-   this->contentType.write(stream);
-   stream.pad(3);
-   this->writeData.offset_of_file_length = stream.get_bytepos();
-   this->fileLength.write(stream); // handled fully in the write_last_minute_fixup member function
-   this->unk08.write(stream);
-   this->unk10.write(stream);
-   this->unk18.write(stream);
-   this->unk20.write(stream);
-   this->activity.write(stream);
-   this->gameMode.write(stream);
-   this->engine.write(stream);
-   stream.pad(1);
-   this->unk2C.write(stream);
-   this->engineCategory.write(stream);
-   stream.pad(4);
-   this->createdBy.write(stream);
-   this->modifiedBy.write(stream);
-   stream.write(this->title);
-   stream.write(this->description);
-   this->engineIcon.write(stream);
-   stream.write(this->unk284);
-}
-void GameVariantHeader::write_last_minute_fixup(cobb::bitwriter& stream) const noexcept {
-   stream.write_to_bitpos(this->writeData.offset_of_file_length, cobb::bits_in<uint32_t>, stream.get_bytespan());
-}
-void GameVariantHeader::write_last_minute_fixup(cobb::bytewriter& stream) const noexcept {
-   stream.write_to_offset(this->writeData.offset_of_file_length, stream.get_bytespan(), cobb::endian::little);
-}
-//
-void GameVariantHeader::set_title(const char16_t* value) noexcept {
-   memset(this->title, 0, sizeof(this->title));
-   for (size_t i = 0; i < std::extent<decltype(this->title)>::value; i++) {
-      char16_t c = value[i];
-      if (!c)
-         break;
-      this->title[i] = c;
-   }
-}
-void GameVariantHeader::set_description(const char16_t* value) noexcept {
-   memset(this->description, 0, sizeof(this->description));
-   for (size_t i = 0; i < std::extent<decltype(this->description)>::value; i++) {
-      char16_t c = value[i];
-      if (!c)
-         break;
-      this->description[i] = c;
-   }
-}
-//
-/*static*/ uint32_t GameVariantHeader::bitcount() noexcept {
-   uint32_t bitcount = 0;
-   bitcount += decltype(build.major)::max_bitcount;
-   bitcount += decltype(build.minor)::max_bitcount;
-   bitcount += decltype(contentType)::max_bitcount;
-   bitcount += decltype(fileLength)::max_bitcount;
-   bitcount += decltype(unk08)::max_bitcount;
-   bitcount += decltype(unk10)::max_bitcount;
-   bitcount += decltype(unk18)::max_bitcount;
-   bitcount += decltype(unk20)::max_bitcount;
-   bitcount += decltype(activity)::max_bitcount;
-   bitcount += decltype(gameMode)::max_bitcount;
-   bitcount += decltype(engine)::max_bitcount;
-   bitcount += decltype(unk2C)::max_bitcount;
-   bitcount += decltype(engineCategory)::max_bitcount;
-   bitcount += ReachContentAuthor::bitcount() * 2; // created by; modified by
-   bitcount += (cobb::bits_in<char16_t> * 128) * 2; // title; description
-   bitcount += decltype(engineIcon)::max_bitcount; // only if contentType == ReachFileType::game_variant
-   bitcount += 16; // only if activity == 2
-   return bitcount;
-}
-
 bool ReachBlockMPVR::read(reach_block_stream& reader) {
    auto& error_report = GameEngineVariantLoadError::get();
    //
@@ -227,7 +78,8 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       case ReachGameEngine::campaign:
          // fall through
       case ReachGameEngine::firefight:
-         // fall through
+         this->data = new GameVariantDataFirefight();
+         break;
       default:
          error_report.state         = GameEngineVariantLoadError::load_state::failure;
          error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;

@@ -5,7 +5,8 @@
    </head>
    <body>
       <input type="file" id="gvar-file" />
-      <input type="button" id="read" value="Read" />
+      <input type="button" id="read-gv" value="Read game variant" />
+      <input type="button" id="read-mv" value="Read map variant" />
       <script src="third-party/pako/pako.js"></script>
       <script src="utils.js"></script>
       <script src="enums-and-flags.js"></script>
@@ -25,11 +26,13 @@
       <script src="megalo/variables-and-scopes.js"></script>
       <script src="megalo/values.js"></script>
       <script src="megalo/condition-opcode-bases.js"></script>
+      <script src="raw/ugc_header.js"></script>
       <script src="raw/game_variant_blam.js"></script>
       <script src="raw/game_variant_chdr.js"></script>
       <script src="raw/game_variant_mpvr.js"></script>
+      <script src="raw/map_variant_mvar.js"></script>
       <script>
-document.getElementById("read").onclick = async function() {
+document.getElementById("read-gv").onclick = async function() {
    let node = document.getElementById("gvar-file");
    let file = node.files[0];
    if (!file) {
@@ -48,7 +51,37 @@ document.getElementById("read").onclick = async function() {
    let variant = new ReachGameVariant();
    stream.backToStart();
    try {
-      variant.parse(stream);
+      variant.parse(stream); // for Firefight, this is wrong
+   } catch (e) {
+      console.error(e);
+   }
+   console.log(variant);
+   let mpvr = blocks["mpvr"];
+   if (mpvr && mpvr.data && (mpvr.data.header instanceof UGCHeader)) {
+      console.log(mpvr.data.header.title);
+      console.log(mpvr.data.header.description);
+   }
+};
+document.getElementById("read-mv").onclick = async function() {
+   let node = document.getElementById("gvar-file");
+   let file = node.files[0];
+   if (!file) {
+      console.warn("No file selected.");
+      return;
+   }
+   let buffer = await file.arrayBuffer();
+   //
+   let stream = new Bitstream(buffer);
+   let blocks = {};
+   blocks["_blf"] = new GameVariantBlamHeader(stream);
+   blocks["chdr"] = new GameVariantContentHeader(stream);
+   blocks["mvar"] = new MapVariant(stream);
+   console.log(blocks);
+   //
+   let variant = new ReachGameVariant();
+   stream.backToStart();
+   try {
+      variant.parse(stream); // this will error
    } catch (e) {
       console.error(e);
    }

@@ -391,6 +391,24 @@
     <ClCompile Include="helpers\qt\widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="formats\ugc_header.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\custom_game_options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\firefight_wave_traits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\firefight_custom_skull.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\firefight_round.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\types\firefight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -967,6 +985,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\qt\widget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="formats\ugc_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\types\firefight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\custom_game_options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\firefight_wave_traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\firefight_custom_skull.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\firefight_round.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -101,7 +101,12 @@
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
+    <ClCompile Include="formats\ugc_header.cpp" />
     <ClCompile Include="game_variants\base.cpp" />
+    <ClCompile Include="game_variants\components\custom_game_options.cpp" />
+    <ClCompile Include="game_variants\components\firefight_custom_skull.cpp" />
+    <ClCompile Include="game_variants\components\firefight_round.cpp" />
+    <ClCompile Include="game_variants\components\firefight_wave_traits.cpp" />
     <ClCompile Include="game_variants\components\loadouts.cpp" />
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp" />
@@ -159,6 +164,7 @@
     <ClCompile Include="game_variants\editor_file_block.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\io_process.cpp" />
+    <ClCompile Include="game_variants\types\firefight.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
@@ -265,6 +271,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="formats\indexed_lists.h" />
+    <ClInclude Include="formats\ugc_header.h" />
+    <ClInclude Include="game_variants\components\custom_game_options.h" />
+    <ClInclude Include="game_variants\components\firefight_custom_skull.h" />
+    <ClInclude Include="game_variants\components\firefight_round.h" />
+    <ClInclude Include="game_variants\components\firefight_wave_traits.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\enums.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\namespaces.h" />
@@ -297,6 +308,7 @@
     <ClInclude Include="game_variants\data\object_types.h" />
     <ClInclude Include="game_variants\editor_file_block.h" />
     <ClInclude Include="game_variants\io_process.h" />
+    <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />

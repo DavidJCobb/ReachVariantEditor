@@ -12,7 +12,7 @@
 #include "../../helpers/pointer_list.h"
 #include "../../helpers/stream.h"
 #include "../../helpers/standalones/unique_pointer.h"
-#include "../components/loadouts.h"
+#include "../components/custom_game_options.h"
 #include "../components/map_permissions.h"
 #include "../components/megalo_game_stats.h"
 #include "../components/megalo_options.h"
@@ -22,9 +22,6 @@
 #include "../components/megalo/variable_declarations.h"
 #include "../components/megalo/widgets.h"
 #include "../components/player_rating_params.h"
-#include "../components/player_traits.h"
-#include "../components/powerups.h"
-#include "../components/teams.h"
 #include "../components/tu1_options.h"
 
 struct ReachMPSizeData {
@@ -88,56 +85,9 @@ class GameVariantDataMultiplayer : public GameVariantData {
       //
       mutable uint32_t encodingVersion;
       mutable uint32_t engineVersion;
-      GameVariantHeader variantHeader;
-      cobb::bitbool isBuiltIn;
-      struct {
-         struct {
-            cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = perfection enabled, reset players on new round, reset map on new round, teams
-            cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
-            cobb::bitnumber<5, uint8_t> roundLimit;
-            cobb::bitnumber<4, uint8_t> roundsToWin;
-            cobb::bitnumber<7, uint8_t> suddenDeathTime; // seconds
-            cobb::bitnumber<5, uint8_t> gracePeriod;
-         } misc;
-         struct {
-            cobb::bitnumber<4, uint8_t> flags; // flags: synch with team; unknown (respawn at teammate?); unknown (respawn at location?); respawn on kills
-            cobb::bitnumber<6, uint8_t> livesPerRound;
-            cobb::bitnumber<7, uint8_t> teamLivesPerRound;
-            cobb::bytenumber<uint8_t> respawnTime = 5;
-            cobb::bytenumber<uint8_t> suicidePenalty = 5;
-            cobb::bytenumber<uint8_t> betrayalPenalty = 5;
-            cobb::bitnumber<4, uint8_t> respawnGrowth;
-            cobb::bitnumber<4, uint8_t> loadoutCamTime = 10;
-            cobb::bitnumber<6, uint8_t> traitsDuration;
-            ReachPlayerTraits traits;
-         } respawn;
-         struct {
-            cobb::bitbool observers = false;
-            cobb::bitnumber<2, uint8_t> teamChanges; // enum: disabled; enabled; balancing only
-            cobb::bitnumber<5, uint8_t> flags; // flags: friendly fire; betrayal booting; proximity voice; global voice; dead player voice
-         } social;
-         struct {
-            cobb::bitnumber<6, uint8_t> flags;
-            ReachPlayerTraits baseTraits;
-            cobb::bytenumber<int8_t> weaponSet; // map default == -2
-            cobb::bytenumber<int8_t> vehicleSet; // map default == -2
-            struct {
-               ReachPowerupData red;
-               ReachPowerupData blue;
-               ReachPowerupData yellow;
-            } powerups;
-         } map;
-         struct {
-            cobb::bitnumber<3, uint8_t> scoring;
-            cobb::bitnumber<3, uint8_t> species;
-            cobb::bitnumber<2, uint8_t> designatorSwitchType;
-            ReachTeamData teams[8];
-         } team;
-         struct {
-            cobb::bitnumber<2, uint8_t> flags; // flags: spartan loadouts; elite loadouts
-            std::array<ReachLoadoutPalette, 6> palettes; // indices: reach::loadout_palette
-         } loadouts;
-      } options;
+      ReachUGCHeader   variantHeader;
+      cobb::bitbool    isBuiltIn;
+      ReachCustomGameOptions options;
       struct {
          cobb::indexed_list<ReachMegaloPlayerTraits, Megalo::Limits::max_script_traits>  traits;
          cobb::indexed_list<ReachMegaloOption,       Megalo::Limits::max_script_options> options;

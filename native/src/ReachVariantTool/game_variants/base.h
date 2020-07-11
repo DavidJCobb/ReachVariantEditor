@@ -5,6 +5,7 @@
 #include "../formats/bitset.h"
 #include "../formats/block.h"
 #include "../formats/content_author.h"
+#include "../formats/ugc_header.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/bitwriter.h"
 #include "../helpers/bytewriter.h"
@@ -18,17 +19,6 @@ enum class ReachGameEngine : uint8_t {
    multiplayer,
    campaign,
    firefight,
-};
-enum class ReachFileType : int8_t {
-   none = -1,
-   dlc,
-   campaign_save,
-   screenshot,
-   film,
-   film_clip,
-   map_variant,
-   game_variant,
-   playlist,
 };
 
 class GameVariantSaveProcess; // io_process.h
@@ -75,52 +65,10 @@ class EOFBlock : public ReachFileBlock {
       void write(cobb::bytewriter&) const noexcept;
 };
 
-class GameVariantHeader {
-   public:
-      struct {
-         cobb::bytenumber<uint16_t> major; // chdr-only
-         cobb::bytenumber<uint16_t> minor; // chdr-only
-      } build;
-      cobb::bitnumber<4, ReachFileType, true> contentType;
-      // skip 3 bytes
-      cobb::bytenumber<uint32_t> fileLength;
-      cobb::bytenumber<uint64_t> unk08;
-      cobb::bytenumber<uint64_t> unk10;
-      cobb::bytenumber<uint64_t> unk18;
-      cobb::bytenumber<uint64_t> unk20;
-      cobb::bitnumber<3, int8_t, true> activity;
-      cobb::bitnumber<3, uint8_t> gameMode;
-      cobb::bitnumber<3, uint8_t> engine;
-      // skip 1 byte
-      cobb::bytenumber<uint32_t> unk2C;
-      cobb::bitnumber<8, uint32_t> engineCategory;
-      ReachContentAuthor createdBy;
-      ReachContentAuthor modifiedBy;
-      char16_t title[128];
-      char16_t description[128];
-      cobb::bitnumber<8, uint32_t> engineIcon;
-      uint8_t  unk284[0x2C]; // only in chdr
-      //
-      mutable struct {
-         uint32_t offset_of_file_length = 0;
-      } writeData;
-      //
-      bool read(cobb::ibitreader&) noexcept;
-      bool read(cobb::ibytereader&) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
-      void write(cobb::bytewriter& stream) const noexcept;
-      void write_last_minute_fixup(cobb::bitwriter&  stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
-      void write_last_minute_fixup(cobb::bytewriter& stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
-      //
-      void set_title(const char16_t* value) noexcept;
-      void set_description(const char16_t* value) noexcept;
-      //
-      static uint32_t bitcount() noexcept;
-};
 class ReachBlockCHDR {
    public:
-      ReachFileBlock    header = ReachFileBlock('chdr', 0x2C0);
-      GameVariantHeader data;
+      ReachFileBlock header = ReachFileBlock('chdr', 0x2C0);
+      ReachUGCHeader data;
       //
       bool read(reach_block_stream& stream) noexcept {
          auto bytes = stream.bytes;
