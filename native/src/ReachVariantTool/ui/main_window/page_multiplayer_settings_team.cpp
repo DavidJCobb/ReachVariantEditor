@@ -7,9 +7,9 @@ PageMPSettingsTeamOverall::PageMPSettingsTeamOverall(QWidget* parent) : QWidget(
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsTeamOverall::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_spinbox(customGameOptions,  this->ui.fieldScoringMethod, team.scoring);
-   reach_state_pane_setup_combobox(customGameOptions, this->ui.fieldSpecies,       team.species);
-   reach_state_pane_setup_spinbox(customGameOptions,  this->ui.fieldSwitchType,    team.designatorSwitchType);
+   reach_main_window_setup_spinbox(customGameOptions,  this->ui.fieldScoringMethod, team.scoring);
+   reach_main_window_setup_combobox(customGameOptions, this->ui.fieldSpecies,       team.species);
+   reach_main_window_setup_spinbox(customGameOptions,  this->ui.fieldSwitchType,    team.designatorSwitchType);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsTeamOverall::updateFromVariant(GameVariant* variant) {

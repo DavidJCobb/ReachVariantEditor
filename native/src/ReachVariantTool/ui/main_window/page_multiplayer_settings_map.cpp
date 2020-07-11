@@ -7,12 +7,12 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsMapAndGame::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldGrenades,  map.flags, ReachCGMapOptions::flags_t::grenades);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldShortcuts, map.flags, ReachCGMapOptions::flags_t::shortcuts);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldAbilities, map.flags, ReachCGMapOptions::flags_t::abilities);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldPowerups,  map.flags, ReachCGMapOptions::flags_t::powerups);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldTurrets,   map.flags, ReachCGMapOptions::flags_t::turrets);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldIndestructibleVehicles, map.flags, ReachCGMapOptions::flags_t::indestructible_vehicles);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldGrenades,  map.flags, ReachCGMapOptions::flags_t::grenades);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldShortcuts, map.flags, ReachCGMapOptions::flags_t::shortcuts);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldAbilities, map.flags, ReachCGMapOptions::flags_t::abilities);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldPowerups,  map.flags, ReachCGMapOptions::flags_t::powerups);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldTurrets,   map.flags, ReachCGMapOptions::flags_t::turrets);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldIndestructibleVehicles, map.flags, ReachCGMapOptions::flags_t::indestructible_vehicles);
    {  // Weapon Set
       QComboBox* widget = this->ui.fieldWeaponSet;
       QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
@@ -50,9 +50,9 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
          data->map.vehicleSet = value;
       });
    }
-   reach_state_pane_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationRed,    map.powerups.red.duration);
-   reach_state_pane_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationBlue,   map.powerups.blue.duration);
-   reach_state_pane_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationYellow, map.powerups.yellow.duration);
+   reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationRed,    map.powerups.red.duration);
+   reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationBlue,   map.powerups.blue.duration);
+   reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationYellow, map.powerups.yellow.duration);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {

@@ -7,18 +7,18 @@ PageMPSettingsRespawn::PageMPSettingsRespawn(QWidget* parent) : QWidget(parent) 
    QObject::connect(&editor, &ReachEditorState::switchedRespawnOptions, this, &PageMPSettingsRespawn::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_flag_checkbox(respawnOptions, this->ui.fieldSyncWithTeam,        flags, ReachCGRespawnOptions::flags_t::sync_with_team);
-   reach_state_pane_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnWithTeammate, flags, ReachCGRespawnOptions::flags_t::respawn_with_teammate);
-   reach_state_pane_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnAtLocation,   flags, ReachCGRespawnOptions::flags_t::respawn_at_location);
-   reach_state_pane_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnOnKills,      flags, ReachCGRespawnOptions::flags_t::respawn_on_kills);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldLivesPerRound,     livesPerRound);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldTeamLivesPerRound, teamLivesPerRound);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldRespawnTime,       respawnTime);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldSuicidePenalty,    suicidePenalty);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldBetrayalPenalty,   betrayalPenalty);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldRespawnGrowth,     respawnGrowth);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldLoadoutCamTime,    loadoutCamTime);
-   reach_state_pane_setup_spinbox(respawnOptions, this->ui.fieldTraitsDuration,    traitsDuration);
+   reach_main_window_setup_flag_checkbox(respawnOptions, this->ui.fieldSyncWithTeam,        flags, ReachCGRespawnOptions::flags_t::sync_with_team);
+   reach_main_window_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnWithTeammate, flags, ReachCGRespawnOptions::flags_t::respawn_with_teammate);
+   reach_main_window_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnAtLocation,   flags, ReachCGRespawnOptions::flags_t::respawn_at_location);
+   reach_main_window_setup_flag_checkbox(respawnOptions, this->ui.fieldRespawnOnKills,      flags, ReachCGRespawnOptions::flags_t::respawn_on_kills);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldLivesPerRound,     livesPerRound);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldTeamLivesPerRound, teamLivesPerRound);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldRespawnTime,       respawnTime);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldSuicidePenalty,    suicidePenalty);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldBetrayalPenalty,   betrayalPenalty);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldRespawnGrowth,     respawnGrowth);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldLoadoutCamTime,    loadoutCamTime);
+   reach_main_window_setup_spinbox(respawnOptions, this->ui.fieldTraitsDuration,    traitsDuration);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsRespawn::updateFromVariant(ReachCGRespawnOptions* data) {

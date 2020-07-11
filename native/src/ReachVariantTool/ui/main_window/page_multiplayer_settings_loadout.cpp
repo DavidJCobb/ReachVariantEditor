@@ -7,8 +7,8 @@ PageMPSettingsLoadoutsOverall::PageMPSettingsLoadoutsOverall(QWidget* parent) : 
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsLoadoutsOverall::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldFlag0, loadouts.flags, 0x01);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldFlag1, loadouts.flags, 0x02);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldFlag0, loadouts.flags, 0x01);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldFlag1, loadouts.flags, 0x02);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsLoadoutsOverall::updateFromVariant(GameVariant* variant) {

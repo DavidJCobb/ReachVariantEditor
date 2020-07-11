@@ -2,3 +2,4 @@
 #undef reach_main_window_update_flag_checkbox
 #undef reach_main_window_update_bool_checkbox
 #undef reach_main_window_update_spinbox
+#undef reach_main_window_update_spinbox_dbl

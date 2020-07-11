@@ -7,13 +7,13 @@ PageMPSettingsSocial::PageMPSettingsSocial(QWidget* parent) : QWidget(parent) {
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsSocial::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_bool_checkbox(customGameOptions, this->ui.fieldObservers,       social.observers);
-   reach_state_pane_setup_combobox(customGameOptions,      this->ui.fieldTeamChanging,    social.teamChanges);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldFriendlyFire,    social.flags, ReachCGSocialOptions::flags_t::friendly_fire);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldBetrayalBooting, social.flags, ReachCGSocialOptions::flags_t::betrayal_booting);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldProximityVoice,  social.flags, ReachCGSocialOptions::flags_t::proximity_voice);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldGlobalVoice,     social.flags, ReachCGSocialOptions::flags_t::global_voice);
-   reach_state_pane_setup_flag_checkbox(customGameOptions, this->ui.fieldDeadVoice,       social.flags, ReachCGSocialOptions::flags_t::dead_player_voice);
+   reach_main_window_setup_bool_checkbox(customGameOptions, this->ui.fieldObservers,       social.observers);
+   reach_main_window_setup_combobox(customGameOptions,      this->ui.fieldTeamChanging,    social.teamChanges);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldFriendlyFire,    social.flags, ReachCGSocialOptions::flags_t::friendly_fire);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldBetrayalBooting, social.flags, ReachCGSocialOptions::flags_t::betrayal_booting);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldProximityVoice,  social.flags, ReachCGSocialOptions::flags_t::proximity_voice);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldGlobalVoice,     social.flags, ReachCGSocialOptions::flags_t::global_voice);
+   reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldDeadVoice,       social.flags, ReachCGSocialOptions::flags_t::dead_player_voice);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsSocial::updateFromVariant(GameVariant* variant) {

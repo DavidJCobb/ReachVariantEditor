@@ -6,7 +6,7 @@
 #pragma region Main window
    //
    // These assume that there is some variable (data) which contains the field that you want to pull values 
-   // from. Despite the name, that variable doesn't necessarily need to be multiplayer data in specific.
+   // from.
    //
    #define reach_main_window_update_combobox(w, field) \
       { \
@@ -31,5 +31,11 @@
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
          widget->setValue((int)data->##field ); \
+      };
+   #define reach_main_window_update_spinbox_dbl(w, field) \
+      { \
+         auto widget = w; \
+         const QSignalBlocker blocker(widget); \
+         widget->setValue((double)data->##field ); \
       };
 #pragma endregion

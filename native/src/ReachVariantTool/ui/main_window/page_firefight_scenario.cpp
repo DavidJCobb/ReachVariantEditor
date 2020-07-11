@@ -8,11 +8,11 @@ PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageFFScenario::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_spinbox(firefightData, this->ui.waveLimit, waveLimit);
-   reach_state_pane_setup_flag_checkbox(firefightData, this->ui.enableHazards,     scenarioFlags, GameVariantDataFirefight::scenario_flags::hazards_enabled);
-   reach_state_pane_setup_flag_checkbox(firefightData, this->ui.enableWeaponDrops, scenarioFlags, GameVariantDataFirefight::scenario_flags::weapon_drops_enabled);
-   reach_state_pane_setup_flag_checkbox(firefightData, this->ui.enableAmmoCrates,  scenarioFlags, GameVariantDataFirefight::scenario_flags::ammo_crates_enabled);
-   reach_state_pane_setup_spinbox(firefightData, this->ui.generatorCount, generatorCount);
+   reach_main_window_setup_spinbox(firefightData, this->ui.waveLimit, waveLimit);
+   reach_main_window_setup_flag_checkbox(firefightData, this->ui.enableHazards,     scenarioFlags, GameVariantDataFirefight::scenario_flags::hazards_enabled);
+   reach_main_window_setup_flag_checkbox(firefightData, this->ui.enableWeaponDrops, scenarioFlags, GameVariantDataFirefight::scenario_flags::weapon_drops_enabled);
+   reach_main_window_setup_flag_checkbox(firefightData, this->ui.enableAmmoCrates,  scenarioFlags, GameVariantDataFirefight::scenario_flags::ammo_crates_enabled);
+   reach_main_window_setup_spinbox(firefightData, this->ui.generatorCount, generatorCount);
    QObject::connect(this->ui.generatorFailCondition, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int value) {
       auto data = ReachEditorState::get().firefightData();
       if (!data)
@@ -25,10 +25,10 @@ PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
          return;
       cobb::modify_bit(data->scenarioFlags, GameVariantDataFirefight::scenario_flags::random_generator_spawns, value);
    });
-   reach_state_pane_setup_spinbox(firefightData, this->ui.unkA, unkA);
-   reach_state_pane_setup_spinbox(firefightData, this->ui.unkB, unkB);
-   reach_state_pane_setup_spinbox(firefightData, this->ui.unkC, unkC);
-   reach_state_pane_setup_spinbox(firefightData, this->ui.unkD, unkD);
+   reach_main_window_setup_spinbox(firefightData, this->ui.unkA, unkA);
+   reach_main_window_setup_spinbox(firefightData, this->ui.unkB, unkB);
+   reach_main_window_setup_spinbox(firefightData, this->ui.unkC, unkC);
+   reach_main_window_setup_spinbox(firefightData, this->ui.unkD, unkD);
    #include "widget_macros_setup_end.h"
 }
 void PageFFScenario::updateFromVariant(GameVariant* variant) {

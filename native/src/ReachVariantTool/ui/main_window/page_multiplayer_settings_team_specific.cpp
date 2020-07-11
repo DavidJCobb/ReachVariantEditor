@@ -54,13 +54,13 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    });
    //
    #include "widget_macros_setup_start.h"
-   reach_state_pane_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnabled,              flags, ReachTeamData::Flags::enabled);
-   reach_state_pane_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorPrimary,   flags, ReachTeamData::Flags::override_color_primary);
-   reach_state_pane_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorSecondary, flags, ReachTeamData::Flags::override_color_secondary);
-   reach_state_pane_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
-   reach_state_pane_setup_combobox(multiplayerTeam,      this->ui.fieldSpecies,              spartanOrElite);
-   reach_state_pane_setup_spinbox(multiplayerTeam,       this->ui.fieldFireteamCount,        fireteamCount);
-   reach_state_pane_setup_spinbox(multiplayerTeam,       this->ui.fieldInitialDesignator,    initialDesignator);
+   reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnabled,              flags, ReachTeamData::Flags::enabled);
+   reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorPrimary,   flags, ReachTeamData::Flags::override_color_primary);
+   reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorSecondary, flags, ReachTeamData::Flags::override_color_secondary);
+   reach_main_window_setup_flag_checkbox(multiplayerTeam, this->ui.fieldEnableColorText,      flags, ReachTeamData::Flags::override_color_text);
+   reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldSpecies,              spartanOrElite);
+   reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldFireteamCount,        fireteamCount);
+   reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldInitialDesignator,    initialDesignator);
    QObject::connect(this->ui.fieldButtonColorPrimary, &QPushButton::clicked, [this]() {
       auto& editor = ReachEditorState::get();
       auto  team   = editor.multiplayerTeam();
