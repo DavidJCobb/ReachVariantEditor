@@ -383,6 +383,9 @@ void ReachVariantTool::openFile(QString fileName) {
    this->refreshWindowTitle();
    this->ui.optionTogglesScripted->updateModelFromGameVariant();
    this->regenerateNavigation();
+   //
+   auto mp = variant->get_multiplayer_data();
+   this->ui.actionEditScript->setEnabled(mp != nullptr); // only allow access to the script editor window when we've actually loaded a Megalo variant
 }
 void ReachVariantTool::_saveFileImpl(bool saveAs) {
    auto& editor = ReachEditorState::get();

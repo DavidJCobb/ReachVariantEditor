@@ -96,3 +96,16 @@ NOTES:
  - The struct that we call GameVariantHeader is also used for map variants; refer to our 
    map variant JS prototype for full details and branches; we should amend our source 
    code to reflect this.
+
+
+OBSERVATIONS FROM TESTING:
+ - Your team species determines what loadouts you get and whether you're allied with 
+   NPCs. Setting the defending team to Elites makes them allied to the Covenant.
+ - Indestructible Vehicles does not apply to Covenant vehicles.
+ - Vehicle Set does not apply to vehicles that spawn during the match. Unknown if it 
+   would apply to pre-placed onces.
+ - Respawn Traits work.
+ - Custom Game base-player traits work and presumably apply to all players, beneath 
+   the Firefight-specific per-species base traits.
+ - If a wave consists entirely of squad types not available on the current map, then 
+   the wave is skipped, apparently.
