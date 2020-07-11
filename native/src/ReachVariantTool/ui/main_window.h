@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_main_window.h"
 
+class ReachCGRespawnOptions;
 class ReachLoadoutPalette;
 class ReachMegaloPlayerTraits;
 class ReachPlayerTraits;
@@ -37,6 +38,7 @@ class ReachVariantTool : public QMainWindow {
       //
       void switchToLoadoutPalette(ReachLoadoutPalette*);
       void switchToPlayerTraits(ReachPlayerTraits*);
+      void switchToRespawnOptions(ReachCGRespawnOptions*);
       //
       void refreshWindowTitle();
       //

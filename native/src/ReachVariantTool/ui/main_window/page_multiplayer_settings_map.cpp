@@ -7,12 +7,12 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsMapAndGame::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_main_window_setup_flag_checkbox(this->ui.fieldGrenades,  options.map.flags, 0x01);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldShortcuts, options.map.flags, 0x02);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldAbilities, options.map.flags, 0x04);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldPowerups,  options.map.flags, 0x08);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldTurrets,   options.map.flags, 0x10);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldIndestructibleVehicles, options.map.flags, 0x20);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldGrenades,  map.flags, 0x01);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldShortcuts, map.flags, 0x02);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldAbilities, map.flags, 0x04);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldPowerups,  map.flags, 0x08);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldTurrets,   map.flags, 0x10);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldIndestructibleVehicles, map.flags, 0x20);
    {  // Weapon Set
       QComboBox* widget = this->ui.fieldWeaponSet;
       //
@@ -22,7 +22,7 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
       //  1 = Covenant
       //
       QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-         auto data = ReachEditorState::get().multiplayerData();
+         auto data = ReachEditorState::get().customGameOptions();
          if (!data)
             return;
          int8_t value;
@@ -36,7 +36,7 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
             default:
                value = index - 1;
          }
-         data->options.map.weaponSet = value;
+         data->map.weaponSet = value;
       });
    }
    {  // Vehicle Set
@@ -48,7 +48,7 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
       // 12 = No Vehicles
       //
       QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), [](int index) {
-         auto data = ReachEditorState::get().multiplayerData();
+         auto data = ReachEditorState::get().customGameOptions();
          if (!data)
             return;
          int8_t value;
@@ -59,29 +59,29 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
             default:
                value = index - 1;
          }
-         data->options.map.vehicleSet = value;
+         data->map.vehicleSet = value;
       });
    }
-   reach_main_window_setup_spinbox(this->ui.fieldPowerupDurationRed,    options.map.powerups.red.duration);
-   reach_main_window_setup_spinbox(this->ui.fieldPowerupDurationBlue,   options.map.powerups.blue.duration);
-   reach_main_window_setup_spinbox(this->ui.fieldPowerupDurationYellow, options.map.powerups.yellow.duration);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldPowerupDurationRed,    map.powerups.red.duration);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldPowerupDurationBlue,   map.powerups.blue.duration);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldPowerupDurationYellow, map.powerups.yellow.duration);
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {
-   auto mp = variant->get_multiplayer_data();
+   auto mp = variant->get_custom_game_options();
    if (!mp)
       return;
    #include "widget_macros_update_start.h"
-   reach_main_window_update_flag_checkbox(this->ui.fieldGrenades, options.map.flags, 0x01);
-   reach_main_window_update_flag_checkbox(this->ui.fieldShortcuts, options.map.flags, 0x02);
-   reach_main_window_update_flag_checkbox(this->ui.fieldAbilities, options.map.flags, 0x04);
-   reach_main_window_update_flag_checkbox(this->ui.fieldPowerups, options.map.flags, 0x08);
-   reach_main_window_update_flag_checkbox(this->ui.fieldTurrets, options.map.flags, 0x10);
-   reach_main_window_update_flag_checkbox(this->ui.fieldIndestructibleVehicles, options.map.flags, 0x20);
+   reach_main_window_update_flag_checkbox(this->ui.fieldGrenades,  map.flags, 0x01);
+   reach_main_window_update_flag_checkbox(this->ui.fieldShortcuts, map.flags, 0x02);
+   reach_main_window_update_flag_checkbox(this->ui.fieldAbilities, map.flags, 0x04);
+   reach_main_window_update_flag_checkbox(this->ui.fieldPowerups,  map.flags, 0x08);
+   reach_main_window_update_flag_checkbox(this->ui.fieldTurrets,   map.flags, 0x10);
+   reach_main_window_update_flag_checkbox(this->ui.fieldIndestructibleVehicles, map.flags, 0x20);
    {  // Weapon Set
       QComboBox* widget = this->ui.fieldWeaponSet;
       const QSignalBlocker blocker(widget);
-      auto value = mp->options.map.weaponSet;
+      auto value = mp->map.weaponSet;
       int  index;
       switch (value) {
          case -2:
@@ -98,7 +98,7 @@ void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {
    {  // Vehicle Set
       QComboBox* widget = this->ui.fieldVehicleSet;
       const QSignalBlocker blocker(widget);
-      auto value = mp->options.map.vehicleSet;
+      auto value = mp->map.vehicleSet;
       int  index;
       switch (value) {
          case -2:
@@ -109,8 +109,8 @@ void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {
       }
       widget->setCurrentIndex(index);
    }
-   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationRed,    options.map.powerups.red.duration);
-   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationBlue,   options.map.powerups.blue.duration);
-   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationYellow, options.map.powerups.yellow.duration);
+   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationRed,    map.powerups.red.duration);
+   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationBlue,   map.powerups.blue.duration);
+   reach_main_window_update_spinbox(this->ui.fieldPowerupDurationYellow, map.powerups.yellow.duration);
    #include "widget_macros_update_end.h"
 }

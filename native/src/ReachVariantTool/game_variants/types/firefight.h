@@ -38,7 +38,7 @@ class GameVariantDataFirefight : public GameVariantData {
       cobb::bitnumber<5, uint8_t> scenarioFlags;
       cobb::bitnumber<3, uint8_t> unkA;
       cobb::bitnumber<8, uint8_t> unkB;
-      cobb::bitnumber<4, uint8_t> waveLimit;
+      cobb::bitnumber<4, uint8_t> waveLimit; // enum
       cobb::bitnumber<15, uint16_t> unkC; // a quantity of points; always 10000?
       cobb::bitnumber<15, uint16_t> eliteKillBonus;
       cobb::bitnumber<7,  uint8_t, true> startingLivesSpartan;

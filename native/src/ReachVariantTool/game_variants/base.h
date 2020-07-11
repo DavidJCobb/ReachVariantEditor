@@ -23,6 +23,7 @@ enum class ReachGameEngine : uint8_t {
 
 class GameVariantSaveProcess; // io_process.h
 
+class ReachCustomGameOptions;
 class GameVariantDataFirefight;
 class GameVariantDataMultiplayer;
 class GameVariantData {
@@ -128,6 +129,7 @@ class GameVariant {
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //
+      ReachCustomGameOptions* get_custom_game_options() const noexcept;
       GameVariantDataFirefight* get_firefight_data() const noexcept;
       GameVariantDataMultiplayer* get_multiplayer_data() const noexcept;
       //

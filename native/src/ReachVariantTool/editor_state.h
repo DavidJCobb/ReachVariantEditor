@@ -21,12 +21,13 @@ class ReachEditorState : public QObject {
       ReachEditorState(const ReachEditorState& other) = delete; // no copy
       //
    private:
-      std::wstring         currentFile;
-      GameVariant*         currentVariant = nullptr;
-      GameVariant*         currentVariantClone = nullptr; /// checks for unsaved changes aren't yet implemented but when that becomes feasible we can turn this back on
-      ReachPlayerTraits*   currentTraits  = nullptr;
-      ReachLoadoutPalette* currentLoadoutPalette = nullptr;
-      int8_t               currentMPTeam = -1;
+      std::wstring           currentFile;
+      GameVariant*           currentVariant        = nullptr;
+      GameVariant*           currentVariantClone   = nullptr; // checks for unsaved changes aren't yet implemented but when that becomes feasible we can turn this back on
+      ReachPlayerTraits*     currentTraits         = nullptr;
+      ReachLoadoutPalette*   currentLoadoutPalette = nullptr;
+      ReachCGRespawnOptions* currentRespawnOptions = nullptr; // used so that Firefight and Megalo can share code for their respective sets of respawn options
+      int8_t                 currentMPTeam = -1;
       //
    signals:
       void variantAbandoned(GameVariant* variant); // the game variant is deleted after this is emitted
@@ -37,6 +38,7 @@ class ReachEditorState : public QObject {
       void switchedLoadoutPalette(ReachLoadoutPalette* which);
       void switchedMultiplayerTeam(GameVariant*, int8_t index, ReachTeamData*);
       void switchedPlayerTraits(ReachPlayerTraits* traits);
+      void switchedRespawnOptions(ReachCGRespawnOptions* options);
       //
       // These are fired by the UI so that different windows/panels/etc. can synch with each other:
       void scriptOptionModified(ReachMegaloOption*); // a single option has changed (does not include reordering, creation, or deletion)
@@ -51,16 +53,19 @@ class ReachEditorState : public QObject {
       void setCurrentLoadoutPalette(ReachLoadoutPalette* which) noexcept; /// sets us as editing a loadout palette
       void setCurrentMultiplayerTeam(int8_t index) noexcept; /// sets us as editing details for a specific team
       void setCurrentPlayerTraits(ReachPlayerTraits* which) noexcept; /// sets us as editing a set of player traits
+      void setCurrentRespawnOptions(ReachCGRespawnOptions* which) noexcept;
       void setVariantFilePath(const wchar_t* path) noexcept; /// provided for you to call after "Save As"
       void takeVariant(GameVariant* other, const wchar_t* path) noexcept;
       //
    public: // getters
+      ReachCustomGameOptions* customGameOptions() noexcept;
       GameVariantDataFirefight* firefightData() noexcept;
       inline ReachLoadoutPalette* loadoutPalette() noexcept { return this->currentLoadoutPalette; }
       GameVariantDataMultiplayer* multiplayerData() noexcept;
       ReachTeamData* multiplayerTeam() noexcept;
       inline int8_t multiplayerTeamIndex() noexcept { return this->currentMPTeam; }
       inline ReachPlayerTraits* playerTraits() noexcept { return this->currentTraits; }
+      inline ReachCGRespawnOptions* respawnOptions() noexcept { return this->currentRespawnOptions; }
       inline GameVariant*   variant()         noexcept { return this->currentVariant; }
       inline const wchar_t* variantFilePath() noexcept { return this->currentFile.c_str(); }
 };

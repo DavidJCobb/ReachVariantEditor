@@ -40,26 +40,24 @@ namespace {
       welcome, // only shows when no file is loaded
       unknown_variant_type, // only shows when a file of an unknown type is (somehow) loaded
       mp_metadata,
-      mp_options_general,
+      mp_options_general, // should work for MP and FF
       mp_options_respawn,
-      mp_options_social,
-      mp_options_map,
-      mp_options_team,
-      mp_options_loadout,
+      mp_options_social,  // should work for MP and FF
+      mp_options_map,     // should work for MP and FF
+      mp_options_team,    // should work for MP and FF
+      mp_options_loadout, // should work for MP and FF
       mp_options_scripted,
-      loadout_palette,
+      loadout_palette,    // should work for MP and FF
       mp_traits_built_in,
       mp_traits_scripted,
-      mp_team_configuration, // specific team
+      mp_team_configuration, // should work for MP and FF // specific team
       mp_option_visibility,
       mp_title_update_1,
       forge_options_general,
       //
       ff_metadata,
-      ff_respawn_elite,
+      ff_options_respawn_elite,
       ff_scenario,
-      ff_base_player_traits,
-      ff_base_wave_traits,
       ff_custom_skull,
       ff_round,
       ff_bonus_wave,
@@ -73,6 +71,10 @@ namespace {
       powerup_blue,
       powerup_yellow,
       forge_editor,
+      ff_base_spartan_traits,
+      ff_base_elite_traits,
+      ff_base_wave_traits,
+      ff_respawn_elite,
    };
 
    inline bool _get_mcc_directory(std::wstring& out) {
@@ -584,7 +586,47 @@ void ReachVariantTool::regenerateNavigation() {
          }
       } else if (ff) {
          defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::ff_metadata);
-         _makeNavItem(widget, tr("Scenario Settings", "main window navigation pane"), _page::ff_scenario);
+         auto scenario = _makeNavItem(widget, tr("Firefight Settings", "main window navigation pane"), _page::ff_scenario);
+         _makeNavItemMPTraits(scenario, tr("Base Spartan Traits", "main window navigation pane"), _traits_builtin::ff_base_spartan_traits);
+         _makeNavItemMPTraits(scenario, tr("Base Elite Traits", "main window navigation pane"), _traits_builtin::ff_base_elite_traits);
+         {  // Options
+            auto options = _makeNavItem(widget, tr("Common Settings", "main window navigation pane"), _page::redirect_to_first_child);
+            {
+               _makeNavItem(options, tr("General Settings", "main window navigation pane"), _page::mp_options_general);
+               //
+               auto respawn = _makeNavItem(options, tr("Spartan Respawn Settings", "main window navigation pane"), _page::mp_options_respawn);
+               _makeNavItemMPTraits(respawn, tr("Respawn Traits", "main window navigation pane"), _traits_builtin::respawn);
+               /**/ respawn = _makeNavItem(options, tr("Elite Respawn Settings", "main window navigation pane"), _page::ff_options_respawn_elite);
+               _makeNavItemMPTraits(respawn, tr("Respawn Traits", "main window navigation pane"), _traits_builtin::ff_respawn_elite);
+               //
+               _makeNavItem(options, tr("Social Settings", "main window navigation pane"), _page::mp_options_social);
+               //
+               auto map = _makeNavItem(options, tr("Map and Game Settings", "main window navigation pane"), _page::mp_options_map);
+               _makeNavItemMPTraits(map, tr("Base Player Traits", "main window navigation pane"), _traits_builtin::base);
+               _makeNavItemMPTraits(map, tr("Red Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_red);
+               _makeNavItemMPTraits(map, tr("Blue Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_blue);
+               _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", "main window navigation pane"), _traits_builtin::powerup_yellow);
+               //
+               auto team = _makeNavItem(options, tr("Team Settings", "main window navigation pane"), _page::mp_options_team);
+               for (uint8_t i = 0; i < 8; i++) {
+                  _makeNavItemTeamConfig(team, tr("Team %1", "main window navigation pane").arg(i + 1), i);
+               }
+               //
+               auto loadout = _makeNavItem(options, tr("Loadout Settings", "main window navigation pane"), _page::mp_options_loadout);
+               for (uint8_t i = 0; i < 3; i++) {
+                  auto t = new QTreeWidgetItem(loadout);
+                  t->setText(0, tr("Spartan Tier %1", "main window navigation pane").arg(i + 1));
+                  t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+                  t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2);
+               }
+               for (uint8_t i = 0; i < 3; i++) {
+                  auto t = new QTreeWidgetItem(loadout);
+                  t->setText(0, tr("Elite Tier %1", "main window navigation pane").arg(i + 1));
+                  t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
+                  t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2 + 1);
+               }
+            }
+         }
          //
          // TODO
          //
@@ -627,10 +669,18 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
    auto selections = widget->selectedItems();
    if (!selections.size())
       return;
+   //
+   auto _revert = [widget, previous]() {
+      const QSignalBlocker blocker(widget);
+      widget->setCurrentItem(previous);
+   };
+   //
    auto sel     = current;
    auto stack   = this->ui.MainContentView;
    auto variant = ReachEditorState::get().variant();
-   auto mp_data = variant ? variant->multiplayer.data->as_multiplayer() : nullptr;
+   auto mp_data = variant ? variant->get_multiplayer_data()    : nullptr;
+   auto cg_data = variant ? variant->get_custom_game_options() : nullptr;
+   auto ff_data = variant ? variant->get_firefight_data()      : nullptr;
    if (uint d = sel->data(0, Qt::ItemDataRole::UserRole).toInt()) {
       uint extra = sel->data(0, Qt::ItemDataRole::UserRole + 1).toInt();
       switch ((_page)d) {
@@ -657,7 +707,18 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             stack->setCurrentWidget(this->ui.PageOptionsGeneral);
             return;
          case _page::mp_options_respawn:
-            stack->setCurrentWidget(this->ui.PageOptionsRespawn);
+            if (!cg_data) {
+               _revert();
+               return;
+            }
+            this->switchToRespawnOptions(&cg_data->respawn);
+            return;
+         case _page::ff_options_respawn_elite:
+            if (!ff_data) {
+               _revert();
+               return;
+            }
+            this->switchToRespawnOptions(&ff_data->eliteRespawnOptions);
             return;
          case _page::mp_options_social:
             stack->setCurrentWidget(this->ui.PageOptionsSocial);
@@ -675,49 +736,60 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             stack->setCurrentWidget(this->ui.PageOptionsScripted);
             return;
          case _page::loadout_palette:
-            if (!mp_data || extra >= mp_data->options.loadouts.palettes.size()) {
-               const QSignalBlocker blocker(widget);
-               widget->setCurrentItem(previous);
+            if (!cg_data || extra >= cg_data->loadouts.palettes.size()) {
+               _revert();
                return;
             }
-            this->switchToLoadoutPalette(&mp_data->options.loadouts.palettes[extra]);
+            this->switchToLoadoutPalette(&cg_data->loadouts.palettes[extra]);
             return;
          case _page::mp_traits_built_in:
-            if (!mp_data) {
-               const QSignalBlocker blocker(widget);
-               widget->setCurrentItem(previous);
-               return;
+            if (cg_data) { // traits common to any variants with a Custom Game Options struct (i.e. Megalo and Firefight)
+               switch ((_traits_builtin)extra) {
+                  case _traits_builtin::base:
+                     this->switchToPlayerTraits(&cg_data->map.baseTraits);
+                     return;
+                  case _traits_builtin::respawn:
+                     this->switchToPlayerTraits(&cg_data->respawn.traits);
+                     return;
+                  case _traits_builtin::powerup_red:
+                     this->switchToPlayerTraits(&cg_data->map.powerups.red.traits);
+                     return;
+                  case _traits_builtin::powerup_blue:
+                     this->switchToPlayerTraits(&cg_data->map.powerups.blue.traits);
+                     return;
+                  case _traits_builtin::powerup_yellow:
+                     this->switchToPlayerTraits(&cg_data->map.powerups.yellow.traits);
+                     return;
+               }
             }
-            switch ((_traits_builtin)extra) {
-               case _traits_builtin::base:
-                  this->switchToPlayerTraits(&mp_data->options.map.baseTraits);
-                  return;
-               case _traits_builtin::respawn:
-                  this->switchToPlayerTraits(&mp_data->options.respawn.traits);
-                  return;
-               case _traits_builtin::powerup_red:
-                  this->switchToPlayerTraits(&mp_data->options.map.powerups.red.traits);
-                  return;
-               case _traits_builtin::powerup_blue:
-                  this->switchToPlayerTraits(&mp_data->options.map.powerups.blue.traits);
-                  return;
-               case _traits_builtin::powerup_yellow:
-                  this->switchToPlayerTraits(&mp_data->options.map.powerups.yellow.traits);
-                  return;
-               case _traits_builtin::forge_editor:
-                  this->switchToPlayerTraits(&mp_data->forgeData.editorTraits);
-                  return;
+            if (ff_data) { // traits exclusive to Firefight variants
+               switch ((_traits_builtin)extra) {
+                  case _traits_builtin::ff_base_spartan_traits:
+                     this->switchToPlayerTraits(&ff_data->baseTraitsSpartan);
+                     return;
+                  case _traits_builtin::ff_base_elite_traits:
+                     this->switchToPlayerTraits(&ff_data->baseTraitsElite);
+                     return;
+                  case _traits_builtin::ff_respawn_elite:
+                     this->switchToPlayerTraits(&ff_data->eliteRespawnOptions.traits);
+                     return;
+                  //
+                  // TODO: custom skull traits for spartans and elites
+                  //
+               }
             }
-            {  // Unknown trait set; disallow selection.
-               const QSignalBlocker blocker(widget);
-               widget->setCurrentItem(previous);
-               return;
+            if (mp_data) { // traits exclusive to Megalo variants
+               switch ((_traits_builtin)extra) {
+                  case _traits_builtin::forge_editor:
+                     this->switchToPlayerTraits(&mp_data->forgeData.editorTraits);
+                     return;
+               }
             }
-            break;
+            _revert(); // Unknown trait set or no suitable data available; disallow selection.
+            return;
          case _page::mp_traits_scripted:
             if (!mp_data || extra >= mp_data->scriptData.traits.size()) {
-               const QSignalBlocker blocker(widget);
-               widget->setCurrentItem(previous);
+               _revert();
                return;
             }
             this->switchToPlayerTraits(&mp_data->scriptData.traits[extra]);
@@ -751,6 +823,10 @@ void ReachVariantTool::switchToLoadoutPalette(ReachLoadoutPalette* palette) {
 void ReachVariantTool::switchToPlayerTraits(ReachPlayerTraits* traits) {
    ReachEditorState::get().setCurrentPlayerTraits(traits);
    this->ui.MainContentView->setCurrentWidget(this->ui.PageEditPlayerTraits);
+}
+void ReachVariantTool::switchToRespawnOptions(ReachCGRespawnOptions* options) {
+   ReachEditorState::get().setCurrentRespawnOptions(options);
+   this->ui.MainContentView->setCurrentWidget(this->ui.PageOptionsRespawn);
 }
 void ReachVariantTool::refreshWindowTitle() {
    auto& editor = ReachEditorState::get();

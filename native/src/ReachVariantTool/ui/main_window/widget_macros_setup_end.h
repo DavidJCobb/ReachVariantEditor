@@ -4,9 +4,18 @@
 #undef reach_main_window_setup_spinbox
 #undef reach_main_window_setup_spinbox_dbl
 
-#undef reach_traits_pane_setup_combobox
-#undef reach_traits_pane_setup_spinbox
+#undef reach_main_window_setup_cg_spinbox
+#undef reach_main_window_setup_cg_flag_checkbox
+#undef reach_main_window_setup_cg_bool_checkbox
+#undef reach_main_window_setup_cg_spinbox
+#undef reach_main_window_setup_cg_spinbox_dbl
 
-#undef reach_team_pane_setup_flag_checkbox
-#undef reach_team_pane_setup_combobox
-#undef reach_team_pane_setup_spinbox
+#undef reach_main_window_setup_ff_spinbox
+#undef reach_main_window_setup_ff_flag_checkbox
+#undef reach_main_window_setup_ff_bool_checkbox
+#undef reach_main_window_setup_ff_spinbox
+#undef reach_main_window_setup_ff_spinbox_dbl
+
+#undef reach_state_pane_setup_flag_checkbox
+#undef reach_state_pane_setup_combobox
+#undef reach_state_pane_setup_spinbox

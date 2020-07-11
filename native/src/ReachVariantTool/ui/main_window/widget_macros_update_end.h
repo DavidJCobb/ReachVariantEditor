@@ -2,10 +2,3 @@
 #undef reach_main_window_update_flag_checkbox
 #undef reach_main_window_update_bool_checkbox
 #undef reach_main_window_update_spinbox
-
-#undef reach_traits_pane_update_combobox
-#undef reach_traits_pane_update_spinbox
-
-#undef reach_team_pane_update_flag_checkbox
-#undef reach_team_pane_update_combobox
-#undef reach_team_pane_update_spinbox

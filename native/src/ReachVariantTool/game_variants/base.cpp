@@ -383,14 +383,20 @@ void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
       printf("   %08X\n", hasher.hash[i]);
    printf("Test done.\n");
 }
+ReachCustomGameOptions* GameVariant::get_custom_game_options() const noexcept {
+   if (!this->multiplayer.data)
+      return nullptr;
+   if (auto mp = this->get_multiplayer_data())
+      return &mp->options;
+   if (auto ff = this->get_firefight_data())
+      return &ff->options;
+   return nullptr;
+}
 GameVariantDataFirefight* GameVariant::get_firefight_data() const noexcept {
    return dynamic_cast<GameVariantDataFirefight*>(this->multiplayer.data);
 }
 GameVariantDataMultiplayer* GameVariant::get_multiplayer_data() const noexcept {
-   auto d = this->multiplayer.data;
-   if (!d)
-      return nullptr;
-   return d->as_multiplayer();
+   return dynamic_cast<GameVariantDataMultiplayer*>(this->multiplayer.data);
 }
 
 GameVariant* GameVariant::clone() const noexcept {

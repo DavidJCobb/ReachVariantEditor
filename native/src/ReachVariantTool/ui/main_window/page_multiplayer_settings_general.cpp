@@ -7,32 +7,43 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsGeneral::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
-   reach_main_window_setup_flag_checkbox(this->ui.fieldPerfectionEnabled,     options.general.flags, 1);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, options.general.flags, 2);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldNewRoundResetsMap,     options.general.flags, 4);
-   reach_main_window_setup_flag_checkbox(this->ui.fieldTeamsEnabled,          options.general.flags, 8);
-   reach_main_window_setup_spinbox(this->ui.fieldRoundTimeLimit,  options.general.timeLimit);
-   reach_main_window_setup_spinbox(this->ui.fieldRoundLimit,      options.general.roundLimit);
-   reach_main_window_setup_spinbox(this->ui.fieldRoundsToWin,     options.general.roundsToWin);
-   reach_main_window_setup_spinbox(this->ui.fieldSuddenDeathTime, options.general.suddenDeathTime);
-   reach_main_window_setup_spinbox(this->ui.fieldGracePeriod,     options.general.gracePeriod);
-   reach_main_window_setup_spinbox(this->ui.fieldScoreToWin,      scoreToWin);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldPerfectionEnabled,     general.flags, 1);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, general.flags, 2);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldNewRoundResetsMap,     general.flags, 4);
+   reach_main_window_setup_cg_flag_checkbox(this->ui.fieldTeamsEnabled,          general.flags, 8);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldRoundTimeLimit,  general.timeLimit);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldRoundLimit,      general.roundLimit);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldRoundsToWin,     general.roundsToWin);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldSuddenDeathTime, general.suddenDeathTime);
+   reach_main_window_setup_cg_spinbox(this->ui.fieldGracePeriod,     general.gracePeriod);
+   reach_main_window_setup_spinbox(this->ui.fieldScoreToWin,      scoreToWin); // MP-specific
    #include "widget_macros_setup_end.h"
 }
 void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
-   auto mp = variant->get_multiplayer_data();
+   this->ui.labelScoreToWin->setVisible(true);
+   this->ui.fieldScoreToWin->setVisible(true);
+   //
+   auto mp = variant->get_custom_game_options();
    if (!mp)
       return;
    #include "widget_macros_update_start.h"
-   reach_main_window_update_flag_checkbox(this->ui.fieldPerfectionEnabled,     options.general.flags, 1);
-   reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, options.general.flags, 2);
-   reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsMap,     options.general.flags, 4);
-   reach_main_window_update_flag_checkbox(this->ui.fieldTeamsEnabled,          options.general.flags, 8);
-   reach_main_window_update_spinbox(this->ui.fieldRoundTimeLimit,  options.general.timeLimit);
-   reach_main_window_update_spinbox(this->ui.fieldRoundLimit,      options.general.roundLimit);
-   reach_main_window_update_spinbox(this->ui.fieldRoundsToWin,     options.general.roundsToWin);
-   reach_main_window_update_spinbox(this->ui.fieldSuddenDeathTime, options.general.suddenDeathTime);
-   reach_main_window_update_spinbox(this->ui.fieldGracePeriod,     options.general.gracePeriod);
-   reach_main_window_update_spinbox(this->ui.fieldScoreToWin,      scoreToWin);
+   reach_main_window_update_flag_checkbox(this->ui.fieldPerfectionEnabled,     general.flags, 1);
+   reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, general.flags, 2);
+   reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsMap,     general.flags, 4);
+   reach_main_window_update_flag_checkbox(this->ui.fieldTeamsEnabled,          general.flags, 8);
+   reach_main_window_update_spinbox(this->ui.fieldRoundTimeLimit,  general.timeLimit);
+   reach_main_window_update_spinbox(this->ui.fieldRoundLimit,      general.roundLimit);
+   reach_main_window_update_spinbox(this->ui.fieldRoundsToWin,     general.roundsToWin);
+   reach_main_window_update_spinbox(this->ui.fieldSuddenDeathTime, general.suddenDeathTime);
+   reach_main_window_update_spinbox(this->ui.fieldGracePeriod,     general.gracePeriod);
+   {  // The above data is common between Multiplayer and Firefight, but this field isn't.
+      auto mp = variant->get_multiplayer_data();
+      if (mp) {
+         reach_main_window_update_spinbox(this->ui.fieldScoreToWin, scoreToWin);
+      } else {
+         this->ui.labelScoreToWin->setVisible(false);
+         this->ui.fieldScoreToWin->setVisible(false);
+      }
+   }
    #include "widget_macros_update_end.h"
 }
