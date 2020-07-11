@@ -5,31 +5,31 @@
 //
 #pragma region Main window
    //
-   // These assume that there is some variable (mp) which contains the field that you want to pull values 
+   // These assume that there is some variable (data) which contains the field that you want to pull values 
    // from. Despite the name, that variable doesn't necessarily need to be multiplayer data in specific.
    //
    #define reach_main_window_update_combobox(w, field) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setCurrentIndex((int)mp->##field ); \
+         widget->setCurrentIndex((int)data->##field ); \
       };
    #define reach_main_window_update_flag_checkbox(w, field, mask) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setChecked((mp->##field & mask ) != 0); \
+         widget->setChecked((data->##field & mask ) != 0); \
       };
    #define reach_main_window_update_bool_checkbox(w, field) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setChecked(mp->##field ); \
+         widget->setChecked(data->##field ); \
       };
    #define reach_main_window_update_spinbox(w, field) \
       { \
          auto widget = w; \
          const QSignalBlocker blocker(widget); \
-         widget->setValue((int)mp->##field ); \
+         widget->setValue((int)data->##field ); \
       };
 #pragma endregion
