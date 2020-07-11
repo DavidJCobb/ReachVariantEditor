@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>16</number>
+       <number>19</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -238,6 +238,9 @@
         <property name="topMargin">
          <number>0</number>
         </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
         <property name="bottomMargin">
          <number>0</number>
         </property>
@@ -326,6 +329,29 @@
        <layout class="QGridLayout" name="gridLayout_13">
         <item row="0" column="0">
          <widget class="PageFFScenario" name="pageContentFFScenario" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightLives">
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0">
+         <widget class="PageFFLives" name="pageContentFFLives" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightRound">
+       <layout class="QGridLayout" name="gridLayout_16">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="PageFFRound" name="pageContentFFRound" native="true"/>
         </item>
        </layout>
       </widget>
@@ -552,6 +578,18 @@
    <class>PageFFScenario</class>
    <extends>QWidget</extends>
    <header>main_window/page_firefight_scenario.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFLives</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_lives.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFRound</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_round.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

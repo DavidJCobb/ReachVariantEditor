@@ -3,14 +3,16 @@
 #include "../../game_variants/components/teams.h"
 #include "../localized_string_editor.h"
 
+#include <QDebug>
+
 namespace {
-   QColor _colorFromReach(uint32_t c, bool alpha = false) {
-      int a = alpha ? 255 : c >> 0x18;
-      return QColor((c >> 0x10) & 0xFF, (c >> 0x08) & 0xFF, c & 0xFF, alpha);
+   QColor _colorFromReach(uint32_t c, bool use_alpha = false) {
+      int a = use_alpha ? (c >> 0x18) : 255;
+      return QColor((c >> 0x10) & 0xFF, (c >> 0x08) & 0xFF, c & 0xFF, a);
    }
-   uint32_t _colorToReach(const QColor& c, bool alpha = false) {
+   uint32_t _colorToReach(const QColor& c, bool use_alpha = false) {
       uint32_t result = ((c.red() & 0xFF) << 0x10) | ((c.green() & 0xFF) << 0x08) | (c.blue() & 0xFF);
-      if (alpha)
+      if (use_alpha)
          result |= c.alpha() << 0x18;
       return result;
    }
@@ -61,7 +63,7 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
    reach_main_window_setup_combobox(multiplayerTeam,      this->ui.fieldSpecies,              spartanOrElite);
    reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldFireteamCount,        fireteamCount);
    reach_main_window_setup_spinbox(multiplayerTeam,       this->ui.fieldInitialDesignator,    initialDesignator);
-   QObject::connect(this->ui.fieldButtonColorPrimary, &QPushButton::clicked, [this]() {
+   QObject::connect(this->ui.fieldButtonColorPrimary,   &QPushButton::clicked, [this]() {
       auto& editor = ReachEditorState::get();
       auto  team   = editor.multiplayerTeam();
       if (!team)

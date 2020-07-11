@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageFFRound</class>
+ <widget class="QWidget" name="PageFFRound">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabSkulls">
+      <attribute name="title">
+       <string>Skulls</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="FFSkullListWidget" name="tabSkullsContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWaveInitial">
+      <attribute name="title">
+       <string>Initial Wave</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="FFWaveDefinitionWidget" name="tabWaveInitialContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWaveMain">
+      <attribute name="title">
+       <string>Main Waves</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="FFWaveDefinitionWidget" name="tabWaveMainContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWaveBoss">
+      <attribute name="title">
+       <string>Boss Waves</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="FFWaveDefinitionWidget" name="tabWaveBossContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FFSkullListWidget</class>
+   <extends>QWidget</extends>
+   <header>../widgets/firefight_skull_list.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FFWaveDefinitionWidget</class>
+   <extends>QWidget</extends>
+   <header>../widgets/firefight_wave.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

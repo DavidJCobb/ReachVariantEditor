@@ -192,11 +192,16 @@
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\main_window\debug_helper_functions.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_lives.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_metadata.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_scenario.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
+    <ClCompile Include="ui\widgets\firefight_skull_list.cpp" />
+    <ClCompile Include="ui\widgets\firefight_squad_type.cpp" />
+    <ClCompile Include="ui\widgets\firefight_wave.cpp" />
     <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
     <ClCompile Include="ui\options_window.cpp" />
@@ -236,7 +241,9 @@
     <QtUic Include="ui\localized_string_editor.ui" />
     <QtUic Include="ui\localized_string_library.ui" />
     <QtUic Include="ui\main_window.ui" />
+    <QtUic Include="ui\main_window\page_firefight_lives.ui" />
     <QtUic Include="ui\main_window\page_firefight_metadata.ui" />
+    <QtUic Include="ui\main_window\page_firefight_round.ui" />
     <QtUic Include="ui\main_window\page_firefight_scenario.ui" />
     <QtUic Include="ui\options_window.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
@@ -265,6 +272,9 @@
     <QtUic Include="ui\script_editor\page_script_traits.ui" />
     <QtUic Include="ui\script_editor\page_script_widgets.ui" />
     <QtUic Include="ui\script_editor\page_string_table.ui" />
+    <QtUic Include="ui\widgets\firefight_skull_list.ui" />
+    <QtUic Include="ui\widgets\firefight_squad_type.ui" />
+    <QtUic Include="ui\widgets\firefight_wave.ui" />
     <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -365,6 +375,8 @@
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
     <QtMoc Include="ui\main_window\page_firefight_metadata.h" />
     <QtMoc Include="ui\main_window\page_firefight_scenario.h" />
+    <QtMoc Include="ui\main_window\page_firefight_lives.h" />
+    <QtMoc Include="ui\main_window\page_firefight_round.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />
@@ -431,6 +443,9 @@
     <QtMoc Include="ui\script_editor\page_req_obj_types.h" />
     <QtMoc Include="ui\script_editor\bottom_bar.h" />
     <QtMoc Include="ui\script_editor\compiler_unresolved_strings.h" />
+    <QtMoc Include="ui\widgets\firefight_squad_type.h" />
+    <QtMoc Include="ui\widgets\firefight_wave.h" />
+    <QtMoc Include="ui\widgets\firefight_skull_list.h" />
     <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />

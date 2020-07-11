@@ -35,17 +35,17 @@ class GameVariantDataFirefight : public GameVariantData {
       ReachUGCHeader variantHeader;
       cobb::bitbool  isBuiltIn;
       ReachCustomGameOptions options;
-      cobb::bitnumber<5, uint8_t> scenarioFlags;
-      cobb::bitnumber<3, uint8_t> unkA;
-      cobb::bitnumber<8, uint8_t> unkB;
-      cobb::bitnumber<4, uint8_t> waveLimit; // enum
+      cobb::bitnumber<5,  uint8_t> scenarioFlags;
+      cobb::bitnumber<3,  uint8_t> unkA;
+      cobb::bitnumber<8,  uint8_t> unkB;
+      cobb::bitnumber<4,  uint8_t> waveLimit; // enum
       cobb::bitnumber<15, uint16_t> unkC; // a quantity of points; always 10000?
       cobb::bitnumber<15, uint16_t> eliteKillBonus;
-      cobb::bitnumber<7,  uint8_t, true> startingLivesSpartan;
-      cobb::bitnumber<7,  uint8_t, true> startingLivesElite;
+      cobb::bitnumber<7,  int8_t, true> startingLivesSpartan;
+      cobb::bitnumber<7,  int8_t, true> startingLivesElite;
       cobb::bitnumber<15, uint16_t> unkD;
-      cobb::bitnumber<7, uint8_t, true> maxSpartanExtraLives;
-      cobb::bitnumber<2, uint8_t> generatorCount;
+      cobb::bitnumber<7,  int8_t, true> maxSpartanExtraLives;
+      cobb::bitnumber<2,  uint8_t> generatorCount;
       ReachPlayerTraits baseTraitsSpartan;
       ReachPlayerTraits baseTraitsElite;
       ReachFirefightWaveTraits  baseTraitsWave; // assumed
@@ -53,6 +53,6 @@ class GameVariantDataFirefight : public GameVariantData {
       ReachCGRespawnOptions eliteRespawnOptions;
       ReachFirefightRound rounds[3];
       cobb::bitnumber<12, uint16_t> bonusWaveDuration; // in seconds
-      decltype(ReachFirefightRound::skulls) bonusWaveSkulls;
+      ReachFirefightRound::skull_list_t bonusWaveSkulls;
       ReachFirefightWave bonusWave;
 };

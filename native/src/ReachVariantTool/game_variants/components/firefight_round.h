@@ -84,10 +84,12 @@ namespace reach {
 
 class ReachFirefightWave {
    public:
+      using squad_type_t = cobb::bitnumber<8, reach::firefight_squad, true>;
+      //
       cobb::bitbool usesDropship;
       cobb::bitbool orderedSquads;
       cobb::bitnumber<4, uint8_t> squadCount; // number of (squads) that are actually defined; everything after those will be ignored
-      cobb::bitnumber<8, reach::firefight_squad, true> squads[12];
+      squad_type_t squads[12];
          //
          // here's an interesting question: how does "ordered squads" interact with this list when the number of squads exceeds the 
          // number of times this wave configuration will actually be used? for example, vanilla allows "main waves" to define five 
@@ -105,7 +107,9 @@ class ReachFirefightWave {
 
 class ReachFirefightRound {
    public:
-      cobb::bitnumber<18, uint32_t> skulls;
+      using skull_list_t = cobb::bitnumber<18, uint32_t>;
+      //
+      skull_list_t skulls;
       ReachFirefightWave waveInitial; // the first of a round's five waves will use the settings defined here
       ReachFirefightWave waveMain;    // the middle three of a round's five waves will use the settings defined here
       ReachFirefightWave waveBoss;    // the last of a round's five waves will use the settings defined here

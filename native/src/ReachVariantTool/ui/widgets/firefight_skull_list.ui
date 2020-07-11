@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FFSkullListWidget</class>
+ <widget class="QWidget" name="FFSkullListWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="skullFamine">
+     <property name="toolTip">
+      <string>Dropped weapons lose half of their ammo or charge, unless they are Spartan Lasers.</string>
+     </property>
+     <property name="text">
+      <string>Famine</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="skullFog">
+     <property name="toolTip">
+      <string>Players' motion trackers are disabled.</string>
+     </property>
+     <property name="text">
+      <string>Fog</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QCheckBox" name="skullToughLuck">
+     <property name="toolTip">
+      <string>NPC enemies dodge dangerous attacks more often, and Grunts are less likely to flee or attempt suicide bombings.</string>
+     </property>
+     <property name="text">
+      <string>Tough Luck</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="skullCowbell">
+     <property name="toolTip">
+      <string>Physics effects are tripled, though physics-related damage is unchanged.</string>
+     </property>
+     <property name="text">
+      <string>Cowbell</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="skullCustomYellow">
+     <property name="toolTip">
+      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+     </property>
+     <property name="text">
+      <string>Custom Yellow</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="skullIWHBYD">
+     <property name="toolTip">
+      <string>Rare dialogue becomes more common and vice versa, for both enemies and players.</string>
+     </property>
+     <property name="text">
+      <string>IWHBYD</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QCheckBox" name="skullGruntParty">
+     <property name="toolTip">
+      <string>Killing a Grunt with a headshot produces an explosion of confetti that can damage other enemies.</string>
+     </property>
+     <property name="text">
+      <string>Grunt Birthday Party</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="skullMythic">
+     <property name="toolTip">
+      <string>NPC enemy health is doubled.</string>
+     </property>
+     <property name="text">
+      <string>Mythic</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QCheckBox" name="skullCustomRed">
+     <property name="toolTip">
+      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+     </property>
+     <property name="text">
+      <string>Custom Red</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QCheckBox" name="skullCustomBlue">
+     <property name="toolTip">
+      <string>A customizable skull whose effects can be configured through game variant settings.</string>
+     </property>
+     <property name="text">
+      <string>Custom Blue</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="skullBlackEye">
+     <property name="toolTip">
+      <string>Players can only recharge their shields by meleeing and assassinating enemies.</string>
+     </property>
+     <property name="text">
+      <string>Black Eye</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="skullTilt">
+     <property name="toolTip">
+      <string>Weapons' strengths and weaknesses are amplified.</string>
+     </property>
+     <property name="text">
+      <string>Tilt</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="skullCatch">
+     <property name="toolTip">
+      <string>Enemies throw grenades twice as often, and drop two grenades when killed.</string>
+     </property>
+     <property name="text">
+      <string>Catch</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -36,13 +36,6 @@ int main(int argc, char *argv[]) {
 //
 //  - Finish adding UI for all Firefight options.
 //
-//     - Custom Game options
-//
-//        - "Spartan Respawn Settings" instead of standard; should also include starting 
-//          lives, max lives, and lives earned for killing elite players
-//
-//        - "Elite Respawn Settings"
-//
 //     - Rounds
 //
 //     - Bonus Wave

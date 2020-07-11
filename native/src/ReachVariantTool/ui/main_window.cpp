@@ -58,6 +58,7 @@ namespace {
       ff_metadata,
       ff_options_respawn_elite,
       ff_scenario,
+      ff_lives,
       ff_custom_skull,
       ff_round,
       ff_bonus_wave,
@@ -490,6 +491,14 @@ namespace {
       item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
       return item;
    }
+   QTreeWidgetItem* _makeNavItemFFRound(QTreeWidgetItem* parent, QString s, uint index) {
+      auto item = new QTreeWidgetItem(parent);
+      item->setText(0, s);
+      item->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::ff_round);
+      item->setData(0, Qt::ItemDataRole::UserRole + 1, index);
+      item->setFlags(Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled);
+      return item;
+   }
 }
 void ReachVariantTool::regenerateNavigation() {
    auto& editor = ReachEditorState::get();
@@ -587,8 +596,12 @@ void ReachVariantTool::regenerateNavigation() {
       } else if (ff) {
          defaultFallback = _makeNavItem(widget, tr("Metadata", "main window navigation pane"), _page::ff_metadata);
          auto scenario = _makeNavItem(widget, tr("Firefight Settings", "main window navigation pane"), _page::ff_scenario);
+         _makeNavItem(scenario, tr("Player Lives", "main window navigation pane"), _page::ff_lives);
          _makeNavItemMPTraits(scenario, tr("Base Spartan Traits", "main window navigation pane"), _traits_builtin::ff_base_spartan_traits);
          _makeNavItemMPTraits(scenario, tr("Base Elite Traits", "main window navigation pane"), _traits_builtin::ff_base_elite_traits);
+         _makeNavItemFFRound(scenario, tr("Round 1", "main window navigation pane"), 0);
+         _makeNavItemFFRound(scenario, tr("Round 2", "main window navigation pane"), 1);
+         _makeNavItemFFRound(scenario, tr("Round 3", "main window navigation pane"), 2);
          {  // Options
             auto options = _makeNavItem(widget, tr("Common Settings", "main window navigation pane"), _page::redirect_to_first_child);
             {
@@ -812,6 +825,13 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             return;
          case _page::ff_scenario:
             stack->setCurrentWidget(this->ui.PageFirefightScenario);
+            return;
+         case _page::ff_lives:
+            stack->setCurrentWidget(this->ui.PageFirefightLives);
+            return;
+         case _page::ff_round:
+            stack->setCurrentWidget(this->ui.PageFirefightRound);
+            this->ui.pageContentFFRound->setIndex(extra);
             return;
       }
    }
