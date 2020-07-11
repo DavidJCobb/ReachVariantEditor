@@ -186,7 +186,7 @@ class GameVariantDataMultiplayer : public GameVariantData {
       struct {
          cobb::bitnumber<2, uint8_t> flags = 0;
          cobb::bitnumber<2, uint8_t> editModeType = 0;
-         cobb::bitnumber<6, uint8_t> respawnTime = 0;
+         cobb::bitnumber<6, uint8_t> respawnTime = 0; // if this is greater than 60, it gets reset to 5 on load
          ReachPlayerTraits editorTraits;
       } forgeData;
 

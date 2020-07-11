@@ -3,8 +3,8 @@
 #include <string>
 #include "../../variables_and_scopes.h"
 #include "../../opcode_arg.h"
-#include "../../../../helpers/bitwise.h"
-#include "../../../../formats/indexed_lists.h"
+#include "../../../../../helpers/bitwise.h"
+#include "../../../../../formats/indexed_lists.h"
 
 /*
 // MEGALO VARIABLES

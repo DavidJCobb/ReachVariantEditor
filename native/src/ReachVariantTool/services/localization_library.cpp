@@ -184,7 +184,7 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
             continue;
          }
          if (key.compare(QString("cate"), Qt::CaseInsensitive) == 0) {
-            current->category = value.toString(); // TODO: enum
+            current->category = value.toString(); // TODO: make this an enum?
             continue;
          }
          if (key.compare(QString("desc"), Qt::CaseInsensitive) == 0) {
@@ -203,7 +203,7 @@ LocalizedStringLibrary::LocalizedStringLibrary() {
             continue;
          }
          if (key.compare(QString("sourcetype"), Qt::CaseInsensitive) == 0) {
-            current->source_type = value.toString(); // TODO: enum
+            current->source_type = value.toString(); // TODO: make this an enum?
             continue;
          }
          if (key.compare(QString("token"), Qt::CaseInsensitive) == 0) {
