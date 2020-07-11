@@ -88,7 +88,7 @@ class ReachFirefightWave {
       //
       cobb::bitbool usesDropship;
       cobb::bitbool orderedSquads;
-      cobb::bitnumber<4, uint8_t> squadCount; // number of (squads) that are actually defined; everything after those will be ignored
+      cobb::bitnumber<4, uint8_t> squadCount; // number of (squads) that are actually defined; everything after those will be ignored. note that below-normal squad counts may not necessarily be honored by the engine
       squad_type_t squads[12];
          //
          // here's an interesting question: how does "ordered squads" interact with this list when the number of squads exceeds the 

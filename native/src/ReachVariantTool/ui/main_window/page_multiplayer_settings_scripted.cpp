@@ -149,23 +149,9 @@ void PageMPSettingsScripted::updateFromOption(ReachMegaloOption* option) {
    auto mp = ReachEditorState::get().multiplayerData();
    if (!mp)
       return;
-   int8_t index = option->index;
-   /*int8_t index = -1;
-   {
-      auto& list = mp->scriptData.options;
-      auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         if (list[i] == option) {
-            index = i;
-            break;
-         }
-      }
-      if (index < 0)
-         return;
-   }
-   //*/
-   auto page   = this;
-   auto layout = dynamic_cast<QGridLayout*>(page->layout());
+   int8_t index  = option->index;
+   auto   page   = this;
+   auto   layout = dynamic_cast<QGridLayout*>(page->layout());
    if (!layout)
       return;
    std::vector<QWidget*> widgets;

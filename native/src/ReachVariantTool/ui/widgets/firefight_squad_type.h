@@ -8,7 +8,7 @@
 // and it will automatically synch to that. Remember to sever that reference with a call to 
 // clearTarget when you're done with the wave data.
 //
-class FFSquadTypeWidget : public QWidget {
+class FFSquadTypeWidget : public QComboBox {
    Q_OBJECT
    //
    public:
@@ -18,7 +18,6 @@ class FFSquadTypeWidget : public QWidget {
       //
       void setTarget(squad_type_t&);
       void clearTarget();
-      void setText(const QString&);
       //
    private:
       Ui::FFSquadTypeWidget ui;

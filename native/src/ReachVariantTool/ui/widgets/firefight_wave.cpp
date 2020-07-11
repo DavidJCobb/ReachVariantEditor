@@ -1,5 +1,8 @@
 #include "firefight_wave.h"
-#include "firefight_squad_type.h"
+
+namespace {
+   constexpr int ce_squad_types_per_wave = 12;
+}
 
 FFWaveDefinitionWidget::FFWaveDefinitionWidget(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
@@ -17,21 +20,35 @@ FFWaveDefinitionWidget::FFWaveDefinitionWidget(QWidget* parent) : QWidget(parent
          this->target->squadCount = value;
    });
    //
-   // TODO: squad types
-   //
+   auto layout = dynamic_cast<QGridLayout*>(this->layout());
+   assert(layout != nullptr);
+   auto start  = layout->rowCount();
+   for (int i = 0; i < ce_squad_types_per_wave; ++i) {
+      auto label  = new QLabel(this);
+      auto widget = new FFSquadTypeWidget(this);
+      label->setText(QString("Squad %1").arg(i + 1));
+      label->setBuddy(widget);
+      layout->addWidget(label,  start + i, 0);
+      layout->addWidget(widget, start + i, 1);
+      this->squadTypeWidgets.push_back(widget);
+   }
+   auto spacer = new QSpacerItem(20, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+   layout->addItem(spacer, start + ce_squad_types_per_wave, 0, 1, 2);
 }
 void FFWaveDefinitionWidget::setTarget(wave_t& target) {
    this->target = &target;
-   //
-   // TODO: squad types
-   //
+   for (int i = 0; i < ce_squad_types_per_wave; ++i) {
+      auto* widget = this->squadTypeWidgets[i];
+      widget->setTarget(target.squads[i]);
+   }
    this->_updateFromTarget();
 }
 void FFWaveDefinitionWidget::clearTarget() {
    this->target = nullptr;
-   //
-   // TODO: squad types
-   //
+   for (int i = 0; i < ce_squad_types_per_wave; ++i) {
+      auto* widget = this->squadTypeWidgets[i];
+      widget->clearTarget();
+   }
    this->_updateFromTarget();
 }
 void FFWaveDefinitionWidget::_updateFromTarget() {

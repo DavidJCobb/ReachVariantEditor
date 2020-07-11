@@ -20,6 +20,7 @@ void PageFFRound::updateFromVariant(GameVariant* variant) {
       this->ui.tabWaveInitialContent->clearTarget();
       this->ui.tabWaveMainContent->clearTarget();
       this->ui.tabWaveBossContent->clearTarget();
+      return;
    }
    this->ui.tabSkullsContent->setTarget(ff->rounds[this->index].skulls);
    this->ui.tabWaveInitialContent->setTarget(ff->rounds[this->index].waveInitial);

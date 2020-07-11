@@ -273,7 +273,6 @@
     <QtUic Include="ui\script_editor\page_script_widgets.ui" />
     <QtUic Include="ui\script_editor\page_string_table.ui" />
     <QtUic Include="ui\widgets\firefight_skull_list.ui" />
-    <QtUic Include="ui\widgets\firefight_squad_type.ui" />
     <QtUic Include="ui\widgets\firefight_wave.ui" />
     <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
