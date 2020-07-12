@@ -31,12 +31,18 @@
      <property name="text">
       <string>Grenades</string>
      </property>
+     <property name="buddy">
+      <cstring>grenades</cstring>
+     </property>
     </widget>
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label_10">
      <property name="text">
       <string>Damage Resistance</string>
+     </property>
+     <property name="buddy">
+      <cstring>damageResist</cstring>
      </property>
     </widget>
    </item>
@@ -72,12 +78,18 @@
      <property name="text">
       <string>Don't Drop Equipment on Death</string>
      </property>
+     <property name="buddy">
+      <cstring>dontDropEquipment</cstring>
+     </property>
     </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
       <string>Hearing</string>
+     </property>
+     <property name="buddy">
+      <cstring>hearing</cstring>
      </property>
     </widget>
    </item>
@@ -179,12 +191,18 @@
      <property name="text">
       <string>Vision</string>
      </property>
+     <property name="buddy">
+      <cstring>vision</cstring>
+     </property>
     </widget>
    </item>
    <item row="9" column="0">
     <widget class="QLabel" name="label_8">
      <property name="text">
       <string>Headshot Immunity</string>
+     </property>
+     <property name="buddy">
+      <cstring>headshotImmunity</cstring>
      </property>
     </widget>
    </item>
@@ -195,6 +213,9 @@
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>Luck</string>
+     </property>
+     <property name="buddy">
+      <cstring>luck</cstring>
      </property>
     </widget>
    </item>
@@ -229,6 +250,9 @@
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>Shootiness</string>
+     </property>
+     <property name="buddy">
+      <cstring>shootiness</cstring>
      </property>
     </widget>
    </item>
@@ -266,12 +290,18 @@
      <property name="text">
       <string>Assassination Immunity</string>
      </property>
+     <property name="buddy">
+      <cstring>assassinImmunity</cstring>
+     </property>
     </widget>
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label_9">
      <property name="text">
       <string>Damage Modifier</string>
+     </property>
+     <property name="buddy">
+      <cstring>damageMult</cstring>
      </property>
     </widget>
    </item>
@@ -334,6 +364,18 @@
    <header>../generic/PlayerTraitWidgets.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>damageMult</tabstop>
+  <tabstop>damageResist</tabstop>
+  <tabstop>vision</tabstop>
+  <tabstop>hearing</tabstop>
+  <tabstop>luck</tabstop>
+  <tabstop>shootiness</tabstop>
+  <tabstop>grenades</tabstop>
+  <tabstop>dontDropEquipment</tabstop>
+  <tabstop>assassinImmunity</tabstop>
+  <tabstop>headshotImmunity</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

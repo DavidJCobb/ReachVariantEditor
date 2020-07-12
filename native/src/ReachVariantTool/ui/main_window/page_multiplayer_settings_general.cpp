@@ -3,6 +3,11 @@
 #include "../../game_variants/types/multiplayer.h" // needed for scoreToWin
 #include "../../game_variants/components/custom_game_options.h"
 
+//
+// NOTE: The "Player Species" value is stored with team options, but it also applies 
+// in FFA, so for the UI, I'm classifying it under General Settings.
+//
+
 PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
@@ -14,6 +19,7 @@ PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) 
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldNewRoundResetsPlayers, general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_players);
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldNewRoundResetsMap,     general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_map);
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldTeamsEnabled,          general.flags, ReachCGGeneralOptions::flags_t::teams_enabled);
+   reach_main_window_setup_combobox(customGameOptions, this->ui.fieldPlayerSpecies,  team.species);
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldRoundTimeLimit,  general.timeLimit);
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldRoundLimit,      general.roundLimit);
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldRoundsToWin,     general.roundsToWin);
@@ -34,6 +40,7 @@ void PageMPSettingsGeneral::updateFromVariant(GameVariant* variant) {
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsPlayers, general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_players);
    reach_main_window_update_flag_checkbox(this->ui.fieldNewRoundResetsMap,     general.flags, ReachCGGeneralOptions::flags_t::new_round_resets_map);
    reach_main_window_update_flag_checkbox(this->ui.fieldTeamsEnabled,          general.flags, ReachCGGeneralOptions::flags_t::teams_enabled);
+   reach_main_window_update_combobox(this->ui.fieldPlayerSpecies,  team.species);
    reach_main_window_update_spinbox(this->ui.fieldRoundTimeLimit,  general.timeLimit);
    reach_main_window_update_spinbox(this->ui.fieldRoundLimit,      general.roundLimit);
    reach_main_window_update_spinbox(this->ui.fieldRoundsToWin,     general.roundsToWin);

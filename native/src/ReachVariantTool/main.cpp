@@ -31,9 +31,6 @@ int main(int argc, char *argv[]) {
 //
 // FIREFIGHT PLANS
 //
-//  - We need to decode the "athr" file block; official and built-in Firefight variants use 
-//    that instead of "chdr".
-//
 //  - Finish adding UI for all Firefight options.
 //
 //     - Bonus Wave configuration
@@ -44,10 +41,21 @@ int main(int argc, char *argv[]) {
 //
 //        - Do not change filenames; we don't want to break hyperlinks to the web docs.
 //
+//        - Update screenshots for General Settings and Team Settings.
+//
 //     - Add a "Main Window (Firefight)" folder.
 //
-//        - We should give the documentation XML a way of saying, "Just copy my file from 
-//          this location relative to me."
+//        - We should give the documentation XML a way of saying, "Just use the same XML 
+//          as in this other file (relative to my location)." Note my wording there: we 
+//          don't want to directly copy HTML output because the file paths might be 
+//          different (i.e. if the duplicate is nested more or less deeply); we just 
+//          don't want to have to write the same XML file twice.
+//
+//          Main use case for this is Custom Game options and player traits appearing 
+//          in Firefight. Many of these will be identical (though some will not, owing 
+//          to different engine behavior).
+//
+//     - Re-bake all documentation.
 //
 
 //

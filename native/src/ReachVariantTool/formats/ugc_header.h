@@ -31,6 +31,8 @@ enum class ReachGameMode : uint8_t {
 };
 class ReachUGCHeader {
    public:
+      ReachUGCHeader();
+      //
       struct {
          cobb::bytenumber<uint16_t> major; // chdr-only
          cobb::bytenumber<uint16_t> minor; // chdr-only
@@ -56,11 +58,11 @@ class ReachUGCHeader {
       cobb::bitnumber<8, uint32_t> engineIcon;
       uint8_t  unk284[0x1C];
       struct {
-         cobb::bytenumber<uint8_t>   id;
-         cobb::bitnumber<2, uint8_t> difficulty;
-         cobb::bitnumber<2, uint8_t> metagameScoring;
-         cobb::bytenumber<uint8_t>   rallyPoint;
-         cobb::bytenumber<uint32_t>  unk2A4;
+         cobb::bytenumber<uint8_t>   id         = 0;
+         cobb::bitnumber<2, uint8_t> difficulty = 0;
+         cobb::bitnumber<2, uint8_t> metagameScoring = 0;
+         cobb::bytenumber<uint8_t>   rallyPoint = 0;
+         cobb::bytenumber<uint32_t>  unk2A4     = 0;
       } campaign; // some fields are also loaded for Firefight
       uint8_t  unk2A8[8];
       //

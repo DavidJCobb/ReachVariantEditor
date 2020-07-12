@@ -1,0 +1,2 @@
+# Don't upload baked documentation files unless they're in the folder that actually ships with the program
+*.html

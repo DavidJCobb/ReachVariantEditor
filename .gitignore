@@ -1,4 +1,4 @@
-# Don't upload Halo: Reach game content (anymore...)
+# Don't upload Halo: Reach game content...
 *.bin
 *.mvar
 
@@ -13,6 +13,3 @@
 *.ini
 *.ini.tmp
 *.ini.bak
-
-# Don't upload baked documentation files unless they're in the folder that actually ships with the program
-/native/src/ReachVariantTool/docs/working - help docs/*/*.html

@@ -51,7 +51,7 @@ class BlamHeader {
       ReachFileBlock header = ReachFileBlock('_blf', 0x30);
       struct {
          uint16_t unk0C = 0;
-         uint8_t  unk0E[0x20];
+         uint8_t  unk0E[0x20]; // very possibly a string buffer; Matchmaking Firefight variants use the text "game var" here
          uint16_t unk2E = 0;
       } data;
       //
@@ -66,6 +66,20 @@ class EOFBlock : public ReachFileBlock {
       //
       bool read(reach_block_stream&) noexcept;
       void write(cobb::bytewriter&) const noexcept;
+};
+
+class ReachBlockATHR { // used to indicate authorship information for internal content
+   public:
+      ReachFileBlock header = ReachFileBlock('athr', 0x50);
+      struct {
+         uint8_t  unk00[0x10];
+         uint32_t buildNumber;
+         uint32_t unk14;
+         char     buildString[0x2C]; // "11860.10.07.24.0147.omaha_r" with a null-terminator. not sure if the last 0x10 bytes are this or another field
+      } data;
+      //
+      bool read(reach_block_stream& stream) noexcept;
+      void write(cobb::bytewriter& stream) const noexcept;
 };
 
 class ReachBlockCHDR {
@@ -119,6 +133,7 @@ class ReachBlockMPVR {
 class GameVariant {
    public:
       BlamHeader     blamHeader;
+      ReachBlockATHR athr; // only seen on Matchmaking Firefight variants; contains internal build information, etc.; no value in keeping it
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
       EOFBlock       eofBlock;
@@ -126,6 +141,8 @@ class GameVariant {
       //
       bool read(cobb::mapped_file& file);
       void write(GameVariantSaveProcess&) noexcept;
+      //
+      void synch_chdr_to_mpvr() noexcept;
       //
       static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
       //

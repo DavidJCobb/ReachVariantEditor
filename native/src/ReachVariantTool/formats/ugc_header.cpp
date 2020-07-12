@@ -1,6 +1,17 @@
 #include "ugc_header.h"
 #include <cassert>
 
+ReachUGCHeader::ReachUGCHeader() {
+   //
+   // We copy the full contents of these fields into the game variant file when saving 
+   // this struct as a (chdr) block, so we want to fully zero them out.
+   //
+   memset(this->title,       0, sizeof(this->title));
+   memset(this->description, 0, sizeof(this->description));
+   memset(this->unk284, 0, sizeof(this->unk284));
+   memset(this->unk2A8, 0, sizeof(this->unk2A8));
+}
+
 bool ReachUGCHeader::read(cobb::ibitreader& stream) noexcept {
    this->build.major = 0; // not in mpvr
    this->build.minor = 0; // not in mpvr

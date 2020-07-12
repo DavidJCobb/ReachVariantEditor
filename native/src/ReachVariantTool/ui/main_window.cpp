@@ -633,17 +633,17 @@ void ReachVariantTool::regenerateNavigation() {
          _makeNavItemFFRound(scenario, tr("Round 2", disambig), 1);
          _makeNavItemFFRound(scenario, tr("Round 3", disambig), 2);
          //
-         auto skull_base = _makeNavItem(widget, tr("Red Skull", disambig), _page::redirect_to_first_child);
+         auto skull_base = _makeNavItem(scenario, tr("Red Skull", disambig), _page::redirect_to_first_child);
          _makeNavItemFFWaveTraits(skull_base, tr("Wave Traits", disambig), _ff_wave_traits::skull_red);
          _makeNavItemMPTraits(skull_base, tr("Spartan Traits", disambig), _traits_builtin::ff_spartan_traits_red);
          _makeNavItemMPTraits(skull_base, tr("Elite Traits", disambig), _traits_builtin::ff_elite_traits_red);
          //
-         skull_base = _makeNavItem(widget, tr("Blue Skull", disambig), _page::redirect_to_first_child);
+         skull_base = _makeNavItem(scenario, tr("Blue Skull", disambig), _page::redirect_to_first_child);
          _makeNavItemFFWaveTraits(skull_base, tr("Wave Traits", disambig), _ff_wave_traits::skull_blue);
          _makeNavItemMPTraits(skull_base, tr("Spartan Traits", disambig), _traits_builtin::ff_spartan_traits_blue);
          _makeNavItemMPTraits(skull_base, tr("Elite Traits", disambig), _traits_builtin::ff_elite_traits_blue);
          //
-         skull_base = _makeNavItem(widget, tr("Yellow Skull", disambig), _page::redirect_to_first_child);
+         skull_base = _makeNavItem(scenario, tr("Yellow Skull", disambig), _page::redirect_to_first_child);
          _makeNavItemFFWaveTraits(skull_base, tr("Wave Traits", disambig), _ff_wave_traits::skull_yellow);
          _makeNavItemMPTraits(skull_base, tr("Spartan Traits", disambig), _traits_builtin::ff_spartan_traits_yellow);
          _makeNavItemMPTraits(skull_base, tr("Elite Traits", disambig), _traits_builtin::ff_elite_traits_yellow);
