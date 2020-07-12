@@ -1,10 +1,8 @@
 #include "page_multiplayer_settings_respawn.h"
+#include "../../game_variants/components/custom_game_options.h"
 
 PageMPSettingsRespawn::PageMPSettingsRespawn(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
-   //
-   auto& editor = ReachEditorState::get();
-   QObject::connect(&editor, &ReachEditorState::switchedRespawnOptions, this, &PageMPSettingsRespawn::updateFromVariant);
    //
    #include "widget_macros_setup_start.h"
    reach_main_window_setup_flag_checkbox(respawnOptions, this->ui.fieldSyncWithTeam,        flags, ReachCGRespawnOptions::flags_t::sync_with_team);

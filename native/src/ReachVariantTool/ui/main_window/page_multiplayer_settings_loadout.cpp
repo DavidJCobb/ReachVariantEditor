@@ -1,4 +1,6 @@
 #include "page_multiplayer_settings_loadout.h"
+#include "../../game_variants/base.h"
+#include "../../game_variants/components/custom_game_options.h"
 
 PageMPSettingsLoadoutsOverall::PageMPSettingsLoadoutsOverall(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

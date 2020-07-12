@@ -1,4 +1,5 @@
 #include "page_multiplayer_settings_scripted.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>

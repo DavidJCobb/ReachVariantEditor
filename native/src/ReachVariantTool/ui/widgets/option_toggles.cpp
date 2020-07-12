@@ -2,6 +2,7 @@
 #include <QHeaderView>
 #include <QMenu>
 #include "../../editor_state.h"
+#include "../../game_variants/types/multiplayer.h"
 
 #pragma region OptionToggleModelItem
 void OptionToggleModelItem::_destroyDescendants() noexcept {

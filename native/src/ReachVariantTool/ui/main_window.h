@@ -5,6 +5,7 @@
 #include "ui_main_window.h"
 
 class ReachCGRespawnOptions;
+class ReachFirefightWaveTraits;
 class ReachLoadoutPalette;
 class ReachMegaloPlayerTraits;
 class ReachPlayerTraits;
@@ -36,6 +37,7 @@ class ReachVariantTool : public QMainWindow {
       //
       void regenerateNavigation();
       //
+      void switchToFFWaveTraits(ReachFirefightWaveTraits*);
       void switchToLoadoutPalette(ReachLoadoutPalette*);
       void switchToPlayerTraits(ReachPlayerTraits*);
       void switchToRespawnOptions(ReachCGRespawnOptions*);

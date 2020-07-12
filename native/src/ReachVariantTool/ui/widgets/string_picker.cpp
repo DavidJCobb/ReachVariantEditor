@@ -4,6 +4,7 @@
 #include "../../editor_state.h"
 #include "../localized_string_editor.h"
 #include "../../helpers/qt/widget.h"
+#include "../../game_variants/types/multiplayer.h"
 
 ReachStringPicker::ReachStringPicker(QWidget* parent, uint32_t flags) : QWidget(parent) {
    #if _DEBUG

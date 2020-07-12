@@ -1,5 +1,6 @@
 #include "page_metadata_strings.h"
 #include "../localized_string_editor.h"
+#include "../../game_variants/types/multiplayer.h"
 
 ScriptEditorPageMetaStrings::ScriptEditorPageMetaStrings(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

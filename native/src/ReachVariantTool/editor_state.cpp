@@ -1,4 +1,10 @@
 #include "editor_state.h"
+#include "game_variants/base.h"
+#include "game_variants/components/loadouts.h"
+#include "game_variants/components/player_traits.h"
+#include "game_variants/components/teams.h"
+#include "game_variants/types/firefight.h"
+#include "game_variants/types/multiplayer.h"
 
 ReachEditorState::ReachEditorState() {
    QObject::connect(this, &ReachEditorState::stringModified, [this](uint32_t index) {
@@ -25,12 +31,23 @@ void ReachEditorState::abandonVariant() noexcept {
       return;
    auto v = this->currentVariant;
    this->currentVariant = nullptr;
-   this->currentTraits  = nullptr;
-   this->currentLoadoutPalette = nullptr;
-   this->currentMPTeam  = -1;
    this->currentFile    = L"";
+   this->currentMPTeam  = -1;
+   this->currentFFWaveTraits   = nullptr;
+   this->currentLoadoutPalette = nullptr;
+   this->currentRespawnOptions = nullptr;
+   this->currentTraits         = nullptr;
+   emit switchedFFWaveTraits(nullptr);
+   emit switchedLoadoutPalette(nullptr);
+   emit switchedMultiplayerTeam(nullptr, -1, nullptr);
+   emit switchedRespawnOptions(nullptr);
+   emit switchedPlayerTraits(nullptr);
    emit variantAbandoned(v);
    delete v;
+}
+void ReachEditorState::setCurrentFFWaveTraits(ReachFirefightWaveTraits* traits) noexcept {
+   this->currentFFWaveTraits = traits;
+   emit switchedFFWaveTraits(traits);
 }
 void ReachEditorState::setCurrentMultiplayerTeam(int8_t index) noexcept {
    this->currentMPTeam = index;

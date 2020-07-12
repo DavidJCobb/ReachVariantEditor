@@ -1,4 +1,5 @@
 #include "page_player_rating_params.h"
+#include "../../game_variants/types/multiplayer.h"
 
 ScriptEditorPagePlayerRating::ScriptEditorPagePlayerRating(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

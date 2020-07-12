@@ -1,6 +1,7 @@
 #pragma once
 #include "ui_page_forge_labels.h"
 #include "../../editor_state.h"
+#include "../../game_variants/components/megalo/forge_label.h"
 
 class ScriptEditorPageForgeLabels : public QWidget {
    Q_OBJECT

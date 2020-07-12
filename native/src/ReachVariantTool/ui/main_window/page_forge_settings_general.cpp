@@ -1,4 +1,5 @@
 #include "page_forge_settings_general.h"
+#include "../../game_variants/types/multiplayer.h"
 
 PageForgeSettingsGeneral::PageForgeSettingsGeneral(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

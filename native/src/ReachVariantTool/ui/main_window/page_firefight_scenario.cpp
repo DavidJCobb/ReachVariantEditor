@@ -1,5 +1,5 @@
 #include "page_firefight_scenario.h"
-#include "../../helpers/bitwise.h"
+#include "../../game_variants/types/firefight.h"
 
 PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

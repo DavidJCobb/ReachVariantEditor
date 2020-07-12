@@ -1,4 +1,5 @@
 #include "page_loadout_palette.h"
+#include "../../game_variants/components/loadouts.h"
 
 PageLoadoutPaletteEditor::PageLoadoutPaletteEditor(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

@@ -1,4 +1,7 @@
 #include "page_multiplayer_settings_general.h"
+#include "../../game_variants/base.h"
+#include "../../game_variants/types/multiplayer.h" // needed for scoreToWin
+#include "../../game_variants/components/custom_game_options.h"
 
 PageMPSettingsGeneral::PageMPSettingsGeneral(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

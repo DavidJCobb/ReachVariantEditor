@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include "../localized_string_editor.h"
 #include "../../helpers/string_scanner.h"
+#include "../../editor_state.h"
+#include "../../game_variants/types/multiplayer.h"
 
 namespace {
    bool _selectByPointerData(QListWidget* widget, void* target) {

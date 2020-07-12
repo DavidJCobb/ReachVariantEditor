@@ -1,4 +1,6 @@
 #include "page_multiplayer_settings_map.h"
+#include "../../game_variants/base.h"
+#include "../../game_variants/components/custom_game_options.h"
 
 PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

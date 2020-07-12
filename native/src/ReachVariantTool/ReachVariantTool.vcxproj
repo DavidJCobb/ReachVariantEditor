@@ -69,6 +69,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -87,6 +88,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -196,6 +198,7 @@
     <ClCompile Include="ui\main_window\page_firefight_metadata.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_scenario.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_wave_traits.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
@@ -245,6 +248,7 @@
     <QtUic Include="ui\main_window\page_firefight_metadata.ui" />
     <QtUic Include="ui\main_window\page_firefight_round.ui" />
     <QtUic Include="ui\main_window\page_firefight_scenario.ui" />
+    <QtUic Include="ui\main_window\page_firefight_wave_traits.ui" />
     <QtUic Include="ui\options_window.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
     <QtUic Include="ui\main_window\page_loadout_palette.ui" />
@@ -376,6 +380,7 @@
     <QtMoc Include="ui\main_window\page_firefight_scenario.h" />
     <QtMoc Include="ui\main_window\page_firefight_lives.h" />
     <QtMoc Include="ui\main_window\page_firefight_round.h" />
+    <QtMoc Include="ui\main_window\page_firefight_wave_traits.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

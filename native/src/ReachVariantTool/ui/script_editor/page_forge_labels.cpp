@@ -1,5 +1,5 @@
 #include "page_forge_labels.h"
-#include "../../helpers/bitwise.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QMessageBox>
 
 ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWidget(parent) {

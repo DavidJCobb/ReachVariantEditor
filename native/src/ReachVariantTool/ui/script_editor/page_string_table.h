@@ -1,7 +1,9 @@
 #pragma once
 #include "ui_page_string_table.h"
-#include "../../editor_state.h"
 #include <QAction>
+
+class GameVariant;
+class ReachString;
 
 class ScriptEditorPageStringTable : public QWidget {
    Q_OBJECT

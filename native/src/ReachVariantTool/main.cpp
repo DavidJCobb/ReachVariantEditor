@@ -36,10 +36,6 @@ int main(int argc, char *argv[]) {
 //
 //  - Finish adding UI for all Firefight options.
 //
-//     - Base Wave Traits
-//
-//     - Custom skull configuration
-//
 //     - Bonus Wave configuration
 //
 

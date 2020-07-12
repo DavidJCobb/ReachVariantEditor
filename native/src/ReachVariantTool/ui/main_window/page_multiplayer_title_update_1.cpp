@@ -1,4 +1,5 @@
 #include "page_multiplayer_title_update_1.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QMessageBox>
 
 PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {

@@ -26,7 +26,7 @@ FFWaveDefinitionWidget::FFWaveDefinitionWidget(QWidget* parent) : QWidget(parent
    for (int i = 0; i < ce_squad_types_per_wave; ++i) {
       auto label  = new QLabel(this);
       auto widget = new FFSquadTypeWidget(this);
-      label->setText(QString("Squad %1").arg(i + 1));
+      label->setText(QString("Squad %1 Type").arg(i + 1));
       label->setBuddy(widget);
       layout->addWidget(label,  start + i, 0);
       layout->addWidget(widget, start + i, 1);

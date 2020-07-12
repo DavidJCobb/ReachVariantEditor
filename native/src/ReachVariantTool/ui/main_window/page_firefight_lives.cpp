@@ -1,5 +1,5 @@
 #include "page_firefight_lives.h"
-#include "../../helpers/bitwise.h"
+#include "../../game_variants/types/firefight.h"
 
 PageFFLives::PageFFLives(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

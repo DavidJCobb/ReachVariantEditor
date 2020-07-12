@@ -1,5 +1,6 @@
 #include "page_multiplayer_settings_team_specific.h"
 #include <QColorDialog>
+#include "../../game_variants/base.h"
 #include "../../game_variants/components/teams.h"
 #include "../localized_string_editor.h"
 

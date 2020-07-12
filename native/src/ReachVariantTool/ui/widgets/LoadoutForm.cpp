@@ -1,5 +1,6 @@
 #include "LoadoutForm.h"
 #include "../../editor_state.h"
+#include "../../game_variants/components/loadouts.h"
 
 LoadoutForm::LoadoutForm(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

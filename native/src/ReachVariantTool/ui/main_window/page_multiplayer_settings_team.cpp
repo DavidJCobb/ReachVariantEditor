@@ -1,4 +1,6 @@
 #include "page_multiplayer_settings_team.h"
+#include "../../game_variants/base.h"
+#include "../../game_variants/components/custom_game_options.h"
 
 PageMPSettingsTeamOverall::PageMPSettingsTeamOverall(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

@@ -1,4 +1,5 @@
 #include "page_firefight_round.h"
+#include "../../game_variants/types/firefight.h"
 
 PageFFRound::PageFFRound(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

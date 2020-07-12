@@ -1,4 +1,5 @@
 #include "page_firefight_metadata.h"
+#include "../../game_variants/types/firefight.h"
 #include <QMessageBox>
 #include "../generic/QXBLGamertagValidator.h"
 

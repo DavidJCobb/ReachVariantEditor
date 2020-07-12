@@ -1,4 +1,5 @@
 #include "page_player_traits.h"
+#include "../../game_variants/components/player_traits.h"
 
 PagePlayerTraits::PagePlayerTraits(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
