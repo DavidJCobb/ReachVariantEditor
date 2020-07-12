@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Index</title>
+   <body>
+      <p>
+         Here, you can find documentation on ReachVariantTool's UI, and on its scripting 
+         language. You can use the sidebar to navigate the documentation. Some entries 
+         in the sidebar can be expanded or collapsed by clicking the grey buttons on 
+         their left ends.
+      </p>
+      <hr />
+      <p>
+         ReachVariantTool is an unofficial tool that can be used to edit <i>Halo: Reach</i> 
+         game variants. A "game variant" is a collection of saved settings for multiplayer 
+         matches; for example, if you have fun playing Capture the Flag with 200% jump 
+         height with your friends, you can save those settings as a "game variant."
+      </p>
+      <p>
+         <i>Halo: Reach</i> introduced an interesting and powerful new feature: instead of 
+         having all game modes hardcoded like in past games, game modes use a scripting 
+         language... and the script code is stored in each individual game variant. When 
+         you save your Capture the Flag with 200% Jump Height game variant, you're not 
+         just saving a little post-it note that says "double jump height" on it; you're 
+         saving <em>an entire separate copy of Capture the Flag's code</em>... and 
+         ReachVariantTool can modify that code. You can make entire new game modes.
+      </p>
+      <p>
+         As an example, here's Minesweeper recreated in <i>Halo: Reach</i>:
+      </p>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/-sP8ElrIdek" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen"></iframe>
+   </body>
+</article>

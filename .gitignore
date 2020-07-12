@@ -13,3 +13,6 @@
 *.ini
 *.ini.tmp
 *.ini.bak
+
+# Don't upload baked documentation files unless they're in the folder that actually ships with the program
+/native/src/ReachVariantTool/docs/working - help docs/*/*.html

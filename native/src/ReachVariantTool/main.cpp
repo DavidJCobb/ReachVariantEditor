@@ -38,6 +38,17 @@ int main(int argc, char *argv[]) {
 //
 //     - Bonus Wave configuration
 //
+//  - Documentation updates
+//
+//     - Rename "Main Window" to "Main Window (Custom Games)"
+//
+//        - Do not change filenames; we don't want to break hyperlinks to the web docs.
+//
+//     - Add a "Main Window (Firefight)" folder.
+//
+//        - We should give the documentation XML a way of saying, "Just copy my file from 
+//          this location relative to me."
+//
 
 //
 // CURRENT PLANS:

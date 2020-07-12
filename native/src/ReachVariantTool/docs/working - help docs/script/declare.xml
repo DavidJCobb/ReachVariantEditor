@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Variable declarations</title>
+   <body>
+      <p>
+         Variable declarations allow you to specify a variable's networking priority and its 
+         initial value. They aren't required &mdash; you can use a variable straightaway, 
+         without declaring it &mdash; but because Megalo's default variable networking priority 
+         can't survive host migrations, you'll probably want to use them.
+      </p>
+      <p>
+         Variable declarations look like this:
+      </p>
+      <pre>
+         declare SOME_VARIABLE
+         declare SOME_VARIABLE = SOME_NUMBER
+         declare SOME_VARIABLE with network priority SOME_PRIORITY
+         declare SOME_VARIABLE with network priority SOME_PRIORITY = SOME_NUMBER
+      </pre>
+      <p>
+         When specifying the variable to declare, you are allowed to use an <a href="alias">alias</a>.
+      </p>
+      <p>
+         Only number and timer variables can be given initial values. These values can be any 
+         number except for another variable. If you do not specify an initial value (or if you 
+         don't declare the variable at all), then the initial value used is zero.
+      </p>
+      <p>
+         All variable types except for timers can have a networking priority set. The network 
+         priority values are:
+      </p>
+      <dl>
+         <dt>default</dt>
+            <dd>The meaning of this value is unclear. Testing has established that a variable's 
+            value will be lost after a host migration if its network priority was the default.</dd>
+         <dt>low</dt>
+            <dd>Testing has established that low-priority variables can survive a host migration.</dd>
+         <dt>high</dt>
+            <dd>Testing has established that high-priority variables can survive a host migration. 
+            If you wish to display a player variable in the UI, it must be high-priority.</dd>
+         <dt>local</dt>
+            <dd>Variables with this network priority aren't sent over the network at all.</dd>
+      </dl>
+      <p>
+         Declaring a variable multiple times generates a compiler warning if the declarations 
+         don't conflict ith each other or contain redundant information (e.g. multiple initial 
+         values), or a compiler error otherwise.
+      </p>
+   </body>
+</article>

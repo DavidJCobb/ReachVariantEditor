@@ -23,6 +23,29 @@
             Testing is pending.</dd>
          <dt>Teams Enabled</dt>
             <dd>Controls whether teams are enabled.</dd>
+         <dt>Player Species</dt>
+            <dd>
+               <p>Determines whether players play as Spartans or Elites. The available 
+               values are:</p>
+               <dl>
+                  <dt>Player Preference</dt>
+                     <dd>Players will spawn as the biped they've selected in their 
+                     customization options.</dd>
+                  <dt>All Spartans</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Spartans.</dd>
+                  <dt>All Elites</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Elites.</dd>
+                  <dt>Use Team Species</dt>
+                     <dd>Player customization will be ignored, and players will spawn 
+                     as the species set up in their team's 
+                     <a href="options-team-specific.html">individual configuration.</a></dd>
+                  <dt>Spartans vs Elites</dt>
+                     <dd>The "defense" team will be Spartans, and the "offense" team 
+                     will be Elites.</dd>
+               </dl>
+            </dd>
          <dt>Score to Win</dt>
             <dd>The number of points that a player or team must accrue to win a round. 
             The value "unlimited" exists in place of zero (i.e. to reach it, decrease 

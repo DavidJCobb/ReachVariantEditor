@@ -17,28 +17,6 @@
             control how a team's score was computed from the scores of its players, 
             but testing is pending. <i>Halo: Reach</i> official files seem to use 
             the value 0.</dd>
-         <dt>Player Species</dt>
-            <dd>
-               <p>Determines whether players play as Spartans or Elites. The available 
-               values are:</p>
-               <dl>
-                  <dt>Player Preference</dt>
-                     <dd>Players will spawn as the biped they've selected in their 
-                     customization options.</dd>
-                  <dt>All Spartans</dt>
-                     <dd>Player customization will be ignored, and players will 
-                     always spawn as Spartans.</dd>
-                  <dt>All Elites</dt>
-                     <dd>Player customization will be ignored, and players will 
-                     always spawn as Elites.</dd>
-                  <dt>Use Team Species</dt>
-                     <dd>Player customization will be ignored, and players will spawn 
-                     as the species set up in their team's individual configuration.</dd>
-                  <dt>Spartans vs Elites</dt>
-                     <dd>The "defense" team will be Spartans, and the "offense" team 
-                     will be Elites.</dd>
-               </dl>
-            </dd>
          <dt>Designator Switch Type</dt>
             <dd>
                <p>This option controls how teams are remapped across rounds, but the 

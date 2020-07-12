@@ -109,3 +109,7 @@ OBSERVATIONS FROM TESTING:
    the Firefight-specific per-species base traits.
  - If a wave consists entirely of squad types not available on the current map, then 
    the wave is skipped, apparently.
+ - If you disable teams in Firefight (i.e. make it FFA), then players spawns with the 
+   species indicated by the gametype's overall species setting. All players are enemies 
+   with Covenant NPCs (even if they spawn as Elites), but they only get points for 
+   killing Covenant NPCs if they are Spartans.
