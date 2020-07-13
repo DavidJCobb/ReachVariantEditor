@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>20</number>
+       <number>21</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -362,6 +362,13 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="PageFirefightBonusWave">
+       <layout class="QGridLayout" name="gridLayout_18">
+        <item row="0" column="0">
+         <widget class="PageFFBonusWave" name="pageContentFFBonusWave" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -603,6 +610,12 @@
    <class>PageFFWaveTraits</class>
    <extends>QWidget</extends>
    <header>main_window/page_firefight_wave_traits.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFBonusWave</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_bonus_wave.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

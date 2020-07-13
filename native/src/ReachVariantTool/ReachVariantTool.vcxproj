@@ -194,6 +194,7 @@
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\main_window\debug_helper_functions.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_bonus_wave.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_lives.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_metadata.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
@@ -244,6 +245,7 @@
     <QtUic Include="ui\localized_string_editor.ui" />
     <QtUic Include="ui\localized_string_library.ui" />
     <QtUic Include="ui\main_window.ui" />
+    <QtUic Include="ui\main_window\page_firefight_bonus_wave.ui" />
     <QtUic Include="ui\main_window\page_firefight_lives.ui" />
     <QtUic Include="ui\main_window\page_firefight_metadata.ui" />
     <QtUic Include="ui\main_window\page_firefight_round.ui" />
@@ -381,6 +383,7 @@
     <QtMoc Include="ui\main_window\page_firefight_lives.h" />
     <QtMoc Include="ui\main_window\page_firefight_round.h" />
     <QtMoc Include="ui\main_window\page_firefight_wave_traits.h" />
+    <QtMoc Include="ui\main_window\page_firefight_bonus_wave.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />

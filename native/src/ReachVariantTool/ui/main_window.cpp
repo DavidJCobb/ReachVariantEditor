@@ -241,6 +241,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    this->setAcceptDrops(true);
 }
 
+#pragma region File I/O
 void ReachVariantTool::getDefaultLoadDirectory(QString& out) const noexcept {
    using dir_type = ReachINI::DefaultPathType;
    out.clear();
@@ -468,6 +469,7 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    out.writeRawData((const char*)save_process.writer.bytes.data(), save_process.writer.bytes.get_bytespan());
    file.commit();
 }
+#pragma endregion
 
 namespace {
    QTreeWidgetItem* _makeNavItem(QTreeWidget* parent, QString s, _page p) {
@@ -632,6 +634,7 @@ void ReachVariantTool::regenerateNavigation() {
          _makeNavItemFFRound(scenario, tr("Round 1", disambig), 0);
          _makeNavItemFFRound(scenario, tr("Round 2", disambig), 1);
          _makeNavItemFFRound(scenario, tr("Round 3", disambig), 2);
+         _makeNavItem(scenario, tr("Bonus Wave", disambig), _page::ff_bonus_wave);
          //
          auto skull_base = _makeNavItem(scenario, tr("Red Skull", disambig), _page::redirect_to_first_child);
          _makeNavItemFFWaveTraits(skull_base, tr("Wave Traits", disambig), _ff_wave_traits::skull_red);
@@ -686,9 +689,6 @@ void ReachVariantTool::regenerateNavigation() {
                }
             }
          }
-         //
-         // TODO
-         //
       } else {
          auto item = _makeNavItem(widget, tr("Welcome", disambig), _page::unknown_variant_type);
          widget->setCurrentItem(item);
@@ -843,6 +843,9 @@ void ReachVariantTool::onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidg
             case _page::ff_round:
                stack->setCurrentWidget(this->ui.PageFirefightRound);
                this->ui.pageContentFFRound->setIndex(extra);
+               return;
+            case _page::ff_bonus_wave:
+               stack->setCurrentWidget(this->ui.PageFirefightBonusWave);
                return;
             case _page::ff_wave_traits:
                switch ((_ff_wave_traits)extra) {

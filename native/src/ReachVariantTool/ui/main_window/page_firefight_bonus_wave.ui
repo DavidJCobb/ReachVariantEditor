@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageFFBonusWave</class>
+ <widget class="QWidget" name="PageFFBonusWave">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="1">
+    <widget class="QSpinBox" name="bonusWaveDuration">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="specialValueText">
+      <string>no bonus wave</string>
+     </property>
+     <property name="suffix">
+      <string> seconds</string>
+     </property>
+     <property name="maximum">
+      <number>4095</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Bonus Wave Duration</string>
+     </property>
+     <property name="buddy">
+      <cstring>bonusWaveDuration</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tabSkulls">
+      <attribute name="title">
+       <string>Skulls</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="FFSkullListWidget" name="tabSkullsContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabWave">
+      <attribute name="title">
+       <string>Wave Options</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="FFWaveDefinitionWidget" name="tabWaveContent" native="true"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FFSkullListWidget</class>
+   <extends>QWidget</extends>
+   <header>../widgets/firefight_skull_list.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FFWaveDefinitionWidget</class>
+   <extends>QWidget</extends>
+   <header>../widgets/firefight_wave.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

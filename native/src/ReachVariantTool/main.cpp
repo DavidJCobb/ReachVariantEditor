@@ -31,9 +31,11 @@ int main(int argc, char *argv[]) {
 //
 // FIREFIGHT PLANS
 //
-//  - Finish adding UI for all Firefight options.
+//  - UI improvements?
 //
-//     - Bonus Wave configuration
+//     - For Firefight squad composition, is there something we can do to make it easy 
+//       to tell at a glance which squads are (by virtue of the squad count) actually 
+//       relevant? I'd rather not straight-up disable controls, but...
 //
 //  - Documentation updates
 //
@@ -56,6 +58,12 @@ int main(int argc, char *argv[]) {
 //          to different engine behavior).
 //
 //     - Re-bake all documentation.
+//
+//  - Testing
+//
+//     - I should see if I can put together a test of SvS Firefight and FFA Firefight. 
+//       I want to know if the two player teams are enemies of each other (in the former 
+//       case) and if all players are enemies of each other (in the latter case).
 //
 
 //
