@@ -168,7 +168,7 @@ class ReachCGTeamOptions {
       };
       //
    public:
-      cobb::bitnumber<3, uint8_t> scoring;
+      cobb::bitnumber<3, uint8_t> scoring; // values above 3 are treated as 0
       cobb::bitnumber<3, species::type> species;
       cobb::bitnumber<2, uint8_t> designatorSwitchType;
       ReachTeamData teams[8];

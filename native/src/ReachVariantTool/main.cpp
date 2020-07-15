@@ -31,11 +31,21 @@ int main(int argc, char *argv[]) {
 //
 // FIREFIGHT PLANS
 //
+//  - Wave Limit: consider replacing the current UI with multiple spinboxes indicating 
+//    the respective numbers of sets, rounds, and waves, along with another spinbox 
+//    indicating the raw value.
+//
 //  - UI improvements?
 //
 //     - For Firefight squad composition, is there something we can do to make it easy 
 //       to tell at a glance which squads are (by virtue of the squad count) actually 
 //       relevant? I'd rather not straight-up disable controls, but...
+//
+//  - Scripting errata
+//
+//     - Apparently, the different shade variants aren't full shades: they're seats 
+//       and turrets, but without the actual bases. We'll need to rename a few things 
+//       accordingly.
 //
 //  - Documentation updates
 //

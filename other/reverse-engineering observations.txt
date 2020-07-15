@@ -96,20 +96,45 @@ NOTES:
  - The struct that we call GameVariantHeader is also used for map variants; refer to our 
    map variant JS prototype for full details and branches; we should amend our source 
    code to reflect this.
+ - Turn Count is implemented via the Number of Rounds setting:
+    - No Limit   = 1 round
+    - One Each   = 2 rounds
+    - Two Each   = 4 rounds
+    - Three Each = 6 rounds
 
 
 OBSERVATIONS FROM TESTING:
- - Your team species determines what loadouts you get and whether you're allied with 
-   NPCs. Setting the defending team to Elites makes them allied to the Covenant.
- - Indestructible Vehicles does not apply to Covenant vehicles.
+ - If teams are enabled, then the only thing they influence is player spawn locations. 
+   Your team species determines what loadouts you get, whether you're allied with the 
+   Covenant NPCs, and whether you can earn points for killing them (no, if you're an 
+   Elite).
+   
+   If teams are disabled, then all players are enemies of the Covenant NPCs, regardless 
+   of their species; however, Elites still neither earn nor lose points for killing 
+   them.
+
+ - Indestructible Vehicles does not apply to Covenant vehicles spawned during the 
+   match.
+
  - Vehicle Set does not apply to vehicles that spawn during the match. Unknown if it 
    would apply to pre-placed onces.
+
  - Respawn Traits work.
+
+ - The Round Time Limit option available in Custom Games works, and limits the length 
+   of the entire match.
+
  - Custom Game base-player traits work and presumably apply to all players, beneath 
    the Firefight-specific per-species base traits.
- - If a wave consists entirely of squad types not available on the current map, then 
-   the wave is skipped, apparently.
- - If you disable teams in Firefight (i.e. make it FFA), then players spawns with the 
-   species indicated by the gametype's overall species setting. All players are enemies 
-   with Covenant NPCs (even if they spawn as Elites), but they only get points for 
-   killing Covenant NPCs if they are Spartans.
+
+ - If a wave fails to spawn any enemies (either because all squad types were None, or 
+   because none of the squad types were available on the current map), then it will 
+   end instantly. If dropships are enabled, then "instantly" means that the next wave 
+   will begin once the dropships have departed the map. If dropships are disabled, 
+   then the wave ends after seven seconds. Note that if map hazards produce any 
+   enemies (e.g. drop pods, or Beachhead's Wraiths and Ghosts), those will count 
+   towards the wave spawning enemies, meaning that the wave will not be skipped.
+   
+   Sadly, multiplayer and the presence of player-Elites doesn't appear to affect this; 
+   if a perfect recreation of Network Test 1 is possible, it will take more than just 
+   setting the squad types to None (or the squad count to 0, for that matter).

@@ -22,6 +22,18 @@ class GameVariantDataFirefight : public GameVariantData {
             ammo_crates_enabled         = 0x10,
          };
       };
+      enum class predefined_wave_limit_values : uint8_t {
+         no_limit   =   0,
+         one_wave   =   1,
+         one_round  =   5, //  5 waves
+         two_rounds =  10,
+         one_set    =  16, // 15 waves plus bonus wave
+         two_sets   =  32, // 30 waves plus two bonus waves
+         three_sets =  48,
+         four_sets  =  64,
+         five_sets  =  80,
+         ten_sets   = 160,
+      };
       //
       GameVariantDataFirefight() {};
       //
@@ -37,8 +49,8 @@ class GameVariantDataFirefight : public GameVariantData {
       ReachCustomGameOptions options;
       cobb::bitnumber<5,  uint8_t> scenarioFlags;
       cobb::bitnumber<3,  uint8_t> unkA;
-      cobb::bitnumber<8,  uint8_t> unkB;
-      cobb::bitnumber<4,  uint8_t> waveLimit; // enum
+      cobb::bitnumber<8,  uint8_t> waveLimit;
+      cobb::bitnumber<4,  uint8_t> unkB;
       cobb::bitnumber<15, uint16_t> unkC; // a quantity of points; always 10000?
       cobb::bitnumber<15, uint16_t> eliteKillBonus;
       cobb::bitnumber<7,  int8_t, true> startingLivesSpartan;

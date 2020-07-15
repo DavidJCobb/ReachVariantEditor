@@ -30,6 +30,10 @@ PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
    reach_main_window_setup_spinbox(firefightData, this->ui.unkC, unkC);
    reach_main_window_setup_spinbox(firefightData, this->ui.unkD, unkD);
    #include "widget_macros_setup_end.h"
+   //
+   // The macros above handle making changes to the data, but we also want to display a few extra details in the UI:
+   //
+   QObject::connect(this->ui.waveLimit, QOverload<int>::of(&QSpinBox::valueChanged), this, &PageFFScenario::updateWaveLimitDetail);
 }
 void PageFFScenario::updateFromVariant(GameVariant* variant) {
    auto data = variant->get_firefight_data();
@@ -56,4 +60,43 @@ void PageFFScenario::updateFromVariant(GameVariant* variant) {
    reach_main_window_update_spinbox(this->ui.unkC, unkC);
    reach_main_window_update_spinbox(this->ui.unkD, unkD);
    #include "widget_macros_update_end.h"
+   //
+   // The macros above handle displaying the data, but we also want to display a few extra details in the UI:
+   //
+   this->updateWaveLimitDetail(data->waveLimit);
+}
+void PageFFScenario::updateWaveLimitDetail(int raw_wave_count) {
+   auto label = this->ui.waveLimitDetail;
+   if (raw_wave_count == 0) {
+      label->setText(QString("No wave limit."));
+      return;
+   }
+   QString out;
+   auto sets   = raw_wave_count / 16;
+   auto extra  = raw_wave_count % 16;
+   auto waves  = extra % 5;
+   auto rounds = extra / 5;
+   if (sets > 0) {
+      if (sets == 1)
+         out += QString("1 set");
+      else
+         out += QString("%1 sets").arg(sets);
+      //
+      if (extra > 0)
+         out += ", ";
+   }
+   if (rounds > 0) {
+      if (rounds == 1)
+         out += QString("1 round");
+      else if (rounds > 1)
+         out += QString("%1 rounds").arg(rounds);
+      if (waves > 0)
+         out += ", ";
+   }
+   if (waves == 1)
+      out += QString("1 wave");
+   else if (waves > 1)
+      out += QString("%1 waves").arg(waves);
+   out += '.';
+   label->setText(out);
 }

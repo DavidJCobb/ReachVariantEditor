@@ -652,7 +652,7 @@ void ReachVariantTool::regenerateNavigation() {
          _makeNavItemMPTraits(skull_base, tr("Elite Traits", disambig), _traits_builtin::ff_elite_traits_yellow);
          //
          {  // Options
-            auto options = _makeNavItem(widget, tr("Common Settings", disambig), _page::redirect_to_first_child);
+            auto options = _makeNavItem(widget, tr("Other Settings", disambig), _page::redirect_to_first_child);
             {
                _makeNavItem(options, tr("General Settings", disambig), _page::cg_options_general);
                //

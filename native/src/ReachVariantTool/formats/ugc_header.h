@@ -38,7 +38,7 @@ class ReachUGCHeader {
          cobb::bytenumber<uint16_t> minor; // chdr-only
       } build;
       cobb::bitnumber<4, ReachFileType, true> contentType;
-      // skip 3 bytes
+      // chdr: skip 3 bytes
       cobb::bytenumber<uint32_t> fileLength;
       cobb::bytenumber<uint64_t> unk08;
       cobb::bytenumber<uint64_t> unk10;
@@ -47,8 +47,8 @@ class ReachUGCHeader {
       cobb::bitnumber<3, int8_t, true>  activity;
       cobb::bitnumber<3, ReachGameMode> gameMode;
       cobb::bitnumber<3, uint8_t> engine;
-      // skip 1 byte
-      cobb::bytenumber<uint32_t> unk2C;
+      // chdr: skip 1 byte
+      cobb::bytenumber<uint32_t> mapID; // for map variants (and maybe Theater files as well; haven't checked them)
       cobb::bitnumber<8, uint32_t> engineCategory;
       ReachContentAuthor createdBy;
       ReachContentAuthor modifiedBy;

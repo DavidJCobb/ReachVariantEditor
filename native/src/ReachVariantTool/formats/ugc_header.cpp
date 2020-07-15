@@ -24,7 +24,7 @@ bool ReachUGCHeader::read(cobb::ibitreader& stream) noexcept {
    this->activity.read(stream);
    this->gameMode.read(stream);
    this->engine.read(stream);
-   this->unk2C.read(stream);
+   this->mapID.read(stream);
    this->engineCategory.read(stream);
    this->createdBy.read(stream);
    this->modifiedBy.read(stream);
@@ -65,7 +65,7 @@ bool ReachUGCHeader::read(cobb::ibytereader& stream) noexcept {
    this->gameMode.read(stream);
    this->engine.read(stream);
    stream.pad(1);
-   this->unk2C.read(stream);
+   this->mapID.read(stream);
    this->engineCategory.read(stream);
    stream.pad(4);
    this->createdBy.read(stream);
@@ -95,7 +95,7 @@ void ReachUGCHeader::write(cobb::bitwriter& stream) const noexcept {
    this->activity.write(stream);
    this->gameMode.write(stream);
    this->engine.write(stream);
-   this->unk2C.write(stream);
+   this->mapID.write(stream);
    this->engineCategory.write(stream);
    this->createdBy.write(stream);
    this->modifiedBy.write(stream);
@@ -134,7 +134,7 @@ void ReachUGCHeader::write(cobb::bytewriter& stream) const noexcept {
    this->gameMode.write(stream);
    this->engine.write(stream);
    stream.pad(1);
-   this->unk2C.write(stream);
+   this->mapID.write(stream);
    this->engineCategory.write(stream);
    stream.pad(4);
    this->createdBy.write(stream);
@@ -189,7 +189,7 @@ void ReachUGCHeader::set_description(const char16_t* value) noexcept {
    bitcount += decltype(activity)::max_bitcount;
    bitcount += decltype(gameMode)::max_bitcount;
    bitcount += decltype(engine)::max_bitcount;
-   bitcount += decltype(unk2C)::max_bitcount;
+   bitcount += decltype(mapID)::max_bitcount;
    bitcount += decltype(engineCategory)::max_bitcount;
    bitcount += ReachContentAuthor::bitcount() * 2; // created by; modified by
    bitcount += (cobb::bits_in<char16_t> * 128) * 2; // title; description

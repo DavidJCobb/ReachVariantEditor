@@ -13,4 +13,5 @@ class PageFFScenario : public QWidget {
       Ui::PageFFScenario ui;
       //
       void updateFromVariant(GameVariant*);
+      void updateWaveLimitDetail(int raw_wave_count);
 };

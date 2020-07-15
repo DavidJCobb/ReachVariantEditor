@@ -35,6 +35,9 @@
    </item>
    <item row="2" column="1">
     <widget class="QSpinBox" name="fieldSquadCount">
+     <property name="toolTip">
+      <string>This doesn't necessarily affect the number of squad types that the game engine will actually use for this round; it just controls whether certain squad types</string>
+     </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
@@ -49,7 +52,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="labelSquadCount">
      <property name="text">
-      <string>Squad Count</string>
+      <string>Squad Count (apparently unused)</string>
      </property>
      <property name="buddy">
       <cstring>fieldSquadCount</cstring>

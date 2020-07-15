@@ -24,8 +24,8 @@ bool GameVariantDataFirefight::read(cobb::reader& reader) noexcept {
    this->options.read(stream);
    this->scenarioFlags.read(stream);
    this->unkA.read(stream);
-   this->unkB.read(stream);
    this->waveLimit.read(stream);
+   this->unkB.read(stream);
    this->unkC.read(stream);
    this->eliteKillBonus.read(stream);
    this->startingLivesSpartan.read(stream);
@@ -64,8 +64,8 @@ void GameVariantDataFirefight::write(GameVariantSaveProcess& save_process) noexc
    this->options.write(stream);
    this->scenarioFlags.write(stream);
    this->unkA.write(stream);
-   this->unkB.write(stream);
    this->waveLimit.write(stream);
+   this->unkB.write(stream);
    this->unkC.write(stream);
    this->eliteKillBonus.write(stream);
    this->startingLivesSpartan.write(stream);
