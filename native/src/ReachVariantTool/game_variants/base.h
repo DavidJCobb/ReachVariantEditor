@@ -144,7 +144,7 @@ class GameVariant {
       //
       void synch_chdr_to_mpvr() noexcept;
       //
-      static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
+      inline ReachGameEngine get_multiplayer_type() const noexcept { return this->multiplayer.type; }
       //
       ReachCustomGameOptions* get_custom_game_options() const noexcept;
       GameVariantDataFirefight* get_firefight_data() const noexcept;

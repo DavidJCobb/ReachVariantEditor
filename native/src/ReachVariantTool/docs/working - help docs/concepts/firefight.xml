@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Firefight</title>
+   <body>
+      <p>
+         Firefight is a predominantly PvE mode wherein a team of player-controlled Spartans 
+         must face off against waves of Covenant NPCs. The Spartans must survive to the end 
+         of the game, and in some cases must also defend a set of power generators placed 
+         on the map. Players can also join the Covenant team as Elites, adding a PvP 
+         dimension to the game mode.
+      </p>
+      <p>
+         Whereas Campaign is a more narrative PvE mode, Firefight has an arcade aesthetic, 
+         with the UI and announcer clearly indicating the match progression.
+      </p>
+      
+      <h2><a name="overall-match-flow">Overall match flow</a></h2>
+      <p>
+         When editing a Firefight game variant, it is worth knowing the general structure 
+         of a Firefight match, especially in comparison to a standard Multiplayer match.
+      </p>
+      <p>
+         A Multiplayer match is divided into "rounds." Gameplay begins when the round 
+         begins and ends when the round ends. A round may end when a time limit runs out, 
+         when the objective is complete, or when the Score to Win is reached.
+      </p>
+      <p>
+         Firefight matches are divided very differently, and the term "round" has an 
+         entirely different meaning. The basic unit of a Firefight match is the "wave:" a 
+         period of time which begins when six squads of NPC enemies are spawned on the map 
+         (or delivered by dropships), and which ends when those enemies are killed. Each 
+         group of five waves is a "round." Three rounds, followed by an optional "bonus 
+         wave," form a "set."
+      </p>
+      <p>
+         The Multiplayer concept of "rounds" still exists in Firefight, but in Firefight, 
+         they are called "turns." A turn encompasses an arbitrary number of sets, rounds, 
+         and waves. A turn ends when the Spartans are defeated, when the wave limit is 
+         reached, or when the turn time limit is reached (though <i>Halo: Reach</i>'s UI 
+         does not normally allow players to set a turn time limit). Spartans are considered 
+         defeated if they are all dead and unable to respawn due to a lack of extra lives, 
+         or (when applicable) if their Generators are destroyed.
+      </p>
+      
+      <h3><a name="match-flow-details">Match flow details</a></h3>
+      <p>
+         If Weapon Drops are enabled, then they will occur at the start of each round. 
+         Spartans will also receive extra lives at the start of each round after the 
+         first.
+      </p>
+      <p>
+         Each round consists of one Initial Wave, three Main Waves, and one Boss Wave, for 
+         a total of five waves. Each wave consists of six squads of enemies, for a total 
+         of thirty squads per round.
+      </p>
+      <p>
+         When a new wave begins, the respawn timers for any currently-dead players will be 
+         reset, and the game will select an enemy squad type to spawn. If dropships are 
+         enabled, then six squads of that type will spawn aboard them, and the dropships 
+         will enter the map to deliver the squads; otherwise, the squads will spawn in a 
+         map-specific manner (typically just appearing out in the open, though Corvette 
+         spawns them behind locked doors instead).
+      </p>
+      <p>
+         All waves except for the last wave in a round will end when all but three enemies 
+         are dead; the last wave in a round will end when all enemies are dead. (During the 
+         last wave in a round, the last five surviving enemies will have their exact 
+         locations shown to the Spartan team via waypoints, though those waypoints will 
+         not appear until the enemies have landed from their dropships.) If a wave failed 
+         to spawn any enemies, whether because the selected enemy squad type was None or 
+         because the selected enemy squad type is not supported on the current map, then 
+         the wave will end after nine seconds.
+      </p>
+      <p>
+         Note that if dropships are enabled for a wave, then the end of a wave will always 
+         be delayed until after the dropships have fully exited the map.
+      </p>
+      <p>
+         When the last round in a set is concluded, Firefight will attempt to begin the 
+         bonus wave. Unlike most waves, the bonus wave does not end when the enemies it 
+         spawns are eliminated. Instead, the bonus wave will only end when its duration 
+         elapses or if all Spartans are dead at the same time. Moreover, if the bonus 
+         wave is configured to use dropships, then the dropships will remain in the map, 
+         continually spawning and dropping new enemies, until the wave ends, at which 
+         point they will depart. Once the bonus round ends, all enemies that were 
+         spawned as part of the bonus round will die instantly (though enemies that 
+         spawned from map hazards will not).
+      </p>
+      <p>
+         Examination of map scripts suggests that Sudden Death activates if any generators 
+         on the map are still online, with some sort of additional check related to whether 
+         they're locked. It also seems as if generators cannot be locked while Sudden Death 
+         is active.
+      </p>
+      
+      <h2>Notes</h2>
+      <h3><a name="network-test-1">Is it possible to remake Network Test 1?</a></h3>
+      <p>
+         Yes, but not very well. Network Test 1 used a map script boolean variable called 
+         <var>alpha_sync_slayer</var> to disable the lion's share of Firefight's 
+         functionality; in the release version of <i>Halo: Reach</i>, this variable is set 
+         to false. This means that it's impossible to disable the normal set/round/wave 
+         progression through game variant content alone.
+      </p>
+      <p>
+         (The same variable also forcibly respawns all Health Packs on the map every 
+         thirty seconds, so that's another behavior that can't be recreated.)
+      </p>
+      <p>
+         Setting all enemy squad types to None and disabling all waves' dropships would 
+         be the obvious thing to try, but remember that dead players' respawn timers reset 
+         on each new wave. The default respawn time is ten seconds, and empty waves with 
+         no dropships end after nine seconds, so any players who die will be unable to 
+         respawn until the next round. Leaving dropships on ensures that waves last long 
+         enough to allow most players to respawn, although players who die too close to 
+         the end of a wave will still have their respawn timers reset one time. This, of 
+         course, still means that the announcer will constantly call out new waves, 
+         rounds, and sets. It also means that weapon drops will appear much too frequently, 
+         as the game engine just blows through rounds literally as quickly as possible.
+      </p>
+      <p>
+         A less obvious thing to try would be taking advantage of the bonus wave as an 
+         arbitrary period of time during which no new waves will occur. However, it is not 
+         possible to trigger the bonus wave early, which means that it would take roughly 
+         two minutes to even reach it. Moreover, the bonus wave will still end early if 
+         all Spartans are ever dead at the same time, even if the Iron Skull is disabled.
+      </p>
+   </body>
+</article>

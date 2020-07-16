@@ -9,8 +9,10 @@ FFSkullListWidget::FFSkullListWidget(QWidget* parent) : QWidget(parent) {
    this->_setupCheckbox(this->ui.skullFamine,       reach::firefight_skull::famine);
    this->_setupCheckbox(this->ui.skullFog,          reach::firefight_skull::fog);
    this->_setupCheckbox(this->ui.skullGruntParty,   reach::firefight_skull::grunt_party);
+   this->_setupCheckbox(this->ui.skullIron,         reach::firefight_skull::iron);
    this->_setupCheckbox(this->ui.skullIWHBYD,       reach::firefight_skull::iwhbyd);
    this->_setupCheckbox(this->ui.skullMythic,       reach::firefight_skull::mythic);
+   this->_setupCheckbox(this->ui.skullThunderstorm, reach::firefight_skull::thunderstorm);
    this->_setupCheckbox(this->ui.skullTilt,         reach::firefight_skull::tilt);
    this->_setupCheckbox(this->ui.skullToughLuck,    reach::firefight_skull::tough_luck);
    this->_setupCheckbox(this->ui.skullCustomRed,    reach::firefight_skull::red);
@@ -32,8 +34,10 @@ void FFSkullListWidget::_updateFromTarget() {
    this->_updateCheckbox(this->ui.skullFamine,       reach::firefight_skull::famine);
    this->_updateCheckbox(this->ui.skullFog,          reach::firefight_skull::fog);
    this->_updateCheckbox(this->ui.skullGruntParty,   reach::firefight_skull::grunt_party);
+   this->_updateCheckbox(this->ui.skullIron,         reach::firefight_skull::iron);
    this->_updateCheckbox(this->ui.skullIWHBYD,       reach::firefight_skull::iwhbyd);
    this->_updateCheckbox(this->ui.skullMythic,       reach::firefight_skull::mythic);
+   this->_updateCheckbox(this->ui.skullThunderstorm, reach::firefight_skull::thunderstorm);
    this->_updateCheckbox(this->ui.skullTilt,         reach::firefight_skull::tilt);
    this->_updateCheckbox(this->ui.skullToughLuck,    reach::firefight_skull::tough_luck);
    this->_updateCheckbox(this->ui.skullCustomRed,    reach::firefight_skull::red);

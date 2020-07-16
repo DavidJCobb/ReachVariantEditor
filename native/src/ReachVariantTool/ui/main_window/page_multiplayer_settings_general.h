@@ -12,5 +12,6 @@ class PageMPSettingsGeneral : public QWidget {
    private:
       Ui::PageMPSettingsGeneral ui;
       //
+      void updateEnableStates();
       void updateFromVariant(GameVariant*);
 };

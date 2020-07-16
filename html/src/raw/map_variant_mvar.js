@@ -464,6 +464,8 @@ class LoadedForgeObject {
       const PI = 3.1415927; // float
       //
       let xmm1 = raw * 0.0003834952 - PI + 0.0001917476;
+      this.rawAxisAngleAngle = raw;
+      this.rawAxisAngleRads  = xmm1;
       //
       let xmm6 = Math.fround(xmm1);
       let rsp20 = new MVVector();
@@ -507,8 +509,6 @@ class LoadedForgeObject {
       // good up to here?
       this.rotation.x = rsp20.x;
       this.rotation.z = rsp20.z;
-console.groupCollapsed("forge object rotation");
-console.log("initial: ", this.rotation.x, this.rotation.y, this.rotation.z);
       //
       let xmm7;
       let xmm0;
@@ -553,25 +553,22 @@ console.log("initial: ", this.rotation.x, this.rotation.y, this.rotation.z);
          let xmm1 = ((a.z * b.x) - (b.z * a.x)) * cy; // correct
          let xmm9 = a.z * cx; // correct
          // and discard xmm10
-         let xmm0 = a.z * xmm5; // wrong. too large
-             xmm2 = (a.x * b.y) - (b.x * a.y) * cy; // wrong? zero when it should just be super small
-         let xmm6 = ((b.z * a.y) - xmm0) * cy; // correct
+         let xmm0 = a.z * xmm5;
+             xmm2 = (a.x * b.y) - (b.x * a.y) * cy;
+         let xmm6 = ((b.z * a.y) - xmm0) * cy;
          // and discard xmm11
          xmm7 -= xmm6; // wrong
          // and discard xmm6
          a.x = xmm7;
          // and discard xmm7
-         xmm0 = (xmm3 * b.y) + xmm8 - xmm1; // correct
+         xmm0 = (xmm3 * b.y) + xmm8 - xmm1;
          // and discard xmm8
          a.y = xmm0;
          // and discard xmm9
          xmm3 = b.z + xmm9 - xmm2;
          a.z = xmm3;
       })(this.rotation, this.axisAngleAxis, xmm7, xmm0);
-console.log("after func: ", this.rotation.x, this.rotation.y, this.rotation.z);
       this.rotation.normalize();
-console.log("normalized: ", this.rotation.x, this.rotation.y, this.rotation.z);
-console.groupEnd();
    }
    constructor(stream, mapBounds, owner) {
       this.loaded = false;
@@ -592,8 +589,8 @@ console.groupEnd();
       //
       this.unk04 = -1; // dword
       this.position = new MVVector(); // 08, 0C, 10
-      this.rotation = new MVVector(); // 14, 18, 1C // Euler
-      this.axisAngleAxis = new MVVector(); // 20, 24, 28
+      this.rotation = new MVVector(); // 14, 18, 1C // possibly local-forward unit vector
+      this.axisAngleAxis = new MVVector(); // 20, 24, 28 // most likely local-up unit vector
       this.unk2C = -1; // word
       //
       // objectSubtype
@@ -636,9 +633,9 @@ console.groupEnd();
          this.objectType = 0xFF; // -1
       this.loadPosition(stream, mapBounds);
       if (stream.readBits(1)) {
-         this.unk20 = 0;
-         this.unk24 = 0;
-         this.unk28 = 1;
+         this.axisAngleAxis.x = 0;
+         this.axisAngleAxis.y = 0;
+         this.axisAngleAxis.z = 1;
          //
          // if this is an axis-angle unit vector, then this would mean that the angle 
          // is just yaw.
@@ -665,8 +662,29 @@ console.groupEnd();
       return entry.content;
    }
    get rotationDegrees() {
+      //
+      // NOTE: Rotations shown here may not be the same as those seen in Forge in 
+      // cases of equivalent angles. For example, roll 0 pitch 0 yaw -180 is the 
+      // same angle as roll 180 pitch 180 yaw 0.
+      //
+      // NOTE: this is also wrong anyway since i don't know bungie's euler 
+      // conventions
+      //
+      // Bungie's Euler conventions: lefthanded. X is forward, Z is vertical.
+      // The game uses inconsistent axes for positions and rotations: X is 
+      // pitch, not roll; Y is yaw, not pitch; and Z is roll, not yaw.
+      //
+      let aa  = this.axisAngleAxis;
+      let rad = this.rawAxisAngleRads;
+      let rot = new MVVector();
+      rot.z = Math.atan2(aa.y * Math.sin(rad) - aa.x * aa.z * (1 - Math.cos(rad)), 1 - (aa.y*aa.y + aa.z*aa.z) * (1 - Math.cos(rad)));
+      rot.y = Math.asin(aa.x * aa.y * (1 - Math.cos(rad)) + aa.z * Math.sin(rad));
+      rot.x = Math.atan2(aa.x * Math.sin(rad) - aa.y * aa.z * (1 - Math.cos(rad)), 1 - (aa.x*aa.x + aa.z*aa.z) * (1 - Math.cos(rad)));
       let conv = function(r) { return r * 180 / Math.PI; }
-      return new MVVector(conv(this.rotation.x), conv(this.rotation.y), conv(this.rotation.z));
+      rot.x = conv(rot.x);
+      rot.y = conv(rot.y);
+      rot.z = conv(rot.z);
+      return rot;
    }
 }
 

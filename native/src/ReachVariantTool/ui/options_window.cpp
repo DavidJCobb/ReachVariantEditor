@@ -10,6 +10,12 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    QObject::connect(this->ui.buttonCancel, &QPushButton::clicked, this, &ProgramOptionsDialog::close);
    QObject::connect(this->ui.buttonSave,   &QPushButton::clicked, this, &ProgramOptionsDialog::saveAndClose);
    //
+   {  // Editing
+      QObject::connect(this->ui.hideFirefightNoOps, &QCheckBox::stateChanged, [](int state) {
+         ReachINI::Editing::bHideFirefightNoOps.pending.b = state == Qt::CheckState::Checked;
+      });
+   }
+   //
    using default_dir_type = ReachINI::DefaultPathType;
    {  // Default load directory
       this->ui.defaultOpenPathAutoMCCSaved->setProperty("enum",    (uint32_t)default_dir_type::mcc_saved_content);
@@ -55,6 +61,10 @@ void ProgramOptionsDialog::close() {
 }
 void ProgramOptionsDialog::refreshWidgetsFromINI() {
    using default_dir_type = ReachINI::DefaultPathType;
+   {  // Editing
+      const QSignalBlocker blocker0(this->ui.hideFirefightNoOps);
+      this->ui.hideFirefightNoOps->setChecked(ReachINI::Editing::bHideFirefightNoOps.current.b);
+   }
    {  // Default load directory
       std::vector<QRadioButton*> buttons = {
          this->ui.defaultOpenPathAutoMCCSaved,

@@ -145,15 +145,12 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       auto     buffer32 = (const uint32_t*)buffer;
       uint8_t* working  = (uint8_t*)malloc(bufsize);
       memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
-      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(uint32_t(size));
-      memcpy(working + bufsize - size, buffer + offset_before_hashable, size);
-      hasher.transform(working, bufsize);
       free(working);
       working = nullptr;
       //
       printf("File's existing hash:\n");
       for (int i = 0; i < 5; i++)
-         printf("   %08X\n", buffer32[0x2FC / 4 + i]);
+         printf("   %08X\n", buffer32[0xC / 4 + i]);
       printf("\nOur hash:\n");
       for (int i = 0; i < 5; i++)
          printf("   %08X\n", hasher.hash[i]);
@@ -414,45 +411,6 @@ void GameVariant::synch_chdr_to_mpvr() noexcept {
       this->contentHeader.data.build.minor = 0xFFFF;
       return;
    }
-}
-void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
-   printf("Testing our hashing algorithm on this game variant...\n");
-   //
-   const uint8_t*  buffer   = (const uint8_t*)file.data();
-   const uint32_t* buffer32 = (const uint32_t*)buffer;
-   //
-   uint32_t signature = cobb::from_big_endian(buffer32[0x2F0 / 4]);
-   if (signature != 'mpvr') {
-      printf("Failed to find the mpvr block; signature found was %08X when we expected %08X.\n", signature, 'mpvr');
-      return;
-   }
-   //
-   // Bungie only hashes the portion of MPVR that the game variant actually uses. This bytecount is a 
-   // big-endian uint32_t located 0x4 bytes after the hash (i.e. offset 0x314 in the file). We need to 
-   // read that, and then only run the hashing algorithm on that many bytes after that length value.
-   //
-   uint32_t size = cobb::from_big_endian(buffer32[0x314 / 4]);
-   printf("File's existing hash (%04X bytes of data):\n", size);
-   for (int i = 0; i < 5; i++)
-      printf("   %08X\n", buffer32[0x2FC / 4 + i]);
-   printf("\n");
-   //
-   auto hasher = cobb::sha1();
-   {
-      uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
-      auto     buffer   = (const uint8_t*)file.data();
-      auto     buffer32 = (const uint32_t*)buffer;
-      uint8_t* working  = (uint8_t*)malloc(bufsize);
-      memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
-      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(size);
-      memcpy(working + bufsize - size, buffer + 0x318, size);
-      hasher.transform(working, bufsize);
-      free(working);
-   }
-   printf("Our hash:\n");
-   for (int i = 0; i < 5; i++)
-      printf("   %08X\n", hasher.hash[i]);
-   printf("Test done.\n");
 }
 ReachCustomGameOptions* GameVariant::get_custom_game_options() const noexcept {
    if (!this->multiplayer.data)

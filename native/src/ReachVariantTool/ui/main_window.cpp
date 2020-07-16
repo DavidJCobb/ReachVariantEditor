@@ -117,6 +117,12 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          ReachVariantTool::get().refreshWindowTitle();
          return;
       }
+      if (setting == &ReachINI::Editing::bHideFirefightNoOps) {
+         auto ff = ReachEditorState::get().firefightData();
+         if (ff)
+            ReachVariantTool::get().regenerateNavigation();
+         return;
+      }
    });
    {
       std::wstring dir;
@@ -625,9 +631,17 @@ void ReachVariantTool::regenerateNavigation() {
             _makeNavItemMPTraits(item, tr("Editor Traits", disambig), _traits_builtin::forge_editor);
          }
       } else if (ff) {
+         bool hide_no_ops = ReachINI::Editing::bHideFirefightNoOps.current.b;
+         //
          defaultFallback = _makeNavItem(widget, tr("Metadata", disambig), _page::ff_metadata);
          auto scenario = _makeNavItem(widget, tr("Firefight Settings", disambig), _page::ff_scenario);
+         //
          _makeNavItem(scenario, tr("Player Lives", disambig), _page::ff_lives);
+         auto respawn = _makeNavItem(scenario, tr("Spartan Respawn Settings", disambig), _page::cg_options_respawn);
+         _makeNavItemMPTraits(respawn, tr("Respawn Traits", disambig), _traits_builtin::respawn);
+         /**/ respawn = _makeNavItem(scenario, tr("Elite Respawn Settings", disambig), _page::ff_options_respawn_elite);
+         //
+         _makeNavItemMPTraits(respawn, tr("Respawn Traits", disambig), _traits_builtin::ff_respawn_elite);
          _makeNavItemMPTraits(scenario, tr("Base Spartan Traits", disambig), _traits_builtin::ff_base_spartan_traits);
          _makeNavItemMPTraits(scenario, tr("Base Elite Traits", disambig), _traits_builtin::ff_base_elite_traits);
          _makeNavItemFFWaveTraits(scenario, tr("Base Wave Traits", disambig), _ff_wave_traits::base);
@@ -655,19 +669,17 @@ void ReachVariantTool::regenerateNavigation() {
             auto options = _makeNavItem(widget, tr("Other Settings", disambig), _page::redirect_to_first_child);
             {
                _makeNavItem(options, tr("General Settings", disambig), _page::cg_options_general);
-               //
-               auto respawn = _makeNavItem(options, tr("Spartan Respawn Settings", disambig), _page::cg_options_respawn);
-               _makeNavItemMPTraits(respawn, tr("Respawn Traits", disambig), _traits_builtin::respawn);
-               /**/ respawn = _makeNavItem(options, tr("Elite Respawn Settings", disambig), _page::ff_options_respawn_elite);
-               _makeNavItemMPTraits(respawn, tr("Respawn Traits", disambig), _traits_builtin::ff_respawn_elite);
-               //
                _makeNavItem(options, tr("Social Settings", disambig), _page::cg_options_social);
                //
-               auto map = _makeNavItem(options, tr("Map and Game Settings", disambig), _page::cg_options_map);
-               _makeNavItemMPTraits(map, tr("Base Player Traits", disambig), _traits_builtin::base);
-               _makeNavItemMPTraits(map, tr("Red Powerup Traits", disambig), _traits_builtin::powerup_red);
-               _makeNavItemMPTraits(map, tr("Blue Powerup Traits", disambig), _traits_builtin::powerup_blue);
-               _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", disambig), _traits_builtin::powerup_yellow);
+               if (!hide_no_ops) {
+                  auto map = _makeNavItem(options, tr("Map and Game Settings", disambig), _page::cg_options_map);
+                  _makeNavItemMPTraits(map, tr("Base Player Traits", disambig), _traits_builtin::base);
+                  _makeNavItemMPTraits(map, tr("Red Powerup Traits", disambig), _traits_builtin::powerup_red);
+                  _makeNavItemMPTraits(map, tr("Blue Powerup Traits", disambig), _traits_builtin::powerup_blue);
+                  _makeNavItemMPTraits(map, tr("Yellow Powerup Traits", disambig), _traits_builtin::powerup_yellow);
+               } else {
+                  _makeNavItemMPTraits(options, tr("Base Player Traits", disambig), _traits_builtin::base);
+               }
                //
                auto team = _makeNavItem(options, tr("Team Settings", disambig), _page::cg_options_team);
                for (uint8_t i = 0; i < 8; i++) {
@@ -680,12 +692,18 @@ void ReachVariantTool::regenerateNavigation() {
                   t->setText(0, tr("Spartan Tier %1", disambig).arg(i + 1));
                   t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
                   t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2);
+                  //
+                  if (hide_no_ops) // only Tier 1 loadouts are used
+                     break;
                }
                for (uint8_t i = 0; i < 3; i++) {
                   auto t = new QTreeWidgetItem(loadout);
                   t->setText(0, tr("Elite Tier %1", disambig).arg(i + 1));
                   t->setData(0, Qt::ItemDataRole::UserRole + 0, (uint)_page::loadout_palette);
                   t->setData(0, Qt::ItemDataRole::UserRole + 1, i * 2 + 1);
+                  //
+                  if (hide_no_ops) // only Tier 1 loadouts are used
+                     break;
                }
             }
          }

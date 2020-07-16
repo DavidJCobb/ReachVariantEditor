@@ -152,6 +152,9 @@ OBSERVATIONS FROM TESTING:
    new waves will still reset a dead Covenant player's respawn time, and since the 
    default spawn time is 10 seconds and waves end in 7, that means that a Covenant 
    player killed during a round won't respawn until it ends.
+   
+    - UPDATE: Examination of the map script establishes that it's actually nine seconds, 
+      not seven.
 
  - The "Squad Count" option on waves doesn't allow you to change the number of squads 
    that Firefight uses for any given wave; it just changes the number of squads in the 

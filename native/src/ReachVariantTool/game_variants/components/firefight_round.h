@@ -30,19 +30,21 @@ namespace reach {
    struct firefight_skull {
       firefight_skull() = delete;
       enum type : uint32_t {
-         black_eye   = 0x00002,
-         tough_luck  = 0x00004,
-         catch_skull = 0x00008, // can't just name this value "catch" :(
-         fog         = 0x00010,
-         famine      = 0x00020,
-         tilt        = 0x00080,
-         mythic      = 0x00100,
-         cowbell     = 0x00800,
-         grunt_party = 0x01000,
-         iwhbyd      = 0x02000,
-         red         = 0x04000,
-         yellow      = 0x08000,
-         blue        = 0x10000,
+         iron         = 0x00001,
+         black_eye    = 0x00002,
+         tough_luck   = 0x00004,
+         catch_skull  = 0x00008, // can't just name this value "catch" :(
+         fog          = 0x00010,
+         famine       = 0x00020,
+         thunderstorm = 0x00040,
+         tilt         = 0x00080,
+         mythic       = 0x00100,
+         cowbell      = 0x00800,
+         grunt_party  = 0x01000,
+         iwhbyd       = 0x02000,
+         red          = 0x04000,
+         yellow       = 0x08000,
+         blue         = 0x10000,
       };
    };
    enum class firefight_squad { // These correspond to the Waves list in the SMDT (Survival Mode Globals) tag.

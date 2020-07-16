@@ -13,6 +13,7 @@
 #include "../errors.h"
 #include "../warnings.h"
 
+#pragma region ReachMPSizeData
 ReachMPSizeData::ReachMPSizeData() {
    {  // Header information
       auto& bitcount = this->bits.header;
@@ -151,6 +152,7 @@ uint32_t ReachMPSizeData::total_bits() const noexcept {
    bitcount += this->bits.title_update_1;
    return bitcount;
 }
+#pragma endregion
 
 bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept {
    if (!subrecord)

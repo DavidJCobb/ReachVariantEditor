@@ -1,12 +1,18 @@
 #include "page_multiplayer_settings_map.h"
 #include "../../game_variants/base.h"
 #include "../../game_variants/components/custom_game_options.h"
+#include "../../services/ini.h"
 
 PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    //
    auto& editor = ReachEditorState::get();
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &PageMPSettingsMapAndGame::updateFromVariant);
+   QObject::connect(&ReachINI::getForQt(), &cobb::qt::ini::file::settingChanged, [this](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
+      if (setting != &ReachINI::Editing::bHideFirefightNoOps)
+         return;
+      this->updateEnableStates();
+   });
    //
    #include "widget_macros_setup_start.h"
    reach_main_window_setup_flag_checkbox(customGameOptions, this->ui.fieldGrenades,  map.flags, ReachCGMapOptions::flags_t::grenades);
@@ -57,10 +63,29 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
    reach_main_window_setup_spinbox(customGameOptions, this->ui.fieldPowerupDurationYellow, map.powerups.yellow.duration);
    #include "widget_macros_setup_end.h"
 }
+void PageMPSettingsMapAndGame::updateEnableStates() {
+   bool disable = ReachINI::Editing::bHideFirefightNoOps.current.b;
+   if (disable) {
+      auto variant = ReachEditorState::get().variant();
+      if (!variant || variant->get_multiplayer_type() != ReachGameEngine::firefight) {
+         disable = false;
+      }
+   }
+   //
+   this->ui.fieldGrenades->setDisabled(disable);
+   this->ui.fieldShortcuts->setDisabled(disable);
+   this->ui.fieldAbilities->setDisabled(disable);
+   this->ui.fieldPowerups->setDisabled(disable);
+   this->ui.fieldTurrets->setDisabled(disable);
+   this->ui.fieldIndestructibleVehicles->setDisabled(disable);
+   this->ui.fieldWeaponSet->setDisabled(disable);
+   this->ui.fieldVehicleSet->setDisabled(disable);
+}
 void PageMPSettingsMapAndGame::updateFromVariant(GameVariant* variant) {
    auto data = variant->get_custom_game_options();
    if (!data)
       return;
+   this->updateEnableStates();
    #include "widget_macros_update_start.h"
    reach_main_window_update_flag_checkbox(this->ui.fieldGrenades,  map.flags, ReachCGMapOptions::flags_t::grenades);
    reach_main_window_update_flag_checkbox(this->ui.fieldShortcuts, map.flags, ReachCGMapOptions::flags_t::shortcuts);

@@ -22,6 +22,7 @@ class ReachVariantTool : public QMainWindow {
    public:
       void getDefaultLoadDirectory(QString& out) const noexcept;
       void getDefaultSaveDirectory(QString& out) const noexcept;
+      void regenerateNavigation();
       //
    private slots:
       //
@@ -34,8 +35,6 @@ class ReachVariantTool : public QMainWindow {
       void saveFile()   { this->_saveFileImpl(false); }
       void saveFileAs() { this->_saveFileImpl(true); }
       void onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-      //
-      void regenerateNavigation();
       //
       void switchToFFWaveTraits(ReachFirefightWaveTraits*);
       void switchToLoadoutPalette(ReachLoadoutPalette*);

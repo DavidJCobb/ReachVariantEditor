@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Main Window</title>
+   <body>
+      <p>
+         The <b>main window</b> offers access to <i>Halo: Reach</i>'s most basic settings. Its 
+         exact contents will vary depending on the type of file you load; this article describes 
+         the contents for Firefight game variants.
+      </p>
+      <img src="scenario.png" />
+      <p>
+         The pane on the left can be used to select a page to view.
+      </p>
+      <p>
+         The pages in this window are:
+      </p>
+      <dl>
+         <dt><a href="metadata">Metadata</a></dt>
+            <dd>Edit a game variant's title, description, and category.</dd>
+         <dt><a href="scenario">Firefight Settings</a></dt>
+            <dd>Edit basic settings related to Firefight.</dd>
+         <dt><a href="lives">Firefight Settings</a></dt>
+            <dd>Edit settings related to players' extra lives.</dd>
+         <dt>Base Elite Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> applied to all player-controlled Elites.</dd>
+         <dt>Base Spartan Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> applied to all player-controlled Spartans.</dd>
+         <dt>Base Wave Traits</dt>
+            <dd>Edit the <a href="traits-wave">traits</a> applied to all NPCs.</dd>
+         <dt><a href="round">Round 1</a></dt>
+         <dt>Round 2</dt>
+         <dt>Round 3</dt>
+            <dd>Edit the settings for each round.</dd>
+         <dt><a href="bonus-wave">Bonus Wave</a></dt>
+            <dd>Edit settings for the Bonus Wave.</dd>
+         <dt><a href="custom-skull">Red Skull</a></dt>
+         <dt>Blue Skull</dt>
+         <dt>Yellow Skull</dt>
+            <dd>Edit the effects of each Custom Skull.</dd>
+         <dt><a href="options-general">General Settings</a></dt>
+            <dd>Edit basic settings related to scoring and time limits.</dd>
+         <dt><a href="options-respawn">Respawn Settings</a></dt>
+            <dd>Edit respawn times.</dd>
+         <dt>Respawn Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> that players are briefly given after they respawn.</dd>
+         <dt><a href="options-social">Social Settings</a></dt>
+            <dd>Edit settings related to chat and teamplay.</dd>
+         <dt><a href="options-map">Map and Game Settings</a></dt>
+            <dd>Edit settings related to the map and powerups.</dd>
+         <dt>Base Player Traits</dt>
+            <dd>Edit the baseline <a href="traits">traits</a> that apply to all players.</dd>
+         <dt>Red Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Overshield powerup.</dd>
+         <dt>Blue Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Active Camo powerup.</dd>
+         <dt>Yellow Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Custom Powerup.</dd>
+         <dt><a href="options-team">Team Settings</a></dt>
+            <dd>Edit basic settings and internal configuration for teams.</dd>
+         <dt><a href="options-team-specific">Team #</a></dt>
+            <dd>Edit internal configuration for each individual team.</dd>
+         <dt><a href="options-loadout">Loadout Settings</a></dt>
+            <dd>Edit baseline settings for loadouts.</dd>
+      </dl>
+   </body>
+</article>
