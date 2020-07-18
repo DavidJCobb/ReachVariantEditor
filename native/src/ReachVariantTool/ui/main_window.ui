@@ -54,7 +54,7 @@
     <item>
      <widget class="QStackedWidget" name="MainContentView">
       <property name="currentIndex">
-       <number>21</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="PageWelcome">
        <layout class="QGridLayout" name="gridLayout_11">
@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool v2.0.0</string>
+           <string>ReachVariantTool v2.1.0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

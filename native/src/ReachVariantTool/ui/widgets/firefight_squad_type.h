@@ -1,7 +1,6 @@
 #pragma once
-#include "widgets/ui_firefight_squad_type.h"
 #include "../../game_variants/components/firefight_round.h"
-#include <QWidget>
+#include <QComboBox>
 
 //
 // Give an instance of this widget a reference to a squad value within a ReachFirefightWave, 
@@ -20,7 +19,6 @@ class FFSquadTypeWidget : public QComboBox {
       void clearTarget();
       //
    private:
-      Ui::FFSquadTypeWidget ui;
       squad_type_t* target = nullptr;
       //
       void _updateFromTarget();

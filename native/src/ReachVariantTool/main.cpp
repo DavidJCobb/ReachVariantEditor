@@ -29,57 +29,6 @@ int main(int argc, char *argv[]) {
 }
 
 //
-// FIREFIGHT PLANS
-//
-//  - Add a user option to the program to hide settings that don't do anything, and 
-//    apply this very liberally to Firefight.
-//
-//     - Option added. Let's see how many settings we can include here.
-//
-//        - Test the Betrayal Penalty with both NPC and PC allies
-//
-//        - Test the Lives Per Round and Team Lives per Round settings; see if they 
-//          overlap or conflict with Firefight's own lives settings
-//
-//  - Scripting errata
-//
-//     - Apparently, the different shade variants aren't full shades: they're seats 
-//       and turrets, but without the actual bases. We'll want to rename a few things 
-//       accordingly.
-//
-//  - Documentation updates
-//
-//     - Rename "Main Window" to "Main Window (Custom Games)"
-//
-//        - Do not change filenames; we don't want to break hyperlinks to the web docs.
-//
-//        - Update screenshots for General Settings and Team Settings.
-//
-//     - Add a "Main Window (Firefight)" folder.
-//
-//        - Update the screenshot for Round Skulls, since Iron and Thunderstorm are now 
-//          configurable.
-//
-//        - We should give the documentation XML a way of saying, "Just use the same XML 
-//          as in this other file (relative to my location)." Note my wording there: we 
-//          don't want to directly copy HTML output because the file paths might be 
-//          different (i.e. if the duplicate is nested more or less deeply); we just 
-//          don't want to have to write the same XML file twice.
-//
-//          Main use case for this is Custom Game options and player traits appearing 
-//          in Firefight. Many of these will be identical (though some will not, owing 
-//          to different engine behavior).
-//
-//     - Re-bake all documentation.
-//
-//  - Testing
-//
-//     - I should see if I can put together a test of SvS Firefight and FFA Firefight. 
-//       I want to know if the two player teams are enemies of each other (in the former 
-//       case) and if all players are enemies of each other (in the latter case).
-//
-
-//
 // CURRENT PLANS:
 //
 //  = [OPTIONAL] Consider renaming all of the opcode arg types: instead of using classnames 
