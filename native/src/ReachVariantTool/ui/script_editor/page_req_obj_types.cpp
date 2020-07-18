@@ -1,5 +1,6 @@
 #include "page_req_obj_types.h"
 #include "../../game_variants/data/object_types.h"
+#include "../../game_variants/types/multiplayer.h"
 
 ScriptEditorPageReqObjTypes::ScriptEditorPageReqObjTypes(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);

@@ -38,7 +38,13 @@
       <p>
          This event fires when certain objects "die." It does not necessarily fire when objects 
          <em>are destroyed</em>; for example, shooting a Fusion Coil does not trigger this 
-         event.
+         event. The following values are available in this event:
       </p>
+      <ul>
+         <li><a href="/script/api/ns_unnamed/killed_object">killed_object</a></li>
+         <li><a href="/script/api/ns_unnamed/killer_object">killer_object</a></li>
+         <li><a href="/script/api/ns_unnamed/killer_player">killer_player</a></li>
+         <li><a href="/script/api/ns_unnamed/death_event_damage_type">death_event_damage_type</a></li>
+      </ul>
    </body>
 </article>

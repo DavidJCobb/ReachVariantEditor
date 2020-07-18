@@ -13,6 +13,7 @@
 #include "../errors.h"
 #include "../warnings.h"
 
+#pragma region ReachMPSizeData
 ReachMPSizeData::ReachMPSizeData() {
    {  // Header information
       auto& bitcount = this->bits.header;
@@ -39,50 +40,10 @@ ReachMPSizeData::ReachMPSizeData() {
    }
    {  // Custom Game options
       auto& bitcount = this->bits.cg_options;
-      bitcount = 0;
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.flags)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.timeLimit)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.roundLimit)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.roundsToWin)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.suddenDeathTime)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.misc.gracePeriod)::bitcount;
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.flags)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.livesPerRound)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.teamLivesPerRound)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.respawnTime)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.suicidePenalty)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.betrayalPenalty)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.respawnGrowth)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.loadoutCamTime)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.respawn.traitsDuration)::bitcount;
-      bitcount += ReachPlayerTraits::bitcount(); // respawn traits
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.social.observers)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.social.teamChanges)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.social.flags)::bitcount;
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.flags)::bitcount;
-      bitcount += ReachPlayerTraits::bitcount(); // base player traits
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.weaponSet)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.vehicleSet)::bitcount;
-      bitcount += ReachPlayerTraits::bitcount() * 3; // powerup traits
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.red.duration)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.blue.duration)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.map.powerups.yellow.duration)::bitcount;
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.team.scoring)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.team.species)::bitcount;
-      bitcount += decltype(GameVariantDataMultiplayer::options.team.designatorSwitchType)::bitcount;
-      //
-      bitcount += decltype(GameVariantDataMultiplayer::options.loadouts.flags)::bitcount;
-      //
+      bitcount  = ReachCustomGameOptions::bitcount();
       bitcount += decltype(GameVariantDataMultiplayer::scoreToWin)::bitcount;
       bitcount += decltype(GameVariantDataMultiplayer::fireteamsEnabled)::bitcount;
       bitcount += decltype(GameVariantDataMultiplayer::symmetric)::bitcount;
-      //
-      bitcount += ReachLoadoutPalette::bitcount() * std::tuple_size<decltype(GameVariantDataMultiplayer::options.loadouts.palettes)>::value;
    }
    this->bits.option_toggles = (ReachGameVariantEngineOptionToggles::dword_count + ReachGameVariantMegaloOptionToggles::dword_count) * 32 * 2;
    this->bits.rating_params  = ReachPlayerRatingParams::bitcount();
@@ -191,6 +152,7 @@ uint32_t ReachMPSizeData::total_bits() const noexcept {
    bitcount += this->bits.title_update_1;
    return bitcount;
 }
+#pragma endregion
 
 bool GameVariantDataMultiplayer::receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept {
    if (!subrecord)
@@ -312,58 +274,7 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
       this->isBuiltIn = false;
       printf("Loaded a game variant with isBuiltIn set to (true). There is no value in keeping that, so forcing it to false.");
    }
-   {
-      auto& o = this->options;
-      auto& m = o.misc;
-      auto& r = o.respawn;
-      auto& s = o.social;
-      auto& a = o.map;
-      auto& t = o.team;
-      auto& l = o.loadouts;
-      //
-      m.flags.read(stream);
-      m.timeLimit.read(stream);
-      m.roundLimit.read(stream);
-      m.roundsToWin.read(stream);
-      m.suddenDeathTime.read(stream);
-      m.gracePeriod.read(stream);
-      //
-      r.flags.read(stream);
-      r.livesPerRound.read(stream);
-      r.teamLivesPerRound.read(stream);
-      r.respawnTime.read(stream);
-      r.suicidePenalty.read(stream);
-      r.betrayalPenalty.read(stream);
-      r.respawnGrowth.read(stream);
-      r.loadoutCamTime.read(stream);
-      r.traitsDuration.read(stream);
-      r.traits.read(stream);
-      //
-      s.observers.read(stream);
-      s.teamChanges.read(stream);
-      s.flags.read(stream);
-      //
-      a.flags.read(stream);
-      a.baseTraits.read(stream);
-      a.weaponSet.read(stream);
-      a.vehicleSet.read(stream);
-      a.powerups.red.traits.read(stream);
-      a.powerups.blue.traits.read(stream);
-      a.powerups.yellow.traits.read(stream);
-      a.powerups.red.duration.read(stream);
-      a.powerups.blue.duration.read(stream);
-      a.powerups.yellow.duration.read(stream);
-      //
-      t.scoring.read(stream);
-      t.species.read(stream);
-      t.designatorSwitchType.read(stream);
-      for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
-         t.teams[i].read(stream);
-      //
-      l.flags.read(stream);
-      for (size_t i = 0; i < l.palettes.size(); i++)
-         l.palettes[i].read(stream);
-   }
+   this->options.read(stream);
    {
       auto& sd = this->scriptData;
       auto& t = sd.traits;
@@ -498,58 +409,7 @@ void GameVariantDataMultiplayer::write(GameVariantSaveProcess& save_process) noe
    bits.write(this->engineVersion);
    this->variantHeader.write(bits);
    this->isBuiltIn.write(bits);
-   {
-      auto& o = this->options;
-      auto& m = o.misc;
-      auto& r = o.respawn;
-      auto& s = o.social;
-      auto& a = o.map;
-      auto& t = o.team;
-      auto& l = o.loadouts;
-      //
-      m.flags.write(bits);
-      m.timeLimit.write(bits);
-      m.roundLimit.write(bits);
-      m.roundsToWin.write(bits);
-      m.suddenDeathTime.write(bits);
-      m.gracePeriod.write(bits);
-      //
-      r.flags.write(bits);
-      r.livesPerRound.write(bits);
-      r.teamLivesPerRound.write(bits);
-      r.respawnTime.write(bits);
-      r.suicidePenalty.write(bits);
-      r.betrayalPenalty.write(bits);
-      r.respawnGrowth.write(bits);
-      r.loadoutCamTime.write(bits);
-      r.traitsDuration.write(bits);
-      r.traits.write(bits);
-      //
-      s.observers.write(bits);
-      s.teamChanges.write(bits);
-      s.flags.write(bits);
-      //
-      a.flags.write(bits);
-      a.baseTraits.write(bits);
-      a.weaponSet.write(bits);
-      a.vehicleSet.write(bits);
-      a.powerups.red.traits.write(bits);
-      a.powerups.blue.traits.write(bits);
-      a.powerups.yellow.traits.write(bits);
-      a.powerups.red.duration.write(bits);
-      a.powerups.blue.duration.write(bits);
-      a.powerups.yellow.duration.write(bits);
-      //
-      t.scoring.write(bits);
-      t.species.write(bits);
-      t.designatorSwitchType.write(bits);
-      for (int i = 0; i < std::extent<decltype(t.teams)>::value; i++)
-         t.teams[i].write(bits);
-      //
-      l.flags.write(bits);
-      for (size_t i = 0; i < l.palettes.size(); i++)
-         l.palettes[i].write(bits);
-   }
+   this->options.write(bits);
    {
       auto& sd = this->scriptData;
       auto& t = sd.traits;

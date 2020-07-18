@@ -23,7 +23,7 @@ class MVVector {
       for(let i = 0; i < 3; ++i)
          this[i] = Math.fround(this[i]);
    }
-   length() { return Math.sqrt(Math.fround(coords[0]*coords[0] + coords[1]*coords[1] + coords[2]*coords[2])); }
+   length() { return Math.sqrt(Math.fround(this[0]*this[0] + this[1]*this[1] + this[2]*this[2])); }
    normalize() {
       let l = this.length();
       let a = Math.abs(l);
@@ -328,7 +328,7 @@ class LoadedForgeObject {
       range = mapBounds.z.max - mapBounds.z.min;
       this.position.z = (0.5 + this.position.z) * (range / (1 << rbp60[2])) + mapBounds.z.min;
    }
-   loadUnk20Floats(stream) {
+   loadAxisAngleAxis(stream) {
       //
       // this is supposed to produce floats, but JS stores all numbers as doubles, 
       // so there will be *slight* inaccuracies
@@ -449,12 +449,124 @@ class LoadedForgeObject {
          }
       }
       normalizeVector(vector);
-      this.unk20 = vector[0];
-      this.unk24 = vector[1];
-      this.unk28 = vector[2];
+      this.axisAngleAxis.x = vector[0];
+      this.axisAngleAxis.y = vector[1];
+      this.axisAngleAxis.z = vector[2];
    }
-   constructor(stream, mapBounds) {
+   loadAxisAngleAngle(raw) {
+      const PI = 3.1415927; // float
+      //
+      let xmm1 = raw * 0.0003834952 - PI + 0.0001917476;
+      this.rawAxisAngleAngle = raw;
+      this.rawAxisAngleRads  = xmm1;
+      //
+      let xmm6 = Math.fround(xmm1);
+      let rsp20 = new MVVector();
+      let rsp30 = new MVVector();
+      (function(a, b, c) {
+         let xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8;
+         //
+         xmm0 = 0;
+         xmm4 = a.z; // correct, notwithstanding precision differences
+         xmm7 = a.z * xmm0; // correct
+         xmm6 = a.x * xmm0; // correct
+         xmm0 = a.x + a.y + xmm7; // correct, notwithstanding precision differences
+         xmm1 = xmm6 + a.y + xmm7; // correct
+         if (Math.abs(xmm1) > Math.abs(xmm0)) {
+            xmm0 = xmm6 - a.y;
+            b.y = a.z - xmm6;
+            b.x = a.y - xmm7;
+         } else {
+            xmm6 -= xmm7; // correct
+            xmm0 = a.y - a.x; // slightly wrong, possibly explainable by precision differences
+            b.y = xmm6;
+            b.x = a.z - (a.y * 0); // correct
+         }
+         b.z = xmm0;
+         b.normalize(); // correct, notwithstanding precision differences
+         xmm5 = a.x;
+         xmm1 = b.x;
+         xmm3 = a.z;
+         xmm0 = b.x * a.y; // correct
+         xmm8 = a.x * b.y - (b.x * a.y); // correct
+         xmm3 *= b.y; // correct
+         xmm2 = xmm3 * b.x; // wrong, possibly explainable by precision differences
+         xmm0 = b.z * a.x; // correct, notwithstanding precision differences
+         xmm4 = b.z * a.y - xmm3; // correct
+         c.z = xmm8;
+         xmm2 -= xmm0; // correct, but this would be due to xmm2's incredibly small value initially
+         c.x = xmm4;
+         c.y = xmm2;
+         c.normalize();
+      })(this.axisAngleAxis, rsp20, rsp30);
+      // good up to here?
+      this.rotation.x = rsp20.x;
+      this.rotation.z = rsp20.z;
+      //
+      let xmm7;
+      let xmm0;
+      /*
+         bool result = (xmm6 == PI);
+         if (isNaN(xmm6) || isNaN(PI)) { // when would this ever be true?
+            result = (xmm6 == -PI);
+            if (isNaN(xmm6) || isNaN(-PI)) // when would this ever be true?
+               result = false;
+               //
+               // The comparisons use UCOMISS, and the weird-ass NaN checks are JP branches. 
+               // UCOMISS should only set the parity flag (PF) if either or both operands 
+               // are NaN, but the code here is written as if the *constant* is the one 
+               // that might be NaN.
+         }
+         if (result) {
+            xmm7 = 0;
+            xmm0 = -1.0;
+         } else {
+            xmm7 = sinf(xmm6);
+            xmm0 = cosf(xmm6);
+         }
+      */
+      if (xmm6 == PI) {
+         xmm7 = 0;
+         xmm0 = -1.0;
+      } else {
+         xmm7 = Math.sin(xmm6);
+         xmm0 = Math.cos(xmm6);
+      }
+      (function(a, b, xmm2, xmm3) {
+         a.enforce_single_precision();
+         b.enforce_single_precision();
+         let cx = Math.fround(xmm3); // correct, notwithstanding precision differences
+         let cy = Math.fround(xmm2); // correct, notwithstanding precision differences
+         //
+         let xmm5 = b.y;
+             xmm3 = Math.fround((b.x * a.x) + (b.y * a.y) + (b.z * a.z)) * Math.fround(1.0 - cx); // wrong digits and sign, right mag
+         let xmm4 = a.x * cx; // correct
+         let xmm8 = a.y * cx; // correct? it's positive zero in JS but negative in haloreach.dll
+         let xmm7 = (b.x * xmm3) + (a.x * cx); // wrong sign and significant digits, right approx. magnitude
+         let xmm1 = ((a.z * b.x) - (b.z * a.x)) * cy; // correct
+         let xmm9 = a.z * cx; // correct
+         // and discard xmm10
+         let xmm0 = a.z * xmm5;
+             xmm2 = (a.x * b.y) - (b.x * a.y) * cy;
+         let xmm6 = ((b.z * a.y) - xmm0) * cy;
+         // and discard xmm11
+         xmm7 -= xmm6; // wrong
+         // and discard xmm6
+         a.x = xmm7;
+         // and discard xmm7
+         xmm0 = (xmm3 * b.y) + xmm8 - xmm1;
+         // and discard xmm8
+         a.y = xmm0;
+         // and discard xmm9
+         xmm3 = b.z + xmm9 - xmm2;
+         a.z = xmm3;
+      })(this.rotation, this.axisAngleAxis, xmm7, xmm0);
+      this.rotation.normalize();
+   }
+   constructor(stream, mapBounds, owner) {
       this.loaded = false;
+      this.owner  = owner || null;
+      //
       this.unk00 = 0;
       //
       // objectSubcat
@@ -470,13 +582,9 @@ class LoadedForgeObject {
       //
       this.unk04 = -1; // dword
       this.position = new MVVector(); // 08, 0C, 10
-      this.unk14 = 0; // float
-      this.unk18 = 0; // float
-      this.unk1C = 0; // float
-      this.unk20 = 0; // float // unit vector x, for axis-angle rotations
-      this.unk24 = 0; // float // unit vector y
-      this.unk28 = 0; // float // unit vector z
-      this.unk2C = -1; // word // probably axis-angle angle but I don't have code to load it yet
+      this.rotation = new MVVector(); // 14, 18, 1C // possibly local-forward unit vector
+      this.axisAngleAxis = new MVVector(); // 20, 24, 28 // most likely local-up unit vector
+      this.unk2C = -1; // word
       //
       // objectSubtype
       //    Index of an object within a subcategory.
@@ -518,19 +626,58 @@ class LoadedForgeObject {
          this.objectType = 0xFF; // -1
       this.loadPosition(stream, mapBounds);
       if (stream.readBits(1)) {
-         this.unk20 = 0;
-         this.unk24 = 0;
-         this.unk28 = 1;
+         this.axisAngleAxis.x = 0;
+         this.axisAngleAxis.y = 0;
+         this.axisAngleAxis.z = 1;
          //
          // if this is an axis-angle unit vector, then this would mean that the angle 
          // is just yaw.
          //
       } else {
-         this.loadUnk20Floats(stream);
+         this.loadAxisAngleAxis(stream);
       }
       let a = stream.readBits(14, false); // TODO: processing
+      this.loadAxisAngleAngle(a);
       this.unk2C = stream.readBits(10, false) - 1;
       this.unk30 = new LFOUnk30(stream);
+   }
+   get forgeLabel() {
+      if (!this.owner)
+         return void 0;
+      if (!this.unk30)
+         return null;
+      let index = this.unk30.forgeLabelIndex;
+      if (index < 0)
+         return null;
+      let entry = this.owner.forgeLabels.strings[index];
+      if (!entry)
+         return NaN;
+      return entry.content;
+   }
+   get rotationDegrees() {
+      //
+      // NOTE: Rotations shown here may not be the same as those seen in Forge in 
+      // cases of equivalent angles. For example, roll 0 pitch 0 yaw -180 is the 
+      // same angle as roll 180 pitch 180 yaw 0.
+      //
+      // NOTE: this is also wrong anyway since i don't know bungie's euler 
+      // conventions
+      //
+      // Bungie's Euler conventions: lefthanded. X is forward, Z is vertical.
+      // The game uses inconsistent axes for positions and rotations: X is 
+      // pitch, not roll; Y is yaw, not pitch; and Z is roll, not yaw.
+      //
+      let aa  = this.axisAngleAxis;
+      let rad = this.rawAxisAngleRads;
+      let rot = new MVVector();
+      rot.z = Math.atan2(aa.y * Math.sin(rad) - aa.x * aa.z * (1 - Math.cos(rad)), 1 - (aa.y*aa.y + aa.z*aa.z) * (1 - Math.cos(rad)));
+      rot.y = Math.asin(aa.x * aa.y * (1 - Math.cos(rad)) + aa.z * Math.sin(rad));
+      rot.x = Math.atan2(aa.x * Math.sin(rad) - aa.y * aa.z * (1 - Math.cos(rad)), 1 - (aa.x*aa.x + aa.z*aa.z) * (1 - Math.cos(rad)));
+      let conv = function(r) { return r * 180 / Math.PI; }
+      rot.x = conv(rot.x);
+      rot.y = conv(rot.y);
+      rot.z = conv(rot.z);
+      return rot;
    }
 }
 
@@ -596,6 +743,8 @@ class MapVariant {
          }
       }
       this.unk02B0 = stream.readBits(8, false);
+      if (this.unk02B0 != 0x1F)
+         console.warn("unk2B0 != 0x1F; Reach would abort with an error here");
       this.unk02DC = stream.readBits(32, false);
       this.unk02E0 = stream.readBits(32, false);
       this.unk02B2 = stream.readBits(9, false);
@@ -678,14 +827,19 @@ try {
          console.warn("unk2B2 > 0x100; Halo: Reach would abort with a load failure at this point");
       this.forgeObjects = [];
       for(let i = 0; i < 0x28B; ++i) {
-         this.forgeObjects[i] = new LoadedForgeObject(stream, this.boundingBox);
+         this.forgeObjects[i] = new LoadedForgeObject(stream, this.boundingBox, this);
       }
       //
       // everything above confirmed accurate via memory inspection of haloreach.dll
       //
-      //
-      // TODO: remaining data
-      //
-      
+      this.unkD630 = [];
+      for(let i = 0; i < 0x100; ++i) {
+         this.unkD630[i] = { unk00: 0, unk01: 0, unk02: 0 };
+         if (i < this.unk2B2) {
+            this.unkD630[i].unk00 = stream.readBits(8, false);
+            this.unkD630[i].unk01 = stream.readBits(8, false);
+            this.unkD630[i].unk02 = stream.readBits(8, false);
+         }
+      }
    }
 }

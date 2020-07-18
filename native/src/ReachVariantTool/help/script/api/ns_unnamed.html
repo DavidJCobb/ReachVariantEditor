@@ -15,30 +15,72 @@
          <ul>
             <li><a href="index.html">Index</a></li>
             <li>
-               <a href="editor/main_window/index.html">Main Window</a>
+               <a>Main Window</a>
                <ul>
-                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
-                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
-                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
-                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
-                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
-                  <li data-dont-default-collapse>
-                     <a href="editor/main_window/options-team.html">Team Settings</a>
+                  <li>
+                     <a href="editor/main_window/index.html">Multiplayer</a>
                      <ul>
-                        <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                        <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                        <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                        <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                        <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                        <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                        <li data-dont-default-collapse>
+                           <a href="editor/main_window/options-team.html">Team Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                           </ul>
+                        </li>
+                        <li data-dont-default-collapse>
+                           <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                        <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                        <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                        <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
+                        <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
                      </ul>
                   </li>
-                  <li data-dont-default-collapse>
-                     <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                  <li>
+                     <a href="editor/main_window_ff/index.html">Firefight</a>
                      <ul>
-                        <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                        <li><a href="editor/main_window_ff/metadata.html">Metadata</a></li>
+                        <li>
+                           <a href="editor/main_window_ff/scenario.html">Firefight Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window_ff/lives.html">Player Lives</a></li>
+                              <li><a href="editor/main_window_ff/options-respawn.html">Respawn Settings</a></li>
+                              <li><a href="editor/main_window_ff/round.html">Round Settings</a></li>
+                              <li><a href="editor/main_window_ff/bonus-wave.html">Bonus Wave Settings</a></li>
+                              <li><a href="editor/main_window_ff/custom-skull.html">Custom Skulls</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Other Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window_ff/options-general.html">General Settings</a></li>
+                              <li><a href="editor/main_window_ff/options-social.html">Social Settings</a></li>
+                              <li data-dont-default-collapse>
+                                 <a href="editor/main_window_ff/options-team.html">Team Settings</a>
+                                 <ul>
+                                    <li><a href="editor/main_window_ff/options-team-specific.html">Individual Team Settings</a></li>
+                                 </ul>
+                              </li>
+                              <li data-dont-default-collapse>
+                                 <a href="editor/main_window_ff/options-loadout.html">Loadout Settings</a>
+                                 <ul>
+                                    <li><a href="editor/main_window_ff/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                                 </ul>
+                              </li>
+                           </ul>
+                        </li>
+                        <li><a href="editor/main_window_ff/traits.html">(all player traits)</a></li>
+                        <li><a href="editor/main_window_ff/traits-wave.html">(all wave traits)</a></li>
                      </ul>
                   </li>
-                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
-                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
-                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
-                  <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
-                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
                </ul>
             </li>
             <li>
@@ -117,6 +159,12 @@
                   </li>
                </ul>
             </li>
+            <li>
+               <a>Concepts</a>
+               <ul>
+                  <li><a href="concepts/firefight.html">Firefight</a></li>
+               </ul>
+            </li>
          </ul>
       </nav>
       <main>
@@ -132,7 +180,9 @@
 <dt><a href="script/api/ns_unnamed/current_team.html">current_team</a></dt>
    <dd><p>The current team in a <code>for each team</code> loop.</p></dd>
 <dt><a href="script/api/ns_unnamed/death_event_damage_type.html">death_event_damage_type</a></dt>
-   <dd><p>The damage reporting type for an object death event.</p></dd>
+   <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
+         damage type that killed the object. It is presumed to be a 
+         <a href="script/api/ns_enums/damage_reporting_type.html">damage reporting type</a>; testing is pending.</p></dd>
 <dt><a href="script/api/ns_unnamed/hud_player.html">hud_player</a></dt>
    <dd><p>This value can be used with HUD widgets and object waypoints to display 
          different information for each player. It refers to the player that the widget 
@@ -153,6 +203,15 @@
    <dd><p>This value's precise meaning is unknown, but it can presumably be used 
          with HUD widgets and object waypoints to display different information for each 
          player.</p></dd>
+<dt><a href="script/api/ns_unnamed/killed_object.html">killed_object</a></dt>
+   <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
+         killed object.</p></dd>
+<dt><a href="script/api/ns_unnamed/killer_object.html">killer_object</a></dt>
+   <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
+         killer object.</p></dd>
+<dt><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></dt>
+   <dd><p>During an <a href="script/events.html">object death event</a>, this is the 
+         killer player.</p></dd>
 <dt><a href="script/api/ns_unnamed/neutral_team.html">neutral_team</a></dt>
    <dd><p>A value that can be used to refer to Neutral Team.</p></dd>
 <dt><a href="script/api/ns_unnamed/no_object.html">no_object</a></dt>

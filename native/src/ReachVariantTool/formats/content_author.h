@@ -5,6 +5,8 @@
 
 class ReachContentAuthor {
    public:
+      ReachContentAuthor();
+      //
       cobb::bytenumber<uint64_t> timestamp; // seconds since Jan 1 1970 midnight GMT
       cobb::bytenumber<uint64_t> xuid;
       char author[16]; // includes null terminator

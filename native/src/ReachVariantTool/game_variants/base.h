@@ -5,6 +5,7 @@
 #include "../formats/bitset.h"
 #include "../formats/block.h"
 #include "../formats/content_author.h"
+#include "../formats/ugc_header.h"
 #include "../helpers/bitnumber.h"
 #include "../helpers/bitwriter.h"
 #include "../helpers/bytewriter.h"
@@ -19,20 +20,11 @@ enum class ReachGameEngine : uint8_t {
    campaign,
    firefight,
 };
-enum class ReachFileType : int8_t {
-   none = -1,
-   dlc,
-   campaign_save,
-   screenshot,
-   film,
-   film_clip,
-   map_variant,
-   game_variant,
-   playlist,
-};
 
 class GameVariantSaveProcess; // io_process.h
 
+class ReachCustomGameOptions;
+class GameVariantDataFirefight;
 class GameVariantDataMultiplayer;
 class GameVariantData {
    public:
@@ -42,6 +34,7 @@ class GameVariantData {
       virtual void write_last_minute_fixup(GameVariantSaveProcess&) const noexcept {};
       virtual GameVariantData* clone() const noexcept = 0;
       virtual bool receive_editor_data(RVTEditorBlock::subrecord* subrecord) noexcept { return false; }; // return true to indicate that you've accepted the subrecord
+      virtual cobb::endian_t sha1_length_endianness() const noexcept { return cobb::endian::little; }
       //
       GameVariantDataMultiplayer* as_multiplayer() const noexcept {
          switch (this->get_type()) {
@@ -58,7 +51,7 @@ class BlamHeader {
       ReachFileBlock header = ReachFileBlock('_blf', 0x30);
       struct {
          uint16_t unk0C = 0;
-         uint8_t  unk0E[0x20];
+         uint8_t  unk0E[0x20]; // very possibly a string buffer; Matchmaking Firefight variants use the text "game var" here
          uint16_t unk2E = 0;
       } data;
       //
@@ -75,52 +68,24 @@ class EOFBlock : public ReachFileBlock {
       void write(cobb::bytewriter&) const noexcept;
 };
 
-class GameVariantHeader {
+class ReachBlockATHR { // used to indicate authorship information for internal content
    public:
+      ReachFileBlock header = ReachFileBlock('athr', 0x50);
       struct {
-         cobb::bytenumber<uint16_t> major; // chdr-only
-         cobb::bytenumber<uint16_t> minor; // chdr-only
-      } build;
-      cobb::bitnumber<4, ReachFileType, true> contentType;
-      // skip 3 bytes
-      cobb::bytenumber<uint32_t> fileLength;
-      cobb::bytenumber<uint64_t> unk08;
-      cobb::bytenumber<uint64_t> unk10;
-      cobb::bytenumber<uint64_t> unk18;
-      cobb::bytenumber<uint64_t> unk20;
-      cobb::bitnumber<3, int8_t, true> activity;
-      cobb::bitnumber<3, uint8_t> gameMode;
-      cobb::bitnumber<3, uint8_t> engine;
-      // skip 1 byte
-      cobb::bytenumber<uint32_t> unk2C;
-      cobb::bitnumber<8, uint32_t> engineCategory;
-      ReachContentAuthor createdBy;
-      ReachContentAuthor modifiedBy;
-      char16_t title[128];
-      char16_t description[128];
-      cobb::bitnumber<8, uint32_t> engineIcon;
-      uint8_t  unk284[0x2C]; // only in chdr
+         uint8_t  unk00[0x10];
+         uint32_t buildNumber;
+         uint32_t unk14;
+         char     buildString[0x2C]; // "11860.10.07.24.0147.omaha_r" with a null-terminator. not sure if the last 0x10 bytes are this or another field
+      } data;
       //
-      mutable struct {
-         uint32_t offset_of_file_length = 0;
-      } writeData;
-      //
-      bool read(cobb::ibitreader&) noexcept;
-      bool read(cobb::ibytereader&) noexcept;
-      void write(cobb::bitwriter& stream) const noexcept;
+      bool read(reach_block_stream& stream) noexcept;
       void write(cobb::bytewriter& stream) const noexcept;
-      void write_last_minute_fixup(cobb::bitwriter&  stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
-      void write_last_minute_fixup(cobb::bytewriter& stream) const noexcept; // call after all file content has been written; writes file lengths, etc.
-      //
-      void set_title(const char16_t* value) noexcept;
-      void set_description(const char16_t* value) noexcept;
-      //
-      static uint32_t bitcount() noexcept;
 };
+
 class ReachBlockCHDR {
    public:
-      ReachFileBlock    header = ReachFileBlock('chdr', 0x2C0);
-      GameVariantHeader data;
+      ReachFileBlock header = ReachFileBlock('chdr', 0x2C0);
+      ReachUGCHeader data;
       //
       bool read(reach_block_stream& stream) noexcept {
          auto bytes = stream.bytes;
@@ -168,6 +133,7 @@ class ReachBlockMPVR {
 class GameVariant {
    public:
       BlamHeader     blamHeader;
+      ReachBlockATHR athr; // only seen on Matchmaking Firefight variants; contains internal build information, etc.; no value in keeping it
       ReachBlockCHDR contentHeader;
       ReachBlockMPVR multiplayer;
       EOFBlock       eofBlock;
@@ -176,8 +142,12 @@ class GameVariant {
       bool read(cobb::mapped_file& file);
       void write(GameVariantSaveProcess&) noexcept;
       //
-      static void test_mpvr_hash(cobb::mapped_file& file) noexcept;
+      void synch_chdr_to_mpvr() noexcept;
       //
+      inline ReachGameEngine get_multiplayer_type() const noexcept { return this->multiplayer.type; }
+      //
+      ReachCustomGameOptions* get_custom_game_options() const noexcept;
+      GameVariantDataFirefight* get_firefight_data() const noexcept;
       GameVariantDataMultiplayer* get_multiplayer_data() const noexcept;
       //
       GameVariant* clone() const noexcept;

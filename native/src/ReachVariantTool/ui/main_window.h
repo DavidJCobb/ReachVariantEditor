@@ -4,6 +4,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_main_window.h"
 
+class ReachCGRespawnOptions;
+class ReachFirefightWaveTraits;
 class ReachLoadoutPalette;
 class ReachMegaloPlayerTraits;
 class ReachPlayerTraits;
@@ -20,6 +22,7 @@ class ReachVariantTool : public QMainWindow {
    public:
       void getDefaultLoadDirectory(QString& out) const noexcept;
       void getDefaultSaveDirectory(QString& out) const noexcept;
+      void regenerateNavigation();
       //
    private slots:
       //
@@ -33,10 +36,10 @@ class ReachVariantTool : public QMainWindow {
       void saveFileAs() { this->_saveFileImpl(true); }
       void onSelectedPageChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
       //
-      void regenerateNavigation();
-      //
+      void switchToFFWaveTraits(ReachFirefightWaveTraits*);
       void switchToLoadoutPalette(ReachLoadoutPalette*);
       void switchToPlayerTraits(ReachPlayerTraits*);
+      void switchToRespawnOptions(ReachCGRespawnOptions*);
       //
       void refreshWindowTitle();
       //

@@ -1,7 +1,7 @@
 #include "number.h"
 #include "../../../../types/multiplayer.h" // game variant class
 #include "../../compiler/compiler.h"
-#include "../../../../helpers/numeric.h"
+#include "../../../../../helpers/numeric.h"
 
 namespace {
    using namespace Megalo;

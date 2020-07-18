@@ -1,6 +1,7 @@
 #pragma once
 #include "ui_bottom_bar.h"
 #include "../../editor_state.h"
+#include "../../game_variants/types/multiplayer.h"
 
 class ScriptEditorBottomPane : public QWidget {
    Q_OBJECT

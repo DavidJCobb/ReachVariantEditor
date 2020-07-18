@@ -1,6 +1,7 @@
 #include "localized_string_editor.h"
 #include "localized_string_library.h"
 #include "../editor_state.h"
+#include "../game_variants/types/multiplayer.h"
 
 namespace {
    ReachStringTable _dummy_string_owner(1, 99999);

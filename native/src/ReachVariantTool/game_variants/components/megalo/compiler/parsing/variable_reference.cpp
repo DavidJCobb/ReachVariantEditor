@@ -6,7 +6,7 @@
 #include "../../variables_and_scopes.h"
 #include "../../opcode_arg_type_registry.h"
 #include "../../opcode_arg_types/variables/all_core.h"
-#include "../../../../helpers/qt/string.h"
+#include "../../../../../helpers/qt/string.h"
 
 namespace {
    const Megalo::VariableScope* _var_scope_for_type(const Megalo::OpcodeArgTypeinfo& type) {

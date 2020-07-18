@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Firefight Settings</title>
+   <body>
+      <p>
+         The <b>Firefight settings</b> page allows you to control overall scenario settings 
+         for Firefight.
+      </p>
+      <img src="scenario.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Wave Limit</dt>
+            <dd>
+               <p>
+                  This is the maximum number of waves that the Firefight match is allowed to 
+                  have per <a href="/concepts/firefight#overall-match-flow">turn</a>. This 
+                  value should include bonus waves even if you have disabled them in 
+                  <a href="bonus-wave">their settings</a>.
+               </p>
+               <p>
+                  Text below the input control will translate the raw number of waves to a 
+                  number of sets, rounds, and waves.
+               </p>
+            </dd>
+         <dt>Hazards</dt>
+            <dd>Controls whether map-specific Hazards will appear on the map. These can 
+            include: Banshees (as on Holdout); Drop Pods filled with Brutes (armed with 
+            Concussion Rifles), Grunts (armed with Fuel Rod Guns), or Elite Ultras; 
+            and Wraiths.</dd>
+         <dt>Weapon Drops</dt>
+            <dd>Controls whether UNSC heavy weapons are air-dropped onto the map at the 
+            start of each round.</dd>
+         <dt>Ammo Crates</dt>
+            <dd>Determines whether UNSC ammo crates spawn on the map. Ammo crates will refill 
+            any UNSC non-power weapons when a player walks up to them.</dd>
+         <dt>Generator Count</dt>
+            <dd>Determines how many generators are on the map. Set this to zero (disabled) 
+            to turn Generator Defense off.</dd>
+         <dt>Generator Fail Condition</dt>
+            <dd>Controls whether Spartans lose the match if they lose all generators, or 
+            just one.</dd>
+         <dt>Generator Spawn Locations</dt>
+            <dd>Controls which of a map's three generator spawn locations are used, when 
+            fewer than three generators are present.</dd>
+         <dt>Unknown A</dt>
+            <dd>Unknown. Possibly unused.</dd>
+         <dt>Unknown B</dt>
+            <dd>Unknown. Possibly unused.</dd>
+         <dt>Unknown C</dt>
+            <dd>Unknown. Possibly unused. The default value is 10000; it may be a quantity 
+            of points.</dd>
+         <dt>Unknown D</dt>
+            <dd>Unknown. Possibly unused.</dd>
+      </dl>
+   </body>
+</article>

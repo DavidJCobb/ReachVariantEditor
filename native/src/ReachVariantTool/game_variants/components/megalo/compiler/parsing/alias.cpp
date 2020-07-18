@@ -3,7 +3,7 @@
 #include "../namespaces.h"
 #include "../../opcode.h"
 #include "../../opcode_arg_type_registry.h"
-#include "../../../../helpers/qt/string.h"
+#include "../../../../../helpers/qt/string.h"
 
 namespace {
    using namespace Megalo;

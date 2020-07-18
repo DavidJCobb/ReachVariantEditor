@@ -1,4 +1,5 @@
 #include "page_map_perms.h"
+#include "../../game_variants/types/multiplayer.h"
 #include "../../game_variants/components/map_permissions.h"
 
 namespace {

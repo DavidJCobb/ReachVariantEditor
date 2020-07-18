@@ -1,4 +1,5 @@
 #include "page_multiplayer_metadata.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QMessageBox>
 #include "../generic/QXBLGamertagValidator.h"
 

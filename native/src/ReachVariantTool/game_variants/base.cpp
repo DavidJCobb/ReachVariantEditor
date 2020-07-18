@@ -5,9 +5,11 @@
 #include "../formats/sha1.h"
 #include "../helpers/sha1.h"
 
+#include "types/firefight.h"
 #include "types/multiplayer.h"
 #include "io_process.h"
 #include "errors.h"
+#include "warnings.h"
 
 bool BlamHeader::read(reach_block_stream& stream) noexcept {
    auto bytes = stream.bytes;
@@ -42,179 +44,62 @@ void EOFBlock::write(cobb::bytewriter& stream) const noexcept {
    stream.write(uint8_t(0));
 }
 
-bool GameVariantHeader::read(cobb::ibitreader& stream) noexcept {
-   this->build.major = 0; // not in mpvr
-   this->build.minor = 0; // not in mpvr
-   this->contentType.read(stream);
-   this->fileLength.read(stream);
-   this->unk08.read(stream);
-   this->unk10.read(stream);
-   this->unk18.read(stream);
-   this->unk20.read(stream);
-   this->activity.read(stream);
-   this->gameMode.read(stream);
-   this->engine.read(stream);
-   this->unk2C.read(stream);
-   this->engineCategory.read(stream);
-   this->createdBy.read(stream);
-   this->modifiedBy.read(stream);
-   stream.read_u16string(this->title, 128); // big-endian
-   this->title[127] = '\0';
-   stream.read_u16string(this->description, 128); // big-endian
-   this->description[127] = '\0';
-   if (this->contentType == ReachFileType::game_variant) {
-      this->engineIcon.read(stream);
-   }
-   if (this->activity == 2)
-      stream.skip(16); // TODO: hopper ID
+bool ReachBlockATHR::read(reach_block_stream& stream) noexcept {
+   auto bytes = stream.bytes;
+   if (!this->header.read(bytes))
+      return false;
+   bytes.read(this->data.unk00);
+   bytes.read(this->data.buildNumber);
+   bytes.read(this->data.unk14);
+   bytes.read(this->data.buildString);
    return true;
 }
-bool GameVariantHeader::read(cobb::ibytereader& stream) noexcept {
-   this->build.major.read(stream);
-   this->build.minor.read(stream);
-   this->contentType.read(stream);
-   stream.pad(3);
-   this->fileLength.read(stream);
-   this->unk08.read(stream);
-   this->unk10.read(stream);
-   this->unk18.read(stream);
-   this->unk20.read(stream);
-   this->activity.read(stream);
-   this->gameMode.read(stream);
-   this->engine.read(stream);
-   stream.pad(1);
-   this->unk2C.read(stream);
-   this->engineCategory.read(stream);
-   stream.pad(4);
-   this->createdBy.read(stream);
-   this->modifiedBy.read(stream);
-   stream.read_u16string(this->title, 128);
-   this->title[127] = '\0';
-   stream.read_u16string(this->description, 128);
-   this->description[127] = '\0';
-   this->engineIcon.read(stream);
-   stream.read(this->unk284);
-   return true;
-}
-void GameVariantHeader::write(cobb::bitwriter& stream) const noexcept {
-   this->contentType.write(stream);
-   this->writeData.offset_of_file_length = stream.get_bitpos();
-   this->fileLength.write(stream); // handled fully in the write_last_minute_fixup member function
-   this->unk08.write(stream);
-   this->unk10.write(stream);
-   this->unk18.write(stream);
-   this->unk20.write(stream);
-   this->activity.write(stream);
-   this->gameMode.write(stream);
-   this->engine.write(stream);
-   this->unk2C.write(stream);
-   this->engineCategory.write(stream);
-   this->createdBy.write(stream);
-   this->modifiedBy.write(stream);
-   stream.write_u16string(this->title,       128); // big-endian
-   stream.write_u16string(this->description, 128); // big-endian
-   if (this->contentType == ReachFileType::game_variant) {
-      this->engineIcon.write(stream);
-   }
-   if (this->activity == 2)
-      assert(false && "Hopper ID writing not implemented!"); // TODO: hopper ID
-}
-void GameVariantHeader::write(cobb::bytewriter& stream) const noexcept {
-   this->build.major.write(stream);
-   this->build.minor.write(stream);
-   this->contentType.write(stream);
-   stream.pad(3);
-   this->writeData.offset_of_file_length = stream.get_bytepos();
-   this->fileLength.write(stream); // handled fully in the write_last_minute_fixup member function
-   this->unk08.write(stream);
-   this->unk10.write(stream);
-   this->unk18.write(stream);
-   this->unk20.write(stream);
-   this->activity.write(stream);
-   this->gameMode.write(stream);
-   this->engine.write(stream);
-   stream.pad(1);
-   this->unk2C.write(stream);
-   this->engineCategory.write(stream);
-   stream.pad(4);
-   this->createdBy.write(stream);
-   this->modifiedBy.write(stream);
-   stream.write(this->title);
-   stream.write(this->description);
-   this->engineIcon.write(stream);
-   stream.write(this->unk284);
-}
-void GameVariantHeader::write_last_minute_fixup(cobb::bitwriter& stream) const noexcept {
-   stream.write_to_bitpos(this->writeData.offset_of_file_length, cobb::bits_in<uint32_t>, stream.get_bytespan());
-}
-void GameVariantHeader::write_last_minute_fixup(cobb::bytewriter& stream) const noexcept {
-   stream.write_to_offset(this->writeData.offset_of_file_length, stream.get_bytespan(), cobb::endian::little);
-}
-//
-void GameVariantHeader::set_title(const char16_t* value) noexcept {
-   memset(this->title, 0, sizeof(this->title));
-   for (size_t i = 0; i < std::extent<decltype(this->title)>::value; i++) {
-      char16_t c = value[i];
-      if (!c)
-         break;
-      this->title[i] = c;
-   }
-}
-void GameVariantHeader::set_description(const char16_t* value) noexcept {
-   memset(this->description, 0, sizeof(this->description));
-   for (size_t i = 0; i < std::extent<decltype(this->description)>::value; i++) {
-      char16_t c = value[i];
-      if (!c)
-         break;
-      this->description[i] = c;
-   }
-}
-//
-/*static*/ uint32_t GameVariantHeader::bitcount() noexcept {
-   uint32_t bitcount = 0;
-   bitcount += decltype(build.major)::max_bitcount;
-   bitcount += decltype(build.minor)::max_bitcount;
-   bitcount += decltype(contentType)::max_bitcount;
-   bitcount += decltype(fileLength)::max_bitcount;
-   bitcount += decltype(unk08)::max_bitcount;
-   bitcount += decltype(unk10)::max_bitcount;
-   bitcount += decltype(unk18)::max_bitcount;
-   bitcount += decltype(unk20)::max_bitcount;
-   bitcount += decltype(activity)::max_bitcount;
-   bitcount += decltype(gameMode)::max_bitcount;
-   bitcount += decltype(engine)::max_bitcount;
-   bitcount += decltype(unk2C)::max_bitcount;
-   bitcount += decltype(engineCategory)::max_bitcount;
-   bitcount += ReachContentAuthor::bitcount() * 2; // created by; modified by
-   bitcount += (cobb::bits_in<char16_t> * 128) * 2; // title; description
-   bitcount += decltype(engineIcon)::max_bitcount; // only if contentType == ReachFileType::game_variant
-   bitcount += 16; // only if activity == 2
-   return bitcount;
+void ReachBlockATHR::write(cobb::bytewriter& stream) const noexcept {
+   this->header.write(stream);
+   stream.write(this->data.unk00);
+   stream.write(this->data.buildNumber);
+   stream.write(this->data.unk14);
+   stream.write(this->data.buildString);
 }
 
 bool ReachBlockMPVR::read(reach_block_stream& reader) {
    auto& error_report = GameEngineVariantLoadError::get();
    //
-   uint32_t offset_before_hashable;
-   uint32_t offset_after_hashable;
+   uint32_t offset_before_hashable = 0;
+   uint32_t offset_after_hashable  = 0;
+   bool     block_type_is_gvar     = false; // are we using a 'gvar' block instead of an 'mpvr' block?
    //
-   if (!this->header.read(reader.bytes)) {
-      error_report.state = GameEngineVariantLoadError::load_state::failure;
-      if (this->header.found.signature == this->header.expected.signature && this->header.found.version == block_header_version::halo_2_annie) {
+   this->header.read(reader.bytes);
+   if (this->header.found.signature == 'mpvr') {
+      if (this->header.found.version == block_header_version::halo_2_annie) {
          //
          // Note: This won't catch all Halo 2 Anniversary variants; some use a new file chunk, "athr", 
          // so those trip the "no 'chdr' block" check instead.
          //
+         error_report.state  = GameEngineVariantLoadError::load_state::failure;
          error_report.reason = GameEngineVariantLoadError::load_failure_reason::unsupported_game;
          error_report.detail = GameEngineVariantLoadError::load_failure_detail::game_is_halo_2_anniversary;
+         return false;
       }
+      if (this->header.found.size != this->header.expected.size) {
+         error_report.state = GameEngineVariantLoadError::load_state::failure;
+         return false;
+      }
+   } else if (this->header.found.signature == 'gvar') {
+      block_type_is_gvar = true;
+      this->header.found.signature = 'mpvr'; // fix this for when we save
+   } else {
+      error_report.state = GameEngineVariantLoadError::load_state::failure;
       return false;
    }
+   //
    auto& stream = reader.bits;
    //
-   stream.read(this->hashSHA1);
-   stream.skip(4 * 8); // skip four unused bytes
-   stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
+   if (!block_type_is_gvar) {
+      stream.read(this->hashSHA1);
+      stream.skip(4 * 8); // skip four unused bytes
+      stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
+   }
    offset_before_hashable = stream.get_bytespan();
    this->type.read(stream);
    switch (this->type) {
@@ -227,7 +112,8 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       case ReachGameEngine::campaign:
          // fall through
       case ReachGameEngine::firefight:
-         // fall through
+         this->data = new GameVariantDataFirefight();
+         break;
       default:
          error_report.state         = GameEngineVariantLoadError::load_state::failure;
          error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;
@@ -250,7 +136,7 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       // the _eof block ends up inside of here AND we hit the actual end-of-file early, causing (remainingData.read) to fail. However, we can still read 
       // the game variant data; I haven't tested whether MCC can.
    //
-   {
+   if (!block_type_is_gvar) {
       auto     hasher   = cobb::sha1();
       uint32_t size     = offset_after_hashable - offset_before_hashable;
       printf("Checking SHA-1 hash... Data size is %08X (%08X - %08X).\n", size, offset_before_hashable, offset_after_hashable);
@@ -259,15 +145,12 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       auto     buffer32 = (const uint32_t*)buffer;
       uint8_t* working  = (uint8_t*)malloc(bufsize);
       memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
-      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(uint32_t(size));
-      memcpy(working + bufsize - size, buffer + offset_before_hashable, size);
-      hasher.transform(working, bufsize);
       free(working);
       working = nullptr;
       //
       printf("File's existing hash:\n");
       for (int i = 0; i < 5; i++)
-         printf("   %08X\n", buffer32[0x2FC / 4 + i]);
+         printf("   %08X\n", buffer32[0xC / 4 + i]);
       printf("\nOur hash:\n");
       for (int i = 0; i < 5; i++)
          printf("   %08X\n", hasher.hash[i]);
@@ -332,7 +215,12 @@ void ReachBlockMPVR::write_last_minute_fixup(GameVariantSaveProcess& save_proces
    {  // SHA-1 hash
       auto hasher = cobb::sha1();
       uint32_t size = wd.offset_after_hashable - wd.offset_before_hashable;
-      bytes.write_to_offset(wd.offset_of_hashable_length, size, cobb::endian::little);
+      //
+      auto length_endian = cobb::endian::little;
+      if (this->data)
+         length_endian = this->data->sha1_length_endianness();
+      bytes.write_to_offset(wd.offset_of_hashable_length, size, length_endian);
+      //
       uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
       auto     buffer   = (const uint8_t*)bytes.data();
       auto     buffer32 = (const uint32_t*)buffer;
@@ -360,10 +248,13 @@ void ReachBlockMPVR::cloneTo(ReachBlockMPVR& target) const noexcept {
 
 bool GameVariant::read(cobb::mapped_file& file) {
    auto& error_report = GameEngineVariantLoadError::get();
+   auto& warnings     = GameEngineVariantLoadWarningLog::get();
    error_report.reset();
+   warnings.clear();
    //
    auto reader = cobb::reader((const uint8_t*)file.data(), file.size());
    auto blocks = ReachFileBlockReader(reader);
+   bool athr   = false;
    bool blam   = false;
    bool chdr   = false;
    bool mpvr   = false;
@@ -401,6 +292,14 @@ bool GameVariant::read(cobb::mapped_file& file) {
                return false;
             }
             break;
+         case 'athr':
+            athr = true;
+            if (!this->athr.read(block)) {
+               warnings.push_back(
+                  "This file has an (athr) block, but the block is invalid somehow (possibly the wrong size)."
+               );
+            }
+            break;
          case 'chdr':
             if (!this->contentHeader.read(block)) {
                error_report.state         = GameEngineVariantLoadError::load_state::failure;
@@ -418,6 +317,7 @@ bool GameVariant::read(cobb::mapped_file& file) {
             }
             break;
          case 'mpvr':
+         case 'gvar':
             if (!this->multiplayer.read(block)) {
                error_report.state = GameEngineVariantLoadError::load_state::failure;
                if (!error_report.has_failure_point())
@@ -443,17 +343,21 @@ bool GameVariant::read(cobb::mapped_file& file) {
       if (stop)
          break;
    }
-   if (!chdr) {
-      error_report.state         = GameEngineVariantLoadError::load_state::failure;
-      error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_chdr;
-      error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
-      return false;
+   if (!chdr && !athr) { // some Matchmaking content uses ATHR and no CHDR
+      warnings.push_back("This file does not have a content header (chdr) block. These blocks are non-essential, but are always generated by the game engine to serve as an easy-to-read, and easy-to-debug, way to view basic metadata about files.");
    }
    if (!mpvr) {
       error_report.state         = GameEngineVariantLoadError::load_state::failure;
       error_report.failure_point = GameEngineVariantLoadError::load_failure_point::block_mpvr;
       error_report.reason        = GameEngineVariantLoadError::load_failure_reason::block_missing;
       return false;
+   }
+   if (!chdr) {
+      //
+      // If there was no CHDR block, then we need to fill in our loaded data from the MPVR 
+      // block if possible so that we save a new CHDR block properly.
+      //
+      this->synch_chdr_to_mpvr();
    }
    if (auto mp = this->get_multiplayer_data()) {
       for (auto*& sub : editor_block.subrecords) {
@@ -487,50 +391,41 @@ void GameVariant::write(GameVariantSaveProcess& save_process) noexcept {
          editor_block.write(writer.bytes);
    }
 }
-void GameVariant::test_mpvr_hash(cobb::mapped_file& file) noexcept {
-   printf("Testing our hashing algorithm on this game variant...\n");
+void GameVariant::synch_chdr_to_mpvr() noexcept {
+   this->contentHeader.header.found.signature = 'chdr';
+   this->contentHeader.header.found.version   = 0x000A;
+   this->contentHeader.header.found.flags     = 0x0002;
    //
-   const uint8_t*  buffer   = (const uint8_t*)file.data();
-   const uint32_t* buffer32 = (const uint32_t*)buffer;
-   //
-   uint32_t signature = cobb::from_big_endian(buffer32[0x2F0 / 4]);
-   if (signature != 'mpvr') {
-      printf("Failed to find the mpvr block; signature found was %08X when we expected %08X.\n", signature, 'mpvr');
+   auto data = this->multiplayer.data;
+   if (!data)
+      return;
+   if (auto mp = dynamic_cast<GameVariantDataMultiplayer*>(data)) {
+      this->contentHeader.data = mp->variantHeader;
+      this->contentHeader.data.build.major = 0;
+      this->contentHeader.data.build.minor = 0xFFFF;
       return;
    }
-   //
-   // Bungie only hashes the portion of MPVR that the game variant actually uses. This bytecount is a 
-   // big-endian uint32_t located 0x4 bytes after the hash (i.e. offset 0x314 in the file). We need to 
-   // read that, and then only run the hashing algorithm on that many bytes after that length value.
-   //
-   uint32_t size = cobb::from_big_endian(buffer32[0x314 / 4]);
-   printf("File's existing hash (%04X bytes of data):\n", size);
-   for (int i = 0; i < 5; i++)
-      printf("   %08X\n", buffer32[0x2FC / 4 + i]);
-   printf("\n");
-   //
-   auto hasher = cobb::sha1();
-   {
-      uint32_t bufsize  = size + sizeof(reachSHA1Salt) + 4;
-      auto     buffer   = (const uint8_t*)file.data();
-      auto     buffer32 = (const uint32_t*)buffer;
-      uint8_t* working  = (uint8_t*)malloc(bufsize);
-      memcpy(working, reachSHA1Salt, sizeof(reachSHA1Salt));
-      *(uint32_t*)(working + sizeof(reachSHA1Salt)) = cobb::to_big_endian(size);
-      memcpy(working + bufsize - size, buffer + 0x318, size);
-      hasher.transform(working, bufsize);
-      free(working);
+   if (auto ff = dynamic_cast<GameVariantDataFirefight*>(data)) {
+      this->contentHeader.data = ff->variantHeader;
+      this->contentHeader.data.build.major = 0;
+      this->contentHeader.data.build.minor = 0xFFFF;
+      return;
    }
-   printf("Our hash:\n");
-   for (int i = 0; i < 5; i++)
-      printf("   %08X\n", hasher.hash[i]);
-   printf("Test done.\n");
+}
+ReachCustomGameOptions* GameVariant::get_custom_game_options() const noexcept {
+   if (!this->multiplayer.data)
+      return nullptr;
+   if (auto mp = this->get_multiplayer_data())
+      return &mp->options;
+   if (auto ff = this->get_firefight_data())
+      return &ff->options;
+   return nullptr;
+}
+GameVariantDataFirefight* GameVariant::get_firefight_data() const noexcept {
+   return dynamic_cast<GameVariantDataFirefight*>(this->multiplayer.data);
 }
 GameVariantDataMultiplayer* GameVariant::get_multiplayer_data() const noexcept {
-   auto d = this->multiplayer.data;
-   if (!d)
-      return nullptr;
-   return d->as_multiplayer();
+   return dynamic_cast<GameVariantDataMultiplayer*>(this->multiplayer.data);
 }
 
 GameVariant* GameVariant::clone() const noexcept {

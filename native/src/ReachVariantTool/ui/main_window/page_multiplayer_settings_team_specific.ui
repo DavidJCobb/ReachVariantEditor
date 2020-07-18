@@ -220,7 +220,7 @@
    <item row="9" column="0" colspan="4">
     <widget class="QLabel" name="label_74">
      <property name="text">
-      <string>&lt;b&gt;NOTE:&lt;/b&gt; &amp;nbsp; This team's species option will only be used if the &quot;Player Species&quot; option under &quot;Team Settings&quot; is set to &quot;Use Team Species.&quot;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NOTE:&lt;/span&gt;   This team's species option will only be used if the &amp;quot;Player Species&amp;quot; option under &amp;quot;General Settings&amp;quot; is set to &amp;quot;Use Team Species.&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

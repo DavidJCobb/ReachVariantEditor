@@ -1,4 +1,10 @@
 #include "editor_state.h"
+#include "game_variants/base.h"
+#include "game_variants/components/loadouts.h"
+#include "game_variants/components/player_traits.h"
+#include "game_variants/components/teams.h"
+#include "game_variants/types/firefight.h"
+#include "game_variants/types/multiplayer.h"
 
 ReachEditorState::ReachEditorState() {
    QObject::connect(this, &ReachEditorState::stringModified, [this](uint32_t index) {
@@ -25,11 +31,23 @@ void ReachEditorState::abandonVariant() noexcept {
       return;
    auto v = this->currentVariant;
    this->currentVariant = nullptr;
-   this->currentTraits  = nullptr;
-   this->currentLoadoutPalette = nullptr;
    this->currentFile    = L"";
+   this->currentMPTeam  = -1;
+   this->currentFFWaveTraits   = nullptr;
+   this->currentLoadoutPalette = nullptr;
+   this->currentRespawnOptions = nullptr;
+   this->currentTraits         = nullptr;
+   emit switchedFFWaveTraits(nullptr);
+   emit switchedLoadoutPalette(nullptr);
+   emit switchedMultiplayerTeam(nullptr, -1, nullptr);
+   emit switchedRespawnOptions(nullptr);
+   emit switchedPlayerTraits(nullptr);
    emit variantAbandoned(v);
    delete v;
+}
+void ReachEditorState::setCurrentFFWaveTraits(ReachFirefightWaveTraits* traits) noexcept {
+   this->currentFFWaveTraits = traits;
+   emit switchedFFWaveTraits(traits);
 }
 void ReachEditorState::setCurrentMultiplayerTeam(int8_t index) noexcept {
    this->currentMPTeam = index;
@@ -42,6 +60,10 @@ void ReachEditorState::setCurrentLoadoutPalette(ReachLoadoutPalette* which) noex
 void ReachEditorState::setCurrentPlayerTraits(ReachPlayerTraits* which) noexcept {
    this->currentTraits = which;
    emit switchedPlayerTraits(which);
+}
+void ReachEditorState::setCurrentRespawnOptions(ReachCGRespawnOptions* which) noexcept {
+   this->currentRespawnOptions = which;
+   emit switchedRespawnOptions(which);
 }
 void ReachEditorState::setVariantFilePath(const wchar_t* path) noexcept {
    this->currentFile = path;
@@ -59,6 +81,17 @@ void ReachEditorState::takeVariant(GameVariant* other, const wchar_t* path) noex
    emit switchedMultiplayerTeam(this->currentVariant, this->currentMPTeam, this->multiplayerTeam());
 }
 
+ReachCustomGameOptions* ReachEditorState::customGameOptions() noexcept {
+   if (!this->currentVariant)
+      return nullptr;
+   return this->currentVariant->get_custom_game_options();
+}
+GameVariantDataFirefight* ReachEditorState::firefightData() noexcept {
+   auto v = this->currentVariant;
+   if (!v)
+      return nullptr;
+   return dynamic_cast<GameVariantDataFirefight*>(v->multiplayer.data);
+}
 GameVariantDataMultiplayer* ReachEditorState::multiplayerData() noexcept {
    auto v = this->currentVariant;
    if (!v)
@@ -76,8 +109,8 @@ GameVariantDataMultiplayer* ReachEditorState::multiplayerData() noexcept {
 ReachTeamData* ReachEditorState::multiplayerTeam() noexcept {
    if (this->currentMPTeam == -1)
       return nullptr;
-   auto mp = this->multiplayerData();
-   if (mp)
-      return &(mp->options.team.teams[this->currentMPTeam]);
+   auto data = this->customGameOptions();
+   if (data)
+      return &(data->team.teams[this->currentMPTeam]);
    return nullptr;
 }

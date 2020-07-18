@@ -1,4 +1,5 @@
 #include "page_script_widgets.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QImage>
 #include <QMessageBox>
 #include <QPainter>

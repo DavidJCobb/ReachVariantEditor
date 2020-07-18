@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Team Settings</title>
+   <body>
+      <p>
+         The <b>team settings</b> page allows you to edit settings related to team scoring 
+         and configuration. To edit settings for individual teams, refer to 
+         <a href="options-team-specific.html">this page</a>.
+      </p>
+      <img src="options-team.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Team Scoring Method</dt>
+            <dd>Unknown. This may be related to the oldest Halo games' options to 
+            control how a team's score was computed from the scores of its players, 
+            but testing is pending. <i>Halo: Reach</i> official files seem to use 
+            the value 0.</dd>
+         <dt>Designator Switch Type</dt>
+            <dd>
+               <p>This option controls how teams are remapped across rounds, but the 
+               meanings of its values are unknown.</p>
+               <p>After each round in a match, teams will swap places; for example, in 
+               offense/defense game variants with two teams, each team will take turns 
+               playing the "defense" role.</p>
+            </dd>
+      </dl>
+   </body>
+</article>

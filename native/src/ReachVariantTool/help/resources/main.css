@@ -85,7 +85,7 @@ dl{}
 main ul>li+li{margin-top:.5em}
 
 code{background:#EEE}
-pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD}
+pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD;overflow-x:auto}
    pre .comment{color:#292;font-style:italic}
    pre .string{color:#777}
    pre .keyword{color:#00F;font-weight:bold}
@@ -93,5 +93,6 @@ pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD}
 a{text-decoration:none}
 a:link{color:#03E}
 a:visited{color:#938}
-#sidebar a:link:hover{color:#36F}
+a:link:hover{text-decoration:underline}
+#sidebar a:link:hover{color:#36F;text-decoration:none}
 #sidebar a:visited:hover{color:#B5A}

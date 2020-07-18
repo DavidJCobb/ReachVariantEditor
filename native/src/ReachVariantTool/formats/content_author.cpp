@@ -1,5 +1,13 @@
 #include "content_author.h"
 
+ReachContentAuthor::ReachContentAuthor() {
+   //
+   // We copy the full contents of this field into the game variant file when saving 
+   // this struct as a (chdr) block, so we want to fully zero it out.
+   //
+   memset(this->author, 0, sizeof(this->author));
+}
+
 bool ReachContentAuthor::read(cobb::ibitreader& stream) noexcept {
    this->timestamp.read(stream);
    this->xuid.read(stream);

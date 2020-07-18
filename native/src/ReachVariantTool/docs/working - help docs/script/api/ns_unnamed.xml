@@ -3,9 +3,6 @@
    <blurb>Contains various utility functions.</blurb>
    <friendly>Content not in any namespace</friendly>
    <members>
-      <member name="death_event_damage_type" type="number" read-only="true">
-         <blurb>The damage reporting type for an object death event.</blurb>
-      </member>
       <member name="no_object" type="object" none="true">
          <blurb>A value which represents "none," usable where an object variable can 
          appear.</blurb>
@@ -142,6 +139,26 @@
       </member>
       <member name="script_option" type="number" indexed="true" read-only="true">
          <blurb>Allows scripts to access the value of scripted Custom Game options.</blurb>
+      </member>
+      <member name="killed_object" type="object" read-only="true">
+         <blurb>During an <a href="script/events">object death event</a>, this is the 
+         killed object.</blurb>
+         <related name="killer_object" />
+         <related name="killer_player" />
+         <related name="death_event_damage_type" />
+      </member>
+      <member name="killer_object" type="object" read-only="true">
+         <blurb>During an <a href="/script/events">object death event</a>, this is the 
+         killer object.</blurb>
+      </member>
+      <member name="killer_player" type="player" read-only="true">
+         <blurb>During an <a href="/script/events">object death event</a>, this is the 
+         killer player.</blurb>
+      </member>
+      <member name="death_event_damage_type" type="number" read-only="true">
+         <blurb>During an <a href="script/events">object death event</a>, this is the 
+         damage type that killed the object. It is presumed to be a 
+         <a href="/script/api/ns_enums/damage_reporting_type">damage reporting type</a>; testing is pending.</blurb>
       </member>
    </members>
    <methods>

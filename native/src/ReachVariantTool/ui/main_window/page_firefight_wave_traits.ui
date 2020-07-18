@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PageFFWaveTraits</class>
+ <widget class="QWidget" name="PageFFWaveTraits">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Grenades</string>
+     </property>
+     <property name="buddy">
+      <cstring>grenades</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="text">
+      <string>Damage Resistance</string>
+     </property>
+     <property name="buddy">
+      <cstring>damageResist</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QComboBox" name="grenades">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>None</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Catch</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="PlayerTraitBooleanCombobox" name="dontDropEquipment"/>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Don't Drop Equipment on Death</string>
+     </property>
+     <property name="buddy">
+      <cstring>dontDropEquipment</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Hearing</string>
+     </property>
+     <property name="buddy">
+      <cstring>hearing</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="damageResist">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>10%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>50%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>90%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>100%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>110%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>150%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>200%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>300%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>500%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>1000%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>2000%</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Invulnerable</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="hearing">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Deaf</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sharp</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Vision</string>
+     </property>
+     <property name="buddy">
+      <cstring>vision</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="text">
+      <string>Headshot Immunity</string>
+     </property>
+     <property name="buddy">
+      <cstring>headshotImmunity</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="PlayerTraitBooleanCombobox" name="assassinImmunity"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Luck</string>
+     </property>
+     <property name="buddy">
+      <cstring>luck</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="PlayerTraitDamageMultCombobox" name="damageMult"/>
+   </item>
+   <item row="5" column="1">
+    <widget class="QComboBox" name="shootiness">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Marksman</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Trigger Happy</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Shootiness</string>
+     </property>
+     <property name="buddy">
+      <cstring>shootiness</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QComboBox" name="vision">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Blind</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Nearsighted</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Eagle Eye</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Assassination Immunity</string>
+     </property>
+     <property name="buddy">
+      <cstring>assassinImmunity</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>Damage Modifier</string>
+     </property>
+     <property name="buddy">
+      <cstring>damageMult</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="PlayerTraitBooleanCombobox" name="headshotImmunity"/>
+   </item>
+   <item row="4" column="1">
+    <widget class="QComboBox" name="luck">
+     <item>
+      <property name="text">
+       <string>Unchanged</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Normal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Unlucky</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Lucky</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Leprechaun</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="10" column="0" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlayerTraitBooleanCombobox</class>
+   <extends>QComboBox</extends>
+   <header>../generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlayerTraitDamageMultCombobox</class>
+   <extends>QComboBox</extends>
+   <header>../generic/PlayerTraitWidgets.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>damageMult</tabstop>
+  <tabstop>damageResist</tabstop>
+  <tabstop>vision</tabstop>
+  <tabstop>hearing</tabstop>
+  <tabstop>luck</tabstop>
+  <tabstop>shootiness</tabstop>
+  <tabstop>grenades</tabstop>
+  <tabstop>dontDropEquipment</tabstop>
+  <tabstop>assassinImmunity</tabstop>
+  <tabstop>headshotImmunity</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

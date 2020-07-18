@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool v2.0.0</string>
+           <string>ReachVariantTool v2.1.0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -177,7 +177,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="PageGameVariantHeader">
+      <widget class="QWidget" name="PageGameVariantMPMetadata">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="PageMPMetadata" name="pageContentMetadata" native="true"/>
@@ -236,6 +236,9 @@
       <widget class="QWidget" name="PageEditPlayerTraits">
        <layout class="QGridLayout" name="gridLayout_9">
         <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
          <number>0</number>
         </property>
         <property name="bottomMargin">
@@ -312,6 +315,57 @@
        <layout class="QGridLayout" name="gridLayout_22">
         <item row="0" column="0">
          <widget class="PageForgeSettingsGeneral" name="pageContentForgeGeneral" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageGameVariantFFMetadata">
+       <layout class="QGridLayout" name="gridLayout_12">
+        <item row="0" column="0">
+         <widget class="PageFFMetadata" name="pageContentFFMetadata" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightScenario">
+       <layout class="QGridLayout" name="gridLayout_13">
+        <item row="0" column="0">
+         <widget class="PageFFScenario" name="pageContentFFScenario" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightLives">
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0">
+         <widget class="PageFFLives" name="pageContentFFLives" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightRound">
+       <layout class="QGridLayout" name="gridLayout_16">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="PageFFRound" name="pageContentFFRound" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightWaveTraits">
+       <layout class="QGridLayout" name="gridLayout_17">
+        <item row="0" column="0">
+         <widget class="PageFFWaveTraits" name="pageContentFFWaveTraits" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="PageFirefightBonusWave">
+       <layout class="QGridLayout" name="gridLayout_18">
+        <item row="0" column="0">
+         <widget class="PageFFBonusWave" name="pageContentFFBonusWave" native="true"/>
         </item>
        </layout>
       </widget>
@@ -527,6 +581,42 @@
    <class>EngineOptionToggleTree</class>
    <extends>QTreeView</extends>
    <header>widgets/option_toggles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PageFFMetadata</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_metadata.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFScenario</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_scenario.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFLives</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_lives.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFRound</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_round.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFWaveTraits</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_wave_traits.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PageFFBonusWave</class>
+   <extends>QWidget</extends>
+   <header>main_window/page_firefight_bonus_wave.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Round Settings</title>
+   <body>
+      <p>
+         The <b>round settings</b> page allows you to control which skulls are enabled 
+         during a Firefight round, and what enemy types spawn during the round's waves.
+      </p>
+      
+      <h2>Skulls</h2>
+      <p>
+         <dfn>Skulls</dfn> are special gameplay modifiers that can be switched on and 
+         off. A Firefight round can use any of the game's original Campaign skulls, as 
+         well as any or all of three <a href="custom-skull">custom skulls</a> with 
+         user-configurable effects.
+      </p>
+      <img src="round-skulls.png" />
+      <dl>
+         <dt>Black Eye</dt>
+            <dd>Players can only recharge their shields by meleeing and assassinating 
+            enemies.</dd>
+         <dt>Catch</dt>
+            <dd>Enemies throw grenades twice as often, and drop two grenades when 
+            killed.</dd>
+         <dt>Cowbell</dt>
+            <dd>Physics effects are tripled, though physics-related damage is unchanged.</dd>
+         <dt>Famine</dt>
+            <dd>Dropped weapons lose half of their ammo or charge.</dd>
+         <dt>Fog</dt>
+            <dd>Players' motion trackers are disabled.</dd>
+         <dt>Grunt Birthday Party</dt>
+            <dd>When a Grunt is killed with a headshot, confetti explodes outward from 
+            the body, accompanied by the sound of children cheering. This explosion can 
+            damage other enemies and detonate grenades.</dd>
+         <dt>Iron</dt>
+            <dd>Prevents killed players from respawning, even if they have lives remaining. 
+            <strong>This skull should only be enabled for the Bonus Wave.</strong> Other 
+            waves will not end (in a Spartan defeat or otherwise) if all Spartans are dead 
+            but still have lives remaining, which means that enabling the Iron Skull for 
+            normal rounds can cause softlocks.</dd>
+         <dt>IWHBYD</dt>
+            <dd>Rare dialogue becomes more common and vice versa, for both players and 
+            enemies.</dd>
+         <dt>Mythic</dt>
+            <dd>NPC enemy health is doubled. This also includes the health of breakable 
+            NPC armor pieces, like Grunt Ultras' helmets.</dd>
+         <dt>Thunderstorm</dt>
+            <dd>Increases NPC enemy ranks. For example, squads of Grunts will generally 
+            consist entirely of Grunt Ultras when this skull is enabled.</dd>
+         <dt>Tilt</dt>
+            <dd>Weapons' strengths and weaknesses are amplified.</dd>
+         <dt>Tough Luck</dt>
+            <dd>Enemies dodge dangerous attacks more often, and Grunts are less likely 
+            to flee or attempt suicide bombings.</dd>
+         <dt>Custom Red</dt>
+         <dt>Custom Blue</dt>
+         <dt>Custom Yellow</dt>
+            <dd>The three custom skulls available for your configuration.</dd>
+      </dl>
+      
+      <h2>Waves</h2>
+      <p>
+         A Firefight round has five waves: one Initial Wave, three Main Waves, and one Boss 
+         Wave. For each wave, the game will select one enemy squad type from those available, 
+         and spawn six of that squad.
+      </p>
+      <img src="round-wave.png" />
+      <p>
+         The following settings are configurable for each type of wave:
+      </p>
+      <dl>
+         <dt>Uses Dropships</dt>
+            <dd>If enabled, enemies will be transported into the playable space by Phantom 
+            or Spirit dropships. If disabled, enemies will spawn inside the map, typically 
+            out in the open (though maps like Corvette spawn them in locked areas instead).</dd>
+         <dt>Squad Order</dt>
+            <dd>
+               <p>Controls whether the game cycles through squad types or picks them at random.</p>
+               <p>
+                  Here's an interesting question: How does "ordered squads" interact with the 
+                  squad type list when the number of squad types exceeds the number of times 
+                  that the wave configuration will actually be used? For example, Main Waves 
+                  typically define five squads, but there are only three Main Waves in any 
+                  given round. Does that mean that the last two squads will never be used? 
+                  Well, no. Each <a href="/concepts/firefight#overall-match-flow">set</a> cycles the starting 
+                  point. Let's use Round 1 as an example, and assume that all wave types are 
+                  set to use ordered squads.
+               </p>
+               <p>
+                  In Set 1, Round 1 will use: Initial Wave squad 1; Main Wave squads 1, 2, and 
+                  3; and Boss Wave squad 1.
+               </p>
+               <p>
+                  In Set 2, Round 1 will use: Initial Wave squad 2; Main Wave squads 2, 3, and 
+                  4; and Boss Wave squad 2.
+               </p>
+            </dd>
+         <dt>Squad Count</dt>
+            <dd>
+               <p>
+                  This setting appears to control the number of your chosen squad types that 
+                  the game engine will pay attention to. The game engine will always spawn only 
+                  six squads (all of the same type) on the map per wave; it will also always use 
+                  at least three squad types for Initial Waves and Boss Waves, and at least five 
+                  squad types for Main Waves. However, if the Squad Count is lower than the number 
+                  of squad types that the game engine will use, then the remaining squad types 
+                  will be Brutes instead of the ones you've specified.
+               </p>
+               <p>
+                  As an example, if you set an Initial Wave's first three squad types to Grunts, 
+                  but you also set the Squad Count to 1, then the game will act as if the squad 
+                  types that it has to choose from are Grunts, Brutes, and Brutes.
+               </p>
+               <p>
+                  Why Brutes? They're encoded as the number zero, and computers typically use zero 
+                  to mean a default, or to mean the first thing in a list of possibilities.
+               </p>
+               <p>
+                  Currently, it is recommended that you leave this option at its default for the 
+                  respective wave type &mdash; again, 3 for Initial and Boss Waves, and 5 for Main 
+                  Waves.
+               </p>
+            </dd>
+         <dt>Squad # Type</dt>
+            <dd>
+               <p>Allows you to set one of the possible squad types. The available options are:</p>
+               <dl>
+                  <dt>Brutes</dt>
+                     <dd>Squads of Brutes.</dd>
+                  <dt>Brute Chieftains</dt>
+                     <dd>Squads each consisting of a single Brute Chieftain.</dd>
+                  <dt>Brute Infantry</dt>
+                     <dd>Squads of Brutes and Jackals.</dd>
+                  <dt>Brute Kill Team</dt>
+                     <dd>Squads of Brutes led by chieftains.</dd>
+                  <dt>Brute Patrol</dt>
+                     <dd>Squads of Brutes and Grunts.</dd>
+                  <dt>Brute Tactical</dt>
+                     <dd>Squads of Brutes and Skirmishers.</dd>
+                  <dt>Elites</dt>
+                     <dd>Squads of Elites.</dd>
+                  <dt>Elite Airborne</dt>
+                     <dd>Squads of Elite Rangers with jetpacks.</dd>
+                  <dt>Elite Generals</dt>
+                     <dd>Squads each consisting of a single Elite General.</dd>
+                  <dt>Elite Infantry</dt>
+                     <dd>Squads of Elites and Jackals.</dd>
+                  <dt>Elite Patrol</dt>
+                     <dd>Squads of Elites and Grunts.</dd>
+                  <dt>Elite Spec Ops</dt>
+                     <dd>Squads of Spec Ops Elites.</dd>
+                  <dt>Elite Strike Team</dt>
+                     <dd>Squads of Elites led by generals.</dd>
+                  <dt>Elite Tactical</dt>
+                     <dd>Squads of Elites and Skirmishers.</dd>
+                  <dt>Engineers</dt>
+                     <dd>Squads each consisting of a single Engineer. Note that some maps don't 
+                     support Engineers; using this option on unsupported maps will result in 
+                     <a href="/concepts/firefight#match-flow-details">the wave being skipped</a>.</dd>
+                  <dt>Grunts</dt>
+                     <dd>Squads each consisting of four Grunts.</dd>
+                  <dt>Guta</dt>
+                     <dd>Squads each consisting of a single Guta. Note that no maps seem to actually 
+                     support this option; using this option on unsupported maps will result in 
+                     <a href="/concepts/firefight#match-flow-details">the wave being skipped</a>.</dd>
+                  <dt>Heretics</dt>
+                     <dd>Squads of Elites wielding human weapons, varying with difficulty (assault rifle, DMR, grenade launcher, magnum, shotgun).</dd>
+                  <dt>Heretic Heavy</dt>
+                     <dd>Squads of Elites wielding human explosive weaponry.</dd>
+                  <dt>Heretic Snipers</dt>
+                     <dd>Squads of Elites wielding human sniper rifles.</dd>
+                  <dt>Hunters</dt>
+                     <dd>Squads each consisting of a single Hunter.</dd>
+                  <dt>Hunter Infantry</dt>
+                     <dd>Squads of Hunters and Jackals.</dd>
+                  <dt>Hunter Kill Team</dt>
+                     <dd>Squads of Hunters, Elites, and Grunts.</dd>
+                  <dt>Hunter Patrol</dt>
+                     <dd>Squads of Hunters and Grunts.</dd>
+                  <dt>Hunter Strike Team</dt>
+                     <dd>Squads of Hunters and Elites led by generals.</dd>
+                  <dt>Hunter Tactical</dt>
+                     <dd>Squads of Hunters and Skirmishers.</dd>
+                  <dt>Jackals</dt>
+                     <dd>Squads of Jackals armed with shields.</dd>
+                  <dt>Jackal Patrol</dt>
+                     <dd>Squads of Jackals and Grunts.</dd>
+                  <dt>Jackal Snipers</dt>
+                     <dd>Squads of Jackals with Needle Rifles and Focus Rifles, but no shields.</dd>
+                  <dt>None</dt>
+                     <dd>An empty squad. This effectively means that 
+                     <a href="concepts/firefight#match-flow-details">the wave will be skipped</a>.</dd>
+                  <dt>Skirmishers</dt>
+                     <dd>Squads of Skirmishers.</dd>
+                  <dt>Skirmisher Infantry</dt>
+                     <dd>Squads of Skirmishers and Jackals.</dd>
+                  <dt>Skirmisher Patrol</dt>
+                     <dd>Squads of Skirmishers and Grunts.</dd>
+               </dl>
+            </dd>
+      </dl>
+   </body>
+</article>

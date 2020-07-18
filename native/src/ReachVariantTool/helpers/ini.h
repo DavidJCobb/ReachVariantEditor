@@ -96,7 +96,7 @@ namespace cobb {
          // category.
          //
          friend setting;
-         private:
+         protected:
             using setting_list = std::vector<setting*>;
             using setting_map  = std::unordered_map<std::string, setting_list>;
             //
@@ -125,7 +125,7 @@ namespace cobb {
             };
             //
             setting_list& _get_category_contents(std::string category);
-            void _send_change_event(setting*, setting_value_union oldValue, setting_value_union newValue);
+            virtual void _send_change_event(setting*, setting_value_union oldValue, setting_value_union newValue);
             //
          public:
             file(const wchar_t* filepath);

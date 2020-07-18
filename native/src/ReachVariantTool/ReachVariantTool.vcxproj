@@ -50,11 +50,11 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>5.12.5 (64-bit)</QtInstall>
+    <QtInstall>5.12.5 MSVC2017 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>5.12.5 (64-bit)</QtInstall>
+    <QtInstall>5.12.5 MSVC2017 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -69,12 +69,16 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <QtUic>
+      <QtUicDir>$(IntDir)uic\%(RelativeDir)</QtUicDir>
+    </QtUic>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -84,18 +88,27 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
+    <QtUic>
+      <QtUicDir>$(IntDir)uic\%(RelativeDir)</QtUicDir>
+    </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
+    <ClCompile Include="formats\ugc_header.cpp" />
     <ClCompile Include="game_variants\base.cpp" />
+    <ClCompile Include="game_variants\components\custom_game_options.cpp" />
+    <ClCompile Include="game_variants\components\firefight_custom_skull.cpp" />
+    <ClCompile Include="game_variants\components\firefight_round.cpp" />
+    <ClCompile Include="game_variants\components\firefight_wave_traits.cpp" />
     <ClCompile Include="game_variants\components\loadouts.cpp" />
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp" />
@@ -153,6 +166,7 @@
     <ClCompile Include="game_variants\editor_file_block.cpp" />
     <ClCompile Include="game_variants\errors.cpp" />
     <ClCompile Include="game_variants\io_process.cpp" />
+    <ClCompile Include="game_variants\types\firefight.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
@@ -162,6 +176,7 @@
     <ClCompile Include="helpers\int128.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
+    <ClCompile Include="helpers\qt\ini.cpp" />
     <ClCompile Include="helpers\qt\string.cpp" />
     <ClCompile Include="helpers\qt\tree_widget.cpp" />
     <ClCompile Include="helpers\qt\widget.cpp" />
@@ -180,9 +195,18 @@
     <ClCompile Include="ui\main_window.cpp" />
     <ClCompile Include="services\ini.cpp" />
     <ClCompile Include="ui\main_window\debug_helper_functions.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_bonus_wave.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_lives.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_metadata.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_scenario.cpp" />
+    <ClCompile Include="ui\main_window\page_firefight_wave_traits.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
+    <ClCompile Include="ui\widgets\firefight_skull_list.cpp" />
+    <ClCompile Include="ui\widgets\firefight_squad_type.cpp" />
+    <ClCompile Include="ui\widgets\firefight_wave.cpp" />
     <ClCompile Include="ui\widgets\GametypeIconCombobox.cpp" />
     <ClCompile Include="ui\generic\IconOnlyCombobox.cpp" />
     <ClCompile Include="ui\options_window.cpp" />
@@ -222,6 +246,12 @@
     <QtUic Include="ui\localized_string_editor.ui" />
     <QtUic Include="ui\localized_string_library.ui" />
     <QtUic Include="ui\main_window.ui" />
+    <QtUic Include="ui\main_window\page_firefight_bonus_wave.ui" />
+    <QtUic Include="ui\main_window\page_firefight_lives.ui" />
+    <QtUic Include="ui\main_window\page_firefight_metadata.ui" />
+    <QtUic Include="ui\main_window\page_firefight_round.ui" />
+    <QtUic Include="ui\main_window\page_firefight_scenario.ui" />
+    <QtUic Include="ui\main_window\page_firefight_wave_traits.ui" />
     <QtUic Include="ui\options_window.ui" />
     <QtUic Include="ui\main_window\page_forge_settings_general.ui" />
     <QtUic Include="ui\main_window\page_loadout_palette.ui" />
@@ -249,6 +279,8 @@
     <QtUic Include="ui\script_editor\page_script_traits.ui" />
     <QtUic Include="ui\script_editor\page_script_widgets.ui" />
     <QtUic Include="ui\script_editor\page_string_table.ui" />
+    <QtUic Include="ui\widgets\firefight_skull_list.ui" />
+    <QtUic Include="ui\widgets\firefight_wave.ui" />
     <QtUic Include="ui\widgets\LoadoutForm.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -259,6 +291,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="formats\indexed_lists.h" />
+    <ClInclude Include="formats\ugc_header.h" />
+    <ClInclude Include="game_variants\components\custom_game_options.h" />
+    <ClInclude Include="game_variants\components\firefight_custom_skull.h" />
+    <ClInclude Include="game_variants\components\firefight_round.h" />
+    <ClInclude Include="game_variants\components\firefight_wave_traits.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\enums.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\namespaces.h" />
@@ -291,6 +328,7 @@
     <ClInclude Include="game_variants\data\object_types.h" />
     <ClInclude Include="game_variants\editor_file_block.h" />
     <ClInclude Include="game_variants\io_process.h" />
+    <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
@@ -327,6 +365,7 @@
     <QtMoc Include="ui\main_window\page_loadout_palette.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h" />
     <ClInclude Include="helpers\memory.h" />
+    <QtMoc Include="helpers\qt\ini.h" />
     <ClInclude Include="helpers\qt\string.h" />
     <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\qt\widget.h" />
@@ -341,6 +380,12 @@
     <ClInclude Include="services\localization_library.h" />
     <QtMoc Include="ui\localized_string_library.h" />
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
+    <QtMoc Include="ui\main_window\page_firefight_metadata.h" />
+    <QtMoc Include="ui\main_window\page_firefight_scenario.h" />
+    <QtMoc Include="ui\main_window\page_firefight_lives.h" />
+    <QtMoc Include="ui\main_window\page_firefight_round.h" />
+    <QtMoc Include="ui\main_window\page_firefight_wave_traits.h" />
+    <QtMoc Include="ui\main_window\page_firefight_bonus_wave.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_end.h" />
     <ClInclude Include="ui\main_window\widget_macros_setup_start.h" />
     <ClInclude Include="ui\main_window\widget_macros_update_end.h" />
@@ -407,6 +452,9 @@
     <QtMoc Include="ui\script_editor\page_req_obj_types.h" />
     <QtMoc Include="ui\script_editor\bottom_bar.h" />
     <QtMoc Include="ui\script_editor\compiler_unresolved_strings.h" />
+    <QtMoc Include="ui\widgets\firefight_squad_type.h" />
+    <QtMoc Include="ui\widgets\firefight_wave.h" />
+    <QtMoc Include="ui\widgets\firefight_skull_list.h" />
     <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />

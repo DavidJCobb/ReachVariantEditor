@@ -1,4 +1,5 @@
 #include "page_script_options.h"
+#include "../../game_variants/types/multiplayer.h"
 #include <QMessageBox>
 
 namespace {

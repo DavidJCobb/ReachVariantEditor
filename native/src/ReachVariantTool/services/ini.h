@@ -1,8 +1,9 @@
 #pragma once
-#include "../helpers/ini.h"
+#include "../helpers/qt/ini.h"
 
 namespace ReachINI {
    extern cobb::ini::file& get();
+   extern cobb::qt::ini::file& getForQt();
 
    enum class DefaultPathType {
       path_of_open_file, // save only
@@ -27,6 +28,9 @@ namespace ReachINI {
       REACHTOOL_MAKE_INI_SETTING(uPathType,                 "DefaultSavePath",(uint32_t)DefaultPathType::path_of_open_file);
       REACHTOOL_MAKE_INI_SETTING(bExcludeMCCBuiltInFolders, "DefaultSavePath", true);
       REACHTOOL_MAKE_INI_SETTING(sCustomPath,               "DefaultSavePath", "");
+   }
+   namespace Editing {
+      REACHTOOL_MAKE_INI_SETTING(bHideFirefightNoOps, "Editing", true);
    }
    namespace UIWindowTitle {
       REACHTOOL_MAKE_INI_SETTING(bShowFullPath,     "UIWindowTitle", true);

@@ -32,58 +32,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="1" column="0">
-    <widget class="QLabel" name="labelSpecies">
-     <property name="text">
-      <string>Player Species</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldSpecies</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QComboBox" name="fieldSpecies">
-     <item>
-      <property name="text">
-       <string>Player Preference</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>All Spartans</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>All Elites</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Use Team Species</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Spartans vs Elites</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QSpinBox" name="fieldSwitchType">
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="prefix">
-      <string>unknown value </string>
-     </property>
-     <property name="maximum">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QSpinBox" name="fieldScoringMethod">
      <property name="alignment">
@@ -97,7 +45,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="1" column="0">
     <widget class="QLabel" name="labelSwitchType">
      <property name="text">
       <string>Designator Switch Type</string>
@@ -107,17 +55,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="labelScoringMethod">
-     <property name="text">
-      <string>Team Scoring Method</string>
-     </property>
-     <property name="buddy">
-      <cstring>fieldScoringMethod</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="0" colspan="2">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -129,6 +67,29 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="labelScoringMethod">
+     <property name="text">
+      <string>Team Scoring Method</string>
+     </property>
+     <property name="buddy">
+      <cstring>fieldScoringMethod</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSpinBox" name="fieldSwitchType">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="prefix">
+      <string>unknown value </string>
+     </property>
+     <property name="maximum">
+      <number>3</number>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

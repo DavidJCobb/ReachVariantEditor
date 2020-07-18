@@ -5,8 +5,7 @@
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QTextStream>
-
-
+#include "../../game_variants/types/multiplayer.h"
 
 namespace DebugHelperFunctions {
    void break_on_variant() {
