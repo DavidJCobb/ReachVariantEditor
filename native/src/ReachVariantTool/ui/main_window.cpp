@@ -181,6 +181,8 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(&editor, &ReachEditorState::scriptOptionsModified, [this]() {
       this->ui.optionTogglesScripted->updateModelFromGameVariant();
    });
+   QObject::connect(this->ui.pageContentMetadata,   &PageMPMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
+   QObject::connect(this->ui.pageContentFFMetadata, &PageFFMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
    //
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);

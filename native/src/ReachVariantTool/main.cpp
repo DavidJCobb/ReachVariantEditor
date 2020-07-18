@@ -31,11 +31,15 @@ int main(int argc, char *argv[]) {
 //
 // FIREFIGHT PLANS
 //
-//  - Firefight: move Spartan Respawn Settings and Elite Respawn Settings under 
-//    the Firefight Settings category in the sidebar.
-//
 //  - Add a user option to the program to hide settings that don't do anything, and 
 //    apply this very liberally to Firefight.
+//
+//     - Option added. Let's see how many settings we can include here.
+//
+//        - Test the Betrayal Penalty with both NPC and PC allies
+//
+//        - Test the Lives Per Round and Team Lives per Round settings; see if they 
+//          overlap or conflict with Firefight's own lives settings
 //
 //  - Scripting errata
 //
@@ -52,6 +56,9 @@ int main(int argc, char *argv[]) {
 //        - Update screenshots for General Settings and Team Settings.
 //
 //     - Add a "Main Window (Firefight)" folder.
+//
+//        - Update the screenshot for Round Skulls, since Iron and Thunderstorm are now 
+//          configurable.
 //
 //        - We should give the documentation XML a way of saying, "Just use the same XML 
 //          as in this other file (relative to my location)." Note my wording there: we 

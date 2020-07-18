@@ -12,6 +12,6 @@ class PageMPSettingsRespawn : public QWidget {
    private:
       Ui::PageMPSettingsRespawn ui;
       //
-      void updateEnableStates();
+      void updateControlStates();
       void updateFromData(ReachCGRespawnOptions*);
 };

@@ -156,7 +156,7 @@
    <item row="2" column="0" colspan="2">
     <widget class="QCheckBox" name="fieldNewRoundResetsMap">
      <property name="text">
-      <string>Reset Map on New Round</string>
+      <string>Reset Map on New Round (unused)</string>
      </property>
     </widget>
    </item>
@@ -199,7 +199,7 @@
    <item row="1" column="0" colspan="2">
     <widget class="QCheckBox" name="fieldNewRoundResetsPlayers">
      <property name="text">
-      <string>Reset Players on New Round</string>
+      <string>Reset Players on New Round (unused)</string>
      </property>
     </widget>
    </item>

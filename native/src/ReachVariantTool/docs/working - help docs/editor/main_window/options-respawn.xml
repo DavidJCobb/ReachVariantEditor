@@ -14,10 +14,10 @@
          <dt>Synchronize with Team</dt>
             <dd>Controls whether player respawn timers run independently or synchronize 
             with those of their teammates.</dd>
-         <dt>Respawn with Teammage (unverified)</dt>
-            <dd>Testing is pending.</dd>
+         <dt>Respawn with Teammate (unverified)</dt>
+            <dd>Unknown. Testing failed to identify any obvious effect.</dd>
          <dt>Respawn at Location (unverified)</dt>
-            <dd>Testing is pending.</dd>
+            <dd>Unknown. Testing failed to identify any obvious effect.</dd>
          <dt>Respawn on Kills</dt>
             <dd>Testing is pending.</dd>
          <dt>Lives per Round</dt>
@@ -37,7 +37,9 @@
             <dd>The number of seconds added to the delay on a player's next spawn, if 
             they have killed a teammate.</dd>
          <dt>Respawn Time Growth</dt>
-            <dd>TBA</dd>
+            <dd>Every time a player dies, their respawn time increases by this amount. 
+            If a player kills an enemy, their respawn time will decrease by this amount, 
+            though it will not fall below the base respawn time.</dd>
          <dt>Loadout Camera Time</dt>
             <dd>A delay between the start of the match and the first time players spawn 
             in. This delay encompasses the initial black screen with a scoreboard, the 
