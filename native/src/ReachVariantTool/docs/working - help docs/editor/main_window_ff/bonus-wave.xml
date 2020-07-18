@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Bonus Wave Settings</title>
+   <body>
+      <p>
+         The <b>bonus wave</b> page allows you to control which skulls are enabled 
+         during a Firefight bonus wave, and what enemy types spawn during the wave.
+      </p>
+      <img src="bonus-wave.png" />
+      <p>
+         Skulls and wave configuration work the same way as for <a href="round">rounds</a>. 
+         Additionally, you can configure the bonus wave's duration in seconds. The value 
+         "disabled" replaces zero; to disable the bonus wave, set the duration to "1 second" 
+         and then decrease it by one.
+      </p>
+   </body>
+</article>

@@ -262,6 +262,47 @@ void syntax_highlight_in_html(std::string& out) {
    out.swap(content);
 }
 
+namespace {
+   bool _is_relative_path(const std::string& path) {
+      if (path[0] == '/' || path[0] == '\\')
+         return false;
+      if (path.compare(0, 7, "script/") == 0) // hack to avoid having to edit 90% of the documentation files again
+         return false;
+      return true;
+   }
+   void _fix_link(const std::string& stem, std::string& out) {
+      //
+      // Really hacky link/image fixup code:
+      //
+      std::string hash;
+      {
+         auto h = out.find_last_of('#');
+         if (h != std::string::npos) {
+            hash = out.substr(h, out.size() - h);
+            out  = out.substr(0, h);
+         }
+      }
+      if (_is_relative_path(out)) {
+         //
+         // Articles typically use hyperlink and image paths that are relative to themselves, so 
+         // we need to fix those up since we're using a <base/> element to change relative paths 
+         // (so that the nav and asset paths can work).
+         //
+         out = stem + out;
+      } else if (out[0] == '/' || out[0] == '\\') {
+         out = out.substr(1);
+      }
+      //
+      // Links between articles usually lack file extensions.
+      //
+      auto a = out.find_last_of(".");
+      auto b = out.find_last_of("/");
+      if (a == std::string::npos || (a < b && b != std::string::npos)) {
+         out += ".html";
+      }
+      out += hash;
+   }
+}
 size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std::string& out, std::string stem) {
    using namespace cobb::xml;
    //
@@ -292,28 +333,8 @@ size_t extract_html_from_xml(uint32_t token_index, cobb::xml::document& doc, std
             last_opened_tag = token.name;
             break;
          case token_code::attribute:
-            if (token.name == "href" || token.name == "src") {
-               //
-               // Really hacky link/image fixup code:
-               //
-               if (token.value.compare(0, 7, "script/") != 0) {
-                  //
-                  // Articles typically use hyperlink and image paths that are relative to themselves, so 
-                  // we need to fix those up since we're using a <base/> element to change relative paths 
-                  // (so that the nav and asset paths can work). However, API documentation sometimes has 
-                  // what are, in effect, absolute paths that we want to ignore.
-                  //
-                  token.value = stem + token.value;
-               }
-               //
-               // Links between articles usually lack file extensions.
-               //
-               auto a = token.value.find_last_of(".");
-               auto b = token.value.find_last_of("/");
-               if (a == std::string::npos || a < b) {
-                  token.value += ".html";
-               }
-            }
+            if (token.name == "href" || token.name == "src")
+               _fix_link(stem, token.value);
             cobb::sprintf(temp, " %s=\"%s\"", token.name.c_str(), token.value.c_str());
             break;
          case token_code::text_content:

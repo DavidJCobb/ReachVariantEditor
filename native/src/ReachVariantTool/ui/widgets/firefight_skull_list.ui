@@ -82,7 +82,7 @@
    <item row="1" column="1">
     <widget class="QCheckBox" name="skullFamine">
      <property name="toolTip">
-      <string>Dropped weapons lose half of their ammo or charge, unless they are Spartan Lasers.</string>
+      <string>Dropped weapons lose half of their ammo or charge.</string>
      </property>
      <property name="text">
       <string>Famine</string>

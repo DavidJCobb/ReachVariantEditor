@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Custom Skulls</title>
+   <body>
+      <p>
+         <dfn>Skulls</dfn> are special gameplay modifiers that can be switched on and 
+         off. A Firefight round can use any of the game's original Campaign skulls, as 
+         well as any or all of three custom skulls: Red, Blue, and Yellow.
+      </p>
+      <p>
+         Each Custom Skull offers a set of <a href="traits">player traits</a> for 
+         Spartans and Elites each, as well as a set of <a href="traits-wave">wave traits</a> 
+         for NPCs.
+      </p>
+   </body>
+</article>

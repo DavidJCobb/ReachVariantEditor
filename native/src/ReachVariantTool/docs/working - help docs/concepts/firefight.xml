@@ -69,11 +69,17 @@
          not appear until the enemies have landed from their dropships.) If a wave failed 
          to spawn any enemies, whether because the selected enemy squad type was None or 
          because the selected enemy squad type is not supported on the current map, then 
-         the wave will end after nine seconds.
+         the wave will end after roughly seven to nine seconds.
       </p>
       <p>
          Note that if dropships are enabled for a wave, then the end of a wave will always 
          be delayed until after the dropships have fully exited the map.
+      </p>
+      <p>
+         When a Boss Wave is completed, the Spartans will be awarded extra lives &mdash; 
+         specifically, one extra life per Spartan; the Hero medal will be awarded at this 
+         time, if applicable. All dead players will respawn, and all living players will 
+         have their shields fully restored. <!-- TODO: are Elites awarded lives? -->
       </p>
       <p>
          When the last round in a set is concluded, Firefight will attempt to begin the 
@@ -95,6 +101,13 @@
       
       <h2>Notes</h2>
       <h3><a name="network-test-1">Is it possible to remake Network Test 1?</a></h3>
+      <p>
+         For those who aren't aware, Network Test 1 was a game variant available to players 
+         during the <i>Halo: Reach</i> beta. It resembled a normal Multiplayer mode, but in 
+         reality, it was actually a Firefight variant intended to test the game's lockstep 
+         networking model. It was effectively a 3v3 PvP-only Generator Defense match. So, 
+         is it possible to recreate Network Test 1 in the final game using modded settings?
+      </p>
       <p>
          Yes, but not very well. Network Test 1 used a map script boolean variable called 
          <var>alpha_sync_slayer</var> to disable the lion's share of Firefight's 
@@ -124,6 +137,29 @@
          possible to trigger the bonus wave early, which means that it would take roughly 
          two minutes to even reach it. Moreover, the bonus wave will still end early if 
          all Spartans are ever dead at the same time, even if the Iron Skull is disabled.
+      </p>
+      
+      <h3><a name="teams">Teams</a></h3>
+      <p>
+         Firefight and Multiplayer use the exact same options for teams. However, Firefight's 
+         handling of these options is very different.
+      </p>
+      <p>
+         If teams are enabled, then the only thing they will affect is which set of spawn 
+         locations are available to a player. The species that a player spawns as will 
+         influence everything else, including which loadout palette they have access to, 
+         which pool of lives they use, and their alliance status with Covenant NPCs.
+      </p>
+      <p>
+         If teams are disabled, then all players will be treated as part of the "defense" 
+         team, and will be enemies with Covenant NPCs, no matter what species the players 
+         spawn as. However, Elites will neither gain nor lose points for killing Covenant 
+         NPCs.
+      </p>
+      <p>
+         If teams are disabled, or if players are on extended teams such as Team 3, then 
+         they will not see a round title card. However, they will still hear a mission 
+         briefing voiceover corresponding to whatever faction they are allied with.
       </p>
    </body>
 </article>

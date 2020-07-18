@@ -15,30 +15,72 @@
          <ul>
             <li><a href="index.html">Index</a></li>
             <li>
-               <a href="editor/main_window/index.html">Main Window</a>
+               <a>Main Window</a>
                <ul>
-                  <li><a href="editor/main_window/metadata.html">Metadata</a></li>
-                  <li><a href="editor/main_window/options-general.html">General Settings</a></li>
-                  <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
-                  <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
-                  <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
-                  <li data-dont-default-collapse>
-                     <a href="editor/main_window/options-team.html">Team Settings</a>
+                  <li>
+                     <a href="editor/main_window/index.html">Multiplayer</a>
                      <ul>
-                        <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                        <li><a href="editor/main_window/metadata.html">Metadata</a></li>
+                        <li><a href="editor/main_window/options-general.html">General Settings</a></li>
+                        <li><a href="editor/main_window/options-respawn.html">Respawn Settings</a></li>
+                        <li><a href="editor/main_window/options-social.html">Social Settings</a></li>
+                        <li><a href="editor/main_window/options-map.html">Map and Game Settings</a></li>
+                        <li data-dont-default-collapse>
+                           <a href="editor/main_window/options-team.html">Team Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window/options-team-specific.html">Individual Team Settings</a></li>
+                           </ul>
+                        </li>
+                        <li data-dont-default-collapse>
+                           <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
+                        <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
+                        <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
+                        <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
+                        <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
                      </ul>
                   </li>
-                  <li data-dont-default-collapse>
-                     <a href="editor/main_window/options-loadout.html">Loadout Settings</a>
+                  <li>
+                     <a href="editor/main_window_ff/index.html">Firefight</a>
                      <ul>
-                        <li><a href="editor/main_window/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                        <li><a href="editor/main_window_ff/metadata.html">Metadata</a></li>
+                        <li>
+                           <a href="editor/main_window_ff/scenario.html">Firefight Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window_ff/lives.html">Player Lives</a></li>
+                              <li><a href="editor/main_window_ff/options-respawn.html">Respawn Settings</a></li>
+                              <li><a href="editor/main_window_ff/round.html">Round Settings</a></li>
+                              <li><a href="editor/main_window_ff/bonus-wave.html">Bonus Wave Settings</a></li>
+                              <li><a href="editor/main_window_ff/custom-skull.html">Custom Skulls</a></li>
+                           </ul>
+                        </li>
+                        <li>
+                           <a>Other Settings</a>
+                           <ul>
+                              <li><a href="editor/main_window_ff/options-general.html">General Settings</a></li>
+                              <li><a href="editor/main_window_ff/options-social.html">Social Settings</a></li>
+                              <li data-dont-default-collapse>
+                                 <a href="editor/main_window_ff/options-team.html">Team Settings</a>
+                                 <ul>
+                                    <li><a href="editor/main_window_ff/options-team-specific.html">Individual Team Settings</a></li>
+                                 </ul>
+                              </li>
+                              <li data-dont-default-collapse>
+                                 <a href="editor/main_window_ff/options-loadout.html">Loadout Settings</a>
+                                 <ul>
+                                    <li><a href="editor/main_window_ff/options-loadout-specific.html">Individual Loadout Settings</a></li>
+                                 </ul>
+                              </li>
+                           </ul>
+                        </li>
+                        <li><a href="editor/main_window_ff/traits.html">(all player traits)</a></li>
+                        <li><a href="editor/main_window_ff/traits-wave.html">(all wave traits)</a></li>
                      </ul>
                   </li>
-                  <li><a href="editor/main_window/options-megalo.html">Script-Specific Settings</a></li>
-                  <li><a href="editor/main_window/option-visibility.html">Option Visibility</a></li>
-                  <li><a href="editor/main_window/tu1.html">Title Update Settings</a></li>
-                  <li><a href="editor/main_window/traits.html">(all player traits)</a></li>
-                  <li><a href="editor/main_window/forge.html">Forge Settings</a></li>
                </ul>
             </li>
             <li>
@@ -68,6 +110,7 @@
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
+                  <li><a href="script/declare.html">Variable declarations</a></li>
                </ul>
             </li>
             <li>
@@ -116,6 +159,12 @@
                   </li>
                </ul>
             </li>
+            <li>
+               <a>Concepts</a>
+               <ul>
+                  <li><a href="concepts/firefight.html">Firefight</a></li>
+               </ul>
+            </li>
          </ul>
       </nav>
       <main>
@@ -134,14 +183,39 @@
             <dd>Controls whether it is possible to earn a Perfection Medal in this game 
             variant. Bungie and 343 Industries only enable this for pure Slayer variants; 
             even Flag Slayer keeps it disabled.</dd>
-         <dt>Reset Players on New Round</dt>
-            <dd>Supposedly resets player health and positions when a new round begins. 
-            Testing is pending.</dd>
-         <dt>Reset Map on New Round</dt>
-            <dd>Supposedly resets a map and its contained items when a new round begins. 
-            Testing is pending.</dd>
+         <dt>Reset Players on New Round (unused)</dt>
+            <dd>A non-functional leftover. Presumably, this setting would have let you 
+            control whether players' weapons, health, or other states were reset with 
+            every new round.</dd>
+         <dt>Reset Map on New Round (unused)</dt>
+            <dd>A non-functional leftover from <i>Halo 2</i>. In the past, this option 
+            let you control whether a map's objects and state were reset with every new 
+            round, but testing suggests that it doesn't work in <i>Halo: Reach</i>.</dd>
          <dt>Teams Enabled</dt>
             <dd>Controls whether teams are enabled.</dd>
+         <dt>Player Species</dt>
+            <dd>
+               <p>Determines whether players play as Spartans or Elites. The available 
+               values are:</p>
+               <dl>
+                  <dt>Player Preference</dt>
+                     <dd>Players will spawn as the biped they've selected in their 
+                     customization options.</dd>
+                  <dt>All Spartans</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Spartans.</dd>
+                  <dt>All Elites</dt>
+                     <dd>Player customization will be ignored, and players will 
+                     always spawn as Elites.</dd>
+                  <dt>Use Team Species</dt>
+                     <dd>Player customization will be ignored, and players will spawn 
+                     as the species set up in their team's 
+                     <a href="editor/main_window/options-team-specific.html">individual configuration.</a></dd>
+                  <dt>Spartans vs Elites</dt>
+                     <dd>The "defense" team will be Spartans, and the "offense" team 
+                     will be Elites.</dd>
+               </dl>
+            </dd>
          <dt>Score to Win</dt>
             <dd>The number of points that a player or team must accrue to win a round. 
             The value "unlimited" exists in place of zero (i.e. to reach it, decrease 

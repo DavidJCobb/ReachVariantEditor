@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Wave Traits</title>
+   <body>
+      <p>
+         The <b>wave traits</b> page allows you to edit the traits for NPCs. Note that 
+         these traits are far less varied than <a href="traits">player traits</a>, and 
+         mainly concern AI behavior.
+      </p>
+      <img src="traits-wave.png" />
+      <p>
+         The fields available to edit are as follows:
+      </p>
+      <dl>
+         <dt>Damage Modifier</dt>
+            <dd>Scales the amount of damage that NPC weapons and melees do.</dd>
+         <dt>Damage Resistance</dt>
+            <dd>Scales the amount of damage that NPCs can withstand. Note that this also 
+            scales the strength of breakable enemy armor, such as Grunt Ultras' helmets.</dd>
+         <dt>Vision</dt>
+            <dd>Controls how likely an NPC is to notice an enemy within its line of sight.</dd>
+         <dt>Hearing</dt>
+            <dd>Controls how likely an NPC is to notice enemies that are making noise.</dd>
+         <dt>Luck</dt>
+            <dd>Controls how likely an NPC is to dodge grenades and needles, versus how 
+            likely an NPC Grunt is to flee or attempt a suicide bombing.</dd>
+         <dt>Shootiness</dt>
+            <dd>Controls NPCs' accuracy and tendency to fire excess shots.</dd>
+         <dt>Grenades</dt>
+            <dd>Controls how often NPCs use grenades.</dd>
+         <dt>Don't Drop Equipment on Death</dt>
+            <dd>If this option is enabled, then NPCs will not drop weapons or grenades when 
+            they die.</dd>
+         <dt>Assassination Immunity</dt>
+            <dd>Controls whether NPCs are immune to instant-kill melees to the back, and 
+            to special finishing moves (which players will not be allowed to perform).</dd>
+         <dt>Assassination Immunity</dt>
+            <dd>Controls whether NPCs are immune to instant-kill headshots.</dd>
+      </dl>
+   </body>
+</article>

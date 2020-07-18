@@ -19,12 +19,17 @@
             <dd>Edit a game variant's title, description, and category.</dd>
          <dt><a href="scenario">Firefight Settings</a></dt>
             <dd>Edit basic settings related to Firefight.</dd>
-         <dt><a href="lives">Firefight Settings</a></dt>
+         <dt><a href="lives">Player Lives</a></dt>
             <dd>Edit settings related to players' extra lives.</dd>
-         <dt>Base Elite Traits</dt>
-            <dd>Edit the <a href="traits">traits</a> applied to all player-controlled Elites.</dd>
+         <dt><a href="options-respawn">Spartan and Elite Respawn Settings</a></dt>
+            <dd>Edit respawn times. Spartan and Elite players can be given different settings.</dd>
+         <dt>Spartan and Elite Respawn Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> that players are briefly given after they 
+            respawn. Spartan and Elite players can be given different settings.</dd>
          <dt>Base Spartan Traits</dt>
             <dd>Edit the <a href="traits">traits</a> applied to all player-controlled Spartans.</dd>
+         <dt>Base Elite Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> applied to all player-controlled Elites.</dd>
          <dt>Base Wave Traits</dt>
             <dd>Edit the <a href="traits-wave">traits</a> applied to all NPCs.</dd>
          <dt><a href="round">Round 1</a></dt>
@@ -39,28 +44,37 @@
             <dd>Edit the effects of each Custom Skull.</dd>
          <dt><a href="options-general">General Settings</a></dt>
             <dd>Edit basic settings related to scoring and time limits.</dd>
-         <dt><a href="options-respawn">Respawn Settings</a></dt>
-            <dd>Edit respawn times.</dd>
-         <dt>Respawn Traits</dt>
-            <dd>Edit the <a href="traits">traits</a> that players are briefly given after they respawn.</dd>
          <dt><a href="options-social">Social Settings</a></dt>
             <dd>Edit settings related to chat and teamplay.</dd>
-         <dt><a href="options-map">Map and Game Settings</a></dt>
-            <dd>Edit settings related to the map and powerups.</dd>
          <dt>Base Player Traits</dt>
-            <dd>Edit the baseline <a href="traits">traits</a> that apply to all players.</dd>
-         <dt>Red Powerup Traits</dt>
-            <dd>Edit the <a href="traits">traits</a> conferred by the Overshield powerup.</dd>
-         <dt>Blue Powerup Traits</dt>
-            <dd>Edit the <a href="traits">traits</a> conferred by the Active Camo powerup.</dd>
-         <dt>Yellow Powerup Traits</dt>
-            <dd>Edit the <a href="traits">traits</a> conferred by the Custom Powerup.</dd>
+            <dd>Edit the baseline <a href="traits">traits</a> that apply to all players. These 
+            are overridden by Base Spartan Traits and Base Elite Traits.</dd>
          <dt><a href="options-team">Team Settings</a></dt>
             <dd>Edit basic settings and internal configuration for teams.</dd>
          <dt><a href="options-team-specific">Team #</a></dt>
             <dd>Edit internal configuration for each individual team.</dd>
          <dt><a href="options-loadout">Loadout Settings</a></dt>
             <dd>Edit baseline settings for loadouts.</dd>
+      </dl>
+      
+      <h2>Sections hidden by default</h2>
+      <p>
+         Firefight files contain the same set of Custom Game options as normal Multiplayer 
+         game variants, but not all of these options are functional. By default, 
+         ReachVariantTool will hide Firefight settings that are known to be non-functional. 
+         Those settings include the following sections:
+      </p>
+      <dl>
+         <dt>Map and Game Settings</dt>
+            <dd>Edit settings related to the map and powerups.</dd>
+         <dt>Red Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Overshield powerup.</dd>
+         <dt>Blue Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Active Camo powerup.</dd>
+         <dt>Yellow Powerup Traits</dt>
+            <dd>Edit the <a href="traits">traits</a> conferred by the Custom Powerup.</dd>
+         <dt><a href="options-loadout">Tier 2 and 3 Loadouts</a></dt>
+            <dd>Edit settings for loadouts.</dd>
       </dl>
    </body>
 </article>
