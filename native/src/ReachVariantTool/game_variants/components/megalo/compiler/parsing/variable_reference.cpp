@@ -344,8 +344,12 @@ namespace Megalo::Script {
          return scope->flags & VariableScopeIndicatorValue::flags::is_readonly;
       if (resolved.accessor)
          return resolved.accessor->setter == nullptr;
-      if (resolved.property.definition)
-         return resolved.property.definition->scope->is_readonly();
+      if (resolved.property.definition) {
+         auto scope = resolved.property.definition->scope;
+         if (!scope)
+            return true;
+         return scope->is_readonly();
+      }
       if (resolved.nested.type)
          return !resolved.nested.type->is_variable(); // only variables can be assigned to
       if (resolved.top_level.is_static || resolved.top_level.is_constant)

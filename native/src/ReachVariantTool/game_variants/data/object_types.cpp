@@ -877,18 +877,20 @@ namespace Megalo {
             DetailedEnumValueInfo::make_map_tag('bloc', "objects/levels/forge/ff_plat_1x1_flat/ff_plat_1x1_flat"),
             DetailedEnumValueInfo::make_description("A Block 1x1 Flat, of the same variety as those placeable in Forge.")
          ),
-         DetailedEnumValue("shade_anti_air",
-            DetailedEnumValueInfo::make_friendly_name("Shade Turret (Anti-Air)"),
+         DetailedEnumValue("shade_gun_anti_air",
+            DetailedEnumValueInfo::make_friendly_name("Shade Turret Gun (Anti-Air)"),
             DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_anti_air_cannon/shade_anti_air_cannon"),
-            DetailedEnumValueInfo::make_description("A Shade turret which fires devastatingly powerful shots at a high rate. Shields protect its operator.")
+            DetailedEnumValueInfo::make_description("The \"gun\" part of a Shade turret; the base is not included. This variant fires devastatingly powerful shots at a high rate. Shields protect its operator.")
          ),
-         DetailedEnumValue("shade_fuel_rod",
-            DetailedEnumValueInfo::make_friendly_name("Shade Turret (Fuel Rod)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_flak_cannon/shade_flak_cannon")
+         DetailedEnumValue("shade_gun_fuel_rod",
+            DetailedEnumValueInfo::make_friendly_name("Shade Turret Gun (Fuel Rod)"),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_flak_cannon/shade_flak_cannon"),
+            DetailedEnumValueInfo::make_description("The \"gun\" part of a Shade turret; the base is not included. This variant fires fuel rods.")
          ),
-         DetailedEnumValue("shade_plasma",
-            DetailedEnumValueInfo::make_friendly_name("Shade Turret (Plasma)"),
-            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_plasma_cannon/shade_plasma_cannon")
+         DetailedEnumValue("shade_gun_plasma",
+            DetailedEnumValueInfo::make_friendly_name("Shade Turret Gun (Plasma)"),
+            DetailedEnumValueInfo::make_map_tag('vehi', "objects/vehicles/covenant/turrets/shade/weapons/shade_plasma_cannon/shade_plasma_cannon"),
+            DetailedEnumValueInfo::make_description("The \"gun\" part of a Shade turret; the base is not included.")
          ),
          DetailedEnumValue("kill_ball",
             DetailedEnumValueInfo::make_friendly_name("Kill Ball"),
