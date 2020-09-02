@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+html/documentation/* linguist-documentation
+native/src/ReachVariantTool/help/* linguist-documentation
