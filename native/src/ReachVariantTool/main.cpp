@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) {
 //       there, but I'd like the "meat" of the decompile state to exist in the files for the 
 //       decompiler itself.
 //
-//     - The compiler interprets "0x" and "0b" as valid integer literals.
-//
 //     = The compiler typically logs errors at the end of the affected object. In some cases, 
 //       this goes especially awry; for example, if a for-each-object-with-label loop refers 
 //       to an invalid trigger, the log is positioned at the end of the block rather than the 
@@ -108,13 +106,7 @@ int main(int argc, char *argv[]) {
 //          (i.e. bolding the "you will not lose work" bit) and having a mandatory delay before 
 //          clicking "yes."
 //
-//     = THE object.place_at_me OPCODE ALLOWS ASSIGNING TO no_object AS A WAY OF CREATING AN 
-//       OBJECT WITHOUT BOTHERING TO KEEP A REFERENCE TO IT. WE NEED TO GIVE OPCODES A WAY TO 
-//       SIGNAL THAT THEY ALLOW ASSIGNING THEIR RETURN VALUES TO "NONE", AND WE NEED TO 
-//       IMPLEMENT THE SYNTAX (FOR COMPILING AND DECOMPILING) AS SIMPLY NOT USING AN ASSIGN 
-//       STATEMENT I.E. (basis.place_at_me(...)) INSTEAD OF (no_object = basis.place_at_me(...)).
-//
-//        - We should test if object.place_between_me_and also has this behavior.
+//     = Test whether object.place_between_me_and allows discarding its return value.
 //
 //     = DOCUMENTATION
 //
@@ -228,13 +220,6 @@ int main(int argc, char *argv[]) {
 //          in case that was interfering, and nope. Nothin'.
 //
 //     = TESTS FOR ONCE WE HAVE A WORKING COMPILER
-//
-//        - Round-trip decompiling/recompiling/decompiling for all vanilla gametype scripts 
-//          and for SvE Mythic Slayer. A successful test is one where both decompile actions 
-//          produce identical (or semantically identical) output. Tests should include 
-//          modified versions of the decompiled scripts that use aliases where appropriate 
-//          (both because I want to provide such "source scripts" to script authors to learn 
-//          from, and so we can test to ensure that aliases work properly).
 //
 //        - Test the film clip opcode, now that MCC has theater. Race+ would be a good test 
 //          candidate: saving a film checkpoint the first time each lap is completed by the 

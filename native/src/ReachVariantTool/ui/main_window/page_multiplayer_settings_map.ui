@@ -166,6 +166,11 @@
        <string comment="Weapon Set Value">No Weapons</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Random</string>
+      </property>
+     </item>
     </widget>
    </item>
    <item row="4" column="0" colspan="2">

@@ -1051,7 +1051,7 @@ namespace Megalo {
       //
       int32_t value = 0;
       QString word;
-      auto    result = compiler.try_get_integer_or_word(arg, value, word, QString("incident names"), nullptr, max_value);
+      auto    result = compiler.try_get_integer_or_word(arg, value, word, QString("incident names"), nullptr, max_value, &OpcodeArgValueIncident::typeinfo);
       if (result.is_failure())
          return result;
       if (!word.isEmpty()) {

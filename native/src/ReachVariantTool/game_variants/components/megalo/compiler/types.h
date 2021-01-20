@@ -17,7 +17,7 @@ namespace Megalo {
          // Do not use this for accessors.
          //
          public:
-            static constexpr VariableScopeIndicatorValue* no_scope = nullptr;
+            static constexpr VariableScopeIndicatorValue* no_scope = nullptr; // note: if you use this, then the property is always read-only
             //
          public:
             std::string name;

@@ -253,7 +253,15 @@ namespace Megalo {
          [[nodiscard]] static bool is_keyword(QString word);
          [[nodiscard]] bool try_decode_enum_reference(QString word, int32_t& out) const;
          [[nodiscard]] bool try_get_integer(string_scanner&, int32_t& out) const;
-         [[nodiscard]] arg_compile_result try_get_integer_or_word(string_scanner&, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from = nullptr, int32_t limit_int = -1) const;
+         [[nodiscard]] arg_compile_result try_get_integer_or_word(
+            string_scanner&,
+            int32_t& out_int,
+            QString& out_name,
+            QString thing_getting,
+            OpcodeArgTypeinfo* word_must_be_imported_from = nullptr,
+            int32_t limit_int = -1,
+            OpcodeArgTypeinfo* prefer_imported_names_when_leading_integers = nullptr // HACK for incident names that begin with numbers
+         ) const;
          //
          [[nodiscard]] Script::Alias* lookup_relative_alias(QString name, const OpcodeArgTypeinfo* relative_to) const;
          [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name) const;

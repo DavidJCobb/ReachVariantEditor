@@ -9,6 +9,7 @@
 
 namespace reach {
    enum class weapon_set : int8_t {
+      random      = -3,
       map_default = -2,
       none        = -1,
       human,

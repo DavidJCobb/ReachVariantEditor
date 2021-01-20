@@ -388,7 +388,7 @@
          </note>
       </member>
       <member name="symmetry" type="number">
-         <blurb>Whether this match is symmetryic.</blurb>
+         <blurb>Whether this match is symmetric.</blurb>
          <description>
             <p>
                This value indicates whether the current match is symmetric (1) or asymmetric (0). 
@@ -417,7 +417,7 @@
          <related name="symmetry_get" />
       </member>
       <member name="symmetry_get" type="number" read-only="true">
-         <blurb>Whether this match is symmetryic.</blurb>
+         <blurb>Whether this match is symmetric.</blurb>
          <description>
             <p>
                This value indicates whether the current match is symmetric (1) or asymmetric (0). 

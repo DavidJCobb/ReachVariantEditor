@@ -286,7 +286,7 @@ namespace cobb {
       return true;
    }
    //
-   void string_scanner::_extract_hex_integer_literal(int32_t& out) {
+   bool string_scanner::_extract_hex_integer_literal(int32_t& out) {
       QString found = "";
       this->scan([this, &found](QChar c) {
          if (c.isNumber()) {
@@ -300,19 +300,23 @@ namespace cobb {
          }
          return true;
       });
-      out = found.toInt(nullptr, 16);
+      bool valid;
+      out = found.toInt(&valid, 16);
+      return valid;
    }
-   void string_scanner::_extract_bin_integer_literal(int32_t& out) {
+   bool string_scanner::_extract_bin_integer_literal(int32_t& out) {
       //
       // Given an integer literal "0b0110111", this should be called after you have read 
       // the "0b". If this encounters invalid numeric digits, it skips them; for example, 
       // "0b00105" will yield the integer 2 but place the cursor after "5".
       //
       bool ignoring = false;
-      this->scan([this, &out, &ignoring](QChar c) {
+      bool any      = false;
+      this->scan([this, &out, &any, &ignoring](QChar c) {
          if (!ignoring) {
             if (c == '0' || c == '1') {
                out = (out << 1) | (c == '1' ? 1 : 0);
+               any = true;
                return false;
             }
          }
@@ -322,6 +326,7 @@ namespace cobb {
          }
          return true;
       });
+      return any;
    }
    bool string_scanner::extract_integer_literal(int32_t& out) {
       auto    prior = this->backup_stream_state();
@@ -336,14 +341,15 @@ namespace cobb {
       auto after_sign = this->backup_stream_state();
       if (this->extract_specific_char('0')) {
          if (this->extract_specific_char('b', true)) {
-            this->_extract_bin_integer_literal(out);
-            out *= sign;
-            return true;
-         }
-         if (this->extract_specific_char('x', true)) {
-            this->_extract_hex_integer_literal(out);
-            out *= sign;
-            return true;
+            if (this->_extract_bin_integer_literal(out)) {
+               out *= sign;
+               return true;
+            }
+         } else if (this->extract_specific_char('x', true)) {
+            if (this->_extract_hex_integer_literal(out)) {
+               out *= sign;
+               return true;
+            }
          }
          this->restore_stream_state(after_sign);
       }

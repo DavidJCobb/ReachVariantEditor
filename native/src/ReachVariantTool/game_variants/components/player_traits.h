@@ -258,7 +258,7 @@ namespace reach {
       fuel_rod_gun     = 20,
       machine_gun_turret = 21, // 400 rounds instead of the normal 200; loadout icon is Mauler
       plasma_cannon    = 22, // 400 rounds instead of the normal 200; loadout icon is Flamethrower
-      // 23 // Magnum, but with SMG icon in loadout selection
+      target_locator   = 23,
       // 24 // Magnum, but with no icon in loadout selection
       // ...
       // 32 // Magnum, but with no icon in loadout selection; probably just a default

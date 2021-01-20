@@ -39,8 +39,8 @@ namespace cobb {
          QString text;
          pos     state;
          //
-         void _extract_hex_integer_literal(int32_t& out);
-         void _extract_bin_integer_literal(int32_t& out);
+         bool _extract_hex_integer_literal(int32_t& out);
+         bool _extract_bin_integer_literal(int32_t& out);
          //
       public:
          string_scanner(QString t) : text(t) {}

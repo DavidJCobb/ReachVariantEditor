@@ -43,7 +43,7 @@
       </dl>
       <p>
          Declaring a variable multiple times generates a compiler warning if the declarations 
-         don't conflict ith each other or contain redundant information (e.g. multiple initial 
+         don't conflict with each other or contain redundant information (e.g. multiple initial 
          values), or a compiler error otherwise.
       </p>
    </body>

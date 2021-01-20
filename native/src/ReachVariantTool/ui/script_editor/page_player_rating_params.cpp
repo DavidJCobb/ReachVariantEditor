@@ -27,7 +27,9 @@ ScriptEditorPagePlayerRating::ScriptEditorPagePlayerRating(QWidget* parent) : QW
    this->floatWidgets.push_back(this->ui.float14);
    //
    for (size_t i = 0; i < this->floatWidgets.size(); i++) {
-      QObject::connect(this->floatWidgets[i], QOverload<double>::of(&QDoubleSpinBox::valueChanged), [i](double v) {
+      auto widget = this->floatWidgets[i];
+      widget->setRange(-FLT_MAX, FLT_MAX); // the underlying values are floats; if there are engine constraints, they are not known; don't enforce any bounds
+      QObject::connect(widget, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [i](double v) {
          auto mp = ReachEditorState::get().multiplayerData();
          if (!mp)
             return;

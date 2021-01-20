@@ -274,6 +274,8 @@
          -- is the fire particle emitter:
          alias all_fire_particles = 7
          
+         declare object.lifespan = 1
+         
          for each player do -- handle super shields VFX
             if opt_super_shields == 1 then 
                alias current_shields = global.number[0]

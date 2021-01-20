@@ -35,6 +35,9 @@ PageMPSettingsMapAndGame::PageMPSettingsMapAndGame(QWidget* parent) : QWidget(pa
             case 16:
                value = reach::weapon_set::none; // No Weapons
                break;
+            case 17:
+               value = reach::weapon_set::random; // Random
+               break;
             default:
                value = (reach::weapon_set)(index - 1);
          }

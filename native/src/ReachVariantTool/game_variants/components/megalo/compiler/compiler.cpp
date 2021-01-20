@@ -661,7 +661,7 @@ namespace Megalo {
       }
       return false;
    }
-   arg_compile_result Compiler::try_get_integer_or_word(string_scanner& str, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from, int32_t limit_int) const {
+   arg_compile_result Compiler::try_get_integer_or_word(string_scanner& str, int32_t& out_int, QString& out_name, QString thing_getting, OpcodeArgTypeinfo* word_must_be_imported_from, int32_t limit_int, OpcodeArgTypeinfo* prefer_imported_names_when_leading_integers) const {
       //
       // This function is provided as a helper for OpcodeArgValue::compile overloads, and attempts to do the 
       // following tasks:
@@ -690,8 +690,33 @@ namespace Megalo {
       //
       out_int = 0;
       out_name.clear();
-      if (!str.extract_integer_literal(out_int)) {
-         auto word  = str.extract_word();
+      //
+      str.skip_whitespace();
+      auto prior      = str.backup_stream_state();
+      bool is_integer = str.extract_integer_literal(out_int);
+      if (is_integer) {
+         if (prefer_imported_names_when_leading_integers && !str.is_at_effective_end()) { // HACK for incident names that start with numbers
+            //
+            // Let's try extracting a word.
+            //
+            str.restore_stream_state(prior);
+            auto word = str.extract_word();
+            if (!word.isEmpty() && prefer_imported_names_when_leading_integers->has_imported_name(word)) {
+               //
+               // We don't need to check for aliases or enum value names, because those cannot begin with 
+               // integers.
+               //
+               out_name = word;
+               return arg_compile_result::success();
+            }
+            str.restore_stream_state(prior);
+         }
+         //
+         // Otherwise, fall through to the integer bounds-checking below.
+         //
+      }
+      if (!is_integer) {
+         auto word = str.extract_word();
          if (word.isEmpty())
             return arg_compile_result::failure();
          auto alias = this->lookup_absolute_alias(word);
@@ -716,6 +741,10 @@ namespace Megalo {
             out_name = word;
             return arg_compile_result::success();
          }
+         //
+         // When decoding an integer alias or enum value name, we will fall through to the integer bounds-checking 
+         // below.
+         //
       }
       if (limit_int >= 0) {
          if (out_int < 0 || out_int > limit_int)
@@ -1003,6 +1032,19 @@ namespace Megalo {
       if (!this->has_fatal()) {
          if (this->block != this->root)
             this->raise_fatal("Unclosed block.");
+         //
+         if (this->root->trigger == nullptr) {
+            //
+            // Compile any loose content that may appear after the last block (or if there are no blocks).
+            //
+            root->compile(*this);
+            root->trigger = nullptr;
+            root->clear();
+            //
+            if (this->has_fatal())
+               return;
+         }
+         //
          if (this->next_event != Script::Block::Event::none)
             this->raise_fatal("The file ended with an \"on\" keyword but no following block.");
          this->root->set_end(this->state);
@@ -1717,6 +1759,7 @@ namespace Megalo {
          this->raise_fatal("Unexpected end-of-file while parsing a block's conditions.");
    }
    //
+   #pragma region function call handling
    void Compiler::__parseFunctionArgs(const OpcodeBase& function, Opcode& opcode, Compiler::unresolved_str_list& unresolved_strings) {
       auto& mapping = function.mapping;
       opcode.function = &function;
@@ -2223,6 +2266,7 @@ namespace Megalo {
       this->_commit_unresolved_strings(unresolved_strings);
       return statement;
    }
+   #pragma endregion
    //
    int32_t Compiler::_index_of_trigger(Trigger* t) const noexcept {
       auto&  list = this->results.triggers;
@@ -2340,6 +2384,7 @@ namespace Megalo {
       return true;
    }
    //
+   #pragma region keyword handlers
    void Compiler::_handleKeyword_Alias() {
       auto start = this->backup_stream_state();
       //
@@ -3086,4 +3131,5 @@ namespace Megalo {
          this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
       }
    }
+   #pragma endregion
 }

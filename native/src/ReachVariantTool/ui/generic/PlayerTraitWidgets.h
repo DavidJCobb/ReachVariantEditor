@@ -65,6 +65,7 @@ class PlayerTraitWeaponCombobox : public QComboBox {
          this->addItem(tr("Spiker",           "Spawn Weapon"), QVariant((int)reach::weapon::spiker));
          this->addItem(tr("Detached Human Turret",  "Spawn Weapon"), QVariant((int)reach::weapon::machine_gun_turret));
          this->addItem(tr("Detached Plasma Turret", "Spawn Weapon"), QVariant((int)reach::weapon::plasma_cannon));
+         this->addItem(tr("Target Locator",   "Spawn Weapon"), QVariant((int)reach::weapon::target_locator));
       }
       //
       void setByData(int v) noexcept {
