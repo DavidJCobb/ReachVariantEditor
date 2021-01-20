@@ -271,6 +271,8 @@ namespace {
       return true;
    }
    void _fix_link(const std::string& stem, std::string& out) {
+      if (out.rfind("http", 0) == 0)
+         return;
       //
       // Really hacky link/image fixup code:
       //

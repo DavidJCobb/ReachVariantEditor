@@ -583,6 +583,13 @@
                is to rotate the biped on one frame and then wait 'til the next to actually force the 
                player into it.
             </note>
+            <note>
+               Forcing the player into a dead biped will cause their camera to point toward the ground, 
+               and lock their camera more-or-less at ground height. They will be unable to move, pick up 
+               weapons, or otherwise interact with the environment. As long as the body remains present, 
+               the player will not respawn; if the biped was set by scripts to never be garbage-collected, 
+               then the player is effectively trapped.
+            </note>
          </method>
          <method name="set_round_card_title" id="56">
             <args>

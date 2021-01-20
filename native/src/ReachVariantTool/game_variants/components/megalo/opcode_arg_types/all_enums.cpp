@@ -25,8 +25,8 @@ namespace Megalo {
          DetailedEnumValue("!=", DetailedEnumValueInfo::make_friendly_name("not equal to")),
       });
       auto drop_weapon_type = DetailedEnum({
-         DetailedEnumValue("primary"),
          DetailedEnumValue("secondary"),
+         DetailedEnumValue("primary"),
       });
       auto grenade_type = DetailedEnum({
          DetailedEnumValue("frag_grenades",   DetailedEnumValueInfo::make_friendly_name("frag grenades")),

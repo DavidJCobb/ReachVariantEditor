@@ -2039,12 +2039,39 @@ namespace Megalo {
             _find_opcode_bases(actionFunctionList, opcode_bases, function_name, context.get());
       }
       if (!opcode_bases.size()) {
-         if (context)
-            this->raise_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context->get_type()->internal_name.c_str()).arg(function_name));
-         else if (context_is_game)
-            this->raise_error(call_start, QString("The game namespace does not have a member function named \"%1\".").arg(function_name));
-         else
+         std::vector<const OpcodeBase*> opposites;
+         if (context) {
+            if (is_condition)
+               _find_opcode_bases(actionFunctionList, opposites, function_name, context.get());
+            else
+               _find_opcode_bases(conditionFunctionList, opposites, function_name, context.get());
+            //
+            QString context_type_name = context->get_type()->internal_name.c_str();
+            if (opposites.empty()) {
+               this->raise_error(call_start, QString("Type %1 does not have a member function named \"%2\".").arg(context_type_name).arg(function_name));
+            } else {
+               if (is_condition)
+                  this->raise_error(call_start, QString("Member function \"%2\" on type %1 is an action and cannot be used in an if-statement like this.").arg(context_type_name).arg(function_name));
+               else
+                  this->raise_error(call_start, QString("Member function \"%2\" on type %1 is a condition and cannot be used outside of an if-statement like this.").arg(context_type_name).arg(function_name));
+            }
+         } else if (context_is_game) {
+            if (is_condition)
+               _find_game_ns_opcode_bases(actionFunctionList, opposites, function_name);
+            else
+               _find_game_ns_opcode_bases(conditionFunctionList, opposites, function_name);
+            //
+            if (opposites.empty()) {
+               this->raise_error(call_start, QString("The game namespace does not have a member function named \"%1\".").arg(function_name));
+            } else {
+               if (is_condition)
+                  this->raise_error(call_start, QString("Function \"game.%1\" is an action and cannot be used in an if-statement like this.").arg(function_name));
+               else
+                  this->raise_error(call_start, QString("Function \"game.%1\" is a condition and cannot be used outside of an if-statement like this.").arg(function_name));
+            }
+         } else {
             this->raise_error(call_start, QString("There is no non-member function named \"%1\".").arg(function_name));
+         }
          //
          // Try to skip to the end of the function call so that parsing can continue.
          //

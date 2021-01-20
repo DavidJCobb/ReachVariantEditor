@@ -225,29 +225,13 @@ int main(int argc, char *argv[]) {
 //          candidate: saving a film checkpoint the first time each lap is completed by the 
 //          player in the lead would be useful.
 //
-//        - Test what happens if script code forces a player to control a dead biped. Based 
-//          on bugs I'm seeing in Halo Chess+ I suspect this would lead to the camera angle 
-//          flipping 180, to a constant vibrating/impact noise, and to the screen being 
-//          faded to a very deep blue (almost black), with the fade mostly vanishing when 
-//          you pause the game.
-//
 //        - Test the "reset round" flags -- specifically, test what happens when they're 
 //          turned off. (This isn't related to Megalo but oh well, this is my in-game test 
 //          list now)
 //
-//        - What happens if we attach the player to an object that is destroyed or equipped 
-//          on contact (e.g. a powerup, a landmine; an armor ability or weapon when they 
-//          are not carrying one)?
-//
 //        - Re-test setting a vehicle's maximum health; use a constant like 150; see if it 
 //          still sets current health to 1 without changing max health and if so, document 
 //          that.
-//
-//        - Can you assign a player to neutral_team, or reassign their team, during a team 
-//          game?
-//
-//        - In team games, can you assign an object to a team that isn't present in a match? 
-//          Some of my tests suggest you can't.
 //
 //        - Can user-defined functions be event handlers and still work? If so, that would 
 //          indicate that nested blocks can be event handlers (something we don't currently 

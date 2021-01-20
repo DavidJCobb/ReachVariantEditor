@@ -745,6 +745,72 @@
                detaching it will teleport it to the world origin. On Forge World, 
                this is a point out by the canyon's beach.
             </note>
+            <note>
+               <p>
+                  If a player's biped is attached to an object that is destroyed on 
+                  contact with a player, such as a landmine or powerup, then that 
+                  player's camera will be locked to a consistent but unusual place; 
+                  on Boneyard, this is a point in space far outside the map. Using 
+                  Theater will show that the object appears to still exist, and that 
+                  the affected player's biped is frozen in place inside of the 
+                  object. The player's camera will remain fixed exactly in this 
+                  spot even if they were in third-person view at the time they were 
+                  affected.
+               </p>
+               <p>
+                  In this state, the player can switch weapons, drop a detached 
+                  turret if they are carrying one, fire their weapons, and throw 
+                  grenades. All of these actions will occur relative to the player's 
+                  "true" position at the object they were attached to, rather than 
+                  at their camera position. Projectiles will fire roughly in the 
+                  direction that the player is looking, but the yaw angle may be 
+                  mismatched: it will be a combination of the direction that the 
+                  player was looking just prior to the attachment, and the amount 
+                  by which they have turned to the side after being attached, 
+                  rather than matching their current camera yaw angle. The player 
+                  will not be able to interact with objects near their "true" 
+                  position; a vehicle next to them, for example, will not show 
+                  button prompts for entry, and pressing the button to enter a 
+                  vehicle anyway will not work.
+               </p>
+               <p>
+                  The object to which the player was attached may activate some 
+                  of its on-contact behaviors; landmines don't detonate, and 
+                  Active Camo Powerups aren't destroyed and don't give the 
+                  player camo, but the latter cause the player to constantly 
+                  experience the sound loop that plays when camo is active.
+               </p>
+               <p>
+                  These are the results of a local, single-player test. The 
+                  networked behavior is not known.
+               </p>
+            </note>
+            <note>
+               <p>
+                  If the player is attached to an armor ability, and if this 
+                  would normally cause them to pick the armor ability up, then 
+                  they will experience the same anomalies as if they were 
+                  attached to a weapon that is destroyed on contact. They will 
+                  not be able to use the armor ability during this time.
+               </p>
+            </note>
+            <note>
+               <p>
+                  If the player is attached to a weapon right as they equip it 
+                  (e.g. an unarmed player being attached to a weapon, such that 
+                  they touch the weapon and equip it as they are attached), 
+                  then they will equip the item normally rather than being 
+                  attached to it... but they will also be launched with 
+                  considerable force &mdash; possibly enough to break a map's 
+                  boundaries.
+               </p>
+               <p>
+                  If the player is attached to a grenade, and if this causes 
+                  them to pick the grenade up, then the player will be unable 
+                  to move, their animations will freeze, and their camera will 
+                  be anchored to the spot the grenade used to be in.
+               </p>
+            </note>
             <related type="action" name="detach" />
          </method>
          <method name="detach" id="34">
@@ -1191,7 +1257,6 @@
          </method>
          <method name="remove_weapon" id="94">
             <args>
-               <arg name="weapon"  type="object-type" />
                <arg name="mode">
                   <p>One of the following values:</p>
                   <dl>
@@ -1201,7 +1266,7 @@
                         <dd>Remove the biped's secondary weapon.</dd>
                   </dl>
                </arg>
-               <arg name="all_axes"  type="bool">A boolean indicating whether to delete the 
+               <arg name="delete" type="bool">A boolean indicating whether to delete the 
                weapon (<var>true</var>) or merely drop it (<var>false</var>).</arg>
             </args>
             <blurb>Remove a weapon from a biped.</blurb>
