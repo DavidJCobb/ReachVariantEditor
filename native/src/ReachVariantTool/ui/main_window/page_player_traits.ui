@@ -413,6 +413,11 @@
          </item>
          <item>
           <property name="text">
+           <string>90%</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>100%</string>
           </property>
          </item>

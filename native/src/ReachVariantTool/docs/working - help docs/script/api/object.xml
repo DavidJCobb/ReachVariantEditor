@@ -698,7 +698,7 @@
                   canopy will instantly snap open or closed as appropriate).
                </p>
                <p>
-                  Bipeds in an attached vehicle will lose mose animations. Passengers' 
+                  Bipeds in an attached vehicle will lose most animations. Passengers' 
                   hands may move slightly (and incorrectly) while reloading their weapon; 
                   though they have no reloading or weapon swap animations, appropriate 
                   sounds still play, and they cannot fire their animations while the 
@@ -826,8 +826,9 @@
             </example>
             <note>
                Detaching a player's carried weapons will cause those weapons to 
-               drop into the game world. Of course, there is already a member 
-               function that can be used to achieve this effect directly.
+               drop into the game world. Of course, it would probably be better to 
+               use <a href="script/api/object/actions/remove_weapon">object.remove_weapon</a> to achieve this 
+               effect more directly.
             </note>
             <note>
                If a player is occupying a vehicle, calling this function on their 

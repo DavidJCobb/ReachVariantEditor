@@ -85,9 +85,9 @@ namespace cobb {
                out += c;
                continue;
             }
-            QString str = text.mid(i + 1, digits);
+            QString str = text.mid(i + 2, digits);
             bool    ok  = false;
-            short   num = str.toShort(&ok, 16);
+            short   num = str.toUShort(&ok, 16);
             if (!ok) {
                out += c;
                continue;

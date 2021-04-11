@@ -148,7 +148,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue powerup_duration_r      = VariableScopeIndicatorValue::make_game_value("game.powerup_duration_red",    "Red Powerup Duration", VariableScopeIndicatorValue::flags::is_readonly);;
          extern VariableScopeIndicatorValue powerup_duration_b      = VariableScopeIndicatorValue::make_game_value("game.powerup_duration_blue",   "Blue Powerup Duration", VariableScopeIndicatorValue::flags::is_readonly);
          extern VariableScopeIndicatorValue powerup_duration_y      = VariableScopeIndicatorValue::make_game_value("game.powerup_duration_yellow", "Yellow Powerup Duration", VariableScopeIndicatorValue::flags::is_readonly);
-         extern VariableScopeIndicatorValue death_event_damage_type = VariableScopeIndicatorValue::make_game_value("game.death_event_damage_type", "Death Event Damage Type", VariableScopeIndicatorValue::flags::is_readonly);
+         extern VariableScopeIndicatorValue death_event_damage_type = VariableScopeIndicatorValue::make_game_value("death_event_damage_type",      "Death Event Damage Type", VariableScopeIndicatorValue::flags::is_readonly);
       }
    }
    OpcodeArgValueScalar::OpcodeArgValueScalar() : Variable(scopes) {}

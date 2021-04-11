@@ -180,6 +180,88 @@
          The RVT dialect of Megalo, then, is loosely inspired by Lua syntax, though there are 
          quite a few differences such as the use of zero-indexed collections.
       </p>
+
+      <h2>Literals</h2>
+      
+      <h3>Numbers</h3>
+      <p>
+         Numbers can be defined with any of the following syntaxes:
+      </p>
+      <dl>
+         <dt>12345</dt>
+            <dd>Defines the decimal value 12345.</dd>
+         <dt>0x3039</dt>
+            <dd>Defines the hexadecimal value 0x3039, which is equal to decimal 12345.</dd>
+         <dt>0b11000000111001</dt>
+            <dd>Defines a binary value which is equal to decimal 12345.</dd>
+      </dl>
+      
+      <h3>Strings</h3>
+      <p>
+         Megalo scripts can contain strings. A string is any value that starts and ends with
+         <code>"</code>, <code>'</code>, or <code>`</code>. The value must start and end with the
+         same symbol.
+      </p>
+      <p>
+         Inside of a string, backslashes have special meaning: they can be used to indicate special
+         characters, or to "escape" certain characters from processing.
+      </p>
+      <dl>
+         <dt>
+            <code>
+               \x<var>HH</var>
+            </code>
+         </dt>
+         <dd>
+            Treats <var>HH</var> as a hexadecimal character code. The entire escape sequence
+            will be replaced with the Unicode character that has that code. You must always provide
+            a two-digit hexadecimal number.
+         </dd>
+         <dt>
+            <code>
+               \u<var>HHHH</var>
+            </code>
+         </dt>
+         <dd>
+            Treats <var>HHHH</var> as a hexadecimal character code. The entire escape sequence
+            will be replaced with the Unicode character that has that code. You must always provide
+            a four-digit hexadecimal number.
+         </dd>
+         <dt>
+            <code>\"</code>
+         </dt>
+         <dd>
+            Inserts a double-quote mark into the string. You can use this to include double-quotes
+            in the text of a string that is itself wrapped in double-quotes, e.g.
+            <code>"And then he said, \"Hello!\""</code>
+         </dd>
+         <dt>
+            <code>\'</code>
+         </dt>
+         <dd>
+            Inserts a single-quote mark into the string. You can use this to include single-quotes
+            in the text of a string that is itself wrapped in single-quotes, e.g.
+            <code>'But that\'s not very nice.'</code>
+         </dd>
+         <dt>
+            <code>\`</code>
+         </dt>
+         <dd>
+            Inserts a backtick into the string. You can use this to include backticks in the text
+            of a string that is itself wrapped in backticks, e.g.
+            <code>`Backticks are often used instead of apostrophes, but I s\`pose that's a bit odd.`</code>
+         </dd>
+         <dt>
+            <code>
+               \<var>[any other character]</var>
+            </code>
+         </dt>
+         <dd>Just inserts the given character.</dd>
+         <dt>
+            <code>\\</code>
+         </dt>
+         <dd>Inserts a real backslash into the string.</dd>
+      </dl>
       
       <h2>Statements</h2>
       <p>
