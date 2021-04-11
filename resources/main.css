@@ -90,6 +90,9 @@ pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD;overflow-x:auto}
    pre .string{color:#777}
    pre .keyword{color:#00F;font-weight:bold}
 
+dl.ordered-enum{counter-reset:enum -1}
+dl.ordered-enum>dt::after{counter-increment:enum;content:" (equal to the number " counter(enum) ")";font-style:italic;font-weight:normal;opacity:.3}
+
 a{text-decoration:none}
 a:link{color:#03E}
 a:visited{color:#938}
