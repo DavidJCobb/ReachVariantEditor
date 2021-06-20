@@ -21,6 +21,8 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
       if (!mp)
          return;
       auto& list  = mp->scriptContent.forgeLabels;
+      if (list.size() >= list.max_count)
+         return;
       auto& label = *list.emplace_back();
       label.is_defined = true;
       this->updateListFromVariant(ReachEditorState::get().variant());

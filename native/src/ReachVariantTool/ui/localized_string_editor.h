@@ -23,6 +23,7 @@ class LocalizedStringEditorModal : public QDialog {
       bool _disallowSaveAsNew            = false;
       bool _isNotInStandardStringTable   = false; // for metadata, team names, etc.
       bool _limitToSingleLanguageStrings = false;
+      int  _maxLength = -1; // special-case for team names
       //
       void updateControls();
       void updateTextboxes(ReachString* use = nullptr);

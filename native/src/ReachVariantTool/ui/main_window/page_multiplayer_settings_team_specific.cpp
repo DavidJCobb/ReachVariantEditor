@@ -42,6 +42,17 @@ PageMPSettingsTeamSpecific::PageMPSettingsTeamSpecific(QWidget* parent) : QWidge
       auto index = string->index; // should always be zero
       if (LocalizedStringEditorModal::editString(this, ReachStringFlags::SingleLanguageString | ReachStringFlags::IsNotInStandardTable, string)) {
          auto& english = string->get_content(reach::language::english);
+         //
+         auto size = english.size();
+         if (auto* table = string->get_owner()) { // Ugly hack to enforce max length, in case our unofficial QPlainTextEdit maxlength workaround ever fails somehow
+            if (size > table->max_buffer_size) {
+               auto content = english;
+               content.resize(table->max_buffer_size);
+               for (int i = 0; i < reach::language_count; ++i)
+                  string->set_content((reach::language)i, content);
+            }
+         }
+         //
          this->ui.fieldName->setText(QString::fromUtf8(english.c_str()));
          if (!english.size())
             //

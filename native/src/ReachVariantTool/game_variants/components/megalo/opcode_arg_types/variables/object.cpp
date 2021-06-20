@@ -78,7 +78,7 @@ namespace Megalo {
                      this->which = top.which->as_integer();
                   else
                      this->which = Variable::_global_index_to_which(*type, top.index, top.is_static);
-                  this->index = res.property.index;
+                  this->index = res.nested.index;
                   //
                   if (type == &OpcodeArgValueObject::typeinfo)
                      this->scope = &variable_scope_indicators::object::object_player_biped;

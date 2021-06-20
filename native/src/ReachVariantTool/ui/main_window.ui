@@ -86,7 +86,7 @@
            </font>
           </property>
           <property name="text">
-           <string>ReachVariantTool v2.1.4</string>
+           <string>ReachVariantTool v2.1.5</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
