@@ -11,6 +11,10 @@ class Bitstream {
       this.view   = new DataView(buf);
       this.offset = 0; // in bits
       this.endianness = ENDIAN_LITTLE;
+      //
+      this.log_state = {
+         start: null,
+      };
    }
    /*int*/ getBitPos() {
       return this.offset;
@@ -20,6 +24,16 @@ class Bitstream {
    }
    /*int*/ getBytePos() {
       return Math.floor(this.offset / 8);
+   }
+   prepToReportBitnumber() {
+      console.assert(this.log_state.start === null);
+      this.log_state.start = this.offset;
+   }
+   reportBitnumber(t) {
+      console.assert(this.log_state.start !== null);
+      let start = this.log_state.start;
+      this.log_state.start = null;
+      console.log(`${t ? t + " - " : ""}Bitnumber at offset 0x${Math.floor(start / 8).toString(16)} bytes + ${start % 8} bits, length ${this.offset - start} bits`);
    }
    reportOffset(t) {
       console.log(`${t ? t + " - " : ""}Bitstream is currently at 0x${this.getBytePos().toString(16)}+${this.getBitOffset()}b.`);

@@ -706,18 +706,18 @@ class MapVariant {
             //   when written to the file.
          // Note: As of the previous field, we are byte-aligned again.
          o.fileLength = _byteswap_ulong(stream.readUInt32());
-         stream.reportOffset();
          o.unk08      = _byteswap_uint64(stream.readUInt64());
          o.unk10      = _byteswap_uint64(stream.readUInt64());
          o.unk18      = _byteswap_uint64(stream.readUInt64());
          o.unk20      = _byteswap_uint64(stream.readUInt64());
-         stream.reportOffset();
          o.activity   = stream.readBits(3, false) - 1;
             // ^ "None" is encoded as 0 instead of -1 in mpvr; the whole enum is shifted up by 1
             //   when written to the file.
          o.gameMode   = stream.readBits(3, false);
          o.engine     = stream.readBits(3, false);
+            stream.prepToReportBitnumber();
          o.mapID      = stream.readBits(32, false); // the ID of the map we're built on
+            stream.reportBitnumber("First map ID");
          o.engineCategoryIndex = stream.readBits(8, false); // TODO: we need to sign-extend it from one byte to an SInt32
          o.createdBy   = new VariantContentAuthor();
          o.createdBy.parseBits(stream);
@@ -748,7 +748,9 @@ class MapVariant {
       this.unk02DC = stream.readBits(32, false);
       this.unk02E0 = stream.readBits(32, false);
       this.unk02B2 = stream.readBits(9, false);
+         stream.prepToReportBitnumber();
       this.unk02B4 = stream.readBits(32, false); // another copy of the map ID
+         stream.reportBitnumber("Second map ID");
       this.unk02D9 = stream.readBits(1, false);
       this.unk02DA = stream.readBits(1, false);
       //

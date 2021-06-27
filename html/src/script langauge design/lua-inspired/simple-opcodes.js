@@ -48,7 +48,7 @@ class ActionFunction {
       this.desc    = d || "";
       this.format  = f || ""; // for printing the opcode as plain English
       this.args    = a || [];
-      this.mapping = sm;
+      this.mapping = sm; // can be null for built-in stuff
    }
 }
 class ConditionFunction {
@@ -59,7 +59,7 @@ class ConditionFunction {
       this.verb_normal = vn || "is";     // for printing the opcode as plain English
       this.verb_invert = vi || "is not"; // for printing the opcode as plain English
       this.args        = a || [];
-      this.mapping     = sm;
+      this.mapping     = sm; // can be null for built-in stuff
    }
 }
 

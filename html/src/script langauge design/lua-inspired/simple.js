@@ -73,6 +73,39 @@
    
    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    
+   I'VE DECIDED TO PORT THIS TO C++ EARLY, AS OTHERWISE I'D HAVE TO COPY ALL OF THE 
+   ENUMS AND THEIR METADATA INTO JAVASCRIPT, INCLUDING THE ENUMS OF HUNDRDEDS OF 
+   INCIDENT AND OBJECT-TYPE VALUES. As such, here's our roadmap:
+   
+    - In JavaScript, write the code to identify what function a given MFunctionCall 
+      is calling, and to fail when calling an undefined function (or when passing 
+      any arguments to a user-defined function).
+      
+    - Build the decompiler in C++, and test the current JavaScript code against 
+      decompiled copies of all official gametypes and of SvE Mythic Slayer. Fix any 
+      parser or decompiler problems that we find.
+   
+    - In C++, every OpcodeArgValue subclass needs to have a static "typeinfo" field, 
+      which should be a pointer to an instance of OpcodeArgTypeinfo. This new class 
+      will contain both the factory function for values of that type, and data that 
+      we need to map things to scripts (e.g. for flags-mask types, name strings for 
+      each flag).
+      
+       = We can build the decompiler first if we have OpcodeArgValues handle their 
+         own serialization, but once we have OpcodeArgTypeinfo implemented, that 
+         should be used to handle as much of the serialization burden as possible.
+   
+    - When the above requirement is met, begin porting the parser to C++.
+   
+    - When the parser is fully ported, test it against the decompiler the same way 
+      we do in JavaScript: have it display any/all parse errors, and if no fatal 
+      parse errors occur, have it re-serialize the parsed data so we can compare it 
+      to the original. (Better yet: when we know that the JavaScript version is 
+      producing correct output, we can just compare the C++ output to that, allowing 
+      us to do a blind string comparison rather than comparing by eye.)
+   
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   
    WE NEED TO BE ABLE TO HANDLE OPCODES-AS-PROPERTIES. I originally didn't want to 
    expose any opcodes as properties because I felt it'd be simpler if properties 
    were always usable in the same places, BUT some opcodes are math operators, e.g. 

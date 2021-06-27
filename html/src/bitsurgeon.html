@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+   <head>
+      <title>Bitsurgeon</title>
+<style>
+html{font-family:"Segoe UI",Calibri,sans-serif}
+
+section{padding:.5em 1em}
+section+section{border-top:1px solid #AAA}
+
+h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.25em}
+
+label{font-weight:bold}
+
+hr.vertical{width:0;display:inline-block;height:1.2em;margin:0 .5em;vertical-align:middle}
+
+li input.bits,
+li input.bitcount{text-align:right}
+</style>
+   </head>
+   <body>
+      <h1>Bitsurgeon</h1>
+      <p>
+         Given a file and a list of non-byte-aligned values, edit those values.
+      </p>
+      <ul id="value-list">
+      </ul>
+      <template id="value">
+         <li>
+            <label>Offset:</label>
+            0x<input type="text"   class="bytes" min="0" placeholder="byte offset in hex" />
+            + <input type="number" class="bits"  min="0" max="7" size="1" value="0" /> bits
+            <hr class="vertical" />
+            <label>Bitcount:</label>
+            <input type="number" class="bitcount" min="1" max="64" size="2" value="8" />
+            <hr class="vertical" />
+            <label>Set to:</label>
+            <input type="number" class="value" placeholder="decimal, or 0xHEX" size="12" />
+            <hr class="vertical" />
+            <input type="button" value="Remove" class="remove" />
+         </li>
+      </template>
+      <input type="button" id="list-add" value="Add value" />
+      <hr />
+      <input type="file" id="file" /><br />
+      <input type="button" id="exec" value="Execute" />
+   </body>
+   <script>
+function download_blob(buffer, name) {
+   let file = new Blob([buffer], { type: "application/octet-stream" });
+   
+   let link  = document.createElement("a");
+   let url   = URL.createObjectURL(file);
+   link.href = url;
+   link.download = name;
+   document.body.appendChild(link);
+   link.click();
+   setTimeout(
+      function() {
+         document.body.removeChild(link);
+         window.URL.revokeObjectURL(url);  
+      },
+   0); 
+}
+function strict_parse_hex(s) {
+   if ((/[^0-9a-fA-F]/).test(s))
+      return NaN;
+   return parseInt(s, 16);
+}
+function strict_parse_dec(s) {
+   let neg = false;
+   if (s[0] == "-") {
+      neg = true;
+      s = s.substring(1);
+   }
+   if ((/[^0-9]/).test(s))
+      return NaN;
+   return parseInt(s, 10) * (neg ? -1 : 1);
+}
+function strict_parse_int(s) {
+   if (s.startsWith("0x"))
+      return strict_parse_hex(s.substring(2));
+   return strict_parse_dec(s);
+}
+function test_range_overlap(a, b) {
+   let x1 = (a.bytes * 8) + a.bits;
+   let y1 = (b.bytes * 8) + b.bits;
+   let x2 = x1 + a.bitcount;
+   let y2 = y1 + b.bitcount;
+   return (x1 <= y2 && y1 <= x2);
+}
+   
+const nodes = {
+   list:               document.getElementById("value-list"),
+   list_item_template: document.getElementById("value"),
+   list_add_new_item:  document.getElementById("list-add"),
+   file: document.getElementById("file"),
+   exec: document.getElementById("exec"),
+};
+
+function add_list_item() {
+   let frag = nodes.list_item_template.content.cloneNode(true);
+   nodes.list.appendChild(frag);
+}
+
+nodes.list_add_new_item.addEventListener("click", function(e) {
+   add_list_item();
+});
+nodes.list.addEventListener("click", function(e) {
+   let button = e.target.closest("input.remove");
+   if (!button)
+      return;
+   let item = button.closest("li");
+   item.parentNode.removeChild(item);
+});
+
+nodes.exec.addEventListener("click", async function(e) {
+   let node = nodes.file;
+   let file = node.files[0];
+   if (!file) {
+      alert("No file selected.");
+      return;
+   }
+   //
+   let buffer = await file.arrayBuffer();
+   //
+   let offsets = [];
+   for(let li of nodes.list.children) {
+      if (li.nodeName.toLowerCase() != "li")
+         continue;
+      let o = { bits: 0 };
+      o.bytes    = strict_parse_hex(li.querySelector(".bytes").value);
+      o.bits     = +li.querySelector(".bits").value;
+      o.bitcount = +li.querySelector(".bitcount").value;
+      o.value    = strict_parse_int(li.querySelector(".value").value);
+      //
+      if (isNaN(o.bytes + o.bits + o.bitcount + o.value) || o.bitcount < 1 || o.bytes < 0 || o.bits < 0)
+         continue;
+      //
+      offsets.push(o);
+   }
+   try {
+      offsets.sort(function(a, b) {
+         let x1 = (a.bytes * 8) + a.bits;
+         let y1 = (b.bytes * 8) + b.bits;
+         if (test_range_overlap(a, b)) {
+            throw new Error(`ranges overlap:\n\n0x${a.bytes} + ${a.bits} bits, bitcount ${a.bitcount}\n0x${b.bytes} + ${b.bits} bits, bitcount ${b.bitcount}`);
+         }
+         return x1 - y1;
+      });
+   } catch (e) {
+      alert("Error: " + e.message);
+   }
+   //
+   {
+      let view = new DataView(buffer);
+      for(o of offsets) {
+         let pos   = o.bytes;
+         let shift = o.bits;
+         //
+         let bytecount = Math.ceil((o.bitcount + o.bits) / 8);
+         let bitmax    = (1 << o.bitcount) - 1;
+         for(let i = 0; i < bytecount; ++i) {
+            let byte = view.getUint8(pos + i); // n
+            let sh   = shift + o.bitcount - ((i + 1) * 8);
+            if (sh > 0) {
+               // Leading or middle bits in the value:
+               let mask = (bitmax  >>> sh) & 0xFF;
+               let mod  = (o.value >>> sh) & 0xFF; // bits to OR with byte
+               //
+               byte = (byte & ~mask) | mod;
+               view.setUint8(pos + i, byte);
+            } else {
+               // Trailing bits in the value:
+               console.assert(sh == shift - 8);
+               sh += 8;
+               console.assert(sh < 8);
+               //
+               let mask = (0xFF >>> sh) & 0xFF;
+               let mod  = (o.value << (8 - sh)) & 0xFF;
+               //
+               byte = (byte & mask) | mod;
+               view.setUint8(pos + i, byte);
+            }
+         }
+      }
+      //
+   }
+   download_blob(buffer, "modified.bin");
+});
+
+add_list_item();
+   </script>
+</html>
