@@ -74,7 +74,7 @@ class ReachString : public indexed_list_item {
       void _set_dirty() noexcept;
       //
    public:
-      ReachString() {}
+      ReachString() {} // used for frontend stuff; do not use this for game variant data
       ReachString(ReachStringTable& o) : owner(&o) {}
       //
       using language_list_t = std::array<std::string, reach::language_count>;
@@ -107,6 +107,8 @@ class ReachString : public indexed_list_item {
       bool can_be_forge_label() const noexcept;
       bool empty() const noexcept;
       inline bool is_dirty() const noexcept { return this->dirty; }
+      //
+      inline ReachStringTable* get_owner() const noexcept { return this->owner; }
 };
 
 class ReachStringTable {

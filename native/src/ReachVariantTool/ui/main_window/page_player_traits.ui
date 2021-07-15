@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>402</width>
     <height>435</height>
    </rect>
   </property>
@@ -236,32 +236,32 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 1</string>
+           <string>0%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>100%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 3</string>
+           <string>150%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 4</string>
+           <string>200%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 5</string>
+           <string>300%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 6</string>
+           <string>400%</string>
           </property>
          </item>
          <item>
@@ -280,17 +280,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 1</string>
+           <string>-25%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>-10%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Unknown 3</string>
+           <string>-5%</string>
           </property>
          </item>
          <item>
@@ -366,6 +366,9 @@
        </item>
        <item row="4" column="1">
         <widget class="QComboBox" name="fieldShieldRegenRate">
+         <property name="toolTip">
+          <string>By default, a Spartan takes three full seconds to regen from 0% shields to 100% shields. The base rate is defined in the map files (specifically, the Spartan's HLMT tag), and is scaled by this setting.</string>
+         </property>
          <item>
           <property name="text">
            <string>Unchanged</string>
@@ -373,17 +376,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Drain (12 sec)</string>
+           <string>-25%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Drain (30 sec)</string>
+           <string>-10%</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Drain (60 sec)</string>
+           <string>-5%</string>
           </property>
          </item>
          <item>
@@ -445,86 +448,81 @@
        </item>
        <item row="5" column="1">
         <widget class="QComboBox" name="fieldShieldRegenRateOver">
-         <item>
-          <property name="text">
-           <string>Unchanged</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 1</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 3</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 4</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 5</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 6</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 7</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 8</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 9</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 10</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 11</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 12</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 13</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 14</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Unknown 15</string>
-          </property>
-         </item>
+           <item>
+              <property name="text">
+                 <string>Unchanged</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>-25%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>-10%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>-5%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>0%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>10%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>25%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>50%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>75%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>90%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>100%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>110%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>125%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>150%</string>
+              </property>
+           </item>
+           <item>
+              <property name="text">
+                 <string>200%</string>
+              </property>
+           </item>
         </widget>
        </item>
        <item row="6" column="1">
@@ -782,7 +780,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Map Default(?)</string>
+           <string>Map Default</string>
           </property>
          </item>
          <item>
@@ -1250,7 +1248,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>Worst Camo</string>
           </property>
          </item>
          <item>
@@ -1468,7 +1466,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 2</string>
+           <string>15 Meters</string>
           </property>
          </item>
          <item>
@@ -1478,7 +1476,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Unknown 3</string>
+           <string>50 Meters</string>
           </property>
          </item>
          <item>
@@ -1489,6 +1487,11 @@
          <item>
           <property name="text">
            <string>100 Meters</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>150 Meters</string>
           </property>
          </item>
         </widget>

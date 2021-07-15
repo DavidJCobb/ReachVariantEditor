@@ -970,7 +970,7 @@
                </p>
             </description>
             <example>
-               current_object.set_text("VIP #%n", current_object.number[0])
+               current_object.set_waypoint_text("VIP #%n", current_object.number[0])
             </example>
             <note>
                The text will be truncated to about 15 characters.

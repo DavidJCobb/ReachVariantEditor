@@ -29,7 +29,8 @@ namespace {
       "Health",
       "Defend Castle",
       "Arrow In Box",
-      "Shapes",
+      //"Shapes", // 25 pre-MCC
+      "Infinity", // 25 post-MCC
       "Forerunner Terminal",
       "8-Ball",
       "Noble Team Insignia",
@@ -50,7 +51,11 @@ namespace {
 GametypeIconCombobox::GametypeIconCombobox(QWidget* parent = nullptr) : IconOnlyCombobox(parent) {
    for (uint8_t i = 0; i < std::extent<decltype(_icons)>::value; i++) {
       auto name = tr(_icons[i], "Gametype Icon");
-      this->addItem(QIcon(QString(":/ReachVariantTool/gametype_icons/%1.png").arg(i)), name);
+      if (i == 25) {
+         this->addItem(QIcon(QString(":/ReachVariantTool/gametype_icons/%1_MCC.png").arg(i)), name);
+      } else {
+         this->addItem(QIcon(QString(":/ReachVariantTool/gametype_icons/%1.png").arg(i)), name);
+      }
       this->setItemData(i, name, Qt::ToolTipRole);
    }
    this->setExpandedIconSize(QSize(24, 24));

@@ -151,7 +151,7 @@
       <enum>Qt::NoContextMenu</enum>
      </property>
      <property name="toolTip">
-      <string>Click here to open a color picker.</string>
+      <string>Click here to open a color picker. This is the secondary team color, used as the secondary armor color for players.</string>
      </property>
      <property name="accessibleName">
       <string>Edit Secondary Color</string>
@@ -167,7 +167,7 @@
       <enum>Qt::NoContextMenu</enum>
      </property>
      <property name="toolTip">
-      <string>Click here to open a color picker.</string>
+      <string>Click here to open a color picker. This is the UI background color, used for round title cards and similar.</string>
      </property>
      <property name="accessibleName">
       <string>Edit Text Color</string>

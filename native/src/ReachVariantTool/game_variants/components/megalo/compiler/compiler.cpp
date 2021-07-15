@@ -2126,7 +2126,17 @@ namespace Megalo {
       if (context) {
          auto index = match->mapping.arg_context;
          const OpcodeArgBase& base = match->arguments[index];
-         opcode->arguments[index] = (base.typeinfo.factory)();
+         //
+         // "Doubly-contextual calls" are those where a single OpcodeArgValue represents both the call context and one of the 
+         // arguments in parentheses.
+         //
+         bool is_doubly_contextual = match->mapping.is_doubly_contextual();
+         if (is_doubly_contextual) {
+            assert(opcode->arguments[index]);
+         } else {
+            opcode->arguments[index] = (base.typeinfo.factory)();
+         }
+         //
          auto result = opcode->arguments[index]->compile(*this, *context, 0);
          if (result.is_failure()) {
             QString error = "Failed to compile the context for this function call. ";

@@ -31,11 +31,54 @@
          <blurb>The current player in a <code>for each player</code> or <code>for 
          each player randomly</code> loop.</blurb>
       </member>
+      <member name="player" type="player" indexed="true" read-only="true">
+         <blurb>Allows direct access to all sixteen possible active players in a match.</blurb>
+         <description>
+            <p>
+               The sixteen players that can exist in a match can be accessed directly 
+               via <code>player[<var>n</var>]</code>, where <var>n</var> is a number 
+               between 0 and 15, inclusive.
+            </p>
+            <p>
+               It is unclear how players are sorted within the list.
+            </p>
+         </description>
+      </member>
       <member name="current_team" type="team" read-only="true">
          <blurb>The current team in a <code>for each team</code> loop.</blurb>
       </member>
       <member name="neutral_team" type="team" read-only="true">
          <blurb>A value that can be used to refer to Neutral Team.</blurb>
+      </member>
+      <member name="team" type="team" indexed="true" read-only="true">
+         <blurb>Allows direct access to all eight possible teams in a match.</blurb>
+         <description>
+            <p>
+               The eight teams that can exist in a match can be accessed directly via 
+               <code>team[<var>n</var>]</code>, where <var>n</var> is a number between 
+               0 and 7, inclusive.
+            </p>
+            <p>
+               Typically, in the first round of a match, the team indices will be 
+               consistent: <code>team[0]</code> is Red Team, the first team in the 
+               list; <code>team[1]</code> is Blue Team, the second team in the list; 
+               and so on. However, you may be aware that teams commonly switch sides 
+               and roles with every round. This happens at the engine level: the game 
+               engine silently remaps the team indices so that Red Team and Blue Team 
+               switch places: Red Team becomes <code>team[1]</code> and Blue Team 
+               becomes <code>team[0]</code>.
+            </p>
+            <p>
+               There's also an additional complication: when editing the 
+               <a href="/editor/main_window/options-team-specific.html">settings for each team</a>, 
+               the "initial designator" can be changed. This changes what index the 
+               team will have in the first round.
+            </p>
+            <p>
+               The full behavior of this system is not understood; for example, it is 
+               not clear whether or how Teams 3 and up are swapped between rounds.
+            </p>
+         </description>
       </member>
       <member name="hud_target_object" type="object" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
@@ -139,6 +182,17 @@
       </member>
       <member name="script_option" type="number" indexed="true" read-only="true">
          <blurb>Allows scripts to access the value of scripted Custom Game options.</blurb>
+      </member>
+      <member name="script_widget" type="widget" indexed="true" read-only="true">
+         <blurb>One of the four HUD widgets available to scripts.</blurb>
+         <description>
+            <p>
+               Scripts can be given access to <a href="/editor/script_window/script-widgets.html">up to four HUD widgets</a>. 
+               Each widget's position on screen is predefined in the game variant and cannot 
+               be altered at run-time. Widgets can be made visible or invisible on a per-player 
+               basis, but can only use the same format string and tokens for all players.
+            </p>
+         </description>
       </member>
       <member name="killed_object" type="object" read-only="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 

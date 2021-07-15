@@ -65,7 +65,7 @@ class ReachCGGeneralOptions {
       cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
       cobb::bitnumber<5, uint8_t> roundLimit;
       cobb::bitnumber<4, uint8_t> roundsToWin;
-      cobb::bitnumber<7, uint8_t> suddenDeathTime; // seconds
+      cobb::bitnumber<7, int8_t, true> suddenDeathTime; // seconds
       cobb::bitnumber<5, uint8_t> gracePeriod;
 
       bool read(cobb::ibitreader& stream) noexcept;

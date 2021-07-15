@@ -52,13 +52,16 @@ namespace Megalo {
          int8_t       arg_index_mappings[8] = { no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument, no_argument }; // map native argument order to script argument order
          flags_type   flags = 0;
          OpcodeBase*  owner = nullptr;
-         variable_scope double_context_type = variable_scope::not_a_scope; // use when the opcode is (non_global_scope.var.opcode()) where the types of both the scope and the variable are significant
+         variable_scope double_context_type = variable_scope::not_a_scope; // use for cases where a single OpcodeArgValue represents both the call context AND one or more of the arguments in parentheses
          //
          uint8_t mapped_arg_count() const noexcept {
             for (uint8_t i = 0; i < std::extent<decltype(arg_index_mappings)>::value; ++i)
                if (this->arg_index_mappings[i] == no_argument)
                   return i;
             return std::extent<decltype(arg_index_mappings)>::value;
+         }
+         inline bool is_doubly_contextual() const noexcept {
+            return this->double_context_type != variable_scope::not_a_scope;
          }
          //
          OpcodeFuncToScriptMapping() {}

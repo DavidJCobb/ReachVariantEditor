@@ -1097,3 +1097,18 @@ ko=오버실드를 가진 플레이어들이 불타는 발을 갖게 됩니다.
 zh=有超能護盾的玩家，會擁有冒出火焰的雙腳
 pt=Jogadores com escudo em excesso vão ter pés ardentes
 
+[none]
+name=None
+cate=option-values
+source=ui\cui\strings\scoreboard_strings
+sourcetype=map
+en=None
+jp=なし
+de=Keine
+fr=Aucune
+es=Ninguna
+mx=Ninguna
+it=No
+ko=없음
+zh=無
+pt=Nenhuma

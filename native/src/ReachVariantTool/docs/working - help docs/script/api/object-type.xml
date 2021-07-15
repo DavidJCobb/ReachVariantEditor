@@ -127,7 +127,7 @@
             <dd>A development leftover from Halo 3: a weapon of Brute design, which fires large explosive 
             shells.</dd>
             
-         <dt data-unused="true" data-tag="weap:objects/weapons/rifle/focus_rifle/focus_rifle"><code>beam_rifle</code> (<del>Beam</del> <ins>Focus</ins> Rifle)</dt>
+         <dt data-tag="weap:objects/weapons/rifle/focus_rifle/focus_rifle"><code>beam_rifle</code> (<del>Beam</del> <ins>Focus</ins> Rifle)</dt>
             <dd>This value seems to have been intended for Beam Rifles, but now it refers to Focus Rifles.</dd>
             
          <dt data-tag="weap:objects/weapons/support_high/spartan_laser/spartan_laser"><code>spartan_laser</code> (Spartan Laser)</dt>

@@ -20,284 +20,419 @@
          <li><a href="snippets.html#announce-game-start">Announce game start</a></li>
          <li><a href="snippets.html#dlc-achievements">DLC Achievements</a></li>
          <li><a href="snippets.html#loadout-palettes">Loadout palette code</a></li>
+         <li><a href="snippets.html#red-and-blue-teams">Identifying Red and Blue Teams across rounds</a></li>
+         <li><a href="snippets.html#moving-objects">Moving one object to another</a></li>
          <li><a href="snippets.html#round-timer">Round timer code (basic)</a></li>
          <li><a href="snippets.html#round-timer-sd">Round timer code (with Sudden Death)</a></li>
          <li><a href="snippets.html#super-shields">Super Shields</a></li>
       </ul>
-      
-      <h2><a name="announce-game-start">Announce game start</a></h2>
-      <p>
-         Most official gametypes announce their names at the start of each round. They do 
-         this by <dfn>sending an incident</dfn>: they use the 
-         <a href="script/api/ns_unnamed/actions/send_incident">send_incident</a> function 
-         to tell the game that some event (such as the start of a round) has occurred. Each 
-         base gametype has its own incident.
-      </p>
-      <pre>
-         alias announced_game_start = player.number[0]
-         alias announce_start_timer = player.timer[0]
+
+      <section>
+         <h2><a name="announce-game-start">Announce game start</a></h2>
+         <p>
+            Most official gametypes announce their names at the start of each round. They do 
+            this by <dfn>sending an incident</dfn>: they use the 
+            <a href="script/api/ns_unnamed/actions/send_incident">send_incident</a> function 
+            to tell the game that some event (such as the start of a round) has occurred. Each 
+            base gametype has its own incident.
+         </p>
+         <pre>
+            alias announced_game_start = player.number[0]
+            alias announce_start_timer = player.timer[0]
          
-         declare player.announced_game_start with network priority low = 0
-         declare player.announce_start_timer = 5
+            declare player.announced_game_start with network priority low = 0
+            declare player.announce_start_timer = 5
          
-         for each player do
-            if current_player.announced_game_start == 0 and current_player.announce_game_start_timer.is_zero() then 
-               send_incident(race_game_start, current_player, no_player)
-               current_player.announced_game_start = 1
-            end
-         end
-      </pre>
-      
-      <h2><a name="dlc-achievements">DLC Achievements</a></h2>
-      <p>
-         Several DLC achievements are awarded by Megalo script instead of being hardcoded 
-         into the game. These include:
-      </p>
-      <dl>
-         <dt>Dive Bomber</dt>
-            <dd>Assassinate an enemy player while using a Jetpack.</dd>
-         <dt>From Hell's Heart</dt>
-            <dd>After being stuck with a plasma grenade, make sure that the player who 
-            stuck you dies in the blast with you.</dd>
-         <dt>Top Shot</dt>
-            <dd>Score three headshot kills in a row without dying.</dd>
-         <dt>License to Kill</dt>
-            <dd>Splatter five enemy players during a single match.</dd>
-         <dt>Paper Beats Rock</dt>
-            <dd>Assassinate an enemy player no more than three seconds after they stop 
-            using Armor Lock.</dd>
-      </dl>
-      <p>
-         This code was taken from official gametypes. In some cases, small adjustments 
-         were made in order to avoid dependencies that you can't easily copy and paste 
-         (e.g. using the
-         <a href="script/api/object/conditions/is_of_type.html">object.is_of_type</a> 
-         condition instead of using 
-         <a href="script/api/object/conditions/has_forge_label.html">object.has_forge_label</a> 
-         with unnamed Forge labels, as 343i does).
-      </p>
-      <pre>
-         alias ach_top_shot_count        = player.number[0]
-         alias ach_license_to_kill_count = player.number[1]
-         alias ach_paper_beats_rock_vuln_timer = player.timer[0]
-         declare player.ach_top_shot_count        with network priority low
-         declare player.ach_license_to_kill_count with network priority low
-         
-         for each player do -- award Dive Bomber achievement as appropriate
-            alias killer    = global.player[0]
-            alias killer_aa = global.object[0]
-            alias death_mod = global.number[0]
-            if current_player.killer_type_is(kill) then 
-               killer    = current_player.get_killer()
-               death_mod = current_player.get_death_damage_mod()
-               if death_mod == enums.damage_reporting_modifier.assassination then
-                  killer_aa = killer.get_armor_ability()
-                  if killer_aa.is_of_type(jetpack) and killer_aa.is_in_use() then 
-                     send_incident(dlc_achieve_2, killer, killer, 65)
-                  end
+            for each player do
+               if current_player.announced_game_start == 0 and current_player.announce_start_timer.is_zero() then
+                  send_incident(race_game_start, current_player, no_player)
+                  current_player.announced_game_start = 1
                end
             end
-         end
-
-         for each player do -- award From Hell's Heart achievement as appropriate
-            alias death_mod = global.number[0]
-            alias killer    = global.player[0]
-            if current_player.killer_type_is(kill) then
-               death_mod = current_player.get_death_damage_mod()
-               if death_mod == enums.damage_reporting_modifier.sticky then
-                  killer = current_player.get_killer()
-                  if killer.killer_type_is(suicide) then 
-                     send_incident(dlc_achieve_2, current_player, current_player, 68)
-                  end
+         </pre>
+         <p>
+            In addition to announcing the game start, you may want to display explanatory 
+            text at the start of the round. You can do this by calling the 
+            <a href="/script/api/player/actions/set_round_card_title.html">player.set_round_card_title</a> 
+            function. Commonly, gametypes will display the score to win in the "round card," 
+            unless the player has turned off the score limit, and this can be accomplished 
+            using <a href="/script/api/format-string.html">format strings</a>.
+         </p>
+         <pre>
+            alias announced_game_start = player.number[0]
+            alias announce_start_timer = player.timer[0]
+         
+            declare player.announced_game_start with network priority low = 0
+            declare player.announce_start_timer = 5
+         
+            for each player do
+               if game.score_to_win != 0 then
+                  current_player.set_round_card_title("Collect flags for your team.\r\n%n points to win.", game.score_to_win)
+               end
+               if game.score_to_win == 0 then
+                  current_player.set_round_card_title("Collect flags for your team.")
+               end
+               if current_player.announced_game_start == 0 and current_player.announce_start_timer.is_zero() then
+                  send_incident(stockpile_game_start, current_player, no_player)
+                  current_player.announced_game_start = 1
                end
             end
-         end
+         </pre>
+      </section>
 
-         for each player do -- manage and award Top Shot achievement as appropriate
-            alias killer    = global.player[0]
-            alias death_mod = global.number[0]
-            if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then 
-               current_player.ach_top_shot_count = 0
+      <section>
+         <h2><a name="dlc-achievements">DLC Achievements</a></h2>
+         <p>
+            Several DLC achievements are awarded by Megalo script instead of being hardcoded 
+            into the game. These include:
+         </p>
+         <dl>
+            <dt>Dive Bomber</dt>
+               <dd>Assassinate an enemy player while using a Jetpack.</dd>
+            <dt>From Hell's Heart</dt>
+               <dd>After being stuck with a plasma grenade, make sure that the player who 
+               stuck you dies in the blast with you.</dd>
+            <dt>Top Shot</dt>
+               <dd>Score three headshot kills in a row without dying.</dd>
+            <dt>License to Kill</dt>
+               <dd>Splatter five enemy players during a single match.</dd>
+            <dt>Paper Beats Rock</dt>
+               <dd>Assassinate an enemy player no more than three seconds after they stop 
+               using Armor Lock.</dd>
+         </dl>
+         <p>
+            This code was taken from official gametypes. In some cases, small adjustments 
+            were made in order to avoid dependencies that you can't easily copy and paste 
+            (e.g. using the
+            <a href="script/api/object/conditions/is_of_type.html">object.is_of_type</a> 
+            condition instead of using 
+            <a href="script/api/object/conditions/has_forge_label.html">object.has_forge_label</a> 
+            with unnamed Forge labels, as 343i does).
+         </p>
+         <pre>
+            alias ach_top_shot_count        = player.number[0]
+            alias ach_license_to_kill_count = player.number[1]
+            alias ach_paper_beats_rock_vuln_timer = player.timer[0]
+            declare player.ach_top_shot_count        with network priority low
+            declare player.ach_license_to_kill_count with network priority low
+         
+            for each player do -- award Dive Bomber achievement as appropriate
+               alias killer    = global.player[0]
+               alias killer_aa = global.object[0]
+               alias death_mod = global.number[0]
                if current_player.killer_type_is(kill) then 
                   killer    = current_player.get_killer()
                   death_mod = current_player.get_death_damage_mod()
-                  if death_mod != enums.damage_reporting_modifier.headshot then 
-                     killer.ach_top_shot_count = 0
-                  end
-                  if death_mod == enums.damage_reporting_modifier.headshot then 
-                     killer.ach_top_shot_count += 1
-                  end
-                  if killer.ach_top_shot_count > 2 then 
-                     send_incident(dlc_achieve_2, killer, killer, 62)
+                  if death_mod == enums.damage_reporting_modifier.assassination then
+                     killer_aa = killer.get_armor_ability()
+                     if killer_aa.is_of_type(jetpack) and killer_aa.is_in_use() then 
+                        send_incident(dlc_achieve_2, killer, killer, 65)
+                     end
                   end
                end
             end
-         end
 
-         for each player do -- manage and award License To Kill achievement as appropriate
-            alias killer    = global.player[0]
-            alias death_mod = global.number[0]
-            if current_player.killer_type_is(kill) then 
-               killer    = current_player.get_killer()
-               death_mod = current_player.get_death_damage_mod()
-               if death_mod == enums.damage_reporting_modifier.splatter then 
-                  killer.ach_license_to_kill_count += 1
-                  if killer.ach_license_to_kill_count > 4 then 
-                     send_incident(dlc_achieve_2, killer, killer, 66)
+            for each player do -- award From Hell's Heart achievement as appropriate
+               alias death_mod = global.number[0]
+               alias killer    = global.player[0]
+               if current_player.killer_type_is(kill) then
+                  death_mod = current_player.get_death_damage_mod()
+                  if death_mod == enums.damage_reporting_modifier.sticky then
+                     killer = current_player.get_killer()
+                     if killer.killer_type_is(suicide) then 
+                        send_incident(dlc_achieve_2, current_player, current_player, 68)
+                     end
                   end
                end
             end
-         end
 
-         for each player do -- manage timing for the Paper Beats Rock achievement
-            alias current_ability = global.object[0]
-            --
-            current_ability = current_player.get_armor_ability()
-            if current_ability.is_of_type(armor_lock) and current_ability.is_in_use() then 
-               current_player.ach_paper_beats_rock_vuln_timer = 3
-               current_player.ach_paper_beats_rock_vuln_timer.set_rate(-100%)
-            end
-         end
-         for each player do -- award Paper Beats Rock achievement as appropriate
-            alias killer    = global.player[0]
-            alias death_mod = global.number[0]
-            if current_player.killer_type_is(kill) and not current_player.ach_paper_beats_rock_vuln_timer.is_zero() then 
-               death_mod = current_player.get_death_damage_mod()
-               if death_mod == enums.damage_reporting_modifier.assassination then
-                  killer = current_player.get_killer()
-                  send_incident(dlc_achieve_2, killer, killer, 60)
+            for each player do -- manage and award Top Shot achievement as appropriate
+               alias killer    = global.player[0]
+               alias death_mod = global.number[0]
+               if current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) then 
+                  current_player.ach_top_shot_count = 0
+                  if current_player.killer_type_is(kill) then 
+                     killer    = current_player.get_killer()
+                     death_mod = current_player.get_death_damage_mod()
+                     if death_mod != enums.damage_reporting_modifier.headshot then 
+                        killer.ach_top_shot_count = 0
+                     end
+                     if death_mod == enums.damage_reporting_modifier.headshot then 
+                        killer.ach_top_shot_count += 1
+                     end
+                     if killer.ach_top_shot_count > 2 then 
+                        send_incident(dlc_achieve_2, killer, killer, 62)
+                     end
+                  end
                end
             end
-         end
-      </pre>
-      
-      <h2><a name="loadout-palettes">Loadout palette code</a></h2>
-      <p>
-         Players will not have access to any loadout palette unless you give them access 
-         to loadout palettes. Standard gametypes grant players access to the Spartan Tier 
-         1 and Elite Tier 1 palettes depending on their species.
-      </p>
-      <pre>
-         for each player do -- loadout palettes
-            if current_player.is_elite() then 
-               current_player.set_loadout_palette(elite_tier_1)
-            end
-            if not current_player.is_elite() then 
-               current_player.set_loadout_palette(spartan_tier_1)
-            end
-         end
-      </pre>
-      
-      <h2><a name="round-timer">Round timer code (basic)</a></h2>
-      <p>
-         <i>Halo: Reach</i> does not automatically end the round when the round timer 
-         expires. Instead, it's up to Megalo script. The round timer likely behaves this 
-         way so that Invasion can use it for individual phases.
-      </p>
-      <pre>
-         if game.round_time_limit > 0 and game.round_timer.is_zero() then
-            game.end_round()
-         end
-      </pre>
-      
-      <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
-      <p>
-         The code for a round timer with Sudden Death is a bit more complicated.
-      </p>
-      <p>
-         Typically, Sudden Death will activate if, at the end of the round, a player is 
-         in a position where they can attempt to complete the objective. For example, 
-         during CTF, Sudden Death will activate if a player is standing very close to a 
-         flag that they can pick up and capture.
-      </p>
-      <p>
-         Typically, the Grace Period is used to complement Sudden Death. 
-         Sudden Death activates when a player is able to further an 
-         objective match; for example, it will enable if any player is 
-         standing close to a flag that they can pick up and score. In 
-         that scenario, if Sudden Death begins and then the conditions 
-         for it are no longer met (the player stops being near the flag), 
-         then the match will end after the Grace Period ends. Sudden 
-         Death never resets (if a player comes near the flag again, the 
-         timer will continue from where it left off), but the Grace 
-         Period does.
-      </p>
-      <pre>
-         alias sudden_death_enabled   = global.number[0] -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
-         alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
 
-         if not game.round_timer.is_zero() then 
-            game.grace_period_timer = 0
-         end
-         if game.round_time_limit > 0 then 
+            for each player do -- manage and award License To Kill achievement as appropriate
+               alias killer    = global.player[0]
+               alias death_mod = global.number[0]
+               if current_player.killer_type_is(kill) then 
+                  killer    = current_player.get_killer()
+                  death_mod = current_player.get_death_damage_mod()
+                  if death_mod == enums.damage_reporting_modifier.splatter then 
+                     killer.ach_license_to_kill_count += 1
+                     if killer.ach_license_to_kill_count > 4 then 
+                        send_incident(dlc_achieve_2, killer, killer, 66)
+                     end
+                  end
+               end
+            end
+
+            for each player do -- manage timing for the Paper Beats Rock achievement
+               alias current_ability = global.object[0]
+               --
+               current_ability = current_player.get_armor_ability()
+               if current_ability.is_of_type(armor_lock) and current_ability.is_in_use() then 
+                  current_player.ach_paper_beats_rock_vuln_timer = 3
+                  current_player.ach_paper_beats_rock_vuln_timer.set_rate(-100%)
+               end
+            end
+            for each player do -- award Paper Beats Rock achievement as appropriate
+               alias killer    = global.player[0]
+               alias death_mod = global.number[0]
+               if current_player.killer_type_is(kill) and not current_player.ach_paper_beats_rock_vuln_timer.is_zero() then 
+                  death_mod = current_player.get_death_damage_mod()
+                  if death_mod == enums.damage_reporting_modifier.assassination then
+                     killer = current_player.get_killer()
+                     send_incident(dlc_achieve_2, killer, killer, 60)
+                  end
+               end
+            end
+         </pre>
+      </section>
+
+      <section>
+         <h2><a name="loadout-palettes">Loadout palette code</a></h2>
+         <p>
+            Players will not have access to any loadout palette unless you give them access 
+            to loadout palettes. Standard gametypes grant players access to the Spartan Tier 
+            1 and Elite Tier 1 palettes depending on their species.
+         </p>
+         <pre>
+            for each player do -- loadout palettes
+               if current_player.is_elite() then 
+                  current_player.set_loadout_palette(elite_tier_1)
+               end
+               if not current_player.is_elite() then 
+                  current_player.set_loadout_palette(spartan_tier_1)
+               end
+            end
+         </pre>
+      </section>
+
+      <section>
+         <h2><a name="red-and-blue-teams">Identifying Red and Blue Teams across rounds</a></h2>
+         <p>
+            As explained <a href="/script/api/ns_unnamed/team.html">here</a>, Megalo scripts 
+            commonly refer to teams by a number, and with each round, Red and Blue Team swap 
+            their numbers. This makes it easy to implement asymmetric gametypes: you can assume 
+            that <code>team[0]</code> is always Defense and <code>team[1]</code> is always 
+            Offense. The thing is, what if you actually need to know which team is Red Team 
+            and which is Blue Team?
+         </p>
+         <p>
+            343 Industries' "Freeze Tag" game mode lightens players' armor colors whenever they 
+            become "frozen." It does this by applying a set of player traits with a forced color, 
+            but this means that Red Team and Blue Team need different traits, to force their 
+            colors to pink and teal, respectively &mdash; and it means that the gametype needs 
+            to know a player's team color, so that it can apply the right set of traits.
+         </p>
+         <pre>
+            alias red_team  = global.team[0]
+            alias blue_team = global.team[1]
+            declare red_team  with network priority high = team[0]
+            declare blue_team with network priority high = team[1]
+            
+            on init: do
+               --
+               -- We need to know which team is red and which team is blue, so we can apply the 
+               -- appropriate visuals to players that are frozen. However, that's trickier than 
+               -- you might expect: teams alternate each round, but their indices are remapped. 
+               -- On round 1, Red Team is team[0], but on round 2, it's team[1].
+               --
+               global.number[2] = game.current_round
+               global.number[2] %= 2
+               if global.number[2] == 0 then -- even-numbered round
+                  red_team  = team[0]
+                  blue_team = team[1]
+               end
+               if global.number[2] != 0 then -- odd-numbered round
+                  red_team  = team[1]
+                  blue_team = team[0]
+               end
+            end
+         </pre>
+      </section>
+
+      <section>
+         <h2>
+            <a name="moving-objects">Moving one object to another</a>
+         </h2>
+         <p>
+            Megalo doesn't have a "move to" function that can be used to move one object to 
+            another. Instead, you must take the object to be moved, attach it to the object 
+            you wish to move it to, and then detach it.
+         </p>
+         <pre>
+            alias subject = global.object[0]
+            alias target  = global.object[1]
+            
+            subject.attach_to(target, 0, 0, 0, relative)
+            subject.detach()
+         </pre>
+         <p>
+            When attaching an object, you can optionally provide a position offset, and you 
+            can decide whether this should be relative to the target's rotation or not. This 
+            can be used to fine-tune object positions:
+         </p>
+         <pre>
+            alias subject = global.object[0]
+            alias target  = global.object[1]
+
+            -- Move (subject) 10.0 Forge units above (target):
+            subject.attach_to(target, 0, 0, 100, relative)
+            subject.detach()
+         </pre>
+         <p>
+            Each coordinate in the attachment offset is limited to the range [-128, 127], 
+            where one unit in Forge is ten in Megalo. If you need to move an object further 
+            than 12.7 Forge units away from some target, you can do so by creating a second 
+            object along the way.
+         </p>
+         <pre>
+            alias subject = global.object[0]
+            alias target  = global.object[1]
+            
+            -- Move (subject) 20 Forge units (200 Megalo units) above (target), by creating 
+            -- a Hill Marker 10 Forge units above (target) and moving (subject) 10 Forge 
+            -- units above that marker:
+            target = target.place_at_me(hill_marker, none, none, 0, 0, 100, none)
+            subject.attach_to(target, 0, 0, 100, relative)
+            subject.detach()
+            target.delete()
+         </pre>
+      </section>
+      
+      <section>
+         <h2><a name="round-timer">Round timer code (basic)</a></h2>
+         <p>
+            <i>Halo: Reach</i> does not automatically end the round when the round timer 
+            expires. Instead, it's up to Megalo script. The round timer likely behaves this 
+            way so that Invasion can use it for individual phases.
+         </p>
+         <pre>
+            if game.round_time_limit > 0 and game.round_timer.is_zero() then
+               game.end_round()
+            end
+         </pre>
+      </section>
+
+      <section>
+         <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
+         <p>
+            The code for a round timer with Sudden Death is a bit more complicated.
+         </p>
+         <p>
+            Typically, Sudden Death will activate if, at the end of the round, a player is 
+            in a position where they can attempt to complete the objective. For example, 
+            during CTF, Sudden Death will activate if a player is standing very close to a 
+            flag that they can pick up and capture.
+         </p>
+         <p>
+            Typically, the Grace Period is used to complement Sudden Death. 
+            Sudden Death activates when a player is able to further an 
+            objective match; for example, it will enable if any player is 
+            standing close to a flag that they can pick up and score. In 
+            that scenario, if Sudden Death begins and then the conditions 
+            for it are no longer met (the player stops being near the flag), 
+            then the match will end after the Grace Period ends. Sudden 
+            Death never resets (if a player comes near the flag again, the 
+            timer will continue from where it left off), but the Grace 
+            Period does.
+         </p>
+         <pre>
+            alias sudden_death_enabled   = global.number[0] -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
+            alias announced_sudden_death = global.number[1] -- only announce the start of Sudden Death once
+
             if not game.round_timer.is_zero() then 
-               announced_sudden_death = 0
+               game.grace_period_timer = 0
             end
-            if game.round_timer.is_zero() then 
-               if sudden_death_enabled == 1 then 
-                  game.sudden_death_timer.set_rate(-100%)
-                  game.grace_period_timer.reset()
-                  if announced_sudden_death == 0 then 
-                     send_incident(sudden_death, all_players, all_players)
-                     announced_sudden_death = 1
-                  end
-                  if game.sudden_death_time > 0 and game.grace_period_timer > game.sudden_death_timer then 
-                     game.grace_period_timer = game.sudden_death_timer
-                  end
+            if game.round_time_limit > 0 then 
+               if not game.round_timer.is_zero() then 
+                  announced_sudden_death = 0
                end
-               if sudden_death_enabled == 0 then 
-                  game.grace_period_timer.set_rate(-100%)
-                  if game.grace_period_timer.is_zero() then 
+               if game.round_timer.is_zero() then 
+                  if sudden_death_enabled == 1 then 
+                     game.sudden_death_timer.set_rate(-100%)
+                     game.grace_period_timer.reset()
+                     if announced_sudden_death == 0 then 
+                        send_incident(sudden_death, all_players, all_players)
+                        announced_sudden_death = 1
+                     end
+                     if game.sudden_death_time > 0 and game.grace_period_timer > game.sudden_death_timer then 
+                        game.grace_period_timer = game.sudden_death_timer
+                     end
+                  end
+                  if sudden_death_enabled == 0 then 
+                     game.grace_period_timer.set_rate(-100%)
+                     if game.grace_period_timer.is_zero() then 
+                        game.end_round()
+                     end
+                  end
+                  if game.sudden_death_timer.is_zero() then 
                      game.end_round()
                   end
                end
-               if game.sudden_death_timer.is_zero() then 
-                  game.end_round()
-               end
             end
-         end
-      </pre>
-      
-      <h2><a name="super-shields">Super Shields</a></h2>
-      <p>
-         Like the original <i>Halo: Combat Evolved</i>, <i>Halo: Reach</i> doesn't 
-         display any extra graphics on players that have overshields. The 
-         "<abbr title="Title Update">TU</abbr>" versions of many gametypes include 
-         a new option called "Super Shields" which works around this, by spawning 
-         fire particles on these players.
-      </p>
-      <pre>
-         alias opt_super_shields = script_option[12]
-         alias lifespan = object.timer[0]
+         </pre>
+      </section>
+
+      <section>
+         <h2><a name="super-shields">Super Shields</a></h2>
+         <p>
+            Like the original <i>Halo: Combat Evolved</i>, <i>Halo: Reach</i> doesn't 
+            display any extra graphics on players that have overshields. The 
+            "<abbr title="Title Update">TU</abbr>" versions of many gametypes include 
+            a new option called "Super Shields" which works around this, by spawning 
+            fire particles on these players.
+         </p>
+         <pre>
+            alias opt_super_shields = script_option[12]
+            alias lifespan = object.timer[0]
          
-         -- This should be the index of a nameless Forge label whose object type 
-         -- is the fire particle emitter:
-         alias all_fire_particles = 7
+            -- This should be the index of a nameless Forge label whose object type 
+            -- is the fire particle emitter:
+            alias all_fire_particles = 7
          
-         declare object.lifespan = 1
+            declare object.lifespan = 1
          
-         for each player do -- handle super shields VFX
-            if opt_super_shields == 1 then 
-               alias current_shields = global.number[0]
-               alias outcome = global.number[1]
-               --
-               current_shields = 0
-               current_shields = current_player.biped.shields
-               if current_shields > 100 then 
-                  outcome = 0
-                  outcome = rand(10)
-                  if outcome &lt;= 2 then -- 30% chance to spawn a particle emitter
-                     current_player.biped.place_at_me(particle_emitter_fire, none, never_garbage_collect, 0, 0, 0, none)
+            for each player do -- handle super shields VFX
+               if opt_super_shields == 1 then 
+                  alias current_shields = global.number[0]
+                  alias outcome = global.number[1]
+                  --
+                  current_shields = 0
+                  current_shields = current_player.biped.shields
+                  if current_shields > 100 then 
+                     outcome = 0
+                     outcome = rand(10)
+                     if outcome &lt;= 2 then -- 30% chance to spawn a particle emitter
+                        current_player.biped.place_at_me(particle_emitter_fire, none, never_garbage_collect, 0, 0, 0, none)
+                     end
                   end
                end
             end
-         end
-         for each object with label all_fire_particles do -- clean up super shields VFX
-            current_object.lifespan.set_rate(-100%)
-            if current_object.lifespan.is_zero() then 
-               current_object.delete()
+            for each object with label all_fire_particles do -- clean up super shields VFX
+               current_object.lifespan.set_rate(-100%)
+               if current_object.lifespan.is_zero() then 
+                  current_object.delete()
+               end
             end
-         end
-      </pre>
+         </pre>
+      </section>
    </body>
 </article>

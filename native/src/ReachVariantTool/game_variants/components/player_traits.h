@@ -33,7 +33,7 @@ namespace reach {
    enum class active_camo : uint8_t {
       unchanged = 0,
       off       = 1,
-      unknown_2 = 2, // fades only very slightly with movement
+      worst     = 2, // fades only very slightly with movement
       poor      = 3,
       good      = 4,
       best      = 5, // seen in Blue Powerup Traits; doesn't fade with movement
@@ -120,11 +120,20 @@ namespace reach {
       each_4      = 14,
       // bitfield can hold 15, though it's likely not valid
    };
+   enum class health_multiplier {
+      unchanged = 0,
+      value_000 = 1,
+      value_100 = 2,
+      value_150 = 3,
+      value_200 = 4,
+      value_300 = 5,
+      value_400 = 6,
+   };
    enum class health_rate : uint8_t {
       unchanged = 0,
-      // 1 (possibly decay)
-      // 2 (possibly decay)
-      // 3 (possibly decay)
+      value_n25 = 1, // -25%
+      value_n10 = 2, // -10%
+      value_n05 = 3, //  -5%
       value_000 = 4,
       value_050 = 5,
       value_090 = 6,
@@ -171,12 +180,12 @@ namespace reach {
    enum class radar_range : uint8_t {
       unchanged  = 0,
       meters_010 = 1,
-      // 2
+      meters_015 = 2,
       meters_025 = 3,
-      // 4
+      meters_050 = 4,
       meters_075 = 5,
-      meters_150 = 6,
-      // bitfield can hold 7, though it's likely not valid
+      meters_100 = 6,
+      meters_150 = 7,
    };
    enum class radar_state : uint8_t {
       unchanged = 0,
@@ -198,9 +207,9 @@ namespace reach {
    };
    enum class shield_rate : uint8_t {
       unchanged =  0,
-      drain_in_12_s = 1, // decays from 100% to 0% in 12 seconds
-      drain_in_30_s = 2, // decays from 100% to 0% in 30 seconds
-      drain_in_60_s = 3, // decays from 100% to 0% in 60 seconds
+      value_n25 = 1, // -25%
+      value_n10 = 2, // -10%
+      value_n05 = 3, //  -5%
       value_000 =  4,
       value_010 =  5,
       value_025 =  6,
@@ -268,13 +277,13 @@ namespace reach {
 class ReachPlayerTraits {
    public:
       struct {
-         cobb::bitnumber<4, reach::damage_resist> damageResist = reach::damage_resist::unchanged;
-         cobb::bitnumber<3, uint8_t> healthMult;
-         cobb::bitnumber<4, reach::health_rate> healthRate = reach::health_rate::unchanged;
-         cobb::bitnumber<3, reach::shield_multiplier> shieldMult = reach::shield_multiplier::unchanged;
-         cobb::bitnumber<4, reach::shield_rate> shieldRate = reach::shield_rate::unchanged;
-         cobb::bitnumber<4, uint8_t> overshieldRate; // recharge rate for overshield powerup? or for overshields in general?
-         cobb::bitnumber<2, reach::bool_trait> headshotImmune = reach::bool_trait::unchanged;
+         cobb::bitnumber<4, reach::damage_resist>     damageResist   = reach::damage_resist::unchanged;
+         cobb::bitnumber<3, reach::health_multiplier> healthMult     = reach::health_multiplier::unchanged;
+         cobb::bitnumber<4, reach::health_rate>       healthRate     = reach::health_rate::unchanged;
+         cobb::bitnumber<3, reach::shield_multiplier> shieldMult     = reach::shield_multiplier::unchanged;
+         cobb::bitnumber<4, reach::shield_rate>       shieldRate     = reach::shield_rate::unchanged;
+         cobb::bitnumber<4, reach::shield_rate>       overshieldRate = reach::shield_rate::unchanged; // recharge rate for overshield powerup? or for overshields in general?
+         cobb::bitnumber<2, reach::bool_trait>        headshotImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<3, uint8_t> vampirism;
          cobb::bitnumber<2, reach::bool_trait> assassinImmune = reach::bool_trait::unchanged;
          cobb::bitnumber<2, reach::bool_trait> cannotDieFromDamage;

@@ -257,8 +257,8 @@
                   <dd>The object's local "forward" vector most closely matches world up; 
                   the object is nose-up.</dd>
                <dt>left_is_up</dt>
-                  <dd>The object's local "left" vector most closely matches world left; 
-                  the object is turned on its side.</dd>
+                  <dd>The object's local "left" vector most closely matches world up; the 
+                  object is turned on its side.</dd>
                <dt>down_is_up</dt>
                <dt>upside_down</dt>
                   <dd>The object's local "down" vector most closely matches world up; the 

@@ -166,40 +166,25 @@ namespace Megalo {
       arg_compile_result OpcodeArgValueObjectPlayerVariable::compile(Compiler& compiler, cobb::string_scanner& arg, uint8_t part) noexcept {
          int32_t index;
          if (!arg.extract_integer_literal(index)) {
-            auto word = arg.extract_word();
-            if (word.startsWith("object.", Qt::CaseInsensitive)) {
-               //
-               // Allow the use of a relative object.player alias here.
-               //
-               word = word.right(word.size() - strlen("object."));
-               if (word.isEmpty())
-                  return arg_compile_result::failure();
-               auto alias = compiler.lookup_relative_alias(word, &OpcodeArgValueObject::typeinfo);
-               if (!alias)
-                  return arg_compile_result::failure();
-               auto target = alias->target;
-               if (!target)
-                  return arg_compile_result::failure();
-               if (target->is_accessor() || target->is_property())
-                  return arg_compile_result::failure();
-               auto& nested = target->resolved.nested;
-               if (nested.type != &OpcodeArgValuePlayer::typeinfo)
-                  return arg_compile_result::failure();
-               index = nested.index;
+            auto word    = arg.extract_word();
+            auto working = std::make_unique<Script::VariableReference>(compiler, word);
+            working->resolve(compiler, true); // Pass (true) to use alias-resolving logic, so that typename.typename[n] is allowed
+            if (working->is_invalid)
+               return arg_compile_result::failure();
+            if (working->is_constant_integer()) { // This check handles aliases of constant integers
+               index = working->get_constant_integer();
             } else {
                //
-               // Look for an absolute alias of an integer.
+               // If it's not an alias of a constant integer, then ensure that it's something of the 
+               // form (object.player[n]), or something which resolves to the same.
                //
-               auto alias = compiler.lookup_absolute_alias(word);
-               if (alias && alias->is_integer_constant()) {
-                  index = alias->get_integer_constant();
-               } else {
-                  //
-                  // Look for an enum value.
-                  //
-                  if (!compiler.try_decode_enum_reference(word, index))
-                     return arg_compile_result::failure();
-               }
+               if (working->resolved.alias_basis != &OpcodeArgValueObject::typeinfo) // Ensure it's an alias relative to the "object" type
+                  return arg_compile_result::failure();
+               if (working->resolved.nested.type != &OpcodeArgValuePlayer::typeinfo) // Ensure it's an object.player alias
+                  return arg_compile_result::failure();
+               if (!working->is_variable()) // Ensure it's not an accessor, property, etc.
+                  return arg_compile_result::failure();
+               index = working->resolved.nested.index;
             }
          }
          //
