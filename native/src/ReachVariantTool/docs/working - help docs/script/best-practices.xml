@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Best practices</title>
+   <body>
+      <p>
+         When writing scripts, there are a number of things you can do to make things easier 
+         for yourself and others.
+      </p>
+
+      <h2>Use aliases everywhere</h2>
+      <p>
+         When working with Megalo, you'll find yourself juggling several variables, particularly 
+         "temporary" variables that only need to hold information very briefly as part of some 
+         task. My approach to this is to alias all of my variables at the top of the script, 
+         with names specifically marking the temporary ones.
+      </p>
+      <pre>
+         --
+         -- I use names like these for my temporary variables:
+         --
+         alias temp_int_00 = global.number[0]
+         alias temp_int_01 = global.number[1]
+         alias temp_obj_00 = global.object[0]
+
+         --
+         -- Variables that need to remain "pristine" throughout a single game tick, or across
+         -- multiple game ticks, get more meaningful names:
+         --
+         alias sudden_death_enabled   = global.number[2] -- set this to 1 when you want Sudden Death to be active, or 0 otherwise
+         alias announced_sudden_death = global.number[3] -- only announce the start of Sudden Death once
+         
+         -- I usually define names like the ones above at the start of the script file.
+         
+         --
+         -- Aliases can be block-scoped, so when you're using a temporary variable for something, 
+         -- you can give it a specific name.
+         --
+         for each object with label "goal" do
+            alias current_biped = temp_obj_00
+            alias distance      = temp_int_00
+            --
+            for each player do
+               current_biped = current_player.biped
+               if current_biped != no_object then
+                  distance = current_biped.get_distance_to(current_object)
+                  if distance &lt; 10 then
+                     --
+                     -- ...
+                     --
+                  end
+               end
+            end
+         end
+      </pre>
+      <p>
+         Aliases are also good for script options, so that you can reorder them within your gametype 
+         without having to change option indices all over the code. I prefer to put these aliases 
+         near the start of the code:
+      </p>
+      <pre>
+         alias opt_leader_points = script_option[0]
+         alias opt_kill_points   = script_option[1]
+      </pre>
+      <p>
+         And of course, it's also useful to do that for script traits and script widgets:
+      </p>
+      <pre>
+         alias leader_traits = script_traits[0]
+         
+         alias ui_turn_clock = script_widget[0]
+      </pre>
+      <p>
+         Most programming languages let you create as many variables as you need. Megalo doesn't; you 
+         have a limited pool of variables to use, and ReachVariantTool doesn't automatically manage 
+         them for you. You have the maximum level of control over them, but also the maximum amount 
+         of responsibility. Aliases are a powerful tool for keeping things manageable.
+      </p>
+
+      <h2>Comment your code!</h2>
+      <p>
+         Code comments are a great way to make sure that other people can easily understand your code. 
+         They're also very helpful for you, because you're gonna be "other people" in six months. It's 
+         always helpful to write informative comments which explain what you're doing.
+      </p>
+      <pre>
+         if opt_draw_rule > 0 and draw_turn_count >= opt_draw_rule then
+            --
+            -- If 75 moves (by default) pass without there being pawns on the board, and 
+            -- without either player capturing an enemy piece, then the game will end in 
+            -- a draw automatically.
+            --
+            ui_endgame.set_text("Draw! (%n turns passed with no pawns and no captures.)", draw_turn_count)
+            do_endgame_ui_visibility()
+            game.end_round()
+         end
+      </pre>
+      <p>
+         It's somewhat common for novice programmers to write code comments that... aren't strictly 
+         helpful, like in this deliberately exaggerated example here:
+      </p>
+      <pre>
+         -- Increase the number by five
+         global.number[0] += 5
+      </pre>
+      <p>
+         But... how does one write a good code comment? Well, a good way to view programming is as its 
+         own form of communication, in a setting where precision is required and enforced, and we don't 
+         call these things "programming <em>languages</em>" for nothing. When you write code, you're 
+         communicating with the machine, but you're also communicating with whoever else reads your 
+         code. Some ideas are easier to express in plain English, however &mdash; particularly high-level 
+         goals and abstractions &mdash; and those are precisely the ideas you should aim to convey in a 
+         code comment.
+      </p>
+      <p>
+         The code that you write consists of low-level, step-by-step instructions &mdash; lots of "little 
+         picture" stuff. Let your comments convey the big picture... and the medium picture, I suppose.
+      </p>
+   </body>
+</article>

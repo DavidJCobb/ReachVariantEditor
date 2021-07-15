@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>String Localization</title>
+   <body>
+      <p>
+         When editing strings in a game variant, it is usually possible to provide
+         translations into multiple languages. (In some cases, this feature is not
+         available due to technical limitations in the game variant file format.)
+         Additionally, there is a "Library" button that you can click to access the
+         <b>localized string library</b>, a collection of translations pulled from
+         official Bungie content &mdash; both existing game variants and the base
+         map files.
+      </p>
+      <img src="string-editor.png" />
+      <p>
+         The string library is shown below.
+      </p>
+      <img src="string-library.png" />
+      <p>
+         The lefthand column has a list of all available strings, along with a 
+         search box.
+      </p>
+      <p>
+         The righthand column allows you to preview the text of a given string in 
+         any supported language. Additionally, some strings allow you to specify 
+         options. As an example, the "x Points" string allows you to substitute in 
+         any number, with plurals handled for each language.
+      </p>
+      <p>
+         Several strings also have more detailed descriptions, which may contain 
+         notes about the context in which the string was used, or information 
+         specific to certain languages. For example, the "Turn Clock" string in 
+         Portugese is "Chess Clock," and this is noted in the description.
+      </p>
+   </body>
+</article>

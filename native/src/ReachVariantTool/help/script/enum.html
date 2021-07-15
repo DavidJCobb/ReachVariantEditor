@@ -87,7 +87,12 @@
                <a href="editor/script_window/index.html">Script Window</a>
                <ul>
                   <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
-                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li>
+                     <a href="editor/script_window/string-table.html">All Other Strings</a>
+                     <ul>
+                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                     </ul>
+                  </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
                   <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
                   <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
@@ -111,6 +116,7 @@
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
+                  <li><a href="script/best-practices.html">Best practices</a></li>
                </ul>
             </li>
             <li>
@@ -177,7 +183,7 @@
          under a single name using the <code>enum</code> keyword:
       </p>
       <pre>
-enum my_cool_enum
+<span class="keyword">enum</span> my_cool_enum
    value_a
    value_b
    value_c
@@ -201,12 +207,12 @@ global.number[0] = my_cool_enum.value_a</pre>
       </p>
       <pre>
 <span class="comment">-- An enum with five values:</span>
-enum alphabet a b c d e <span class="keyword">end</span>
+<span class="keyword">enum</span> alphabet a b c d e <span class="keyword">end</span>
 <span class="comment">--</span>
 <span class="comment">-- alphabet.a == 0</span>
 <span class="comment">-- alphabet.e == 4</span>
 
-enum an_enum_with_explicit_values
+<span class="keyword">enum</span> an_enum_with_explicit_values
    a
    b
    c = 5
@@ -221,7 +227,7 @@ enum an_enum_with_explicit_values
 <span class="comment">-- an_enum_with_explicit_values.e == 7</span>
 
 <span class="keyword">alias</span> foo = 5
-enum some_enum
+<span class="keyword">enum</span> some_enum
    bar = foo
 <span class="keyword">end</span>
 <span class="comment">--</span>
@@ -234,7 +240,7 @@ enum some_enum
          for each individual value. The following pieces of code are identical:
       </p>
       <pre>
-enum chess_piece_type
+<span class="keyword">enum</span> chess_piece_type
    none
    pawn
    rook

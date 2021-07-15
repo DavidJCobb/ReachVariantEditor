@@ -87,7 +87,12 @@
                <a href="editor/script_window/index.html">Script Window</a>
                <ul>
                   <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
-                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li>
+                     <a href="editor/script_window/string-table.html">All Other Strings</a>
+                     <ul>
+                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                     </ul>
+                  </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
                   <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
                   <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
@@ -111,6 +116,7 @@
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
+                  <li><a href="script/best-practices.html">Best practices</a></li>
                </ul>
             </li>
             <li>
@@ -225,8 +231,14 @@
          appear. It is not the same as <var>neutral_team</var>.</p></dd>
 <dt><a href="script/api/ns_unnamed/no_widget.html">no_widget</a></dt>
    <dd><p>A value which represents "none," usable where a HUD widget can appear.</p></dd>
+<dt><a href="script/api/ns_unnamed/player.html">player[<var>n</var>]</a></dt>
+   <dd><p>Allows direct access to all sixteen possible active players in a match.</p></dd>
 <dt><a href="script/api/ns_unnamed/script_option.html">script_option[<var>n</var>]</a></dt>
    <dd><p>Allows scripts to access the value of scripted Custom Game options.</p></dd>
+<dt><a href="script/api/ns_unnamed/script_widget.html">script_widget[<var>n</var>]</a></dt>
+   <dd><p>One of the four HUD widgets available to scripts.</p></dd>
+<dt><a href="script/api/ns_unnamed/team.html">team[<var>n</var>]</a></dt>
+   <dd><p>Allows direct access to all eight possible teams in a match.</p></dd>
 <dt><a href="script/api/ns_unnamed/unk_14_team.html">unk_14_team</a></dt>
    <dd><p>Unknown, and potentially unused.</p></dd>
 <dt><a href="script/api/ns_unnamed/unk_15_team.html">unk_15_team</a></dt>

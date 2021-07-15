@@ -18,14 +18,6 @@
 // other functions (i.e. only A has to be told that it's related to B; the loader then tells B 
 // that it's related to A).
 //
-// NOTE: As of this writing, MSVC's linker fails with an internal error (i.e. Microsoft screwed 
-// something up) when building this tool in Release. This tool is only intended for internal usage 
-// anyway, so build it in Debug instead. Runs fast enough either way. Realistically speaking, it's 
-// never going to be possible for me to actually narrow this problem down to a minimal test case 
-// to send to Microsoft, and debugging their tools isn't my responsibility or a good use of my 
-// time. If this builds in any configuration, then it builds in the configuration I need it to 
-// build in.
-//
 
 bool read_file(const wchar_t* path, std::string& out) {
    std::ifstream in(path, std::ios::in);
@@ -189,6 +181,7 @@ int main(int argc, char* argv[]) {
    auto& registry = APIRegistry::get();
    registry.root_path = out_path;
    //
+   int count = 0;
    std::error_code err;
    for (auto di = fs_rdi(out_path, err); di != fs_rdi(); ++di) {
       if (err) {
@@ -204,6 +197,7 @@ int main(int argc, char* argv[]) {
             temp.replace_extension(".html");
             std::wcout << L"File: " << temp.c_str() << L"\n";
             //
+            ++count;
             handle_file(path, depth);
          }
       }
@@ -214,4 +208,5 @@ int main(int argc, char* argv[]) {
    for (auto* ns : registry.namespaces) {
       ns->write(get_article_template(), get_ns_member_template());
    }
+   std::wcout << L"\nHandled " << count << " files.";
 }

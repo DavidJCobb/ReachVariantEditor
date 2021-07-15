@@ -304,16 +304,17 @@
             object along the way.
          </p>
          <pre>
-            alias subject = global.object[0]
-            alias target  = global.object[1]
-            
-            -- Move (subject) 20 Forge units (200 Megalo units) above (target), by creating 
-            -- a Hill Marker 10 Forge units above (target) and moving (subject) 10 Forge 
+            alias subject   = global.object[0]
+            alias target    = global.object[1]
+            alias temporary = global.object[2]
+
+            -- Move (subject) 20 Forge units (200 Megalo units) above (target), by creating
+            -- a Hill Marker 10 Forge units above (target) and moving (subject) 10 Forge
             -- units above that marker:
-            target = target.place_at_me(hill_marker, none, none, 0, 0, 100, none)
-            subject.attach_to(target, 0, 0, 100, relative)
+            temporary = target.place_at_me(hill_marker, none, none, 0, 0, 100, none)
+            subject.attach_to(temporary, 0, 0, 100, relative)
             subject.detach()
-            target.delete()
+            temporary.delete() -- make sure to delete the temporary Hill Marker afterward!
          </pre>
       </section>
       

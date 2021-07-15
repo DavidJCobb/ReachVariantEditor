@@ -2055,6 +2055,8 @@ void APIRegistry::make_stem(std::filesystem::path path, std::string& out) {
       return;
    for (auto temp = depth; temp; --temp) {
       path = path.parent_path();
-      out  = path.filename().u8string() + '/' + out;
+      auto fn = path.filename().u8string();
+      fn += '/';
+      out.insert(0, (const char*)fn.c_str());
    }
 }

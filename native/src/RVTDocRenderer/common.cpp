@@ -157,6 +157,7 @@ namespace {
       "declare",
       "do",
       "end",
+      "enum",
       "for",
       "function",
       "if",
