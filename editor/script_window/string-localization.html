@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>Forge Labels | ReachVariantTool Documentation</title>
+      <title>String Localization | ReachVariantTool Documentation</title>
       <base href="../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -174,35 +174,38 @@
          </ul>
       </nav>
       <main>
-         <h1>Forge Labels</h1>
+         <h1>String Localization</h1>
 
       <p>
-         The <b>Forge labels</b> page allows you to edit the Forge labels defined 
-         for a game variant. You can add labels, reorder them, and delete any labels 
-         not in use by the gametype script.
+         When editing strings in a game variant, it is usually possible to provide
+         translations into multiple languages. (In some cases, this feature is not
+         available due to technical limitations in the game variant file format.)
+         Additionally, there is a "Library" button that you can click to access the
+         <b>localized string library</b>, a collection of translations pulled from
+         official Bungie content &mdash; both existing game variants and the base
+         map files.
       </p>
-      <img src="editor/script_window/forge-labels.png">
+      <img src="editor/script_window/string-editor.png">
       <p>
-         The fields available to edit for each Forge label are as follows:
+         The string library is shown below.
       </p>
-      <dl>
-         <dt>Name</dt>
-            <dd>The name to use for a Forge label; the label matches all objects 
-            with this label assigned. This is optional; a label with no name string 
-            can be used internally by the gametype script to rapidly access all 
-            objects on the map that meet specific criteria.</dd>
-         <dt>Object Type</dt>
-            <dd>If enabled, the label also matches all objects of this type.</dd>
-         <dt>Team</dt>
-            <dd>If enabled, the label also matches all objects on this team. This 
-            may not behave the way you expect; for example, in FFA gametypes, it 
-            seems like most or all objects, including projectiles, are on Team 1.</dd>
-         <dt>Number</dt>
-            <dd>Yet to be determined.</dd>
-         <dt>Map Must Have At Least</dt>
-            <dd>The minimum number of labeled objects that must exist on the map 
-            in order for this game variant to be considered compatible.</dd>
-      </dl>
+      <img src="editor/script_window/string-library.png">
+      <p>
+         The lefthand column has a list of all available strings, along with a 
+         search box.
+      </p>
+      <p>
+         The righthand column allows you to preview the text of a given string in 
+         any supported language. Additionally, some strings allow you to specify 
+         options. As an example, the "x Points" string allows you to substitute in 
+         any number, with plurals handled for each language.
+      </p>
+      <p>
+         Several strings also have more detailed descriptions, which may contain 
+         notes about the context in which the string was used, or information 
+         specific to certain languages. For example, the "Turn Clock" string in 
+         Portugese is "Chess Clock," and this is noted in the description.
+      </p>
    
       </main>
       <script src="resources/sidebar.js"></script>

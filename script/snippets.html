@@ -87,7 +87,12 @@
                <a href="editor/script_window/index.html">Script Window</a>
                <ul>
                   <li><a href="editor/script_window/meta-strings.html">Metadata Strings</a></li>
-                  <li><a href="editor/script_window/string-table.html">All Other Strings</a></li>
+                  <li>
+                     <a href="editor/script_window/string-table.html">All Other Strings</a>
+                     <ul>
+                        <li><a href="editor/script_window/string-localization.html">Localization</a></li>
+                     </ul>
+                  </li>
                   <li><a href="editor/script_window/forge-labels.html">Forge Labels</a></li>
                   <li><a href="editor/script_window/map-permissions.html">Map Permissions</a></li>
                   <li><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></li>
@@ -111,6 +116,7 @@
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
                   <li><a href="script/declare.html">Variable declarations</a></li>
+                  <li><a href="script/best-practices.html">Best practices</a></li>
                </ul>
             </li>
             <li>
@@ -188,20 +194,23 @@
          <li><a href="script/snippets.html#announce-game-start">Announce game start</a></li>
          <li><a href="script/snippets.html#dlc-achievements">DLC Achievements</a></li>
          <li><a href="script/snippets.html#loadout-palettes">Loadout palette code</a></li>
+         <li><a href="script/snippets.html#red-and-blue-teams">Identifying Red and Blue Teams across rounds</a></li>
+         <li><a href="script/snippets.html#moving-objects">Moving one object to another</a></li>
          <li><a href="script/snippets.html#round-timer">Round timer code (basic)</a></li>
          <li><a href="script/snippets.html#round-timer-sd">Round timer code (with Sudden Death)</a></li>
          <li><a href="script/snippets.html#super-shields">Super Shields</a></li>
       </ul>
-      
-      <h2><a name="announce-game-start">Announce game start</a></h2>
-      <p>
-         Most official gametypes announce their names at the start of each round. They do 
-         this by <dfn>sending an incident</dfn>: they use the 
-         <a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a> function 
-         to tell the game that some event (such as the start of a round) has occurred. Each 
-         base gametype has its own incident.
-      </p>
-      <pre>
+
+      <section>
+         <h2><a name="announce-game-start">Announce game start</a></h2>
+         <p>
+            Most official gametypes announce their names at the start of each round. They do 
+            this by <dfn>sending an incident</dfn>: they use the 
+            <a href="script/api/ns_unnamed/actions/send_incident.html">send_incident</a> function 
+            to tell the game that some event (such as the start of a round) has occurred. Each 
+            base gametype has its own incident.
+         </p>
+         <pre>
 <span class="keyword">alias</span> announced_game_start = player.number[0]
 <span class="keyword">alias</span> announce_start_timer = player.timer[0]
 
@@ -209,41 +218,70 @@
 <span class="keyword">declare</span> player.announce_start_timer = 5
 
 <span class="keyword">for</span> each player <span class="keyword">do</span>
-   <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_game_start_timer.is_zero() <span class="keyword">then</span> 
+   <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_start_timer.is_zero() <span class="keyword">then</span>
       send_incident(race_game_start, current_player, no_player)
       current_player.announced_game_start = 1
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
-      
-      <h2><a name="dlc-achievements">DLC Achievements</a></h2>
-      <p>
-         Several DLC achievements are awarded by Megalo script instead of being hardcoded 
-         into the game. These include:
-      </p>
-      <dl>
-         <dt>Dive Bomber</dt>
-            <dd>Assassinate an enemy player while using a Jetpack.</dd>
-         <dt>From Hell's Heart</dt>
-            <dd>After being stuck with a plasma grenade, make sure that the player who 
-            stuck you dies in the blast with you.</dd>
-         <dt>Top Shot</dt>
-            <dd>Score three headshot kills in a row without dying.</dd>
-         <dt>License to Kill</dt>
-            <dd>Splatter five enemy players during a single match.</dd>
-         <dt>Paper Beats Rock</dt>
-            <dd>Assassinate an enemy player no more than three seconds after they stop 
-            using Armor Lock.</dd>
-      </dl>
-      <p>
-         This code was taken from official gametypes. In some cases, small adjustments 
-         were made in order to avoid dependencies that you can't easily copy and paste 
-         (e.g. using the
-         <a href="script/api/object/conditions/is_of_type.html">object.is_of_type</a> 
-         condition instead of using 
-         <a href="script/api/object/conditions/has_forge_label.html">object.has_forge_label</a> 
-         with unnamed Forge labels, as 343i does).
-      </p>
-      <pre>
+         <p>
+            In addition to announcing the game start, you may want to display explanatory 
+            text at the start of the round. You can do this by calling the 
+            <a href="script/api/player/actions/set_round_card_title.html">player.set_round_card_title</a> 
+            function. Commonly, gametypes will display the score to win in the "round card," 
+            unless the player has turned off the score limit, and this can be accomplished 
+            using <a href="script/api/format-string.html">format strings</a>.
+         </p>
+         <pre>
+<span class="keyword">alias</span> announced_game_start = player.number[0]
+<span class="keyword">alias</span> announce_start_timer = player.timer[0]
+
+<span class="keyword">declare</span> player.announced_game_start with network priority low = 0
+<span class="keyword">declare</span> player.announce_start_timer = 5
+
+<span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">then</span>
+      current_player.set_round_card_title(<span class="string">"Collect flags for your team.\r\n%n points to win.</span>", game.score_to_win)
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> game.score_to_win == 0 <span class="keyword">then</span>
+      current_player.set_round_card_title(<span class="string">"Collect flags for your team.</span>")
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_start_timer.is_zero() <span class="keyword">then</span>
+      send_incident(stockpile_game_start, current_player, no_player)
+      current_player.announced_game_start = 1
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      </section>
+
+      <section>
+         <h2><a name="dlc-achievements">DLC Achievements</a></h2>
+         <p>
+            Several DLC achievements are awarded by Megalo script instead of being hardcoded 
+            into the game. These include:
+         </p>
+         <dl>
+            <dt>Dive Bomber</dt>
+               <dd>Assassinate an enemy player while using a Jetpack.</dd>
+            <dt>From Hell's Heart</dt>
+               <dd>After being stuck with a plasma grenade, make sure that the player who 
+               stuck you dies in the blast with you.</dd>
+            <dt>Top Shot</dt>
+               <dd>Score three headshot kills in a row without dying.</dd>
+            <dt>License to Kill</dt>
+               <dd>Splatter five enemy players during a single match.</dd>
+            <dt>Paper Beats Rock</dt>
+               <dd>Assassinate an enemy player no more than three seconds after they stop 
+               using Armor Lock.</dd>
+         </dl>
+         <p>
+            This code was taken from official gametypes. In some cases, small adjustments 
+            were made in order to avoid dependencies that you can't easily copy and paste 
+            (e.g. using the
+            <a href="script/api/object/conditions/is_of_type.html">object.is_of_type</a> 
+            condition instead of using 
+            <a href="script/api/object/conditions/has_forge_label.html">object.has_forge_label</a> 
+            with unnamed Forge labels, as 343i does).
+         </p>
+         <pre>
 <span class="keyword">alias</span> ach_top_shot_count        = player.number[0]
 <span class="keyword">alias</span> ach_license_to_kill_count = player.number[1]
 <span class="keyword">alias</span> ach_paper_beats_rock_vuln_timer = player.timer[0]
@@ -336,14 +374,16 @@
       <span class="keyword">end</span>
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
-      
-      <h2><a name="loadout-palettes">Loadout palette code</a></h2>
-      <p>
-         Players will not have access to any loadout palette unless you give them access 
-         to loadout palettes. Standard gametypes grant players access to the Spartan Tier 
-         1 and Elite Tier 1 palettes depending on their species.
-      </p>
-      <pre>
+      </section>
+
+      <section>
+         <h2><a name="loadout-palettes">Loadout palette code</a></h2>
+         <p>
+            Players will not have access to any loadout palette unless you give them access 
+            to loadout palettes. Standard gametypes grant players access to the Spartan Tier 
+            1 and Elite Tier 1 palettes depending on their species.
+         </p>
+         <pre>
 <span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- loadout palettes</span>
    <span class="keyword">if</span> current_player.is_elite() <span class="keyword">then</span> 
       current_player.set_loadout_palette(elite_tier_1)
@@ -352,41 +392,135 @@
       current_player.set_loadout_palette(spartan_tier_1)
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
+      </section>
+
+      <section>
+         <h2><a name="red-and-blue-teams">Identifying Red and Blue Teams across rounds</a></h2>
+         <p>
+            As explained <a href="script/api/ns_unnamed/team.html">here</a>, Megalo scripts 
+            commonly refer to teams by a number, and with each round, Red and Blue Team swap 
+            their numbers. This makes it easy to implement asymmetric gametypes: you can assume 
+            that <code>team[0]</code> is always Defense and <code>team[1]</code> is always 
+            Offense. The thing is, what if you actually need to know which team is Red Team 
+            and which is Blue Team?
+         </p>
+         <p>
+            343 Industries' "Freeze Tag" game mode lightens players' armor colors whenever they 
+            become "frozen." It does this by applying a set of player traits with a forced color, 
+            but this means that Red Team and Blue Team need different traits, to force their 
+            colors to pink and teal, respectively &mdash; and it means that the gametype needs 
+            to know a player's team color, so that it can apply the right set of traits.
+         </p>
+         <pre>
+<span class="keyword">alias</span> red_team  = global.team[0]
+<span class="keyword">alias</span> blue_team = global.team[1]
+<span class="keyword">declare</span> red_team  with network priority high = team[0]
+<span class="keyword">declare</span> blue_team with network priority high = team[1]
+
+<span class="keyword">on</span> init: <span class="keyword">do</span>
+   <span class="comment">--</span>
+   <span class="comment">-- We need to know which team is red and which team is blue, so we can apply the </span>
+   <span class="comment">-- appropriate visuals to players that are frozen. However, that's trickier than </span>
+   <span class="comment">-- you might expect: teams alternate each round, but their indices are remapped. </span>
+   <span class="comment">-- On round 1, Red Team is team[0], but on round 2, it's team[1].</span>
+   <span class="comment">--</span>
+   global.number[2] = game.current_round
+   global.number[2] %= 2
+   <span class="keyword">if</span> global.number[2] == 0 <span class="keyword">then</span> <span class="comment">-- even-numbered round</span>
+      red_team  = team[0]
+      blue_team = team[1]
+   <span class="keyword">end</span>
+   <span class="keyword">if</span> global.number[2] != 0 <span class="keyword">then</span> <span class="comment">-- odd-numbered round</span>
+      red_team  = team[1]
+      blue_team = team[0]
+   <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+      </section>
+
+      <section>
+         <h2>
+            <a name="moving-objects">Moving one object to another</a>
+         </h2>
+         <p>
+            Megalo doesn't have a "move to" function that can be used to move one object to 
+            another. Instead, you must take the object to be moved, attach it to the object 
+            you wish to move it to, and then detach it.
+         </p>
+         <pre>
+<span class="keyword">alias</span> subject = global.object[0]
+<span class="keyword">alias</span> target  = global.object[1]
+
+subject.attach_to(target, 0, 0, 0, relative)
+subject.detach()</pre>
+         <p>
+            When attaching an object, you can optionally provide a position offset, and you 
+            can decide whether this should be relative to the target's rotation or not. This 
+            can be used to fine-tune object positions:
+         </p>
+         <pre>
+<span class="keyword">alias</span> subject = global.object[0]
+<span class="keyword">alias</span> target  = global.object[1]
+
+<span class="comment">-- Move (subject) 10.0 Forge units above (target):</span>
+subject.attach_to(target, 0, 0, 100, relative)
+subject.detach()</pre>
+         <p>
+            Each coordinate in the attachment offset is limited to the range [-128, 127], 
+            where one unit in Forge is ten in Megalo. If you need to move an object further 
+            than 12.7 Forge units away from some target, you can do so by creating a second 
+            object along the way.
+         </p>
+         <pre>
+<span class="keyword">alias</span> subject   = global.object[0]
+<span class="keyword">alias</span> target    = global.object[1]
+<span class="keyword">alias</span> temporary = global.object[2]
+
+<span class="comment">-- Move (subject) 20 Forge units (200 Megalo units) above (target), by creating</span>
+<span class="comment">-- a Hill Marker 10 Forge units above (target) and moving (subject) 10 Forge</span>
+<span class="comment">-- units above that marker:</span>
+temporary = target.place_at_me(hill_marker, none, none, 0, 0, 100, none)
+subject.attach_to(temporary, 0, 0, 100, relative)
+subject.detach()
+temporary.delete() <span class="comment">-- make sure to delete the temporary Hill Marker afterward!</span></pre>
+      </section>
       
-      <h2><a name="round-timer">Round timer code (basic)</a></h2>
-      <p>
-         <i>Halo: Reach</i> does not automatically end the round when the round timer 
-         expires. Instead, it's up to Megalo script. The round timer likely behaves this 
-         way so that Invasion can use it for individual phases.
-      </p>
-      <pre>
+      <section>
+         <h2><a name="round-timer">Round timer code (basic)</a></h2>
+         <p>
+            <i>Halo: Reach</i> does not automatically end the round when the round timer 
+            expires. Instead, it's up to Megalo script. The round timer likely behaves this 
+            way so that Invasion can use it for individual phases.
+         </p>
+         <pre>
 <span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">and</span> game.round_timer.is_zero() <span class="keyword">then</span>
    game.end_round()
 <span class="keyword">end</span></pre>
-      
-      <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
-      <p>
-         The code for a round timer with Sudden Death is a bit more complicated.
-      </p>
-      <p>
-         Typically, Sudden Death will activate if, at the end of the round, a player is 
-         in a position where they can attempt to complete the objective. For example, 
-         during CTF, Sudden Death will activate if a player is standing very close to a 
-         flag that they can pick up and capture.
-      </p>
-      <p>
-         Typically, the Grace Period is used to complement Sudden Death. 
-         Sudden Death activates when a player is able to further an 
-         objective match; for example, it will enable if any player is 
-         standing close to a flag that they can pick up and score. In 
-         that scenario, if Sudden Death begins and then the conditions 
-         for it are no longer met (the player stops being near the flag), 
-         then the match will end after the Grace Period ends. Sudden 
-         Death never resets (if a player comes near the flag again, the 
-         timer will continue from where it left off), but the Grace 
-         Period does.
-      </p>
-      <pre>
+      </section>
+
+      <section>
+         <h2><a name="round-timer-sd">Round timer code (with Sudden Death)</a></h2>
+         <p>
+            The code for a round timer with Sudden Death is a bit more complicated.
+         </p>
+         <p>
+            Typically, Sudden Death will activate if, at the end of the round, a player is 
+            in a position where they can attempt to complete the objective. For example, 
+            during CTF, Sudden Death will activate if a player is standing very close to a 
+            flag that they can pick up and capture.
+         </p>
+         <p>
+            Typically, the Grace Period is used to complement Sudden Death. 
+            Sudden Death activates when a player is able to further an 
+            objective match; for example, it will enable if any player is 
+            standing close to a flag that they can pick up and score. In 
+            that scenario, if Sudden Death begins and then the conditions 
+            for it are no longer met (the player stops being near the flag), 
+            then the match will end after the Grace Period ends. Sudden 
+            Death never resets (if a player comes near the flag again, the 
+            timer will continue from where it left off), but the Grace 
+            Period does.
+         </p>
+         <pre>
 <span class="keyword">alias</span> sudden_death_enabled   = global.number[0] <span class="comment">-- set this to 1 when you want Sudden Death to be active, or 0 otherwise</span>
 <span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
 
@@ -420,16 +554,18 @@
       <span class="keyword">end</span>
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
-      
-      <h2><a name="super-shields">Super Shields</a></h2>
-      <p>
-         Like the original <i>Halo: Combat Evolved</i>, <i>Halo: Reach</i> doesn't 
-         display any extra graphics on players that have overshields. The 
-         "<abbr title="Title Update">TU</abbr>" versions of many gametypes include 
-         a new option called "Super Shields" which works around this, by spawning 
-         fire particles on these players.
-      </p>
-      <pre>
+      </section>
+
+      <section>
+         <h2><a name="super-shields">Super Shields</a></h2>
+         <p>
+            Like the original <i>Halo: Combat Evolved</i>, <i>Halo: Reach</i> doesn't 
+            display any extra graphics on players that have overshields. The 
+            "<abbr title="Title Update">TU</abbr>" versions of many gametypes include 
+            a new option called "Super Shields" which works around this, by spawning 
+            fire particles on these players.
+         </p>
+         <pre>
 <span class="keyword">alias</span> opt_super_shields = script_option[12]
 <span class="keyword">alias</span> lifespan = object.timer[0]
 
@@ -461,6 +597,7 @@
       current_object.delete()
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
+      </section>
    
       </main>
       <script src="resources/sidebar.js"></script>

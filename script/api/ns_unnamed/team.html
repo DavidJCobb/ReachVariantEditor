@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>killed_object | ReachVariantTool Documentation</title>
+      <title>team[n] | ReachVariantTool Documentation</title>
       <base href="../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -75,15 +75,34 @@
          </ul>
       </nav>
       <main>
-         <h1>killed_object<span class="type">Type: <a href="script/api/object.html">Object</a></span></h1>
-<p>During an <a href="script/events.html">object death event</a>, this is the 
-         killed object.</p><p>This value is read-only.</p><h2>See also</h2>
-<ul>
-   <li><a href="script/api/ns_unnamed/killer_object.html">killer_object</a></li>
-   <li><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></li>
-   <li><a href="script/api/ns_unnamed/death_event_damage_type.html">death_event_damage_type</a></li>
-</ul>
+         <h1>team[<var>n</var>]<span class="type">Type: <a href="script/api/team.html">Team</a></span></h1>
 
+            <p>
+               The eight teams that can exist in a match can be accessed directly via 
+               <code>team[<var>n</var>]</code>, where <var>n</var> is a number between 
+               0 and 7, inclusive.
+            </p>
+            <p>
+               Typically, in the first round of a match, the team indices will be 
+               consistent: <code>team[0]</code> is Red Team, the first team in the 
+               list; <code>team[1]</code> is Blue Team, the second team in the list; 
+               and so on. However, you may be aware that teams commonly switch sides 
+               and roles with every round. This happens at the engine level: the game 
+               engine silently remaps the team indices so that Red Team and Blue Team 
+               switch places: Red Team becomes <code>team[1]</code> and Blue Team 
+               becomes <code>team[0]</code>.
+            </p>
+            <p>
+               There's also an additional complication: when editing the 
+               <a href="editor/main_window/options-team-specific.html">settings for each team</a>, 
+               the "initial designator" can be changed. This changes what index the 
+               team will have in the first round.
+            </p>
+            <p>
+               The full behavior of this system is not understood; for example, it is 
+               not clear whether or how Teams 3 and up are swapped between rounds.
+            </p>
+         <p>These values are read-only.</p>
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>

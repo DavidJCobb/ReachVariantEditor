@@ -2,7 +2,7 @@
 <html>
    <head>
       <meta charset="UTF-8" />
-      <title>killed_object | ReachVariantTool Documentation</title>
+      <title>script_widget[n] | ReachVariantTool Documentation</title>
       <base href="../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -75,15 +75,15 @@
          </ul>
       </nav>
       <main>
-         <h1>killed_object<span class="type">Type: <a href="script/api/object.html">Object</a></span></h1>
-<p>During an <a href="script/events.html">object death event</a>, this is the 
-         killed object.</p><p>This value is read-only.</p><h2>See also</h2>
-<ul>
-   <li><a href="script/api/ns_unnamed/killer_object.html">killer_object</a></li>
-   <li><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></li>
-   <li><a href="script/api/ns_unnamed/death_event_damage_type.html">death_event_damage_type</a></li>
-</ul>
+         <h1>script_widget[<var>n</var>]<span class="type">Type: <a href="script/api/widget.html">HUD Widget</a></span></h1>
 
+            <p>
+               Scripts can be given access to <a href="editor/script_window/script-widgets.html">up to four HUD widgets</a>. 
+               Each widget's position on screen is predefined in the game variant and cannot 
+               be altered at run-time. Widgets can be made visible or invisible on a per-player 
+               basis, but can only use the same format string and tokens for all players.
+            </p>
+         <p>These values are read-only.</p>
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>
