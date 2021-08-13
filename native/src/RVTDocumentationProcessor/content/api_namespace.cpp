@@ -11,45 +11,6 @@ namespace content {
          return this->name;
       return this->name2;
    }
-   api_method* api_namespace::get_action_by_name(const QString&) const noexcept {
-      for (auto& member : this->actions) {
-         if (member->is_stub)
-            continue;
-         if (member->name == name || member->name2 == name)
-            return member;
-      }
-      return nullptr;
-   }
-   api_method* api_namespace::get_condition_by_name(const QString&) const noexcept {
-      for (auto& member : this->conditions) {
-         if (member->is_stub)
-            continue;
-         if (member->name == name || member->name2 == name)
-            return member;
-      }
-      return nullptr;
-   }
-   api_namespace_member* api_namespace::get_member_by_name(const QString&) const noexcept {
-      for (auto& member : this->members)
-         if (member->name == name || member->name2 == name)
-            return member;
-      return nullptr;
-   }
-
-   QString api_namespace::relative_subfolder_path() const noexcept {
-      return QString("%1/ns_%2/")
-         .arg(this->relative_folder_path)
-         .arg(this->name);
-   }
-   /*static*/ QString api_namespace::sub_sub_folder_name_for(entry_type type) noexcept {
-      switch (type) {
-         case entry_type::action:
-            return "actions/";
-         case entry_type::condition:
-            return "conditions/";
-      }
-      return "";
-   }
 
    void api_namespace::load(QDomDocument& doc) {
       auto root = doc.documentElement();
@@ -89,14 +50,14 @@ namespace content {
             auto* added = new api_method(false);
             added->parent = this;
             added->load(elem, *this, true);
-            this->conditions.push_back(added);
+            this->insert_member(*added);
             //
             if (!added->name2.isEmpty()) {
                auto* stub = new api_method(false);
-               this->conditions.append(stub);
                stub->parent  = this;
                stub->is_stub = true;
                stub->name    = added->name2;
+               this->insert_member(*stub);
             }
          }
          for (auto node : cobb::qt::xml::const_iterable_node_list(actions.childNodes())) {
@@ -108,14 +69,14 @@ namespace content {
             auto* added = new api_method(true);
             added->parent = this;
             added->load(elem, *this, false);
-            this->actions.push_back(added);
+            this->insert_member(*added);
             //
             if (!added->name2.isEmpty()) {
                auto* stub = new api_method(true);
-               this->actions.append(stub);
                stub->parent  = this;
                stub->is_stub = true;
                stub->name    = added->name2;
+               this->insert_member(*stub);
             }
          }
       }
@@ -128,12 +89,10 @@ namespace content {
          auto* member = new api_namespace_member;
          member->parent = this;
          member->load(elem, *this);
-         this->members.push_back(member);
+         this->insert_member(*member);
       }
       //
-      std::sort(this->actions.begin(),    this->actions.end(),    [](const api_method* a, const api_method* b) { return a->name < b->name; });
-      std::sort(this->conditions.begin(), this->conditions.end(), [](const api_method* a, const api_method* b) { return a->name < b->name; });
-      std::sort(this->members.begin(),    this->members.end(),    [](const base* a, const base* b) { return a->name < b->name; });
+      this->sort_members();
    }
    void api_namespace::write(QString base_output_folder) {
       auto& registry = registry::get();
@@ -147,56 +106,56 @@ namespace content {
          //
          auto subfolder_path = this->relative_subfolder_path();
          //
-         if (this->members.size()) {
+         if (this->has_members_of_type(entry_type::generic)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::generic);
             //
             body += "\n<h2>Members</h2>\n<dl>";
-            for (auto* prop : this->members) {
+            this->for_each_generic_member([&folder, &body](auto& prop) {
                body += QString(
                   "<dt><a href=\"%1%2.html\">%2%3</a></dt>\n"
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->name)
-                  .arg(prop->is_indexed ? "[<var>n</var>]" : "")
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.name)
+                  .arg(prop.is_indexed ? "[<var>n</var>]" : "")
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
-         if (this->conditions.size()) {
+         if (this->has_members_of_type(entry_type::condition)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::condition);
             //
             body += "\n<h2>Member conditions</h2>\n<dl>";
-            for (auto* prop : this->conditions) {
-               if (prop->is_stub)
-                  continue;
+            this->for_each_condition([&folder, &body](auto& prop) {
+               if (prop.is_stub)
+                  return;
                body += QString(
                   "<dt><a href=\"%1%2\">%3</a></dt>\n"
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->filename())
-                  .arg(prop->friendly_name(true))
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.filename())
+                  .arg(prop.friendly_name(true))
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
-         if (this->actions.size()) {
+         if (this->has_members_of_type(entry_type::action)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::action);
             //
             body += "\n<h2>Member actions</h2>\n<dl>";
-            for (auto* prop : this->actions) {
-               if (prop->is_stub)
-                  continue;
+            this->for_each_action([&folder, &body](auto& prop) {
+               if (prop.is_stub)
+                  return;
                body += QString(
                   "<dt><a href=\"%1%2\">%3</a></dt>\n"
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->filename())
-                  .arg(prop->friendly_name(true))
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.filename())
+                  .arg(prop.friendly_name(true))
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
          body = registry::get().page_templates.article.create_page({
@@ -225,7 +184,7 @@ namespace content {
          .nav = {
             .actions    = this->actions_to_nav_html(),
             .conditions = this->conditions_to_nav_html(),
-            .members    = this->members_to_nav_html(),
+            .members    = this->generic_members_to_nav_html(),
             .member_of_link = QString("<a href=\"script/api/ns_%1.html\">%2</a>").arg(this->name).arg(this->get_friendly_name()),
          },
       };
@@ -235,92 +194,37 @@ namespace content {
       {
          auto path = folder_path + "conditions/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->conditions) {
-            if (member->is_stub)
-               continue;
+         this->for_each_condition([this, &options, &path](auto& member) {
+            if (member.is_stub)
+               return;
             //
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
       {
          auto path = folder_path + "actions/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->actions) {
-            if (member->is_stub)
-               continue;
+         this->for_each_action([this, &options, &path](auto& member) {
+            if (member.is_stub)
+               return;
             //
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
       {
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(folder_path);
-         for (auto* member : this->members) {
-            auto filename = member->filename();
-            auto content  = member->write(folder_path, *this, options);
+         this->for_each_generic_member([this, &options, &folder_path](auto& member) {
+            auto filename = member.filename();
+            auto content  = member.write(folder_path, *this, options);
             //
             cobb::qt::save_file_to(folder_path + filename, content);
-         }
+         });
       }
-   }
-
-   QString api_namespace::actions_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::action);
-      for (auto* prop : this->actions) {
-         if (prop->is_stub) {
-            auto* target = this->get_action_by_name(prop->name);
-            if (target) {
-               out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-                  .arg(folder)
-                  .arg(target->filename())
-                  .arg(prop->friendly_name(false));
-            }
-            continue;
-         }
-         out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->friendly_name(false));
-      }
-      return out;
-   }
-   QString api_namespace::conditions_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::condition);
-      for (auto* prop : this->conditions) {
-         if (prop->is_stub) {
-            auto* target = this->get_condition_by_name(prop->name);
-            if (target) {
-               out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-                  .arg(folder)
-                  .arg(target->filename())
-                  .arg(prop->friendly_name(false));
-            }
-            continue;
-         }
-         out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->friendly_name(false));
-      }
-      return out;
-   }
-   QString api_namespace::members_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::generic);
-      for (auto* prop : this->members) {
-         out += QString("<li><a href=\"%1%2\">%3%4</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->name)
-            .arg(prop->is_indexed ? "[<var>n</var>]" : "");
-      }
-      return out;
    }
 }

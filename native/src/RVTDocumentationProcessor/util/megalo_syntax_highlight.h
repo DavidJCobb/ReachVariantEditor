@@ -36,7 +36,7 @@ namespace util {
             struct {
                impl::megalo_keyword* main = nullptr;
                int phrase     = -1;
-               int subkeyword = -1; // number of words completed (not started) for the current phrase
+               int subkeyword = -1;
             } keyword;
             bool  in_comment    = false;
             bool  in_xml_entity = false;
@@ -67,6 +67,8 @@ namespace util {
          QString before_markup_break() const noexcept;
          QString after_markup_break() const noexcept;
 
+         // Not super reliable, I don't think. Don't know if it sensibly handles e.g. keywords 
+         // and other highlightable content being broken across element boundaries.
          QString parse_dom(QDomElement root, parse_dom_options);
    };
 

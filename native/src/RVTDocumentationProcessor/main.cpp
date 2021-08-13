@@ -134,6 +134,7 @@ int main(int argc, char *argv[]) {
       }
    }
    if (count) {
+      registry.post_load_mirror_all_relationships();
       for (auto* type : registry.types) {
          type->write(output_dir);
       }

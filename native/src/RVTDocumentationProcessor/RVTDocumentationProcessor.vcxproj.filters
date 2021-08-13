@@ -68,6 +68,12 @@
     <ClCompile Include="content\api_namespace_member.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="content\category.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="content\api_parent_object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helpers\passkey.h">
@@ -116,6 +122,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\qt\save_file_to.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="content\category.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="content\api_parent_object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

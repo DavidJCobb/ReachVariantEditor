@@ -99,9 +99,11 @@
     <ClCompile Include="content\api_method.cpp" />
     <ClCompile Include="content\api_namespace.cpp" />
     <ClCompile Include="content\api_namespace_member.cpp" />
+    <ClCompile Include="content\api_parent_object.cpp" />
     <ClCompile Include="content\api_property.cpp" />
     <ClCompile Include="content\api_type.cpp" />
     <ClCompile Include="content\base.cpp" />
+    <ClCompile Include="content\category.cpp" />
     <ClCompile Include="content\page_template.cpp" />
     <ClCompile Include="content\registry.cpp" />
     <ClCompile Include="helpers\qt\xml.cpp" />
@@ -116,9 +118,11 @@
     <ClInclude Include="content\api_method.h" />
     <ClInclude Include="content\api_namespace.h" />
     <ClInclude Include="content\api_namespace_member.h" />
+    <ClInclude Include="content\api_parent_object.h" />
     <ClInclude Include="content\api_property.h" />
     <ClInclude Include="content\api_type.h" />
     <ClInclude Include="content\base.h" />
+    <ClInclude Include="content\category.h" />
     <ClInclude Include="content\page_template.h" />
     <ClInclude Include="content\registry.h" />
     <ClInclude Include="helpers\passkey.h" />

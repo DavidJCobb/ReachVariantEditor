@@ -12,7 +12,7 @@ namespace util::impl {
       int last = -1;
       for (int i = 0; i < this->phrases.size(); ++i) {
          auto& phrase = this->phrases[i];
-         int   p_sz = phrase.size();
+         int   p_sz   = phrase.size();
          if (p_sz <= w_sz) {
             bool match = true;
             for (int i = 0; i < p_sz; ++i) {
@@ -48,10 +48,10 @@ namespace {
       util::impl::megalo_keyword{ "and" },
       util::impl::megalo_keyword{ "declare",
          {
-            { "*", "with", "networking", "priority", "default" },
-            { "*", "with", "networking", "priority", "low" },
-            { "*", "with", "networking", "priority", "high" },
-            { "*", "with", "networking", "priority", "local" },
+            { "*", "with", "network", "priority", "default" },
+            { "*", "with", "network", "priority", "low" },
+            { "*", "with", "network", "priority", "high" },
+            { "*", "with", "network", "priority", "local" },
          }
       },
       util::impl::megalo_keyword{ "do" },
@@ -87,7 +87,7 @@ namespace {
       return !c.isSpace() && !_is_operator_char(c) && !_is_quote_char(c) && !_is_syntax_char(c);
    }
 
-   QVector<QString> _extract_next_few_words(QStringRef source, int max_word_count = 5) {
+   QVector<QString> _extract_next_few_words(QStringRef source, int max_word_count = 6) {
       QVector<QString> words;
       //
       auto size = source.size();
@@ -112,177 +112,6 @@ namespace {
 }
 
 namespace util {
-   extern QString megalo_syntax_highlight(const QString& script) {
-      using keyword_t = impl::megalo_keyword;
-      //
-      QString out;
-      if (script.isEmpty())
-         return out;
-      auto size = script.size();
-      out.reserve(size);
-      //
-      keyword_t* in_keyword    = nullptr;
-      int        which_phrase  = -1;
-      int        subkeyword    = -1;
-      bool       in_comment    = false;
-      bool       in_xml_entity = false;
-      QChar      in_string     = '\0';
-      for (uint i = 0; i < size; ++i) {
-         QChar c = script[i];
-         //
-         if (in_xml_entity) {
-            if (c == ';')
-               in_xml_entity = false;
-            out += c;
-            continue;
-         } else {
-            if (c == '&') {
-               in_xml_entity = true;
-               out += c;
-               continue;
-            }
-         }
-         //
-         if (in_string != '\0') {
-            if (c == in_string) {
-               in_string = '\0';
-               out += "</span>";
-            }
-            out += c;
-            continue;
-         }
-         if (in_comment) {
-            if (c == '\r' || c == '\n') {
-               in_comment = false;
-               out += "</span>";
-            }
-            out += c;
-            continue;
-         }
-         if (_is_quote_char(c)) {
-            in_string = c;
-            out += "<span class=\"string\">";
-            out += c;
-            continue;
-         }
-         if (c == '-' && i + 1 < size) {
-            QChar d = script[i + 1];
-            if (d == '-') {
-               in_comment = true;
-               out += "<span class=\"comment\">";
-               out += c;
-               continue;
-            }
-         }
-         //
-         // Non-string, non-comment content:
-         //
-         if (!in_keyword) {
-            bool can_start = i == 0;
-            if (i > 0)
-               can_start = script[i - 1].isSpace();
-            //
-            if (can_start && _is_word_char(c)) {
-               auto subject = QStringRef(&script).mid(i);
-               auto words   = _extract_next_few_words(subject);
-               //
-               for (auto& k : keywords) {
-                  if (k.initial.compare(words[0], Qt::CaseInsensitive) == 0) {
-                     in_keyword = &k;
-                     break;
-                  }
-               }
-               if (in_keyword) {
-                  //
-                  // We seem to be in a keyword, but let's double-check that the keyword actually 
-                  // ends, whether at the end of the script or at a punctuation or space character. 
-                  // That way, we can avoid false-positives e.g. "alias" matching "aliasing."
-                  //
-                  auto k_sz = in_keyword->initial.size();
-                  bool ends = false;
-                  if (i + k_sz == script.size())
-                     ends = true;
-                  else
-                     ends = !_is_word_char(script[i + k_sz]);
-                  //
-                  if (!ends) {
-                     in_keyword = nullptr;
-                  } else {
-                     //
-                     // We're definitely in a valid keyword. Let's pop out some HTML:
-                     //
-                     out += "<span class=\"keyword\">";
-                     //
-                     // Now let's test for sub-keywords.
-                     //
-                     words.pop_front(); // the first word will be the initial keyword. remove it.
-                     which_phrase = -1;
-                     subkeyword   = -1;
-                     int w_sz = words.size();
-                     for (int i = 0; i < in_keyword->phrases.size(); ++i) {
-                        auto& phrase = in_keyword->phrases[i];
-                        int   p_sz   = phrase.size();
-                        if (p_sz <= w_sz) {
-                           bool match = true;
-                           for (int i = 0; i < p_sz; ++i) {
-                              if (words[i].compare(phrase[i], Qt::CaseInsensitive) != 0) {
-                                 match = false;
-                                 break;
-                              }
-                           }
-                           if (match) {
-                              if (which_phrase >= 0) {
-                                 //
-                                 // We want to find the longest phrase that matches.
-                                 //
-                                 if (in_keyword->phrases[which_phrase].size() > p_sz)
-                                    continue;
-                              }
-                              which_phrase = i;
-                              continue;
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         } else {
-            bool this_is_word = _is_word_char(c);
-            bool prev_is_word = _is_word_char(script[i - 1]);
-
-            if (!this_is_word && prev_is_word) {
-               //
-               // End of a word.
-               //
-               out += "</span>";
-               if (which_phrase >= 0) {
-                  ++subkeyword;
-                  if (subkeyword >= in_keyword->phrases[which_phrase].size()) {
-                     in_keyword   = nullptr;
-                     which_phrase = -1;
-                     subkeyword   = -1;
-                  }
-               } else {
-                  in_keyword   = nullptr;
-                  which_phrase = -1;
-                  subkeyword   = -1;
-               }
-            } else if (this_is_word && !prev_is_word) {
-               //
-               // Start of a word.
-               //
-               out += "<span class=\"subkeyword\">";
-            }
-         }
-         //
-         out += c;
-      }
-      if (in_keyword || in_comment || (in_string != '\0')) {
-         out += "</span>";
-      }
-      return out;
-   }
-
    void megalo_syntax_highlighter::_exit_keyword() {
       state.keyword.main       = nullptr;
       state.keyword.phrase     = -1;
@@ -433,7 +262,7 @@ namespace util {
                bool is_subkeyword = sk.phrase >= 0 && sk.subkeyword >= 0;
                bool has_tag       = true;
                if (is_subkeyword) {
-                  has_tag = sk.main->phrases[sk.phrase][sk.subkeyword + 1] != "*";
+                  has_tag = sk.main->phrases[sk.phrase][sk.subkeyword] != "*";
                }
                if (has_tag)
                   out += _exit_markup(is_subkeyword ? "subkeyword" : "keyword");
@@ -452,7 +281,7 @@ namespace util {
                bool has_tag = true;
                if (sk.phrase >= 0) {
                   auto& phrase = sk.main->phrases[sk.phrase];
-                  auto  index  = sk.subkeyword + 1;
+                  auto  index  = sk.subkeyword;
                   if (index < phrase.size())
                      has_tag = phrase[index] != "*";
                }
@@ -565,4 +394,11 @@ namespace util {
       }
       return out;
    }
+
+   
+   extern QString megalo_syntax_highlight(const QString& script) {
+      megalo_syntax_highlighter highlighter;
+      return highlighter.parse_more(script, true);
+   }
+
 }

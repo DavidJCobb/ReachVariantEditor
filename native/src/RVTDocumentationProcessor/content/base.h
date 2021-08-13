@@ -14,6 +14,9 @@ namespace content {
       type,
       ns, // namespace
    };
+   
+   class api_parent_object;
+   class category;
 
    class base {
       //
@@ -34,12 +37,12 @@ namespace content {
             QString    name;
             entry_type type = entry_type::same;
             //
-            // State:
-            //
-            bool mirrored = false;
+            base* target   = nullptr;
+            bool  mirrored = false;
          };
          
-         base* parent = nullptr;
+         api_parent_object* parent = nullptr;
+         QVector<category*> categories;
          //
          QString name;
          QString name2;
@@ -48,12 +51,15 @@ namespace content {
          QString example;
          //
          QVector<note> notes;
-         QVector<relationship> related;
+         QVector<relationship*> related;
 
          QString description_to_html() const noexcept;
          QString example_to_html() const noexcept;
          QString notes_to_html() const noexcept;
          QString relationships_to_html(base* member_of, entry_type my_entry_type) const noexcept;
+
+         relationship* get_relationship_entry(base& to) const noexcept;
+         QVector<base*> get_all_see_also() const noexcept;
          
       protected:
          void _load_blurb(QDomElement& doc, const QString& stem);
@@ -61,5 +67,7 @@ namespace content {
          void _load_example(QDomElement& doc, const QString& stem);
          void _load_relationship(QDomElement& doc);
          void _load_note(QDomElement& doc, QString stem);
+
+         void _load_all_categories_in(QDomElement container);
    };
 }

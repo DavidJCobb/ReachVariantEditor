@@ -15,55 +15,6 @@ namespace content {
          return this->name;
       return this->name2;
    }
-   api_method* api_type::get_action_by_name(const QString& name) const noexcept {
-      for (auto& member : this->actions) {
-         if (member->is_stub)
-            continue;
-         if (member->name == name || member->name2 == name)
-            return member;
-      }
-      return nullptr;
-   }
-   api_method* api_type::get_condition_by_name(const QString& name) const noexcept {
-      for (auto& member : this->conditions) {
-         if (member->is_stub)
-            continue;
-         if (member->name == name || member->name2 == name)
-            return member;
-      }
-      return nullptr;
-   }
-   api_property* api_type::get_property_by_name(const QString& name) const noexcept {
-      for (auto& member : this->properties)
-         if (member->name == name || member->name2 == name)
-            return member;
-      return nullptr;
-   }
-   api_accessor* api_type::get_accessor_by_name(const QString& name) const noexcept {
-      for (auto& member : this->accessors)
-         if (member->name == name || member->name2 == name)
-            return member;
-      return nullptr;
-   }
-
-   QString api_type::relative_subfolder_path() const noexcept {
-      return QString("%1/%2/")
-         .arg(this->relative_folder_path)
-         .arg(this->name);
-   }
-   /*static*/ QString api_type::sub_sub_folder_name_for(entry_type type) noexcept {
-      switch (type) {
-         case entry_type::action:
-            return "actions/";
-         case entry_type::condition:
-            return "conditions/";
-         case entry_type::property:
-            return "properties/";
-         case entry_type::accessor:
-            return "accessors/";
-      }
-      return "";
-   }
    
    void api_type::load(QDomDocument& doc) {
       auto root = doc.documentElement();
@@ -132,14 +83,14 @@ namespace content {
             auto* added = new api_method(false);
             added->parent = this;
             added->load(elem, *this, true);
-            this->conditions.push_back(added);
+            this->insert_member(*added);
             //
             if (!added->name2.isEmpty()) {
                auto* stub = new api_method(false);
-               this->conditions.append(stub);
                stub->parent  = this;
                stub->is_stub = true;
                stub->name    = added->name2;
+               this->insert_member(*stub);
             }
          }
          for (auto node : cobb::qt::xml::const_iterable_node_list(actions.childNodes())) {
@@ -151,14 +102,14 @@ namespace content {
             auto* added = new api_method(true);
             added->parent = this;
             added->load(elem, *this, false);
-            this->actions.push_back(added);
+            this->insert_member(*added);
             //
             if (!added->name2.isEmpty()) {
                auto* stub = new api_method(true);
-               this->actions.append(stub);
                stub->parent  = this;
                stub->is_stub = true;
                stub->name    = added->name2;
+               this->insert_member(*stub);
             }
          }
       }
@@ -171,7 +122,7 @@ namespace content {
          auto* member = new api_property;
          member->parent = this;
          member->load(elem, *this);
-         this->properties.push_back(member);
+         this->insert_member(*member);
       }
       for (auto node : cobb::qt::xml::const_iterable_node_list(accessors.childNodes())) {
          auto elem = node.toElement();
@@ -182,73 +133,10 @@ namespace content {
          auto* member = new api_accessor;
          member->parent = this;
          member->load(elem, *this);
-         this->accessors.push_back(member);
+         this->insert_member(*member);
       }
 
-      std::sort(this->actions.begin(),    this->actions.end(),    [](const api_method* a, const api_method* b) { return a->name < b->name; });
-      std::sort(this->conditions.begin(), this->conditions.end(), [](const api_method* a, const api_method* b) { return a->name < b->name; });
-      std::sort(this->properties.begin(), this->properties.end(), [](const base* a, const base* b) { return a->name < b->name; });
-      std::sort(this->accessors.begin(),  this->accessors.end(),  [](const base* a, const base* b) { return a->name < b->name; });
-      
-      this->_make_member_relationships_bidirectional();
-   }
-
-   void api_type::_mirror_member_relationships(api_type& member_of, base& member, entry_type member_type) {
-      /*//
-      for (auto& rel : member.related) {
-         if (rel.mirrored)
-            continue;
-         if (!rel.context.isEmpty() && rel.context != member_of.name) // this is a relationship to something in another type
-            continue;
-         base* target = nullptr;
-         //
-         auto rt = rel.type;
-         if (rt == entry_type::same)
-            rt = member_type;
-         switch (rt) {
-            case entry_type::condition:
-               target = member_of.get_condition_by_name(rel.name);
-               break;
-            case entry_type::action:
-               target = member_of.get_action_by_name(rel.name);
-               break;
-            case entry_type::property:
-               target = member_of.get_property_by_name(rel.name);
-               break;
-            case entry_type::accessor:
-               target = member_of.get_accessor_by_name(rel.name);
-               break;
-         }
-         //
-         if (target == nullptr)
-            continue;
-         rel.name = target->name; // if we matched name2, then we need to set this here so we write the proper name into HTML
-         target->related.emplace_back();
-         auto& mirrored = target->related.back();
-         mirrored.mirrored = true;
-         mirrored.name = member.name;
-         mirrored.type = member_type;
-         //
-         for (auto& rel2 : member.related) {
-            if (&rel2 == &rel)
-               continue;
-            target->related.emplace_back();
-            auto& mirrored = target->related.back();
-            mirrored = rel2;
-            mirrored.mirrored = true;
-         }
-      }
-      //*/
-   }
-   void api_type::_make_member_relationships_bidirectional() {
-      for (auto* member : this->conditions)
-         this->_mirror_member_relationships(*this, *member, entry_type::condition);
-      for (auto* member : this->actions)
-         this->_mirror_member_relationships(*this, *member, entry_type::action);
-      for (auto* member : this->properties)
-         this->_mirror_member_relationships(*this, *member, entry_type::property);
-      for (auto* member : this->accessors)
-         this->_mirror_member_relationships(*this, *member, entry_type::accessor);
+      this->sort_members();
    }
 
    void api_type::write(QString base_output_folder) {
@@ -277,13 +165,13 @@ namespace content {
          //
          auto subfolder_path = this->relative_subfolder_path();
          //
-         if (this->properties.size()) {
+         if (this->has_members_of_type(entry_type::property)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::property);
             //
             body += "\n<h2>Properties</h2>\n<dl>";
-            for (auto* prop : this->properties) {
+            this->for_each_property([&folder, &body](auto& prop) {
                QString index;
-               if (prop->is_indexed)
+               if (prop.is_indexed)
                   index = "[<var>n</var>]";
                //
                body += QString(
@@ -291,61 +179,61 @@ namespace content {
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->name)
+                  .arg(prop.name)
                   .arg(index)
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
-         if (this->accessors.size()) {
+         if (this->has_members_of_type(entry_type::accessor)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::accessor);
             //
             body += "\n<h2>Accessors</h2>\n<dl>";
-            for (auto* prop : this->accessors) {
+            this->for_each_accessor([&folder, &body](auto& prop) {
                body += QString(
                   "<dt><a href=\"%1%2.html\">%2</a></dt>\n"
                   "   <dd>%3</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->name)
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.name)
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
-         if (this->conditions.size()) {
+         if (this->has_members_of_type(entry_type::condition)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::condition);
             //
             body += "\n<h2>Member conditions</h2>\n<dl>";
-            for (auto* prop : this->conditions) {
-               if (prop->is_stub)
-                  continue;
+            this->for_each_condition([&folder, &body](auto& prop) {
+               if (prop.is_stub)
+                  return;
                body += QString(
                   "<dt><a href=\"%1%2\">%3</a></dt>\n"
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->filename())
-                  .arg(prop->friendly_name(true))
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.filename())
+                  .arg(prop.friendly_name(true))
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
-         if (this->actions.size()) {
+         if (this->has_members_of_type(entry_type::action)) {
             auto folder = subfolder_path + sub_sub_folder_name_for(entry_type::action);
             //
             body += "\n<h2>Member actions</h2>\n<dl>";
-            for (auto* prop : this->actions) {
-               if (prop->is_stub)
-                  continue;
+            this->for_each_action([&folder, &body](auto& prop) {
+               if (prop.is_stub)
+                  return;
                body += QString(
                   "<dt><a href=\"%1%2\">%3</a></dt>\n"
                   "   <dd>%4</dd>\n"
                )
                   .arg(folder)
-                  .arg(prop->filename())
-                  .arg(prop->friendly_name(true))
-                  .arg(!prop->blurb.isEmpty() ? prop->blurb : "No description available.");
-            }
+                  .arg(prop.filename())
+                  .arg(prop.friendly_name(true))
+                  .arg(!prop.blurb.isEmpty() ? prop.blurb : "No description available.");
+            });
             body += "</dl>\n";
          }
          body = registry::get().page_templates.article.create_page({
@@ -382,114 +270,48 @@ namespace content {
       {
          auto path = folder_path + "conditions/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->conditions) {
-            if (member->is_stub)
-               continue;
+         this->for_each_condition([this, &options, &path](auto& member) {
+            if (member.is_stub)
+               return;
             //
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
       {
          auto path = folder_path + "actions/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->actions) {
-            if (member->is_stub)
-               continue;
+         this->for_each_action([this, &options, &path](auto& member) {
+            if (member.is_stub)
+               return;
             //
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
       {
          auto path = folder_path + "properties/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->properties) {
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+         this->for_each_property([this, &options, &path](auto& member) {
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
       {
          auto path = folder_path + "accessors/";
          options.relative_folder_path = QDir(base_output_folder).relativeFilePath(path);
-         for (auto* member : this->accessors) {
-            auto filename = member->filename();
-            auto content  = member->write(path, *this, options);
+         this->for_each_accessor([this, &options, &path](auto& member) {
+            auto filename = member.filename();
+            auto content  = member.write(path, *this, options);
             //
             cobb::qt::save_file_to(path + filename, content);
-         }
+         });
       }
-   }
-
-   QString api_type::accessors_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::accessor);
-      for (auto* prop : this->accessors) {
-         out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->name);
-      }
-      return out;
-   }
-   QString api_type::actions_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::action);
-      for (auto* prop : this->actions) {
-         if (prop->is_stub) {
-            auto* target = this->get_action_by_name(prop->name);
-            if (target) {
-               out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-                  .arg(folder)
-                  .arg(target->filename())
-                  .arg(prop->friendly_name(false));
-            }
-            continue;
-         }
-         out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->friendly_name(false));
-      }
-      return out;
-   }
-   QString api_type::conditions_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::condition);
-      for (auto* prop : this->conditions) {
-         if (prop->is_stub) {
-            auto* target = this->get_condition_by_name(prop->name);
-            if (target) {
-               out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-                  .arg(folder)
-                  .arg(target->filename())
-                  .arg(prop->friendly_name(false));
-            }
-            continue;
-         }
-         out += QString("<li><a href=\"%1%2\">%3</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->friendly_name(false));
-      }
-      return out;
-   }
-   QString api_type::properties_to_nav_html() const noexcept {
-      QString out;
-      QString folder = this->relative_subfolder_path() + sub_sub_folder_name_for(entry_type::property);
-      for (auto* prop : this->properties) {
-         out += QString("<li><a href=\"%1%2\">%3%4</a></li>\n")
-            .arg(folder)
-            .arg(prop->filename())
-            .arg(prop->name)
-            .arg(prop->is_indexed ? "[<var>n</var>]" : "");
-      }
-      return out;
    }
 }

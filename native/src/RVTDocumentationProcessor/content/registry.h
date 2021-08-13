@@ -6,8 +6,10 @@
 #include "page_template.h"
 
 namespace content {
+   class api_parent_object;
    class api_namespace;
    class api_type;
+   class category;
 
    class registry {
       //
@@ -29,6 +31,8 @@ namespace content {
          std::filesystem::path root_path;
          std::vector<api_type*> types;
          std::vector<api_namespace*> namespaces;
+         //
+         QVector<category*> categories;
 
          struct {
             page_template article;
@@ -40,6 +44,9 @@ namespace content {
          api_type* get_type(const QString& name);
          void load_type(const QString& relative_folder_path, QDomDocument& doc);
          void load_namespace(const QString& relative_folder_path, QDomDocument& doc);
+
+         api_parent_object* get_namespace_or_type(const QString& name) const noexcept;
+         category* get_or_create_category(const QString& id);
          
          int  depth_of(std::filesystem::path path);
          QString make_stem(std::filesystem::path path);
@@ -47,7 +54,6 @@ namespace content {
 
          void post_load_mirror_all_relationships();
       protected:
-         void _mirror_relationships_for_member(api_namespace& type, base& member, entry_type member_type);
-         void _mirror_relationships_for_member(api_type& type, base& member, entry_type member_type);
+         void _mirror_relationships_for_member(base& member);
    };
 }

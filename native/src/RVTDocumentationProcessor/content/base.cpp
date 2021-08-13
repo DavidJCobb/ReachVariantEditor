@@ -1,8 +1,13 @@
 #include "base.h"
+#include "category.h"
+#include "registry.h"
 #include "../util/html.h"
 #include "../util/link_fixup.h"
 #include "../util/megalo_syntax_highlight.h"
 #include "../helpers/qt/xml.h"
+
+#include "api_namespace.h"
+#include "api_type.h"
 
 namespace content {
    QString base::description_to_html() const noexcept {
@@ -56,41 +61,86 @@ namespace content {
    }
    QString base::relationships_to_html(base* member_of, entry_type my_entry_type) const noexcept {
       QString out;
-      if (this->related.empty())
+      auto    list = this->get_all_see_also();
+      if (list.empty())
          return out;
       out = "<h2>See also</h2>\n<ul>\n";
-      for (auto& rel : this->related) {
-         QString context = rel.context;
-         if (context.isEmpty() && member_of)
-            context = member_of->name;
+      for (auto* article : list) {
+         assert(article->parent);
+         QString text;
+         QString path;
          //
-         QString type_folder;
-         auto rt = rel.type;
-         if (rt == entry_type::same)
-            rt = my_entry_type;
-         switch (rt) {
-            case entry_type::action:    type_folder  = "actions/";    break;
-            case entry_type::condition: type_folder = "conditions/"; break;
-            case entry_type::property:  type_folder = "properties/"; break;
-            case entry_type::accessor:  type_folder = "accessors/";  break;
-         }
+         auto* context = article->parent;
+         if (context->type != entry_type::ns || context->name != "unnamed")
+            text = context->name + '.';
+         text += article->name;
          //
-         QString context_text = context;
-         if (context_text == "ns_unnamed")
-            context_text.clear();
-         else if (context_text.startsWith("ns_"))
-            context_text.remove(0, 3);
-         if (!context_text.isEmpty())
-            context_text += '.';
+         path = QDir::cleanPath(context->relative_subfolder_path() + api_parent_object::sub_sub_folder_name_for(this->type));
          //
-         out += QString("   <li><a href=\"script/api/%1/%2%3.html\">%4%3</a></li>\n")
-            .arg(context)
-            .arg(type_folder)
-            .arg(rel.name)
-            .arg(context_text);
+         out += QString("   <li><a href=\"%1/%2.html\">%3</a></li>\n")
+            .arg(path)
+            .arg(article->name)
+            .arg(text);
       }
       out += "</ul>\n";
       return out;
+   }
+
+   base::relationship* base::get_relationship_entry(base& to) const noexcept {
+      bool same = this->type == to.type;
+      for (auto* rel : this->related) {
+         if (rel->type != to.type) {
+            if (!same || rel->type != entry_type::same)
+               continue;
+         }
+         if (rel->name.compare(to.name, Qt::CaseInsensitive) != 0)
+            if (rel->name.compare(to.name2, Qt::CaseInsensitive) != 0)
+               continue;
+         if (rel->context.isEmpty()) {
+            if (this->parent != to.parent)
+               continue;
+         } else {
+            if (!to.parent)
+               continue;
+            if (rel->context.compare(to.parent->name, Qt::CaseInsensitive) != 0)
+               if (rel->context.compare(to.parent->name2, Qt::CaseInsensitive) != 0)
+                  continue;
+         }
+         return rel;
+      }
+      return nullptr;
+   }
+   QVector<base*> base::get_all_see_also() const noexcept {
+      QVector<base*> articles;
+      for (auto* cat : this->categories) {
+         for (auto* art : cat->articles) {
+            if (art == this)
+               continue;
+            if (articles.indexOf(art))
+               continue;
+            articles.push_back(art);
+         }
+      }
+      {
+         auto& registry = registry::get();
+         for (auto& rel : this->related) {
+            base* target  = rel->target;
+            if (!target)
+               continue;
+            base* context = target->parent;
+            if (!context)
+               continue;
+            articles.push_back(target);
+         }
+      }
+      //
+      qSort(articles.begin(), articles.end(), [](base* a, base* b) {
+         auto c = a->name.compare(b->name);
+         if (c == 0)
+            c = a->name2.compare(b->name2);
+         return c;
+      });
+      return articles;
    }
 
    void base::_load_blurb(QDomElement& elem, const QString& stem) {
@@ -123,21 +173,21 @@ namespace content {
       elem.setTagName(tag);
    }
    void base::_load_relationship(QDomElement& elem) {
-      this->related.push_back(relationship());
-      auto& rel = this->related.back();
+      auto* rel = new relationship;
+      this->related.push_back(rel);
       //
-      rel.name    = elem.attribute("name");
-      rel.context = elem.attribute("context");
+      rel->name    = elem.attribute("name");
+      rel->context = elem.attribute("context");
       //
       auto type = elem.attribute("type");
       if (type == "action")
-         rel.type = entry_type::action;
+         rel->type = entry_type::action;
       else if (type == "condition")
-         rel.type = entry_type::condition;
+         rel->type = entry_type::condition;
       else if (type == "property")
-         rel.type = entry_type::property;
+         rel->type = entry_type::property;
       else if (type == "accessor")
-         rel.type = entry_type::accessor;
+         rel->type = entry_type::accessor;
    }
    void base::_load_note(QDomElement& elem, QString stem) {
       this->notes.push_back(note());
@@ -152,5 +202,21 @@ namespace content {
          .url_tweak                    = [stem](QString& out) { util::link_fixup(stem, out);  },
          .wrap_bare_text_in_paragraphs = true,
       });
+   }
+
+   void base::_load_all_categories_in(QDomElement root) {
+      auto& registry = registry::get();
+      //
+      auto list = cobb::qt::xml::child_elements_of_type(root, "category");
+      auto size = list.size();
+      for (decltype(size) i = 0; i < size; ++i) {
+         auto item = list[i];
+         auto id   = item.attribute("id");
+         if (id.isEmpty())
+            continue;
+         auto* cat = registry.get_or_create_category(id);
+         if (cat)
+            cat->add_article(*this);
+      }
    }
 }
