@@ -94,6 +94,7 @@
                   end
                end
             </example>
+            <category id="scoring" />
             <related context="player" type="action" name="get_scoreboard_pos" />
          </method>
          <method name="set_co_op_spawning" id="59">
@@ -115,11 +116,7 @@
                   current_team.set_co_op_spawning(true) -- enable it
                end
             </example>
-            <related context="player" type="action" name="set_co_op_spawning" />
-            <related context="object" type="action" name="set_spawn_location_fireteams" />
-            <related context="object" type="action" name="set_spawn_location_permissions" />
-            <related context="player" type="action" name="set_primary_respawn_object" />
-            <related context="team"   type="action" name="set_primary_respawn_object" />
+            <category id="spawning" />
          </method>
          <method name="set_primary_respawn_object" id="60">
             <args>
@@ -143,7 +140,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="spawning" />
          </method>
       </actions>
    </methods>
@@ -181,6 +178,7 @@
             thing occurs in Stockpile, if a collected flag was placed into a team's goal 
             by a player who quit or (perhaps accidentally) by an enemy of that team.
          </note>
+         <category id="scoring" />
          <related context="player" type="property" name="score" />
       </property>
       <property name="script_stat" type="number" indexed="true">

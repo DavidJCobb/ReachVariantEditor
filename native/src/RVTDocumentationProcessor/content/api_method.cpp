@@ -4,6 +4,8 @@
 #include "registry.h"
 #include "../helpers/qt/xml.h"
 #include "../util/html.h"
+#include "../util/link_fixup.h"
+#include "../util/megalo_syntax_highlight.h"
 
 namespace content {
    QString api_method::filename() const noexcept {
@@ -78,9 +80,6 @@ namespace content {
             if (!text.isEmpty())
                this->bare_argument_text = text;
          } else {
-            html_serializer serializer;
-            serializer.link_base_path = stem;
-            //
             for (auto node : list) {
                auto elem = node.toElement();
                if (elem.isNull())
@@ -94,7 +93,13 @@ namespace content {
                //
                // Get argument content:
                //
-               added.content = serializer.serialize(elem);
+               added.content = util::serialize_element(elem, {
+                  .adapt_indented_pre_tags      = true,
+                  .include_containing_element   = false,
+                  .pre_tag_content_tweak        = [](QString& out) { out = util::megalo_syntax_highlight(out); },
+                  .url_tweak                    = [stem](QString& out) { util::link_fixup(stem, out);  },
+                  .wrap_bare_text_in_paragraphs = true,
+               });
             }
          }
       }
@@ -112,8 +117,7 @@ namespace content {
             continue;
          }
       }
-
-
+      this->_load_all_categories_in(root);
    }
    QString api_method::write(QString stem, base& member_of, page_creation_options options) {
       QString body;

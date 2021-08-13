@@ -7,6 +7,8 @@ namespace content {
 
    class api_property : public base {
       public:
+         api_property() : base(entry_type::property) {}
+
          QString type;
          bool is_read_only = false;
          bool is_indexed   = false;

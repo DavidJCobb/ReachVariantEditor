@@ -51,7 +51,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-shape" />
          </method>
          <method name="is_of_type" id="6">
             <args>
@@ -130,6 +130,8 @@
                This function doesn't appear to ever actually return <code>true</code> when called 
                on the Hologram armor ability.
             </note>
+            <category id="armor-abilities" />
+            <category id="biped-equipment" />
          </method>
       </conditions>
       <actions>
@@ -188,8 +190,7 @@
                <a href="script/api/object/actions/detach">detach</a> 
                it.
             </note>
-            <related type="action" name="delete" />
-            <related type="action" name="place_between_me_and" />
+            <category id="object-lifetime" />
          </method>
          <method name="delete" id="3">
             <blurb>Delete this object from the game world.</blurb>
@@ -216,7 +217,7 @@
                If one biped is assassinating another, deleting the victim will not interrupt 
                the killer's assassination animation.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-lifetime" />
          </method>
          <method name="set_waypoint_visibility" id="4">
             <args>
@@ -232,11 +233,7 @@
                Testing suggests that weapons cannot show waypoints if they are being carried 
                by bipeds.
             </note>
-            <related type="action" name="set_waypoint_icon" />
-            <related type="action" name="set_waypoint_priority" />
-            <related type="action" name="set_waypoint_timer" />
-            <related type="action" name="set_waypoint_range" />
-            <related type="action" name="set_waypoint_text" />
+            <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_icon" id="5">
             <args>
@@ -248,7 +245,7 @@
                   current_object.set_waypoint_icon(defend)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_priority" id="6">
             <args>
@@ -272,7 +269,7 @@
                   current_object.set_waypoint_priority(low)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_timer" id="7">
             <args>
@@ -297,7 +294,7 @@
                   current_object.set_waypoint_timer(none)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-waypoint" />
          </method>
          <method name="set_waypoint_range" id="8">
             <args>
@@ -316,7 +313,7 @@
                   current_object.set_waypoint_range(0, 50)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-waypoint" />
          </method>
          <method name="set_shape" id="10">
             <args>
@@ -361,9 +358,7 @@
                   current_object.set_shape(box, 10, 10, 10, 10)
                end
             </example>
-            <related type="condition" name="shape_contains" />
-            <related type="action" name="set_shape_visibility" />
-            <related type="action" name="apply_shape_color_from_player_member" />
+            <category id="object-shape" />
          </method>
          <method name="set_pickup_permissions" id="12">
             <args>
@@ -397,13 +392,9 @@
                   end
                end
             </example>
-            <related context="object" type="action" name="add_weapon" />
-            <related context="object" type="action" name="get_carrier" />
-            <related context="object" type="action" name="remove_weapon" />
-            <related context="object" type="action" name="set_weapon_pickup_priority" />
-            <related context="player" type="action" name="get_armor_ability" />
-            <related context="player" type="action" name="add_weapon" />
-            <related context="player" type="action" name="get_weapon" />
+            <category id="objectives" />
+            <category id="weapon-configuration" />
+            <category id="weapons" />
          </method>
          <method name="set_spawn_location_permissions" id="13">
             <args>
@@ -429,11 +420,7 @@
                current_checkpoint.set_spawn_location_permissions(mod_player, current_player, 0)
                next_checkpoint.set_spawn_location_permissions(mod_player, current_player, 1)
             </example>
-            <related context="player" type="action" name="set_co_op_spawning" />
-            <related context="team"   type="action" name="set_co_op_spawning" />
-            <related type="action" name="set_spawn_location_fireteams" />
-            <related context="player" type="action" name="set_primary_respawn_object" />
-            <related context="team"   type="action" name="set_primary_respawn_object" />
+            <category id="spawning" />
          </method>
          <method name="set_spawn_location_fireteams" id="14">
             <args>
@@ -456,7 +443,7 @@
                   current_object.set_spawn_location_permissions(allies)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="spawning" />
          </method>
          <method name="set_progress_bar" id="15">
             <args>
@@ -484,6 +471,7 @@
                   current_object.set_progress_bar(everyone, none)
                end
             </example>
+            <category id="object-ui" />
          </method>
          <method name="try_get_carrier" name2="get_carrier" id="19" returns="player">
             <blurb>Identify the player carrying a weapon or Armor Ability.</blurb>
@@ -509,7 +497,9 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="armor-abilities" />
+            <category id="biped-equipment" />
+            <category id="weapons" />
          </method>
          <method name="set_shape_visibility" id="22">
             <args>
@@ -526,7 +516,8 @@
                available via scripting, not in Forge, and the game apparently has no 
                code to display them.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-shape" />
+            <category id="object-ui" />
          </method>
          <method name="kill" id="23">
             <args>
@@ -544,6 +535,8 @@
                   end
                end
             </example>
+            <category id="object-lifetime" />
+            <category id="object-stats" />
          </method>
          <method name="set_invincibility" id="24">
             <args>
@@ -566,6 +559,7 @@
                   current_player.biped.set_invincibility(1)
                end
             </example>
+            <category id="object-stats" />
          </method>
          <method name="get_orientation" id="29" returns="number">
             <blurb>Returns a number representing the object's overall rotation.</blurb>
@@ -594,6 +588,8 @@
                on an object's physics. It works on vehicles, but phased-physics objects 
                that have been pre-rotated in Forge seem to always test as being upright.
             </note>
+            <category id="positioning" />
+            <category id="physics" />
          </method>
          <method name="get_speed" id="30" returns="number">
             <blurb>Returns the object's speed in feet per second.</blurb>
@@ -607,6 +603,8 @@
             <example>
                global.number[0] = current_object.get_speed()
             </example>
+            <category id="positioning" />
+            <category id="physics" />
          </method>
          <method name="attach_to" id="33">
             <args>
@@ -815,7 +813,8 @@
                   be anchored to the spot the grenade used to be in.
                </p>
             </note>
-            <related type="action" name="detach" />
+            <category id="attachment" />
+            <category id="positioning" />
          </method>
          <method name="detach" id="34">
             <blurb>Detaches this object from anything it is attached to.</blurb>
@@ -867,7 +866,7 @@
                   but the EMP itself still comes from the player.
                </p>
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="attachment" />
          </method>
          <method name="set_weapon_pickup_priority" id="44">
             <args>
@@ -918,7 +917,7 @@
                function. The data cores and power cores used in Invasion are similar 
                weapons.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="weapons" />
          </method>
          <method name="push_upward" name2="apply_upward_impulse" id="45">
             <blurb>Apply a random mostly-upward force to the object.</blurb>
@@ -933,6 +932,7 @@
             <example>
                current_object.push_upward()
             </example>
+            <category id="physics" />
          </method>
          <method name="set_scale" id="52">
             <args>
@@ -990,7 +990,6 @@
             <note>
                The text will be truncated to about 15 characters.
             </note>
-            <!-- relationships only need to be specified on one end -->
          </method>
          <method name="get_distance_to" id="66" returns="number">
             <args>
@@ -1013,6 +1012,7 @@
                   --
                end
             </example>
+            <category id="positioning" />
          </method>
          <method name="set_device_power" id="70">
             <args>
@@ -1022,19 +1022,14 @@
             <example>
                current_object.set_device_power(100)
             </example>
-            <related type="action" name="get_device_power" />
-            <related type="action" name="set_device_position" />
-            <related type="action" name="get_device_position" />
-            <related type="action" name="set_device_animation_position" />
-            <related type="action" name="animate_device_position" />
-            <related type="action" name="set_device_actual_position" />
+            <category id="device-machines" />
          </method>
          <method name="get_device_power" id="71" returns="number">
             <blurb>Gets the current power level of a device machine.</blurb>
             <example>
                global.number[0] = current_object.get_device_power()
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="set_device_position" id="72">
             <args>
@@ -1044,14 +1039,14 @@
             <example>
                current_object.set_device_position(100)
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="get_device_position" id="73" returns="number">
             <blurb>Gets the current position level of a device machine.</blurb>
             <example>
                global.number[0] = current_object.get_device_position()
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="set_device_animation_position" id="78">
             <args>
@@ -1059,7 +1054,7 @@
                <arg name="position"  type="number" />
             </args>
             <blurb>Sets the current animation and position of a device machine.</blurb>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="animate_device_position" id="79">
             <args>
@@ -1075,13 +1070,13 @@
                </arg>
             </args>
             <blurb>Animate a device machine's position over time.</blurb>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="set_device_actual_position" id="80">
             <args>
                <arg name="position"  type="number" />
             </args>
-            <!-- relationships only need to be specified on one end -->
+            <category id="device-machines" />
          </method>
          <method name="enable_spawn_zone" id="82">
             <args>
@@ -1105,6 +1100,7 @@
                   end
                end
             </example>
+            <category id="spawning" />
          </method>
          <method name="set_garbage_collection_disabled" id="85">
             <args>
@@ -1154,6 +1150,7 @@
                   end
                end
             </example>
+            <category id="object-lifetime" />
          </method>
          <method name="place_between_me_and" id="87" returns="object" nodiscard="false">
             <args>
@@ -1173,7 +1170,7 @@
                this function appears to spawn objects exactly in place, provided they aren't 
                solid or obstructed.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-lifetime" />
          </method>
          <method name="copy_rotation_from" id="91">
             <args>
@@ -1199,7 +1196,7 @@
                This function can fail to do anything if it is called on an object that is attached 
                to something else.
             </note>
-            <related type="action" name="face_toward" />
+            <category id="positioning" />
          </method>
          <method name="face_toward" id="92">
             <args>
@@ -1238,7 +1235,7 @@
             <note>
                If you face an object toward itself, you can use the position offset to rotate it.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="positioning" />
          </method>
          <method name="add_weapon" id="93">
             <args>
@@ -1280,7 +1277,8 @@
                the object function takes an object type and spawns a new weapon; while the player 
                function takes an existing weapon object.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="biped-equipment" />
+            <category id="weapons" />
          </method>
          <method name="remove_weapon" id="94">
             <args>
@@ -1306,7 +1304,8 @@
                   current_player.biped.remove_weapon(primary, true)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="biped-equipment" />
+            <category id="weapons" />
          </method>
          <method name="apply_shape_color_from_player_member" id="98">
             <args>
@@ -1339,7 +1338,7 @@
                   current_object.apply_shape_color_from_player_member(object.owner)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="object-shape" />
          </method>
       </actions>
    </methods>
@@ -1389,9 +1388,7 @@
                end
             end
          </example>
-         <related type="accessor" name="health" />
-         <related type="accessor" name="max_shields" />
-         <related type="accessor" name="max_health" />
+         <category id="object-stats" />
       </accessor>
       <accessor name="health" type="number" getter="opcode" setter="opcode">
          <blurb>The object's current health.</blurb>
@@ -1409,6 +1406,7 @@
                end
             end
          </example>
+         <category id="object-stats" />
       </accessor>
       <accessor name="max_shields" type="number" setter="opcode">
          <blurb>The object's maximum shields.</blurb>
@@ -1422,6 +1420,7 @@
                current_player.biped.max_shields = 50
             end
          </example>
+         <category id="object-stats" />
       </accessor>
       <accessor name="max_health" type="number" setter="opcode">
          <blurb>The object's maximum health.</blurb>
@@ -1435,6 +1434,7 @@
                current_player.biped.max_health = 50
             end
          </example>
+         <category id="object-stats" />
       </accessor>
    </accessors>
 </script-type>

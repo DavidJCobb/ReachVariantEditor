@@ -19,6 +19,7 @@ namespace cobb::qt {
       auto save = QSaveFile(file_path);
       if (save.open(QIODevice::WriteOnly)) {
          QTextStream stream(&save);
+         stream.setCodec("UTF-8");
          stream << content;
          save.commit();
       }

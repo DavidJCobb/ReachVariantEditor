@@ -73,6 +73,7 @@
                   end
                end
             </example>
+            <category id="player-cause-of-death" />
          </method>
          <method name="is_fireteam_leader" id="9">
             <blurb>This function always returns false.</blurb>
@@ -82,6 +83,7 @@
                   is the "leader" of their fireteam. However, it apparently always returns false.
                </p>
             </description>
+            <category id="fireteams" />
          </method>
          <method name="assisted_kill_of" id="10">
             <args>
@@ -115,6 +117,7 @@
                   end
                end
             </example>
+            <category id="player-cause-of-death" />
          </method>
          <method name="is_not_respawning" id="12">
             <blurb>Checks whether a player <em>is not</em> respawning.</blurb>
@@ -123,7 +126,8 @@
                then they are not respawning. If you need to know whether the player is or isn't 
                alive, testing whether they have a <a href="script/api/player/properties/biped">biped</a> 
                may be more reliable.
-         </note>
+            </note>
+            <category id="spawning" />
          </method>
          <method name="is_spartan" id="13">
             <blurb>Checks whether a player's current species is Spartan.</blurb>
@@ -143,8 +147,7 @@
                   end
                end
             </example>
-            <related type="condition" name="is_elite" />
-            <related type="condition" name="is_monitor" />
+            <category id="player-species" />
          </method>
          <method name="is_elite" id="14">
             <blurb>Checks whether a player's current species is Elite.</blurb>
@@ -164,6 +167,7 @@
                   end
                end
             </example>
+            <category id="player-species" />
          </method>
          <method name="is_monitor" id="15">
             <blurb>Checks whether a player's current species is Monitor.</blurb>
@@ -175,6 +179,7 @@
                   to the <code>game.is_in_forge()</code> condition.
                </p>
             </description>
+            <category id="player-species" />
          </method>
       </conditions>
       <actions>
@@ -230,9 +235,7 @@
                   end
                end
             </example>
-            <related context="player" type="condition" name="killer_type_is" />
-            <related context="player" type="action" name="try_get_death_damage_type" />
-            <related context="player" type="action" name="try_get_death_damage_mod" />
+            <category id="player-cause-of-death" />
          </method>
          <method name="try_get_death_damage_type" name2="get_death_damage_type" id="30" returns="number">
             <blurb>Identify the type of damage that killed this player.</blurb>
@@ -271,7 +274,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="player-cause-of-death" />
          </method>
          <method name="try_get_death_damage_mod" name2="get_death_damage_mod" id="31" returns="number">
             <blurb>Identify the modifier for the damage that killed this player.</blurb>
@@ -310,7 +313,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="player-cause-of-death" />
          </method>
          <method name="get_scoreboard_pos" id="32" returns="number">
             <blurb>Get a player's position on the scoreboard.</blurb>
@@ -331,6 +334,7 @@
                   end
                end
             </example>
+            <category id="scoring" />
             <related context="team" type="action" name="get_scoreboard_pos" />
          </method>
          <method name="get_spree_count" id="37" returns="number">
@@ -362,6 +366,7 @@
                   end
                end
             </example>
+            <category id="scoring" />
          </method>
          <method name="increment_req_money_by" id="38">
             <args>
@@ -460,7 +465,7 @@
                them in the game data, and boarding relies on special "seats" that are flagged as 
                being exclusively for boarding.
             </note>
-            <related context="player" type="action" name="force_into_vehicle" />
+            <category id="vehicles" />
          </method>
          <method name="force_into_vehicle" id="41">
             <args>
@@ -488,6 +493,7 @@
                If the vehicle is flipped, then the player will be moved to it, but will not 
                be forced into it. <!-- TODO: RECHECK THIS -->
             </note>
+            <category id="vehicles" />
          </method>
          <method name="set_biped" id="42">
             <args>
@@ -616,7 +622,7 @@
                the player will not respawn; if the biped was set by scripts to never be garbage-collected, 
                then the player is effectively trapped.
             </note>
-            <related context="player" type="property" name="biped" />
+            <category id="bipeds" />
          </method>
          <method name="set_round_card_title" id="56">
             <args>
@@ -649,7 +655,7 @@
                   end
                end
             </example>
-            <related context="player" type="action" name="set_round_card_text" />
+            <category id="round-card" />
          </method>
          <method name="set_round_card_text" id="57">
             <args>
@@ -680,7 +686,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="round-card" />
          </method>
          <method name="set_round_card_icon" id="58">
             <args>
@@ -714,7 +720,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="round-card" />
          </method>
          <method name="set_primary_respawn_object" id="61">
             <args>
@@ -775,7 +781,7 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="spawning" />
          </method>
          <method name="get_fireteam" id="62" returns="number">
             <blurb>Returns the index of the fireteam that a player is on.</blurb>
@@ -832,12 +838,14 @@
                   end
                end
             </example>
+            <category id="fireteams" />
          </method>
          <method name="set_fireteam" id="63">
             <args>
                <arg name="index" type="number" />
             </args>
             <blurb>Sets a player's current fireteam index.</blurb>
+            <category id="fireteams" />
          </method>
          <method name="set_requisition_palette" id="69">
             <args>
@@ -921,7 +929,8 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="biped-equipment" />
+            <category id="weapons" />
          </method>
          <method name="try_get_armor_ability" name2="get_armor_ability" id="84" returns="object">
             <blurb>Identify the player's current Armor Ability.</blurb>
@@ -951,7 +960,8 @@
                   end
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="armor-abilities" />
+            <category id="biped-equipment" />
          </method>
          <method name="get_crosshair_target" id="86" returns="object">
             <blurb>Identify the object that the player is aiming at, if that object 
@@ -977,7 +987,7 @@
                the object function takes an object type and spawns a new weapon; while the player 
                function takes an existing weapon object.
             </note>
-            <!-- relationships only need to be specified on one end -->
+            <category id="biped-equipment" />
          </method>
          <method name="set_co_op_spawning" id="90">
             <args>
@@ -998,11 +1008,7 @@
                   current_player.set_co_op_spawning(true) -- enable it
                end
             </example>
-            <related context="team" type="action" name="set_co_op_spawning" />
-            <related context="object" type="action" name="set_spawn_location_fireteams" />
-            <related context="object" type="action" name="set_spawn_location_permissions" />
-            <related context="player" type="action" name="set_primary_respawn_object" />
-            <related context="team" type="action" name="set_primary_respawn_object" />
+            <category id="spawning" />
          </method>
          <method name="record_griefer_penalty" id="97">
             <args>
@@ -1028,6 +1034,7 @@
             This is the only property that can be accessed on nested variables, e.g. 
             <var>current_team.player[0].biped</var>.
          </note>
+         <category id="bipeds" />
       </property>
       <property name="rating" type="number" read-only="true">
          <blurb>The player's Arena rating.</blurb>
@@ -1053,6 +1060,7 @@
                end
             end
          </example>
+         <category id="scoring" />
          <related context="team" type="property" name="score" />
       </property>
       <property name="script_stat" type="number" indexed="true">
@@ -1069,6 +1077,7 @@
                current_player.script_stat[3] += 5
             end
          </example>
+         <category id="scoring" />
          <related context="team" type="property" name="script_stat" />
       </property>
       <property name="team" type="team">
@@ -1114,6 +1123,7 @@
                current_player.frag_grenades += 1
             end
          </example>
+         <category id="biped-equipment" />
       </accessor>
       <accessor name="plasma_grenades" type="number" setter="opcode" id="74">
          <blurb>The player's current plasma grenade count.</blurb>
@@ -1128,6 +1138,7 @@
                current_player.plasma_grenades += 1
             end
          </example>
+         <category id="biped-equipment" />
       </accessor>
    </accessors>
 </script-type>

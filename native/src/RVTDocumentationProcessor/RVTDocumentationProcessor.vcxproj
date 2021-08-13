@@ -107,6 +107,8 @@
     <ClCompile Include="content\page_template.cpp" />
     <ClCompile Include="content\registry.cpp" />
     <ClCompile Include="helpers\qt\xml.cpp" />
+    <ClCompile Include="helpers\qt\xml_html_entity_resolver.cpp" />
+    <ClCompile Include="helpers\qt\xml_stream_reader_to_dom.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="util\html.cpp" />
     <ClCompile Include="util\link_fixup.cpp" />
@@ -128,6 +130,8 @@
     <ClInclude Include="helpers\passkey.h" />
     <ClInclude Include="helpers\qt\save_file_to.h" />
     <ClInclude Include="helpers\qt\xml.h" />
+    <ClInclude Include="helpers\qt\xml_html_entity_resolver.h" />
+    <ClInclude Include="helpers\qt\xml_stream_reader_to_dom.h" />
     <ClInclude Include="util\html.h" />
     <ClInclude Include="util\link_fixup.h" />
     <ClInclude Include="util\megalo_syntax_highlight.h" />

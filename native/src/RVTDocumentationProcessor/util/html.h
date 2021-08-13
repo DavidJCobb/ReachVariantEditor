@@ -3,13 +3,6 @@
 #include <QString>
 #include <QtXml>
 
-class html_serializer {
-   public:
-      QString link_base_path;
-
-      QString serialize(QDomElement);
-};
-
 namespace util {
    struct html_serialize_options {
       bool adapt_indented_pre_tags      = false;

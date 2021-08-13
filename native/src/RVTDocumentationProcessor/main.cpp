@@ -14,6 +14,9 @@
 #include "util/link_fixup.h"
 #include "util/megalo_syntax_highlight.h"
 
+#include "helpers/qt/xml_html_entity_resolver.h"
+#include "helpers/qt/xml_stream_reader_to_dom.h"
+
 void handle_article(QDomElement& root, QDir base_save_folder, QString relative_path, QString relative_folder) {
    auto& registry = content::registry::get();
    //
@@ -100,7 +103,25 @@ int main(int argc, char *argv[]) {
          //
          QDomDocument doc;
          QString      error;
+         {
+            //
+            // Can't use QDomDocument::setContent; nothing in the QtXml module allows us to 
+            // perform parse-time modifications, which are needed in order to get HTML entities 
+            // to work (no, including the entity definition from w3.org doesn't seem to help).
+            // 
+            // If we want to be able to predefine entities, or else support entities without 
+            // the XML files having to define them individually, then we gotta do this.
+            //
+            cobb::qt::xml::XmlStreamReaderToDom  stream;
+            cobb::qt::xml::XmlHtmlEntityResolver resolver;
+            stream.setEntityResolver(&resolver);
+            stream.parse(file.readAll());
+            doc   = stream.document;
+            error = stream.errorString();
+         }
+         /*//
          doc.setContent(&file, &error);
+         //*/
          if (!error.isEmpty()) {
             qDebug() << error.toLatin1().data();
             continue;

@@ -6,30 +6,34 @@
       <member name="no_object" type="object" none="true">
          <blurb>A value which represents "none," usable where an object variable can 
          appear.</blurb>
-         <related name="no_player" />
-         <related name="no_team"   />
-         <related name="no_widget" />
+         <category id="const-none" />
       </member>
       <member name="no_player" type="object" none="true">
          <blurb>A value which represents "none," usable where an player variable can 
          appear.</blurb>
+         <category id="const-none" />
       </member>
       <member name="no_team" type="object" none="true">
          <blurb>A value which represents "none," usable where a team variable can 
          appear. It is not the same as <var>neutral_team</var>.</blurb>
+         <category id="const-none" />
       </member>
       <member name="no_widget" type="widget" none="true">
          <blurb>A value which represents "none," usable where a HUD widget can appear.</blurb>
+         <category id="const-none" />
+         <category id="unscoped-widget" />
       </member>
       <member name="current_object" type="object" read-only="true">
          <blurb>The current object in a <code>for each object</code> or <code>for 
          each object with label</code> loop.</blurb>
-         <related name="current_player" />
-         <related name="current_team"   />
+         <category id="unscoped-current" />
+         <category id="unscoped-object" />
       </member>
       <member name="current_player" type="player" read-only="true">
          <blurb>The current player in a <code>for each player</code> or <code>for 
          each player randomly</code> loop.</blurb>
+         <category id="unscoped-current" />
+         <category id="unscoped-player" />
       </member>
       <member name="player" type="player" indexed="true" read-only="true">
          <blurb>Allows direct access to all sixteen possible active players in a match.</blurb>
@@ -46,9 +50,12 @@
       </member>
       <member name="current_team" type="team" read-only="true">
          <blurb>The current team in a <code>for each team</code> loop.</blurb>
+         <category id="unscoped-current" />
+         <category id="unscoped-team" />
       </member>
       <member name="neutral_team" type="team" read-only="true">
          <blurb>A value that can be used to refer to Neutral Team.</blurb>
+         <category id="unscoped-team" />
       </member>
       <member name="team" type="team" indexed="true" read-only="true">
          <blurb>Allows direct access to all eight possible teams in a match.</blurb>
@@ -79,6 +86,7 @@
                not clear whether or how Teams 3 and up are swapped between rounds.
             </p>
          </description>
+         <category id="unscoped-team" />
       </member>
       <member name="hud_target_object" type="object" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
@@ -95,10 +103,8 @@
                target object" of some kind, testing has failed to determine any specifics.
             </p>
          </description>
-         <related name="hud_target_player" />
-         <related name="hud_player" />
-         <related name="hud_player_team" />
-         <related name="hud_target_player_team" />
+         <category id="unscoped-hud" />
+         <category id="unscoped-object" />
       </member>
       <member name="hud_target_player" type="player" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
@@ -115,6 +121,8 @@
                target player" of some kind, testing has failed to determine any specifics.
             </p>
          </description>
+         <category id="unscoped-hud" />
+         <category id="unscoped-player" />
       </member>
       <member name="hud_player" type="player" read-only="true">
          <blurb>This value can be used with HUD widgets and object waypoints to display 
@@ -138,6 +146,8 @@
                current_player.speed_kph /= 100 -- to KPH
             end
          </example>
+         <category id="unscoped-hud" />
+         <category id="unscoped-player" />
       </member>
       <member name="hud_player_team" type="team" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
@@ -155,6 +165,8 @@
                failed to verify this.
             </p>
          </description>
+         <category id="unscoped-hud" />
+         <category id="unscoped-team" />
       </member>
       <member name="hud_target_player_team" type="team" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
@@ -172,6 +184,8 @@
                testing has failed to verify this.
             </p>
          </description>
+         <category id="unscoped-hud" />
+         <category id="unscoped-team" />
       </member>
       <member name="unk_14_team" type="team">
          <blurb>Unknown, and potentially unused.</blurb>
@@ -193,6 +207,7 @@
                basis, but can only use the same format string and tokens for all players.
             </p>
          </description>
+         <category id="unscoped-widget" />
       </member>
       <member name="killed_object" type="object" read-only="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 
@@ -200,19 +215,24 @@
          <related name="killer_object" />
          <related name="killer_player" />
          <related name="death_event_damage_type" />
+         <category id="death-event-params" />
       </member>
       <member name="killer_object" type="object" read-only="true">
          <blurb>During an <a href="/script/events">object death event</a>, this is the 
          killer object.</blurb>
+         <category id="death-event-params" />
       </member>
       <member name="killer_player" type="player" read-only="true">
          <blurb>During an <a href="/script/events">object death event</a>, this is the 
          killer player.</blurb>
+         <category id="unscoped-player" />
+         <category id="death-event-params" />
       </member>
       <member name="death_event_damage_type" type="number" read-only="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 
          damage type that killed the object. It is presumed to be a 
          <a href="/script/api/ns_enums/damage_reporting_type">damage reporting type</a>; testing is pending.</blurb>
+         <category id="death-event-params" />
       </member>
    </members>
    <methods>
@@ -226,9 +246,7 @@
             <example>
                debug_print("This function doesn't do anything! :D")
             </example>
-            <related type="action" name="debug_break" />
-            <related type="action" name="debug_force_player_view_count" />
-            <related type="action" name="debug_set_tracing_enabled" />
+            <category id="debug" />
          </method>
          <method name="rand" id="25" returns="number">
             <args>
@@ -257,6 +275,7 @@
                   debug_break()
                end
             </example>
+            <category id="debug" />
          </method>
          <method name="debug_set_tracing_enabled" id="32">
             <args>
@@ -268,6 +287,7 @@
             <example>
                debug_set_tracing_enabled(true)
             </example>
+            <category id="debug" />
          </method>
          <method name="send_incident" id="75">
             <args>
@@ -366,6 +386,7 @@
                <arg name="number" type="number">Unknown.</arg>
             </args>
             <blurb>A non-functional debugging tool.</blurb>
+            <category id="debug" />
          </method>
          <method name="set_scenario_interpolator_state" id="95">
             <args>

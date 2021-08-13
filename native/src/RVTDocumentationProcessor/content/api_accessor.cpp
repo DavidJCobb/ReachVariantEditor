@@ -46,6 +46,7 @@ namespace content {
             continue;
          }
       }
+      this->_load_all_categories_in(root);
    }
    QString api_accessor::write(QString stem, api_type& member_of, page_creation_options options) {
       QString body;

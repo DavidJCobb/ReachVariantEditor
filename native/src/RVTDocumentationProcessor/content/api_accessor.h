@@ -7,6 +7,8 @@ namespace content {
 
    class api_accessor : public base {
       public:
+         api_accessor() : base(entry_type::accessor) {}
+
          QString type;
          bool getter = false;
          bool setter = false;

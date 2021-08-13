@@ -1,4 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article [
+   <!ENTITY % htmlmathml-f PUBLIC
+      "-//W3C//ENTITIES HTML MathML Set//EN//XML"
+      "http://www.w3.org/2003/entities/2007/htmlmathml-f.ent"
+   >
+   %htmlmathml-f;
+]>
 <article>
    <title>Best practices</title>
    <body>

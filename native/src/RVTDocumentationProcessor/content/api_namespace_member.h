@@ -7,6 +7,8 @@ namespace content {
 
    class api_namespace_member : public base {
       public:
+         api_namespace_member() : base(entry_type::generic) {}
+
          QString type;
          bool is_read_only = false;
          bool is_indexed   = false;

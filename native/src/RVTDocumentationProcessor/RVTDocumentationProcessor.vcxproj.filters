@@ -74,6 +74,12 @@
     <ClCompile Include="content\api_parent_object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\qt\xml_stream_reader_to_dom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\qt\xml_html_entity_resolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="helpers\passkey.h">
@@ -128,6 +134,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="content\api_parent_object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\xml_stream_reader_to_dom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\xml_html_entity_resolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

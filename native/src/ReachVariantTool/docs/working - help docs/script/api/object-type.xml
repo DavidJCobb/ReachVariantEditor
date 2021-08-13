@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE script-type [
+   <!ENTITY unused-object "<span class='unused'>This value is not used by the engine and will not spawn or match any object.</span>" >
+]>
 <script-type name="object-type">
    <friendly>Object Type</friendly>
    <blurb>A type of object that can exist in the game world.</blurb>
@@ -11,9 +14,8 @@
       <h2>All types (unsorted)</h2>
       <style>
 .object-type-list dt[data-unused],
-.object-type-list dt[data-unused]+dd{opacity:0.6}
-
-.object-type-list dt[data-unused]+dd::before{content:"This value is not used by the engine and will not spawn or match any object. ";color:#A00}
+.object-type-list dt[data-unused]+dd{opacity:0.7}
+.object-type-list span.unused{color:#A00}
 
 .object-type-list dt code{background:transparent}
 .object-type-list dt[data-tag]:not([data-unused])::after{display:block;font-size:.75em;color:#888;content:attr(data-tag);font-weight:normal}
@@ -57,11 +59,11 @@
             <dd>A plasma grenade that sticks to targets.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>spike_grenade</code> (Spike Grenade)</dt>
-            <dd>A development leftover from Halo 3: a spike grenade similar in design to a Stielhandgranate, 
+            <dd>&unused-object; A development leftover from Halo 3: a spike grenade similar in design to a Stielhandgranate, 
             which sticks to targets when thrown and unleashes a hail of spikes when detonating.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>firebomb_grenade</code> (Firebomb Grenade)</dt>
-            <dd>A development leftover from Halo 3: a firebomb which shatters upon impact and ignites the 
+            <dd>&unused-object; A development leftover from Halo 3: a firebomb which shatters upon impact and ignites the 
             ground at the impact site.</dd>
             
          <dt data-tag="weap:objects/weapons/rifle/dmr/dmr"><code>dmr</code> (DMR)</dt>
@@ -83,7 +85,7 @@
             arc over a short distance due to gravity.</dd>
             
          <dt data-unused="true"><code>smg</code> (SMG)</dt>
-            <dd>A development leftover from Halo 2: a fully-automatic submachine gun with a high fire 
+            <dd>&unused-object; A development leftover from Halo 2: a fully-automatic submachine gun with a high fire 
             rate and very low accuracy.</dd>
             
          <dt data-tag="weap:objects/weapons/rifle/needle_rifle/needle_rifle"><code>needle_rifle</code> (Needle Rifle)</dt>
@@ -124,7 +126,7 @@
             <dd>A human sniper rifle. It has two levels of zoom, and can load four rounds at a time.</dd>
             
          <dt data-unused="true"><code>brute_shot</code></dt>
-            <dd>A development leftover from Halo 3: a weapon of Brute design, which fires large explosive 
+            <dd>&unused-object; A development leftover from Halo 3: a weapon of Brute design, which fires large explosive 
             shells.</dd>
             
          <dt data-tag="weap:objects/weapons/rifle/focus_rifle/focus_rifle"><code>beam_rifle</code> (<del>Beam</del> <ins>Focus</ins> Rifle)</dt>
@@ -138,15 +140,15 @@
             <dd>A Covenant melee weapon which generates a powerful physics impuolse when swung.</dd>
             
          <dt data-unused="true"><code>mauler</code></dt>
-            <dd>A development leftover from Halo 3: a cross between a pistol and a shotgun, with a drum 
+            <dd>&unused-object; A development leftover from Halo 3: a cross between a pistol and a shotgun, with a drum 
             magazine.</dd>
             
          <dt data-unused="true"><code>flamethrower</code></dt>
-            <dd>A development leftover from Halo 3: a large flamethrower. In that game, it functioned 
+            <dd>&unused-object; A development leftover from Halo 3: a large flamethrower. In that game, it functioned 
             like a detachable turret.</dd>
             
          <dt data-unused="true"><code>missile_pod</code></dt>
-            <dd>A development leftover from Halo 3: a large cannon capable of firing homing missiles at 
+            <dd>&unused-object; A development leftover from Halo 3: a large cannon capable of firing homing missiles at 
             vehicles.</dd>
             
          <dt data-tag="vehi:objects/vehicles/human/warthog/warthog"><code>warthog</code> (Warthog)</dt>
@@ -173,24 +175,24 @@
             <dd>A two-seater ATV with no weapons.</dd>
             
          <dt data-unused="true"><code>chopper</code></dt>
-            <dd>A development leftover from Halo 3: a single-occupant Covenant vehicle armed with 
+            <dd>&unused-object; A development leftover from Halo 3: a single-occupant Covenant vehicle armed with 
             two cannons that fire explosive shells. The front of the vehicle was equipped with a 
             large bladed wheel; boosting into enemy vehicles with it will usually destroy them 
             instantly.</dd>
 
          <dt data-unused="true"><code>prowler</code></dt>
-            <dd>A development leftover from Halo 3: a four-seater Covenant vehicle analogous to 
+            <dd>&unused-object; A development leftover from Halo 3: a four-seater Covenant vehicle analogous to 
             the Warthog.</dd>
 
          <dt data-unused="true"><code>hornet</code></dt>
-            <dd>A development leftover from Halo 3: a single-occupant human air vehicle, sometimes 
+            <dd>&unused-object; A development leftover from Halo 3: a single-occupant human air vehicle, sometimes 
             equipped with rails allowing two passengers to ride on the sides.</dd>
             
          <dt data-unused="true" data-tag="vehi:"><code>stingray</code></dt>
-            <dd>A development leftover.</dd>
+            <dd>&unused-object; A development leftover.</dd>
             
          <dt data-unused="true" data-tag="vehi:"><code>heavy_wraith</code></dt>
-            <dd>A development leftover.</dd>
+            <dd>&unused-object; A development leftover.</dd>
             
          <dt data-tag="vehi:objects/vehicles/human/falcon/falcon"><code>falcon</code> (Falcon)</dt>
             <dd>A human air vehicle with two door guns operable by passengers.</dd>
@@ -212,7 +214,7 @@
             the minor cost of immobilizing the user (but not their teammates) while activated.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>power_fist</code></dt>
-            <dd>A development leftover: a scrapped Armor Ability.</dd>
+            <dd>&unused-object; A development leftover: a scrapped Armor Ability.</dd>
             
          <dt data-tag="eqip:objects/equipment/active_camouflage/active_camouflage"><code>active_camo_aa</code> (Active Camo (Armor Ability))</dt>
             <dd>An Armor Ability that allows its user to become invisible for short periods of 
@@ -220,10 +222,10 @@
             ability also emits a radar jamming effect that can alert enemies to its use.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>ammo_pack</code></dt>
-            <dd>A development leftover: a scrapped Armor Ability.</dd>
+            <dd>&unused-object; A development leftover: a scrapped Armor Ability.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>sensor_pack</code></dt>
-            <dd>A development leftover: a scrapped Armor Ability.</dd>
+            <dd>&unused-object; A development leftover: a scrapped Armor Ability.</dd>
             
          <dt data-tag="vehi:objects/vehicles/covenant/revenant/revenant"><code>revenant</code> (Revenant)</dt>
             <dd>A Covenant vehicle that can move like a Ghost, but has a miniaturized mortar launcher akin 
@@ -236,18 +238,18 @@
             <dd>A Covenant weapon that fires a weak particle beam.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>territory_static</code></dt>
-            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
+            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name was equivalent to a marker with Halo: Reach's <var>TERR_OBJECT</var> 
             label.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>ctf_flag_return_area</code></dt>
-            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
+            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name marked where flags needed to be delivered; Halo: Reach's Capture 
             the Flag combines both the flag spawn point and the flag return point into a single 
             <var>CTF_FLAG_RETURN</var> label.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>ctf_flag_spawn_point</code></dt>
-            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
+            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name marked where flags spawned; Halo: Reach's Capture the Flag 
             combines both the flag spawn point and the flag return point into a single <var>CTF_FLAG_RETURN</var> 
             label.</dd>
@@ -256,35 +258,35 @@
             <dd>A respawn zone marker, of the same variety as those placeable in Forge.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_elite_buy</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented, and it may also be connected to "requisitions," a 
             scrapped development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_elite_drop</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented, and it may also be connected to "requisitions," a 
             scrapped development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_slayer</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_spartan_buy</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented, and it may also be connected to "requisitions," a 
             scrapped development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_spartan_drop</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented, and it may also be connected to "requisitions," a 
             scrapped development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_spawn_controller</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>oddball_ball_spawn_point</code></dt>
-            <dd>A leftover from some point in development before Forge labels were designed and implemented. 
+            <dd>&unused-object; A leftover from some point in development before Forge labels were designed and implemented. 
             In Halo 3, a tag with this name was equivalent to a marker with Halo: Reach's <var>ODDBALL_BALL</var> 
             label.</dd>
             
@@ -297,147 +299,147 @@
             units. It is explosive and will detonate when it receives too much damage.</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>unsc_shield_generator</code></dt>
-            <dd>Unknown. This <em>is not</em> a Generator Defense generator; those use the internal 
+            <dd>&unused-object; Unknown. This <em>is not</em> a Generator Defense generator; those use the internal 
             name "generator_x_large".</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>cov_shield_generator</code></dt>
-            <dd>Unknown.</dd>
+            <dd>&unused-object; Unknown.</dd>
             
          <dt data-tag="scen:objects/multi/spawning/initial_spawn_point"><code>initial_spawn_point</code> (Initial Spawn Point)</dt>
             <dd>A respawn point that is only used to spawn players in for the first time, at the start of 
             a round.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>invasion_vehicle_req</code></dt>
-            <dd>A development leftover. This may be from development work on Invasion that was done before 
+            <dd>&unused-object; A development leftover. This may be from development work on Invasion that was done before 
             the Forge label system was implemented, and it may also be connected to "requisitions," a 
             scrapped development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>vehicle_req_floor</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>wall_switch</code></dt>
-            <dd>This value does not correspond to any object defined in any existing map files, but based 
+            <dd>&unused-object; This value does not correspond to any object defined in any existing map files, but based 
             on its type, it was meant to be an interactable object of some kind.</dd>
             
          <dt data-tag="ctrl:objects/levels/shared/device_controls/health_station/health_station"><code>health_pack</code> (Health Pack)</dt>
             <dd>A health pack.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_unsc_laser</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_unsc_dmr</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_unsc_rocket</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_unsc_shotgun</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_unsc_sniper</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_covy_launcher</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_covy_needler</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_covy_sniper</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>req_covy_sword</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>shock_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; &unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>specialist_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; &unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>assassin_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; &unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>infiltrator_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>warrior_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>combatant_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>engineer_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>infantry_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>operator_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>recon_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>scout_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>seeker_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>airborne_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>ranger_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_banshee</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_falcon</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_ghost</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_mongoose</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_revenant</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_scorpion</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_warthog</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
          <dt data-unused="true" data-tag="ctrl:"><code>req_buy_wraith</code></dt>
-            <dd>A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
+            <dd>&unused-object; A development leftover. Based on the name, it's connected to "requisitions," a scrapped 
             development concept that seems to have been scaled down to make Invasion Slayer. Based on 
             the tag type, you would have interacted with this object to make a purchase.</dd>
             
@@ -451,7 +453,7 @@
             <dd>A special type of Respawn Zone defined on Boneyard. It can be seen in Forge on maps like Boneyard, but not edited.</dd>
 
          <dt data-unused="true" data-tag="scen:"><code>fireteam_4_respawn_zone</code> (Respawn Zone, Fireteam 4)</dt>
-            <dd>As of this writing, no multiplayer maps define this tag; fireteam-specific respawn zones only go up to 3.</dd>
+            <dd>&unused-object; As of this writing, no multiplayer maps define this tag; fireteam-specific respawn zones only go up to 3.</dd>
             
          <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/civilian/truck_cab_large/truck_cab_large"><code>semi_truck</code> (Semi Truck)</dt>
             <dd>A semi truck with no trailer attached. The ones placeable in Forge with the Thorage 
@@ -466,10 +468,10 @@
             <dd>A giant golf ball, of the same variety as those placeable in Forge.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>golf_ball_blue</code> (Golf Ball, Blue)</dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
                      
          <dt data-unused="true" data-tag="bloc:"><code>golf_ball_red</code> (Golf Ball, Red)</dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
                      
          <dt data-tag="weap:objects/levels/shared/golf_club/golf_club"><code>golf_club</code> (Golf Club)</dt>
             <dd>A reskinned Gravity Hammer which looks like a gigantic golf club.</dd>
@@ -480,37 +482,35 @@
             pull golf balls into the cup, but it also affects some other objects, including Mongooses.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>golf_tee</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="bloc:objects/multi/dice/dice"><code>dice</code> (Dice)</dt>
             <dd>A giant six-sided die, of the same variety as those placeable in Forge. It is a muted green 
             with white dots. The pivot point is on the "six" face, but is slightly off-center.</dd>
             
          <dt data-unused="true" data-tag="bloc:objects/props/covenant/crate_space/crate_space"><code>covenant_crate</code> (Covenant Crate)</dt>
-            <dd>Defined on some Firefight maps, including Overlook. It is a Covenant weapon 
+            <dd>&unused-object; Defined on some Firefight maps, including Overlook. It is a Covenant weapon 
             crate. This same crate is available on some Multiplayer maps, including Forge 
             World, but it uses a different tag, and Megalo is not set up to make that tag 
             available to scripts.</dd> <!-- crate_space_mp versus crate_space, ugh -->
             
          <dt data-unused="true" data-tag="eqip:"><code>eradicator_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>saboteur_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>grenadier_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="eqip:"><code>marksman_loadout</code></dt>
-            <dd>Apparently a development leftover from an older implementation of loadouts.</dd>
+            <dd>&unused-object; Apparently a development leftover from an older implementation of loadouts.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>flare</code> (Flare)</dt>
-            <dd>An unused scenery item; it is <em>not</em> a leftover of the Flare equipment item from 
-            Halo 3.</dd>
+            <dd>&unused-object; An unused scenery item; it is <em>not</em> a leftover of the Flare equipment item from Halo 3.</dd>
             
          <dt data-unused="true" data-tag="bloc:objects/props/human/unsc/unsc_glow_stick/unsc_glow_stick"><code>glow_stick</code> (Glowstick)</dt>
-            <dd>Defined on some Firefight maps, but doesn't appear to be defined in any Multiplayer 
-            maps.</dd>
+            <dd>&unused-object; Defined on some Firefight maps, but doesn't appear to be defined in any Multiplayer maps.</dd>
             
          <dt data-tag="weap:objects/weapons/rifle/concussion_rifle/concussion_rifle"><code>concussion_rifle</code> (Concussion Rifle)</dt>
             <dd>A Covenant weapon similar to the Brute Shot; it does less damage but has a greater physics 
@@ -539,22 +539,19 @@
             when a shape is set on it.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>teleporter_sender</code></dt>
-            <dd>Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in 
-            Forge.</dd>
+            <dd>&unused-object; Testing indicates that this does not correspond to the Sender-Node Teleporters placeable in Forge.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>teleporter_receiver</code></dt>
-            <dd>Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable 
-            in Forge.</dd>
+            <dd>&unused-object; Testing indicates that this does not correspond to the Receiver-Node Teleporters placeable in Forge.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>teleporter_2way</code></dt>
-            <dd>Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in 
-            Forge.</dd>
+            <dd>&unused-object; Testing indicates that this does not correspond to the Two-Way-Node Teleporters placeable in Forge.</dd>
             
          <dt data-tag="mach:"><code>data_core_beam</code></dt>
             <dd>A device machine.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>phantom_overwatch</code> (Phantom, Overwatch)</dt>
-            <dd>A device machine with the Phantom model, suitable for scripted animation.</dd>
+            <dd>&unused-object; A device machine with the Phantom model, suitable for scripted animation.</dd>
             
          <dt data-tag="mach:objects/vehicles/human/longsword/longsword"><code>longsword</code> (Longsword)</dt>
             <dd>A relatively low-detail static model of a Longsword bomber. The tag is defined on Boneyard.</dd>
@@ -570,16 +567,16 @@
             <dd>A non-animated Pelican.</dd>
             
          <dt data-unused="true" data-tag="vehi:"><code>phantom</code> (Phantom, Vehicle)</dt>
-            <dd>A drivable Phantom.</dd>
+            <dd>&unused-object; A drivable Phantom.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>pelican</code> (Pelican)</dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>armory_shelf</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>covenant_resupply_capsule</code></dt> <!-- cov_resupply_capsule -->
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="mach:objects/levels/multi/70_boneyard/covy_drop_pod/covy_drop_pod"><code>covenant_drop_pod</code></dt>
             <dd>An unfinished asset available on Boneyard. It is a small, untextured (i.e. flat 
@@ -587,7 +584,7 @@
             no collision and no apparent function.</dd>
 
          <dt data-unused="true" data-tag="bloc:"><code>invisible_marker</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="scen:objects/multi/spawning/weak_respawn_zone"><code>respawn_zone_weak</code> (Respawn Zone, Weak)</dt>
             <dd>A respawn zone with a weak influence, of the same variety as those placeable in Forge.</dd>
@@ -606,20 +603,20 @@
             however, attempting to do the same with Megalo scripts produces no result.</dd>
             
          <dt data-unused="true" data-tag="scen:"><code>resupply_capsule_open</code></dt>
-            <dd>This tag is not defined even in Firefight maps, which define the "closed" 
+            <dd>&unused-object; This tag is not defined even in Firefight maps, which define the "closed" 
             variant. Examination of the "closed" variant's tags suggest that an explicit "open" 
             variant shouldn't even be necessary.</dd>
             
          <dt data-unused="true" data-tag="scen:objects/gear/human/military/weapon_box/weapon_box"><code>weapon_box</code></dt>
-            <dd>Defined on some Firefight maps, including Courtyard. It is a flat olive drab metal 
+            <dd>&unused-object; Defined on some Firefight maps, including Courtyard. It is a flat olive drab metal 
             panel with UNSC branding that in Firefight can spawn with power weapons attached to 
             it.</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>tech_console_stationary</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-unused="true" data-tag="mach:"><code>tech_console_wall</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-tag="scen:objects/multi/generic/mp_cinematic_camera"><code>initial_loadout_camera</code> (Initial Loadout Camera)</dt>
             <dd>An object which defines a camera view that can be used during the initial loadout selection 
@@ -641,16 +638,16 @@
             the angle at which they hit a surface.</dd>
             
          <dt data-unused="true" data-tag="bloc:"><code>dropzone_boundary</code> (dropzone_boundary)</dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_small/shield_door_small"><code>shield_door_small</code> (Shield Door, Small)</dt>
-            <dd>Defined on some Firefight maps, including Courtyard.</dd>
+            <dd>&unused-object; Defined on some Firefight maps, including Courtyard.</dd>
             
          <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_medium/shield_door_medium"><code>shield_door_medium</code> (Shield Door, Medium)</dt>
-            <dd>Defined on some Firefight maps, including Courtyard.</dd>
+            <dd>&unused-object; Defined on some Firefight maps, including Courtyard.</dd>
             
          <dt data-unused="true" data-tag="bloc:objects/props/covenant/shield_door_large/shield_door_large"><code>shield_door_large</code> (Shield Door, Large)</dt>
-            <dd>Defined on some Firefight maps, including Courtyard.</dd>
+            <dd>&unused-object; Defined on some Firefight maps, including Courtyard.</dd>
             
          <dt data-tag="eqip:objects/equipment/drop_shield/drop_shield"><code>drop_shield</code> (Drop Shield)</dt>
             <dd>An Armor Ability which allows the user to place a small bubble shield at their location.</dd>
@@ -679,7 +676,7 @@
             <dd>A Covenant turret emplacement.</dd>
             
          <dt data-unused="true" data-tag="vehi:"><code>cargo_truck</code> (Cargo Truck)</dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
             
          <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/civilian/cart_electric/cart_electric"><code>electric_cart</code> (Electric Cart)</dt>
             <dd>An electric cart with no armaments.</dd>
@@ -688,7 +685,7 @@
             <dd>A drivable forklift.</dd>
             
          <dt data-unused="true" data-tag="vehi:"><code>military_truck</code></dt>
-            <dd></dd>
+            <dd>&unused-object;</dd>
 
          <dt data-thorage="true" data-tag="vehi:objects/vehicles/human/civilian/oni_van/oni_van"><code>oni_van</code> (ONI Van)</dt>
             <dd>A huge black van with a driver and passenger seat. It is fairly slow.</dd>
@@ -722,8 +719,7 @@
             on maps that define its tag.</dd> <!-- can't find it on any MP maps but Firefight has it -->
             
          <dt data-unused="true" data-tag="bloc:"><code>kill_boundary_3d_model</code></dt>
-            <dd>Internally, a tag named "ff_kill_zone" is used for the (Soft) Kill Boundary's 3D model, but not 
-            for the actual object.</dd>
+            <dd>&unused-object; Internally, a tag named "ff_kill_zone" is used for the (Soft) Kill Boundary's 3D model, but not for the actual object.</dd>
 
          <dt data-tag="bloc:objects/levels/forge/ff_plat_1x1_flat/ff_plat_1x1_flat"><code>block_1x1_flat</code> (Block 1x1 Flat)</dt>
             <dd>A Block 1x1 Flat, of the same variety as those placeable in Forge.</dd>

@@ -75,7 +75,7 @@ namespace content {
             text = context->name + '.';
          text += article->name;
          //
-         path = QDir::cleanPath(context->relative_subfolder_path() + api_parent_object::sub_sub_folder_name_for(this->type));
+         path = QDir::cleanPath(context->relative_subfolder_path() + api_parent_object::sub_sub_folder_name_for(article->type));
          //
          out += QString("   <li><a href=\"%1/%2.html\">%3</a></li>\n")
             .arg(path)
@@ -116,7 +116,7 @@ namespace content {
          for (auto* art : cat->articles) {
             if (art == this)
                continue;
-            if (articles.indexOf(art))
+            if (articles.indexOf(art) >= 0)
                continue;
             articles.push_back(art);
          }
@@ -125,10 +125,9 @@ namespace content {
          auto& registry = registry::get();
          for (auto& rel : this->related) {
             base* target  = rel->target;
-            if (!target)
+            if (!target || !target->parent)
                continue;
-            base* context = target->parent;
-            if (!context)
+            if (articles.indexOf(target) >= 0)
                continue;
             articles.push_back(target);
          }

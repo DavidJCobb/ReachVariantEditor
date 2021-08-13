@@ -9,7 +9,7 @@
       
       <h2>All sounds (unsorted)</h2>
       <style>
-.sound-list q{display:block;font-style:italic;margin-top:.125em;quotes: "“" "”" "‘" "’"}
+.sound-list q{display:block;font-style:italic;margin-top:.125em;quotes: "&#x201c;" "&#x201d;" "&#x2018;" "&#x2019;"}
    .sound-list q::before{content:open-quote}
    .sound-list q::after{content:close-quote}
 
