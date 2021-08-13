@@ -59,7 +59,7 @@ namespace Megalo {
       });
       auto pickup_priority = DetailedEnum({
          DetailedEnumValue("normal"),
-         DetailedEnumValue("hold_action"),
+         DetailedEnumValue("high"),
          DetailedEnumValue("automatic"),
       });
       auto team_alliance_status = DetailedEnum({
@@ -134,8 +134,32 @@ namespace Megalo {
          }
       }
       auto index = this->base.lookup(word);
-      if (index < 0)
-         return arg_compile_result::failure(QString("Value \"%1\" cannot be used here.").arg(word));
+      if (index < 0) {
+         bool  failure      = true;
+         auto* deprecations = this->get_deprecations();
+         if (deprecations) {
+            for (auto& d : *deprecations) {
+               if (word.compare(d.name.c_str(), Qt::CaseInsensitive) == 0) {
+                  failure = false;
+                  index   = d.index;
+                  //
+                  auto* item = this->base.item(index);
+                  if (item) {
+                     compiler.raise_warning(
+                        QString("Here, the value \"%1\" is deprecated. It has the same meaning as \"%2\", which you should use instead.")
+                           .arg(d.name.c_str())
+                           .arg(item->name.c_str())
+                     );
+                  } else {
+                     failure = true;
+                  }
+                  break;
+               }
+            }
+         }
+         if (failure)
+            return arg_compile_result::failure(QString("Value \"%1\" cannot be used here.").arg(word));
+      }
       this->value = index;
       return arg_compile_result::success();
    }
@@ -250,6 +274,9 @@ namespace Megalo {
       // DO NOT import any names, because all of the enum values are operators and the compiler has handling for them built-in
    );
 
+   /*static*/ std::vector<OpcodeArgValuePickupPriorityEnum::deprecation> OpcodeArgValuePickupPriorityEnum::deprecations = {
+      { "hold_action", 1 },
+   };
    OpcodeArgValuePickupPriorityEnum::OpcodeArgValuePickupPriorityEnum() : OpcodeArgValueEnumSuperclass(enums::pickup_priority) {}
    OpcodeArgTypeinfo OpcodeArgValuePickupPriorityEnum::typeinfo = OpcodeArgTypeinfo(
       "_pickup_priority",

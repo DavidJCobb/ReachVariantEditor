@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<article>
+   <title>Special string characters</title>
+   <body>
+      <p>
+         <i>Halo: Reach</i>'s fonts include several unique icons and symbols, which are listed 
+         below. Note that the game uses two sets of fonts. "TV Nord" is used for large portions 
+         of the UI, including the scoreboard, HUD action prompts kill feed, and round cards. 
+         "Eurostile" is used for most of the rest of the HUD, including the game variant name, 
+         all scripted HUD widgets, and location names near the motion tracker.
+      </p>
+      
+      <style>
+         table{border-collapse:collapse}
+            thead{background:#666;color:#FFF}
+               thead th+th{border-left-color:#AAA}
+            tbody{background:#FFF}
+               th,
+               td{border:1px solid #888;padding:.25em .5em}
+               tbody tr:nth-of-type(2n) td{background:#F0F0F0}
+            th{font-weight:bold}
+               td:first-child{font-family:Lucida Console,monospace;font-size:.8125em}
+               td+td{width:50%}
+               
+               td:empty{background:#B0B0B0!important}
+               tbody tr:nth-of-type(2n) td:empty{background:#A8A8A8!important}
+      </style>
+      
+      <table>
+         <thead>
+            <tr>
+               <th>Symbol code</th>
+               <th>Eurostile</th>
+               <th>TV Nord</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td>\u00A4</td>
+               <td colspan="2">The Microsoft Points currency icon.</td>
+            </tr>
+            <tr>
+               <td>\u00A6</td>
+               <td colspan="2">The Bungie logo.</td>
+            </tr>
+            <tr>
+               <td>\uE008</td>
+               <td></td>
+               <td>Padlock</td>
+            </tr>
+            <tr>
+               <td>\uE034</td>
+               <td></td>
+               <td>Mongoose HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE035</td>
+               <td></td>
+               <td>Revenant HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE036</td>
+               <td>Alpha version of the Sprint icon: a diamond with a lightning bolt cut out of it.</td>
+               <td>Sprint HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE037</td>
+               <td>Alpha version of the Hologram HUD icon: two parallelograms sharing an edge.</td>
+               <td>Hologram HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE038</td>
+               <td>Alpha version of the Evade HUD icon: an oval with two angle brackets cut out of its sides.</td>
+               <td>Evade HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE039</td>
+               <td></td>
+               <td>Sabre HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE040</td>
+               <td></td>
+               <td>Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE041</td>
+               <td></td>
+               <td>Scorpion HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE042</td>
+               <td>Alpha version of the Active Camo HUD icon: an upward-pointing equilateral triangle with an eye insignia on it.</td>
+               <td>Active Camo HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE043</td>
+               <td>Alpha version of the Jetpack HD icon: an upward-pointing shape with an upward-pointing arrow cut out of it.</td>
+               <td>Jetpack HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE044</td>
+               <td></td>
+               <td>Ghost HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE045</td>
+               <td></td>
+               <td>Wraith HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE046</td>
+               <td>Alpha version of the Drop Shield icon: a shield shape with a padlock cut out of it.</td>
+               <td>Drop Shield HUD icon</td>
+            </tr>
+            <tr>
+               <td>\uE047</td>
+               <td></td>
+               <td>Banshee HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE048</td>
+               <td></td>
+               <td>Falcon HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE049</td>
+               <td></td>
+               <td>Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE050</td>
+               <td></td>
+               <td>Shade HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE051</td>
+               <td></td>
+               <td>Abstract icon of a vehicle seen from the front.</td>
+            </tr>
+            <tr>
+               <td>\uE065</td>
+               <td>Infinity symbol.</td>
+               <td>Infinity symbol.</td>
+            </tr>
+            <tr>
+               <td>\uE067</td>
+               <td></td>
+               <td>Black triangle pointing to the right.</td>
+            </tr>
+            <tr>
+               <td>\uE071</td>
+               <td></td>
+               <td>Machine Gun Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE072</td>
+               <td></td>
+               <td>Covenant Power Core HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE073</td>
+               <td></td>
+               <td>Rocket Warthog Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE074</td>
+               <td></td>
+               <td>Gauss Warthog Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE075</td>
+               <td></td>
+               <td>Unknown HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE076</td>
+               <td></td>
+               <td>Target Locator HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE077</td>
+               <td>A small Banshee silhouette.</td>
+               <td>UNSC Data Core HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE078</td>
+               <td>An unfinished, improperly cropped graphic resembling a capital "F" in cursive.</td>
+               <td>Unknown HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE079</td>
+               <td>A small Ghost silhouette.</td>
+               <td>Microsoft Points icon</td>
+            </tr>
+            <tr>
+               <td>\uE080</td>
+               <td>A small Mongoose silhouette.</td>
+               <td></td>
+            </tr>
+            <tr>
+               <td>\uE081</td>
+               <td>An unfinished, improperly cropped graphic resembling a capital "F" in cursive.</td>
+               <td></td>
+            </tr>
+            <tr>
+               <td>\uE082</td>
+               <td>A small Scorpion silhouette.</td>
+               <td></td>
+            </tr>
+            <tr>
+               <td>\uE083</td>
+               <td>A small Warthog silhouette.</td>
+               <td>Warthog HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE084</td>
+               <td>A small Wraith silhouette.</td>
+               <td></td>
+            </tr>
+            <tr>
+               <td>\uE085</td>
+               <td></td>
+               <td>Question mark HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE100</td>
+               <td colspan="2">Xbox "A" button</td>
+            </tr>
+            <tr>
+               <td>\uE101</td>
+               <td colspan="2">Xbox "B" button</td>
+            </tr>
+            <tr>
+               <td>\uE102</td>
+               <td colspan="2">Xbox "X" button</td>
+            </tr>
+            <tr>
+               <td>\uE103</td>
+               <td colspan="2">Xbox "Y" button</td>
+            </tr>
+            <tr>
+               <td>\uE104</td>
+               <td colspan="2">Xbox "LB" button</td>
+            </tr>
+            <tr>
+               <td>\uE105</td>
+               <td colspan="2">Xbox "RB" button</td>
+            </tr>
+            <tr>
+               <td>\uE106</td>
+               <td colspan="2">Xbox "LT" button</td>
+            </tr>
+            <tr>
+               <td>\uE107</td>
+               <td colspan="2">Xbox "RT" button</td>
+            </tr>
+            <tr>
+               <td>\uE108</td>
+               <td colspan="2">Xbox "D-Pad Up" button</td>
+            </tr>
+            <tr>
+               <td>\uE109</td>
+               <td colspan="2">Xbox "D-Pad Down" button</td>
+            </tr>
+            <tr>
+               <td>\uE10A</td>
+               <td colspan="2">Xbox "D-Pad Left" button</td>
+            </tr>
+            <tr>
+               <td>\uE10B</td>
+               <td colspan="2">Xbox "D-Pad Right" button</td>
+            </tr>
+            <tr>
+               <td>\uE10C</td>
+               <td colspan="2">Xbox "Start" button</td>
+            </tr>
+            <tr>
+               <td>\uE10D</td>
+               <td colspan="2">Xbox "Back" button</td>
+            </tr>
+            <tr>
+               <td>\uE10E</td>
+               <td colspan="2">Xbox "Left Stick" button</td>
+            </tr>
+            <tr>
+               <td>\uE10F</td>
+               <td colspan="2">Xbox "Right Stick" button</td>
+            </tr>
+            <tr>
+               <td>\uE110</td>
+               <td colspan="2">Xbox "Left Stick" button</td>
+            </tr>
+            <tr>
+               <td>\uE111</td>
+               <td colspan="2">Xbox "Right Stick" button</td>
+            </tr>
+            <tr>
+               <td>\uE112</td>
+               <td>A small silhouette of an Assault Rifle.</td>
+               <td>Assault Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE113</td>
+               <td></td>
+               <td>Oddball HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE114</td>
+               <td>A small silhouette of a DMR.</td>
+               <td>DMR HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE115</td>
+               <td></td>
+               <td>Bomb HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE116</td>
+               <td>A small silhouette of a Grenade Launcher.</td>
+               <td>Grenade Launcher HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE117</td>
+               <td>A small silhouette of a Needle Rifle.</td>
+               <td>Needle Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE119</td>
+               <td>A small silhouette of an Energy Sword.</td>
+               <td>Energy Sword HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11A</td>
+               <td colspan="2">Mauler HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11B</td>
+               <td></td>
+               <td>Firebomb HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11C</td>
+               <td></td>
+               <td>Flag HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11D</td>
+               <td>A copy of the Flamethrower HUD graphic with the wrong aspect ratio, condensed into a square.</td>
+               <td>Flamethrower HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11E</td>
+               <td>A small silhouette of a Frag Grenade.</td>
+               <td>Frag Grenade HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE11F</td>
+               <td>A small silhouette of a Fuel Rod Gun.</td>
+               <td>Fuel Rod Gun HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE120</td>
+               <td>A small silhouette of a Gravity Hammer.</td>
+               <td>Gravity Hammer HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE121</td>
+               <td>A small silhouette of a Concussion Rifle.</td>
+               <td>Concussion Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE122</td>
+               <td>A small silhouette of a Machine Gun Turret.</td>
+               <td>Machine Gun Turret HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE123</td>
+               <td>A small silhouette of a Magnum.</td>
+               <td>Magnum HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE124</td>
+               <td>A small silhouette of a Missile Pod.</td>
+               <td>Golf Club HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE125</td>
+               <td>A small silhouette of a Needler.</td>
+               <td>Needler HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE126</td>
+               <td>A small silhouette of a Focus Rifle.</td>
+               <td>Focus Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE127</td>
+               <td>A small silhouette of a Plasma Grenade.</td>
+               <td>Plasma Grenade HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE128</td>
+               <td>A small silhouette of a Plasma Launcher.</td>
+               <td>Plasma Launcher HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE129</td>
+               <td>A small silhouette of a Plasma Pistol.</td>
+               <td>Plasma Pistol HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12A</td>
+               <td>A small silhouette of a Plasma Rifle.</td>
+               <td>Plasma Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12B</td>
+               <td>A small silhouette of a Plasma Cannon.</td>
+               <td>Plasma Cannon HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12C</td>
+               <td>A small silhouette of a Spartan Laser.</td>
+               <td>Spartan Laser HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12D</td>
+               <td>A small silhouette of a Rocket Launcher.</td>
+               <td>Rocket Launcher HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12E</td>
+               <td>A small silhouette of a Plasma Repeater.</td>
+               <td>Plasma Repeater HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE12F</td>
+               <td>A small silhouette of a Shotgun.</td>
+               <td>Shotgun HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE130</td>
+               <td>A copy of the SMG HUD graphic with the wrong aspect ratio, condensed into a square.</td>
+               <td>SMG HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE131</td>
+               <td>A small silhouette of a Sniper Rifle.</td>
+               <td>Sniper Rifle HUD graphic</td>
+            </tr>
+            <tr>
+               <td>\uE132</td>
+               <td>A small silhouette of a Spiker.</td>
+               <td>Spiker HUD graphic</td>
+            </tr>
+         </tbody>
+      </table>
+   </body>
+</article>

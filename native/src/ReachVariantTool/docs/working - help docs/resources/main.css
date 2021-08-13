@@ -33,8 +33,10 @@ body{background:var(--sidebar-back);min-height:100vh;display:flex;flex-flow:row 
 main{padding-bottom:0} /* this bug affects main, too */
    main::after{height:.5rem;content:" ";display:block}
 
-h1 .a-k-a,
-h1 .type{display:block;color:#666;font-size:1.1rem;font-weight:normal}
+main header{margin-bottom:1rem}
+   main header h1 {margin-bottom:0}
+   header .a-k-a,
+   header .type{display:block;color:#666;font-size:1.1rem;font-weight:normal}
 
 #toc{max-width:20rem;list-style:none;margin:1em 0;padding:.25rem .5rem;border:1px solid #AAA;border-radius:3px;background:#FCFCFC}
    #toc::before{display:block;content:"Contents";font-weight:bold;text-align:center}
@@ -89,6 +91,7 @@ pre{padding:.5em;background:#F4F4F4;border:1px solid #DDD;overflow-x:auto}
    pre .comment{color:#292;font-style:italic}
    pre .string{color:#777}
    pre .keyword{color:#00F;font-weight:bold}
+   pre .subkeyword{color:#07B;font-weight:bold}
 
 a{text-decoration:none}
 a:link{color:#03E}

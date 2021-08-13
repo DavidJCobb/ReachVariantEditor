@@ -55,9 +55,11 @@
             </code>
          </dt>
          <dd>
-            Treats <var>HHHH</var> as a hexadecimal character code. The entire escape sequence
+            <p>Treats <var>HHHH</var> as a hexadecimal character code. The entire escape sequence
             will be replaced with the Unicode character that has that code. You must always provide
-            a four-digit hexadecimal number.
+            a four-digit hexadecimal number.</p>
+            <p>There are <a href="string-special-chars">special codes</a> that can be used to show 
+            Halo-specific icons and symbols.</p>
          </dd>
          <dt>
             <code>\"</code>

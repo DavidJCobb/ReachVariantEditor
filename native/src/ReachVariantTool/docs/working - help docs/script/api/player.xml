@@ -118,6 +118,12 @@
          </method>
          <method name="is_not_respawning" id="12">
             <blurb>Checks whether a player <em>is not</em> respawning.</blurb>
+            <note>
+               If a match has just started, and a player is waiting to spawn for the first time, 
+               then they are not respawning. If you need to know whether the player is or isn't 
+               alive, testing whether they have a <a href="script/api/player/properties/biped">biped</a> 
+               may be more reliable.
+         </note>
          </method>
          <method name="is_spartan" id="13">
             <blurb>Checks whether a player's current species is Spartan.</blurb>
@@ -229,7 +235,7 @@
             <related context="player" type="action" name="try_get_death_damage_mod" />
          </method>
          <method name="try_get_death_damage_type" name2="get_death_damage_type" id="30" returns="number">
-            <blurb>Identify the player who killed this player.</blurb>
+            <blurb>Identify the type of damage that killed this player.</blurb>
             <description>
                <p>
                   When called on a player who is dead, this function returns a number 
@@ -268,7 +274,7 @@
             <!-- relationships only need to be specified on one end -->
          </method>
          <method name="try_get_death_damage_mod" name2="get_death_damage_mod" id="31" returns="number">
-            <blurb>Identify the player who killed this player.</blurb>
+            <blurb>Identify the modifier for the damage that killed this player.</blurb>
             <description>
                <p>
                   When called on a player who is dead, this function returns a number 
@@ -511,10 +517,30 @@
                end
             </example>
             <note>
-               Holograms do not <a href="script/api/object/conditions/is_of_type">test</a> 
-               as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
-               passing a Hologram to <code>set_biped</code> will place the player in control 
-               of the biped.
+               <p>
+                  Holograms do not <a href="script/api/object/conditions/is_of_type">test</a> 
+                  as being Spartans, Elites, or Monitors. However, they are still valid bipeds; 
+                  passing a Hologram to <code>set_biped</code> will place the player in control
+                  of the biped.
+               </p>
+               <p>
+                  Holograms spawn with a primary weapon only, with a full magazine regardless
+                  of how much ammo the caster had left. If a Hologram's player traits don't
+                  prevent it from taking damage, then it will be killed when it expires. Any
+                  weapons dropped by a Hologram will be deleted instantly; this includes any
+                  cases of a Hologram swapping a held weapon for one on the ground. Any items 
+                  that a Hologram is carrying at the time it dies or expires will be deleted. 
+                  Holograms can use Armor Abilities, but the Hologram ability has no effect 
+                  for them because the "hologram" bipeds don't have a "Hologram Unit" set.
+               </p>
+               <p>
+                  If a player is forced to control their own Hologram, this will affect their
+                  respawns. If the Hologram dies while under control, they will not be placed
+                  back into their original body; instead, they will respawn normally (if the
+                  Hologram was killed), or they will instantly appear in a new body such that
+                  there is never any frame on which the player has no biped (if the Hologram
+                  expires due to its natural timer).
+               </p>
             </note>
             <note>
                <p>
@@ -590,6 +616,7 @@
                the player will not respawn; if the biped was set by scripts to never be garbage-collected, 
                then the player is effectively trapped.
             </note>
+            <related context="player" type="property" name="biped" />
          </method>
          <method name="set_round_card_title" id="56">
             <args>
@@ -927,7 +954,8 @@
             <!-- relationships only need to be specified on one end -->
          </method>
          <method name="get_crosshair_target" id="86" returns="object">
-            <blurb>Identify the player's current Armor Ability.</blurb>
+            <blurb>Identify the object that the player is aiming at, if that object 
+            is changing the player's reticle color.</blurb>
             <description>
                <p>
                   This function returns the object that the current player is aiming at, if 
@@ -991,7 +1019,9 @@
          <description>
             <p>
                This property allows you to access the biped a player is currently 
-               in control of.
+               in control of. If the player is not in control of a biped, e.g. 
+               because they haven't spawned yet or they've been killed, then this 
+               property's value will be <code>no_object</code>.
             </p>
          </description>
          <note>
@@ -1004,7 +1034,16 @@
       </property>
       <property name="score" type="number" setter-is-accessor="true">
          <blurb>The player's current score.</blurb>
+         <description>
+            <p>
+               The player's current score. The value is capped at 30,000; attempting to 
+               increase it past 30,000 will simply set it to 30,000.
+            </p>
+         </description>
          <example>
+            --
+            -- Award a player one point for every frame they spend alive:
+            --
             for each player do
                if current_player.biped != no_object then
                   --
@@ -1034,6 +1073,18 @@
       </property>
       <property name="team" type="team">
          <blurb>The player's owner team.</blurb>
+         <description>
+            <p>
+               The team that this player belongs to.
+            </p>
+            <p>
+               This property can be assigned to, but only in Free-For-All games; this is how 
+               gametypes like Infection are able to split players into separate factions. 
+               Assigning to this property during Team games has no effect; if teams are 
+               enabled within the gametype, then you cannot forcibly change a player's team 
+               using scripts.
+            </p>
+         </description>
          <example>
             for each player do
                if current_player.team == team[0] then
@@ -1052,6 +1103,12 @@
    <accessors>
       <accessor name="frag_grenades" type="number" setter="opcode" id="74">
          <blurb>The player's current frag grenade count.</blurb>
+         <description>
+            <p>
+               The player's current frag grenade count. The count is capped at 4; attempting 
+               to increase it past this number will simply set it to 4 instead.
+            </p>
+         </description>
          <example>
             for each player do
                current_player.frag_grenades += 1
@@ -1060,6 +1117,12 @@
       </accessor>
       <accessor name="plasma_grenades" type="number" setter="opcode" id="74">
          <blurb>The player's current plasma grenade count.</blurb>
+         <description>
+            <p>
+               The player's current plasma grenade count. The count is capped at 4; attempting
+               to increase it past this number will simply set it to 4 instead.
+            </p>
+         </description>
          <example>
             for each player do
                current_player.plasma_grenades += 1

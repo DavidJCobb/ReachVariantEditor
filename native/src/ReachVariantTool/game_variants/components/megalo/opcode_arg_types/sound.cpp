@@ -497,7 +497,7 @@ namespace Megalo {
       if (part > 0)
          return arg_compile_result::failure();
       //
-      constexpr int max_value = Megalo::Limits::max_incident_types - 1;
+      constexpr int max_value = Megalo::Limits::max_engine_sounds - 1;
       //
       int32_t value = 0;
       QString word;

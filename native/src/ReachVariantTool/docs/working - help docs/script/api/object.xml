@@ -126,6 +126,10 @@
                   end
                end
             </example>
+            <note>
+               This function doesn't appear to ever actually return <code>true</code> when called 
+               on the Hologram armor ability.
+            </note>
          </method>
       </conditions>
       <actions>
@@ -872,8 +876,19 @@
                   <dl>
                      <dt>normal</dt>
                         <dd>The weapon's pickup behavior is not modified.</dd>
-                     <dt>hold_action</dt>
-                        <dd>Players must hold a button to pick up the weapon.</dd>
+                     <dt>high</dt>
+                        <dd>
+                           <p>
+                              If this weapon is lying in a pile of weapons, and the player
+                              attempts to pick up a weapon from the pile, the game will
+                              preferto have them pick up this weapon. Good for objective 
+                              items.
+                           </p>
+                           <p>
+                              In versions of ReachVariantTool before 2.1.7, this value was 
+                              called <code>hold_action</code>.
+                           </p>
+                        </dd>
                      <dt>automatic</dt>
                         <dd>Players automatically pick up the weapon when they come into 
                         contact with it.</dd>
@@ -1232,16 +1247,27 @@
                   <p>One of the following values:</p>
                   <dl>
                      <dt>primary</dt>
-                        <dd>TBA</dd>
+                        <dd>Attempts to give the weapon to the biped. If successful, then any 
+                        weapon the biped was already holding will be holstered, and the new 
+                        weapon will be switched into their hands.</dd>
                      <dt>secondary</dt>
-                        <dd>TBA</dd>
+                        <dd>Attempts to give the weapon to the biped.</dd>
                      <dt>force</dt>
-                        <dd>Forcibly adds the weapon to the player and switches them to use 
+                        <dd>Forcibly adds the weapon to the biped and switches them to use 
                         it.</dd>
                   </dl>
                </arg>
             </args>
             <blurb>Give a weapon to a biped, even if it isn't player-controlled.</blurb>
+            <description>
+               <p>
+                  This function attempts to create a new weapon of the desired type, and give 
+                  it to the biped that the function is called on. If that biped is already 
+                  carrying two weapons, then the function will fail, and no new weapon will 
+                  be created. Similarly, the function doesn't seem to do anything when called 
+                  on something that is not a biped.
+               </p>
+            </description>
             <example>
                global.object[0].add_weapon(assault_rifle, force)
             </example>
@@ -1285,8 +1311,8 @@
          <method name="apply_shape_color_from_player_member" id="98">
             <args>
                <arg name="member">An integer constant indicating the index of an object.player 
-               variable, or a relative alias of an object-player variable prefixed with 
-               <code>object.</code> i.e. <code>object.alias_name</code>.</arg>
+               variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
+                  or an alias of such.</arg>
             </args>
             <blurb>Recolor an object's shape boundary based on a player variable.</blurb>
             <description>
@@ -1306,9 +1332,10 @@
                
                for each object with label "koth_hill" do
                   --
-                  -- The next two lines do the exact same thing:
+                  -- The next three lines do the exact same thing:
                   --
                   current_object.apply_shape_color_from_player_member(1)
+                  current_object.apply_shape_color_from_player_member(object.player[1])
                   current_object.apply_shape_color_from_player_member(object.owner)
                end
             </example>

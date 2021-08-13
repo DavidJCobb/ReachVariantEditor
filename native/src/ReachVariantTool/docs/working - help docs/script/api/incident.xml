@@ -49,11 +49,13 @@
          <dt>death</dt>
             <dd>The target player has died at the cause player's hands.</dd>
          <dt>assist</dt>
-            <dd>Yet to be determined.</dd> <!-- who assisted and who was assisted? -->
+            <dd>Seems to indicate that the cause player assisted in killing some other player. 
+            It's not known whether the target player is meaningful.</dd>
          <dt>suicide</dt>
-            <dd>Yet to be determined.</dd>
+            <dd>The cause player has committed suicide.</dd>
          <dt>fell_to_death</dt>
-            <dd>Yet to be determined.</dd>
+            <dd>The cause player has fallen to their death. Unlike the "suicide" incident, 
+            this incident has unique kill feed text and no announcer voiceover.</dd>
          <dt>kill_betrayal</dt>
             <dd>The cause player has betrayed the target player.</dd>
          <dt>melee_kill</dt>
@@ -80,7 +82,9 @@
          <dt>sniper_headshot_kill</dt>
             <dd>The cause player has sniped the target player with a headshot.</dd>
          <dt>emp_assist</dt>
-            <dd>Yet to be determined.</dd>
+            <dd>The cause player assisted in the killing of some other player by draining 
+            the victim's shields with an EMP. It's not known whether the target player is 
+            meaningful.</dd>
          <dt>supercombine_kill</dt>
             <dd>The cause player has killed the target player with a supercombine 
             explosion from a Needler or Needle Rifle.</dd>
@@ -114,13 +118,17 @@
          <dt>dmr_kill</dt>
             <dd>The cause player has killed the target player with a DMR.</dd>
          <dt>enemy_vehicle_kill</dt>
-            <dd>No description available.</dd>
+            <dd>Exclusive to Campaign. Indicates that the cause player has killed a 
+            vehicle occupied by an enemy. There are no medals tied to this incident, 
+            but it appears that in <i>Halo: Reach</i>'s original Xbox 360 release, 
+            these kills could contribute to daily challenges for killing enemies.</dd>
          <dt>sword_kill</dt>
             <dd>The cause player has killed the target player with an Energy Sword.</dd>
          <dt>airstrike_kill</dt>
             <dd>The cause player has killed the target player with a Target Locator.</dd>
          <dt>airstrike_vehicle_kill</dt>
-            <dd>No description available.</dd>
+            <dd>Exclusive to Campaign. This incident fires when <code>enemy_vehicle_kill</code> 
+            is triggered using a Target Locator.</dd>
          <dt>sticky_grenade_kill</dt>
             <dd>The cause player has killed the target player with a stuck grenade, 
             earning a Grenade Stick medal.</dd>
@@ -159,20 +167,30 @@
             Fuel Rod Gun, Grenade Launcher, Plasma Launcher, Rocket Launcher, Spartan 
             Laser, or Target Locator.</dd>
          <dt>vehicle_kill</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has killed the target player with a Banshee, Falcon, 
+            Ghost, Machine Gun Turret, Missile Pod, Mongoose, Plasma Cannon, Revenant, 
+            Sabre, Scorpion, Shade, Trip Mine, Warthog, or Wraith.</dd>
          <dt>shade_aa_kill</dt>
             <dd>The cause player has destroyed a Shade turret.</dd>
          <dt>driver_assist_gunner</dt>
             <dd>The cause player was driving a vehicle while an allied player in 
             another seat killed an enemy, earning the driver a Wheelman medal.</dd>
          <dt>highjack</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player hijacked the target player's land vehicle, booting 
+            the target player out and stealing the vehicle, and earning a Hijack 
+            medal.</dd>
          <dt>skyjack</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player hijacked the target player's air vehicle, booting 
+            the target player out and stealing the vehicle, and earning a Skyjack 
+            medal.</dd>
          <dt data-internal="shotgun_kill_sword">bulltrue</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player used a Shotgun to kill an enemy player while the 
+            victim was in the middle of an Energy Sword lunge, earning a Bulltrue 
+            medal. Triggering this incident in Matchmaking on the Xbox 360 would 
+            also unlock Emile's helmet as an Xbox Avatar Award.</dd>
          <dt>killjoy</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player ended an enemy's spree, earning the Killjoy 
+            medal.</dd>
          <dt>survival_wave_completed_deathless</dt>
             <dd>A Firefight incident which signals the completion of a wave without 
             any defenders dying.</dd>
@@ -203,7 +221,7 @@
             cause player for killing the target player, who was a Bomb Carrier.</dd>
          <dt>juggernaut_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Juggernaut 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>kill_as_juggernaut</dt>
             <dd>Sending this incident signals that the cause player, a Juggernaut, 
             has killed an enemy.</dd>
@@ -217,17 +235,24 @@
             for killing the target player, an enemy VIP.</dd>
          <dt>koth_game_start</dt>
             <dd>Sending this incident signals the start of a round in a King of the 
-            Hill match. An appropriate announcer voiceover will play.</dd>
+            Hill match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt>hill_controlled</dt>
-            <dd>Sending this incident triggers an announcer voiceover telling 
-            players that a hill is now controlled.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a hill is now controlled by the 
+            cause player.</dd>
          <dt>hill_contested</dt>
-            <dd>Sending this incident triggers an announcer voiceover telling 
-            players that a hill is now contested.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a hill is now contested. It seems 
+            that this incident may be meant for FFA games.</dd>
          <dt>hill_controlled_team</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a hill is now controlled by the 
+            cause team.</dd>
          <dt>hill_contested_team</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a hill is now contested. It seems 
+            that this incident may be meant for team games.</dd>
          <dt>hill_moved</dt>
             <dd>Sending this incident triggers an announcer voiceover telling 
             players that a hill has moved.</dd>
@@ -235,68 +260,94 @@
             <dd>No description available.</dd>
          <dt>ball_game_start</dt>
             <dd>Sending this incident signals the start of a round in an Oddball 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt>ball_taken</dt>
-            <dd>Sending this incident triggers an announcer voiceover telling 
-            players that a ball has been taken.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has been taken by the 
+            cause player.</dd>
          <dt>ball_dropped</dt>
-            <dd>Sending this incident triggers an announcer voiceover telling 
-            players that a ball has been dropped.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has been dropped by the 
+            cause player.</dd>
          <dt>ball_taken_team</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has been taken by the 
+            cause team.</dd>
          <dt>ball_dropped_team</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has been dropped by the 
+            cause team.</dd>
          <dt>ball_spawned</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has spawned.</dd>
          <dt>ball_reset</dt>
-            <dd>Sending this incident triggers an announcer voiceover telling 
-            players that a ball has been reset.</dd>
+            <dd>Sending this incident triggers an announcer voiceover and kill 
+            feed message telling players that a ball has been reset.</dd>
          <dt>ball_carrier_kill</dt>
             <dd>Sending this incident signals that the cause player has killed 
             the target player, a Ball Carrier.</dd>
          <dt>assault_game_start</dt>
             <dd>Sending this incident signals the start of a round in an Assault 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt>bomb_planted</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has planted a bomb.</dd>
          <dt>bomb_taken</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has picked up a bomb.</dd>
          <dt>bomb_dropped</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has dropped a bomb.</dd>
          <dt>bomb_armed</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has armed a bomb. The target is irrelevant; the 
+            official Assault variant passes <code>all_players</code>.</dd>
          <dt>bomb_reset_neutral</dt>
-            <dd>No description available.</dd>
+            <dd>A neutral bomb was reset.</dd>
          <dt>bomb_returned</dt>
-            <dd>No description available.</dd>
+            <dd>
+               <p>The cause player has returned the target team's bomb.</p>
+               <p>
+                  This incident doesn't seem to be used in the official Assault 
+                  variant, and inspection in Assembly suggests that it may be 
+                  incomplete. The related "Engine Events" use incorrect string 
+                  names, so kill feed messages wouldn't appear as intended.
+               </p>
+            </dd>
          <dt>bomb_disarmed</dt>
-            <dd>No description available.</dd>
+            <dd>A bomb has been disarmed. This incident triggers an announcer 
+            voiceover and kill feed message for all players. The cause and target 
+            are irrelevant; the official Assault variant passes <code>all_players</code> 
+            for both.</dd>
          <dt>bomb_arming</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has begun arming the bomb. This incident triggers 
+            a kill feed message for all players. The official Assault variant does 
+            not use this incident.</dd>
          <dt>bomb_detonated</dt>
-            <dd>No description available.</dd>
+            <dd>The cause team has detonated a bomb, to the detriment of the target 
+            team.</dd>
          <dt>bomb_reset</dt>
-            <dd>No description available.</dd>
+            <dd>The cause team's bomb was reset.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>terr_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Territories 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>terr_captured</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has captured a territory originally belonging to 
+            the target team.</dd>
          <dt>terr_contested</dt>
-            <dd>No description available.</dd>
+            <dd>A territory is contested. The cause and target are irrelevant; the 
+            official Territories variant passes <code>all_players</code> for both.</dd>
          <dt>teleporter_used</dt>
             <dd>Sending this incident plays a sound for the cause player. It is the 
             same sound that plays when entering a teleporter normally.</dd>
          <dt>race_game_start</dt>
-            <dd>Sending this incident signals the start of a round in a Race 
-            match. An appropriate announcer voiceover will play.</dd>
+            <dd>Sending this incident signals the start of a round in a Race match. 
+            An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>rally_game_start</dt>
-            <dd>Sending this incident signals the start of a round in a Rally 
-            match. An appropriate announcer voiceover will play.</dd>
+            <dd>Sending this incident signals the start of a round in a Rally match. 
+            An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>checkpoint_reached</dt>
             <dd>Sending this incident triggers the "Checkpoint reached!" announcer 
             voiceover and kill feed message for the cause player.</dd>
@@ -314,34 +365,39 @@
             for the cause team, and a kill feed message for all players.</dd>
          <dt>rocket_race_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Rocket Race  
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>ctf_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Capture the             
-            Flag match. An appropriate announcer voiceover will play.</dd>
+            Flag match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt>ctf_team</dt>
             <dd>No description available.</dd>
          <dt>flag_grabbed</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has taken the target team's flag.</dd>
          <dt>flag_dropped_neutral</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has dropped the neutral flag.</dd>
          <dt>flag_dropped</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has dropped the target team's flag.</dd>
          <dt>flag_grabbed_neutral</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has taken the neutral flag.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>flag_scored</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has successfully captured a flag.</dd>
          <dt>flag_reset_neutral</dt>
-            <dd>No description available.</dd>
+            <dd>The neutral flag has been reset. The cause and target are irrelevant; 
+            the official Capture the Flag variant passes the flag's last carrier player 
+            as the cause, and the flag's owning team (i.e. neutral team) as the target.</dd>
          <dt>flag_reset</dt>
-            <dd>No description available.</dd>
+            <dd>A flag has been reset. The cause and target are irrelevant; the official 
+            Capture the Flag variant passes the flag's owning team for both.</dd>
          <dt>flag_recovered</dt>
-            <dd>No description available.</dd>
+            <dd>The target team's flag has been recovered. The cause is irrelevant; 
+            the official Capture the Flag variant passes the flag's owning team.</dd>
          <dt>kill_with_flag</dt>
-            <dd>No description available.</dd>
+            <dd>Sending this incident awards the Flag Kill medal.</dd>
          <dt>team_offense</dt>
             <dd>Sending this incident triggers an announcer voiceover and kill 
             feed message indicating that the cause player is on Offense. It is 
@@ -356,13 +412,15 @@
             round.</dd>
          <dt>headhunter_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Headhunter 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>skulls_taken</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has picked up one or more skulls.</dd>
          <dt>skulls_scored</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has scored skulls.</dd>
          <dt>skulls_dropped</dt>
-            <dd>No description available.</dd>
+            <dd>This incident was presumably intended to be sent when a player drops 
+            skulls, but it isn't hooked up to anything in the game files, and has no 
+            effect.</dd>
          <dt>skullamanjaro</dt>
             <dd>Sending this incident awards a Skullamanjaro medal to the cause 
             player.</dd>
@@ -370,7 +428,7 @@
             <dd>This incident ID is unused.</dd>
          <dt>infection_game_start</dt>
             <dd>Sending this incident signals the start of a round in an Infection 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>inf_new_alpha</dt>
             <dd>Sending this incident displays a kill feed message for the cause 
             player telling them that they are an Alpha Zombie.</dd>
@@ -394,7 +452,7 @@
             informing them that the zombies have won.</dd>
          <dt>stockpile_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Stockpile 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>stock_flags_collected</dt>
             <dd>Sending this incident triggers an announcer voiceover and kill 
             feed message telling all players that flags have been collected.</dd>
@@ -402,27 +460,27 @@
             <dd>Sending this incident triggers an announcer voiceover and kill 
             feed message telling all players that a flag has been reset.</dd>
          <dt>swat_game_start</dt>
-            <dd>Sending this incident signals the start of a round in a SWAT 
-            match. An appropriate announcer voiceover will play.</dd>
+            <dd>Sending this incident signals the start of a round in a SWAT match. 
+            An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>action_sack_game_start</dt>
             <dd>Sending this incident signals the start of a round. An announcer 
-            voiceover will say, "Action Sack."</dd>
+            voiceover will play for the cause player, saying, "Action Sack."</dd>
          <dt>bumper_cars_game_start</dt>
             <dd>Sending this incident signals the start of a round. An announcer 
-            voiceover will say, "Bumper Cars."</dd>
+            voiceover will play for the cause player, saying, "Bumper Cars."</dd>
          <dt>custom_game_start</dt>
             <dd>Sending this incident signals the start of a round. An announcer 
-            voiceover will say, "Custom."</dd>
+            voiceover will play for the cause player, saying, "Custom."</dd>
          <dt>dogfight_game_start</dt>
             <dd>No description available.</dd>
          <dt>fiesta_game_start</dt>
             <dd>Sending this incident signals the start of a round. An announcer 
-            voiceover will say, "Fiesta."</dd>
+            voiceover will play for the cause player, saying, "Fiesta."</dd>
          <dt>golf_game_start</dt>
             <dd>No description available.</dd>
          <dt>grifball_game_start</dt>
             <dd>Sending this incident signals the start of a round in a Grifball 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause player.</dd>
          <dt>hogpile_game_start</dt>
             <dd>No description available.</dd>
          <dt>pinata_game_start</dt>
@@ -432,28 +490,31 @@
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>new_juggernaut</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has become the Juggernaut. An announcer voiceover 
+            and kill feed message will play.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>revenge_kill</dt>
-            <dd>No description available.</dd>
+            <dd>The cause player has killed the target player, who was responsible for 
+            the cause player's last death. In so doing, the cause player has earned the 
+            Revenge medal. The target player will also see a kill feed message.</dd>
          <dt>close_call</dt>
-            <dd>No description available.</dd>
+            <dd>The incident for the "Close Call" medal.</dd>
          <dt>opportunist_kill</dt>
             <dd>The incident for the "Reload This!" medal.</dd>
          <dt>first_blood</dt>
-            <dd>No description available.</dd>
+            <dd>The incident for the "First Strike" medal.</dd>
          <dt>wingman_spawn</dt>
             <dd>Examination of the incident definition in the game files suggests that 
             this incident "powers" the various Wingman spree medals.</dd>
          <dt>sprinting_kill</dt>
-            <dd>No description available.</dd>
+            <dd>The incident for the "Headcase" medal.</dd>
          <dt>pull_kill</dt>
-            <dd>No description available.</dd>
+            <dd>The incident for the "Pull" medal.</dd>
          <dt>perfection</dt>
-            <dd>No description available.</dd>
+            <dd>The incident for the "Perfection" medal.</dd>
          <dt>showstopper</dt>
             <dd>No description available.</dd>
          <dt>yoink</dt>
@@ -700,12 +761,14 @@
             <dd>No description available.</dd>
          <dt>invasion_slayer_start</dt>
             <dd>Sending this incident signals the start of a round in an Invasion 
-            Slayer match. An appropriate announcer voiceover will play.</dd>
+            Slayer match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>game_start_slayer</dt>
             <dd>Sending this incident signals the start of a round in a Slayer 
-            match. An appropriate announcer voiceover will play.</dd>
+            match. An appropriate announcer voiceover will play for the cause 
+            player.</dd>
          <dt>team_game_start</dt>
             <dd>Examination of the incident definition in the game files indicates 
             that this incident does absolutely nothing.</dd>
@@ -775,47 +838,68 @@
          <dt><i>[unused]</i></dt>
             <dd>This incident ID is unused.</dd>
          <dt>multikill_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>spree_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>assist_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>technician_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>wheelman_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>auto_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>small_arms_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>ordnance_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>vehicle_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>grenades_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>precision_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>finishing_move_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>cqc_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>set_clear_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>deathless_round_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>kill_leader_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>kill_infantry_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>kill_specialist_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>destroy_vehicle_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign- and Firefight Matchmaking-exclusive incident tied to the Commendations 
+            system in the game's original Xbox 360 release.</dd>
          <dt>clear_a_mission_comm</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign-exclusive incident tied to the Commendations system in the game's 
+            original Xbox 360 release.</dd>
          <dt>campaign_level_completed_deathless</dt>
-            <dd>No description available.</dd>
+            <dd>A Campaign-exclusive incident tied to the Commendations system in the game's 
+            original Xbox 360 release.</dd>
          <dt>player_kills_spartan</dt>
             <dd>Examination of the game's incident definitions suggests that this 
             incident triggers automatically when an Elite player kills a Spartan 

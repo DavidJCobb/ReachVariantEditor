@@ -7,6 +7,20 @@
          for yourself and others.
       </p>
 
+      <h2>Back up your original source code</h2>
+      <p>
+         Megalo is a <dfn>compiled</dfn> language. This means that the game variants that you save 
+         will not include the full and exact script code that you wrote; rather, they include a 
+         pre-processed copy of the code, which <i>Halo: Reach</i> can quickly read and execute. 
+         Aliases, code comments, and similar <em>are not saved</em>, and if you lose them, they 
+         <em>cannot be recovered by decompiling.</em>
+      </p>
+      <p>
+         You should keep your own copies of the source code that you write, separately from the 
+         game variant files that you save, so that you don't lose your code comments and other 
+         informative content.
+      </p>
+
       <h2>Use aliases everywhere</h2>
       <p>
          When working with Megalo, you'll find yourself juggling several variables, particularly 
@@ -62,12 +76,18 @@
          alias opt_kill_points   = script_option[1]
       </pre>
       <p>
-         And of course, it's also useful to do that for script traits and script widgets:
+         And of course, it's also useful to do that for script traits, script widgets, and the indices 
+         of unnamed Forge labels:
       </p>
       <pre>
          alias leader_traits = script_traits[0]
          
          alias ui_turn_clock = script_widget[0]
+         
+         alias all_jetpacks = 1
+         for each object with label all_jetpacks do
+            -- ...
+         end
       </pre>
       <p>
          Most programming languages let you create as many variables as you need. Megalo doesn't; you 
