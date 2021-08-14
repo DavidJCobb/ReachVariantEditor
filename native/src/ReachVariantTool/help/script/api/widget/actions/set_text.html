@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>widget.set_text | ReachVariantTool Documentation</title>
@@ -53,8 +53,9 @@
          </ul>
       </nav>
       <main>
-         <h1>widget.set_text</h1>
-<p>Set the HUD widget's text.</p><h2>Arguments</h2>
+         <header><h1>widget.set_text</h1></header>
+<p>Set the HUD widget's text.</p>
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/format-string.html">text</a></dt>
       <dd><p>A string literal or an integer constant denoting a string index, optionally 
@@ -63,7 +64,7 @@
 </dl>
 <h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    script_widget[0].set_visibility(current_player, false)
    <span class="keyword">if</span> current_player.number[0] == 1 <span class="keyword">then</span>
       script_widget[0].set_visibility(current_player, true)

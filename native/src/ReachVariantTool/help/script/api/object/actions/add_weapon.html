@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.add_weapon | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,8 +101,17 @@
          </ul>
       </nav>
       <main>
-         <h1>object.add_weapon</h1>
-<p>Give a weapon to a biped, even if it isn't player-controlled.</p><h2>Arguments</h2>
+         <header><h1>object.add_weapon</h1></header>
+
+               <p>
+                  This function attempts to create a new weapon of the desired type, and give 
+                  it to the biped that the function is called on. If that biped is already 
+                  carrying two weapons, then the function will fail, and no new weapon will 
+                  be created. Similarly, the function doesn't seem to do anything when called 
+                  on something that is not a biped.
+               </p>
+            
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object-type.html">weapon</a></dt>
       <dd><p>A type of object that can exist in the game world.</p></dd>
@@ -111,11 +120,13 @@
                   <p>One of the following values:</p>
                   <dl>
                      <dt>primary</dt>
-                        <dd>TBA</dd>
+                        <dd>Attempts to give the weapon to the biped. If successful, then any 
+                        weapon the biped was already holding will be holstered, and the new 
+                        weapon will be switched into their hands.</dd>
                      <dt>secondary</dt>
-                        <dd>TBA</dd>
+                        <dd>Attempts to give the weapon to the biped.</dd>
                      <dt>force</dt>
-                        <dd>Forcibly adds the weapon to the player and switches them to use 
+                        <dd>Forcibly adds the weapon to the biped and switches them to use 
                         it.</dd>
                   </dl>
                </dd>
@@ -136,13 +147,16 @@ global.object[0].add_weapon(assault_rifle, force)</pre>
             </p></li>
 </ul><h2>See also</h2>
 <ul>
-   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
-   <li><a href="script/api/object/actions/get_carrier.html">object.get_carrier</a></li>
+   <li><a href="script/api/object/conditions/is_in_use.html">object.is_in_use</a></li>
    <li><a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a></li>
+   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
    <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">object.set_weapon_pickup_priority</a></li>
-   <li><a href="script/api/player/actions/get_armor_ability.html">player.get_armor_ability</a></li>
+   <li><a href="script/api/object/actions/try_get_carrier.html">object.try_get_carrier</a></li>
    <li><a href="script/api/player/actions/add_weapon.html">player.add_weapon</a></li>
-   <li><a href="script/api/player/actions/get_weapon.html">player.get_weapon</a></li>
+   <li><a href="script/api/player/accessors/frag_grenades.html">player.frag_grenades</a></li>
+   <li><a href="script/api/player/accessors/plasma_grenades.html">player.plasma_grenades</a></li>
+   <li><a href="script/api/player/actions/try_get_armor_ability.html">player.try_get_armor_ability</a></li>
+   <li><a href="script/api/player/actions/try_get_weapon.html">player.try_get_weapon</a></li>
 </ul>
 
       </main>

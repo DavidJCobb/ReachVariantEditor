@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>game.score_to_win | ReachVariantTool Documentation</title>
@@ -78,13 +78,15 @@
          </ul>
       </nav>
       <main>
-         <h1>game.score_to_win<span class="type">Type: <a href="script/api/number.html">Number</a></span></h1>
+         <header><h1>game.score_to_win</h1><span class="type">Type: <a href="script/api/number.html">Number</a></span></header>
 
             <p>
                This value indicates the number of points that a player or team must be 
                accumulate to win.
             </p>
-         <p>This value is read-only.</p><h2>Example</h2>
+         
+<p>This value is read-only.</p>
+<h2>Example</h2>
 <pre>
 <span class="comment">-- Code borrowed from Territories, with slight modifications: play announcer </span>
 <span class="comment">-- voiceovers when the player approaches the score to win.</span>
@@ -92,7 +94,7 @@
 <span class="keyword">alias</span> announced_30s_win = player.number[0]
 <span class="keyword">alias</span> announced_60s_win = player.number[1]
 
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">alias</span> threshold_30s = temp_int_00
    <span class="keyword">alias</span> threshold_60s = temp_int_02
    <span class="comment">--</span>

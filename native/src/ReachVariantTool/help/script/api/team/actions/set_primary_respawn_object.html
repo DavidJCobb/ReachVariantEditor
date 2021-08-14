@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>team.set_primary_respawn_object | ReachVariantTool Documentation</title>
@@ -55,12 +55,13 @@
          </ul>
       </nav>
       <main>
-         <h1>team.set_primary_respawn_object</h1>
+         <header><h1>team.set_primary_respawn_object</h1></header>
 <p>This function appears to set a team's default respawn object, when 
-            co-op spawning is enabled.</p><h2>Arguments</h2>
+            co-op spawning is enabled.</p>
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object.html">respawn</a></dt>
-      <dd>The object to use as a respawn point.</dd>
+      <dd><p>The object to use as a respawn point.</p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
@@ -71,7 +72,7 @@
    <span class="keyword">alias</span> lowest = global.number[0]
    <span class="comment">--</span>
    lowest = 32767
-   <span class="keyword">for</span> each object with label <span class="string">"defend_res_zone</span>" <span class="keyword">do</span>
+   <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"defend_res_zone</span>" <span class="keyword">do</span>
       <span class="keyword">if</span> current_object.spawn_sequence &lt; lowest <span class="keyword">then</span>
          lowest = current_object.spawn_sequence
          team[0].set_primary_respawn_object(current_object)
@@ -80,11 +81,13 @@
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
-   <li><a href="script/api/team/actions/set_co_op_spawning.html">team.set_co_op_spawning</a></li>
-   <li><a href="script/api/player/actions/set_co_op_spawning.html">player.set_co_op_spawning</a></li>
+   <li><a href="script/api/object/actions/enable_spawn_zone.html">object.enable_spawn_zone</a></li>
    <li><a href="script/api/object/actions/set_spawn_location_fireteams.html">object.set_spawn_location_fireteams</a></li>
    <li><a href="script/api/object/actions/set_spawn_location_permissions.html">object.set_spawn_location_permissions</a></li>
+   <li><a href="script/api/player/conditions/is_not_respawning.html">player.is_not_respawning</a></li>
+   <li><a href="script/api/player/actions/set_co_op_spawning.html">player.set_co_op_spawning</a></li>
    <li><a href="script/api/player/actions/set_primary_respawn_object.html">player.set_primary_respawn_object</a></li>
+   <li><a href="script/api/team/actions/set_co_op_spawning.html">team.set_co_op_spawning</a></li>
 </ul>
 
       </main>

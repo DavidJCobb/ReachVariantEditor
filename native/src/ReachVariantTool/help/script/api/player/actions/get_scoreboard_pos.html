@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>player.get_scoreboard_pos | ReachVariantTool Documentation</title>
@@ -58,16 +58,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
-<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -94,19 +94,19 @@
          </ul>
       </nav>
       <main>
-         <h1>player.get_scoreboard_pos</h1>
+         <header><h1>player.get_scoreboard_pos</h1></header>
 
                <p>
                   This function returns a player's position on the scoreboard. A value 
                   of 1 represents 1st place, while a value of 0 results if the function 
                   is called on <var>no_player</var>.
                </p>
-            <p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p>
-<h2>Example</h2>
+            
+<p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> leader_traits = script_traits[0]
 
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    global.number[0] = current_player.get_scoreboard_pos()
    <span class="keyword">if</span> global.number[0] == 1 <span class="keyword">then</span>
       current_player.apply_traits(leader_traits)
@@ -114,7 +114,11 @@
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
+   <li><a href="script/api/player/actions/get_spree_count.html">player.get_spree_count</a></li>
+   <li><a href="script/api/player/properties/score.html">player.score</a></li>
+   <li><a href="script/api/player/properties/script_stat.html">player.script_stat</a></li>
    <li><a href="script/api/team/actions/get_scoreboard_pos.html">team.get_scoreboard_pos</a></li>
+   <li><a href="script/api/team/properties/score.html">team.score</a></li>
 </ul>
 
       </main>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.apply_shape_color_from_player_member | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,7 +101,7 @@
          </ul>
       </nav>
       <main>
-         <h1>object.apply_shape_color_from_player_member</h1>
+         <header><h1>object.apply_shape_color_from_player_member</h1></header>
 
                <p>
                   This function recolors an object's shape boundary baesd on the armor color 
@@ -113,29 +113,31 @@
                   This function is used in King of the Hill FFA modes to recolor the hill to 
                   match the player currently controlling it.
                </p>
-            <h2>Arguments</h2>
+            
+<h2>Arguments</h2>
 <dl>
    <dt>member</dt>
-      <dd>An integer constant indicating the index of an object.player 
-               variable, or a relative alias of an object-player variable prefixed with 
-               <code>object.</code> i.e. <code>object.alias_name</code>.</dd>
+      <dd><p>An integer constant indicating the index of an object.player 
+               variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
+                  or an alias of such.</p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> owner = object.player[1]
 
-<span class="keyword">for</span> each object with label <span class="string">"koth_hill</span>" <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"koth_hill</span>" <span class="keyword">do</span>
    <span class="comment">--</span>
-   <span class="comment">-- The next two lines do the exact same thing:</span>
+   <span class="comment">-- The next three lines do the exact same thing:</span>
    <span class="comment">--</span>
    current_object.apply_shape_color_from_player_member(1)
+   current_object.apply_shape_color_from_player_member(object.player[1])
    current_object.apply_shape_color_from_player_member(object.owner)
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_shape.html">object.set_shape</a></li>
-   <li><a href="script/api/object/conditions/shape_contains.html">object.shape_contains</a></li>
    <li><a href="script/api/object/actions/set_shape_visibility.html">object.set_shape_visibility</a></li>
+   <li><a href="script/api/object/conditions/shape_contains.html">object.shape_contains</a></li>
 </ul>
 
       </main>

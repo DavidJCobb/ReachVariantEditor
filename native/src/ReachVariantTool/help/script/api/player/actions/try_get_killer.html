@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>player.try_get_killer | ReachVariantTool Documentation</title>
@@ -58,16 +58,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
-<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -94,7 +94,7 @@
          </ul>
       </nav>
       <main>
-         <h1>player.try_get_killer<span class="a-k-a">a.k.a. player.get_killer</span></h1>
+         <header><h1>player.try_get_killer</h1><span class="a-k-a">a.k.a. player.get_killer</span></header>
 
                <p>
                   When called on a player who is dead, this function returns the player 
@@ -108,10 +108,10 @@
                   assignment to <var>no_player</var> before the call, while calling 
                   the function with the name <code>try_get_killer</code> will not.
                </p>
-            <p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p>
-<h2>Example</h2>
+            
+<p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.killer_type_is(guardians | suicide | kill | betrayal | quit) <span class="keyword">then</span>
       <span class="comment">--</span>
       <span class="comment">-- The player is dead.</span>
@@ -122,9 +122,10 @@
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
+   <li><a href="script/api/player/conditions/assisted_kill_of.html">player.assisted_kill_of</a></li>
    <li><a href="script/api/player/conditions/killer_type_is.html">player.killer_type_is</a></li>
-   <li><a href="script/api/player/actions/try_get_death_damage_type.html">player.try_get_death_damage_type</a></li>
    <li><a href="script/api/player/actions/try_get_death_damage_mod.html">player.try_get_death_damage_mod</a></li>
+   <li><a href="script/api/player/actions/try_get_death_damage_type.html">player.try_get_death_damage_type</a></li>
 </ul>
 
       </main>

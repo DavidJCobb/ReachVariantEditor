@@ -294,7 +294,7 @@ namespace util {
       }
       state.previous_char = script.back();
       if (is_end)
-         this->end();
+         out += this->end();
       return out;
    }
    QString megalo_syntax_highlighter::end() {

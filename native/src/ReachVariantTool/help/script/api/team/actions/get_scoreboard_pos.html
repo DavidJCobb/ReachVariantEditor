@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>team.get_scoreboard_pos | ReachVariantTool Documentation</title>
@@ -55,19 +55,19 @@
          </ul>
       </nav>
       <main>
-         <h1>team.get_scoreboard_pos</h1>
+         <header><h1>team.get_scoreboard_pos</h1></header>
 
                <p>
                   This function returns a team's position on the scoreboard. A value 
                   of 1 represents 1st place, while a value of 0 results if the function 
                   is called on <var>no_player</var>.
                </p>
-            <p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p>
-<h2>Example</h2>
+            
+<p>This function returns <a href="script/api/number.html">number</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> leader = global.team[0]
 
-<span class="keyword">for</span> each team <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">team</span> <span class="keyword">do</span>
    leader = no_team
    global.number[0] = current_team.get_scoreboard_pos()
    <span class="keyword">if</span> global.number[0] == 1 <span class="keyword">then</span>
@@ -77,6 +77,10 @@
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/player/actions/get_scoreboard_pos.html">player.get_scoreboard_pos</a></li>
+   <li><a href="script/api/player/actions/get_spree_count.html">player.get_spree_count</a></li>
+   <li><a href="script/api/player/properties/score.html">player.score</a></li>
+   <li><a href="script/api/player/properties/script_stat.html">player.script_stat</a></li>
+   <li><a href="script/api/team/properties/score.html">team.score</a></li>
 </ul>
 
       </main>

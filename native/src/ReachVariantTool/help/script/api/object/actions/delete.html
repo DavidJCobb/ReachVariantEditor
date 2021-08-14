@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.delete | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,15 +101,16 @@
          </ul>
       </nav>
       <main>
-         <h1>object.delete</h1>
-<p>Delete this object from the game world.</p><h2>Example</h2>
+         <header><h1>object.delete</h1></header>
+<p>Delete this object from the game world.</p>
+<h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each object with label <span class="string">"team_only</span>" <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"team_only</span>" <span class="keyword">do</span>
    <span class="keyword">if</span> game.teams_enabled == 0 <span class="keyword">then</span>
       current_object.delete()
    <span class="keyword">end</span>
 <span class="keyword">end</span>
-<span class="keyword">for</span> each object with label <span class="string">"ffa_only</span>" <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"ffa_only</span>" <span class="keyword">do</span>
    <span class="keyword">if</span> game.teams_enabled != 0 <span class="keyword">then</span>
       current_object.delete()
    <span class="keyword">end</span>
@@ -129,8 +130,10 @@
             </p></li>
 </ul><h2>See also</h2>
 <ul>
+   <li><a href="script/api/object/actions/kill.html">object.kill</a></li>
    <li><a href="script/api/object/actions/place_at_me.html">object.place_at_me</a></li>
    <li><a href="script/api/object/actions/place_between_me_and.html">object.place_between_me_and</a></li>
+   <li><a href="script/api/object/actions/set_garbage_collection_disabled.html">object.set_garbage_collection_disabled</a></li>
 </ul>
 
       </main>

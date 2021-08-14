@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>player.try_get_armor_ability | ReachVariantTool Documentation</title>
@@ -58,16 +58,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
-<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -94,7 +94,7 @@
          </ul>
       </nav>
       <main>
-         <h1>player.try_get_armor_ability<span class="a-k-a">a.k.a. player.get_armor_ability</span></h1>
+         <header><h1>player.try_get_armor_ability</h1><span class="a-k-a">a.k.a. player.get_armor_ability</span></header>
 
                <p>
                   This function can be used to access a player's readied or holstered 
@@ -108,19 +108,30 @@
                   assignment to <var>no_object</var> before the call, while calling 
                   the function with the name <code>try_get_armor_ability</code> will not.
                </p>
-            <p>This function returns <a href="script/api/object.html">object</a>. Calling this function without storing its return value in a variable is an error.</p>
-<h2>Example</h2>
+            
+<p>This function returns <a href="script/api/object.html">object</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>
 <span class="comment">--</span>
 <span class="comment">-- Don't allow players to use Armor Lock:</span>
 <span class="comment">--</span>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    global.object[0] = current_player.get_armor_ability()
    <span class="keyword">if</span> global.object[0].is_of_type(armor_lock) <span class="keyword">and</span> global.object[0].is_in_use() <span class="keyword">then</span>
       global.object[0].delete()
       game.show_message_to(current_player, none, <span class="string">"nope</span>")
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
+<h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/add_weapon.html">object.add_weapon</a></li>
+   <li><a href="script/api/object/conditions/is_in_use.html">object.is_in_use</a></li>
+   <li><a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a></li>
+   <li><a href="script/api/object/actions/try_get_carrier.html">object.try_get_carrier</a></li>
+   <li><a href="script/api/player/actions/add_weapon.html">player.add_weapon</a></li>
+   <li><a href="script/api/player/accessors/frag_grenades.html">player.frag_grenades</a></li>
+   <li><a href="script/api/player/accessors/plasma_grenades.html">player.plasma_grenades</a></li>
+   <li><a href="script/api/player/actions/try_get_weapon.html">player.try_get_weapon</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>

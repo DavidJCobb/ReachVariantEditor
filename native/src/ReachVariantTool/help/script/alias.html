@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>Aliases | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -175,7 +176,6 @@
       </nav>
       <main>
          <h1>Aliases</h1>
-
       <p>
          Megalo only supports a limited number of variables; however, you can define 
          <dfn>aliases</dfn>, or custom names, for each variable. Once defined, an 
@@ -184,7 +184,7 @@
       <pre>
 <span class="keyword">alias</span> is_zombie = player.number[0]
 
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.is_zombie == 1 <span class="keyword">then</span>
       <span class="comment">--</span>
       <span class="comment">-- ...</span>
@@ -205,7 +205,7 @@
 <span class="comment">-- Let's mark a variable for temporary use, with an alias.</span>
 <span class="keyword">alias</span> temp_int_00 = global.number[0]
 
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.killer_type_is(kill) <span class="keyword">then</span>
       <span class="keyword">alias</span> death_type = temp_int_00
       
@@ -227,11 +227,11 @@
 <span class="keyword">alias</span> temp_int_00   = global.number[0]
 <span class="keyword">alias</span> objective_obj = flag
 
-<span class="keyword">for</span> each team <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">team</span> <span class="keyword">do</span>
    <span class="keyword">alias</span> created = temp_int_00
    <span class="comment">--</span>
    created = 0
-   <span class="keyword">for</span> each object with label <span class="string">"ctf_return</span>" <span class="keyword">do</span>
+   <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"ctf_return</span>" <span class="keyword">do</span>
       <span class="keyword">if</span> created == 0 <span class="keyword">and</span> current_object.team == current_team <span class="keyword">then</span>
          current_object.place_at_me(objective_obj, none, never_garbage_collect, 0, 0, 0, none)
          created = 1

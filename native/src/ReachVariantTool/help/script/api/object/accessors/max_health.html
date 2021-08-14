@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.max_health | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,22 +101,25 @@
          </ul>
       </nav>
       <main>
-         <h1>object.max_health</h1>
+         <header><h1>object.max_health</h1><span class="type">Type: <a href="script/api/number.html">Number</a></span></header>
 
             <p>
                This accessor can be used to set an object's maximum health.
             </p>
-         <p>This accessor supports write access only; you cannot read an existing value.</p>
+         
+<p>This accessor supports write access only; you cannot read an existing value.</p>
 <h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    current_player.biped.max_health = 50
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
-   <li><a href="script/api/object/accessors/shields.html">object.shields</a></li>
    <li><a href="script/api/object/accessors/health.html">object.health</a></li>
+   <li><a href="script/api/object/actions/kill.html">object.kill</a></li>
    <li><a href="script/api/object/accessors/max_shields.html">object.max_shields</a></li>
+   <li><a href="script/api/object/actions/set_invincibility.html">object.set_invincibility</a></li>
+   <li><a href="script/api/object/accessors/shields.html">object.shields</a></li>
 </ul>
 
       </main>

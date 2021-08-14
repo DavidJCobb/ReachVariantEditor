@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.attach_to | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,7 +101,7 @@
          </ul>
       </nav>
       <main>
-         <h1>object.attach_to</h1>
+         <header><h1>object.attach_to</h1></header>
 
                <p>
                   This function attaches the context object to a given basis object. 
@@ -119,44 +119,45 @@
                   basis, such as a Hill Marker, then they stop being visible altogether. 
                   Note that non-solid vehicles still offer entry prompts.
                </p>
-            <h2>Arguments</h2>
+            
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object.html">basis</a></dt>
-      <dd>
+      <dd><p>
                   The object to attach this one to.
-               </dd>
+               </p></dd>
    <dt>x</dt>
-      <dd>
+      <dd><p>
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
-               </dd>
+               </p></dd>
    <dt>y</dt>
-      <dd>
+      <dd><p>
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
-               </dd>
+               </p></dd>
    <dt>z</dt>
-      <dd>
+      <dd><p>
                   The X-coordinate to anchor this object at, relative to the position 
                   of the other object. Allowed values are integer constants between 
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
-               </dd>
+               </p></dd>
    <dt>reference_frame</dt>
-      <dd>
+      <dd><p>
                   Either the word <var>relative</var>, indicating that the position 
                   offset passed to this function is relative to the rotation of the 
                   <var>basis</var> object, or the word <var>absolute</var>, indicating 
                   that the position offset passed to this function uses the world axes.
-               </dd>
+               </p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> basis = global.object[0]
 current_object.attach_to(basis, 0, 0, 20, relative)</pre>
 <h2>Notes</h2>
-<h3><a name="anchoring">Anchoring</a></h3>
+<h3>Anchoring</h3>
 
                <p>
                   Objects appear to be attached to the nearest node on a basis object's 
@@ -185,7 +186,7 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
                   with offset (0, 0, 0); then, attach the rest of your objects to 
                   that extra object.
                </p>
-            <h3><a name="vehicle-attachment">Effects of attaching vehicles to other objects</a></h3>
+            <h3>Effects of attaching vehicles to other objects</h3>
 
                <p>
                   Attaching a vehicle to an object will lock the vehicle in place. The 
@@ -303,7 +304,7 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
                   they touch the weapon and equip it as they are attached), 
                   then they will equip the item normally rather than being 
                   attached to it... but they will also be launched with 
-                  considerable force &mdash; possibly enough to break a map's 
+                  considerable force — possibly enough to break a map's 
                   boundaries.
                </p>
                <p>
@@ -315,7 +316,12 @@ global.object[0].attach_to(some_warthog, 0, 0, 20, relative)</pre>
             </li>
 </ul><h2>See also</h2>
 <ul>
+   <li><a href="script/api/object/actions/copy_rotation_from.html">object.copy_rotation_from</a></li>
    <li><a href="script/api/object/actions/detach.html">object.detach</a></li>
+   <li><a href="script/api/object/actions/face_toward.html">object.face_toward</a></li>
+   <li><a href="script/api/object/actions/get_distance_to.html">object.get_distance_to</a></li>
+   <li><a href="script/api/object/actions/get_orientation.html">object.get_orientation</a></li>
+   <li><a href="script/api/object/actions/get_speed.html">object.get_speed</a></li>
 </ul>
 
       </main>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>player.force_into_vehicle | ReachVariantTool Documentation</title>
@@ -58,16 +58,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
-<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -94,18 +94,19 @@
          </ul>
       </nav>
       <main>
-         <h1>player.force_into_vehicle</h1>
-<p>Force a player into a vehicle if any seat is available.</p><h2>Arguments</h2>
+         <header><h1>player.force_into_vehicle</h1></header>
+<p>Force a player into a vehicle if any seat is available.</p>
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/object.html">vehicle</a></dt>
-      <dd>The vehicle to force the player into.</dd>
+      <dd><p>The vehicle to force the player into.</p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="comment">--</span>
 <span class="comment">-- Force players into Sabres.</span>
 <span class="comment">--</span>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="comment">--</span>
    <span class="comment">-- First, let's make sure the player is actually spawned on the map.</span>
    <span class="comment">--</span>
