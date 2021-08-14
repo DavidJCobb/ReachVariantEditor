@@ -60,6 +60,13 @@ namespace content {
 
          relationship* get_relationship_entry(base& to) const noexcept;
          QVector<base*> get_all_see_also() const noexcept;
+
+         bool name_is_less_than(base& other) const noexcept {
+            auto c = this->name.compare(other.name);
+            if (c == 0)
+               c = this->name2.compare(other.name2);
+            return c < 0;
+         }
          
       protected:
          void _load_blurb(QDomElement& doc, const QString& stem);

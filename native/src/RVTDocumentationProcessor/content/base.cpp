@@ -134,10 +134,10 @@ namespace content {
       }
       //
       qSort(articles.begin(), articles.end(), [](base* a, base* b) {
-         auto c = a->name.compare(b->name);
-         if (c == 0)
-            c = a->name2.compare(b->name2);
-         return c;
+         if (a->parent && b->parent && a->parent != b->parent) {
+            return a->parent->name_is_less_than(*b->parent);
+         }
+         return a->name_is_less_than(*b);
       });
       return articles;
    }
