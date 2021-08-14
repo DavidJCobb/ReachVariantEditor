@@ -99,6 +99,21 @@ namespace util {
             out += "&gt;";
             continue;
          }
+         switch (c.unicode()) { // spaces
+            case 0xA0: // nbsp
+            case 0x2002:
+            case 0x2003:
+            case 0x2004:
+            case 0x2005:
+            case 0x2007:
+            case 0x2008:
+            case 0x2009:
+            case 0x200A:
+            case 0x200B:
+            case 0x205F:
+               out += QString("&#x%1;").arg(c.unicode(), 0, 16);
+               continue;
+         }
          if (options.escape_quotes) {
             if (c == '"') {
                out += "&quot;";

@@ -2,23 +2,13 @@
 #include <QDebug>
 #include <array>
 #include <cstdint>
-
-namespace {
-   static QString make_character(uint c) {
-      return QChar(c);
-   }
-
-   std::array entities = {
-      std::pair<QString, QString>{ "mdash", make_character(0x2014) },
-   };
-}
+#include "../all_html_entities.h"
 
 namespace cobb::qt::xml {
    QString XmlHtmlEntityResolver::resolveUndeclaredEntity(const QString& name) {
-      for (auto& pair : entities)
-         if (name.compare(pair.first, Qt::CaseInsensitive) == 0)
-            return pair.second;
-      qDebug() << QString("Unrecognized entity: %1\n").arg(name);
-      return "";
+      QString text = cobb::html::look_up_entity(name);
+      if (text.isEmpty())
+         qDebug() << QString("Unrecognized entity: %1\n").arg(name);
+      return text;
    }
 }
