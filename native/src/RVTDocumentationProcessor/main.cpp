@@ -4,6 +4,7 @@
 #include <QMessageBox>
 
 #include "content/registry.h"
+#include "content/category.h"
 #include "content/api_namespace.h"
 #include "content/api_type.h"
 
@@ -234,10 +235,31 @@ int main(int argc, char *argv[]) {
       qDebug() << L"\nHandled " << count << " files.";
       //
       window->setEnabled(true);
-      QMessageBox::information(
-         window, "Done!",
-         QString(copy_assets ? "Processed %1 XML file(s) and attempted to copy %2 asset(s)." : "Processed %1 files.").arg(count).arg(asset_file_paths.size())
-      );
+      {
+         QString category_list;
+         {
+            auto cats = registry.categories;
+            qSort(cats.begin(), cats.end(), [](content::category* a, content::category* b) {
+               return a->id < b->id;
+            });
+            for (auto* c : cats) {
+               if (!category_list.isEmpty())
+                  category_list += '\n';
+               category_list += c->id;
+            }
+         }
+         if (category_list.isEmpty())
+            category_list = "<none>";
+         //
+         QMessageBox::information(
+            window, "Done!",
+            QString(copy_assets ? "Processed %1 XML file(s) and attempted to copy %3 asset(s).\n\nCategories seen:\n\n%2" : "Processed %1 files.\n\nCategories seen:\n\n%2")
+               .arg(count)
+               .arg(category_list)
+               .arg(asset_file_paths.size())
+         );
+      }
+      registry.clear();
    });
    //
    return a.exec();
