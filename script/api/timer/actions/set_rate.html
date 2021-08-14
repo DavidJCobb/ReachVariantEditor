@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>timer.set_rate | ReachVariantTool Documentation</title>
@@ -51,8 +51,9 @@
          </ul>
       </nav>
       <main>
-         <h1>timer.set_rate</h1>
-<p>Set the rate and direction in which the timer advances.</p><h2>Arguments</h2>
+         <header><h1>timer.set_rate</h1></header>
+<p>Set the rate and direction in which the timer advances.</p>
+<h2>Arguments</h2>
 <dl>
    <dt>rate</dt>
       <dd>
@@ -90,7 +91,7 @@
 <span class="keyword">alias</span> announced_timer = player.timer[0]
 <span class="keyword">declare</span> player.announced_timer = 5
 <span class="comment">--</span>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.announced_start == 0 <span class="keyword">then</span>
       current_player.announced_timer.set_rate(-100%)
       <span class="keyword">if</span> current_player.announced_timer.is_zero() <span class="keyword">then</span>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.is_out_of_bounds | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,19 +101,20 @@
          </ul>
       </nav>
       <main>
-         <h1>object.is_out_of_bounds</h1>
+         <header><h1>object.is_out_of_bounds</h1></header>
 
                <p>
                   This condition function tests as true if the context object is outside of 
                   the level's defined playable space, or if the context object is inside of 
                   a Forge-placed Kill Boundary or Soft Kill Boundary.
                </p>
-            <h2>Example</h2>
+            
+<h2>Example</h2>
 <pre>
 <span class="comment">--</span>
 <span class="comment">-- Delete objects that fall out of bounds.</span>
 <span class="comment">--</span>
-<span class="keyword">for</span> each object <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_object.is_out_of_bounds() <span class="keyword">then</span>
       current_object.delete()
    <span class="keyword">end</span>

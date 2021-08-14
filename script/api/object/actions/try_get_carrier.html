@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.try_get_carrier | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,7 +101,7 @@
          </ul>
       </nav>
       <main>
-         <h1>object.try_get_carrier<span class="a-k-a">a.k.a. object.get_carrier</span></h1>
+         <header><h1>object.try_get_carrier</h1><span class="a-k-a">a.k.a. object.get_carrier</span></header>
 
                <p>
                   When called on a weapon or Armor Ability, this function returns the 
@@ -115,10 +115,10 @@
                   assignment to <var>no_player</var> before the call, while calling 
                   the function with the name <code>try_get_carrier</code> will not.
                </p>
-            <p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p>
-<h2>Example</h2>
+            
+<p>This function returns <a href="script/api/player.html">player</a>. Calling this function without storing its return value in a variable is an error.</p><h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each object with label <span class="string">"awful_gun</span>" <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"awful_gun</span>" <span class="keyword">do</span>
    global.player[0] = current_object.get_carrier()
    <span class="keyword">if</span> global.player[0] != no_player <span class="keyword">then</span>
       global.player[0].kill(false)
@@ -126,13 +126,16 @@
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
-   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
    <li><a href="script/api/object/actions/add_weapon.html">object.add_weapon</a></li>
+   <li><a href="script/api/object/conditions/is_in_use.html">object.is_in_use</a></li>
    <li><a href="script/api/object/actions/remove_weapon.html">object.remove_weapon</a></li>
+   <li><a href="script/api/object/actions/set_pickup_permissions.html">object.set_pickup_permissions</a></li>
    <li><a href="script/api/object/actions/set_weapon_pickup_priority.html">object.set_weapon_pickup_priority</a></li>
-   <li><a href="script/api/player/actions/get_armor_ability.html">player.get_armor_ability</a></li>
    <li><a href="script/api/player/actions/add_weapon.html">player.add_weapon</a></li>
-   <li><a href="script/api/player/actions/get_weapon.html">player.get_weapon</a></li>
+   <li><a href="script/api/player/accessors/frag_grenades.html">player.frag_grenades</a></li>
+   <li><a href="script/api/player/accessors/plasma_grenades.html">player.plasma_grenades</a></li>
+   <li><a href="script/api/player/actions/try_get_armor_ability.html">player.try_get_armor_ability</a></li>
+   <li><a href="script/api/player/actions/try_get_weapon.html">player.try_get_weapon</a></li>
 </ul>
 
       </main>

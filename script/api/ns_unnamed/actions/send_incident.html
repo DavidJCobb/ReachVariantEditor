@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>send_incident | ReachVariantTool Documentation</title>
@@ -75,27 +75,28 @@
          </ul>
       </nav>
       <main>
-         <h1>send_incident</h1>
+         <header><h1>send_incident</h1></header>
 
                <p>
                   This function sends an "incident" to the game engine. Incidents can be 
                   announcer voiceovers, medals (to be awarded to the "cause" player), or 
                   even triggers for unlocking achievements.
                </p>
-            <h2>Arguments</h2>
+            
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/incident.html">incident</a></dt>
       <dd><p>The ID of an event that the game engine can be told about.</p></dd>
    <dt>cause</dt>
-      <dd>
+      <dd><p>
                   The cause of the incident: a <a href="script/api/player.html">player</a> or 
                   <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
-               </dd>
+               </p></dd>
    <dt>target</dt>
-      <dd>
+      <dd><p>
                   The target of the incident: a <a href="script/api/player.html">player</a> or 
                   <a href="script/api/team.html">team</a> , or the value <var>all_players</var>.
-               </dd>
+               </p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
@@ -107,7 +108,7 @@
 
 <span class="keyword">declare</span> player.announce_start_timer = 5
 
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.announced_game_start == 0 <span class="keyword">and</span> current_player.announce_game_start_timer.is_zero() <span class="keyword">then</span> 
       send_incident(race_game_start, current_player, no_player)
       current_player.announced_game_start = 1

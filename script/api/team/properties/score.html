@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>team.score | ReachVariantTool Documentation</title>
@@ -55,7 +55,7 @@
          </ul>
       </nav>
       <main>
-         <h1>team.score</h1>
+         <header><h1>team.score</h1><span class="type">Type: <a href="script/api/number.html">Number</a></span></header>
 
             <p>
                This property provides access to a team's score. Note that a team's score 
@@ -67,9 +67,10 @@
                has any points. If you set each team's score to 1, and then set a Red Team 
                player's score to 1, then Red Team will be in the lead.
             </p>
-         <h2>Example</h2>
+         
+<h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each team <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">team</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.biped != no_object <span class="keyword">then</span>
       <span class="comment">--</span>
       <span class="comment">-- If the player has a biped on the map, then they must be alive.</span>
@@ -90,7 +91,11 @@
          </p></li>
 </ul><h2>See also</h2>
 <ul>
+   <li><a href="script/api/player/actions/get_scoreboard_pos.html">player.get_scoreboard_pos</a></li>
+   <li><a href="script/api/player/actions/get_spree_count.html">player.get_spree_count</a></li>
    <li><a href="script/api/player/properties/score.html">player.score</a></li>
+   <li><a href="script/api/player/properties/script_stat.html">player.script_stat</a></li>
+   <li><a href="script/api/team/actions/get_scoreboard_pos.html">team.get_scoreboard_pos</a></li>
 </ul>
 
       </main>

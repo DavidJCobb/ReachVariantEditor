@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>hud_player | ReachVariantTool Documentation</title>
@@ -75,22 +75,24 @@
          </ul>
       </nav>
       <main>
-         <h1>hud_player<span class="type">Type: <a href="script/api/player.html">Player</a></span></h1>
+         <header><h1>hud_player</h1><span class="type">Type: <a href="script/api/player.html">Player</a></span></header>
 <p>This value can be used with HUD widgets and object waypoints to display 
          different information for each player. It refers to the player that the widget 
-         or waypoint is being shown to.</p><p>This value is read-only.</p><h2>Example</h2>
+         or waypoint is being shown to.</p>
+<p>This value is read-only.</p>
+<h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> speed_raw = player.number[0]
 <span class="keyword">alias</span> speed_kph = player.number[1]
-<span class="keyword">declare</span> player.speed_raw with network priority local
-<span class="keyword">declare</span> player.speed_kph with network priority local
+<span class="keyword">declare</span> player.speed_raw <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">local</span>
+<span class="keyword">declare</span> player.speed_kph <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">local</span>
 <span class="comment">--</span>
 <span class="comment">-- Allow each player to see how fast they're moving.</span>
 <span class="comment">--</span>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    script_widget[0].set_text(<span class="string">"%n KPH</span>", hud_player.speed_kph)
 <span class="keyword">end</span>
-<span class="keyword">on</span> local: <span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">on</span> local: <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    current_player.speed_raw = current_player.biped.get_speed()
    current_player.speed_kph = current_player.speed_raw
    current_player.speed_kph *= 109
@@ -98,10 +100,12 @@
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
+   <li><a href="script/api/ns_unnamed/current_player.html">current_player</a></li>
+   <li><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></li>
    <li><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></li>
    <li><a href="script/api/ns_unnamed/hud_target_player.html">hud_target_player</a></li>
-   <li><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></li>
    <li><a href="script/api/ns_unnamed/hud_target_player_team.html">hud_target_player_team</a></li>
+   <li><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></li>
 </ul>
 
       </main>

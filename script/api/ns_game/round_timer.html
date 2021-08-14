@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>game.round_timer | ReachVariantTool Documentation</title>
@@ -78,7 +78,7 @@
          </ul>
       </nav>
       <main>
-         <h1>game.round_timer<span class="type">Type: <a href="script/api/timer.html">Timer</a></span></h1>
+         <header><h1>game.round_timer</h1><span class="type">Type: <a href="script/api/timer.html">Timer</a></span></header>
 
             <p>
                This timer is the round timer; it is displayed on the HUD. By default, it is 
@@ -91,7 +91,8 @@
                The round timer's behavior appears to exist in order to enable Invasion to 
                use it to display the current phase's remaining time.
             </p>
-         <h2>Example</h2>
+         
+<h2>Example</h2>
 <pre>
 <span class="keyword">if</span> game.round_time_limit &gt; 0 <span class="keyword">and</span> game.round_timer.is_zero() <span class="keyword">then</span>
    game.end_round()
@@ -105,10 +106,6 @@
 </ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/ns_game/grace_period_time.html">game.grace_period_time</a></li>
-   <li><a href="script/api/ns_game/grace_period_timer.html">game.grace_period_timer</a></li>
-   <li><a href="script/api/ns_game/round_time_limit.html">game.round_time_limit</a></li>
-   <li><a href="script/api/ns_game/sudden_death_time.html">game.sudden_death_time</a></li>
-   <li><a href="script/api/ns_game/sudden_death_timer.html">game.sudden_death_timer</a></li>
 </ul>
 
       </main>

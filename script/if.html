@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>If-statements | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -175,13 +176,12 @@
       </nav>
       <main>
          <h1>If-statements</h1>
-
       <p>
          If you want to run a piece of code only when certain conditions are met, you 
          should use an if-statement:
       </p>
       <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.team == team[0] <span class="keyword">then</span>
       <span class="comment">--</span>
       <span class="comment">-- ... do something ...</span>
@@ -222,7 +222,7 @@
       <pre>
 <span class="keyword">if</span> x == 1 <span class="keyword">then</span>
    run_function_a()
-altif y == 1 <span class="keyword">then</span>
+<span class="keyword">altif</span> y == 1 <span class="keyword">then</span>
    run_function_b()
 <span class="keyword">alt</span>
    run_function_c()
@@ -304,14 +304,14 @@ else
          uses one less trigger and so contributes less to script size limits:
       </p>
       <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    <span class="keyword">if</span> current_player.team == team[0] <span class="keyword">then</span>
       game.show_message_to(current_player, none, <span class="string">"Your objective is under attack!</span>")
    <span class="keyword">end</span>
    script_widget[0].set_visibility(current_player, true)
 <span class="keyword">end</span></pre>
       <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    script_widget[0].set_visibility(current_player, true)
    <span class="keyword">if</span> current_player.team == team[0] <span class="keyword">then</span>
       game.show_message_to(current_player, none, <span class="string">"Your objective is under attack!</span>")

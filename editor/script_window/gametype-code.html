@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>Gametype Code | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -175,7 +176,6 @@
       </nav>
       <main>
          <h1>Gametype Code</h1>
-
       <p>
          The <b>gametype code</b> page allows you to decompile a gametype's script code, 
          and compile new code into a gametype.
@@ -201,7 +201,7 @@
          <em>use</em> a string literal, and ReachVariantTool will try to handle it:
       </p>
       <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
    current_player.set_round_card_title(<span class="string">"i didn't bother defining this text\nin advance lol</span>")
 <span class="keyword">end</span></pre>
       <p>

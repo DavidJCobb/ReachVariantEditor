@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>Basic syntax | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -175,7 +176,6 @@
       </nav>
       <main>
          <h1>Basic syntax</h1>
-
       <p>
          Only Bungie and 343 Industries know what Megalo "truly" looks like. However, community 
          reverse-engineers have figured out Megalo's bytecode. This makes it possible for members 
@@ -229,9 +229,11 @@
             </code>
          </dt>
          <dd>
-            Treats <var>HHHH</var> as a hexadecimal character code. The entire escape sequence
+            <p>Treats <var>HHHH</var> as a hexadecimal character code. The entire escape sequence
             will be replaced with the Unicode character that has that code. You must always provide
-            a four-digit hexadecimal number.
+            a four-digit hexadecimal number.</p>
+            <p>There are <a href="script/string-special-chars.html">special codes</a> that can be used to show 
+            Halo-specific icons and symbols.</p>
          </dd>
          <dt>
             <code>\"</code>

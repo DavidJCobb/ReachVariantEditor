@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>Best practices | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -175,10 +176,23 @@
       </nav>
       <main>
          <h1>Best practices</h1>
-
       <p>
          When writing scripts, there are a number of things you can do to make things easier 
          for yourself and others.
+      </p>
+
+      <h2>Back up your original source code</h2>
+      <p>
+         Megalo is a <dfn>compiled</dfn> language. This means that the game variants that you save 
+         will not include the full and exact script code that you wrote; rather, they include a 
+         pre-processed copy of the code, which <i>Halo: Reach</i> can quickly read and execute. 
+         Aliases, code comments, and similar <em>are not saved</em>, and if you lose them, they 
+         <em>cannot be recovered by decompiling.</em>
+      </p>
+      <p>
+         You should keep your own copies of the source code that you write, separately from the 
+         game variant files that you save, so that you don't lose your code comments and other 
+         informative content.
       </p>
 
       <h2>Use aliases everywhere</h2>
@@ -209,11 +223,11 @@
 <span class="comment">-- Aliases can be block-scoped, so when you're using a temporary variable for something, </span>
 <span class="comment">-- you can give it a specific name.</span>
 <span class="comment">--</span>
-<span class="keyword">for</span> each object with label <span class="string">"goal</span>" <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"goal</span>" <span class="keyword">do</span>
    <span class="keyword">alias</span> current_biped = temp_obj_00
    <span class="keyword">alias</span> distance      = temp_int_00
    <span class="comment">--</span>
-   <span class="keyword">for</span> each player <span class="keyword">do</span>
+   <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
       current_biped = current_player.biped
       <span class="keyword">if</span> current_biped != no_object <span class="keyword">then</span>
          distance = current_biped.get_distance_to(current_object)
@@ -234,12 +248,18 @@
 <span class="keyword">alias</span> opt_leader_points = script_option[0]
 <span class="keyword">alias</span> opt_kill_points   = script_option[1]</pre>
       <p>
-         And of course, it's also useful to do that for script traits and script widgets:
+         And of course, it's also useful to do that for script traits, script widgets, and the indices 
+         of unnamed Forge labels:
       </p>
       <pre>
 <span class="keyword">alias</span> leader_traits = script_traits[0]
 
-<span class="keyword">alias</span> ui_turn_clock = script_widget[0]</pre>
+<span class="keyword">alias</span> ui_turn_clock = script_widget[0]
+
+<span class="keyword">alias</span> all_jetpacks = 1
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> all_jetpacks <span class="keyword">do</span>
+   <span class="comment">-- ...</span>
+<span class="keyword">end</span></pre>
       <p>
          Most programming languages let you create as many variables as you need. Megalo doesn't; you 
          have a limited pool of variables to use, and ReachVariantTool doesn't automatically manage 
@@ -276,12 +296,12 @@ global.number[0] += 5</pre>
          own form of communication, in a setting where precision is required and enforced, and we don't 
          call these things "programming <em>languages</em>" for nothing. When you write code, you're 
          communicating with the machine, but you're also communicating with whoever else reads your 
-         code. Some ideas are easier to express in plain English, however &mdash; particularly high-level 
-         goals and abstractions &mdash; and those are precisely the ideas you should aim to convey in a 
+         code. Some ideas are easier to express in plain English, however — particularly high-level 
+         goals and abstractions — and those are precisely the ideas you should aim to convey in a 
          code comment.
       </p>
       <p>
-         The code that you write consists of low-level, step-by-step instructions &mdash; lots of "little 
+         The code that you write consists of low-level, step-by-step instructions — lots of "little 
          picture" stuff. Let your comments convey the big picture... and the medium picture, I suppose.
       </p>
    

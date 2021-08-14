@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>object.set_garbage_collection_disabled | ReachVariantTool Documentation</title>
@@ -54,14 +54,14 @@
                         <li><a href="script/api/object/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/object/actions/animate_device_position.html">animate_device_position</a></li>
 <li><a href="script/api/object/actions/apply_shape_color_from_player_member.html">apply_shape_color_from_player_member</a></li>
-<li><a href="script/api/object/actions/push_upward.html">apply_upward_impulse</a></li>
+<li><a href="script/api/object/actions/apply_upward_impulse.html">apply_upward_impulse</a></li>
 <li><a href="script/api/object/actions/attach_to.html">attach_to</a></li>
 <li><a href="script/api/object/actions/copy_rotation_from.html">copy_rotation_from</a></li>
 <li><a href="script/api/object/actions/delete.html">delete</a></li>
 <li><a href="script/api/object/actions/detach.html">detach</a></li>
 <li><a href="script/api/object/actions/enable_spawn_zone.html">enable_spawn_zone</a></li>
 <li><a href="script/api/object/actions/face_toward.html">face_toward</a></li>
-<li><a href="script/api/object/actions/try_get_carrier.html">get_carrier</a></li>
+<li><a href="script/api/object/actions/get_carrier.html">get_carrier</a></li>
 <li><a href="script/api/object/actions/get_device_position.html">get_device_position</a></li>
 <li><a href="script/api/object/actions/get_device_power.html">get_device_power</a></li>
 <li><a href="script/api/object/actions/get_distance_to.html">get_distance_to</a></li>
@@ -101,7 +101,7 @@
          </ul>
       </nav>
       <main>
-         <h1>object.set_garbage_collection_disabled</h1>
+         <header><h1>object.set_garbage_collection_disabled</h1></header>
 
                <p>
                   This function can be used to enable and disable garbage collection for 
@@ -111,19 +111,20 @@
                   flag set. Objects created with that flag cannot have garbage collection 
                   re-enabled using this function.
                </p>
-            <h2>Arguments</h2>
+            
+<h2>Arguments</h2>
 <dl>
    <dt><a href="script/api/number.html">disable</a></dt>
-      <dd>
+      <dd><p>
                   If this argument is 1, then garbage collection will be disabled; 
                   if it is 0, then garbage collection will be enabled.
-               </dd>
+               </p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> has_been_carried = object.number[0]
 <span class="keyword">alias</span> expire_timer     = object.timer[0]
-<span class="keyword">declare</span> object.has_been_carried with network priority low = 0
+<span class="keyword">declare</span> object.has_been_carried <span class="subkeyword">with</span> <span class="subkeyword">network</span> <span class="subkeyword">priority</span> <span class="subkeyword">low</span> = 0
 <span class="keyword">declare</span> object.expire_timer = 60
 
 <span class="comment">-- pretend this is a Forge label with no name, targeted to Rocket Launchers:</span>
@@ -132,7 +133,7 @@
 <span class="comment">-- Let's say we want to prevent dropped Rocket Launchers from </span>
 <span class="comment">-- despawning for a full minute.</span>
 
-<span class="keyword">for</span> each object with label all_rockets <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> all_rockets <span class="keyword">do</span>
    global.player[0] = current_object.get_carrier()
    <span class="keyword">if</span> global.player[0] != no_player <span class="keyword">then</span>
       current_object.set_garbage_collection_disabled(0)
@@ -149,6 +150,13 @@
       <span class="keyword">end</span>
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
+<h2>See also</h2>
+<ul>
+   <li><a href="script/api/object/actions/delete.html">object.delete</a></li>
+   <li><a href="script/api/object/actions/kill.html">object.kill</a></li>
+   <li><a href="script/api/object/actions/place_at_me.html">object.place_at_me</a></li>
+   <li><a href="script/api/object/actions/place_between_me_and.html">object.place_between_me_and</a></li>
+</ul>
 
       </main>
       <script src="resources/sidebar.js"></script>

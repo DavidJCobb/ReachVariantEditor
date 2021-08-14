@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>Format String | ReachVariantTool Documentation</title>
@@ -112,6 +112,7 @@
                   <li><a href="script/for.html">For-each-loops</a></li>
                   <li><a href="script/if.html">If-/alt-statements</a></li>
                   <li><a href="script/operators.html">Operators</a></li>
+                  <li><a href="script/string-special-chars.html">Special string characters</a></li>
                   <li><a href="script/enum.html">User-defined enums</a></li>
                   <li><a href="script/function.html">User-defined functions</a></li>
                   <li><a href="script/snippets.html">Useful code snippets</a></li>
@@ -217,7 +218,7 @@
          limit.
       </p>
       <pre>
-<span class="keyword">for</span> each player <span class="keyword">do</span> <span class="comment">-- round card</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span> <span class="comment">-- round card</span>
    <span class="keyword">if</span> game.score_to_win != 0 <span class="keyword">and</span> game.teams_enabled == 1 <span class="keyword">then</span> 
       current_player.set_round_card_title(<span class="string">"Kill players on the enemy team.\r\n%n points to win.</span>", game.score_to_win)
    <span class="keyword">end</span>

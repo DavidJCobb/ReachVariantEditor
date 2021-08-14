@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>player.biped | ReachVariantTool Documentation</title>
@@ -58,16 +58,16 @@
                         <li><a href="script/api/player/actions/add_weapon.html">add_weapon</a></li>
 <li><a href="script/api/player/actions/apply_traits.html">apply_traits</a></li>
 <li><a href="script/api/player/actions/force_into_vehicle.html">force_into_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_armor_ability.html">get_armor_ability</a></li>
+<li><a href="script/api/player/actions/get_armor_ability.html">get_armor_ability</a></li>
 <li><a href="script/api/player/actions/get_crosshair_target.html">get_crosshair_target</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_mod.html">get_death_damage_mod</a></li>
-<li><a href="script/api/player/actions/try_get_death_damage_type.html">get_death_damage_type</a></li>
+<li><a href="script/api/player/actions/get_death_damage_mod.html">get_death_damage_mod</a></li>
+<li><a href="script/api/player/actions/get_death_damage_type.html">get_death_damage_type</a></li>
 <li><a href="script/api/player/actions/get_fireteam.html">get_fireteam</a></li>
-<li><a href="script/api/player/actions/try_get_killer.html">get_killer</a></li>
+<li><a href="script/api/player/actions/get_killer.html">get_killer</a></li>
 <li><a href="script/api/player/actions/get_scoreboard_pos.html">get_scoreboard_pos</a></li>
 <li><a href="script/api/player/actions/get_spree_count.html">get_spree_count</a></li>
-<li><a href="script/api/player/actions/try_get_vehicle.html">get_vehicle</a></li>
-<li><a href="script/api/player/actions/try_get_weapon.html">get_weapon</a></li>
+<li><a href="script/api/player/actions/get_vehicle.html">get_vehicle</a></li>
+<li><a href="script/api/player/actions/get_weapon.html">get_weapon</a></li>
 <li><a href="script/api/player/actions/increment_req_money_by.html">increment_req_money_by</a></li>
 <li><a href="script/api/player/actions/record_griefer_penalty.html">record_griefer_penalty</a></li>
 <li><a href="script/api/player/actions/set_biped.html">set_biped</a></li>
@@ -94,19 +94,27 @@
          </ul>
       </nav>
       <main>
-         <h1>player.biped</h1>
+         <header><h1>player.biped</h1><span class="type">Type: <a href="script/api/object.html">Object</a></span></header>
 
             <p>
                This property allows you to access the biped a player is currently 
-               in control of.
+               in control of. If the player is not in control of a biped, e.g. 
+               because they haven't spawned yet or they've been killed, then this 
+               property's value will be <code>no_object</code>.
             </p>
-         <h2>Notes</h2>
+         
+<p>This value is read-only.</p>
+<h2>Notes</h2>
 <ul>
    <li><p>
             This is the only property that can be accessed on nested variables, e.g. 
             <var>current_team.player[0].biped</var>.
          </p></li>
+</ul><h2>See also</h2>
+<ul>
+   <li><a href="script/api/player/actions/set_biped.html">player.set_biped</a></li>
 </ul>
+
       </main>
       <script src="resources/sidebar.js"></script>
       <script src="resources/header-links.js"></script>

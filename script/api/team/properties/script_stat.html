@@ -1,8 +1,8 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
-      <title>team.script_stat[n] | ReachVariantTool Documentation</title>
+      <title>team.script_stat[<var>n</var>] | ReachVariantTool Documentation</title>
       <base href="../../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -55,16 +55,17 @@
          </ul>
       </nav>
       <main>
-         <h1>team.script_stat[<var>n</var>]</h1>
+         <header><h1>team.script_stat[<var>n</var>]</h1><span class="type">Type: <a href="script/api/number.html">Number</a></span></header>
 
             <p>
                This member allows you to access the values of script-defined Post-Game Carnage 
                Report stats on a per-team basis. Stats can be read or modified. Their values 
                persist between rounds, making them a useful way to persist state between rounds.
             </p>
-         <h2>Example</h2>
+         
+<h2>Example</h2>
 <pre>
-<span class="keyword">for</span> each team <span class="keyword">do</span>
+<span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">team</span> <span class="keyword">do</span>
    current_team.script_stat[3] += 5
 <span class="keyword">end</span></pre>
 <h2>See also</h2>

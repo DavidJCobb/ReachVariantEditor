@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
    <head>
       <meta charset="UTF-8" />
       <title>game.sudden_death_timer | ReachVariantTool Documentation</title>
@@ -78,11 +78,11 @@
          </ul>
       </nav>
       <main>
-         <h1>game.sudden_death_timer<span class="type">Type: <a href="script/api/timer.html">Timer</a></span></h1>
+         <header><h1>game.sudden_death_timer</h1><span class="type">Type: <a href="script/api/timer.html">Timer</a></span></header>
 
             <p>
                This timer is used for Sudden Death; it is displayed on the HUD when appropriate. 
-               Its initial value is the <a href="script/api/ns_game/sudden_death_time.html">sudden_death_time</a>.
+               Its initial value is the <a href="script/api/game/sudden_death_time.html">sudden_death_time</a>.
             </p>
             <p>
                Typically, Sudden Death will activate if, at the end of the round, a player is 
@@ -102,7 +102,8 @@
                timer will continue from where it left off), but the Grace 
                Period does.
             </p>
-         <h2>Example</h2>
+         
+<h2>Example</h2>
 <pre>
 <span class="keyword">alias</span> sudden_death_enabled   = global.number[0]
 <span class="keyword">alias</span> announced_sudden_death = global.number[1] <span class="comment">-- only announce the start of Sudden Death once</span>
@@ -146,10 +147,6 @@
 </ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/ns_game/grace_period_time.html">game.grace_period_time</a></li>
-   <li><a href="script/api/ns_game/grace_period_timer.html">game.grace_period_timer</a></li>
-   <li><a href="script/api/ns_game/round_time_limit.html">game.round_time_limit</a></li>
-   <li><a href="script/api/ns_game/round_timer.html">game.round_timer</a></li>
-   <li><a href="script/api/ns_game/sudden_death_time.html">game.sudden_death_time</a></li>
 </ul>
 
       </main>
