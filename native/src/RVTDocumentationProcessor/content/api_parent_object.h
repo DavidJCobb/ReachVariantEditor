@@ -11,6 +11,7 @@ namespace content {
    class api_parent_object : public base {
       public:
          using base::base;
+         ~api_parent_object();
 
          QString        relative_folder_path;
          QVector<base*> children;

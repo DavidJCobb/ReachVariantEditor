@@ -47,10 +47,6 @@ namespace content {
 
          api_parent_object* get_namespace_or_type(const QString& name) const noexcept;
          category* get_or_create_category(const QString& id);
-         
-         int  depth_of(std::filesystem::path path);
-         QString make_stem(std::filesystem::path path);
-         QString make_stem(int);
 
          void post_load_mirror_all_relationships();
       protected:

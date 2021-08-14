@@ -1,7 +1,7 @@
 #include <QtXml>
 
 #include <QApplication>
-#include <QFileDialog>
+#include <QMessageBox>
 
 #include "content/registry.h"
 #include "content/api_namespace.h"
@@ -16,6 +16,9 @@
 
 #include "helpers/qt/xml_html_entity_resolver.h"
 #include "helpers/qt/xml_stream_reader_to_dom.h"
+
+#include "ui/MainWindow.h"
+#include "ui/FilePicker.h"
 
 void handle_article(QDomElement& root, QDir base_save_folder, QString relative_path, QString relative_folder) {
    auto& registry = content::registry::get();
@@ -71,98 +74,140 @@ void handle_article(QDomElement& root, QDir base_save_folder, QString relative_p
    cobb::qt::save_file_to(write_to, body);
 }
 
+void process_xml_file(content::registry& registry, const QString& path, QFile& file, const QDir& base_load_folder, const QDir& base_save_folder) {
+   QDomDocument doc;
+   QString      error;
+   {
+      //
+      // Can't use QDomDocument::setContent; nothing in the QtXml module allows us to 
+      // perform parse-time modifications, which are needed in order to get HTML entities 
+      // to work (no, including the entity definition from w3.org doesn't seem to help).
+      // 
+      // If we want to be able to predefine entities, or else support entities without 
+      // the XML files having to define them individually, then we gotta do this.
+      //
+      cobb::qt::xml::XmlStreamReaderToDom  stream;
+      cobb::qt::xml::XmlHtmlEntityResolver resolver;
+      stream.setEntityResolver(&resolver);
+      stream.parse(file.readAll());
+      doc   = stream.document;
+      error = stream.errorString();
+   }
+   /*//
+   doc.setContent(&file, &error);
+   //*/
+   if (!error.isEmpty()) {
+      qDebug() << error.toLatin1().data();
+      return;
+   }
+   //
+   QString relative_path   = base_load_folder.relativeFilePath(path);
+   QString relative_folder;
+   {
+      relative_folder = relative_path;
+      int i = relative_folder.lastIndexOf('/');
+      int j = relative_folder.lastIndexOf('\\');
+      i = std::max(i, j);
+      if (i >= 0)
+         relative_folder.truncate(i + 1);
+      else
+         relative_folder.clear();
+   }
+   //
+   auto root = doc.documentElement();
+   auto type = root.nodeName();
+   if (type == "article") {
+      handle_article(root, base_save_folder, relative_path, relative_folder);
+   } else if (type == "script-namespace") {
+      registry.load_namespace(relative_folder, doc);
+   } else if (type == "script-type") {
+      registry.load_type(relative_folder, doc);
+   } else if (type == "reuse") {
+      auto path = root.attribute("src");
+      qDebug() << "Found a \"reuse\" file; unsure what to do with it: " << path << '\n';
+   }
+}
+
 int main(int argc, char *argv[]) {
    QApplication a(argc, argv);
-   //
-   //ReachVariantTool w;
-   //w.show();
-   //return a.exec();
-
-   auto& registry = content::registry::get();
-
-   QString dir = QFileDialog::getExistingDirectory(nullptr, "Select folder");
-   if (dir.isEmpty())
-      return 0;
-   QString output_dir = QFileDialog::getExistingDirectory(nullptr, "Select folder", dir);
-   if (output_dir.isEmpty())
-      return 0;
-   //
-   QDir base_load_folder = QDir(dir);
-   QDir base_save_folder = QDir(output_dir);
-   auto rdi   = QDirIterator(base_load_folder, QDirIterator::Subdirectories);
-   int  count = 0;
-   while (rdi.hasNext()) {
-      auto path = rdi.next();
-      auto info = rdi.fileInfo();
-      if (!info.isFile() || info.suffix().compare("xml", Qt::CaseInsensitive) != 0)
-         continue;
-      auto file = QFile(path);
-      file.open(QIODevice::ReadOnly);
-      if (file.isOpen()) {
-         ++count;
-         //
-         QDomDocument doc;
-         QString      error;
-         {
-            //
-            // Can't use QDomDocument::setContent; nothing in the QtXml module allows us to 
-            // perform parse-time modifications, which are needed in order to get HTML entities 
-            // to work (no, including the entity definition from w3.org doesn't seem to help).
-            // 
-            // If we want to be able to predefine entities, or else support entities without 
-            // the XML files having to define them individually, then we gotta do this.
-            //
-            cobb::qt::xml::XmlStreamReaderToDom  stream;
-            cobb::qt::xml::XmlHtmlEntityResolver resolver;
-            stream.setEntityResolver(&resolver);
-            stream.parse(file.readAll());
-            doc   = stream.document;
-            error = stream.errorString();
-         }
-         /*//
-         doc.setContent(&file, &error);
-         //*/
-         if (!error.isEmpty()) {
-            qDebug() << error.toLatin1().data();
+   auto* window = new MainWindow;
+   window->show();
+   QObject::connect(window, &MainWindow::onStartRequested, [](MainWindow* window) {
+      window->setEnabled(false);
+      QCoreApplication::sendPostedEvents(window); // for some reason, enable state changes aren't instant in this one case specifically?
+      //
+      QString load_path = window->widgets.input_folder->value();
+      QString save_path = window->widgets.output_folder->value();
+      if (load_path.isEmpty() || save_path.isEmpty()) {
+         QApplication::beep();
+         window->setEnabled(true);
+         return;
+      }
+      QDir base_load_folder = load_path;
+      QDir base_save_folder = save_path;
+      QVector<QString> asset_file_paths;
+      bool copy_assets = window->widgets.copy_assets_over->isChecked();
+      //
+      auto& registry = content::registry::get();
+      auto  rdi      = QDirIterator(base_load_folder, QDirIterator::Subdirectories);
+      int   count    = 0;
+      while (rdi.hasNext()) {
+         auto path = rdi.next();
+         auto info = rdi.fileInfo();
+         if (!info.isFile())
+            continue;
+         auto ext = info.suffix();
+         if (ext.compare("xml", Qt::CaseInsensitive) != 0) {
+            if (!copy_assets)
+               continue;
+            if (info.baseName().isEmpty()) // e.g. ".gitignore"
+               continue;
+            if (ext.compare("html", Qt::CaseInsensitive) == 0)
+               continue;
+            if (ext.compare("lnk", Qt::CaseInsensitive) == 0)
+               continue;
+            asset_file_paths.push_back(path);
             continue;
          }
-         //
-         QString relative_path   = base_load_folder.relativeFilePath(path);
-         QString relative_folder;
-         {
-            relative_folder = relative_path;
-            int i = relative_folder.lastIndexOf('/');
-            int j = relative_folder.lastIndexOf('\\');
-            i = std::max(i, j);
-            if (i >= 0)
-               relative_folder.truncate(i + 1);
-            else
-               relative_folder.clear();
-         }
-         //
-         auto root = doc.documentElement();
-         auto type = root.nodeName();
-         if (type == "article") {
-            handle_article(root, base_save_folder, relative_path, relative_folder);
-         } else if (type == "script-namespace") {
-            registry.load_namespace(relative_folder, doc);
-         } else if (type == "script-type") {
-            registry.load_type(relative_folder, doc);
-         } else if (type == "reuse") {
-            auto path = root.attribute("src");
-            qDebug() << "Found a \"reuse\" file; unsure what to do with it: " << path << '\n';
+         auto file = QFile(path);
+         file.open(QIODevice::ReadOnly);
+         if (file.isOpen()) {
+            ++count;
+            process_xml_file(registry, path, file, base_load_folder, base_save_folder);
          }
       }
-   }
-   if (count) {
-      registry.post_load_mirror_all_relationships();
-      for (auto* type : registry.types) {
-         type->write(output_dir);
+      if (count) {
+         registry.post_load_mirror_all_relationships();
+         for (auto* type : registry.types) {
+            type->write(save_path);
+         }
+         for (auto* ns : registry.namespaces) {
+            ns->write(save_path);
+         }
+         if (copy_assets) {
+            for (auto& path : asset_file_paths) {
+               QString to = base_save_folder.absoluteFilePath(base_load_folder.relativeFilePath(path));
+               {  // Ensure the destination folder exists.
+                  QString folder = to;
+                  int i = folder.lastIndexOf('/');
+                  int j = folder.lastIndexOf('\\');
+                  i = std::max(i, j);
+                  if (i >= 0)
+                     folder.truncate(i);
+                  QDir("/").mkpath(folder);
+               }
+               QFile::copy(path, to);
+            }
+         }
       }
-      for (auto* ns : registry.namespaces) {
-         ns->write(output_dir);
-      }
-   }
-   qDebug() << L"\nHandled " << count << " files.";
-   return 0;
+      qDebug() << L"\nHandled " << count << " files.";
+      //
+      window->setEnabled(true);
+      QMessageBox::information(
+         window, "Done!",
+         QString(copy_assets ? "Processed %1 XML file(s) and attempted to copy %2 asset(s)." : "Processed %1 files.").arg(count).arg(asset_file_paths.size())
+      );
+   });
+   //
+   return a.exec();
 }

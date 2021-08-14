@@ -38,6 +38,16 @@ namespace content {
          if (t)
             delete t;
       this->types.clear();
+      //
+      for (auto* t : this->namespaces)
+         if (t)
+            delete t;
+      this->namespaces.clear();
+      //
+      for (auto* c : this->categories)
+         if (c)
+            delete c;
+      this->categories.clear();
    }
    api_type* registry::get_type(const QString& name) {
       for (auto* t : this->types)
@@ -77,31 +87,6 @@ namespace content {
       return c;
    }
 
-   int registry::depth_of(std::filesystem::path path) {
-      int depth = 0;
-      if (path.has_extension())
-         path = path.parent_path();
-      for (; !std::filesystem::equivalent(path, this->root_path); ++depth) {
-         if (!path.has_parent_path())
-            return -1;
-         path = path.parent_path();
-      }
-      return depth;
-   }
-   QString registry::make_stem(std::filesystem::path path) {
-      QString out;
-      auto depth = this->depth_of(path);
-      if (depth < 0)
-         return out;
-      for (auto temp = depth; temp; --temp) {
-         path = path.parent_path();
-         auto fn = path.filename().u8string();
-         fn += '/';
-         out.insert(0, (const char*)fn.c_str());
-      }
-      return out;
-   }
-
    void registry::_mirror_relationships_for_member(base& member) {
       for (auto* rel : member.related) {
          if (rel->mirrored || rel->target)
@@ -133,53 +118,6 @@ namespace content {
             rel->mirrored = true;
          }
       }
-      /*//
-      for (auto& rel : member.related) {
-         if (rel.mirrored)
-            continue;
-         if (!rel.context.isEmpty() && rel.context != type.name) // this is a relationship to something in another type
-            continue && static_assert(false, "is this a limitation we want to keep in place? at the VERY least it needs to go behind a constexpr bool");
-         base* target = nullptr;
-         //
-         auto rt = rel.type;
-         if (rt == entry_type::same)
-            rt = member_type;
-         switch (rt) {
-            case entry_type::condition:
-               target = type.get_condition_by_name(rel.name);
-               break;
-            case entry_type::action:
-               target = type.get_action_by_name(rel.name);
-               break;
-            case entry_type::property:
-               target = type.get_property_by_name(rel.name);
-               break;
-            case entry_type::accessor:
-               target = type.get_accessor_by_name(rel.name);
-               break;
-            case entry_type::generic:
-               //target = type.get_member_by_name(rel.name); // namespaces only
-               break;
-         }
-         if (target == nullptr)
-            continue;
-         //
-         target->related.emplace_back();
-         auto& mirrored = target->related.back();
-         mirrored.mirrored = true;
-         mirrored.name = member.name;
-         mirrored.type = member_type;
-         //
-         for (auto& rel2 : member.related) {
-            if (&rel2 == &rel)
-               continue;
-            target->related.emplace_back();
-            auto& mirrored = target->related.back();
-            mirrored = rel2;
-            mirrored.mirrored = true;
-         }
-      }
-      //*/
    }
    void registry::post_load_mirror_all_relationships() {
       for (auto* type : this->types) {

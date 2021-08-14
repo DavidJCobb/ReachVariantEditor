@@ -5,6 +5,13 @@
 #include "api_property.h"
 
 namespace content {
+   api_parent_object::~api_parent_object() {
+      for (auto* c : this->children)
+         if (c)
+            delete c;
+      this->children.clear();
+   }
+
    api_method* api_parent_object::get_action_by_name(const QString& name) const noexcept {
       return (api_method*)this->lookup_nested_article(entry_type::action, name);
    }
