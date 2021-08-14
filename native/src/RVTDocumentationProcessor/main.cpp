@@ -74,7 +74,7 @@ void handle_article(QDomElement& root, QDir base_save_folder, QString relative_p
    cobb::qt::save_file_to(write_to, body);
 }
 
-void process_xml_file(content::registry& registry, const QString& path, QFile& file, const QDir& base_load_folder, const QDir& base_save_folder) {
+void process_xml_file(content::registry& registry, const QString& path, const QString& xml, const QDir& base_load_folder, const QDir& base_save_folder) {
    QDomDocument doc;
    QString      error;
    {
@@ -89,7 +89,7 @@ void process_xml_file(content::registry& registry, const QString& path, QFile& f
       cobb::qt::xml::XmlStreamReaderToDom  stream;
       cobb::qt::xml::XmlHtmlEntityResolver resolver;
       stream.setEntityResolver(&resolver);
-      stream.parse(file.readAll());
+      stream.parse(xml);
       doc   = stream.document;
       error = stream.errorString();
    }
@@ -123,8 +123,39 @@ void process_xml_file(content::registry& registry, const QString& path, QFile& f
    } else if (type == "script-type") {
       registry.load_type(relative_folder, doc);
    } else if (type == "reuse") {
-      auto path = root.attribute("src");
-      qDebug() << "Found a \"reuse\" file; unsure what to do with it: " << path << '\n';
+      //
+      // A file whose root element is <reuse src="../relative/path.xml" /> where the path in 
+      // question is relative to the "reuse" file, and specifies an XML file whose content 
+      // should be copied.
+      // 
+      // Basically, it means, "Take this other file, and re-render it, but with my path, and 
+      // then have that be my output."
+      //
+      auto src = root.attribute("src");
+      if (src.isEmpty())
+         return;
+      auto target_path = QDir::cleanPath(QDir(base_load_folder.absoluteFilePath(relative_folder)).absoluteFilePath(src));
+      auto target_file = QFile(target_path);
+      target_file.open(QIODevice::ReadOnly);
+      if (!target_file.isOpen()) {
+         qDebug() << "Failed to process a \"reuse\" file.\n   Source path: " << path << "\n   Target path: " << target_path << '\n';
+         return;
+      }
+      //
+      // Ensure that the target file is an article.
+      //
+      QXmlStreamReader reader;
+      QString          target_xml = target_file.readAll();
+      reader.addData(target_xml);
+      if (reader.readNextStartElement()) {
+         if (reader.name() == "article") {
+            qDebug() << "Processing \"reuse\" file...\n   Source path: " << path << "\n   Target path: " << target_path << '\n';
+            process_xml_file(registry, path, target_xml, base_load_folder, base_save_folder);
+            return;
+         }
+      }
+      qDebug() << "Failed to parse a \"reuse\" file.\n   Source path: " << path << "\n   Target path: " << target_path << '\n';
+      return;
    }
 }
 
@@ -173,7 +204,7 @@ int main(int argc, char *argv[]) {
          file.open(QIODevice::ReadOnly);
          if (file.isOpen()) {
             ++count;
-            process_xml_file(registry, path, file, base_load_folder, base_save_folder);
+            process_xml_file(registry, path, file.readAll(), base_load_folder, base_save_folder);
          }
       }
       if (count) {

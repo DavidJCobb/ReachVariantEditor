@@ -19,13 +19,16 @@
             to be on it.</dd>
          <dt>Set Primary Color</dt>
             <dd>If enabled, allows you to override a team's primary color. The primary 
-            color is used for players' armor color and for the color of any displayed 
-            objectives. Note that dark colors are likely to appear differently in-game 
-            due to the shaders used.</dd>
+            color is used for players' primary armor color and for the color of any 
+            displayed objectives. Note that dark colors are likely to appear differently 
+            in-game due to the shaders used.</dd>
          <dt>Set Secondary Color</dt>
-            <dd>If enabled, allows you to override a team's secondary color.</dd>
+            <dd>If enabled, allows you to override a team's secondary color. The 
+            secondary color is used for players' secondary armor color.</dd>
          <dt>Set Tertiary Color</dt>
-            <dd>If enabled, allows you to override a team's tertiary color.</dd>
+            <dd>If enabled, allows you to override a team's tertiary color. The tertiary 
+            color is used as the background color for the team in the scoreboard, the 
+            round card, and so on.</dd>
          <dt>Player Species</dt>
             <dd>If the <a href="options-team">general team settings</a> are set to have 
             players use team-specific species, then this option controls whether this 
