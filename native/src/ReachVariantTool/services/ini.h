@@ -35,7 +35,7 @@ namespace ReachINI {
    namespace UIWindowTitle {
       REACHTOOL_MAKE_INI_SETTING(bShowFullPath,     "UIWindowTitle", true);
       REACHTOOL_MAKE_INI_SETTING(bShowVariantTitle, "UIWindowTitle", true);
-      REACHTOOL_MAKE_INI_SETTING(sTheme, "UIWindowTitle", "themes/dark.qss");
+      REACHTOOL_MAKE_INI_SETTING(sTheme, "UIWindowTitle", "themes/default.qss");
    }
    #undef REACHTOOL_MAKE_INI_SETTING
 }
