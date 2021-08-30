@@ -187,6 +187,7 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
+   QObject::connect(this->ui.actionExit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
    QObject::connect(this->ui.actionOptions, &QAction::triggered, &ProgramOptionsDialog::get(), &ProgramOptionsDialog::open);
    QObject::connect(this->ui.actionEditScript, &QAction::triggered, [this]() {
       (new MegaloScriptEditorWindow(this))->exec();

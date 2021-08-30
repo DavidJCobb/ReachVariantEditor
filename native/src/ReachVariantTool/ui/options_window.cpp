@@ -1,6 +1,10 @@
 #include "options_window.h"
 #include "../helpers/ini.h"
 #include "../services/ini.h"
+#include <qdir.h>
+#include <qstringlist.h>
+#include <QFileDialog>
+#include <filesystem>
 
 ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
@@ -54,6 +58,10 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    QObject::connect(this->ui.optionVariantNameInWindowTitle, &QCheckBox::stateChanged, [](int state) {
       ReachINI::UIWindowTitle::bShowVariantTitle.pending.b = state == Qt::CheckState::Checked;
    });
+   QObject::connect(this->ui.optionTheme, &QLineEdit::textEdited, this, [](const QString& text) {
+       ReachINI::UIWindowTitle::sTheme.pendingStr = text.toUtf8();
+    });
+   QObject::connect(this->ui.themeFileDialog, &QPushButton::pressed, this, &ProgramOptionsDialog::openFile);
 }
 void ProgramOptionsDialog::close() {
    ReachINI::get().abandon_pending_changes();
@@ -130,6 +138,7 @@ void ProgramOptionsDialog::refreshWidgetsFromINI() {
       const QSignalBlocker blocker1(this->ui.optionVariantNameInWindowTitle);
       this->ui.optionFullFilePathsInWindowTitle->setChecked(ReachINI::UIWindowTitle::bShowFullPath.current.b);
       this->ui.optionVariantNameInWindowTitle->setChecked(ReachINI::UIWindowTitle::bShowVariantTitle.current.b);
+      this->ui.optionTheme->setText(ReachINI::UIWindowTitle::sTheme.currentStr.c_str());
    }
 }
 void ProgramOptionsDialog::saveAndClose() {
@@ -163,4 +172,12 @@ void ProgramOptionsDialog::defaultSaveTypeChanged() {
    else if (this->ui.defaultSavePathUseCustom->isChecked())
       which = type::custom;
    ReachINI::DefaultSavePath::uPathType.pending.u = (uint32_t)which;
+}
+
+void ProgramOptionsDialog::openFile() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select theme"), "~/", tr("QT Stylesheets (*.qss)"));
+    if (!fileName.isNull()) {
+        this->ui.optionTheme->setText(fileName.toUtf8());
+        ReachINI::UIWindowTitle::sTheme.pendingStr = fileName.toUtf8();
+    }
 }
