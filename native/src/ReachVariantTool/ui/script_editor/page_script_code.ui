@@ -86,13 +86,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QFrame" name="compileLogWrapper">
-      <property name="frameShape">
-       <enum>QFrame::Panel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
-      </property>
+     <widget class="QWidget" name="compileLogWrapper" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
         <number>0</number>
@@ -110,13 +104,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::WinPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
+        <widget class="QWidget" name="widget" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout">
           <property name="spacing">
            <number>2</number>

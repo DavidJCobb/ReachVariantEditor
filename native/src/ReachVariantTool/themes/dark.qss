@@ -16,6 +16,7 @@ QComboBox{
 	border-style:solid;
 	border-color:#525252;
 	padding:3px;
+	border-radius:1px
 	}
 QComboBox:hover{
 	color:#ffffff;
@@ -23,9 +24,10 @@ QComboBox:hover{
 	}
 QListView{
 	color:#ffffff;
-	background-color:#363636;
+	background-color:#242424;
 	selection-color:#b7fbff;
 	selection-background-color:#6b6b6b;
+	border-radius:1px;
 	}
 QLabel{
 	color:#ffffff;
@@ -87,6 +89,10 @@ QMenu{
 	selection-color:#b7fbff;
 	selection-background-color:#6b6b6b;
 	}
+QMenuBar::item:selected{
+	color:#b7fbff;
+	background-color:#6b6b6b;
+	}
 QAction{
 	color:#ffffff;
 	background-color:#363636;
@@ -101,6 +107,7 @@ QPlainTextEdit{
 	border-style:solid;
 	border-color:#525252;
 	padding:3px;
+	border-radius:1px;
 	}
 QLineEdit{
 	color:#ffffff;
@@ -138,6 +145,10 @@ QPushButton:hover{
 	background-color:#363636;
 	}
 QPushButton:pressed{
+	background-color:#6b6b6b;
+	color:#b7fbff;
+	}
+QPushButton:checked{
 	background-color:#6b6b6b;
 	color:#b7fbff;
 	}
@@ -180,6 +191,7 @@ QTabBar::tab{
 	border-color:#525252;
 	border:1px;
 	padding:3px;
+	border-radius:1px;
 	}
 QTabBar::tab:selected{
 	color:#b7fbff;
@@ -236,6 +248,7 @@ QToolBox QWidget QComboBox{
 	border-style:solid;
 	border-color:#525252;
 	padding:3px;
+	border-radius:1px;
 	}
 QTextEdit{
 	color:#ffffff;
@@ -245,6 +258,7 @@ QTextEdit{
 	border-style:solid;
 	border-color:#525252;
 	padding:3px;
+	border-radius:1px;
 	}
 QTextEdit:disabled{
 	color:#c9c9c9;
@@ -260,21 +274,16 @@ QTreeView{
 	selection-color:#b7fbff;
 	selection-background-color:#6b6b6b;
 	}
-QHeaderView{
-	color:#ffffff;
-	background-color:#363636;
-	border-style:solid;
-	border-color:#525252;
-	border:1px;
-	padding:3px;
 QHeaderView::section{
 	color:#ffffff;
 	background-color:#363636;
-	border-style:solid;
-	border-color:#525252;
-	border:1px;
-	padding:3px;
+    padding: 3px;
+    border: 1px solid #6c6c6c;
 	}
-QFrame{
-	border-color:#525252;
+QSplitter::handle{
+	background-color:#6b6b6b;
+	padding: 2px;
+	}
+QSplitter::handle:vertical{
+	height: 1px;
 	}
