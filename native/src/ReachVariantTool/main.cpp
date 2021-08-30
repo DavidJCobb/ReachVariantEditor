@@ -23,6 +23,11 @@ int main(int argc, char *argv[]) {
       }
    #endif
    //
+      QString Style = QString::fromUtf8(ReachINI::UIWindowTitle::sTheme.currentStr.c_str());
+      QFile stylesheet(Style);
+      stylesheet.open(QFile::ReadOnly);
+      Style = QLatin1String(stylesheet.readAll());
+      a.setStyleSheet(Style);
    ReachVariantTool w;
    w.show();
    return a.exec();
