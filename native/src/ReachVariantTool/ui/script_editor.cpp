@@ -5,6 +5,7 @@
 MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
    //
+   this->setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
    QObject::connect(this->ui.navigation, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* current, QListWidgetItem* previous) {
       auto stack = this->ui.stack;
       if (current->text() == "Metadata Strings") {

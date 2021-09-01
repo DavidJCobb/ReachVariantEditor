@@ -27,6 +27,7 @@ class ProgramOptionsDialog : public QDialog {
       void defaultLoadTypeChanged();
       void defaultSaveTypeChanged();
       //
+      void openFile();
    private:
       Ui::ProgramOptionsDialog ui;
 };
