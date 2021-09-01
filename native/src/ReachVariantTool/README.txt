@@ -38,24 +38,27 @@ them by accident.
 == Scattered usage notes ==
 
 Although Halo: Reach doesn't allow you to save any settings you've changed in the 
-Forge lobby, it does support loading them. You can create edited copies of the 
-built-in 
+Forge lobby, it does support loading them.
 
 
-== Qt ==
+== Licensing ==
 
-This program uses the Qt library, version 5.12.5. The source code to Qt is available 
-on their website; per the license terms (LGPLv3) I am legally obligated to provide 
-you with a copy of that source code on request, in the event that their website 
-vanishes.
+The bulk of ReachVariantTool is licensed under the GNU Public License version 3. The 
+help manual is licensed under the Creative Commons 0 License, which is effectively 
+public domain.
 
-The source code is an 800MB ZIP file (qt-everywhere-src-5.12.5.zip) and is as of 
-this writing available here: <http://download.qt.io/archive/qt/5.12/5.12.5/>
+This program uses the Qt library, version 5.12.5, per the terms of LGPLv3. The source 
+code to Qt is available on their website; per the license terms, I am legally obligated 
+to provide you with a copy of that source code on request, in the event that their 
+website vanishes. The source code is an 800MB ZIP file (qt-everywhere-src-5.12.5.zip) 
+and is as of this writing available here: <http://download.qt.io/archive/qt/5.12/5.12.5/>
+
+zlib is used under the terms of the license in the zlib.h source file.
 
 All associated licenses are included in text within the "LICENSES" folder.
 
 
-== Original game assets ==
+=== Original game assets ===
 
 Halo: Reach © Microsoft Corporation. This program was created under Microsoft's 
 "Game Content Usage Rules" using assets from Halo: Reach, and it is not endorsed 
