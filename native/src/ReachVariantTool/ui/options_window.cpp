@@ -1,10 +1,7 @@
 #include "options_window.h"
 #include "../helpers/ini.h"
 #include "../services/ini.h"
-#include <qdir.h>
-#include <qstringlist.h>
 #include <QFileDialog>
-#include <filesystem>
 
 ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
