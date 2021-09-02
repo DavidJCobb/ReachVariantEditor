@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QProcess>
+#include <QResource>
 #include <QSaveFile>
 #include <QString>
 #include <QTextCodec>
@@ -184,6 +185,17 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(this->ui.pageContentMetadata,   &PageMPMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
    QObject::connect(this->ui.pageContentFFMetadata, &PageFFMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
    //
+   this->ui.actionSave->setEnabled(false);
+   this->ui.actionSaveAs->setEnabled(false);
+   QObject::connect(this->ui.actionNewMP, &QAction::triggered, this, [this]() {
+      this->openFile(":/ReachVariantTool/gametype_files/blank_mp.bin");
+   });
+   QObject::connect(this->ui.actionNewFF, &QAction::triggered, this, [this]() {
+      this->openFile(":/ReachVariantTool/gametype_files/blank_ff.bin");
+   });
+   QObject::connect(this->ui.actionNewForge, &QAction::triggered, this, [this]() {
+      this->openFile(":/ReachVariantTool/gametype_files/blank_forge.bin");
+   });
    QObject::connect(this->ui.actionOpen,    &QAction::triggered, this, QOverload<>::of(&ReachVariantTool::openFile));
    QObject::connect(this->ui.actionSave,    &QAction::triggered, this, &ReachVariantTool::saveFile);
    QObject::connect(this->ui.actionSaveAs,  &QAction::triggered, this, &ReachVariantTool::saveFileAs);
@@ -359,29 +371,14 @@ void ReachVariantTool::openFile(QString fileName) {
    //
    if (fileName.isEmpty())
       return;
-   std::wstring s = fileName.toStdWString();
-   auto file    = cobb::mapped_file(s.c_str());
-   if (!file) {
-      QString text = tr("Failed to open the file. %1");
-      //
-      LPVOID message;
-      uint32_t size = FormatMessage(
-         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-         nullptr,
-         file.get_error(),
-         LANG_USER_DEFAULT,
-         (LPTSTR)&message,
-         0,
-         nullptr
-      );
-      text = text.arg((LPCTSTR)message);
-      LocalFree(message);
-      //
-      QMessageBox::information(this, tr("Unable to open file"), text);
+   QFile file(fileName);
+   if (!file.open(QIODevice::ReadOnly)) {
+      QMessageBox::information(this, tr("Unable to open file"), tr("An error occurred while trying to open this file.\n\nWindows error text:\n%1").arg(file.errorString()));
       return;
    }
    auto variant = new GameVariant();
-   if (!variant->read(file)) {
+   auto buffer  = file.readAll();
+   if (!variant->read(buffer.data(), buffer.size())) {
       auto& error_report = GameEngineVariantLoadError::get();
       if (error_report.state == GameEngineVariantLoadError::load_state::failure) {
          QMessageBox::information(this, tr("Unable to open file"), error_report.to_qstring());
@@ -406,11 +403,19 @@ void ReachVariantTool::openFile(QString fileName) {
          }
       }
    }
-   editor.takeVariant(variant, s.c_str());
+   editor.takeVariant(variant, fileName.toStdWString().c_str());
    {
       auto i = this->ui.MainTreeview->currentIndex();
       this->ui.MainTreeview->setCurrentItem(nullptr);
       this->ui.MainTreeview->setCurrentIndex(i); // force update of team, trait, etc., pages
+   }
+   {
+      bool is_resource = false;
+      if (fileName[0] == ':') { // Qt resource?
+         is_resource = QResource(fileName).isValid();
+      }
+      this->ui.actionSave->setEnabled(!is_resource);
+      this->ui.actionSaveAs->setEnabled(true);
    }
    this->refreshWindowTitle();
    this->ui.optionTogglesScripted->updateModelFromGameVariant();

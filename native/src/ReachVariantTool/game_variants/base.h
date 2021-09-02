@@ -139,7 +139,7 @@ class GameVariant {
       EOFBlock       eofBlock;
       std::vector<ReachFileBlockUnknown> unknownBlocks;
       //
-      bool read(cobb::mapped_file& file);
+      bool read(const void* data, size_t size);
       void write(GameVariantSaveProcess&) noexcept;
       //
       void synch_chdr_to_mpvr() noexcept;

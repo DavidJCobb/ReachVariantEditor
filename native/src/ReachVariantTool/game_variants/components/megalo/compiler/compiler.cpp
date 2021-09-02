@@ -1296,6 +1296,12 @@ namespace Megalo {
             }
          #pragma endregion
       #pragma endregion
+      if (!rhs || !lhs) {
+         //
+         // Statement was invalid but parseable.
+         //
+         return;
+      }
       //
       auto statement = new Script::Statement;
       statement->set_start(prior);
@@ -1588,7 +1594,7 @@ namespace Megalo {
          #pragma region Righthand side
             statement_side_t rhs_type = this->_extract_statement_side(word, integer);
             if (rhs_type == statement_side::string) {
-               this->raise_error("You cannot assign a string literal to a variable.");
+               this->raise_error("You cannot compare a string literal.");
             } else if (rhs_type == statement_side::integer) {
                rhs = new Script::VariableReference(integer);
             } else if (rhs_type == statement_side::word) {
@@ -1607,6 +1613,14 @@ namespace Megalo {
             }
          #pragma endregion
       #pragma endregion
+      if (!lhs || !rhs) {
+         //
+         // The statement was invalid, and we've now fully parsed it. Move on.
+         //
+         auto result = this->__parseConditionEnding();
+         this->_applyConditionModifiers(nullptr);
+         return result;
+      }
       //
       auto statement = new Script::Comparison;
       statement->set_start(prior);
@@ -1694,8 +1708,11 @@ namespace Megalo {
    }
 
    void Compiler::_applyConditionModifiers(Script::Comparison* condition) {
-      if (!condition)
+      if (!condition) {
+         this->next_condition_joiner = c_joiner::none;
+         this->negate_next_condition = false;
          return;
+      }
       auto opcode = dynamic_cast<Condition*>(condition->opcode);
       if (opcode) // it could have failed to compile
          opcode->inverted = this->negate_next_condition;

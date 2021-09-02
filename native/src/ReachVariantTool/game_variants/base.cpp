@@ -246,13 +246,13 @@ void ReachBlockMPVR::cloneTo(ReachBlockMPVR& target) const noexcept {
    this->remainingData.cloneTo(target.remainingData);
 }
 
-bool GameVariant::read(cobb::mapped_file& file) {
+bool GameVariant::read(const void* data, size_t size) {
    auto& error_report = GameEngineVariantLoadError::get();
    auto& warnings     = GameEngineVariantLoadWarningLog::get();
    error_report.reset();
    warnings.clear();
    //
-   auto reader = cobb::reader((const uint8_t*)file.data(), file.size());
+   auto reader = cobb::reader((const uint8_t*)data, size);
    auto blocks = ReachFileBlockReader(reader);
    bool athr   = false;
    bool blam   = false;

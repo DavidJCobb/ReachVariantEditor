@@ -379,13 +379,22 @@
      <x>0</x>
      <y>0</y>
      <width>682</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuNew">
+     <property name="title">
+      <string>New</string>
+     </property>
+     <addaction name="actionNewMP"/>
+     <addaction name="actionNewFF"/>
+     <addaction name="actionNewForge"/>
+    </widget>
+    <addaction name="menuNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
@@ -489,6 +498,21 @@
   <action name="actionHelpFolder">
    <property name="text">
     <string>View Help (in folder)</string>
+   </property>
+  </action>
+  <action name="actionNewMP">
+   <property name="text">
+    <string>Multiplayer game variant</string>
+   </property>
+  </action>
+  <action name="actionNewFF">
+   <property name="text">
+    <string>Firefight game variant</string>
+   </property>
+  </action>
+  <action name="actionNewForge">
+   <property name="text">
+    <string>Forge game variant</string>
    </property>
   </action>
  </widget>
