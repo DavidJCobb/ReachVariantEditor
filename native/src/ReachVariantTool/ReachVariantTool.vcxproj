@@ -189,6 +189,7 @@
     <ClCompile Include="services\localization_library.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
+    <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
     <ClCompile Include="ui\localized_string_editor.cpp" />
     <ClCompile Include="ui\localized_string_library.cpp" />
@@ -379,6 +380,7 @@
     <QtMoc Include="ui\generic\QListWidgetEx.h" />
     <ClInclude Include="services\localization_library.h" />
     <QtMoc Include="ui\localized_string_library.h" />
+    <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h" />
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
     <QtMoc Include="ui\main_window\page_firefight_metadata.h" />
     <QtMoc Include="ui\main_window\page_firefight_scenario.h" />

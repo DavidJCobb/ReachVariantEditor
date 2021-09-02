@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include <QTextBlock>
+#include "../generic/MegaloSyntaxHighlighter.h"
 
 namespace {
    static const QString ce_icon_success = ":/ScriptEditor/compiler_log/success.png";
@@ -25,6 +26,9 @@ namespace {
 
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
+   {
+      new MegaloSyntaxHighlighter(this->ui.textEditor->document());
+   }
    //
    auto& editor = ReachEditorState::get();
    //
