@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../helpers/ini.h"
 #include "../../services/ini.h"
+#include "../../services/syntax_highlight_option.h"
 
 namespace {
    const std::array ini_settings = {
@@ -45,6 +46,7 @@ namespace {
       QString("if"),
       QString("not"),
       QString("or"),
+      QString("then"),
       QString("true"),
    };
 
@@ -418,93 +420,12 @@ void MegaloSyntaxHighlighter::highlightBlock(const QString& text) {
    setCurrentBlockState(state.to_int());
 }
 
-namespace {
-   static QStringRef _extractFontRule(const QStringRef& text, bool& error) {
-      int size  = text.size();
-      int i;
-      int paren = 0;
-      for (i = 0; i < size; ++i) {
-         if (text[i] == '(') {
-            ++paren;
-            continue;
-         }
-         if (text[i] == ')') {
-            --paren;
-            if (paren < 0) { // more closing parentheses than opening ones
-               error = true;
-               return QStringRef();
-            }
-            continue;
-         }
-         if (!paren && !text[i].isLetter())
-            break;
-      }
-      if (paren) { // unterminated parenthetical
-         error = true;
-         return QStringRef();
-      }
-      return QStringRef(text.string(), text.position(), i);
-   }
-   static QTextCharFormat _fromString(const QString& text, bool& error) {
-      // e.g. "rgb( 32, 160,   8) italic"
-      QTextCharFormat out;
-      error = false;
-      //
-      int size = text.size();
-      for (int i = 0; i < size; ++i) {
-         auto  forward = QStringRef(&text, i, size - i);
-         QChar c       = text[i];
-         if (c.isSpace())
-            continue;
-         if (c.isLetter()) {
-            auto rule = _extractFontRule(forward, error);
-            if (error)
-               return QTextCharFormat();
-            i += rule.size() - 1; // subtract 1 because our loop will increment it
-            if (rule.compare(QLatin1Literal("bold"), Qt::CaseInsensitive) == 0) {
-               out.setFontWeight(QFont::Weight::Bold);
-               continue;
-            }
-            if (rule.compare(QLatin1Literal("italic"), Qt::CaseInsensitive) == 0) {
-               out.setFontItalic(true);
-               continue;
-            }
-            if (rule.compare(QLatin1Literal("underline"), Qt::CaseInsensitive) == 0) {
-               out.setFontUnderline(true);
-               continue;
-            }
-            if (rule.startsWith(QLatin1Literal("rgb("), Qt::CaseInsensitive) && rule.endsWith(')')) {
-               QString body = rule.mid(4).toString();
-               QColor  color;
-               color.setRed(body.section(",", 0).toInt(&error));
-               if (!error) {
-                  color.setGreen(body.section(",", 1).toInt(&error));
-                  if (!error)
-                     color.setBlue(body.section(",", 2).toInt(&error));
-               }
-               if (error)
-                  return QTextCharFormat();
-               out.setForeground(color);
-               //
-               continue;
-            }
-            continue;
-         }
-         //
-         // Unrecognized symbol:
-         //
-         error = true;
-         break;
-      }
-      return out;
-   }
-}
 void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    bool error;
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatCommentBlock.currentStr.c_str());
       auto& format  = this->formats.comment.block;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -516,7 +437,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatCommentLine.currentStr.c_str());
       auto& format  = this->formats.comment.line;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -528,7 +449,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatKeyword.currentStr.c_str());
       auto& format  = this->formats.keyword;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -540,7 +461,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatNumber.currentStr.c_str());
       auto& format  = this->formats.number;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -551,7 +472,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatOperator.currentStr.c_str());
       auto& format  = this->formats.op;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -563,7 +484,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatStringSimple.currentStr.c_str());
       auto& format  = this->formats.string.simple;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {
@@ -574,7 +495,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
    {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatStringBlock.currentStr.c_str());
       auto& format  = this->formats.string.block;
-      auto  working = _fromString(setting, error);
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
       if (error) {
          format = working;
       } else {

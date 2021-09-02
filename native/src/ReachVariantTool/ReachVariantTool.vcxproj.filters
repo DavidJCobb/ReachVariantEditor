@@ -442,6 +442,15 @@
     <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\generic\ColorPickerButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\options_window\syntax_highlight_option_widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="services\syntax_highlight_option.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -603,6 +612,12 @@
     <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ui\options_window\syntax_highlight_option_widget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\generic\ColorPickerButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="ui\main_window\page_multiplayer_settings_general.ui">
@@ -720,6 +735,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ui\main_window\page_firefight_bonus_wave.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ui\options_window\syntax_highlight_option_widget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -1093,6 +1111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\ini.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="services\syntax_highlight_option.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

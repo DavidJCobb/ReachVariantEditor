@@ -58,7 +58,7 @@ QSize ImageStackWidget::sizeHint() const {
    return result;
 }
 
-void ImageStackWidget::addImage(QImage& image) noexcept {
+void ImageStackWidget::addImage(QImage image) noexcept {
    this->_images.push_back(image);
    this->repaint();
 }

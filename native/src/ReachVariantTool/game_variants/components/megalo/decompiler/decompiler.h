@@ -39,12 +39,12 @@ namespace Megalo {
          //
          void modify_indent_count(int16_t nesting) noexcept;
          //
-         void write(string_type& content);
-         void write(std::string& content);
+         void write(const string_type& content);
+         void write(const std::string& content);
          void write(const char* content);
          void write(char_type c);
-         void write_line(string_type& content); // writes `\n${current_indent}${content}`
-         void write_line(std::string& content); // writes `\n${current_indent}${content}`
+         void write_line(const string_type& content); // writes `\n${current_indent}${content}`
+         void write_line(const std::string& content); // writes `\n${current_indent}${content}`
          void write_line(const char*  content); // writes `\n${current_indent}${content}`
          void write_string_literal(const char*  content); // content is taken as UTF-8
          void write_string_literal(std::string& content); // content is taken as UTF-8

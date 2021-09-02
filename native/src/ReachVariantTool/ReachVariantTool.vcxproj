@@ -50,11 +50,11 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>5.12.5 MSVC2017 x64</QtInstall>
+    <QtInstall>5.15.2 MSVC2019 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtInstall>5.12.5 MSVC2017 x64</QtInstall>
+    <QtInstall>5.15.2 MSVC2019 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -68,7 +68,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -87,7 +87,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>26812;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -187,7 +187,9 @@
     <ClCompile Include="helpers\string_scanner.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="services\localization_library.cpp" />
+    <ClCompile Include="services\syntax_highlight_option.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
+    <ClCompile Include="ui\generic\ColorPickerButton.cpp" />
     <ClCompile Include="ui\generic\ImageStackWidget.cpp" />
     <ClCompile Include="ui\generic\MegaloSyntaxHighlighter.cpp" />
     <ClCompile Include="ui\generic\QListWidgetEx.cpp" />
@@ -202,6 +204,7 @@
     <ClCompile Include="ui\main_window\page_firefight_round.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_scenario.cpp" />
     <ClCompile Include="ui\main_window\page_firefight_wave_traits.cpp" />
+    <ClCompile Include="ui\options_window\syntax_highlight_option_widget.cpp" />
     <ClCompile Include="ui\script_editor\bottom_bar.cpp" />
     <ClCompile Include="ui\script_editor\compiler_unresolved_strings.cpp" />
     <ClCompile Include="ui\script_editor\page_req_obj_types.cpp" />
@@ -266,6 +269,7 @@
     <QtUic Include="ui\main_window\page_multiplayer_settings_team_specific.ui" />
     <QtUic Include="ui\main_window\page_multiplayer_title_update_1.ui" />
     <QtUic Include="ui\main_window\page_player_traits.ui" />
+    <QtUic Include="ui\options_window\syntax_highlight_option_widget.ui" />
     <QtUic Include="ui\script_editor.ui" />
     <QtUic Include="ui\script_editor\bottom_bar.ui" />
     <QtUic Include="ui\script_editor\compiler_unresolved_strings.ui" />
@@ -381,6 +385,8 @@
     <ClInclude Include="services\localization_library.h" />
     <QtMoc Include="ui\localized_string_library.h" />
     <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h" />
+    <QtMoc Include="ui\generic\ColorPickerButton.h" />
+    <ClInclude Include="services\syntax_highlight_option.h" />
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
     <QtMoc Include="ui\main_window\page_firefight_metadata.h" />
     <QtMoc Include="ui\main_window\page_firefight_scenario.h" />
@@ -457,6 +463,7 @@
     <QtMoc Include="ui\widgets\firefight_squad_type.h" />
     <QtMoc Include="ui\widgets\firefight_wave.h" />
     <QtMoc Include="ui\widgets\firefight_skull_list.h" />
+    <QtMoc Include="ui\options_window\syntax_highlight_option_widget.h" />
     <ClInclude Include="ui\widgets\GametypeIconCombobox.h" />
     <QtMoc Include="ui\main_window\page_multiplayer_settings_general.h" />
     <QtMoc Include="ui\generic\IconOnlyCombobox.h" />

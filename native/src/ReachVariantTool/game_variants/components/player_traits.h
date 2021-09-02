@@ -27,7 +27,7 @@ namespace reach {
    enum class ability_usage : uint8_t {
       unchanged = 0,
       disabled  = 1,
-      default   = 2,
+      normal    = 2, // "default"?
       enabled   = 3,
    };
    enum class active_camo : uint8_t {

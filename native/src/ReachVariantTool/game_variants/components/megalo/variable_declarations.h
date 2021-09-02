@@ -12,7 +12,7 @@ namespace Megalo {
       none, // offline
       low,  // survives host migration
       high, // survives host migration
-      default, // apparently networked, but does not survive host migration
+      normal, // apparently networked, but does not survive host migration
    };
    using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
    //
@@ -40,7 +40,7 @@ namespace Megalo {
          ~VariableDeclaration();
          //
          compile_flags_t compiler_flags = compile_flags::none;
-         network_type    networking     = network_enum::default;
+         network_type    networking     = network_enum::normal;
          struct {
             OpcodeArgValueScalar* number = nullptr;
             team_bitnumber        team   = const_team::none;

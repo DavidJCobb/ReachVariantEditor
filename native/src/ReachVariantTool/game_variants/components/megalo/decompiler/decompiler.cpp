@@ -68,10 +68,10 @@ namespace Megalo {
       }
    }
 
-   void Decompiler::write(string_type& content) {
+   void Decompiler::write(const string_type& content) {
       this->current_content += content;
    }
-   void Decompiler::write(std::string& content) {
+   void Decompiler::write(const std::string& content) {
       this->current_content += QString::fromUtf8(content.c_str());
    }
    void Decompiler::write(const char* content) {
@@ -80,12 +80,12 @@ namespace Megalo {
    void Decompiler::write(char_type c) {
       this->current_content += c;
    }
-   void Decompiler::write_line(string_type& content) {
+   void Decompiler::write_line(const string_type& content) {
       this->current_content += "\r\n";
       this->current_content += this->current_indent;
       this->write(content);
    }
-   void Decompiler::write_line(std::string& content) {
+   void Decompiler::write_line(const std::string& content) {
       this->current_content += "\r\n";
       this->current_content += this->current_indent;
       this->write(content);

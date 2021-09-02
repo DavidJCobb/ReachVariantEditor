@@ -58,7 +58,7 @@ namespace Megalo {
          case PlayerSetType::enemies:
             out = "enemies";
             return;
-         case PlayerSetType::default:
+         case PlayerSetType::normal:
             out = "default";
             return;
       }
@@ -78,7 +78,7 @@ namespace Megalo {
          case PlayerSetType::enemies:
             out.write("enemies");
             return;
-         case PlayerSetType::default:
+         case PlayerSetType::normal:
             out.write("default");
             return;
          case PlayerSetType::specific_player:

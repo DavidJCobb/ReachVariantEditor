@@ -194,8 +194,8 @@ namespace Megalo {
       protected:
          enum class c_joiner {
             none,
-            and,
-            or,
+            c_and,
+            c_or,
          };
          //
          Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.

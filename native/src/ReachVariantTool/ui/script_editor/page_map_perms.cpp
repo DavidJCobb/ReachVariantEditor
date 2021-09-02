@@ -10,7 +10,7 @@ namespace {
       _MapID(uint16_t i, QString n) : index(i), name(n) {}
       _MapID(uint16_t i) : index(i), name(QObject::tr("Unknown %1").arg(i)) {}
    };
-   constexpr char* disambig = "Reach map names";
+   static constexpr const char* disambig = "Reach map names";
    _MapID _mapIDList[] = {
       _MapID(1),
       _MapID(1000, QObject::tr("Sword Base", disambig)),
@@ -29,7 +29,11 @@ namespace {
       _MapID(2002, QObject::tr("Breakpoint", disambig)),
       _MapID(2004, QObject::tr("Tempest", disambig)),
       _MapID(3006, QObject::tr("Forge World", disambig)),
-      /*// No point in letting the user specify these
+      /*
+      // With modded MAPINFOs, a person can host Custom Games on Campaign and Firefight maps, 
+      // which players without modded MAPs can join. At some point we may wish to expose these 
+      // options to users.
+      //
       _MapID(5005, QObject::tr("Campaign Mission 0: NOBLE Actual", disambig)),
       _MapID(5010, QObject::tr("Campaign Mission 1: Winter Contingency", disambig)),
       _MapID(5020, QObject::tr("Campaign Mission 2: ONI: Sword Base", disambig)),

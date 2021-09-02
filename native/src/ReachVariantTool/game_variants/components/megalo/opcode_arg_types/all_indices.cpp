@@ -37,7 +37,7 @@ namespace Megalo {
    }
    void OpcodeArgValueBaseIndex::decompile(Decompiler& out, uint64_t flags) noexcept {
       if (this->value == OpcodeArgValueBaseIndex::none || this->value < 0) {
-         out.write(u8"none");
+         out.write("none");
          return;
       }
       std::string temp;

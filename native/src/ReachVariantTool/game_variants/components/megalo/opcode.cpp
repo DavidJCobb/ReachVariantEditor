@@ -284,7 +284,8 @@ namespace Megalo {
             continue;
          //
          arg.reset((type->factory)());
-         if (arg->compile(compiler, cobb::string_scanner(name), 0).is_success())
+         auto scan = cobb::string_scanner(name);
+         if (arg->compile(compiler, scan, 0).is_success())
             return &entry;
       }
       return nullptr;

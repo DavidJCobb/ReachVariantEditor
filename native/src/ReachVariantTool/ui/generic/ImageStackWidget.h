@@ -19,7 +19,7 @@ class ImageStackWidget : public QFrame {
             return nullptr;
          return &this->_images[index];
       }
-      void addImage(QImage& image) noexcept;
+      void addImage(QImage image) noexcept;
       void removeImage(size_t);
       void removeImage(QImage&);
       //

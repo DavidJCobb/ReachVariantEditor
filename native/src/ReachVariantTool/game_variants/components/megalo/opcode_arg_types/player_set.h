@@ -10,7 +10,7 @@ namespace Megalo {
       allies,  // for teams
       enemies, // for teams
       specific_player,
-      default,
+      normal,
    };
    class OpcodeArgValuePlayerSet : public OpcodeArgValue {
       megalo_opcode_arg_value_make_create_override;

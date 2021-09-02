@@ -6,7 +6,7 @@ namespace {
       switch (p) {
          case variable_network_priority::none:
             return "with network priority local";
-         case variable_network_priority::default:
+         case variable_network_priority::normal:
             return "with network priority default";
          case variable_network_priority::low:
             return "with network priority low";
@@ -131,7 +131,7 @@ namespace Megalo {
       return initial->is_const_zero();
    }
    bool VariableDeclaration::network_type_is_default() const noexcept {
-      if (this->networking == network_enum::default || !this->has_network_type())
+      if (this->networking == network_enum::normal || !this->has_network_type())
          return true;
       return false;
    }

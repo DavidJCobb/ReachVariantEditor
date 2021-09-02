@@ -366,25 +366,25 @@ namespace Megalo {
             out.write_line("");
             break;
          case entry_type::local:
-            out.write_line(u8"on local: ");
+            out.write_line("on local: ");
             break;
          case entry_type::on_host_migration:
             if (state.index >= 0 && state.index == entry.indices.doubleHostMigrate)
-               out.write_line(u8"on double host migration: ");
+               out.write_line("on double host migration: ");
             else
-               out.write_line(u8"on host migration: ");
+               out.write_line("on host migration: ");
             break;
          case entry_type::on_init:
-            out.write_line(u8"on init: ");
+            out.write_line("on init: ");
             break;
          case entry_type::on_local_init:
-            out.write_line(u8"on local init: ");
+            out.write_line("on local init: ");
             break;
          case entry_type::on_object_death:
-            out.write_line(u8"on object death: ");
+            out.write_line("on object death: ");
             break;
          case entry_type::pregame:
-            out.write_line(u8"on pregame: ");
+            out.write_line("on pregame: ");
             break;
       }
       //
@@ -405,12 +405,12 @@ namespace Megalo {
                   if (cnd) {
                      trigger_is_if_block = true;
                   } else if (!state.is_function) {
-                     out.write(u8"do");
+                     out.write("do");
                      out.modify_indent_count(1);
                      ++indent_count;
                   }
                } else if (!state.is_function) {
-                  out.write(u8"do");
+                  out.write("do");
                   out.modify_indent_count(1);
                   ++indent_count;
                }
@@ -443,17 +443,17 @@ namespace Megalo {
             }
             break;
          case block_type::for_each_player:
-            out.write(u8"for each player do");
+            out.write("for each player do");
             out.modify_indent_count(1);
             ++indent_count;
             break;
          case block_type::for_each_player_randomly:
-            out.write(u8"for each player randomly do");
+            out.write("for each player randomly do");
             out.modify_indent_count(1);
             ++indent_count;
             break;
          case block_type::for_each_team:
-            out.write(u8"for each team do");
+            out.write("for each team do");
             out.modify_indent_count(1);
             ++indent_count;
             break;
@@ -461,7 +461,7 @@ namespace Megalo {
             if (state.is_function) {
                out.write(" -- unknown block type");
             } else {
-               out.write(u8"do -- unknown block type");
+               out.write("do -- unknown block type");
                out.modify_indent_count(1);
                ++indent_count;
             }
@@ -487,9 +487,9 @@ namespace Megalo {
                writing_if_conditions = true;
             } else {
                if (condition->or_group == last_condition_or_group)
-                  out.write(u8"or ");
+                  out.write("or ");
                else
-                  out.write(u8"and ");
+                  out.write("and ");
             }
             last_condition_or_group = condition->or_group;
             opcode->decompile(out);
@@ -497,7 +497,7 @@ namespace Megalo {
             continue;
          }
          if (writing_if_conditions) {
-            out.write(u8"then ");
+            out.write("then ");
             last_condition_or_group = -1;
             writing_if_conditions   = false;
             is_first_condition      = true;
@@ -507,7 +507,7 @@ namespace Megalo {
             if (index) {
                auto i = index->value;
                if (i < 0 || i >= triggers.size()) {
-                  cobb::sprintf(line, u8"-- execute nested trigger with invalid index %d", i);
+                  cobb::sprintf(line, "-- execute nested trigger with invalid index %d", i);
                   out.write_line(line);
                   continue;
                }
@@ -519,7 +519,7 @@ namespace Megalo {
                other.decompile(out);
                continue;
             }
-            out.write_line(u8"-- invalid \"execute nested trigger\" opcode");
+            out.write_line("-- invalid \"execute nested trigger\" opcode");
             continue;
          }
          out.write_line("");
@@ -527,7 +527,7 @@ namespace Megalo {
          continue;
       }
       if (writing_if_conditions) { // can be true if the last opcode was a condition
-         out.write(u8"then ");
+         out.write("then ");
          writing_if_conditions = false;
          is_first_condition = true;
       }
@@ -538,7 +538,7 @@ namespace Megalo {
       //
       while (indent_count-- > 0) {
          out.modify_indent_count(-1);
-         out.write_line(u8"end");
+         out.write_line("end");
       }
    }
    void Trigger::count_contents(size_t& conditions, size_t& actions) const noexcept {

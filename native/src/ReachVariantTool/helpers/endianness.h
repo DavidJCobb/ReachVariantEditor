@@ -15,8 +15,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 #pragma once
-#ifdef __cpp_lib_endian
-   #include <bits>
+#if __cplusplus > 201703L || _MSVC_LANG > 201703L // MSVC fails to comply with __cplusplus standards as of 2021
+   #include <version>
+   #ifdef __cpp_lib_endian // provided by <version>, but IntelliSense and MSVC will not properly warn you of this
+      #include <bit>
+   #endif
 #endif
 #include <cstdint>
 #include <cstdlib>

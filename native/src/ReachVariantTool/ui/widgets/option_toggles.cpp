@@ -431,7 +431,7 @@ EngineOptionToggleTree::EngineOptionToggleTree(QWidget* parent) : OptionToggleTr
    //       of 180 flags for all loadouts.
    //
 
-   constexpr char* disambig = "engine option toggles";
+   static constexpr const char* disambig = "engine option toggles";
    auto model = static_cast<OptionToggleModel*>(this->model());
    {
       auto parent = new OptionToggleModelItem(OptionToggleModelItem::container, tr("General Settings", disambig));

@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "intrusive_windows_defines.h"
 
 namespace {
-   constexpr char* install_directory_key = "installdir";
+   static constexpr const char* install_directory_key = "installdir";
    bool _install_directory_from_acf(uint32_t appID, const std::wstring& acf_folder_path, std::wstring& out) {
       std::wstring acf = acf_folder_path + L"/appmanifest_";
       acf += std::to_wstring(appID);

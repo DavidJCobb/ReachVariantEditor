@@ -1,4 +1,5 @@
 #include "compiler.h"
+#include <array>
 #include "enums.h"
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
@@ -20,9 +21,9 @@
 #define MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS 1
 
 namespace {
-   constexpr char* ce_assignment_operator = "=";
+   constexpr const char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
-      constexpr char* operators[] = {
+      constexpr std::array operators = {
          "=",
          "+=",
          "-=",
@@ -37,13 +38,13 @@ namespace {
          "&=",
          "|="
       };
-      for (size_t i = 0; i < std::extent<decltype(operators)>::value; i++)
+      for (size_t i = 0; i < operators.size(); i++)
          if (s == operators[i])
             return true;
       return false;
    }
    bool _is_comparison_operator(QString s) {
-      constexpr char* operators[] = {
+      constexpr std::array operators = {
          "==",
          "!=",
          ">=",
@@ -51,7 +52,7 @@ namespace {
          ">",
          "<"
       };
-      for (size_t i = 0; i < std::extent<decltype(operators)>::value; i++)
+      for (size_t i = 0; i < operators.size(); i++)
          if (s == operators[i])
             return true;
       return false;
@@ -1677,9 +1678,9 @@ namespace Megalo {
    bool Compiler::__parseConditionEnding() {
       auto word = this->extract_word();
       if (word.compare("and", Qt::CaseInsensitive) == 0) {
-         this->next_condition_joiner = c_joiner::and;
+         this->next_condition_joiner = c_joiner::c_and;
       } else if (word.compare("or", Qt::CaseInsensitive) == 0) {
-         this->next_condition_joiner = c_joiner::or;
+         this->next_condition_joiner = c_joiner::c_or;
       } else if (word.compare("then", Qt::CaseInsensitive) == 0) {
          return true;
       } else {
@@ -1698,7 +1699,7 @@ namespace Megalo {
       auto opcode = dynamic_cast<Condition*>(condition->opcode);
       if (opcode) // it could have failed to compile
          opcode->inverted = this->negate_next_condition;
-      if (this->next_condition_joiner == c_joiner::or)
+      if (this->next_condition_joiner == c_joiner::c_or)
          condition->next_is_or = true;
       this->next_condition_joiner = c_joiner::none;
       this->negate_next_condition = false;
@@ -2616,7 +2617,7 @@ namespace Megalo {
       }
       //
       bool  has_network = false;
-      net_t network     = net_t::default;
+      net_t network     = net_t::normal;
       #pragma region Parsing and extracting all relevant tokens
          auto  after_name = this->backup_stream_state();
          auto  word       = this->extract_word();
@@ -2658,7 +2659,7 @@ namespace Megalo {
                   return;
                }
                if (word.compare("default", Qt::CaseInsensitive) == 0) {
-                  network = net_t::default;
+                  network = net_t::normal;
                } else if (word.compare("low", Qt::CaseInsensitive) == 0) {
                   network = net_t::low;
                } else if (word.compare("high", Qt::CaseInsensitive) == 0) {

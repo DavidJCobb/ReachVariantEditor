@@ -14,7 +14,7 @@ void GameEngineVariantLoadError::reset() {
       this->extra[i] = 0;
 }
 QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
-   constexpr char* tr_disambiguator = "GameEngineVariantLoadError";
+   static constexpr const char* tr_disambiguator = "GameEngineVariantLoadError";
    //
    QString noun_single;
    QString noun_plural;
@@ -100,7 +100,7 @@ QString GameEngineVariantLoadError::_explain_opcode_failure() const noexcept {
    return result;
 }
 QString GameEngineVariantLoadError::to_qstring() const noexcept {
-   constexpr char* tr_disambiguator = "GameEngineVariantLoadError";
+   static constexpr const char* tr_disambiguator = "GameEngineVariantLoadError";
    //
    QString result;
    if (this->state != load_state::failure)

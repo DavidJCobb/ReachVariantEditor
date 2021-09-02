@@ -82,11 +82,11 @@ void PageMPSettingsScripted::_renderOptionRow(uint32_t i, QGridLayout* layout, c
          widget->setToolTip(QString::fromUtf8(desc->get_content(reach::language::english).c_str()));
       //
       auto labelMin = new QLabel(container);
-      labelMin->setText(QString::fromUtf8(u8"%1 \u2264 ").arg(option.rangeMin->value));
+      labelMin->setText(QString::fromUtf8((const char*)u8"%1 \u2264 ").arg(option.rangeMin->value));
       labelMin->setBuddy(widget);
       labelMin->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
       auto labelMax = new QLabel(container);
-      labelMax->setText(QString::fromUtf8(u8" \u2264 %1").arg(option.rangeMax->value));
+      labelMax->setText(QString::fromUtf8((const char*)u8" \u2264 %1").arg(option.rangeMax->value));
       labelMax->setBuddy(widget);
       //
       horizontal->addWidget(labelMin, 2);

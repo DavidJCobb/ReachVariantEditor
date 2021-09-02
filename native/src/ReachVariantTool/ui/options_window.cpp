@@ -30,7 +30,7 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
       QObject::connect(this->ui.defaultOpenPathCWD, &QRadioButton::toggled, this, &ProgramOptionsDialog::defaultLoadTypeChanged);
       QObject::connect(this->ui.defaultOpenPathUseCustom,       &QRadioButton::toggled, this, &ProgramOptionsDialog::defaultLoadTypeChanged);
       QObject::connect(this->ui.defaultOpenPathCustom, &QLineEdit::textEdited, this, [](const QString& text) {
-         ReachINI::DefaultLoadPath::sCustomPath.pendingStr = text.toUtf8();
+         ReachINI::DefaultLoadPath::sCustomPath.pendingStr = (const char*)text.toUtf8();
       });
    }
    {  // Default save directory
@@ -43,7 +43,7 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
       QObject::connect(this->ui.defaultSavePathCWD, &QRadioButton::toggled, this, &ProgramOptionsDialog::defaultSaveTypeChanged);
       QObject::connect(this->ui.defaultSavePathUseCustom,       &QRadioButton::toggled, this, &ProgramOptionsDialog::defaultSaveTypeChanged);
       QObject::connect(this->ui.defaultSavePathCustom, &QLineEdit::textEdited, this, [](const QString& text) {
-         ReachINI::DefaultSavePath::sCustomPath.pendingStr = text.toUtf8();
+         ReachINI::DefaultSavePath::sCustomPath.pendingStr = (const char*)text.toUtf8();
       });
       QObject::connect(this->ui.defaultSavePathExcludeMCCNative, &QCheckBox::stateChanged, [](int state) {
          ReachINI::DefaultSavePath::bExcludeMCCBuiltInFolders.pending.b = state == Qt::CheckState::Checked;
@@ -56,7 +56,7 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
       ReachINI::UIWindowTitle::bShowVariantTitle.pending.b = state == Qt::CheckState::Checked;
    });
    QObject::connect(this->ui.optionTheme, &QLineEdit::textEdited, this, [](const QString& text) {
-       ReachINI::UIWindowTitle::sTheme.pendingStr = text.toUtf8();
+       ReachINI::UIWindowTitle::sTheme.pendingStr = (const char*)text.toUtf8();
     });
    QObject::connect(this->ui.themeFileDialog, &QPushButton::pressed, this, &ProgramOptionsDialog::openFile);
 }
@@ -79,7 +79,7 @@ void ProgramOptionsDialog::refreshWidgetsFromINI() {
          this->ui.defaultOpenPathUseCustom,
       };
       QRadioButton* defaultWidget = nullptr;
-      uint32_t      defaultEnum   = ReachINI::DefaultLoadPath::uPathType.default.u;
+      uint32_t      defaultEnum   = ReachINI::DefaultLoadPath::uPathType.initial.u;
       bool found = false;
       auto type  = ReachINI::DefaultLoadPath::uPathType.current.u;
       for (auto widget : buttons) {
@@ -108,7 +108,7 @@ void ProgramOptionsDialog::refreshWidgetsFromINI() {
          this->ui.defaultSavePathUseCustom,
       };
       QRadioButton* defaultWidget = nullptr;
-      uint32_t      defaultEnum   = ReachINI::DefaultSavePath::uPathType.default.u;
+      uint32_t      defaultEnum   = ReachINI::DefaultSavePath::uPathType.initial.u;
       bool found = false; // if the setting's current value doesn't match any widget, use the default
       auto type  = ReachINI::DefaultSavePath::uPathType.current.u;
       for (auto widget : buttons) {
@@ -175,6 +175,6 @@ void ProgramOptionsDialog::openFile() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Select theme"), "~/", tr("QT Stylesheets (*.qss)"));
     if (!fileName.isNull()) {
         this->ui.optionTheme->setText(fileName.toUtf8());
-        ReachINI::UIWindowTitle::sTheme.pendingStr = fileName.toUtf8();
+        ReachINI::UIWindowTitle::sTheme.pendingStr = (const char*)fileName.toUtf8();
     }
 }

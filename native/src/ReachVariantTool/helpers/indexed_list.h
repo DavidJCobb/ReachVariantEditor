@@ -18,6 +18,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 #include "iterators/pointer_based.h"

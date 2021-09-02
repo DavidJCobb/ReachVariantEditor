@@ -91,7 +91,7 @@ namespace cobb {
          };
          template<typename value_type> class reverse_iterator : public iterator<value_type> {
             public:
-               using iterator::iterator;
+               using iterator<value_type>::iterator;
                //
                reverse_iterator& operator+=(size_t i) noexcept { return iterator::operator-=(i); }
                reverse_iterator& operator-=(size_t i) noexcept { return iterator::operator+=(i); }
@@ -102,7 +102,7 @@ namespace cobb {
          };
          template<typename value_type> class const_reverse_iterator : public const_iterator<value_type> {
             public:
-               using const_iterator::const_iterator;
+               using const_iterator<value_type>::const_iterator;
                //
                const_reverse_iterator& operator+=(size_t i) noexcept { return const_iterator::operator-=(i); }
                const_reverse_iterator& operator-=(size_t i) noexcept { return const_iterator::operator+=(i); }
@@ -189,7 +189,7 @@ namespace cobb {
          };
          template<typename value_type> class ptr_ref_reverse_iterator : public ptr_ref_iterator<value_type> {
             public:
-               using ptr_ref_iterator::ptr_ref_iterator;
+               using ptr_ref_iterator<value_type>::ptr_ref_iterator;
                //
                ptr_ref_reverse_iterator& operator+=(size_t i) noexcept { return iterator::operator-=(i); }
                ptr_ref_reverse_iterator& operator-=(size_t i) noexcept { return iterator::operator+=(i); }
@@ -200,7 +200,7 @@ namespace cobb {
          };
          template<typename value_type> class ptr_ref_const_reverse_iterator : public ptr_ref_const_iterator<value_type> {
             public:
-               using ptr_ref_const_iterator::ptr_ref_const_iterator;
+               using ptr_ref_const_iterator<value_type>::ptr_ref_const_iterator;
                //
                ptr_ref_const_reverse_iterator& operator+=(size_t i) noexcept { return const_iterator::operator-=(i); }
                ptr_ref_const_reverse_iterator& operator-=(size_t i) noexcept { return const_iterator::operator+=(i); }

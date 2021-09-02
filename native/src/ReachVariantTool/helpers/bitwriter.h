@@ -87,11 +87,13 @@ namespace cobb {
             this->write(value ? 1 : 0, 1);
          }
          //
-         template<typename T, cobb_enable_case(1, !std::is_bounded_array_v<T> && std::is_integral_v<T>)> void write(const T& value) noexcept {
+         template<typename T> requires(!std::is_bounded_array_v<T>&& std::is_integral_v<T>)
+         void write(const T& value) noexcept {
             T v = value;
             this->write((uint64_t)v, cobb::bits_in<T>);
          };
-         template<typename T, cobb_enable_case(2, std::is_bounded_array_v<T>)> void write(const T& value) noexcept {
+         template<typename T> requires(std::is_bounded_array_v<T>)
+         void write(const T& value) noexcept {
             using item_type = std::remove_extent_t<T>; // from X[i] to X
             //
             for (int i = 0; i < std::extent<T>::value; i++)

@@ -6,7 +6,7 @@ namespace {
    enum _range_property_to_modify {
       min,
       max,
-      default,
+      default_value,
    };
 
    bool _selectByPointerData(QListWidget* widget, void* target) {
@@ -42,7 +42,7 @@ namespace {
             if (p && current > value)
                current = value;
             break;
-         case _range_property_to_modify::default:
+         case _range_property_to_modify::default_value:
             p = option->rangeDefault;
             break;
          default:
@@ -125,7 +125,7 @@ ScriptEditorPageScriptOptions::ScriptEditorPageScriptOptions(QWidget* parent) : 
          _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::max, value);
       });
       QObject::connect(this->ui.rangeDefault, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
-         _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::default, value);
+         _modifyOptionRangeProperty(this->targetOption, _range_property_to_modify::default_value, value);
       });
       //
       QObject::connect(this->ui.buttonOptionsNew, &QPushButton::clicked, [this]() {
