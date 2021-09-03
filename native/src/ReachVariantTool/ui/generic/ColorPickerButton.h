@@ -27,7 +27,7 @@ class ColorPickerButton : public QPushButton {
       void setHasAlpha(bool);
       //
    signals:
-      void colorChanged();
+      void colorChanged(QColor);
       //
    protected:
       bool   _hasAlpha = false;

@@ -24,6 +24,7 @@ namespace ReachINI {
       REACHTOOL_MAKE_INI_SETTING(sFormatCommentLine,  "CodeEditor", "rgb( 32, 160,   8) italic");
       REACHTOOL_MAKE_INI_SETTING(sFormatCommentBlock, "CodeEditor", "rgb( 32, 160,   8) italic");
       REACHTOOL_MAKE_INI_SETTING(sFormatKeyword,      "CodeEditor", "rgb(  0,  16, 255) bold");
+      REACHTOOL_MAKE_INI_SETTING(sFormatSubkeyword,   "CodeEditor", "rgb(  0, 120, 190) bold");
       REACHTOOL_MAKE_INI_SETTING(sFormatNumber,       "CodeEditor", "rgb(200, 100,   0)");
       REACHTOOL_MAKE_INI_SETTING(sFormatOperator,     "CodeEditor", "rgb(  0,   0, 128) bold");
       REACHTOOL_MAKE_INI_SETTING(sFormatStringSimple, "CodeEditor", "rgb(140, 140, 140)");

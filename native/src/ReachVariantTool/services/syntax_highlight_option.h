@@ -5,9 +5,9 @@
 
 namespace ReachINI {
    struct syntax_highlight_option {
-      bool bold;
-      bool italic;
-      bool underline;
+      bool bold      = false;
+      bool italic    = false;
+      bool underline = false;
       struct {
          QColor text;
       } colors;

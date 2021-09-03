@@ -27,6 +27,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class MegaloSyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT
    public:
+      struct Keyword {
+         QString  word;
+         bool     is_subkeyword = false;
+         bool     requires_next = false; // may not actually be usable in QSyntaxHighlighter design
+         QVector<Keyword*> possible;
+
+         Keyword* make_phrase(const QVector<QString>&);
+
+         Keyword* make_subkeyword(const QString&, bool requires_next = false);
+      };
+
+   public:
        MegaloSyntaxHighlighter(QTextDocument* parent = nullptr);
 
        enum class TokenType {
@@ -37,6 +49,7 @@ class MegaloSyntaxHighlighter : public QSyntaxHighlighter {
           String_Block,
        };
 
+       // Simple block state, capable ofb eing stored in a single int.
        class BlockState {
           protected:
              int value = 0;
@@ -65,6 +78,11 @@ class MegaloSyntaxHighlighter : public QSyntaxHighlighter {
             inline int to_int() const noexcept { return this->value; }
        };
 
+       class ComplexBlockState : public QTextBlockUserData {
+          public:
+            const Keyword* keyword = nullptr;
+       };
+
    protected:
        void highlightBlock(const QString &text) override;
 
@@ -84,6 +102,7 @@ class MegaloSyntaxHighlighter : public QSyntaxHighlighter {
             QTextCharFormat block;
          } comment;
          QTextCharFormat keyword;
+         QTextCharFormat subkeyword;
          QTextCharFormat number;
          QTextCharFormat op;
          struct {

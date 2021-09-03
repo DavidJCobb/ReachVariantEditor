@@ -29,19 +29,17 @@ namespace {
    }
 }
 ColorPickerButton::ColorPickerButton(QWidget* parent) : QPushButton(parent) {
-   QObject::connect(this, &ColorPickerButton::colorChanged, this, &ColorPickerButton::_updateColor);
    QObject::connect(this, &QPushButton::clicked, [this]() {
       auto color = QColorDialog::getColor(this->_color, this->window(), QString(), (QColorDialog::ColorDialogOptions)(this->hasAlpha() ? QColorDialog::ShowAlphaChannel : 0));
       if (!color.isValid())
          return;
-      this->_color = color;
-      this->_updateColor();
-      emit this->colorChanged();
+      this->setColor(color);
    });
 }
 void ColorPickerButton::setColor(QColor c) {
    this->_color = c;
-   emit this->colorChanged();
+   this->_updateColor();
+   emit this->colorChanged(c);
 }
 void ColorPickerButton::setHasAlpha(bool s) {
    this->_hasAlpha = s;

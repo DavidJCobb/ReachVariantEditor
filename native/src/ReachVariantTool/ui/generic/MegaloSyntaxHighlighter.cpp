@@ -24,31 +24,72 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "../../services/syntax_highlight_option.h"
 
 namespace {
+   using Keyword = MegaloSyntaxHighlighter::Keyword;
+}
+Keyword* Keyword::make_subkeyword(const QString& s, bool requires_next) {
+   auto* k = new Keyword;
+   k->word = s;
+   k->is_subkeyword = true;
+   k->requires_next = requires_next;
+   this->possible.push_back(k);
+   return k;
+}
+Keyword* Keyword::make_phrase(const QVector<QString>& s) {
+   auto* next = this;
+   for (auto& word : s) {
+      next = next->make_subkeyword(word, true);
+   }
+   if (next != this || !next->is_subkeyword)
+      next->requires_next = false;
+   return next;
+}
+
+namespace {
    const std::array ini_settings = {
       &ReachINI::CodeEditor::sFormatCommentLine,
       &ReachINI::CodeEditor::sFormatCommentBlock,
       &ReachINI::CodeEditor::sFormatKeyword,
+      &ReachINI::CodeEditor::sFormatSubkeyword,
       &ReachINI::CodeEditor::sFormatNumber,
       &ReachINI::CodeEditor::sFormatOperator,
       &ReachINI::CodeEditor::sFormatStringSimple,
       &ReachINI::CodeEditor::sFormatStringBlock,
    };
 
-   const std::array keywords = {
-      QString("alias"),
-      QString("and"),
-      QString("declare"),
-      QString("do"),
-      QString("for"),
-      QString("function"),
-      QString("end"),
-      QString("false"),
-      QString("if"),
-      QString("not"),
-      QString("or"),
-      QString("then"),
-      QString("true"),
-   };
+   static QVector<Keyword*> all_keywords;
+
+   Keyword* _lookup_keyword(const QString& word) {
+      for (auto* k : all_keywords)
+         if (word.compare(k->word, Qt::CaseInsensitive) == 0)
+            return k;
+      return nullptr;
+   }
+   void _generate_all_keywords() {
+      static bool done = false;
+      if (done)
+         return;
+      done = true;
+      //
+      for (auto& s : { "alias", "and", "declare", "do", "end", "enum", "for", "function", "if", "not", "on", "or", "then" }) {
+         auto* k = new Keyword;
+         k->word = s;
+         all_keywords.push_back(k);
+      }
+      //
+      if (auto* word = _lookup_keyword("declare")) {
+         auto* next = word->make_phrase({ "*", "with", "network", "priority" });
+         next->make_subkeyword("default");
+         next->make_subkeyword("low");
+         next->make_subkeyword("high");
+         next->make_subkeyword("local");
+      }
+      if (auto* word = _lookup_keyword("for")) {
+         auto* next = word->make_subkeyword("each", true);
+         next->make_subkeyword("player")->make_subkeyword("randomly");
+         next->make_subkeyword("object")->make_subkeyword("with", true)->make_subkeyword("label");
+         next->make_subkeyword("team");
+      }
+   }
 
    const std::array operators = {
       // Assign:
@@ -142,19 +183,59 @@ namespace {
       return false;
    }
 
-   static const QString* extract_keyword(const QStringRef& view) {
-      auto size = view.size();
-      for (auto& keyword : keywords) {
-         if (view.startsWith(keyword)) {
-            auto kw_size = keyword.size();
-            bool bounded = true;
-            if (size > kw_size)
-               bounded = is_keyword_boundary(view[kw_size]);
-            if (bounded)
-               return &keyword;
+   static const Keyword* extract_keyword(const QStringRef& view, const Keyword* last) {
+      auto     size  = view.size();
+      Keyword* match = nullptr;
+      if (last) {
+         for (auto* k : last->possible) {
+            if (k->word == "*") {
+               match = k;
+               break;
+            }
+            if (view.startsWith(k->word, Qt::CaseInsensitive)) {
+               match = k;
+               break;
+            }
          }
       }
+      if (!match) {
+         //
+         // If we don't have a previous keyword, or if we failed to match the 
+         // next word in a phrase (possibly because the phrase has ended), then 
+         // we need to look for a new base-level keyword.
+         //
+         for (auto* k : all_keywords) {
+            if (view.startsWith(k->word, Qt::CaseInsensitive)) {
+               match = k;
+               break;
+            }
+         }
+      }
+      //
+      // Once we find a match, make sure it's not a substring; given a keyword "for" we 
+      // want to match "for " but not "forfeiture."
+      //
+      if (match) {
+         auto kw_size = match->word.size();
+         bool bounded = true;
+         if (size > kw_size)
+            bounded = is_keyword_boundary(view[kw_size]);
+         if (bounded)
+            return match;
+      }
       return nullptr;
+   }
+   static QStringRef extract_word(const QStringRef& view) {
+      int size = view.size();
+      int i    = 0;
+      for (; i < size; ++i) {
+         if (view[i].isLetterOrNumber())
+            continue;
+         if (view[i] == '[' || view[i] == ']' || view[i] == '.')
+            continue;
+         break;
+      }
+      return QStringRef(view.string(), view.position(), i);
    }
 
    static const QString* extract_operator(const QStringRef& view) {
@@ -235,19 +316,8 @@ namespace {
 }
 
 MegaloSyntaxHighlighter::MegaloSyntaxHighlighter(QTextDocument* document) : QSyntaxHighlighter(document) {
-   /*//
-   this->formats.comment.block.setFontItalic(true);
-   this->formats.comment.block.setForeground(QColor::fromRgb(32, 160, 8));
-   this->formats.comment.line.setFontItalic(true);
-   this->formats.comment.line.setForeground(QColor::fromRgb(32, 160, 8));
-   this->formats.keyword.setFontWeight(QFont::Weight::Bold);
-   this->formats.keyword.setForeground(QColor::fromRgb(0, 16, 255));
-   this->formats.number.setForeground(QColor::fromRgb(200, 100, 0));
-   this->formats.op.setForeground(QColor::fromRgb(0, 0, 128));
-   this->formats.op.setFontWeight(QFont::Weight::Bold);
-   this->formats.string.simple.setForeground(QColor::fromRgb(140, 140, 140));
-   this->formats.string.block.setForeground(QColor::fromRgb(160, 0, 80));
-   //*/
+   _generate_all_keywords();
+   //
    this->reloadFormattingFromINI();
    QObject::connect(&ReachINI::getForQt(), &cobb::qt::ini::file::settingChanged, this, [this](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
       for (auto* ptr : ini_settings) {
@@ -264,20 +334,13 @@ void MegaloSyntaxHighlighter::highlightBlock(const QString& text) {
    int  start   = 0;
    const auto size = text.size();
    //
+   const Keyword* last_keyword = nullptr;
+   //
    if (state.is_none()) {
-      //
-      // Catch keywords at the start of the block:
-      //
-      for (auto& keyword : keywords) {
-         if (text.startsWith(keyword)) {
-            auto kw_size = keyword.size();
-            if (size > kw_size) {
-               if (!is_keyword_boundary(text[kw_size]))
-                  continue;
-            }
-            this->setFormat(0, kw_size, this->formats.keyword);
-            break;
-         }
+      auto prev = this->currentBlock().previous();
+      if (prev.isValid()) {
+         if (auto* data = dynamic_cast<ComplexBlockState*>(prev.userData()))
+            last_keyword = data->keyword;
       }
    }
    //
@@ -330,14 +393,22 @@ void MegaloSyntaxHighlighter::highlightBlock(const QString& text) {
          }
          //
          auto next = QStringRef(&text, i, size - i);
-         if (i && is_keyword_boundary(text[i - 1]) && !is_keyword_boundary(c)) {
-            auto  view = QStringRef(&text, i, size - i);
-            auto* keyword = extract_keyword(view);
-            if (keyword) {
-               auto length = keyword->size();
-               this->setFormat(i, length, this->formats.keyword);
-               i += length - 1;
-               continue;
+         if (!is_keyword_boundary(c)) {
+            QChar b = i ? text[i - 1] : '\0';
+            if (is_keyword_boundary(b)) {
+               auto view = extract_word(QStringRef(&text, i, size - i));
+               last_keyword = extract_keyword(view, last_keyword);
+               if (last_keyword) {
+                  auto& word = last_keyword->word;
+                  if (word == "*") {
+                     i += view.size() - 1;
+                  } else {
+                     auto length = last_keyword->word.size();
+                     this->setFormat(i, length, last_keyword->is_subkeyword ? this->formats.subkeyword : this->formats.keyword);
+                     i += length - 1;
+                  }
+                  continue;
+               }
             }
          }
          if (i == 0 || is_keyword_boundary(text[i - 1])) {
@@ -417,6 +488,20 @@ void MegaloSyntaxHighlighter::highlightBlock(const QString& text) {
          this->setFormat(start, text.size() - start, this->formats.string.block);
          break;
    }
+   //
+   // Block state and userdata:
+   //
+   auto* ud = dynamic_cast<ComplexBlockState*>(currentBlockUserData());
+   if (last_keyword) {
+      if (!ud) {
+         ud = new ComplexBlockState;
+         setCurrentBlockUserData(ud);
+      }
+      ud->keyword = last_keyword;
+   } else {
+      if (ud)
+         ud->keyword = nullptr;
+   }
    setCurrentBlockState(state.to_int());
 }
 
@@ -426,7 +511,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatCommentBlock.currentStr.c_str());
       auto& format  = this->formats.comment.block;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -438,7 +523,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatCommentLine.currentStr.c_str());
       auto& format  = this->formats.comment.line;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -450,7 +535,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatKeyword.currentStr.c_str());
       auto& format  = this->formats.keyword;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -459,10 +544,22 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       }
    }
    {
+      auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatSubkeyword.currentStr.c_str());
+      auto& format  = this->formats.subkeyword;
+      auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
+      if (!error) {
+         format = working;
+      } else {
+         format = QTextCharFormat();
+         format.setFontWeight(QFont::Weight::Bold);
+         format.setForeground(QColor::fromRgb(0, 120, 190));
+      }
+   }
+   {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatNumber.currentStr.c_str());
       auto& format  = this->formats.number;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -473,7 +570,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatOperator.currentStr.c_str());
       auto& format  = this->formats.op;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -485,7 +582,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatStringSimple.currentStr.c_str());
       auto& format  = this->formats.string.simple;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();
@@ -496,7 +593,7 @@ void MegaloSyntaxHighlighter::reloadFormattingFromINI() {
       auto  setting = QString::fromUtf8(ReachINI::CodeEditor::sFormatStringBlock.currentStr.c_str());
       auto& format  = this->formats.string.block;
       auto  working = ReachINI::parse_syntax_highlight_option(setting, error);
-      if (error) {
+      if (!error) {
          format = working;
       } else {
          format = QTextCharFormat();

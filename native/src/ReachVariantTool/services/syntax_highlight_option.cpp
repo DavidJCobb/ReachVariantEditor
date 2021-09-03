@@ -58,16 +58,19 @@ namespace ReachINI {
                continue;
             }
             if (rule.startsWith(QLatin1Literal("rgb("), Qt::CaseInsensitive) && rule.endsWith(')')) {
-               QString body = rule.mid(4).toString();
+               QString body = rule.mid(4).chopped(1).toString();
                QColor  color;
-               color.setRed(body.section(",", 0).toInt(&error));
-               if (!error) {
-                  color.setGreen(body.section(",", 1).toInt(&error));
-                  if (!error)
-                     color.setBlue(body.section(",", 2).toInt(&error));
+               bool    valid = true;
+               color.setRed(body.section(",", 0, 0).trimmed().toInt(&valid));
+               if (valid) {
+                  color.setGreen(body.section(",", 1, 1).trimmed().toInt(&valid));
+                  if (valid)
+                     color.setBlue(body.section(",", 2, 2).trimmed().toInt(&valid));
                }
-               if (error)
+               if (!valid) {
+                  error = true;
                   return out;
+               }
                out.colors.text = color;
                continue;
             }
@@ -111,7 +114,7 @@ namespace ReachINI {
    extern QString stringify_syntax_highlight_option(const syntax_highlight_option& format) {
       QString out;
       {
-         auto c = format.colors.text;
+         const auto& c = format.colors.text;
          out += QString("rgb(%1, %2, %3)")
             .arg(c.red())
             .arg(c.green())

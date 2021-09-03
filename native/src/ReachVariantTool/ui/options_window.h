@@ -1,7 +1,13 @@
 #pragma once
-
-#include <QtWidgets/QDialog>
+#include <QDialog>
 #include "ui_options_window.h"
+
+namespace cobb::ini {
+   class setting;
+}
+namespace ReachINI {
+   struct syntax_highlight_option;
+}
 
 class ProgramOptionsDialog : public QDialog {
    Q_OBJECT
@@ -28,6 +34,11 @@ class ProgramOptionsDialog : public QDialog {
       void defaultSaveTypeChanged();
       //
       void openFile();
+
    private:
       Ui::ProgramOptionsDialog ui;
+
+      QVector<cobb::ini::setting*> currentSyntaxHighlightOptions() const;
+      ReachINI::syntax_highlight_option syntaxHighlightOptionFromUI() const;
+      void setCurrentSyntaxHighlightOptions(const ReachINI::syntax_highlight_option&) const;
 };
