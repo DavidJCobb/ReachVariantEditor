@@ -89,20 +89,25 @@
          <category id="unscoped-team" />
       </member>
       <member name="hud_target_object" type="object" read-only="true">
-         <blurb>This value's precise meaning is unknown, but it can presumably be used 
-         with HUD widgets and object waypoints to display different information for each 
-         player.</blurb>
+         <blurb>This value can be used with object waypoint text to display values related 
+         to the object that has the waypoint.</blurb>
          <description>
             <p>
-               Community reverse-engineering indicates that this value is one of several 
-               that can be used with HUD widgets and object waypoints to display different 
-               information to each player. When setting a widget or waypoint's text, you 
-               would pass this value (or a member variable on it) as a 
-               <a href="script/api/format-string.html">format string</a> parameter. However, 
-               while community reverse-engineering indicates that this would refer to a "HUD 
-               target object" of some kind, testing has failed to determine any specifics.
+               When setting the text of an object's waypoint, you can use this value with 
+               <a href="script/api/format-string.html">format string</a> parameters in order 
+               to display information about the object in question.
             </p>
          </description>
+         <example>
+            --
+            -- Have an object's waypoint display the name of a player, based on one of 
+            -- the object's player variables.
+            --
+            if current_object.player[0] != no_player then
+               current_object.set_waypoint_visibility(everyone)
+               current_object.set_waypoint_text("%p", hud_target_object.player[0])
+            end
+         </example>
          <category id="unscoped-hud" />
          <category id="unscoped-object" />
       </member>
