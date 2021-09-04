@@ -78,16 +78,22 @@
          <header><h1>hud_target_object</h1><span class="type">Type: <a href="script/api/object.html">Object</a></span></header>
 
             <p>
-               Community reverse-engineering indicates that this value is one of several 
-               that can be used with HUD widgets and object waypoints to display different 
-               information to each player. When setting a widget or waypoint's text, you 
-               would pass this value (or a member variable on it) as a 
-               <a href="script/api/format-string.html">format string</a> parameter. However, 
-               while community reverse-engineering indicates that this would refer to a "HUD 
-               target object" of some kind, testing has failed to determine any specifics.
+               When setting the text of an object's waypoint, you can use this value with 
+               <a href="script/api/format-string.html">format string</a> parameters in order 
+               to display information about the object in question.
             </p>
          
 <p>This value is read-only.</p>
+<h2>Example</h2>
+<pre>
+<span class="comment">--</span>
+<span class="comment">-- Have an object's waypoint display the name of a player, based on one of </span>
+<span class="comment">-- the object's player variables.</span>
+<span class="comment">--</span>
+<span class="keyword">if</span> current_object.player[0] != no_player <span class="keyword">then</span>
+   current_object.set_waypoint_visibility(everyone)
+   current_object.set_waypoint_text(<span class="string">"%p</span>", hud_target_object.player[0])
+<span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
    <li><a href="script/api/ns_unnamed/current_object.html">current_object</a></li>
