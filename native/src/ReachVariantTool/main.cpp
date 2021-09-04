@@ -6,6 +6,7 @@
 #include "helpers/files.h"
 #include "helpers/stream.h"
 #include "services/ini.h"
+#include "services/RVTThemeEngine.h"
 #if _DEBUG
    #include <QDebug>
    #include <QDirIterator>
@@ -15,6 +16,7 @@ int main(int argc, char *argv[]) {
    ReachINI::get().load();
    //
    QApplication a(argc, argv);
+   qDebug() << a.applicationVersion();
    //
    #if _DEBUG // log all qt resources to the "output" tab in the debugger
       QDirIterator it(":", QDirIterator::Subdirectories);
@@ -23,11 +25,20 @@ int main(int argc, char *argv[]) {
       }
    #endif
    //
-   QString Style = QString::fromUtf8(ReachINI::UIWindowTitle::sTheme.currentStr.c_str());
-   QFile stylesheet(Style);
-   stylesheet.open(QFile::ReadOnly);
-   Style = QLatin1String(stylesheet.readAll());
-   a.setStyleSheet(Style);
+   {  // Themes
+      auto* engine = new RVTThemeEngine(&a);
+      //
+      auto& s = ReachINI::UIWindowTitle::sTheme;
+      engine->changeStyleFile(QString::fromUtf8(s.currentStr.c_str()));
+      {
+         using namespace cobb::ini;
+         QObject::connect(&ReachINI::getForQt(), &cobb::qt::ini::file::settingChanged, &a, [engine](setting* s, setting_value_union oldValue, setting_value_union newValue) {
+            if (s != &ReachINI::UIWindowTitle::sTheme)
+               return;
+            engine->changeStyleFile(QString::fromUtf8(s->currentStr.c_str()));
+         });
+      }
+   }
    ReachVariantTool w;
    w.show();
    return a.exec();

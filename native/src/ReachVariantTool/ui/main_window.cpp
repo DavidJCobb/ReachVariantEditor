@@ -111,6 +111,23 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    ui.setupUi(this);
    _window = this;
    //
+   {
+      auto v = QApplication::applicationVersion();
+      if (!v.isEmpty()) {
+         //
+         // Got the version info. If it's "A.B.C.0", let's strip that trailing ".0" build number.
+         //
+         auto m = QRegularExpression(R"(^(\d+)\.(\d+)\.(\d+)\.(\d+)$)").match(v); // R"(abc)" creates a string literal in which "abc" needs no escape sequences
+         if (m.hasMatch() && m.capturedRef(4) == "0") {
+            v = QString("%1.%2.%3").arg(m.capturedRef(1)).arg(m.capturedRef(2)).arg(m.capturedRef(3));
+         }
+         //
+         // Display the version info:
+         //
+         this->ui.welcomeText->setText(tr("ReachVariantTool v%1").arg(v));
+      }
+   }
+   //
    auto& editor = ReachEditorState::get();
    //
    ReachINI::get().register_for_changes([](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {

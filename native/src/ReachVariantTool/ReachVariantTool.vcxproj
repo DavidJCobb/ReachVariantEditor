@@ -100,6 +100,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\Skyrim\DovahKit\build\DovahKit\DovahKit\helpers\qt\repaint.cpp" />
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="helpers\string_scanner.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="services\localization_library.cpp" />
+    <ClCompile Include="services\RVTThemeEngine.cpp" />
     <ClCompile Include="services\syntax_highlight_option.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
     <ClCompile Include="ui\generic\ColorPickerButton.cpp" />
@@ -295,6 +297,7 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Skyrim\DovahKit\build\DovahKit\DovahKit\helpers\qt\repaint.h" />
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="formats\ugc_header.h" />
     <ClInclude Include="game_variants\components\custom_game_options.h" />
@@ -386,6 +389,7 @@
     <QtMoc Include="ui\localized_string_library.h" />
     <QtMoc Include="ui\generic\MegaloSyntaxHighlighter.h" />
     <QtMoc Include="ui\generic\ColorPickerButton.h" />
+    <QtMoc Include="services\RVTThemeEngine.h" />
     <ClInclude Include="services\syntax_highlight_option.h" />
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
     <QtMoc Include="ui\main_window\page_firefight_metadata.h" />
