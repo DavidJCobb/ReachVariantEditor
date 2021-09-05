@@ -229,6 +229,7 @@ namespace cobb {
             #pragma endregion
          }
          file.close();
+         this->abandon_pending_changes();
       };
       __declspec(noinline) void file::save() {
          for (auto& setting : this->settings) {

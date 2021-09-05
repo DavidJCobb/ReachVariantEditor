@@ -3,7 +3,9 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include <QTextBlock>
+#include "../../helpers/qt/color.h"
 #include "../generic/MegaloSyntaxHighlighter.h"
+#include "../../services/ini.h"
 
 namespace {
    static const QString ce_icon_success = ":/ScriptEditor/compiler_log/success.png";
@@ -28,6 +30,7 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
    ui.setupUi(this);
    {
       new MegaloSyntaxHighlighter(this->ui.textEditor->document());
+      this->updateCodeEditorStyle();
    }
    //
    auto& editor = ReachEditorState::get();
@@ -181,4 +184,36 @@ void ScriptEditorPageScriptCode::redrawLog() {
       item->setIcon(ico_success);
       widget->addItem(item);
    }
+}
+
+void ScriptEditorPageScriptCode::updateCodeEditorStyle() {
+   auto* widget = this->ui.textEditor;
+   //
+   {
+      const auto& setting = ReachINI::CodeEditor::sFontFamily;
+      auto family = QString::fromUtf8(setting.currentStr.c_str());
+      auto font   = QFont(family);
+      if (!font.exactMatch()) {
+         family = QString::fromUtf8(setting.initialStr.c_str());
+         font   = QFont(family);
+      }
+      font.setPointSize(10); // TODO: make configurable
+      widget->setFont(font);
+   }
+   QString qss;
+   if (ReachINI::CodeEditor::bOverrideBackColor.current.b) {
+      cobb::qt::css_color_parse_error error;
+      QString data = QString::fromUtf8(ReachINI::CodeEditor::sBackColor.currentStr.c_str());
+      QColor  c    = cobb::qt::parse_css_color(data, error);
+      if (error == cobb::qt::css_color_parse_error::none)
+         qss += QString("background-color: %1;").arg(data);
+   }
+   if (ReachINI::CodeEditor::bOverrideTextColor.current.b) {
+      cobb::qt::css_color_parse_error error;
+      QString data = QString::fromUtf8(ReachINI::CodeEditor::sTextColor.currentStr.c_str());
+      QColor  c    = cobb::qt::parse_css_color(data, error);
+      if (error == cobb::qt::css_color_parse_error::none)
+         qss += QString("color: %1;").arg(data);
+   }
+   widget->setStyleSheet(qss);
 }

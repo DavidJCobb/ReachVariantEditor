@@ -1,4 +1,5 @@
 #include "syntax_highlight_option.h"
+#include "../helpers/qt/color.h"
 
 namespace {
    static QStringRef _extractFontRule(const QStringRef& text, bool& error) {
@@ -6,6 +7,8 @@ namespace {
       int i;
       int paren = 0;
       for (i = 0; i < size; ++i) {
+         if (i == 0 && text[i] == '#') // allow hex color literals
+            continue;
          if (text[i] == '(') {
             ++paren;
             continue;
@@ -57,17 +60,10 @@ namespace ReachINI {
                out.underline = true;
                continue;
             }
-            if (rule.startsWith(QLatin1Literal("rgb("), Qt::CaseInsensitive) && rule.endsWith(')')) {
-               QString body = rule.mid(4).chopped(1).toString();
-               QColor  color;
-               bool    valid = true;
-               color.setRed(body.section(",", 0, 0).trimmed().toInt(&valid));
-               if (valid) {
-                  color.setGreen(body.section(",", 1, 1).trimmed().toInt(&valid));
-                  if (valid)
-                     color.setBlue(body.section(",", 2, 2).trimmed().toInt(&valid));
-               }
-               if (!valid) {
+            if (rule.startsWith('#') || rule.startsWith(QLatin1Literal("rgb"), Qt::CaseInsensitive) || rule.startsWith(QLatin1Literal("hsl"), Qt::CaseInsensitive)) {
+               cobb::qt::css_color_parse_error pe;
+               auto color = cobb::qt::parse_css_color(rule, pe);
+               if (pe != cobb::qt::css_color_parse_error::none) {
                   error = true;
                   return out;
                }

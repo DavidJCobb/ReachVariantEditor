@@ -1,5 +1,6 @@
 #include "options_window.h"
 #include "../helpers/ini.h"
+#include "../helpers/qt/color.h"
 #include "../services/ini.h"
 #include "../services/syntax_highlight_option.h"
 #include <QFileDialog>
@@ -62,73 +63,138 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    QObject::connect(this->ui.themeFileDialog, &QPushButton::pressed, this, &ProgramOptionsDialog::openFile);
    //
    #pragma region Script code editor
-   {  // syn
-      QComboBox* widget = this->ui.synHighType;
-      widget->clear();
-      QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this]() {
-         const auto blocker0 = QSignalBlocker(this->ui.synHighBold);
-         const auto blocker1 = QSignalBlocker(this->ui.synHighItalic);
-         const auto blocker2 = QSignalBlocker(this->ui.synHighUnderline);
-         const auto blocker3 = QSignalBlocker(this->ui.synHighColor);
-         //
-         cobb::ini::setting* setting = nullptr;
+      #pragma region General
+      {
+         auto* fontpicker = this->ui.codeEditFont;
          {
-            auto list = this->currentSyntaxHighlightOptions();
-            if (!list.isEmpty())
-               setting = list[0];
+            auto& setting = ReachINI::CodeEditor::sFontFamily;
+            auto  family  = QString::fromUtf8(setting.currentStr.c_str());
+            QFont font    = QFont(family);
+            if (!font.exactMatch()) {
+               // This typeface isn't available
+               family = QString::fromUtf8(setting.initialStr.c_str());
+               font   = QFont(family);
+            }
+            fontpicker->setCurrentFont(font);
          }
-         if (!setting) { // shouldn't happen
-            this->ui.synHighBold->setChecked(false);
-            this->ui.synHighBold->setEnabled(false);
-            this->ui.synHighItalic->setChecked(false);
-            this->ui.synHighItalic->setEnabled(false);
-            this->ui.synHighUnderline->setChecked(false);
-            this->ui.synHighUnderline->setEnabled(false);
-            this->ui.synHighColor->setEnabled(false);
-         } else {
-            auto value = QString::fromUtf8(setting->pendingStr.c_str());
-            if (value.isEmpty())
-               value = QString::fromUtf8(setting->currentStr.c_str());
-            auto option = ReachINI::syntax_highlight_option::fromString(value);
+         QObject::connect(fontpicker, &QFontComboBox::currentFontChanged, this, [](const QFont& font) {
+            ReachINI::CodeEditor::sFontFamily.pendingStr = (const char*)font.family().toUtf8();
+         });
+      }
+      {
+         auto& enable = ReachINI::CodeEditor::bOverrideBackColor;
+         auto& color  = ReachINI::CodeEditor::sBackColor;
+         //
+         auto* e_widget = this->ui.codeEditEnableBackColor;
+         auto* c_widget = this->ui.codeEditBackColor;
+         e_widget->setChecked(enable.current.b);
+         {
+            cobb::qt::css_color_parse_error error;
+            QColor c = cobb::qt::parse_css_color(QString::fromUtf8(color.currentStr.c_str()), error);
+            if (error != cobb::qt::css_color_parse_error::none) {
+               c = cobb::qt::parse_css_color(QString::fromUtf8(color.initialStr.c_str()), error);
+            }
+            c_widget->setColor(c);
+         }
+         QObject::connect(e_widget, &QCheckBox::toggled, this, [&enable, &color](bool checked) {
+            enable.pending.b = checked;
+         });
+         QObject::connect(c_widget, &ColorPickerButton::colorChanged, this, [&enable, &color](const QColor& c) {
+            color.pendingStr = (const char*)cobb::qt::stringify_css_color(c, cobb::qt::css_color_format::rgb).toUtf8();
+         });
+      }
+      {
+         auto& enable = ReachINI::CodeEditor::bOverrideTextColor;
+         auto& color  = ReachINI::CodeEditor::sTextColor;
+         //
+         auto* e_widget = this->ui.codeEditEnableTextColor;
+         auto* c_widget = this->ui.codeEditTextColor;
+         e_widget->setChecked(enable.current.b);
+         {
+            cobb::qt::css_color_parse_error error;
+            QColor c = cobb::qt::parse_css_color(QString::fromUtf8(color.currentStr.c_str()), error);
+            if (error != cobb::qt::css_color_parse_error::none) {
+               c = cobb::qt::parse_css_color(QString::fromUtf8(color.initialStr.c_str()), error);
+            }
+            c_widget->setColor(c);
+         }
+         QObject::connect(e_widget, &QCheckBox::toggled, this, [&enable, &color](bool checked) {
+            enable.pending.b = checked;
+         });
+         QObject::connect(c_widget, &ColorPickerButton::colorChanged, this, [&enable, &color](const QColor& c) {
+            color.pendingStr = (const char*)cobb::qt::stringify_css_color(c, cobb::qt::css_color_format::rgb).toUtf8();
+         });
+      }
+      #pragma endregion
+      #pragma region Syntax highlighting
+      {  // syn
+         QComboBox* widget = this->ui.synHighType;
+         widget->clear();
+         QObject::connect(widget, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this]() {
+            const auto blocker0 = QSignalBlocker(this->ui.synHighBold);
+            const auto blocker1 = QSignalBlocker(this->ui.synHighItalic);
+            const auto blocker2 = QSignalBlocker(this->ui.synHighUnderline);
+            const auto blocker3 = QSignalBlocker(this->ui.synHighColor);
             //
-            this->ui.synHighBold->setChecked(option.bold);
-            this->ui.synHighBold->setEnabled(true);
-            this->ui.synHighItalic->setChecked(option.italic);
-            this->ui.synHighItalic->setEnabled(true);
-            this->ui.synHighUnderline->setChecked(option.underline);
-            this->ui.synHighUnderline->setEnabled(true);
-            this->ui.synHighColor->setEnabled(true);
-            this->ui.synHighColor->setColor(option.colors.text);
-         }
-      });
-      widget->addItem("Comment",    QStringList({"sFormatCommentBlock", "sFormatCommentLine"}));
-      widget->addItem("Keyword",    "sFormatKeyword");
-      widget->addItem("Subkeyword", "sFormatSubkeyword");
-      widget->addItem("Number",     "sFormatNumber");
-      widget->addItem("Operator",   "sFormatOperator");
-      widget->addItem("String",     "sFormatStringSimple");
-      //
-      QObject::connect(this->ui.synHighBold, &QAbstractButton::toggled, this, [this](bool checked) {
-         auto c = this->syntaxHighlightOptionFromUI();
-         c.bold = checked;
-         this->setCurrentSyntaxHighlightOptions(c);
-      });
-      QObject::connect(this->ui.synHighItalic, &QAbstractButton::toggled, this, [this](bool checked) {
-         auto c = this->syntaxHighlightOptionFromUI();
-         c.italic = checked;
-         this->setCurrentSyntaxHighlightOptions(c);
-      });
-      QObject::connect(this->ui.synHighUnderline, &QAbstractButton::toggled, this, [this](bool checked) {
-         auto c = this->syntaxHighlightOptionFromUI();
-         c.underline = checked;
-         this->setCurrentSyntaxHighlightOptions(c);
-      });
-      QObject::connect(this->ui.synHighColor, &ColorPickerButton::colorChanged, this, [this](QColor color) {
-         auto c = this->syntaxHighlightOptionFromUI();
-         c.colors.text = color;
-         this->setCurrentSyntaxHighlightOptions(c);
-      });
-   }
+            cobb::ini::setting* setting = nullptr;
+            {
+               auto list = this->currentSyntaxHighlightOptions();
+               if (!list.isEmpty())
+                  setting = list[0];
+            }
+            if (!setting) { // shouldn't happen
+               this->ui.synHighBold->setChecked(false);
+               this->ui.synHighBold->setEnabled(false);
+               this->ui.synHighItalic->setChecked(false);
+               this->ui.synHighItalic->setEnabled(false);
+               this->ui.synHighUnderline->setChecked(false);
+               this->ui.synHighUnderline->setEnabled(false);
+               this->ui.synHighColor->setEnabled(false);
+            } else {
+               auto value = QString::fromUtf8(setting->pendingStr.c_str());
+               if (value.isEmpty())
+                  value = QString::fromUtf8(setting->currentStr.c_str());
+               auto option = ReachINI::syntax_highlight_option::fromString(value);
+               //
+               this->ui.synHighBold->setChecked(option.bold);
+               this->ui.synHighBold->setEnabled(true);
+               this->ui.synHighItalic->setChecked(option.italic);
+               this->ui.synHighItalic->setEnabled(true);
+               this->ui.synHighUnderline->setChecked(option.underline);
+               this->ui.synHighUnderline->setEnabled(true);
+               this->ui.synHighColor->setEnabled(true);
+               this->ui.synHighColor->setColor(option.colors.text);
+            }
+         });
+         widget->addItem("Comment",    QStringList({"sFormatCommentBlock", "sFormatCommentLine"}));
+         widget->addItem("Keyword",    "sFormatKeyword");
+         widget->addItem("Subkeyword", "sFormatSubkeyword");
+         widget->addItem("Number",     "sFormatNumber");
+         widget->addItem("Operator",   "sFormatOperator");
+         widget->addItem("String",     "sFormatStringSimple");
+         //
+         QObject::connect(this->ui.synHighBold, &QAbstractButton::toggled, this, [this](bool checked) {
+            auto c = this->syntaxHighlightOptionFromUI();
+            c.bold = checked;
+            this->setCurrentSyntaxHighlightOptions(c);
+         });
+         QObject::connect(this->ui.synHighItalic, &QAbstractButton::toggled, this, [this](bool checked) {
+            auto c = this->syntaxHighlightOptionFromUI();
+            c.italic = checked;
+            this->setCurrentSyntaxHighlightOptions(c);
+         });
+         QObject::connect(this->ui.synHighUnderline, &QAbstractButton::toggled, this, [this](bool checked) {
+            auto c = this->syntaxHighlightOptionFromUI();
+            c.underline = checked;
+            this->setCurrentSyntaxHighlightOptions(c);
+         });
+         QObject::connect(this->ui.synHighColor, &ColorPickerButton::colorChanged, this, [this](QColor color) {
+            auto c = this->syntaxHighlightOptionFromUI();
+            c.colors.text = color;
+            this->setCurrentSyntaxHighlightOptions(c);
+         });
+      }
+      #pragma endregion
    #pragma endregion
 }
 

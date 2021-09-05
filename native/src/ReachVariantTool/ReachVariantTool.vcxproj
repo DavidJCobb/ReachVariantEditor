@@ -177,8 +177,10 @@
     <ClCompile Include="helpers\int128.cpp" />
     <ClCompile Include="helpers\memory.cpp" />
     <ClCompile Include="helpers\miscellaneous.cpp" />
+    <ClCompile Include="helpers\qt\color.cpp" />
     <ClCompile Include="helpers\qt\ini.cpp" />
     <ClCompile Include="helpers\qt\string.cpp" />
+    <ClCompile Include="helpers\qt\string_scanner.cpp" />
     <ClCompile Include="helpers\qt\tree_widget.cpp" />
     <ClCompile Include="helpers\qt\widget.cpp" />
     <ClCompile Include="helpers\sha1.cpp" />
@@ -374,7 +376,9 @@
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\forge_label.h" />
     <ClInclude Include="helpers\memory.h" />
     <QtMoc Include="helpers\qt\ini.h" />
+    <ClInclude Include="helpers\qt\color.h" />
     <ClInclude Include="helpers\qt\string.h" />
+    <ClInclude Include="helpers\qt\string_scanner.h" />
     <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\qt\widget.h" />
     <ClInclude Include="helpers\refcounting.h" />

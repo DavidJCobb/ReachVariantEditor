@@ -23,4 +23,6 @@ class ScriptEditorPageScriptCode : public QWidget {
       //
       void updateLog(Compiler&);
       void redrawLog();
+
+      void updateCodeEditorStyle();
 };
