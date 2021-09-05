@@ -99,6 +99,9 @@ QAction{
 	selection-color:#b7fbff;
 	selection-background-color:#6b6b6b;
 	}
+QMenu::item:disabled, QAction:disabled{
+	color:#aaaaaa;
+	}
 QPlainTextEdit{
 	color:#ffffff;
 	background-color:#525252;

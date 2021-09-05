@@ -16,7 +16,9 @@ int main(int argc, char *argv[]) {
    ReachINI::get().load();
    //
    QApplication a(argc, argv);
-   qDebug() << a.applicationVersion();
+   #if _DEBUG
+      qDebug() << a.applicationVersion();
+   #endif
    //
    #if _DEBUG // log all qt resources to the "output" tab in the debugger
       QDirIterator it(":", QDirIterator::Subdirectories);
