@@ -47,11 +47,11 @@ The bulk of ReachVariantTool is licensed under the GNU Public License version 3.
 help manual is licensed under the Creative Commons 0 License, which is effectively 
 public domain.
 
-This program uses the Qt library, version 5.12.5, per the terms of LGPLv3. The source 
+This program uses the Qt library, version 5.15.2, per the terms of LGPLv3. The source 
 code to Qt is available on their website; per the license terms, I am legally obligated 
 to provide you with a copy of that source code on request, in the event that their 
-website vanishes. The source code is an 800MB ZIP file (qt-everywhere-src-5.12.5.zip) 
-and is as of this writing available here: <http://download.qt.io/archive/qt/5.12/5.12.5/>
+website vanishes. The source code is an 800MB ZIP file (qt-everywhere-src-5.15.2.zip) 
+and is as of this writing available here: <http://download.qt.io/archive/qt/5.15/5.15.2/>
 
 zlib is used under the terms of the license in the zlib.h source file.
 
