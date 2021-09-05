@@ -128,7 +128,19 @@
       current_player.set_round_card_title(<span class="string">"Score points by killing other players.</span>")
    <span class="keyword">end</span>
 <span class="keyword">end</span></pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               Only the first 116 characters of the specified string will be displayed; this limitation 
+               applies after all format string parameters are substituted in. It seems that the UI 
+               reserves room for 117 characters, including an invisible "end of text" marker.
+            </p></li>
+   <li><p>
+               Text does not word wrap automatically; you must insert line breaks manually. The font 
+               used to display the text is "TV Nord;" there are font preview websites that you can use 
+               to compare line lengths and save yourself a bit of trial and error.
+            </p></li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/player/actions/set_round_card_icon.html">player.set_round_card_icon</a></li>
    <li><a href="script/api/player/actions/set_round_card_text.html">player.set_round_card_text</a></li>
