@@ -1,4 +1,5 @@
 #include "page_script_code.h"
+#include <array>
 #include "compiler_unresolved_strings.h"
 #include <QMessageBox>
 #include <QListWidget>
@@ -26,11 +27,29 @@ namespace {
    constexpr int role_icon   = Qt::ItemDataRole::UserRole + 3;
 }
 
+namespace {
+   const std::array ini_settings = {
+      &ReachINI::CodeEditor::bOverrideBackColor,
+      &ReachINI::CodeEditor::bOverrideTextColor,
+      &ReachINI::CodeEditor::sBackColor,
+      &ReachINI::CodeEditor::sTextColor,
+      &ReachINI::CodeEditor::sFontFamily,
+   };
+}
+
 ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidget(parent) {
    ui.setupUi(this);
    {
       new MegaloSyntaxHighlighter(this->ui.textEditor->document());
       this->updateCodeEditorStyle();
+      QObject::connect(&ReachINI::getForQt(), &cobb::qt::ini::file::settingChanged, this, [this](cobb::ini::setting* setting, cobb::ini::setting_value_union oldValue, cobb::ini::setting_value_union newValue) {
+         for (auto* ptr : ini_settings) {
+            if (setting == ptr) {
+               this->updateCodeEditorStyle();
+               return;
+            }
+         }
+      });
    }
    //
    auto& editor = ReachEditorState::get();
@@ -189,18 +208,20 @@ void ScriptEditorPageScriptCode::redrawLog() {
 void ScriptEditorPageScriptCode::updateCodeEditorStyle() {
    auto* widget = this->ui.textEditor;
    //
+   QString qss;
    {
       const auto& setting = ReachINI::CodeEditor::sFontFamily;
       auto family = QString::fromUtf8(setting.currentStr.c_str());
-      auto font   = QFont(family);
+      QFont font;
+      font.setFamily(family);
       if (!font.exactMatch()) {
          family = QString::fromUtf8(setting.initialStr.c_str());
-         font   = QFont(family);
+         font.setFamily(family);
       }
       font.setPointSize(10); // TODO: make configurable
-      widget->setFont(font);
+      //
+      qss += QString("font: %2pt \"%1\";").arg(font.family()).arg(font.pointSize());
    }
-   QString qss;
    if (ReachINI::CodeEditor::bOverrideBackColor.current.b) {
       cobb::qt::css_color_parse_error error;
       QString data = QString::fromUtf8(ReachINI::CodeEditor::sBackColor.currentStr.c_str());
