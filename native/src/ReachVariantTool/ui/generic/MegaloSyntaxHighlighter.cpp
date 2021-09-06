@@ -70,7 +70,7 @@ namespace {
          return;
       done = true;
       //
-      for (auto& s : { "alias", "and", "declare", "do", "end", "enum", "for", "function", "if", "not", "on", "or", "then" }) {
+      for (auto& s : { "alias", "alt", "altif", "and", "declare", "do", "end", "enum", "for", "function", "if", "not", "on", "or", "then" }) {
          auto* k = new Keyword;
          k->word = s;
          all_keywords.push_back(k);
@@ -183,7 +183,7 @@ namespace {
       return false;
    }
 
-   static const Keyword* extract_keyword(const QStringRef& view, const Keyword* last) {
+   static const Keyword* match_keyword(const QStringRef& view, const Keyword* last) {
       auto     size  = view.size();
       Keyword* match = nullptr;
       if (last) {
@@ -192,7 +192,7 @@ namespace {
                match = k;
                break;
             }
-            if (view.startsWith(k->word, Qt::CaseInsensitive)) {
+            if (view.compare(k->word, Qt::CaseInsensitive) == 0) {
                match = k;
                break;
             }
@@ -205,33 +205,23 @@ namespace {
          // we need to look for a new base-level keyword.
          //
          for (auto* k : all_keywords) {
-            if (view.startsWith(k->word, Qt::CaseInsensitive)) {
+            if (view.compare(k->word, Qt::CaseInsensitive) == 0) {
                match = k;
                break;
             }
          }
       }
-      //
-      // Once we find a match, make sure it's not a substring; given a keyword "for" we 
-      // want to match "for " but not "forfeiture."
-      //
-      if (match) {
-         auto kw_size = match->word.size();
-         bool bounded = true;
-         if (size > kw_size)
-            bounded = is_keyword_boundary(view[kw_size]);
-         if (bounded)
-            return match;
-      }
-      return nullptr;
+      return match;
    }
    static QStringRef extract_word(const QStringRef& view) {
-      int size = view.size();
-      int i    = 0;
+      int size  = view.size();
+      int i     = 0;
+      int brace = 0;
       for (; i < size; ++i) {
-         if (view[i].isLetterOrNumber())
+         auto c = view[i];
+         if (c.isLetterOrNumber())
             continue;
-         if (view[i] == '[' || view[i] == ']' || view[i] == '.')
+         if (c == '_' || c == '[' || c == ']' || c == '.')
             continue;
          break;
       }
@@ -396,17 +386,15 @@ void MegaloSyntaxHighlighter::highlightBlock(const QString& text) {
          if (!is_keyword_boundary(c)) {
             QChar b = i ? text[i - 1] : '\0';
             if (is_keyword_boundary(b)) {
-               auto view = extract_word(QStringRef(&text, i, size - i));
-               last_keyword = extract_keyword(view, last_keyword);
+               auto view = extract_word(next);
+               last_keyword = match_keyword(view, last_keyword);
                if (last_keyword) {
-                  auto& word = last_keyword->word;
-                  if (word == "*") {
-                     i += view.size() - 1;
-                  } else {
-                     auto length = last_keyword->word.size();
+                  auto& word   = last_keyword->word;
+                  auto  length = view.size();
+                  if (word != "*") {
                      this->setFormat(i, length, last_keyword->is_subkeyword ? this->formats.subkeyword : this->formats.keyword);
-                     i += length - 1;
                   }
+                  i += length - 1;
                   continue;
                }
             }

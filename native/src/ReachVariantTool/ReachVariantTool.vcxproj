@@ -56,6 +56,7 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.15.2 MSVC2019 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
+    <QtDeploy>false</QtDeploy>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -73,7 +74,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <QtUic>
@@ -92,7 +92,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <QtUic>
@@ -100,7 +99,6 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Skyrim\DovahKit\build\DovahKit\DovahKit\helpers\qt\repaint.cpp" />
     <ClCompile Include="formats\block.cpp" />
     <ClCompile Include="formats\content_author.cpp" />
     <ClCompile Include="formats\localized_string_table.cpp" />
@@ -299,7 +297,6 @@
     <ResourceCompile Include="ReachVariantTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Skyrim\DovahKit\build\DovahKit\DovahKit\helpers\qt\repaint.h" />
     <ClInclude Include="formats\indexed_lists.h" />
     <ClInclude Include="formats\ugc_header.h" />
     <ClInclude Include="game_variants\components\custom_game_options.h" />

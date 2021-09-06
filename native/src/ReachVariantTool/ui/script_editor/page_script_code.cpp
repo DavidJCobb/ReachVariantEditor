@@ -236,5 +236,6 @@ void ScriptEditorPageScriptCode::updateCodeEditorStyle() {
       if (error == cobb::qt::css_color_parse_error::none)
          qss += QString("color: %1;").arg(data);
    }
+   qss = QString("QTextEdit { %1 }").arg(qss); // needed to prevent settings from bleeding into e.g. the scrollbar
    widget->setStyleSheet(qss);
 }
