@@ -39,7 +39,7 @@ namespace content {
          }
          has_any_named = true;
          //
-         bool has_id = note.id.isEmpty();
+         bool has_id = !note.id.isEmpty();
          out += QString("<h3>%1%2%3</h3>\n")
             .arg(has_id ? QString("<a name=\"%1\">").arg(note.id) : "")
             .arg(note.title)

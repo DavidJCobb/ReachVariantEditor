@@ -19,9 +19,18 @@
                end
             </example>
             <note>
-               A HUD widget must display the same text to all players. If you may need to 
-               display different text to different players at the same time, you will need 
-               to define multiple widgets and manage their visibility and text appropriately.
+               <p>
+                  A HUD widget must display the same format string to all players. If you may 
+                  need to display completely different text to different players at the same 
+                  time, you will need to define multiple widgets and manage their visibility 
+                  and text appropriately.
+               </p>
+               <p>
+                  Some format string parameters make it possible to display different values 
+                  within a single string, for each player viewing the widget. The 
+                  <a href="script/api/ns_unnamed/hud_player">hud_player</a> variable is one 
+                  such parameter.
+               </p>
             </note>
          </method>
          <method name="set_value_text" id="47">
@@ -67,6 +76,13 @@
                <arg name="icon" type="widget-icon" />
             </args>
             <blurb>Set the HUD widget's icon.</blurb>
+            <description>
+               <p>
+                  This function sets what icon a HUD widget displays. Note that Halo: Reach will 
+                  only actually display a widget's icon if the widget is in the "Lower Center" 
+                  or "Meter Only" positions.
+               </p>
+            </description>
             <example>
                script_widget[0].set_icon(infection)
             </example>

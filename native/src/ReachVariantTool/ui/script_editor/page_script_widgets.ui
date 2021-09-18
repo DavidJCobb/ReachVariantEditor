@@ -139,7 +139,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Unknown 11 (Hidden?)</string>
+         <string>Bottom Right (Meter Only)</string>
         </property>
        </item>
       </widget>

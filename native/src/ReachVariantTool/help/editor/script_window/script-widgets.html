@@ -188,12 +188,20 @@
          two HUD widgets have the same position, they will not overlap; they will be 
          positioned adjacent to each other in an intelligent fashion. However, some 
          widget positions will overlap standard HUD elements such as the shield bar 
-         or motion tracker.
+         or motion tracker. Additionally, if a gametype tries to display more than two 
+         widgets to the same player at the same position, only two of them will actually 
+         be shown by the game, preferring ones earlier in the widget list.
       </p>
       <p>
          Most of the page is taken up by an image which displays where the HUD widget 
          will appear. This preview only shows the selected widget, and it assumes that 
          only the selected widget is showing.
+      </p>
+      <p>
+         Note that the bottom-right widget position is only suitable for "meter" widgets 
+         — that is, those which use the "set_meter_params" function. Widgets in 
+         this position can display icons and meters, but not any text. The widget will 
+         appear below the hardcoded scoring UI.
       </p>
    
       </main>

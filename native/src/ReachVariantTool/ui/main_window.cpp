@@ -499,6 +499,7 @@ void ReachVariantTool::_saveFileImpl(bool saveAs) {
    out.setVersion(QDataStream::Qt_4_5);
    out.writeRawData((const char*)save_process.writer.bytes.data(), save_process.writer.bytes.get_bytespan());
    file.commit();
+   this->ui.actionSave->setEnabled(true); // if we did File -> New and then did Save As, now we need to enable Save
 }
 #pragma endregion
 
@@ -996,8 +997,16 @@ void ReachVariantTool::refreshWindowTitle() {
       return;
    }
    std::wstring file = editor.variantFilePath();
-   if (ReachINI::UIWindowTitle::bShowFullPath.current.b == false) {
-      file = std::filesystem::path(file).filename().wstring();
+   {
+      bool is_resource = false;
+      if (file[0] == ':') { // Qt resource?
+         is_resource = QResource(QString::fromStdWString(file)).isValid();
+      }
+      if (is_resource) {
+         file.clear();
+      } else if (ReachINI::UIWindowTitle::bShowFullPath.current.b == false) {
+         file = std::filesystem::path(file).filename().wstring();
+      }
    }
    if (ReachINI::UIWindowTitle::bShowVariantTitle.current.b == true) {
       QString variantTitle;
@@ -1015,13 +1024,19 @@ void ReachVariantTool::refreshWindowTitle() {
       } else {
          variantTitle = QString::fromUtf16(editor.variant()->contentHeader.data.title);
       }
-      this->setWindowTitle(
-         QString("%1 <%2> - ReachVariantTool").arg(variantTitle).arg(file)
-      );
+      if (file.empty())
+         this->setWindowTitle(
+            QString("%1 - ReachVariantTool").arg(variantTitle)
+         );
+      else
+         this->setWindowTitle(
+            QString("%1 <%2> - ReachVariantTool").arg(variantTitle).arg(file)
+         );
    } else {
-      this->setWindowTitle(
-         QString("%1 - ReachVariantTool").arg(file)
-      );
+      if (file.empty())
+         this->setWindowTitle("ReachVariantTool");
+      else
+         this->setWindowTitle(QString("%1 - ReachVariantTool").arg(file));
    }
 }
 
