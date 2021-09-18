@@ -73,11 +73,20 @@
 <span class="keyword">end</span></pre>
 <h2>Notes</h2>
 <ul>
-   <li><p>
-               A HUD widget must display the same text to all players. If you may need to 
-               display different text to different players at the same time, you will need 
-               to define multiple widgets and manage their visibility and text appropriately.
-            </p></li>
+   <li>
+               <p>
+                  A HUD widget must display the same format string to all players. If you may 
+                  need to display completely different text to different players at the same 
+                  time, you will need to define multiple widgets and manage their visibility 
+                  and text appropriately.
+               </p>
+               <p>
+                  Some format string parameters make it possible to display different values 
+                  within a single string, for each player viewing the widget. The 
+                  <a href="script/api/ns_unnamed/hud_player.html">hud_player</a> variable is one 
+                  such parameter.
+               </p>
+            </li>
 </ul>
       </main>
       <script src="resources/sidebar.js"></script>

@@ -105,30 +105,30 @@
 <p>Set whether an object displays a progress bar, and who should be able to see it.</p>
 <h2>Arguments</h2>
 <dl>
-   <dt><a href="script/api/player-set.html">who</a></dt>
-      <dd><p>A group of players.</p></dd>
    <dt>timer</dt>
       <dd><p>
                   The word <var>none</var>, or an integer constant indicating the index of an 
                   object.timer variable, or a relative alias of an object-timer variable 
                   prefixed with <code>object.</code> i.e. <code>object.alias_name</code>.
                </p></dd>
+   <dt><a href="script/api/player-set.html">who</a></dt>
+      <dd><p>A group of players.</p></dd>
 </dl>
 <h2>Example</h2>
 <pre>
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"koth_hill</span>" <span class="keyword">do</span>
-   current_object.set_progress_bar(everyone, 3)
+   current_object.set_progress_bar(3, everyone)
 <span class="keyword">end</span>
 
 <span class="keyword">alias</span> capture_timer = object.timer[0]
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"territory</span>" <span class="keyword">do</span>
    <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">player</span> <span class="keyword">do</span>
-      current_object.set_progress_bar(mod_player, current_player, 1, object.capture_timer)
+      current_object.set_progress_bar(object.capture_timer, mod_player, current_player, 1)
    <span class="keyword">end</span>
 <span class="keyword">end</span>
 
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"ignore_me</span>" <span class="keyword">do</span>
-   current_object.set_progress_bar(everyone, none)
+   current_object.set_progress_bar(none, everyone)
 <span class="keyword">end</span></pre>
 <h2>See also</h2>
 <ul>
