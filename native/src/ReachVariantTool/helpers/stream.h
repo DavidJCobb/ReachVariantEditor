@@ -168,6 +168,9 @@ namespace cobb {
          inline uint32_t get_overshoot_bits()  const noexcept { return this->overflow; }
          inline uint32_t get_overshoot_bytes() const noexcept { return this->overflow / 8; }
          //
+         inline bool is_at_end() const noexcept {
+            return this->offset == this->length;
+         }
          inline bool is_in_bounds(uint32_t bytes = 0) const noexcept {
             if (bytes)
                return this->offset + bytes <= this->length;

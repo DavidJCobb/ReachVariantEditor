@@ -125,16 +125,19 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       return false;
    }
    offset_after_hashable = stream.get_bytespan();
-   if (!reader.is_in_bounds()) {
-      error_report.state  = GameEngineVariantLoadError::load_state::failure;
-      error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
-      return false;
-   }
-   this->remainingData.read(stream, this->header.end()); // TODO: this can fail and it'll signal errors to (error_report) appropriately; should we even care?
+   if (!reader.is_at_end()) {
+      if (!reader.is_in_bounds()) {
+         error_report.state  = GameEngineVariantLoadError::load_state::failure;
+         error_report.reason = GameEngineVariantLoadError::load_failure_reason::block_ended_early;
+         return false;
+      }
+      this->remainingData.read(stream, this->header.end()); // TODO: this can fail and it'll signal errors to (error_report) appropriately; should we even care?
       //
       // Specifically, a 360-era modded gametype, "SvE Mythic Infection," ends its MPVR block early but still has a full-size block length i.e. 0x5028, so 
       // the _eof block ends up inside of here AND we hit the actual end-of-file early, causing (remainingData.read) to fail. However, we can still read 
       // the game variant data; I haven't tested whether MCC can.
+      //
+   }
    //
    if (!block_type_is_gvar) {
       auto     hasher   = cobb::sha1();

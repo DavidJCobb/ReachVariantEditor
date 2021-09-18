@@ -4,7 +4,7 @@ IDI_ICON1		ICON		DISCARDABLE	"ReachVariantTool.ico"
 #define VER_MAJOR 2
 #define VER_MINOR 1
 #define VER_PATCH 8
-#define VER_BUILD 1
+#define VER_BUILD 2
 
 // No need to edit anything below here. :)
 
