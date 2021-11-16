@@ -107,13 +107,15 @@
 <dl>
    <dt><a href="script/api/number.html">min</a></dt>
       <dd><p>
-                  A number between -1 and 100, inclusive. A value of 10 represents one Forge 
-                  unit.
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
+                  unit. The player will not be able to see the waypoint unless they are 
+                  further away than this distance.
                </p></dd>
    <dt><a href="script/api/number.html">max</a></dt>
       <dd><p>
-                  A number between -1 and 100, inclusive. A value of 10 represents one Forge 
-                  unit.
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
+                  unit. The player will not be able to see the waypoint unless they are 
+                  closer than this distance.
                </p></dd>
 </dl>
 <h2>Example</h2>
@@ -121,7 +123,15 @@
 <span class="keyword">for</span> <span class="subkeyword">each</span> <span class="subkeyword">object</span> <span class="subkeyword">with</span> <span class="subkeyword">label</span> <span class="string">"koth_hill</span>" <span class="keyword">do</span>
    current_object.set_waypoint_range(0, 50)
 <span class="keyword">end</span></pre>
-<h2>See also</h2>
+<h2>Notes</h2>
+<ul>
+   <li><p>
+               Most Megalo functions that work with distances use a value of 1 to represent 
+               <em>one tenth</em> of a Forge unit. However, this function uses a value of 1 
+               to represent <em>one entire</em> Forge unit. Be mindful of the difference 
+               when using this function together with the others.
+            </p></li>
+</ul><h2>See also</h2>
 <ul>
    <li><a href="script/api/object/actions/set_waypoint_icon.html">object.set_waypoint_icon</a></li>
    <li><a href="script/api/object/actions/set_waypoint_priority.html">object.set_waypoint_priority</a></li>

@@ -32,6 +32,11 @@ namespace content {
       for (auto* child : this->children) {
          if (child->type != t)
             continue;
+         if (t == entry_type::action || t == entry_type::condition) {
+            auto* casted = (api_method*)child;
+            if (casted->is_stub)
+               continue;
+         }
          if (name.compare(child->name, Qt::CaseInsensitive) == 0)
             return child;
          if (name.compare(child->name2, Qt::CaseInsensitive) == 0)

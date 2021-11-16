@@ -357,6 +357,9 @@ namespace Megalo {
                   // bail out of this branch without making the nested block share a trigger with the 
                   // containing function block, IF both blocks have an event type and these types differ 
                   // from each other.
+                  // 
+                  // TODO: If we allow event handlers within nested blocks, we need to ensure that a for-loop 
+                  // can't be an event handler. The game considers that an invalid file.
                   //
                   item->trigger = this->trigger; // get the inner Block to write into the function's trigger
                   this->trigger->blockType = _block_type_to_trigger_type(item->type);
@@ -429,6 +432,61 @@ namespace Megalo {
                t->blockType = block_type::for_each_team;
                break;
          }
+         if (this->event != Event::none) {
+            //
+            // "on:for workaround:"
+            //
+            // The game engine considers files invalid if they contain constructions like:
+            // 
+            //    on event name: for anything do
+            //    end
+            // 
+            // The solution is to create a wrapper trigger:
+            // 
+            //    on event name: do
+            //       for anything do
+            //       end
+            //    end
+            // 
+            // The code to compile blocks will need to check for a wrapper trigger for 
+            // inner blocks when compiling their containing outer blocks.
+            //
+            switch (this->type) {
+               case Type::for_each_object:
+               case Type::for_each_object_with_label:
+               case Type::for_each_player:
+               case Type::for_each_player_randomly:
+               case Type::for_each_team:
+                  this->tr_wrap = new Trigger;
+                  {
+                     size_t wi = compiler.results.triggers.size(); // index of this trigger in the full trigger list
+                     compiler.results.triggers.push_back(this->tr_wrap);
+                     //
+                     auto et = t->entryType;
+                     this->tr_wrap->entryType = et;
+                     t->entryType = entry_type::subroutine;
+                     if (this->event == Event::double_host_migration) // double host migration uses the same entry_type as host migration, so we need to special-case it
+                        compiler.results.events.indices.doubleHostMigrate = wi;
+                     else
+                        compiler.results.events.set_index_of_event(et, wi);
+                     //
+                     // Have the wrapper call the inner trigger:
+                     //
+                     auto call = new Action;
+                     this->tr_wrap->opcodes.push_back(call);
+                     call->function = &actionFunction_runNestedTrigger;
+                     auto arg = (call->function->arguments[0].typeinfo.factory)();
+                     call->arguments.push_back(arg);
+                     auto arg_c = dynamic_cast<OpcodeArgValueTrigger*>(arg);
+                     assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
+                     arg_c->value = ti;
+                  }
+                  break;
+            }
+
+
+            // tr_wrap
+         }
       }
       void Block::compile(Compiler& compiler) {
          std::vector<ParsedItem*> items;
@@ -444,7 +502,7 @@ namespace Megalo {
          }
          //
          this->_make_trigger(compiler);
-         {
+         {  // Conditions on "if" blocks
             auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
             for (auto item : this->conditions_alt) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
@@ -479,7 +537,8 @@ namespace Megalo {
                   continue;
                if (block->type == Block::Type::function) // don't mis-compile function definitions as function calls
                   continue;
-               if (block->trigger != this->trigger) {
+               auto* block_trigger = block->tr_wrap ? block->tr_wrap : block->trigger; // needed for the on:for workaround
+               if (block_trigger != this->trigger) {
                   //
                   // Create a "call nested trigger" opcode.
                   //
@@ -490,7 +549,7 @@ namespace Megalo {
                   call->arguments.push_back(arg);
                   auto arg_c = dynamic_cast<OpcodeArgValueTrigger*>(arg);
                   assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
-                  arg_c->value = compiler._index_of_trigger(block->trigger);
+                  arg_c->value = compiler._index_of_trigger(block_trigger);
                   assert(arg_c->value >= 0 && "Nested block trigger isn't in the Compiler's trigger list?!");
                }
                continue;

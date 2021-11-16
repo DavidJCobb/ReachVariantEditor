@@ -30,6 +30,7 @@ namespace content {
             uint8_t teams   = 0;
             uint8_t players = 0;
             uint8_t objects = 0;
+            QString extra;
          } scope; // if this type can be a variable scope, how many of each variable type can it hold?
 
          QString get_friendly_name() const noexcept;

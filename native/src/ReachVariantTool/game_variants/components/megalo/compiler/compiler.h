@@ -48,6 +48,7 @@ namespace Megalo {
             //
          public:
             Trigger* trigger = nullptr;
+            Trigger* tr_wrap = nullptr; // wrapper trigger; use to fix (on event: for ... do end) so that it compiles properly
             QString  name; // only for functions
             QString  label_name;
             int32_t  label_index = -1;

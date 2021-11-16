@@ -133,6 +133,7 @@
     <ClInclude Include="helpers\all_html_entities.h" />
     <ClInclude Include="helpers\passkey.h" />
     <ClInclude Include="helpers\qt\save_file_to.h" />
+    <ClInclude Include="util\strip_html.h" />
     <ClInclude Include="helpers\qt\xml.h" />
     <ClInclude Include="helpers\qt\xml_html_entity_resolver.h" />
     <ClInclude Include="helpers\qt\xml_stream_reader_to_dom.h" />

@@ -9,6 +9,7 @@ ProgramOptionsDialog::ProgramOptionsDialog(QWidget* parent) : QDialog(parent) {
    ui.setupUi(this);
    //
    this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint); // no need for What's This yet
+   this->ui.tabWidget->setCurrentIndex(0);
    //
    QObject::connect(this->ui.buttonCancel, &QPushButton::clicked, this, &ProgramOptionsDialog::close);
    QObject::connect(this->ui.buttonSave,   &QPushButton::clicked, this, &ProgramOptionsDialog::saveAndClose);

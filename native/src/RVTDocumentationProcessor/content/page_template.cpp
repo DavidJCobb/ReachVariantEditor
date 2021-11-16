@@ -3,6 +3,7 @@
 #include "api_namespace.h"
 #include "api_type.h"
 #include "../util/html.h"
+#include "../util/strip_html.h"
 #include <array>
 #include <cassert>
 
@@ -77,9 +78,10 @@ namespace content {
       }
    }
 
-   QString page_template::createPage(const QString& title, const QString& body, const QString& base_href) const noexcept {
+   QString page_template::createPage(const QString& raw_title, const QString& body, const QString& base_href) const noexcept {
       assert(this->tokens.body.at >= 0);
       //
+      QString title = util::strip_html(raw_title);
       QString out;
       {
          int size = this->html.size();
@@ -140,6 +142,7 @@ namespace content {
             options.base_href = QDir(QDir("/").absoluteFilePath(options.relative_folder_path)).relativeFilePath("/");
          }
       }
+      options.title = util::strip_html(options.title);
       //
       QString out;
       {

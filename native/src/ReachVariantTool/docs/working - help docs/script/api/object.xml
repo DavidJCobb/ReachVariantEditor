@@ -8,7 +8,11 @@
       teams="2"
       players="4"
       objects="4"
-   />
+   >
+      Note that only 256 objects on the map can have variables at a time; if you try to 
+      set variables on objects past that limit, Megalo may fail to set variables on the 
+      new objects, or it may clear variables off of the old objects.
+   </scope>
    <description>
       <p>
          Object variables refer to objects that are currently present on the map. Objects 
@@ -299,12 +303,14 @@
          <method name="set_waypoint_range" id="8">
             <args>
                <arg name="min" type="number">
-                  A number between -1 and 100, inclusive. A value of 10 represents one Forge 
-                  unit.
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
+                  unit. The player will not be able to see the waypoint unless they are 
+                  further away than this distance.
                </arg>
                <arg name="max" type="number">
-                  A number between -1 and 100, inclusive. A value of 10 represents one Forge 
-                  unit.
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
+                  unit. The player will not be able to see the waypoint unless they are 
+                  closer than this distance.
                </arg>
             </args>
             <blurb>Change the distances at which waypoints are visible.</blurb>
@@ -313,6 +319,12 @@
                   current_object.set_waypoint_range(0, 50)
                end
             </example>
+            <note>
+               Most Megalo functions that work with distances use a value of 1 to represent 
+               <em>one tenth</em> of a Forge unit. However, this function uses a value of 1 
+               to represent <em>one entire</em> Forge unit. Be mindful of the difference 
+               when using this function together with the others.
+            </note>
             <category id="object-waypoint" />
          </method>
          <method name="set_shape" id="10">
