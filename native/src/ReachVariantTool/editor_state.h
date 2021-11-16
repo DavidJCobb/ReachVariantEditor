@@ -34,6 +34,10 @@ class ReachEditorState : public QObject {
       ReachFirefightWaveTraits* currentFFWaveTraits = nullptr;
       int8_t                 currentMPTeam = -1;
       //
+      QString dirSavedVariants;
+      QString dirBuiltInVariants;
+      QString dirMatchmakingVariants;
+      //
    signals:
       void variantAbandoned(GameVariant* variant); // the game variant is deleted after this is emitted
       void variantAcquired(GameVariant* variant);
@@ -64,6 +68,10 @@ class ReachEditorState : public QObject {
       void setVariantFilePath(const wchar_t* path) noexcept; /// provided for you to call after "Save As"
       void takeVariant(GameVariant* other, const wchar_t* path) noexcept;
       //
+      bool saveVariant(QWidget* parent, bool saveAs);
+      //
+      void openHelp(QWidget* parent, bool folder);
+      
    public: // getters
       ReachCustomGameOptions* customGameOptions() noexcept;
       inline ReachFirefightWaveTraits* ffWaveTraits() noexcept { return this->currentFFWaveTraits; }
@@ -76,4 +84,7 @@ class ReachEditorState : public QObject {
       inline ReachCGRespawnOptions* respawnOptions() noexcept { return this->currentRespawnOptions; }
       inline GameVariant*   variant()         noexcept { return this->currentVariant; }
       inline const wchar_t* variantFilePath() noexcept { return this->currentFile.c_str(); }
+
+      void getDefaultLoadDirectory(QString& out) const noexcept;
+      void getDefaultSaveDirectory(QString& out) const noexcept;
 };

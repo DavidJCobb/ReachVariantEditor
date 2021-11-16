@@ -69,15 +69,24 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
       this->ui.textEditor->setPlainText(decompiler.current_content);
    });
    QObject::connect(this->ui.buttonCompile, &QPushButton::clicked, [this]() {
-      auto& editor  = ReachEditorState::get();
+      auto& editor = ReachEditorState::get();
       auto  variant = editor.variant();
       if (!variant)
          return;
       auto mp = variant->get_multiplayer_data();
       if (!mp)
          return;
+      auto code = this->ui.textEditor->toPlainText();
+      if (code.trimmed().isEmpty()) {
+         if (!mp->scriptContent.triggers.empty()) {
+            auto choice = QMessageBox::question(this, tr("Are you sure?"), tr("This game variant currently has script content. Compiling an empty variant will clear all script data. Are you sure you wish to proceed?"), QMessageBox::StandardButton::No | QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
+            if (choice == QMessageBox::StandardButton::No)
+               return;
+         }
+      }
+      //
       Megalo::Compiler compiler(*mp);
-      compiler.parse(this->ui.textEditor->toPlainText());
+      compiler.parse(code);
       //
       this->updateLog(compiler);
       if (!compiler.has_errors()) {

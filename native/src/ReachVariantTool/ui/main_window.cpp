@@ -2,7 +2,6 @@
 #include <cassert>
 #include <filesystem>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileDialog>
@@ -127,6 +126,9 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          this->ui.welcomeText->setText(tr("ReachVariantTool v%1").arg(v));
       }
    }
+   this->flashTitleOnSaveTimer.setInterval(1500);
+   this->flashTitleOnSaveTimer.setSingleShot(true);
+   QObject::connect(&this->flashTitleOnSaveTimer, &QTimer::timeout, this, &ReachVariantTool::refreshWindowTitle);
    //
    auto& editor = ReachEditorState::get();
    //
@@ -142,25 +144,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          return;
       }
    });
-   {
-      std::wstring dir;
-      if (_get_mcc_directory(dir)) {
-         this->dirBuiltInVariants      = QString::fromWCharArray(dir.c_str());
-         this->dirMatchmakingVariants  = this->dirBuiltInVariants;
-         this->dirBuiltInVariants     += "/haloreach/game_variants/";
-         this->dirMatchmakingVariants += "/haloreach/hopper_game_variants/";
-         //
-         this->dirBuiltInVariants     = QDir::cleanPath(this->dirBuiltInVariants);
-         this->dirMatchmakingVariants = QDir::cleanPath(this->dirMatchmakingVariants);
-         //
-         auto env = QProcessEnvironment::systemEnvironment();
-         auto dir = QDir(env.value("USERPROFILE"));
-         dir.cd("AppData/LocalLow/MCC/LocalFiles/");
-         if (dir.exists()) {
-            this->dirSavedVariants = dir.absolutePath();
-         }
-      }
-   }
    QObject::connect(&editor, &ReachEditorState::scriptTraitsModified, [this](ReachMegaloPlayerTraits* traits) {
       if (!traits) { // traits were added, reordered, or removed
          this->regenerateNavigation();
@@ -199,6 +182,13 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
    QObject::connect(&editor, &ReachEditorState::scriptOptionsModified, [this]() {
       this->ui.optionTogglesScripted->updateModelFromGameVariant();
    });
+   QObject::connect(&editor, &ReachEditorState::variantFilePathChanged, this, [this](const wchar_t* path) {
+      this->refreshWindowTitle();
+   });
+   QObject::connect(&editor, &ReachEditorState::variantFilePathChanged, this, &ReachVariantTool::updateSaveMenuItems);
+   QObject::connect(&editor, &ReachEditorState::variantAbandoned, this, &ReachVariantTool::updateSaveMenuItems);
+   QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ReachVariantTool::updateSaveMenuItems);
+   this->updateSaveMenuItems();
    QObject::connect(this->ui.pageContentMetadata,   &PageMPMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
    QObject::connect(this->ui.pageContentFFMetadata, &PageFFMetadata::titleChanged, this, &ReachVariantTool::refreshWindowTitle);
    //
@@ -245,6 +235,12 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       this->ui.actionDebugExportStringsText->setVisible(false);
    #endif
    {
+      this->ui.actionOpen->setShortcut(QKeySequence::Open);
+      this->ui.actionSave->setShortcut(QKeySequence::Save);
+      this->ui.actionSaveAs->setShortcut(QKeySequence::SaveAs);
+      this->ui.actionHelpFolder->setShortcut(QKeySequence::HelpContents);
+   }
+   {
       auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // ughhhhh
       auto dir  = QDir(path);
       if (!dir.exists()) {
@@ -254,16 +250,10 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
          this->ui.actionHelpFolder->setToolTip(tr("The documentation folder is missing!", ""));
       }
       QObject::connect(this->ui.actionHelpWeb, &QAction::triggered, [this]() {
-         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/index.html"; // gotta do weird stuff to normalize the application path ughhhhh
-         if (!QDesktopServices::openUrl(QString("file:///") + path)) {
-            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
-            return;
-         }
+         ReachEditorState::get().openHelp(this, false);
       });
       QObject::connect(this->ui.actionHelpFolder, &QAction::triggered, [this]() {
-         auto path = QDir(QApplication::applicationDirPath()).currentPath() + "/help/"; // gotta do weird stuff to normalize the application path ughhhhh
-         if (!QDesktopServices::openUrl(QString("file:///") + path))
-            QMessageBox::critical(this, "Error", QString("Unable to open the documentation. We apologize for the inconvenience."));
+         ReachEditorState::get().openHelp(this, true);
       });
    }
    //
@@ -280,65 +270,6 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
 }
 
 #pragma region File I/O
-void ReachVariantTool::getDefaultLoadDirectory(QString& out) const noexcept {
-   using dir_type = ReachINI::DefaultPathType;
-   out.clear();
-   switch ((dir_type)ReachINI::DefaultLoadPath::uPathType.current.u) {
-      case dir_type::custom:
-         out = QString::fromUtf8(ReachINI::DefaultLoadPath::sCustomPath.currentStr.c_str());
-         return;
-      case dir_type::mcc_built_in_content:
-         out = this->dirBuiltInVariants;
-         return;
-      case dir_type::current_working_directory:
-         out = "";
-         return;
-      case dir_type::mcc_saved_content:
-         out = this->dirSavedVariants;
-         return;
-      default:
-      case dir_type::mcc_matchmaking_content:
-         out = this->dirMatchmakingVariants;
-         return;
-   }
-}
-void ReachVariantTool::getDefaultSaveDirectory(QString& out) const noexcept {
-   using dir_type = ReachINI::DefaultPathType;
-   out.clear();
-   switch ((dir_type)ReachINI::DefaultSavePath::uPathType.current.u) {
-      case dir_type::custom:
-         out = QString::fromUtf8(ReachINI::DefaultSavePath::sCustomPath.currentStr.c_str());
-         return;
-      case dir_type::mcc_built_in_content:
-         out = this->dirBuiltInVariants;
-         return;
-      case dir_type::mcc_matchmaking_content:
-         out = this->dirMatchmakingVariants;
-         return;
-      case dir_type::current_working_directory:
-         out = "";
-         return;
-      default:
-      case dir_type::path_of_open_file:
-         out = QString::fromWCharArray(ReachEditorState::get().variantFilePath());
-         if (!out.isEmpty()) {
-            if (!ReachINI::DefaultSavePath::bExcludeMCCBuiltInFolders.current.b)
-               return;
-            std::wstring path    = out.toStdWString();
-            std::wstring prefix = this->dirBuiltInVariants.toStdWString();
-            if (!cobb::path_starts_with(path, prefix)) {
-               prefix = this->dirMatchmakingVariants.toStdWString();
-               if (!cobb::path_starts_with(path, prefix))
-                  return;
-            }
-            out.clear();
-         }
-      case dir_type::mcc_saved_content:
-         out = this->dirSavedVariants;
-         return;
-   }
-}
-
 void ReachVariantTool::dragEnterEvent(QDragEnterEvent* event) {
    if (event->mimeData()->hasUrls())
       event->acceptProposedAction();
@@ -373,7 +304,7 @@ void ReachVariantTool::openFile() {
    //
    QString targetDir = this->lastFileDirectory;
    if (targetDir.isEmpty())
-      this->getDefaultLoadDirectory(targetDir);
+      ReachEditorState::get().getDefaultLoadDirectory(targetDir);
    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Game Variant"), targetDir, tr("Game Variant (*.bin);;All Files (*)"));
    if (!fileName.isEmpty()) {
       QDir dir;
@@ -426,14 +357,6 @@ void ReachVariantTool::openFile(QString fileName) {
       this->ui.MainTreeview->setCurrentItem(nullptr);
       this->ui.MainTreeview->setCurrentIndex(i); // force update of team, trait, etc., pages
    }
-   {
-      bool is_resource = false;
-      if (fileName[0] == ':') { // Qt resource?
-         is_resource = QResource(fileName).isValid();
-      }
-      this->ui.actionSave->setEnabled(!is_resource);
-      this->ui.actionSaveAs->setEnabled(true);
-   }
    this->refreshWindowTitle();
    this->ui.optionTogglesScripted->updateModelFromGameVariant();
    this->regenerateNavigation();
@@ -441,65 +364,16 @@ void ReachVariantTool::openFile(QString fileName) {
    auto mp = variant->get_multiplayer_data();
    this->ui.actionEditScript->setEnabled(mp != nullptr); // only allow access to the script editor window when we've actually loaded a Megalo variant
 }
-void ReachVariantTool::_saveFileImpl(bool saveAs) {
-   auto& editor = ReachEditorState::get();
-   if (!editor.variant()) {
-      QMessageBox::information(this, tr("No game variant is open"), tr("We do not currently support creating game variants from scratch. Open a variant and then you can save an edited copy of it."));
-      return;
-   }
-   QString fileName;
-   if (saveAs) {
-      QString defaultSave;
-      this->getDefaultSaveDirectory(defaultSave);
-      fileName = QFileDialog::getSaveFileName(
-         this,
-         tr("Save Game Variant"), // window title
-         defaultSave, // working directory and optionally default-selected file
-         tr("Game Variant (*.bin);;All Files (*)") // filetype filters
-      );
-      if (fileName.isEmpty())
-         return;
-   } else {
-      fileName = QString::fromWCharArray(editor.variantFilePath());
-   }
-   QSaveFile file(fileName);
-   if (!file.open(QIODevice::WriteOnly)) {
-      QMessageBox::information(this, tr("Unable to open file for writing"), file.errorString());
-      return;
-   }
-   //
-   GameVariantSaveProcess save_process;
-   editor.variant()->write(save_process);
-   if (save_process.variant_is_editor_only()) {
-      auto text = tr("Your game variant exceeds the limits of Halo: Reach's game variant file format. As such, the following data will have to be embedded in a non-standard way to avoid data loss:\n\n");
-      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_scripts))
-         text += tr(" - All script code\n");
-      if (save_process.has_flag(GameVariantSaveProcess::flag::uses_xrvt_strings))
-         text += tr(" - All script strings\n");
-      text += tr("\nThis data is still visible to this editor; you will not lose any of your work. However, the data is invisible to the game; moreover, if you resave this file through Halo: Reach or the Master Chief Collection, the data will then be lost.\n\nDo you still wish to save this file to <%1>?").arg(fileName);
-      //
-      QMessageBox::StandardButton result = QMessageBox::warning(
-         this,
-         tr("Incomplete game variant"),
-         text,
-         QMessageBox::Yes | QMessageBox::No,
-         QMessageBox::Yes // default button
-      );
-      if (result == QMessageBox::StandardButton::No) {
-         file.cancelWriting();
-         return;
-      }
-   }
-   if (saveAs) {
-      std::wstring temp = fileName.toStdWString();
-      editor.setVariantFilePath(temp.c_str());
-      this->refreshWindowTitle();
-   }
-   QDataStream out(&file);
-   out.setVersion(QDataStream::Qt_4_5);
-   out.writeRawData((const char*)save_process.writer.bytes.data(), save_process.writer.bytes.get_bytespan());
-   file.commit();
-   this->ui.actionSave->setEnabled(true); // if we did File -> New and then did Save As, now we need to enable Save
+//
+void ReachVariantTool::saveFile() {
+   bool result = ReachEditorState::get().saveVariant(this, false);
+   if (result)
+      this->flashTitleOnSave();
+}
+void ReachVariantTool::saveFileAs() {
+   bool result = ReachEditorState::get().saveVariant(this, true);
+   if (result)
+      this->flashTitleOnSave();
 }
 #pragma endregion
 
@@ -1038,6 +912,28 @@ void ReachVariantTool::refreshWindowTitle() {
       else
          this->setWindowTitle(QString("%1 - ReachVariantTool").arg(file));
    }
+}
+void ReachVariantTool::updateSaveMenuItems() {
+   auto& editor = ReachEditorState::get();
+   if (!editor.variant()) {
+      this->ui.actionSave->setEnabled(false);
+      this->ui.actionSaveAs->setEnabled(false);
+      return;
+   }
+   //
+   bool is_resource = false;
+   {
+      std::wstring file = ReachEditorState::get().variantFilePath();
+      if (file[0] == ':') { // Qt resource?
+         is_resource = QResource(QString::fromStdWString(file)).isValid();
+      }
+   }
+   this->ui.actionSave->setEnabled(!is_resource);
+   this->ui.actionSaveAs->setEnabled(true);
+}
+void ReachVariantTool::flashTitleOnSave() {
+   this->setWindowTitle("File saved!");
+   this->flashTitleOnSaveTimer.start();
 }
 
 QTreeWidgetItem* ReachVariantTool::getNavItemForScriptTraits(ReachMegaloPlayerTraits* traits, int32_t index) {

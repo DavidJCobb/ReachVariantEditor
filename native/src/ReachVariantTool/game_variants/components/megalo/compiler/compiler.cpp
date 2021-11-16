@@ -7,6 +7,7 @@
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
+#include "../helpers/format_strings.h"
 
 //
 // Attempt to emulate quirks in Bungie's compiler:
@@ -976,8 +977,6 @@ namespace Megalo {
       this->fatal_errors.resize(point.fatal_errors);
    }
    bool Compiler::checkpoint_has_errors(Compiler::log_checkpoint point) const noexcept {
-      if (this->warnings.size() > point.warnings)
-         return true;
       if (this->errors.size() > point.errors)
          return true;
       if (this->fatal_errors.size() > point.fatal_errors)
@@ -1013,6 +1012,78 @@ namespace Megalo {
    }
    void Compiler::raise_warning(const QString& text) {
       this->warnings.emplace_back(text, this->state);
+   }
+   void Compiler::validate_format_string_tokens(const QString& text) {
+      auto issues = check_format_string(text);
+      if (issues.empty())
+         return;
+      for (const auto& issue : issues) {
+         if (issue.code.size() < 2) {
+            if (issue.index > 0) {
+               QChar c = text[(uint)issue.index - 1];
+               switch (c.unicode()) {
+                  case 'n':
+                  case 'o':
+                  case 'p':
+                  case 's':
+                  case 't':
+                     this->raise_warning(
+                        QString("The percentage symbol at position %1 in the string will be interpreted by the game as an incorrect format string placeholder. The game will refuse to display this string. (Did you mean \"%2\" instead of \"%3\"?)")
+                           .arg(QString("%1").arg(issue.index), QString("%") + c, QString(c) + '%')
+                     );
+                     continue;
+               }
+            }
+            this->raise_warning(
+               QString("The percentage symbol at position %1 in the string will be interpreted by the game as an incorrect format string placeholder. The game will refuse to display this string. If you wish to write an actual percentage sign, write \"%%\" instead.")
+                  .arg(issue.index)
+            );
+            continue;
+         }
+         QChar code = issue.code.back();
+         if (issue.crash) {
+            this->raise_error(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" will crash the game when displayed.")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+         if (issue.no_params_allowed) {
+            this->raise_warning(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" are not allowed to have extra parameters between the \"%\" symbol and \"%3\". The game will refuse to display this string.")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+         if (code == 'c') {
+            this->raise_warning(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" are broken and cannot be used to display variables. The game may refuse to display this string.")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+         if (issue.always_one) {
+            this->raise_warning(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" are broken and always act as if you've asked them to display the number 1.")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+         if (issue.is_floating_point) {
+            this->raise_warning(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" are only usable for decimal numbers, but decimal numbers can't be used in Megalo. These codes always act as if you've asked them to display the smallest possible positive decimal number (basically zero).")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+         if (issue.error) {
+            this->raise_warning(
+               QString("Bad format string code \"%1\" at position %2 in the string: codes of the form \"%%3\" are not recognized by the game. The game will refuse to display the string.")
+                  .arg(issue.code, QString("%1").arg(issue.index), code)
+            );
+            continue;
+         }
+      }
    }
    //
    void Compiler::parse(QString text) {
@@ -1867,11 +1938,14 @@ namespace Megalo {
             if (!argument.is_at_effective_end()) {
                this->raise_error(QString("Failed to parse script argument %1 (type %2). There was unexpected content at the end of the argument.").arg(script_arg_index + 1).arg(function.arguments[mapped_index].typeinfo.friendly_name));
             } else {
-               if (result.is_unresolved_string())
+               if (result.is_unresolved_string()) {
+                  auto s = result.get_unresolved_string();
                   unresolved_strings.insert(
-                     result.get_unresolved_string(), // key
+                     s, // key
                      unresolved_str(*current_argument, opcode_arg_part) // value
                   );
+                  this->validate_format_string_tokens(s);
+               }
             }
          }
          if (another && has_more) {
@@ -1908,8 +1982,6 @@ namespace Megalo {
             auto& mapping = action.mapping;
             if (mapping.arg_context != OpcodeFuncToScriptMapping::game_namespace)
                continue;
-            if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
-               results.push_back(&action);
             if (cobb::qt::stricmp(function_name, mapping.primary_name) == 0 || cobb::qt::stricmp(function_name, mapping.secondary_name) == 0)
                results.push_back(&action);
          }
@@ -2189,86 +2261,88 @@ namespace Megalo {
             fail = true;
          }
          //
-         const OpcodeArgBase& base = match->arguments[index];
-         //
-         // Verify that the variable we're assigning our return value to is of the right type:
-         //
-         auto target_type = assign_to->get_type();
-         if (&base.typeinfo != target_type) {
-            QString context_name = "";
-            if (context)
-               context_name = QString("%1.").arg(context->get_type()->internal_name.c_str());
-            //
-            if (target_type) {
-               this->raise_error(call_start, QString("Function %1%2 returns a %3, not a %4.")
-                  .arg(context_name)
-                  .arg(function_name)
-                  .arg(base.typeinfo.internal_name.c_str())
-                  .arg(target_type->internal_name.c_str())
-               );
-            } else {
-               this->raise_error(call_start, QString("Function %1%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
-                  .arg(context_name)
-                  .arg(function_name)
-                  .arg(base.typeinfo.internal_name.c_str())
-               );
-            }
-            fail = true;
-         }
-         //
          if (!fail) {
+            const OpcodeArgBase& base = match->arguments[index];
             //
-            // The type is correct, so set the out-argument.
+            // Verify that the variable we're assigning our return value to is of the right type:
             //
-            opcode->arguments[index] = (base.typeinfo.factory)();
-            opcode->arguments[index]->compile(*this, *assign_to, 0);
+            auto target_type = assign_to->get_type();
+            if (&base.typeinfo != target_type) {
+               QString context_name = "";
+               if (context)
+                  context_name = QString("%1.").arg(context->get_type()->internal_name.c_str());
+               //
+               if (target_type) {
+                  this->raise_error(call_start, QString("Function %1%2 returns a %3, not a %4.")
+                     .arg(context_name)
+                     .arg(function_name)
+                     .arg(base.typeinfo.internal_name.c_str())
+                     .arg(target_type->internal_name.c_str())
+                  );
+               } else {
+                  this->raise_error(call_start, QString("Function %1%2 returns a %3. Could not verify whether you are assigning it to a variable of the correct type.")
+                     .arg(context_name)
+                     .arg(function_name)
+                     .arg(base.typeinfo.internal_name.c_str())
+                  );
+               }
+               fail = true;
+            }
             //
-            if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result) {
+            if (!fail) {
                //
-               // There are several opcodes that will return a result only if there is a result 
-               // to return. The function to get a player's Armor Ability, for example, will only 
-               // write to the specified object variable if the player has an Armor Ability; if 
-               // the player does not, then the variable is not modified (as opposed to clearing 
-               // it). The OpcodeFuncToScriptMapping class allows opcodes to have two names, and 
-               // offers a flag which indicates alternate behavior for the second name. This 
-               // allows us to do this:
+               // The type is correct, so set the out-argument.
                //
-               //    some_object = current_player.get_armor_ability()
+               opcode->arguments[index] = (base.typeinfo.factory)();
+               opcode->arguments[index]->compile(*this, *assign_to, 0);
                //
-               // as a shorthand for this:
-               //
-               //    some_object = no_object
-               //    some_object = current_player.try_get_armor_ability()
-               //
-               // We just compile an assignment to none/zero.
-               //
-               if (cobb::qt::stricmp(function_name, match->mapping.secondary_name) == 0) {
-                  auto base  = &_get_assignment_opcode();
-                  auto blank = new Action;
-                  blank->function = base;
-                  blank->arguments.resize(3);
-                  blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
-                  auto result = blank->arguments[0]->compile(*this, *assign_to, 0);
-                  if (result.is_failure())
-                     this->raise_error("Failed to compile the lefthand side of an implicit assignment (before a function call).");
+               if (match->mapping.flags & OpcodeFuncToScriptMapping::flags::secondary_property_zeroes_result) {
                   //
-                  auto lhs = dynamic_cast<OpcodeArgValueAnyVariable*>(blank->arguments[0]);
-                  assert(lhs && "Each side of the assignment opcode should be an OpcodeArgValueAnyVariable. If for any reason this has changed, update the compiler code.");
-                  auto rhs = blank->arguments[1] = lhs->create_zero_or_none(); // rhs
-                  if (!rhs)
-                     this->raise_error("Failed to compile the righthand side of an implicit assignment (before a function call).");
+                  // There are several opcodes that will return a result only if there is a result 
+                  // to return. The function to get a player's Armor Ability, for example, will only 
+                  // write to the specified object variable if the player has an Armor Ability; if 
+                  // the player does not, then the variable is not modified (as opposed to clearing 
+                  // it). The OpcodeFuncToScriptMapping class allows opcodes to have two names, and 
+                  // offers a flag which indicates alternate behavior for the second name. This 
+                  // allows us to do this:
                   //
-                  auto op_string = string_scanner("=");
-                  blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
-                  result = blank->arguments[2]->compile(*this, op_string, 0);
-                  if (result.is_failure())
-                     this->raise_error("Failed to compile the operator in an implicit assignment (before a function call).");
+                  //    some_object = current_player.get_armor_ability()
                   //
-                  auto statement = new Script::Statement;
-                  statement->set_start(this->state);
-                  statement->set_end(this->state);
-                  statement->opcode = blank;
-                  this->block->insert_item(statement);
+                  // as a shorthand for this:
+                  //
+                  //    some_object = no_object
+                  //    some_object = current_player.try_get_armor_ability()
+                  //
+                  // We just compile an assignment to none/zero.
+                  //
+                  if (cobb::qt::stricmp(function_name, match->mapping.secondary_name) == 0) {
+                     auto base  = &_get_assignment_opcode();
+                     auto blank = new Action;
+                     blank->function = base;
+                     blank->arguments.resize(3);
+                     blank->arguments[0] = (base->arguments[0].typeinfo.factory)(); // lhs
+                     auto result = blank->arguments[0]->compile(*this, *assign_to, 0);
+                     if (result.is_failure())
+                        this->raise_error("Failed to compile the lefthand side of an implicit assignment (before a function call).");
+                     //
+                     auto lhs = dynamic_cast<OpcodeArgValueAnyVariable*>(blank->arguments[0]);
+                     assert(lhs && "Each side of the assignment opcode should be an OpcodeArgValueAnyVariable. If for any reason this has changed, update the compiler code.");
+                     auto rhs = blank->arguments[1] = lhs->create_zero_or_none(); // rhs
+                     if (!rhs)
+                        this->raise_error("Failed to compile the righthand side of an implicit assignment (before a function call).");
+                     //
+                     auto op_string = string_scanner("=");
+                     blank->arguments[2] = (base->arguments[2].typeinfo.factory)(); // operator
+                     result = blank->arguments[2]->compile(*this, op_string, 0);
+                     if (result.is_failure())
+                        this->raise_error("Failed to compile the operator in an implicit assignment (before a function call).");
+                     //
+                     auto statement = new Script::Statement;
+                     statement->set_start(this->state);
+                     statement->set_end(this->state);
+                     statement->opcode = blank;
+                     this->block->insert_item(statement);
+                  }
                }
             }
          }
@@ -2454,9 +2528,23 @@ namespace Megalo {
       }
       Script::Alias* item = nullptr;
       //
+      auto    prior = this->backup_stream_state();
       int32_t value;
       if (this->extract_integer_literal(value)) { // need to handle this separately from word parsing so that negative numbers are interpreted properly
-         item = new Script::Alias(*this, name, value);
+         //
+         // Need to do some mildly cursed stuff to handle built-in names that 
+         // start with numbers e.g. 35_spire_fp.
+         //
+         auto after = this->backup_stream_state();
+         this->restore_stream_state(prior);
+         auto word  = this->extract_word();
+         auto alter = this->backup_stream_state();
+         if (after.offset < alter.offset) {
+            item = new Script::Alias(*this, name, word);
+         } else {
+            item = new Script::Alias(*this, name, value);
+            this->restore_stream_state(after);
+         }
       } else {
          auto target = this->extract_word();
          if (target.isEmpty()) {

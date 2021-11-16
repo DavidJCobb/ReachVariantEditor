@@ -451,6 +451,18 @@
     <ClCompile Include="services\syntax_highlight_option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="services\RVTThemeEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\qt\color.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="helpers\qt\string_scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\helpers\format_strings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -616,6 +628,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\generic\ColorPickerButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="services\RVTThemeEngine.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1114,6 +1129,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="services\syntax_highlight_option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\string_scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\helpers\format_strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

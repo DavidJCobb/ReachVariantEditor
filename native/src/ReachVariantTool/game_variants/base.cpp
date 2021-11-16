@@ -107,13 +107,13 @@ bool ReachBlockMPVR::read(reach_block_stream& reader) {
       case ReachGameEngine::forge:
          this->data = new GameVariantDataMultiplayer(this->type == ReachGameEngine::forge);
          break;
+      case ReachGameEngine::firefight:
+         this->data = new GameVariantDataFirefight();
+         break;
       case ReachGameEngine::none: // TODO: Ask the user what type we should use.
          // fall through
       case ReachGameEngine::campaign:
          // fall through
-      case ReachGameEngine::firefight:
-         this->data = new GameVariantDataFirefight();
-         break;
       default:
          error_report.state         = GameEngineVariantLoadError::load_state::failure;
          error_report.failure_point = GameEngineVariantLoadError::load_failure_point::variant_type;

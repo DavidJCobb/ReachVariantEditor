@@ -238,6 +238,7 @@ namespace Megalo {
          void raise_fatal(const QString& text);
          void raise_fatal(const pos& pos, const QString& text);
          void raise_warning(const QString& text);
+         void validate_format_string_tokens(const QString&);
          //
          void parse(QString text); // parse and compile the text
          void apply(); // applies compiled content to the game variant, and relinquishes ownership of it

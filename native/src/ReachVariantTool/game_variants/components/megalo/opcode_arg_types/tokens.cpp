@@ -2,6 +2,7 @@
 #include "../../../types/multiplayer.h"
 #include "variables/all_core.h"
 #include "../compiler/compiler.h"
+#include "../helpers/format_strings.h"
 
 namespace Megalo {
    bool OpcodeStringToken::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
@@ -166,6 +167,10 @@ namespace Megalo {
                return arg_compile_result::failure(QString("The format string provided is an exact match to multiple strings in the table. Unable to figure out which one you want."));
             if (!this->string)
                return arg_compile_result::unresolved_string(temp).set_more(arg_compile_result::more_t::optional);
+            else {
+               const auto& content = this->string->get_content(reach::language::english);
+               compiler.validate_format_string_tokens(QString::fromUtf8(content.data(), content.size()));
+            }
             return arg_compile_result::success().set_more(arg_compile_result::more_t::optional);
          }
          int32_t index;

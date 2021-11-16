@@ -56,7 +56,7 @@
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtInstall>5.15.2 MSVC2019 x64</QtInstall>
     <QtModules>core;gui;help;widgets</QtModules>
-    <QtDeploy>false</QtDeploy>
+    <QtDeploy>true</QtDeploy>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -120,6 +120,7 @@
     <ClCompile Include="game_variants\components\megalo\conditions.cpp" />
     <ClCompile Include="game_variants\components\megalo\decompiler\decompiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\forge_label.cpp" />
+    <ClCompile Include="game_variants\components\megalo\helpers\format_strings.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg.cpp" />
     <ClCompile Include="game_variants\components\megalo\opcode_arg_types\all_constants.cpp" />
@@ -311,6 +312,7 @@
     <ClInclude Include="game_variants\components\megalo\compiler\parsing\variable_reference.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\types.h" />
     <ClInclude Include="game_variants\components\megalo\decompiler\decompiler.h" />
+    <ClInclude Include="game_variants\components\megalo\helpers\format_strings.h" />
     <ClInclude Include="game_variants\components\megalo\opcode.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\fireteam_list.h" />
     <ClInclude Include="game_variants\components\megalo\opcode_arg_types\icons.h" />

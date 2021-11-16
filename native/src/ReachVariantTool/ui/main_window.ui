@@ -427,24 +427,15 @@
    <property name="text">
     <string>Open...</string>
    </property>
-   <property name="shortcut">
-    <string>O</string>
-   </property>
   </action>
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
   </action>
   <action name="actionSaveAs">
    <property name="text">
     <string>Save As...</string>
-   </property>
-   <property name="shortcut">
-    <string>A</string>
    </property>
   </action>
   <action name="actionExit">

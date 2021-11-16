@@ -13,33 +13,157 @@
          string itself.
       </p>
       <p>
-         The known format codes are:
+         A percentage sign (<code>%</code>) marks the start of a placeholder; the 
+         content after it determines the type of placeholder to use, and in some 
+         cases, the options to use for the placeholder. If you want to write an 
+         actual percentage sign in text, you must type <code>%%</code>. Using a 
+         placeholder symbol incorrectly (including by writing just one <code>%</code> 
+         symbol) will cause Halo: Reach to refuse to display your string.
       </p>
-      <dl>
-         <dt>%p</dt>
-            <dd>Placeholder for a player. Prints their gamertag.</dd>
-         <dt>%n</dt>
-            <dd>Placeholder for a number.</dd>
-         <dt>%s</dt>
-            <dd>Placeholder for any other value that should display as text.</dd>
-      </dl>
+      
+      <h2>Placeholder codes by type</h2>
+      <style>
+      .default-result{display:block;border-top:1px solid #AAA;padding:.25em 0 0 0}
+      </style>
       <p>
-         Variables with the following types can be substituted into the string:
+         Different placeholder codes are intended to format different kinds of 
+         information. If you pass a value of the wrong type (e.g. passing a 
+         player variable for a placeholder meant for numbers), then you'll see 
+         a default value which varies depending on the placeholder code.
+      </p>
+      <p>
+         If you don't pass any value at all, then the placeholder will be 
+         cut out of the string, but the string should still display as long as 
+         the placeholder itself was valid.
+      </p>
+      
+      <h3>Integer number</h3>
+      <dl>
+         <dt>%n</dt>
+         <dt>%o</dt>
+         <dt>%p</dt>
+         <dt>%s</dt>
+         <dt>%t</dt>
+            <dd>
+               All of these codes print the number normally, as you would expect.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0</code>
+               </div>
+            </dd>
+      </dl>
+      
+      <h3>Object</h3>
+      <dl>
+         <dt>%n</dt>
+         <dt>%o</dt>
+         <dt>%p</dt>
+         <dt>%s</dt>
+         <dt>%t</dt>
+            <dd>Displays the name of the object as defined in the map file. Note 
+            that most objects don't have actual names defined, and will instead 
+            display <code>unknown</code>.</dd>
+      </dl>
+      
+      <h3>Player</h3>
+      <dl>
+         <dt>%n</dt>
+         <dt>%o</dt>
+         <dt>%p</dt>
+         <dt>%s</dt>
+         <dt>%t</dt>
+            <dd>Displays the player's Xbox LIVE gamertag.</dd>
+      </dl>
+      
+      <h3>Timer</h3>
+      <dl>
+         <dt>%n</dt>
+         <dt>%o</dt>
+         <dt>%p</dt>
+         <dt>%s</dt>
+         <dt>%t</dt>
+            <dd>Displays minutes and seconds, separated with a colon and with 
+            the seconds padded to two digits, e.g. <code>0:05</code>.</dd>
+      </dl>
+      
+      <h3>Unknown</h3>
+      <dl>
+         <dt>%c</dt>
+            <dd>Sometimes, this fails as an error and prevents the string from being 
+            displayed. Other times, it produces a line break followed by the number 
+            25. Notably, in ASCII, the number 25 is used to encode the percentage sign.</dd>
+         <dt>%d</dt>
+         <dt>%i</dt>
+         <dt>%u</dt>
+         <dt>%x</dt>
+         <dt>%X</dt>
+            <dd>
+               <p>Seems to always produce <code>1</code>, no matter what you pass in.</p>
+               <p>
+                  In the C and C++ programming languages, these codes are used to 
+                  format integers. You can put additional settings between the 
+                  percentage sign and the number, in order to pad the number to 
+                  a certain length using spaces or zeroes. Those settings work 
+                  here, but they always act as if you passed in the number 1; 
+                  <code>%03d</code>, for example, always produces <code>001</code>.
+               </p>
+            </dd>
+         <dt>%S</dt>
+         <dt>%Z</dt>
+            <dd>Crashes the game instantly, when displayed.</dd>
+      </dl>
+      
+      <h3>Decimal number</h3>
+      <p>
+         Format codes exist for decimal numbers, but it's not clear why. None of 
+         the variable types available to Megalo are decimal numbers, and these 
+         codes don't work for timers (except when timers have special meanings 
+         for them).
+      </p>
+      <p>
+         These codes seem to be meant for double-precision floating-point values.
       </p>
       <dl>
-         <dt>number</dt>
-            <dd>Displays normally.</dd>
-         <dt>object</dt>
-            <dd>Displays the name of the object; however, most objects don't have 
-            actual names defined and will show "unknown".</dd>
-         <dt>player</dt>
-            <dd>Displays the player's Xbox LIVE Gamertag.</dd>
-         <dt>team</dt>
-            <dd>Displays as a blank, zero-length value.</dd>
-         <dt>timer</dt>
-            <dd>Displays minutes and seconds, separated with a colon and each padded 
-            to two digits.</dd>
+         <dt>%a</dt>
+            <dd>
+               Prints the number in hexadecimal (base-16) format.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0x0.0000000000001p-1022</code>
+               </div>
+            </dd>
+         <dt>%A</dt>
+            <dd>
+               Same as <code>%a</code>, but the result uses all-caps.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0X0.0000000000001P-1022</code>
+               </div>
+            </dd>
+         <dt>%e</dt>
+            <dd>
+               Prints the number using scientific notation.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0.000000e+00</code>
+               </div>
+            </dd>
+         <dt>%f</dt>
+            <dd>
+               Prints the number out to six significant figures.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0.000000</code>
+               </div>
+            </dd>
+         <dt>%g</dt>
+            <dd>
+               Prints the number out to exactly as many decimal points as is 
+               necessary if the number has fewer than six significant digits 
+               before the decimal point and fewer than four after; otherwise, 
+               uses scientific notation like <code>%e</code> does.
+               <div class="default-result">
+                  <b>Default result:</b> <code>0</code>
+               </div>
+            </dd>
       </dl>
+      
+      <h2>Examples</h2>
       <p>
          Here's an example of how to use format strings: this code, taken from Slayer, 
          displays the number of points needed to win if the game variant has a score 
@@ -61,5 +185,10 @@
             end
          end
       </pre>
+      <p>
+         Note that the game appears to handle strings with improper format codes 
+         by simply refusing to display the string at all.
+      </p>
+      <!-- supplying a string with codes, but not enough values to fill those codes, substitutes in blank -->
    </description>
 </script-type>

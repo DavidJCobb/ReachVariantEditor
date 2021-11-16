@@ -214,6 +214,16 @@
          </description>
          <category id="unscoped-widget" />
       </member>
+      <member name="script_traits" type="player-traits" indexed="true" read-only="true">
+         <blurb>One of the sixteen sets of player traits available to scripts.</blurb>
+         <description>
+            <p>
+               Scripts can be given access to <a href="/editor/script_window/script-traits.html">up to sixteen sets of player traits</a>. 
+               These traits can be applied to players by the script.
+            </p>
+         </description>
+         <category id="traits" />
+      </member>
       <member name="killed_object" type="object" read-only="true">
          <blurb>During an <a href="script/events">object death event</a>, this is the 
          killed object.</blurb>

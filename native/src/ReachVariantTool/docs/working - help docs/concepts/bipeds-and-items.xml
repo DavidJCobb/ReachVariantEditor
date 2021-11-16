@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<article>
+   <title>Bipeds and items</title>
+   <body>
+      <p>
+         A "biped" is any character that a player can theoretically control. This includes 
+         typical Spartans and Elites, but it also includes Monitors and spawned holograms. 
+         This article is an overview of several aspects of bipeds that can be relevant when 
+         writing scripts.
+      </p>
+      
+      <h2><a name="positioning">Positioning</a></h2>
+      <p>
+         When attempting to attach objects to a biped, or position objects relative to a 
+         biped, it is important to understand the nuances of how bipeds' positions work.
+      </p>
+      <p>
+         A "grounded" biped &mdash; that is, one which walks on the ground, like Spartans 
+         and Elites &mdash; will have a rotation that does <em>not</em> match the direction 
+         that its player is looking in. Rather, the position and rotation of a biped is 
+         more closely linked to its physics and animation; typically, a biped will be 
+         facing toward whatever direction its legs are pointing in, though its facing 
+         direction can change rapidly as the biped switches between strafing and non-strafing 
+         animations.
+      </p>
+      <p>
+         A "grounded" biped's rotation will more accurately reflect the player's camera 
+         when the biped is in midair, but it still won't match up in real-time. If the 
+         player rapidly looks to the side while in midair, the biped's rotation will 
+         animate in that direction, possibly at a slower speed than the player's camera 
+         speed.
+      </p>
+      <p>
+         "Grounded" bipeds are always considered upright; even if the player is looking 
+         upward or downward, the biped's "forward" direction will always be level with 
+         flat ground.
+      </p>
+      
+      <h2><a name="attachment">Attachment</a></h2>
+      <p>
+         A biped's held items are attached to the biped; the object attachment system 
+         that Megalo has access to appears to be the same system that the game uses 
+         internally for equipped items. Similarly, a biped occupying a vehicle is 
+         attached to that vehicle.
+      </p>
+   </body>
+</article>

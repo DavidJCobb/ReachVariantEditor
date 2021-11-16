@@ -95,6 +95,8 @@ namespace Megalo {
          DetailedEnumValue("recon"),
          DetailedEnumValue("recover"),
          DetailedEnumValue("ammo"),
+         DetailedEnumValue("skull"),
+         DetailedEnumValue("forge"),
       });
    }
    

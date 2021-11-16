@@ -1,4 +1,6 @@
 #include "script_editor.h"
+#include <QMenuBar>
+#include <QResource>
 #include "../game_variants/data/object_types.h"
 #include "localized_string_editor.h"
 
@@ -53,4 +55,73 @@ MegaloScriptEditorWindow::MegaloScriptEditorWindow(QWidget* parent) : QDialog(pa
          return;
       }
    });
+   //
+   auto* menubar = new QMenuBar(this);
+   this->layout()->setMenuBar(menubar);
+   {
+      auto* root = new QMenu(tr("File"), menubar);
+      {
+         auto* action = this->menu_actions.save = new QAction(tr("Save"), root);
+         QObject::connect(action, &QAction::triggered, this, [this]() { ReachEditorState::get().saveVariant(this, false); });
+      }
+      {
+         auto* action = this->menu_actions.saveAs = new QAction(tr("Save As..."), root);
+         QObject::connect(action, &QAction::triggered, this, [this]() { ReachEditorState::get().saveVariant(this, true); });
+      }
+      root->addAction(this->menu_actions.save);
+      root->addAction(this->menu_actions.saveAs);
+      menubar->addAction(root->menuAction());
+   }
+   {
+      auto* root = new QMenu(tr("Help"), menubar);
+      {
+         auto* action = this->menu_actions.help.web = new QAction(tr("View Help (in browser)"), root);
+         QObject::connect(action, &QAction::triggered, this, [this]() { ReachEditorState::get().openHelp(this, false); });
+      }
+      {
+         auto* action = this->menu_actions.help.folder = new QAction(tr("View Help (in folder)"), root);
+         QObject::connect(action, &QAction::triggered, this, [this]() { ReachEditorState::get().openHelp(this, true); });
+      }
+      root->addAction(this->menu_actions.help.web);
+      root->addAction(this->menu_actions.help.folder);
+      menubar->addAction(root->menuAction());
+   }
+   {
+      this->menu_actions.save->setShortcut(QKeySequence::Save);
+      this->menu_actions.saveAs->setShortcut(QKeySequence::SaveAs);
+      this->menu_actions.help.folder->setShortcut(QKeySequence::HelpContents);
+   }
+   //
+   auto& editor = ReachEditorState::get();
+   QObject::connect(&editor, &ReachEditorState::variantFilePathChanged, this, &MegaloScriptEditorWindow::updateSaveMenuItems);
+   QObject::connect(&editor, &ReachEditorState::variantAbandoned,       this, &MegaloScriptEditorWindow::updateSaveMenuItems);
+   QObject::connect(&editor, &ReachEditorState::variantAcquired,        this, &MegaloScriptEditorWindow::updateSaveMenuItems);
+   this->updateSaveMenuItems();
+}
+
+void MegaloScriptEditorWindow::keyPressEvent(QKeyEvent* event) {
+   if (event->matches(QKeySequence::Cancel)) {
+      event->ignore();
+      return;
+   }
+   QDialog::keyPressEvent(event);
+}
+
+void MegaloScriptEditorWindow::updateSaveMenuItems() {
+   auto& editor = ReachEditorState::get();
+   if (!editor.variant()) {
+      this->menu_actions.save->setEnabled(false);
+      this->menu_actions.saveAs->setEnabled(false);
+      return;
+   }
+   //
+   bool is_resource = false;
+   {
+      std::wstring file = ReachEditorState::get().variantFilePath();
+      if (file[0] == ':') { // Qt resource?
+         is_resource = QResource(QString::fromStdWString(file)).isValid();
+      }
+   }
+   this->menu_actions.save->setEnabled(!is_resource);
+   this->menu_actions.saveAs->setEnabled(true);
 }

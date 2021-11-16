@@ -207,6 +207,7 @@
                   end
                end
             </example>
+            <category id="traits" />
          </method>
          <method name="try_get_killer" name2="get_killer" id="29" returns="player">
             <blurb>Identify the player who killed this player.</blurb>
