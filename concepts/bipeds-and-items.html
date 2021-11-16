@@ -2,8 +2,8 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
-      <title>Script Editor | ReachVariantTool Documentation</title>
-      <base href="../../" />
+      <title>Bipeds and items | ReachVariantTool Documentation</title>
+      <base href="../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
          <link rel="stylesheet" href="resources/noscript.css" />
@@ -177,47 +177,48 @@
          </ul>
       </nav>
       <main>
-         <h1>Script Editor</h1>
+         <h1>Bipeds and items</h1>
       <p>
-         The <b>script editor window</b> can be used to modify a gametype's script. The 
-         script determines a gametype's behavior. Gametype code isn't built into the game 
-         engine anymore; with <i>Halo: Reach</i>, each game variant includes its own copy 
-         of a gametype's code, and that code can be modified to produce entirely new game 
-         modes.
+         A "biped" is any character that a player can theoretically control. This includes 
+         typical Spartans and Elites, but it also includes Monitors and spawned holograms. 
+         This article is an overview of several aspects of bipeds that can be relevant when 
+         writing scripts.
       </p>
-      <img src="editor/script_window/meta-strings.png">
+      
+      <h2><a name="positioning">Positioning</a></h2>
       <p>
-         The pane on the left can be used to select a page to view. The bar on the bottom 
-         shows how much of the available space in the game variant has been used up; it's 
-         a good way to tell at a glance how "full" a file is.
+         When attempting to attach objects to a biped, or position objects relative to a 
+         biped, it is important to understand the nuances of how bipeds' positions work.
       </p>
       <p>
-         The pages in this window are:
+         A "grounded" biped — that is, one which walks on the ground, like Spartans 
+         and Elites — will have a rotation that does <em>not</em> match the direction 
+         that its player is looking in. Rather, the position and rotation of a biped is 
+         more closely linked to its physics and animation; typically, a biped will be 
+         facing toward whatever direction its legs are pointing in, though its facing 
+         direction can change rapidly as the biped switches between strafing and non-strafing 
+         animations.
       </p>
-      <dl>
-         <dt><a href="editor/script_window/meta-strings.html">Metadata Strings</a></dt>
-            <dd>Edit strings used for localizing gametype categories.</dd>
-         <dt><a href="editor/script_window/string-table.html">All Other Strings</a></dt>
-            <dd>Edit strings used by the gametype data and script.</dd>
-         <dt><a href="editor/script_window/forge-labels.html">Forge Labels</a></dt>
-            <dd>Edit the gametype's Forge labels.</dd>
-         <dt><a href="editor/script_window/map-permissions.html">Map Permissions</a></dt>
-            <dd>Control what maps the player can play this gametype on.</dd>
-         <dt><a href="editor/script_window/player-rating-parameters.html">Player Rating Parameters</a></dt>
-            <dd>Control how this gametype interacts with Bungie's Arena rating system.</dd>
-         <dt><a href="editor/script_window/required-object-types.html">Required Object Types</a></dt>
-            <dd>Specify which object types a map must define for this gametype.</dd>
-         <dt><a href="editor/script_window/script-options.html">Scripted Options</a></dt>
-            <dd>Define which Custom Game options this gametype offers.</dd>
-         <dt><a href="editor/script_window/script-traits.html">Scripted Player Traits</a></dt>
-            <dd>Define which player traits this gametype offers.</dd>
-         <dt><a href="editor/script_window/script-stats.html">Scripted Stats</a></dt>
-            <dd>Define scripted scoreboard stats for this gametype.</dd>
-         <dt><a href="editor/script_window/script-widgets.html">Scripted HUD Widgets</a></dt>
-            <dd>Define scripted HUD widgets for this gametype.</dd>
-         <dt><a href="editor/script_window/gametype-code.html">Gametype Code</a></dt>
-            <dd>The compiler and decompiler. This is where the magic happens.</dd>
-      </dl>
+      <p>
+         A "grounded" biped's rotation will more accurately reflect the player's camera 
+         when the biped is in midair, but it still won't match up in real-time. If the 
+         player rapidly looks to the side while in midair, the biped's rotation will 
+         animate in that direction, possibly at a slower speed than the player's camera 
+         speed.
+      </p>
+      <p>
+         "Grounded" bipeds are always considered upright; even if the player is looking 
+         upward or downward, the biped's "forward" direction will always be level with 
+         flat ground.
+      </p>
+      
+      <h2><a name="attachment">Attachment</a></h2>
+      <p>
+         A biped's held items are attached to the biped; the object attachment system 
+         that Megalo has access to appears to be the same system that the game uses 
+         internally for equipped items. Similarly, a biped occupying a vehicle is 
+         attached to that vehicle.
+      </p>
    
       </main>
       <script src="resources/sidebar.js"></script>

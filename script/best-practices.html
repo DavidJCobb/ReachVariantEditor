@@ -155,6 +155,7 @@
                               <li><a href="script/api/incident.html">Incident</a></li>
                               <li><a href="script/api/object-type.html">Object Type</a></li>
                               <li><a href="script/api/player-set.html">Player Set</a></li>
+                              <li><a href="script/api/player-traits.html">Player Traits</a></li>
                               <li><a href="script/api/sound.html">Sound</a></li>
                               <li><a href="script/api/variant-string-id.html">Variant ID</a></li>
                               <li><a href="script/api/waypoint-icon.html">Waypoint Icon</a></li>
@@ -169,6 +170,7 @@
             <li>
                <a>Concepts</a>
                <ul>
+                  <li><a href="concepts/bipeds-and-items.html">Bipeds and items</a></li>
                   <li><a href="concepts/firefight.html">Firefight</a></li>
                </ul>
             </li>
@@ -265,6 +267,13 @@
          have a limited pool of variables to use, and ReachVariantTool doesn't automatically manage 
          them for you. You have the maximum level of control over them, but also the maximum amount 
          of responsibility. Aliases are a powerful tool for keeping things manageable.
+      </p>
+      
+      <h2>Use object-scoped variables sparingly!</h2>
+      <p>
+         Megalo allows us to store information on objects in the game world, using variables that 
+         belong to those objects. However, only 256 objects at a time are allowed to have variables. 
+         If you try to assign variables to more objects than that, then you simply won't be able to.
       </p>
 
       <h2>Comment your code!</h2>
