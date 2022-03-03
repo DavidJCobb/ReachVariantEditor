@@ -10,12 +10,14 @@
 namespace Megalo {
    enum class variable_network_priority {
       none, // offline
-      low,  // survives host migration
-      high, // survives host migration
-      normal, // apparently networked, but does not survive host migration
+      low,  // basic
+      high, // usable in UI
    };
    using variable_network_priority_t = cobb::bitnumber<2, variable_network_priority>;
-   //
+
+   extern constexpr bool variable_type_can_have_initializer(variable_type);
+   extern constexpr bool variable_type_has_network_priority(variable_type);
+   
    class VariableDeclaration {
       public:
          using network_enum   = variable_network_priority;
@@ -40,7 +42,7 @@ namespace Megalo {
          ~VariableDeclaration();
          //
          compile_flags_t compiler_flags = compile_flags::none;
-         network_type    networking     = network_enum::normal;
+         network_type    networking     = network_enum::low;
          struct {
             OpcodeArgValueScalar* number = nullptr;
             team_bitnumber        team   = const_team::none;
@@ -54,14 +56,13 @@ namespace Megalo {
          [[nodiscard]] inline bool initial_value_is_implicit() const noexcept { return this->compiler_flags & compile_flags::implicit_initial; }
          inline void make_initial_value_explicit() noexcept { this->compiler_flags &= ~compile_flags::implicit_initial; }
          //
-         [[nodiscard]] bool has_initial_value() const noexcept;
-         [[nodiscard]] bool has_network_type() const noexcept;
+         [[nodiscard]] bool has_initial_value() const noexcept { return variable_type_can_have_initializer(this->type); }
+         [[nodiscard]] bool has_network_type() const noexcept { return variable_type_has_network_priority(this->type); }
          void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
          void decompile(const char* scope_name, uint8_t var_index, Decompiler& out, uint32_t flags = 0) noexcept;
          //
          bool initial_value_is_default() const noexcept;
-         bool network_type_is_default() const noexcept;
    };
    class ScalarVariableDeclaration : public VariableDeclaration {
       public:
@@ -129,9 +130,12 @@ namespace Megalo {
          VariableDeclarationList objects = VariableDeclarationList(variable_type::object);
          VariableDeclarationList teams   = VariableDeclarationList(variable_type::team);
          VariableDeclarationList timers  = VariableDeclarationList(variable_type::timer);
-         //
+         
          VariableDeclarationSet(variable_scope t) : type(t) {}
-         //
+
+         VariableDeclarationList& variables_by_type(variable_type);
+         const VariableDeclarationList& variables_by_type(variable_type) const;
+         
          void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
             //
@@ -161,11 +165,17 @@ namespace Megalo {
             #undef megalo_variable_declaration_set_write_type
          }
          void decompile(Decompiler& out, uint32_t flags = 0) noexcept;
-         //
+         
          void adopt(VariableDeclarationSet& other) noexcept;
          bool imply(variable_type vt, uint8_t index) noexcept;
          void make_explicit(variable_type vt, uint8_t index) noexcept;
-         //
+         
          VariableDeclaration* get_or_create_declaration(variable_type vt, uint8_t index) noexcept;
+
+         // older versions of RVT mishandled the variable networking priority enum, and so a fixup step is needed. 
+         // this returns true if the number of variables that had an incorrect priority value. we do it this way 
+         // so that the code for logging warnings only logs one warning overall, and not one warning per bad 
+         // variable.
+         size_t post_read_fixup();
    };
 }

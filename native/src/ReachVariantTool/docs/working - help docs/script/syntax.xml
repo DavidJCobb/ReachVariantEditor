@@ -193,8 +193,8 @@
       <p>
          In this particular Megalo dialect, you cannot define your own variables; there are a 
          fixed number available. However, you can <a href="alias">give names to variables</a>, 
-         and <a href="declare">variable declarations</a> can (and should) be used to set a 
-         variable's networking priority and initial value.
+         and <a href="declare">variable declarations</a> can be used to set a variable's 
+         networking priority and initial value.
       </p>
       
       <h3>Properties</h3>

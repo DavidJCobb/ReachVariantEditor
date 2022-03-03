@@ -17,12 +17,15 @@ class ScriptEditorPageScriptCode : public QWidget {
    protected:
       Ui::ScriptEditorPageScriptCode ui;
       //
+      log_t _lastNotices;
       log_t _lastWarnings;
       log_t _lastErrors;
       log_t _lastFatals;
       //
       void updateLog(Compiler&);
       void redrawLog();
+
+      void jumpToLogItem(QListWidgetItem&);
 
       void updateCodeEditorStyle();
 };

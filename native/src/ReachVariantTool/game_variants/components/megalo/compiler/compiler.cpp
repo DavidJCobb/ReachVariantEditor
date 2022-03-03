@@ -535,8 +535,36 @@ namespace Megalo {
                block->compile(compiler);
                if (!block->trigger) // empty blocks get skipped
                   continue;
-               if (block->type == Block::Type::function) // don't mis-compile function definitions as function calls
+               if (block->type == Block::Type::function) {
+                  //
+                  // We don't want to mis-compile function definitions as function calls. Additionally, we should 
+                  // emit compile-time warnings or notices based on function usage.
+                  //
+                  if (block->caller_count < 2) {
+                     Compiler::pos start;
+                     start.line   = block->line;
+                     start.offset = block->range.start;
+                     start.last_newline = block->range.start - block->col;
+                     if (block->caller_count == 0) {
+                        compiler.raise_notice(
+                           start,
+                           QString("User-defined function \"%1\" isn't called from anywhere. Is this intentional?")
+                              .arg(block->name)
+                        );
+                     } else if (block->caller_count == 1) {
+                        compiler.raise_notice(
+                           start,
+                           QString("User-defined function \"%1\" is only called from one place. When decompiling this gametype, it will not appear as a function; a function that is called from only one place is indistinguishable from a nested block.")
+                              .arg(block->name)
+                        );
+
+                     }
+                  }
+                  //
+                  // Don't compile a call:
+                  //
                   continue;
+               }
                auto* block_trigger = block->tr_wrap ? block->tr_wrap : block->trigger; // needed for the on:for workaround
                if (block_trigger != this->trigger) {
                   //
@@ -563,6 +591,14 @@ namespace Megalo {
                continue;
             }
          }
+      }
+
+      void Block::for_each_function(std::function<void(Block*)> functor) {
+         if (this->type == Type::function)
+            (functor)(this);
+         for (auto* child : this->items)
+            if (auto* nested = dynamic_cast<Block*>(child))
+               nested->for_each_function(functor);
       }
       #pragma endregion
       //
@@ -638,7 +674,7 @@ namespace Megalo {
          return *this;
       }
    }
-   //
+   
    Compiler::~Compiler() {
       for (auto trigger : this->results.triggers)
          delete trigger;
@@ -1025,12 +1061,14 @@ namespace Megalo {
    //
    Compiler::log_checkpoint Compiler::create_log_checkpoint() {
       log_checkpoint point;
+      point.notices  = this->notices.size();
       point.warnings = this->warnings.size();
-      point.errors = this->errors.size();
+      point.errors  = this->errors.size();
       point.fatal_errors = this->fatal_errors.size();
       return point;
    }
    void Compiler::revert_to_log_checkpoint(Compiler::log_checkpoint point) {
+      this->notices.resize(point.notices);
       this->warnings.resize(point.warnings);
       this->errors.resize(point.errors);
       this->fatal_errors.resize(point.fatal_errors);
@@ -1071,6 +1109,15 @@ namespace Megalo {
    }
    void Compiler::raise_warning(const QString& text) {
       this->warnings.emplace_back(text, this->state);
+   }
+   void Compiler::raise_warning(const Compiler::pos& pos, const QString& text) {
+      this->warnings.emplace_back(text, pos);
+   }
+   void Compiler::raise_notice(const QString& text) {
+      this->notices.emplace_back(text, this->state);
+   }
+   void Compiler::raise_notice(const Compiler::pos& pos, const QString& text) {
+      this->notices.emplace_back(text, pos);
    }
    void Compiler::validate_format_string_tokens(const QString& text) {
       auto issues = check_format_string(text);
@@ -1340,6 +1387,7 @@ namespace Megalo {
       Script::VariableReference* lhs = nullptr;
       Script::VariableReference* rhs = nullptr;
       //
+      this->skip_whitespace();
       auto prior = this->backup_stream_state();
       //
       #pragma region Parsing
@@ -1353,7 +1401,7 @@ namespace Megalo {
                lhs = new Script::VariableReference(integer);
             } else if (lhs_type == statement_side::word) {
                if (auto handler = Compiler::__get_handler_for_keyword(word)) {
-                  ((*this).*(handler))();
+                  ((*this).*(handler))(prior);
                   return;
                }
                if (word == "and" || word == "or" || word == "not" || word == "then") {
@@ -2167,6 +2215,11 @@ namespace Megalo {
             statement->set_start(call_start);
             statement->set_end(this->state);
             this->block->insert_item(statement);
+            //
+            if (func->content) {
+               ++func->content->caller_count;
+            }
+            //
             return nullptr;
          }
          //
@@ -2573,9 +2626,7 @@ namespace Megalo {
    }
    //
    #pragma region keyword handlers
-   void Compiler::_handleKeyword_Alias() {
-      auto start = this->backup_stream_state();
-      //
+   void Compiler::_handleKeyword_Alias(const pos start) {
       auto name = this->extract_word();
       if (name.isEmpty()) {
          this->raise_fatal("An alias declaration must supply a name.");
@@ -2622,7 +2673,7 @@ namespace Megalo {
       if (!item->invalid) // aliases can also run into non-fatal errors
          this->aliases_in_scope.push_back(item);
    }
-   void Compiler::_handleKeyword_Alt() {
+   void Compiler::_handleKeyword_Alt(const pos start) {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
          auto prev = this->block->item(-1);
          auto p_bl = dynamic_cast<Script::Block*>(prev);
@@ -2639,7 +2690,7 @@ namespace Megalo {
       }
       auto item = new Script::Block;
       item->type = Script::Block::Type::alt_block;
-      item->set_start(this->state);
+      item->set_start(start);
       this->block->insert_item(item);
       this->_openBlock(item);
       {
@@ -2649,7 +2700,7 @@ namespace Megalo {
             item->make_alt_of(*block);
       }
    }
-   void Compiler::_handleKeyword_AltIf() {
+   void Compiler::_handleKeyword_AltIf(const pos start) {
       if (this->block->type != Script::Block::Type::if_block && this->block->type != Script::Block::Type::altif_block) {
          auto prev = this->block->item(-1);
          auto p_bl = dynamic_cast<Script::Block*>(prev);
@@ -2666,7 +2717,7 @@ namespace Megalo {
       }
       auto item = new Script::Block;
       item->type = Script::Block::Type::altif_block;
-      item->set_start(this->state);
+      item->set_start(start);
       this->block->insert_item(item);
       this->_openBlock(item);
       {
@@ -2760,8 +2811,7 @@ namespace Megalo {
          }
       }
    }
-   void Compiler::_handleKeyword_Declare() {
-      auto  start = this->backup_stream_state();
+   void Compiler::_handleKeyword_Declare(const pos start) {
       using net_t = Megalo::variable_network_priority;
       //
       // declare [word]
@@ -2781,7 +2831,7 @@ namespace Megalo {
       }
       //
       bool  has_network = false;
-      net_t network     = net_t::normal;
+      net_t network     = net_t::low;
       #pragma region Parsing and extracting all relevant tokens
          auto  after_name = this->backup_stream_state();
          auto  word       = this->extract_word();
@@ -2823,7 +2873,8 @@ namespace Megalo {
                   return;
                }
                if (word.compare("default", Qt::CaseInsensitive) == 0) {
-                  network = net_t::normal;
+                  this->raise_error("Value \"default\" is not a valid network priority. Older versions of ReachVariantTool (2.1.10 and older) incorrectly treated it as one. You should probably use \"low\" instead.");
+                  network = net_t::low;
                } else if (word.compare("low", Qt::CaseInsensitive) == 0) {
                   network = net_t::low;
                } else if (word.compare("high", Qt::CaseInsensitive) == 0) {
@@ -2934,20 +2985,20 @@ namespace Megalo {
          delete initial;
    }
 
-   void Compiler::_handleKeyword_Do() {
+   void Compiler::_handleKeyword_Do(const pos start) {
       auto item = new Script::Block;
       item->type = Script::Block::Type::basic;
-      item->set_start(this->state);
+      item->set_start(start);
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
       this->_openBlock(item);
    }
-   void Compiler::_handleKeyword_End() {
+   void Compiler::_handleKeyword_End(const pos start) {
       if (!this->_closeCurrentBlock())
          this->raise_fatal("Unexpected \"end\".");
    }
-   void Compiler::_handleKeyword_Enum() {
+   void Compiler::_handleKeyword_Enum(const pos start) {
       auto name = this->extract_word();
       {  // Validate the name.
          if (name.isEmpty()) {
@@ -3083,19 +3134,17 @@ namespace Megalo {
       //
       this->enums_in_scope.emplace_back(def.release(), this->block);
    }
-   void Compiler::_handleKeyword_If() {
+   void Compiler::_handleKeyword_If(const pos start) {
       auto item = new Script::Block;
       item->type = Script::Block::Type::if_block;
-      item->set_start(this->state);
+      item->set_start(start);
       item->event = this->next_event;
       this->next_event = Script::Block::Event::none;
       this->block->insert_item(item);
       this->_openBlock(item);
       this->_parseBlockConditions();
    }
-   void Compiler::_handleKeyword_For() {
-      auto start = this->backup_stream_state();
-      //
+   void Compiler::_handleKeyword_For(const pos start) {
       if (!this->extract_word("each")) {
          this->raise_fatal("The \"for\" keyword must be followed by \"each\".");
          return;
@@ -3168,9 +3217,7 @@ namespace Megalo {
       this->block->insert_item(item);
       this->_openBlock(item);
    }
-   void Compiler::_handleKeyword_Function() {
-      auto start = this->backup_stream_state();
-      //
+   void Compiler::_handleKeyword_Function(const pos start) {
       auto name = this->extract_word();
       if (name.isEmpty()) {
          this->raise_fatal("A function must have a name.");
@@ -3261,10 +3308,14 @@ namespace Megalo {
       // trigger. So, we'll create it early.
       //
       item->trigger = new Trigger;
-      this->functions_in_scope.push_back(Script::UserDefinedFunction(name, this->results.triggers.size(), item)); // remember this function and its index
+      this->functions_in_scope.push_back(Script::UserDefinedFunction( // remember this function and its index
+         name,
+         this->results.triggers.size(),
+         *item
+      ));
       this->results.triggers.push_back(item->trigger);
    }
-   void Compiler::_handleKeyword_On() {
+   void Compiler::_handleKeyword_On(const pos start) {
       if (this->block != this->root) {
          this->raise_error("Only top-level (non-nested) blocks can be event handlers.");
          if (!this->skip_to(':'))

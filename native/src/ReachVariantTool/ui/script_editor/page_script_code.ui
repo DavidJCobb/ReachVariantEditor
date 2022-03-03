@@ -161,6 +161,13 @@
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="buttonCompileLogJump">
+            <property name="text">
+             <string>Jump to Selected</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="buttonCopyCompileLog">
             <property name="text">
              <string>Copy All</string>
@@ -202,6 +209,16 @@
    <header>../generic/QListWidgetEx.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>buttonDecompile</tabstop>
+  <tabstop>buttonCompile</tabstop>
+  <tabstop>textEditor</tabstop>
+  <tabstop>compileLog</tabstop>
+  <tabstop>compileLogFilterWarn</tabstop>
+  <tabstop>compileLogFilterError</tabstop>
+  <tabstop>buttonCompileLogJump</tabstop>
+  <tabstop>buttonCopyCompileLog</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

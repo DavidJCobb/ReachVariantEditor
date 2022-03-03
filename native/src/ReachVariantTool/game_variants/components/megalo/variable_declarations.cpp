@@ -6,8 +6,6 @@ namespace {
       switch (p) {
          case variable_network_priority::none:
             return "with network priority local";
-         case variable_network_priority::normal:
-            return "with network priority default";
          case variable_network_priority::low:
             return "with network priority low";
          case variable_network_priority::high:
@@ -17,6 +15,26 @@ namespace {
    }
 }
 namespace Megalo {
+   extern constexpr bool variable_type_can_have_initializer(variable_type v) {
+      switch (v) {
+         case variable_type::scalar:
+         case variable_type::team:
+         case variable_type::timer:
+            return true;
+      }
+      return false;
+   }
+   extern constexpr bool variable_type_has_network_priority(variable_type v) {
+      switch (v) {
+         case variable_type::scalar:
+         case variable_type::player:
+         case variable_type::object:
+         case variable_type::team:
+            return true;
+      }
+      return false;
+   }
+
    VariableDeclaration::VariableDeclaration(variable_type vt) : type(vt) {
       if (this->has_initial_value()) {
          if (this->type != variable_type::team) {
@@ -30,25 +48,6 @@ namespace Megalo {
          delete this->initial.number;
          this->initial.number = nullptr;
       }
-   }
-   bool VariableDeclaration::has_initial_value() const noexcept {
-      switch (this->type) {
-         case variable_type::scalar:
-         case variable_type::team:
-         case variable_type::timer:
-            return true;
-      }
-      return false;
-   }
-   bool VariableDeclaration::has_network_type() const noexcept {
-      switch (this->type) {
-         case variable_type::scalar:
-         case variable_type::player:
-         case variable_type::object:
-         case variable_type::team:
-            return true;
-      }
-      return false;
    }
    void VariableDeclaration::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       if (this->has_initial_value()) {
@@ -91,7 +90,7 @@ namespace Megalo {
          case variable_type::team:   name = ".team[%u]";   break;
          case variable_type::timer:  name = ".timer[%u]";   break;
       }
-      bool n_default = this->network_type_is_default();
+      bool n_default = !this->has_network_type();
       bool i_default = this->initial_value_is_default();
       if (n_default && i_default)
          return;
@@ -130,11 +129,6 @@ namespace Megalo {
          return true;
       return initial->is_const_zero();
    }
-   bool VariableDeclaration::network_type_is_default() const noexcept {
-      if (this->networking == network_enum::normal || !this->has_network_type())
-         return true;
-      return false;
-   }
 
    void VariableDeclarationList::clear() noexcept {
       for (auto* decl : this->list)
@@ -147,6 +141,28 @@ namespace Megalo {
       for (auto* decl : other.list)
          this->list.push_back(decl);
       other.list.clear(); // NOT other.clear, which would delete the list items
+   }
+
+
+   VariableDeclarationList& VariableDeclarationSet::variables_by_type(variable_type t) {
+      switch (t) {
+         case variable_type::scalar: return this->scalars;
+         case variable_type::player: return this->players;
+         case variable_type::object: return this->objects;
+         case variable_type::team:   return this->teams;
+         case variable_type::timer:  return this->timers;
+      }
+      __assume(0); // unreachable
+   }
+   const VariableDeclarationList& VariableDeclarationSet::variables_by_type(variable_type t) const {
+      switch (t) {
+         case variable_type::scalar: return this->scalars;
+         case variable_type::player: return this->players;
+         case variable_type::object: return this->objects;
+         case variable_type::team:   return this->teams;
+         case variable_type::timer:  return this->timers;
+      }
+      __assume(0); // unreachable
    }
 
    void VariableDeclarationSet::adopt(VariableDeclarationSet& other) noexcept {
@@ -262,5 +278,27 @@ namespace Megalo {
             return _get_or_create_impl(this->timers, index);
       }
       return nullptr;
+   }
+
+   size_t VariableDeclarationSet::post_read_fixup() {
+      size_t bad = 0;
+      //
+      auto fixup = [&bad, this](variable_type t) {
+         if (!variable_type_has_network_priority(t))
+            return;
+         auto& list = this->variables_by_type(t);
+         for (auto& item : list) {
+            if ((int)item->networking == 3) {
+               ++bad;
+               item->networking = variable_network_priority::low;
+            }
+         }
+      };
+      fixup(variable_type::scalar);
+      fixup(variable_type::object);
+      fixup(variable_type::player);
+      fixup(variable_type::team);
+      fixup(variable_type::timer);
+      return bad;
    }
 }

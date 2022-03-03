@@ -239,7 +239,7 @@ bool GameVariantDataMultiplayer::_read_script_code(cobb::ibitreader& stream) noe
 }
 
 namespace {
-   bool _error_check_count(int count, int maximum, GameEngineVariantLoadError::load_failure_detail detail) {
+   inline bool _error_check_count(int count, int maximum, GameEngineVariantLoadError::load_failure_detail detail) {
       if (count > maximum) {
          auto& error_report = GameEngineVariantLoadError::get();
          //
@@ -346,6 +346,15 @@ bool GameVariantDataMultiplayer::read(cobb::reader& reader) noexcept {
          v.player.read(stream, *this);
          v.object.read(stream, *this);
          v.team.read(stream, *this);
+         //
+         size_t bad = 0;
+         bad += v.global.post_read_fixup();
+         bad += v.player.post_read_fixup();
+         bad += v.object.post_read_fixup();
+         bad += v.team.post_read_fixup();
+         if (bad > 0) {
+            GameEngineVariantLoadWarningLog::get().push_back(QString("The Megalo script data contained %1 variables with an invalid networking priority. Versions of ReachVariantTool prior to 2.1.11 could produce this due to a program bug.\n\nThe variables in question have been corrected. These corrections will take effect when you re-save the game variant.").arg(bad));
+         }
       }
       {  // HUD widget declarations
          count = stream.read_bits(cobb::bitcount(Megalo::Limits::max_script_widgets));

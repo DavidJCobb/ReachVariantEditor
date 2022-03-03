@@ -59,7 +59,7 @@ namespace Megalo {
             NamespaceMember::make_which_member("killed_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killed),
             NamespaceMember::make_which_member("killer_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killer),
             NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, variable_which_values::player::killer),
-            NamespaceMember::make_which_member("unk_14_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_14),
+            NamespaceMember::make_which_member("hud_target_object_team", OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_target_object_owner_team),
             NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_15),
             //
             NamespaceMember::make_scope_member("script_option", OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::option),

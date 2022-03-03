@@ -166,7 +166,7 @@ namespace Megalo {
          extern VariableScopeWhichValue current;
          extern VariableScopeWhichValue hud_player_owner_team;
          extern VariableScopeWhichValue hud_target_player_owner_team;
-         extern VariableScopeWhichValue unk_14;
+         extern VariableScopeWhichValue hud_target_object_owner_team;
          extern VariableScopeWhichValue unk_15;
       }
    }

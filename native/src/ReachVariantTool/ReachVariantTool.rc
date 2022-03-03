@@ -3,7 +3,7 @@ IDI_ICON1		ICON		DISCARDABLE	"ReachVariantTool.ico"
 // Edit these to control the embedded version information.
 #define VER_MAJOR 2
 #define VER_MINOR 1
-#define VER_PATCH 10
+#define VER_PATCH 11
 #define VER_BUILD 0
 
 // No need to edit anything below here. :)

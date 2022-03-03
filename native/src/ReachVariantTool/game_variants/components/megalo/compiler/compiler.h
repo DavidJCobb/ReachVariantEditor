@@ -51,7 +51,8 @@ namespace Megalo {
             Trigger* tr_wrap = nullptr; // wrapper trigger; use to fix (on event: for ... do end) so that it compiles properly
             QString  name; // only for functions
             QString  label_name;
-            int32_t  label_index = -1;
+            int32_t  label_index  = -1;
+            size_t   caller_count = 0; // for functions
             Type     type  = Type::basic;
             Event    event = Event::none;
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
@@ -70,6 +71,8 @@ namespace Megalo {
             //
             void clear(bool deleting = false);
             void compile(Compiler&);
+            //
+            void for_each_function(std::function<void(Block*)>);
             //
             inline bool is_event_trigger() const noexcept { return this->event != Event::none; }
             //
@@ -117,10 +120,11 @@ namespace Megalo {
          public:
             QString name;
             int32_t trigger_index = -1;
-            Block*  parent = nullptr; // used so we can tell when the function goes out of scope
+            Block*  content = nullptr;
+            Block*  parent  = nullptr; // used so we can tell when the function goes out of scope
             //
             UserDefinedFunction() {}
-            UserDefinedFunction(const QString& n, int32_t ti, Block* b) : name(n), trigger_index(ti), parent(b ? dynamic_cast<Block*>(b->parent) : nullptr) {}
+            UserDefinedFunction(const QString& n, int32_t ti, Block& b) : name(n), trigger_index(ti), content(&b), parent(dynamic_cast<Block*>(b.parent)) {}
       };
    }
    //
@@ -135,6 +139,7 @@ namespace Megalo {
          };
          using log_t = std::vector<LogEntry>;
          struct log_checkpoint {
+            size_t notices      = 0;
             size_t warnings     = 0;
             size_t errors       = 0;
             size_t fatal_errors = 0;
@@ -190,7 +195,7 @@ namespace Megalo {
          using unresolved_str_list = QMultiMap<QString, unresolved_str>;
          //
       protected:
-         using keyword_handler_t = void (Compiler::*)();
+         using keyword_handler_t = void (Compiler::*)(const pos);
          //
       protected:
          enum class c_joiner {
@@ -209,6 +214,7 @@ namespace Megalo {
          std::vector<Script::UserDefinedFunction> functions_in_scope;
          GameVariantDataMultiplayer& variant;
          //
+         log_t notices;
          log_t warnings;
          log_t errors;
          log_t fatal_errors;
@@ -239,6 +245,9 @@ namespace Megalo {
          void raise_fatal(const QString& text);
          void raise_fatal(const pos& pos, const QString& text);
          void raise_warning(const QString& text);
+         void raise_warning(const pos& pos, const QString& text);
+         void raise_notice(const QString& text);
+         void raise_notice(const pos& pos, const QString& text);
          void validate_format_string_tokens(const QString&);
          //
          void parse(QString text); // parse and compile the text
@@ -248,6 +257,7 @@ namespace Megalo {
          //
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
          inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }
+         inline const log_t& get_notices() const noexcept { return this->notices; }
          inline const log_t& get_warnings() const noexcept { return this->warnings; }
          inline const log_t& get_non_fatal_errors() const noexcept { return this->errors; }
          inline const log_t& get_fatal_errors() const noexcept { return this->fatal_errors; }
@@ -341,16 +351,16 @@ namespace Megalo {
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
          #pragma endregion
          //
-         void _handleKeyword_Alias();
-         void _handleKeyword_Alt();
-         void _handleKeyword_AltIf();
-         void _handleKeyword_Declare(); // INCOMPLETE
-         void _handleKeyword_Do();
-         void _handleKeyword_End();
-         void _handleKeyword_Enum();
-         void _handleKeyword_If();
-         void _handleKeyword_For();
-         void _handleKeyword_Function();
-         void _handleKeyword_On();
+         void _handleKeyword_Alias(const pos start);
+         void _handleKeyword_Alt(const pos start);
+         void _handleKeyword_AltIf(const pos start);
+         void _handleKeyword_Declare(const pos start); // INCOMPLETE
+         void _handleKeyword_Do(const pos start);
+         void _handleKeyword_End(const pos start);
+         void _handleKeyword_Enum(const pos start);
+         void _handleKeyword_If(const pos start);
+         void _handleKeyword_For(const pos start);
+         void _handleKeyword_Function(const pos start);
+         void _handleKeyword_On(const pos start);
    };
 }

@@ -78,7 +78,6 @@ namespace {
       //
       if (auto* word = _lookup_keyword("declare")) {
          auto* next = word->make_phrase({ "*", "with", "network", "priority" });
-         next->make_subkeyword("default");
          next->make_subkeyword("low");
          next->make_subkeyword("high");
          next->make_subkeyword("local");

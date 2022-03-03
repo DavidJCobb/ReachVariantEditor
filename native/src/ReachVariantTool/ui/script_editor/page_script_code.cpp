@@ -10,6 +10,7 @@
 
 namespace {
    static const QString ce_icon_success = ":/ScriptEditor/compiler_log/success.png";
+   static const QString ce_icon_notice  = ":/ScriptEditor/compiler_log/notice.png";
    static const QString ce_icon_warning = ":/ScriptEditor/compiler_log/warning.png";
    static const QString ce_icon_error   = ":/ScriptEditor/compiler_log/error.png";
    static const QString ce_icon_fatal   = ":/ScriptEditor/compiler_log/fatal.png";
@@ -17,6 +18,7 @@ namespace {
    enum class _icon_type {
       unknown = 0,
       success,
+      notice,
       warning,
       error,
       fatal,
@@ -110,6 +112,12 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
    QObject::connect(this->ui.compileLogFilterError, &QAbstractButton::toggled, [this](bool checked) {
       this->redrawLog();
    });
+   QObject::connect(this->ui.buttonCompileLogJump, &QPushButton::clicked, [this]() {
+      auto* item = this->ui.compileLog->currentItem();
+      if (!item)
+         return;
+      this->jumpToLogItem(*item);
+   });
    QObject::connect(this->ui.buttonCopyCompileLog, &QPushButton::clicked, [this]() {
       this->ui.compileLog->copyAllToClipboard();
    });
@@ -117,6 +125,9 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
       switch ((_icon_type)item->data(role_icon).toInt()) {
          case _icon_type::success:
             out.prepend("[GOOD!] ");
+            break;
+         case _icon_type::notice:
+            out.prepend("[NOTE:] ");
             break;
          case _icon_type::warning:
             out.prepend("[WARN!] ");
@@ -136,21 +147,13 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
       out.prepend(QString("Line %1 col %2: ").arg(line).arg(col));
    });
    QObject::connect(this->ui.compileLog, &QListWidget::itemDoubleClicked, [this](QListWidgetItem* item) {
-      int line = item->data(role_line).toInt();
-      if (line < 1)
+      if (!item)
          return;
-      --line;
-      //
-      auto editor = this->ui.textEditor;
-      auto doc    = editor->document();
-      QTextBlock  block  = doc->findBlockByLineNumber(line);
-      QTextCursor cursor = editor->textCursor();
-      cursor.setPosition(block.position());
-      editor->setFocus();
-      editor->setTextCursor(cursor);
+      this->jumpToLogItem(*item);
    });
 }
 void ScriptEditorPageScriptCode::updateLog(Compiler& compiler) {
+   this->_lastNotices  = compiler.get_notices();
    this->_lastWarnings = compiler.get_warnings();
    this->_lastErrors   = compiler.get_non_fatal_errors();
    this->_lastFatals   = compiler.get_fatal_errors();
@@ -164,10 +167,21 @@ void ScriptEditorPageScriptCode::redrawLog() {
    widget->clear();
    //
    auto ico_success = QIcon(ce_icon_success);
+   auto ico_notice  = QIcon(ce_icon_notice);
    auto ico_warning = QIcon(ce_icon_warning);
    auto ico_error   = QIcon(ce_icon_error);
    auto ico_fatal   = QIcon(ce_icon_fatal);
    //
+   for (auto& entry : this->_lastNotices) {
+      auto item = new QListWidgetItem;
+      item->setText(entry.text);
+      item->setData(role_offset, entry.pos.offset);
+      item->setData(role_line,   entry.pos.line + 1);
+      item->setData(role_col,    entry.pos.col());
+      item->setData(role_icon,   (int)_icon_type::notice);
+      item->setIcon(ico_notice);
+      widget->addItem(item);
+   }
    if (this->ui.compileLogFilterWarn->isChecked()) {
       for (auto& entry : this->_lastWarnings) {
          auto item = new QListWidgetItem;
@@ -212,6 +226,25 @@ void ScriptEditorPageScriptCode::redrawLog() {
       item->setIcon(ico_success);
       widget->addItem(item);
    }
+}
+
+void ScriptEditorPageScriptCode::jumpToLogItem(QListWidgetItem& item) {
+   int line = item.data(role_line).toInt();
+   int col  = item.data(role_col).toInt();
+   if (line < 1)
+      return;
+   --line;
+   //
+   auto editor = this->ui.textEditor;
+   auto doc    = editor->document();
+   QTextBlock  block  = doc->findBlockByLineNumber(line);
+   QTextCursor cursor = editor->textCursor();
+   int pos = block.position();
+   if (col > 0)
+      pos += (col - 1);
+   cursor.setPosition(pos);
+   editor->setFocus();
+   editor->setTextCursor(cursor);
 }
 
 void ScriptEditorPageScriptCode::updateCodeEditorStyle() {

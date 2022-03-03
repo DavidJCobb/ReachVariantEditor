@@ -192,9 +192,26 @@
          <category id="unscoped-hud" />
          <category id="unscoped-team" />
       </member>
-      <member name="unk_14_team" type="team">
-         <blurb>Unknown, and potentially unused.</blurb>
-         <related name="unk_15_team" />
+      <member name="hud_target_object_team" type="team">
+         <blurb>This value is believed to refer to the owner team for <code>hud_target_object</code>.</blurb>
+         <description>
+            <p>
+               Community testing indicates that this value is one of several that can be used 
+               with HUD widgets and object waypoints to display different information to each 
+               player. When setting a widget or waypoint's text, you  would pass this value 
+               (or a member variable on it) as a <a href="script/api/format-string.html">format string</a> 
+               parameter. Testing suggests that this refers to the owner team for <a href="hud_target_object.html">hud_target_object</a>'s owner team.
+            </p>
+            <p>
+               These values would be useful for UI code. Consider, for example, a situation 
+               where you want to put a waypoint on an object, and have that object display the value of <code>&lt;self&gt;.team.number[0]</code> 
+               as the waypoint's text. There wouldn't be any way to pass that unless you could 
+               write something like <code>hud_target_object_team.number[0]</code> into the 
+               format string. 
+            </p>
+         </description>
+         <category id="unscoped-hud" />
+         <category id="unscoped-team" />
       </member>
       <member name="unk_15_team" type="team">
          <blurb>Unknown, and potentially unused.</blurb>
