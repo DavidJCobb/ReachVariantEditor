@@ -2,7 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8" />
-      <title>killed_object | ReachVariantTool Documentation</title>
+      <title>hud_target_object_team | ReachVariantTool Documentation</title>
       <base href="../../../" />
       <link rel="stylesheet" href="resources/main.css" />
       <noscript>
@@ -76,15 +76,33 @@
          </ul>
       </nav>
       <main>
-         <header><h1>killed_object</h1><span class="type">Type: <a href="script/api/object.html">Object</a></span></header>
-<p>During an <a href="script/events.html">object death event</a>, this is the 
-         killed object.</p>
-<p>This value is read-only.</p>
+         <header><h1>hud_target_object_team</h1><span class="type">Type: <a href="script/api/team.html">Team</a></span></header>
+
+            <p>
+               Community testing indicates that this value is one of several that can be used 
+               with HUD widgets and object waypoints to display different information to each 
+               player. When setting a widget or waypoint's text, you  would pass this value 
+               (or a member variable on it) as a <a href="script/api/format-string.html">format string</a> 
+               parameter. Testing suggests that this refers to the owner team for <a href="script/api/unnamed/hud_target_object.html">hud_target_object</a>'s owner team.
+            </p>
+            <p>
+               These values would be useful for UI code. Consider, for example, a situation 
+               where you want to put a waypoint on an object, and have that object display the value of <code>&lt;self&gt;.team.number[0]</code> 
+               as the waypoint's text. There wouldn't be any way to pass that unless you could 
+               write something like <code>hud_target_object_team.number[0]</code> into the 
+               format string. 
+            </p>
+         
 <h2>See also</h2>
 <ul>
-   <li><a href="script/api/ns_unnamed/death_event_damage_type.html">death_event_damage_type</a></li>
-   <li><a href="script/api/ns_unnamed/killer_object.html">killer_object</a></li>
-   <li><a href="script/api/ns_unnamed/killer_player.html">killer_player</a></li>
+   <li><a href="script/api/ns_unnamed/current_team.html">current_team</a></li>
+   <li><a href="script/api/ns_unnamed/hud_player.html">hud_player</a></li>
+   <li><a href="script/api/ns_unnamed/hud_player_team.html">hud_player_team</a></li>
+   <li><a href="script/api/ns_unnamed/hud_target_object.html">hud_target_object</a></li>
+   <li><a href="script/api/ns_unnamed/hud_target_player.html">hud_target_player</a></li>
+   <li><a href="script/api/ns_unnamed/hud_target_player_team.html">hud_target_player_team</a></li>
+   <li><a href="script/api/ns_unnamed/neutral_team.html">neutral_team</a></li>
+   <li><a href="script/api/ns_unnamed/team.html">team</a></li>
 </ul>
 
       </main>

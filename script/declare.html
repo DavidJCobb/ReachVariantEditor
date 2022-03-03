@@ -180,12 +180,7 @@
          <h1>Variable declarations</h1>
       <p>
          Variable declarations allow you to specify a variable's networking priority and its 
-         initial value. They aren't required — you can use a variable straightaway, 
-         without declaring it — but because Megalo's default variable networking priority 
-         can't survive host migrations, you'll probably want to use them.
-      </p>
-      <p>
-         Variable declarations look like this:
+         initial value. They look like this:
       </p>
       <pre>
 <span class="keyword">declare</span> SOME_VARIABLE
@@ -205,16 +200,17 @@
          priority values are:
       </p>
       <dl>
-         <dt>default</dt>
-            <dd>The meaning of this value is unclear. Testing has established that a variable's 
-            value will be lost after a host migration if its network priority was the default.</dd>
          <dt>low</dt>
-            <dd>Testing has established that low-priority variables can survive a host migration.</dd>
+            <dd>Testing has established that low-priority variables can survive a host migration. 
+            If you don't specify a networking priority for a variable, this is used as the 
+            default.</dd>
          <dt>high</dt>
             <dd>Testing has established that high-priority variables can survive a host migration. 
             If you wish to display a player variable in the UI, it must be high-priority.</dd>
          <dt>local</dt>
-            <dd>Variables with this network priority aren't sent over the network at all.</dd>
+            <dd>Variables with this network priority aren't sent over the network at all. This 
+            is a good thing to use for temporary variables that are just used to do quick tasks, 
+            like computing a number to be stored elsewhere.</dd>
       </dl>
       <p>
          Declaring a variable multiple times generates a compiler warning if the declarations 
