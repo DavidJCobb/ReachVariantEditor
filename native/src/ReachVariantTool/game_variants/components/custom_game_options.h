@@ -61,7 +61,7 @@ class ReachCGGeneralOptions {
       };
       //
    public:
-      cobb::bitnumber<4, uint8_t> flags; // 0, 1, 2, 3 = perfection enabled, reset players on new round, reset map on new round, teams
+      cobb::bitnumber<4, uint8_t> flags; // game reads these individually (four read-bit-bool calls)
       cobb::bytenumber<uint8_t>   timeLimit; // round time limit in minutes
       cobb::bitnumber<5, uint8_t> roundLimit;
       cobb::bitnumber<4, uint8_t> roundsToWin;

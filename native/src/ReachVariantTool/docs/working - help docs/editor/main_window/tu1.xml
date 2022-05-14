@@ -55,5 +55,38 @@
          Additionally, there are controls at the bottom of the page that can be used to 
          rapidly apply values from official game variants.
       </p>
+      
+      <h2>Imprecision</h2>
+      <p>
+         Due to how these values are encoded in game variant files, there are precision 
+         limits that come into play when saving and loading. This means that after saving 
+         and reloading a game variant, you may not see the exact values that you originally 
+         entered. The following technical details are provided for reference purposes, but 
+         all that one really needs to understand is that there is a margin of error that 
+         may range from 0.8% to 4% depending on the values one wishes to use.
+      </p>
+      <p>
+         The precision limit, or <dfn>interval</dfn>, for Magnum options is roughly 
+         (10 &divide; 254), or about 0.04. The precision limit for all other options is 
+         roughly (2 &divide; 254), or about 0.008. Some math is done during encoding and 
+         decoding to ensure that the minimum and maximum values are always represented 
+         with exact accuracy, and to "center" other values within their allowed ranges. 
+         This means that the lowest non-zero value will be equal to half of the interval.
+      </p>
+      <p>
+         As an example, the lowest values that can be encoded for non-Magnum options are:
+      </p>
+      <ul>
+         <li>0.0000 (the minimum)</li>
+         <li>0.0039 (the interval times 0.5)</li>
+         <li>0.0118 (the interval times 1.5)</li>
+         <li>0.0197 (the interval times 2.5)</li>
+      </ul>
+      <p>
+         This also means that the value 1.0, used for vanilla settings, can't be represented 
+         exactly. The closest you can get is 1.0039, or 100.4%. Coincidentally, the margin of 
+         error in this case is identical for both Magnum and non-Magnum options despite the 
+         different intervals.
+      </p>
    </body>
 </article>

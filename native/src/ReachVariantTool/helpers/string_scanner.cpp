@@ -165,14 +165,51 @@ namespace cobb {
    }
    //
    void string_scanner::scan(scan_functor_t functor) {
-      auto&  text    = this->text;
-      size_t length  = this->text.size();
-      auto&  pos     = this->state.offset;
-      bool   comment = false; // are we inside of a line comment?
-      QChar  delim   = '\0';
-      bool   escape  = false;
+      auto&  text      = this->text;
+      size_t length    = this->text.size();
+      auto&  pos       = this->state.offset;
+      bool   comment_l = false; // are we inside of a line comment?
+      size_t comment_b = 0;     // are we inside of a block comment? if so, this is the number of equal signs between the [[s, plus 1
+      QChar  delim     = '\0';
+      bool   escape    = false;
       for (; pos < length; ++pos) {
          QChar c = text[pos];
+         if (comment_b) {
+            if (c == ']') {
+               //
+               // Possible end of block comment?
+               // 
+               // Given a block comment that started like "--[===[", we want to check for "]===]". 
+               // We'll check whether the square bracket we just found is the last one in the 
+               // closing token.
+               //
+               if (pos < comment_b)
+                  //
+                  // Not far enough ahead.
+                  //
+                  continue;
+               if (text[uint(pos - comment_b)] != ']')
+                  //
+                  // First square bracket in the closing token is missing.
+                  //
+                  continue;
+               //
+               // Check for the requisite number of equal signs.
+               //
+               bool match = true;
+               for (uint i = 0; i < (comment_b - 1); ++i) {
+                  if (text[uint(pos - (comment_b - 1) + i)] != '=') {
+                     match = false;
+                     break;
+                  }
+               }
+               if (!match)
+                  continue;
+               comment_b = false;
+               continue;
+            }
+            // ...and fall through.
+         }
          if (c == '\n') {
             if (pos != this->state.last_newline) {
                //
@@ -183,16 +220,35 @@ namespace cobb {
                ++this->state.line;
                this->state.last_newline = pos;
             }
-            if (comment) {
-               comment = false;
+            if (comment_l) {
+               comment_l = false;
                continue;
             }
          }
-         if (comment)
+         if (comment_l || comment_b)
             continue;
          if (delim == '\0') {
             if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle line comments
-               comment = true;
+               if (pos + 2 < length && text[pos + 2] == '[') {
+                  size_t equals = 0;
+                  bool   bounded = false;
+                  for (uint i = pos + 3; i < length; ++i) {
+                     if (text[i] == '[') {
+                        bounded = true;
+                        break;
+                     }
+                     if (text[i] == '=') {
+                        ++equals;
+                     } else {
+                        break;
+                     }
+                  }
+                  if (bounded) {
+                     comment_b = equals + 1;
+                     continue;
+                  }
+               }
+               comment_l = true;
                continue;
             }
             if (string_scanner::is_quote_char(c))

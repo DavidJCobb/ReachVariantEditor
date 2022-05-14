@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstdio>
+#include "../formats/compressed_float.h"
 
 namespace cobb {
    void bit_or_byte_writer::dump_to_console() const noexcept {
@@ -128,31 +129,17 @@ namespace cobb {
       }
       return result;
    }
-   float ibitreader::read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept {
+   float ibitreader::read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool guarantee_exact_bounds) noexcept {
       assert(bitcount <= 8 && "bitstream::read_compressed_float doesn't currently support compressed floats larger than one byte.");
       uint8_t raw = this->read_bits<uint8_t>(bitcount);
       //
-      float    range = max - min;
-      uint32_t max_encoded = 1 << bitcount;
-      if (is_signed)
-         max_encoded--;
-      float result;
-      if (unknown) {
-         if (!raw)
-            result = min;
-         else if (raw == max_encoded - 1)
-            result = max;
-         else
-            result = min + ((float)raw - 0.5F) * (range / (float)(max_encoded - 2));
-      } else {
-         result = min + ((float)raw + 0.5F) * (range / (float)max_encoded);
-      }
-      if (is_signed) {
-         max_encoded--;
-         if (raw * 2 == max_encoded)
-            result = (min + max) * 0.5F;
-      }
-      return result;
+      // This sort of breaks encapsulation -- the "helper" files are meant to work on their own -- but 
+      // frankly, I just need this done with. A lot of the "helper" files here in ReachVariantTool have 
+      // been superseded or improved upon in later projects, and may as well be considered deprecated 
+      // in the overall scheme of things. I've gotten considerably better at all this since RVT, so to 
+      // my thinking, the only way to make RVT's code clean would be to refactor it entirely.
+      //
+      return reach::decode_compressed_float(raw, bitcount, min, max, is_signed, guarantee_exact_bounds);
    }
    //
    void ibitreader::read_string(char* out, uint32_t maxlength) noexcept {
