@@ -144,7 +144,7 @@ void CompilerUnresolvedStringsDialog::updateStatus() {
    auto& mp    = this->_compiler->get_variant();
    auto& table = mp.scriptData.strings;
    //
-   size_t remaining = table.max_count - table.size();
+   int32_t remaining = table.max_count - table.size() - this->_compiler->get_new_forge_label_count();
    //
    auto&  list      = this->_compiler->get_unresolved_string_references();
    auto&  keys      = this->_keys;
@@ -158,7 +158,7 @@ void CompilerUnresolvedStringsDialog::updateStatus() {
          }
       }
    }
-   label->setText(tr("The options you have selected in this dialog dictate that <b>%1</b> new strings will be created. The string table has room for <b>%2</b> new strings.").arg(to_create).arg(remaining));
+   label->setText(tr("The options you have selected in this dialog dictate that <b>%1</b> new strings will be created. The string table has room for <b>%2</b> new strings (not including any new Forge labels used in the script code).").arg(to_create).arg(remaining));
    //
    this->ui.buttonCommit->setDisabled(to_create > remaining);
 }
