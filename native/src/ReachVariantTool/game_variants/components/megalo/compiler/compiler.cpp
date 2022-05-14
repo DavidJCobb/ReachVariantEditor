@@ -321,9 +321,11 @@ namespace Megalo {
                }
             }
             if (index == -1) {
-               //QString lit = cobb::string_scanner::escape(this->label_name, '"');
-               //compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
                compiler._trigger_needs_forge_label(*t, this->label_name);
+               compiler.raise_notice(
+                  QString("The specified Forge label (\"%1\") isn't defined in the game variant data. If compilation succeeds, a label with this name will be created for you.")
+                     .arg(this->label_name)
+               );
             } else
                t->forgeLabel = &list[index];
          }
@@ -1261,12 +1263,6 @@ namespace Megalo {
             bool    for_missing_label = false;
             for (auto trigger : this->results.triggers) {
                trigger->count_contents(cc, ac);
-               /*//
-               if (!for_missing_label) {
-                  if (trigger->blockType == block_type::for_each_object_with_label && !trigger->forgeLabel)
-                     for_missing_label = true;
-               }
-               //*/
                if (!incomplete) {
                   for (auto opcode : trigger->opcodes) {
                      if (!opcode->function) {
@@ -1299,10 +1295,6 @@ namespace Megalo {
                }
                this->raise_error(error);
             }
-            /*//
-            if (for_missing_label)
-               this->raise_error("At least one for-each-object-with-label loop failed to compile because its Forge label was unspecified. If no other errors relating to Forge labels were logged, then this may be the result of a bug in the compiler itself; consider reporting this issue and sending your script to this program's developer to test with.");
-            //*/
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
@@ -1329,6 +1321,13 @@ namespace Megalo {
       for (auto* trigger : this->results.triggers)
          triggers.push_back(trigger);
       {  // Create Forge labels as appropriate. We should have already validated that there's room, in Compiler::parse.
+         //
+         // Missing Forge labels are identified as triggers are compiled, but can only be properly handled after 
+         // all other compilation tasks are complete and it's time to commit the new script. We verify that there 
+         // is enough room for the labels when parsing is complete (the end of Compiler::parse), and string table 
+         // limits are enforced during the "unreferenced string handling" stuff, so all we need to do here is 
+         // just create the missing strings and labels.
+         //
          auto& labels       = mp.scriptContent.forgeLabels;
          auto& string_table = mp.scriptData.strings;
          //
@@ -1355,11 +1354,18 @@ namespace Megalo {
                continue;
             }
             //
-            // Create the string:
+            // Create the string, if no existing string is there:
             //
-            auto str = string_table.add_new();
-            for (int i = 0; i < reach::language_count; ++i)
-               str->get_write_access((reach::language)i) = item.label_name.toStdString();
+            ReachString* str = nullptr;
+            {
+               bool multiple;
+               str = string_table.lookup(item.label_name, multiple);
+               if (!str || multiple) {
+                  str = string_table.add_new();
+                  for (int i = 0; i < reach::language_count; ++i)
+                     str->get_write_access((reach::language)i) = item.label_name.toStdString();
+               }
+            }
             //
             // Create the label:
             //
