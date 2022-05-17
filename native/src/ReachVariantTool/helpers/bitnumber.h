@@ -17,7 +17,7 @@ namespace cobb {
    template<
       int        bitcount,   // number of bits that the value is encoded as
       typename   underlying, // type to use to hold the value in-memory / type the value is encoded as when not in a bitstream
-      bool       offset       = false, // if true, the value is incremented by 1 when saved and must be decremented hwen loaded; used to avoid sign issues with small-bitcount values
+      bool       offset       = false, // if true, the value is incremented by 1 when saved and must be decremented when loaded; used to avoid sign issues with small-bitcount values
       typename   presence_bit = bitnumber_no_presence_bit, // if std::true_type or std::false_type, then the game writes a bit indicating whether the value is present; if the bit equals the specified type, the value is present
       underlying if_absent    = underlying() // if the bitnumber has a presence bit, this value is assigned when the bit indicates absence
    > class bitnumber {
@@ -54,16 +54,16 @@ namespace cobb {
          static constexpr bool uses_offset     = offset;
          static constexpr bool has_presence    = !std::is_same_v<presence_bit, bitnumber_no_presence_bit>;
          static constexpr int  max_bitcount    = bitcount + (has_presence ? 1 : 0);
-         //
-         underlying_type value = underlying_type();
-         //
+         
+         underlying_type value = underlying_type{};
+         
          bitnumber() {};
          bitnumber(int v) : value(underlying_type(v)) {};
-         template<typename = std::enable_if_t<!std::is_same_v<int, underlying_type>>> bitnumber(underlying_type v) : value(v) {};
-         //
+         bitnumber(underlying_type v) requires !std::is_same_v<int, underlying_type> : value(v) {};
+         
       protected:
          bool _read_presence(cobb::ibitreader& stream) { // returns bool: value should be read?
-            if (!this->uses_presence())
+            if constexpr (!has_presence)
                return true;
             bool bit = stream.read_bits(1);
             if (bit == presence_bit::value)
@@ -72,7 +72,7 @@ namespace cobb {
             return false;
          }
          bool _write_presence(cobb::bitwriter& stream) const noexcept { // returns bool: value should be written?
-            if (!this->uses_presence())
+            if constexpr (!has_presence)
                return true;
             bool presence = presence_bit::value;
             if (this->value == if_absent) {
@@ -91,7 +91,7 @@ namespace cobb {
          }
          //
          bool is_absent() const noexcept {
-            if (!this->uses_presence())
+            if constexpr (!has_presence)
                return false;
             return this->value == if_absent;
          }
