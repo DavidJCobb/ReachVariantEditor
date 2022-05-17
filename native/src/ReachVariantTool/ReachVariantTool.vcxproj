@@ -30,9 +30,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
     <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
@@ -168,6 +170,9 @@
     <ClCompile Include="game_variants\io_process.cpp" />
     <ClCompile Include="game_variants\types\firefight.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
+    <ClCompile Include="halo\loc_string_base.cpp" />
+    <ClCompile Include="halo\loc_string_table.cpp" />
+    <ClCompile Include="halo\util\bitnumber.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
@@ -339,6 +344,60 @@
     <ClInclude Include="game_variants\io_process.h" />
     <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
+    <ClInclude Include="halo\reach\files\blocks\author_header.h" />
+    <ClInclude Include="halo\reach\files\blocks\base.h" />
+    <ClInclude Include="halo\reach\files\blocks\blam_header.h" />
+    <ClInclude Include="halo\reach\files\blocks\content_header.h" />
+    <ClInclude Include="halo\reach\files\blocks\eof_block.h" />
+    <ClInclude Include="halo\reach\files\blocks\file_share_metadata_block.h" />
+    <ClInclude Include="halo\reach\files\blocks\unknown_file_block.h" />
+    <ClInclude Include="halo\reach\files\block_stream.h" />
+    <ClInclude Include="halo\reach\files\game_variant.h" />
+    <ClInclude Include="halo\localization_language.h" />
+    <ClInclude Include="halo\loc_string.h" />
+    <ClInclude Include="halo\loc_string_base.h" />
+    <ClInclude Include="halo\loc_string_table.h" />
+    <ClInclude Include="halo\reach\firefight\wave_traits.h" />
+    <ClInclude Include="halo\common\traits\bool_trait.h" />
+    <ClInclude Include="halo\reach\traits\ability.h" />
+    <ClInclude Include="halo\reach\traits\ability_usage.h" />
+    <ClInclude Include="halo\reach\traits\active_camo.h" />
+    <ClInclude Include="halo\reach\traits\aura.h" />
+    <ClInclude Include="halo\reach\traits\damage_multiplier.h" />
+    <ClInclude Include="halo\reach\traits\damage_resistance.h" />
+    <ClInclude Include="halo\reach\traits\double_jump.h" />
+    <ClInclude Include="halo\reach\traits\forced_color.h" />
+    <ClInclude Include="halo\reach\traits\grenade_count.h" />
+    <ClInclude Include="halo\reach\traits\health_multiplier.h" />
+    <ClInclude Include="halo\reach\traits\health_rate.h" />
+    <ClInclude Include="halo\reach\traits\infinite_ammo.h" />
+    <ClInclude Include="halo\reach\traits\jump_height.h" />
+    <ClInclude Include="halo\reach\traits\movement_speed.h" />
+    <ClInclude Include="halo\reach\traits\player_gravity.h" />
+    <ClInclude Include="halo\reach\traits\radar_range.h" />
+    <ClInclude Include="halo\reach\traits\radar_state.h" />
+    <ClInclude Include="halo\reach\traits\shield_multiplier.h" />
+    <ClInclude Include="halo\reach\traits\shield_rate.h" />
+    <ClInclude Include="halo\reach\traits\shield_vampirism.h" />
+    <ClInclude Include="halo\reach\traits\vehicle_usage.h" />
+    <ClInclude Include="halo\reach\traits\visible_identity.h" />
+    <ClInclude Include="halo\reach\traits\weapon.h" />
+    <ClInclude Include="halo\reach\traits\_all.h" />
+    <ClInclude Include="halo\reach\trait_set.h" />
+    <ClInclude Include="halo\reach\ugc_author.h" />
+    <ClInclude Include="halo\reach\ugc_header.h" />
+    <ClInclude Include="halo\trait_bitnumber.h" />
+    <ClInclude Include="halo\trait_information.h" />
+    <ClInclude Include="halo\util\bitnumber.h" />
+    <ClInclude Include="halo\util\dirty.h" />
+    <ClInclude Include="halo\util\dummyable.h" />
+    <ClInclude Include="halo\util\fixed_list.h" />
+    <ClInclude Include="halo\util\fixed_string.h" />
+    <ClInclude Include="halo\util\four_cc.h" />
+    <ClInclude Include="halo\util\indexed.h" />
+    <ClInclude Include="halo\util\indexed_list.h" />
+    <ClInclude Include="halo\util\refcount.h" />
+    <ClInclude Include="halo\util\scalar_trait.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
@@ -384,6 +443,7 @@
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />
     <ClInclude Include="helpers\string_scanner.h" />
+    <ClInclude Include="helpers\type_traits\set_const.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />
@@ -492,6 +552,11 @@
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="halo\loc_string_table.inl" />
+    <None Include="halo\trait_information.inl" />
+    <None Include="halo\util\bitnumber.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

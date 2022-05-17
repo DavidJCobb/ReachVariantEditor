@@ -2,10 +2,10 @@
 #include <bit>
 #include <optional>
 #include <QString>
-#include "../helpers/stream.h"
-#include "util/dirty.h"
-#include "util/indexed_list.h"
-#include "loc_string.h"
+#include "helpers/stream.h"
+#include "halo/util/dirty.h"
+#include "halo/util/indexed_list.h"
+#include "./loc_string.h"
 
 namespace halo {
    namespace impl::loc_string_table {

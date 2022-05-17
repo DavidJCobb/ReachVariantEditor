@@ -1,10 +1,7 @@
 #pragma once
-#include "../helpers/bitnumber.h"
-#include "util/scalar_trait.h"
-#include "trait_information.h"
-
-// test
-#include "reach/traits/damage_resistance.h"
+#include "helpers/bitnumber.h"
+#include "halo/util/scalar_trait.h"
+#include "./trait_information.h"
 
 namespace halo {
    namespace impl::trait_bitnumber {

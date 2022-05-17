@@ -1,9 +1,9 @@
 #pragma once
-#include "util/dirty.h"
-#include "util/dummyable.h"
-#include "util/indexed.h"
-#include "util/refcount.h"
-#include "loc_string_base.h"
+#include "halo/util/dirty.h"
+#include "halo/util/dummyable.h"
+#include "halo/util/indexed.h"
+#include "halo/util/refcount.h"
+#include "./loc_string_base.h"
 
 namespace halo {
    template<class Table> class loc_string;

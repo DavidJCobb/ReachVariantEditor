@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <string>
-#include "localization_language.h"
+#include "./localization_language.h"
 
 namespace halo {
    class loc_string_base {

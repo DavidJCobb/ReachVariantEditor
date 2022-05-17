@@ -1,6 +1,8 @@
 #pragma once
+#include <bit>
 #include <limits>
-#include "trait_information.h"
+#include <type_traits>
+#include "./trait_information.h"
 
 namespace halo {
    constexpr trait_information::trait_information(impl::bare_trait_information d) : impl::bare_trait_information(d) {
