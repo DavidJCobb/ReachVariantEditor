@@ -1,5 +1,10 @@
 #pragma once
 #include "loc_string_table.h"
+#include "halo/common/load_errors/string_table_cannot_allocate_buffer.h"
+#include "halo/common/load_errors/string_table_entries_not_null_separated.h"
+#include "halo/common/load_errors/string_table_entry_offset_out_of_bounds.h"
+#include "halo/common/load_errors/string_table_too_large_buffer.h"
+#include "halo/common/load_errors/string_table_too_large_count.h"
 
 #define CLASS_TEMPLATE_PARAMS template<size_t max_count, size_t max_buffer_size>
 #define CLASS_NAME loc_string_table<max_count, max_buffer_size>
@@ -48,7 +53,8 @@ namespace halo {
    }
    #pragma endregion
 
-   CLASS_TEMPLATE_PARAMS loc_string_table_load_result CLASS_NAME::read(cobb::ibitreader& stream) {
+   CLASS_TEMPLATE_PARAMS
+   template<typename LoadProcess> loc_string_table_load_result CLASS_NAME::read(bitreader<LoadProcess>& stream) {
       //
       // The game engine retains the string table in memory as...
       // 
@@ -106,6 +112,14 @@ namespace halo {
       // 
       size_t count = stream.read_bits(count_bitlength);
       if (count > max_count) {
+         if constexpr (decltype(stream)::has_load_process) {
+            stream.load_process().emit_error({
+               halo::common::load_errors::string_table_too_large_count{
+                  .count     = count,
+                  .max_count = max_count,
+               }
+            });
+         }
          impl::loc_string_table::warn_on_loading_excess_strings(count, max_count);
          count = max_count;
       }
@@ -126,51 +140,91 @@ namespace halo {
       //
       if (count) {
          void*  buffer = nullptr;
+         bool   is_compressed;
          size_t uncompressed_size = stream.read_bits(buffer_size_bitlength);
-         //
-         // TODO: If uncompressed_size >= max_buffer_size, then the variant is invalid; that should 
-         // trigger a warning here.
-         //
-         {
-            bool   is_compressed   = stream.read_bits(1) != 0;
-            size_t serialized_size = uncompressed_size;
-            if (is_compressed)
-               serialized_size = stream.read_bits(buffer_size_bitlength);
-            //
-            buffer = impl::loc_string_table::load_buffer(serialized_size, is_compressed, uncompressed_size, stream);
+         size_t serialized_size   = uncompressed_size;
+         if constexpr (decltype(stream)::has_load_process) {
+            if (uncompressed_size >= max_buffer_size) {
+               stream.load_process().emit_error({
+                  halo::common::load_errors::string_table_too_large_buffer{
+                     .max_buffer_size   = max_buffer_size,
+                     .uncompressed_size = uncompressed_size,
+                  }
+               });
+            }
          }
+         is_compressed = stream.read_bits(1) != 0;
+         if (is_compressed)
+            serialized_size = stream.read_bits(buffer_size_bitlength);
+         buffer = impl::loc_string_table::load_buffer(serialized_size, is_compressed, uncompressed_size, stream);
+         //
+         // Read buffer:
+         //
          if (buffer) {
             for (size_t i = 0; i < count; i++) {
                auto& current_string  = this->strings[i];
                auto& current_offsets = offsets[i];
                for (size_t j = 0; j < current_offsets.size(); j++) {
                   auto off = current_offsets[j];
-                  if (off < 0)
+                  if (off < 0) {
                      //
-                     // TODO: Negative offsets are an error in-game; they should trigger a warning here.
+                     // Negative offsets fail validation in-game.
                      //
+                     if constexpr (decltype(stream)::has_load_process) {
+                        stream.load_process().emit_error({
+                           halo::common::load_errors::string_table_entry_offset_out_of_bounds{
+                              .string_index  = i,
+                              .string_offset = off,
+                              .language      = (localization_language)j,
+                           }
+                        });
+                     }
                      continue;
+                  }
                   if (off >= uncompressed_size) {
-                     return load_result{
-                        .error = load_result::failure_reason::string_offset_out_of_bounds,
-                        .affected_string = {
-                           .index    = (int32_t)i,
-                           .language = (localization_language)j,
-                        },
-                     };
+                     if constexpr (decltype(stream)::has_load_process) {
+                        stream.load_process().emit_error({
+                           halo::common::load_errors::string_table_entry_offset_out_of_bounds{
+                              .string_index  = i,
+                              .string_offset = off,
+                              .language      = (localization_language)j,
+                           }
+                        });
+                     }
+                     continue;
                   }
                   if (off > 0 && ((const char*)buffer)[off - 1] != '\0') {
                      //
-                     // TODO: Strings that aren't null-separated trigger an error in-game; they should trigger 
-                     // a warning here.
+                     // Strings that aren't null-separated will fail validation in-game. You aren't allowed 
+                     // to overlap strings unless they are exactly identical.
                      //
+                     if constexpr (bitreader::has_load_process) {
+                        stream.load_process().emit_error({
+                           halo::common::load_errors::string_table_entries_not_null_separated{
+                              .string_index  = i,
+                              .string_offset = off,
+                              .language      = (localization_language)j,
+                           }
+                        });
+                     }
                   }
                   current_string.set_translation((localization_language)j, (const char*)((std::uintptr_t)buffer + off));
                }
             }
             free(buffer);
-         } else
+         } else {
+            if constexpr (decltype(stream)::has_load_process) {
+               stream.load_process().emit_error({
+                  halo::common::load_errors::string_table_cannot_allocate_buffer{
+                     .compressed_size   = serialized_size,
+                     .uncompressed_size = uncompressed_size,
+                     .max_buffer_size   = max_buffer_size,
+                     .is_compressed     = is_compressed,
+                  }
+               });
+            }
             return load_result{ load_result::failure_reason::unable_to_allocate_buffer };
+         }
       }
       this->set_dirty();
       return {};

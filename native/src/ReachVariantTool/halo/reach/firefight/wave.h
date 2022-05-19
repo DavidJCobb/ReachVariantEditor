@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include "halo/reach/bitreader.h"
 #include "halo/bitbool.h"
 #include "halo/bitnumber.h"
 #include "./squad_type.h"
@@ -20,6 +21,7 @@ namespace halo::reach::firefight {
          //
          // in Set 1, Round 1 will use: Initial Wave squad 0; Main Wave squads 0, 1, and 2; and Boss Wave squad 0.
          // in Set 2, Round 1 will use: Initial Wave squad 1; Main Wave squads 1, 2, and 3; and Boss Wave squad 1.
-      
+
+      void read(bitreader&);
    };
 }

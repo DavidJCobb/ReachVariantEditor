@@ -1,4 +1,5 @@
 #pragma once
+#include "halo/reach/bitreader.h"
 #include "halo/bitbool.h"
 #include "halo/bitnumber.h"
 #include "halo/common/traits/bool_trait.h"
@@ -53,5 +54,7 @@ namespace halo::reach::firefight {
          bitnumber<2, common::traits::bool_trait> immunity_headshots;
          bitnumber<4, traits::damage_resistance>  damage_resistance;
          bitnumber<4, traits::damage_multiplier>  damage_multiplier;
+
+         void read(bitreader&);
    };
 }

@@ -9,10 +9,12 @@ namespace halo::reach {
          //
          if (v.to_int() < info.minimum || v.to_int() > info.maximum) {
             v = halo::default_trait_value<Trait>;
-            if constexpr (game_silently_corrects) {
-               // TODO: emit warning via stream's load_process
-            } else {
-               // TODO: emit error via stream's load_process
+            if constexpr (decltype(stream)::has_load_process) {
+               if constexpr (game_silently_corrects) {
+                  // TODO: emit warning via stream's load_process
+               } else {
+                  // TODO: emit error via stream's load_process
+               }
             }
          }
       }

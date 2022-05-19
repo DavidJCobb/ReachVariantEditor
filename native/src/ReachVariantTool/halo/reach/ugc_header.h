@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "halo/bitbool.h"
 #include "halo/bitnumber.h"
+#include "./bitreader.h"
 #include "halo/util/fixed_string.h"
 #include "./ugc_author.h"
 
@@ -67,5 +68,7 @@ namespace halo::reach {
          mutable struct {
             uint32_t offset_of_file_length = 0;
          } writeData;
+
+         void read(bitreader&);
    };
 }

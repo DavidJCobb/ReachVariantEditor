@@ -1,5 +1,6 @@
 #pragma once
 #include "halo/bitnumber.h"
+#include "halo/reach/bitreader.h"
 #include "./skull.h"
 #include "./wave.h"
 
@@ -36,5 +37,7 @@ namespace halo::reach::firefight {
          wave main;    // Waves 2, 3, and 4
          wave boss;    // Wave 5
       } waves;
+
+      void read(bitreader&);
    };
 }

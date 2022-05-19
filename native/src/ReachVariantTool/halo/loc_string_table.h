@@ -5,6 +5,7 @@
 #include "helpers/stream.h"
 #include "halo/util/dirty.h"
 #include "halo/util/indexed_list.h"
+#include "./bitreader.h"
 #include "./loc_string.h"
 
 namespace halo {
@@ -55,7 +56,7 @@ namespace halo {
          };
 
       protected:
-         using offset_type = uint16_t; // same as used by the game internally
+         using offset_type = int16_t; // same as used by the game internally
          using offset_list = std::array<offset_type, loc_string_base::translation_count>;
          struct sort_pair {
             entry_type* entry = nullptr;
@@ -74,7 +75,8 @@ namespace halo {
          } cached_export;
 
       public:
-         loc_string_table_load_result read(cobb::ibitreader&);
+         template<typename LoadProcess>
+         loc_string_table_load_result read(bitreader<LoadProcess>&);
 
          entry_type*       lookup(const QString& english, bool& matched_multiple);
          const entry_type* lookup(const QString& english, bool& matched_multiple) const;
