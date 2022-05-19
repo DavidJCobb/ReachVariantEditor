@@ -15,6 +15,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 #pragma once
-#include <type_traits>
-#include "./type_traits/has_std_size_getter.h"
-#include "./type_traits/strip_enum.h"
+#include <concepts>
+
+namespace cobb {
+   template<typename T> concept has_std_size_getter = requires(const T& x) {
+      { x.size() } -> std::same_as<size_t>;
+   };
+}

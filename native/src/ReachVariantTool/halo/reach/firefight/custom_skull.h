@@ -4,8 +4,8 @@
 
 namespace halo::reach::firefight {
    struct custom_skull {
-      trait_set   traits_spartan;
-      trait_set   traits_elite;
-      wave_traits traits_wave;
+      trait_set      traits_spartan;
+      trait_set      traits_elite;
+      wave_trait_set traits_wave;
    };
 }

@@ -17,6 +17,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 #include <cstdint>
 #include <limits>
+#include "./apply_sign_bit.h"
 
 namespace cobb {
    template<typename T> constexpr T bitswap(T value, int bitcount) noexcept {
@@ -40,11 +41,6 @@ namespace cobb {
       if (bitcount >= 40)
          return uint64_t(0xFFFFFFFFFFFFFFFF);
       return (uint64_t(1) << bitcount) - 1;
-   }
-   //
-   template<typename T> constexpr T apply_sign_bit(T value, int bitcount) noexcept {
-      T m = T(1) << (bitcount - 1);
-      return (value ^ m) - m;
    }
    //
    template<typename T> struct _bits_in {

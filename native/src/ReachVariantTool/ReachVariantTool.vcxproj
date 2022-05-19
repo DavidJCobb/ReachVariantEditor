@@ -18,7 +18,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -170,9 +170,9 @@
     <ClCompile Include="game_variants\io_process.cpp" />
     <ClCompile Include="game_variants\types\firefight.cpp" />
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
+    <ClCompile Include="halo\bitreader.cpp" />
     <ClCompile Include="halo\loc_string_base.cpp" />
     <ClCompile Include="halo\loc_string_table.cpp" />
-    <ClCompile Include="halo\util\bitnumber.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
@@ -344,6 +344,8 @@
     <ClInclude Include="game_variants\io_process.h" />
     <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
+    <ClInclude Include="halo\bitreader.h" />
+    <ClInclude Include="halo\util\compressed_float.h" />
     <ClInclude Include="halo\reach\files\blocks\author_header.h" />
     <ClInclude Include="halo\reach\files\blocks\base.h" />
     <ClInclude Include="halo\reach\files\blocks\blam_header.h" />
@@ -388,7 +390,7 @@
     <ClInclude Include="halo\reach\ugc_header.h" />
     <ClInclude Include="halo\trait_bitnumber.h" />
     <ClInclude Include="halo\trait_information.h" />
-    <ClInclude Include="halo\util\bitnumber.h" />
+    <ClInclude Include="halo\bitnumber.h" />
     <ClInclude Include="halo\util\dirty.h" />
     <ClInclude Include="halo\util\dummyable.h" />
     <ClInclude Include="halo\util\fixed_list.h" />
@@ -398,6 +400,7 @@
     <ClInclude Include="halo\util\indexed_list.h" />
     <ClInclude Include="halo\util\refcount.h" />
     <ClInclude Include="halo\util\scalar_trait.h" />
+    <ClInclude Include="helpers\apply_sign_bit.h" />
     <ClInclude Include="helpers\bitarray.h" />
     <ClInclude Include="helpers\int128.h" />
     <ClInclude Include="helpers\iterators\pointer_based.h" />
@@ -443,7 +446,14 @@
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />
     <ClInclude Include="helpers\string_scanner.h" />
+    <ClInclude Include="helpers\template_parameters\optional.h" />
+    <ClInclude Include="helpers\type_traits\has_std_size_getter.h" />
+    <ClInclude Include="helpers\type_traits\is_literal.h" />
+    <ClInclude Include="helpers\type_traits\is_std_array.h" />
+    <ClInclude Include="helpers\type_traits\is_std_vector.h" />
     <ClInclude Include="helpers\type_traits\set_const.h" />
+    <ClInclude Include="helpers\type_traits\strip_enum.h" />
+    <ClInclude Include="helpers\type_traits\value_type_of.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />
@@ -554,9 +564,10 @@
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="halo\bitreader.inl" />
     <None Include="halo\loc_string_table.inl" />
     <None Include="halo\trait_information.inl" />
-    <None Include="halo\util\bitnumber.inl" />
+    <None Include="halo\bitnumber.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

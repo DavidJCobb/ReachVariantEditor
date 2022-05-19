@@ -1,13 +1,16 @@
 #pragma once
+#include <array>
+#include "halo/bitbool.h"
+#include "halo/bitnumber.h"
 #include "./squad_type.h"
 
 namespace halo::reach::firefight {
    struct wave {
-      using squad_bitnumber = cobb::bitnumber<8, squad_type, true>;
+      using squad_bitnumber = bitnumber<8, squad_type, bitnumber_params<squad_type>{ .offset = 1 }>;
       
-      cobb::bitbool uses_dropship;
-      cobb::bitbool ordered_squads;
-      cobb::bitnumber<4, uint8_t> squad_count; // number of (squads) that are actually defined; everything after those will be ignored. note that below-normal squad counts may not necessarily be honored by the engine
+      bitbool uses_dropship;
+      bitbool ordered_squads;
+      bitnumber<4, uint8_t> squad_count; // number of (squads) that are actually defined; everything after those will be ignored. note that below-normal squad counts may not necessarily be honored by the engine
       std::array<squad_bitnumber, 12> squads;
          //
          // here's an interesting question: how does "ordered squads" interact with this list when the number of squads exceeds the 

@@ -1,5 +1,8 @@
 #pragma once
 #include <array>
+#include "halo/bitbool.h"
+#include "halo/bitnumber.h"
+#include "../bitreader.h"
 #include "./loadout.h"
 #include "./loadout_palette.h"
 #include "./match_species.h"
@@ -21,12 +24,14 @@ namespace halo::reach::custom_game_options {
          };
       };
       
-      cobb::bitnumber<4, uint8_t>      flags; // game reads these individually (four read-bit-bool calls)
-      cobb::bytenumber<uint8_t>        time_limit; // round time limit in minutes
-      cobb::bitnumber<5, uint8_t>      round_limit;
-      cobb::bitnumber<4, uint8_t>      rounds_to_win;
-      cobb::bitnumber<7, int8_t, true> sudden_death_time; // seconds
-      cobb::bitnumber<5, uint8_t>      grace_period_time;
+      bitnumber<4, uint8_t> flags; // game reads these individually (four read-bit-bool calls)
+      bytenumber<uint8_t>   time_limit; // round time limit in minutes
+      bitnumber<5, uint8_t> round_limit;
+      bitnumber<4, uint8_t> rounds_to_win;
+      bitnumber<7, int8_t, bitnumber_params<int8_t>{ .offset = true }> sudden_death_time; // seconds
+      bitnumber<5, uint8_t> grace_period_time; // seconds
+
+      void read(bitreader&);
    };
    
    struct respawn {
@@ -40,16 +45,18 @@ namespace halo::reach::custom_game_options {
          };
       };
       
-      cobb::bitnumber<4, uint8_t> flags;
-      cobb::bitnumber<6, uint8_t> lives_per_round;
-      cobb::bitnumber<7, uint8_t> team_lives_per_round;
-      cobb::bytenumber<uint8_t>   respawn_time     = 5;
-      cobb::bytenumber<uint8_t>   suicide_penalty  = 5;
-      cobb::bytenumber<uint8_t>   betrayal_penalty = 5;
-      cobb::bitnumber<4, uint8_t> respawn_growth;
-      cobb::bitnumber<4, uint8_t> loadout_camera_time = 10;
-      cobb::bitnumber<6, uint8_t> traits_duration;
+      bitnumber<4, uint8_t> flags;
+      bitnumber<6, uint8_t> lives_per_round;
+      bitnumber<7, uint8_t> team_lives_per_round;
+      bytenumber<uint8_t>   respawn_time     = 5;
+      bytenumber<uint8_t>   suicide_penalty  = 5;
+      bytenumber<uint8_t>   betrayal_penalty = 5;
+      bitnumber<4, uint8_t> respawn_growth   = 0;
+      bitnumber<4, uint8_t> loadout_camera_time = 10;
+      bitnumber<6, uint8_t> traits_duration;
       trait_set traits;
+
+      void read(bitreader&);
    };
    
    struct social {
@@ -70,9 +77,11 @@ namespace halo::reach::custom_game_options {
          balancing_only,
       };
       
-      cobb::bitbool observers = false; // game reads this but discards the value
-      cobb::bitnumber<2, team_change_options> team_changes;
-      cobb::bitnumber<5, uint8_t> flags;
+      bitbool observers = false; // game reads this but discards the value
+      bitnumber<2, team_change_options> team_changes;
+      bitnumber<5, uint8_t> flags;
+
+      void read(bitreader&);
    };
    
    struct map {
@@ -88,27 +97,33 @@ namespace halo::reach::custom_game_options {
          };
       };
       
-      cobb::bitnumber<6, uint8_t> flags;
+      bitnumber<6, uint8_t> flags;
       trait_set base_player_traits;
-      cobb::bytenumber<weapon_set>  weapon_set;  // map default == -2
-      cobb::bytenumber<vehicle_set> vehicle_set; // map default == -2
+      bitnumber<8, weapon_set>  weapon_set;  // map default == -2
+      bitnumber<8, vehicle_set> vehicle_set; // map default == -2
       struct {
          powerup red;
          powerup blue;
          powerup yellow;
       } powerups;
+
+      void read(bitreader&);
    };
    
    struct teams {
-      cobb::bitnumber<3, uint8_t>       scoring; // values above 3 are treated as 0
-      cobb::bitnumber<3, match_species> species;
-      cobb::bitnumber<2, uint8_t>       designator_switch_type;
-      std::array<team_definition, 8>    definitions;
+      bitnumber<3, uint8_t>          scoring; // values above 3 are treated as 0
+      bitnumber<3, match_species>    species;
+      bitnumber<2, uint8_t>          designator_switch_type;
+      std::array<team_definition, 8> definitions;
+
+      void read(bitreader&);
    };
    
    struct loadouts {
-      cobb::bitnumber<2, uint8_t> flags; // flags: spartan loadouts; elite loadouts
+      bitnumber<2, uint8_t> flags; // flags: spartan loadouts; elite loadouts
       loadout_palette_set palettes;
+
+      void read(bitreader&);
    };
 
    struct all {
@@ -118,5 +133,7 @@ namespace halo::reach::custom_game_options {
       map      map;
       teams    teams;
       loadouts loadouts;
+
+      void read(bitreader&);
    };
 }

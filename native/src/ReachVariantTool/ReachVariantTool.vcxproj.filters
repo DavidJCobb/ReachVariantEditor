@@ -463,6 +463,15 @@
     <ClCompile Include="game_variants\components\megalo\helpers\format_strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\loc_string_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\loc_string_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\bitreader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1140,6 +1149,201 @@
     <ClInclude Include="game_variants\components\megalo\helpers\format_strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\localization_language.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\loc_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\loc_string_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\loc_string_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\fixed_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\set_const.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\dirty.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\indexed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\refcount.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\indexed_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\dummyable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\firefight\wave_traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\common\traits\bool_trait.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\damage_resistance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\damage_multiplier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\forced_color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\health_rate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\shield_rate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\shield_vampirism.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\health_multiplier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\shield_multiplier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\trait_set.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\weapon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\grenade_count.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\infinite_ammo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\ability_usage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\ability.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\movement_speed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\player_gravity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\vehicle_usage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\aura.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\double_jump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\jump_height.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\active_camo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\visible_identity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\radar_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\radar_range.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\traits\_all.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\trait_information.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\trait_bitnumber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\scalar_trait.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\game_variant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\blam_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\four_cc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\author_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\ugc_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\ugc_author.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\fixed_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\content_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\eof_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\unknown_file_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\blocks\file_share_metadata_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\files\block_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\bitnumber.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\apply_sign_bit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\template_parameters\optional.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\strip_enum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\value_type_of.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\has_std_size_getter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\is_literal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\is_std_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\is_std_vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\bitreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\compressed_float.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -1149,5 +1353,19 @@
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="halo\loc_string_table.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\trait_information.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\bitnumber.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\bitreader.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 #pragma once
+#include "halo/bitnumber.h"
 #include "./skull.h"
 #include "./wave.h"
 
@@ -27,7 +28,7 @@
 
 namespace halo::reach::firefight {
    struct round {
-      using skull_bitnumber = cobb::bitnumber<18, uint32_t>;
+      using skull_bitnumber = bitnumber<18, uint32_t>;
       
       skull_bitnumber skull_flags; // skulls to flags: (1 << (int)skull)
       struct {

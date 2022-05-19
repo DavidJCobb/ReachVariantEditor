@@ -1,9 +1,7 @@
 #pragma once
 #include "traits/_all.h"
-#include "../../helpers/bitnumber.h"
-#include "../../helpers/stream.h"
-#include "../../helpers/bitwriter.h"
 #include "../trait_bitnumber.h"
+#include "./bitreader.h"
 
 namespace halo::reach {
    struct trait_set {
@@ -52,5 +50,7 @@ namespace halo::reach {
          trait_bitnumber<traits::radar_range>       radar_range;
          trait_bitnumber<traits::bool_trait>        directional_damage_indicator;
       } sensors;
+
+      void read(bitreader&);
    };
 }

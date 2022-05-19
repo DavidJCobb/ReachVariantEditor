@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include "../bitreader.h"
 #include "./loadout.h"
 
 namespace halo::reach::custom_game_options {
@@ -14,14 +15,16 @@ namespace halo::reach::custom_game_options {
 
    struct loadout_palette {
       std::array<loadout, 5> loadouts;
+
+      void read(bitreader& stream) { stream.read(loadouts); }
    };
    
    struct loadout_palette_set : public std::array<loadout_palette, 6> {
       loadout_palette& operator[](loadout_palette_index i) {
-         return std::array::operator[]((int)i);
+         return std::array<loadout_palette, 6>::operator[]((int)i);
       }
       const loadout_palette& operator[](loadout_palette_index i) const {
-         return std::array::operator[]((int)i);
+         return std::array<loadout_palette, 6>::operator[]((int)i);
       }
    };
 }
