@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 #include <cstdint>
 #include <cstdlib>
+#include "./byteswap.h"
 
 namespace cobb {
    #ifdef __cpp_lib_endian
@@ -39,17 +40,6 @@ namespace cobb {
          extern const endian_t native;
       }
    #endif
-
-   template<typename T> T byteswap(T v) noexcept {
-      switch (sizeof(T)) {
-         case 1: return v;
-         case 2: return (T)_byteswap_ushort((uint16_t)v);
-         case 4: return (T)_byteswap_ulong ((uint32_t)v);
-         case 8: return (T)_byteswap_uint64((uint64_t)v);
-      }
-      static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8, "No byteswap intrinsic available for this size.");
-      __assume(0); // let MSVC know this branch should never be reached, so it doesn't warn on not returning a value here
-   }
 
    //
    // Byteswap a value if we are not on a big-endian platform. Use this when 

@@ -43,4 +43,44 @@ namespace halo::reach {
             break;
       }
    }
+   void ugc_header::read(bytereader& stream) {
+      stream.read(
+         build.major,
+         build.minor,
+         type
+      );
+      stream.skip(3);
+      stream.read(
+         file_length,
+         unk08,
+         unk10,
+         unk18,
+         unk20,
+         activity,
+         game_mode,
+         engine
+      );
+      stream.skip(1);
+      stream.read(
+         map_id,
+         engine_category
+      );
+      stream.skip(4);
+      stream.read(
+         created_by,
+         modified_by
+      );
+      stream.read(
+         title,
+         description,
+         engine_icon,
+         unk284,
+         campaign.id,
+         campaign.difficulty,
+         campaign.metagame_scoring,
+         campaign.rally_point,
+         campaign.unk2A4,
+         unk2A8
+      );
+   }
 }

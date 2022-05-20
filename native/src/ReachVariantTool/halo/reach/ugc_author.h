@@ -2,6 +2,7 @@
 #include "halo/bitbool.h"
 #include "halo/bitnumber.h"
 #include "./bitreader.h"
+#include "./bytereader.h"
 #include "halo/util/fixed_string.h"
 
 namespace halo::reach {
@@ -15,6 +16,7 @@ namespace halo::reach {
          bitbool is_online_id;
 
          void read(bitreader&);
+         void read(bytereader&);
          
          bool has_xuid() const noexcept;
          void erase_xuid() noexcept;

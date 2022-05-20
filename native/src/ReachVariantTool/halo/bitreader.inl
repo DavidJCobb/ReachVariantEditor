@@ -65,8 +65,8 @@ namespace halo {
    }
 
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::set_buffer(const uint8_t* b, size_t s) {
-      this->_buffer = b;
-      this->_size = s;
+      this->_buffer   = b;
+      this->_size     = s;
       this->_position = {};
    }
    CLASS_TEMPLATE_PARAMS inline void CLASS_NAME::set_bitpos(uint32_t bitpos) {
@@ -82,7 +82,7 @@ namespace halo {
    CLASS_TEMPLATE_PARAMS inline void CLASS_NAME::set_bytepos(uint32_t bytepos) {
       this->_position.bytes = bytepos;
       if (bytepos > this->size()) {
-         this->_position.bytes = this->size();
+         this->_position.bytes    = this->size();
          this->_position.overflow = (bytepos - this->size()) * 8;
       } else
          this->_position.overflow = 0;
