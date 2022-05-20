@@ -10,16 +10,16 @@ namespace halo {
          static constexpr trait_information info = ::halo::trait_information_for<Trait>;
 
          using trait = Trait;
-         static constexpr auto params = ([]() {
-            auto v = bitnumber_params<Trait>{
-               .initial = ::halo::default_trait_value<Trait>,
+         static constexpr bitnumber_params<trait> params = ([]() {
+            auto v = bitnumber_params<trait>{
+               .initial = ::halo::default_trait_value<trait>,
             };
             if (info.uses_presence_bit)
                v.presence = true;
             return v;
          })();
 
-         using base_bitnumber = typename halo::bitnumber<
+         using type = typename halo::bitnumber<
             info.bitcount,
             trait,
             params
@@ -33,12 +33,5 @@ namespace halo {
    // allow us to set the default value automatically, too.
    //
    template<typename Trait> requires trait_has_compile_time_information<Trait>
-   class trait_bitnumber : public impl::trait_bitnumber::helper<Trait>::base_bitnumber {
-      protected:
-         using helper = impl::trait_bitnumber::helper<Trait>;
-      public:
-         trait_bitnumber() {
-            this->value = helper::default_value;
-         }
-   };
+   using trait_bitnumber = impl::trait_bitnumber::helper<Trait>::type;
 }

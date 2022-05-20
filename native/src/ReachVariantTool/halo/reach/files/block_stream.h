@@ -7,16 +7,17 @@
 
 namespace halo::reach {
    class file_block_stream : public bytereader {
+      protected:
+         file_block_stream() {}
       public:
-         file_block_stream(const uint8_t* data, uint32_t length) : reader(data, length) {};
-         file_block_stream(cobb::generic_buffer&& source) : reader(nullptr, 0) {
+         file_block_stream(cobb::generic_buffer&& source) {
             this->decompressed = std::move(source);
             this->set_buffer(this->decompressed.data(), this->decompressed.size());
          };
          file_block_stream(cobb::generic_buffer& source) = delete; // use std::move on the buffer
 
          static file_block_stream create_invalid() {
-            file_block_stream out(nullptr, 0);
+            file_block_stream out;
             out.is_invalid = true;
             return out;
          }

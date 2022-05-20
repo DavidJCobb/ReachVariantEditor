@@ -3,7 +3,7 @@
 #include "../../trait_information.h"
 
 namespace halo::reach::traits {
-   enum class weapon : uint8_t {
+   enum class weapon : int8_t {
       random           = -4,
       unchanged        = -3, // default
       map_default      = -2,

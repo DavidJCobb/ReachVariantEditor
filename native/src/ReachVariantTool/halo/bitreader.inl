@@ -23,8 +23,8 @@ namespace halo {
       }
       if (this->_position.bytes > this->_size) {
          this->_position.overflow = (this->_position.bytes - this->_size) * 8 + this->_position.bits;
-         this->_position.bytes = this->length;
-         this->_position.bits  = 0;
+         this->_position.bytes    = this->_size;
+         this->_position.bits     = 0;
       }
    }
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_advance_offset_by_bytes(size_t bytes) {
@@ -62,6 +62,20 @@ namespace halo {
          consumed = bits_read;
       }
       out = byte;
+   }
+   CLASS_TEMPLATE_PARAMS uint64_t CLASS_NAME::_read_bits(uint8_t bitcount) {
+      uint64_t result = 0;
+      uint8_t  bits;
+      int      consumed;
+      this->_consume_byte(bits, bitcount, consumed);
+      result = bits;
+      int remaining = bitcount - consumed;
+      while (remaining) {
+         this->_consume_byte(bits, remaining, consumed);
+         result = (result << consumed) | bits;
+         remaining -= consumed;
+      }
+      return result;
    }
 
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::set_buffer(const uint8_t* b, size_t s) {

@@ -5,10 +5,11 @@ namespace halo::util {
       public:
          using underlying_type = Underlying;
          static const underlying_type unchanged = Unchanged;
-      protected:
-         underlying_type value = unchanged;
+      public:
+         underlying_type value = unchanged; // must be public to meet "structural class type" requirements for use [in anything being used] as a non-type template parameter
 
       public:
+         constexpr scalar_trait() {}
          constexpr scalar_trait(Underlying v) : value(v) {}
 
          constexpr operator Underlying() const { return value; }

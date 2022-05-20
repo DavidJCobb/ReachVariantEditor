@@ -27,10 +27,10 @@ namespace halo::util {
          std::array<value_type, Size + 1> _data = {}; // + 1 to ensure null terminator for c_str()
 
       public:
-         using iterator       = decltype(_data)::iterator;
-         using const_iterator = decltype(_data)::const_iterator;
-         using reverse_iterator       = decltype(_data)::reverse_iterator;
-         using const_reverse_iterator = decltype(_data)::const_reverse_iterator;
+         using iterator       = typename decltype(_data)::iterator;
+         using const_iterator = typename decltype(_data)::const_iterator;
+         using reverse_iterator       = typename decltype(_data)::reverse_iterator;
+         using const_reverse_iterator = typename decltype(_data)::const_reverse_iterator;
 
       public:
          constexpr fixed_string() {}
@@ -46,7 +46,7 @@ namespace halo::util {
             this->_data.back() = value_type(0); // ensure null terminator for c_str
          }
          template<size_type OtherSize> requires (OtherSize <= Size) constexpr fixed_string(const fixed_string<value_type, OtherSize>& o) noexcept {
-            size_type i = 0
+            size_type i = 0;
             for (; i < OtherSize; ++i)
                this->_data[i] = o._data[i];
             for (; i < max_length; ++i)

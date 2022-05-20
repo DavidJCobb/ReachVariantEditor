@@ -1,9 +1,12 @@
 #include "game_variant.h"
+
 #include "files/block_stream.h"
 #include "halo/common/load_errors/file_is_for_the_wrong_game.h"
 #include "halo/common/load_errors/first_file_block_is_not_blam_header.h"
 #include "halo/common/load_errors/game_variant_no_file_block_for_data.h"
 #include "halo/common/load_errors/invalid_file_block_header.h"
+
+#include "firefight/variant_data.h"
 
 namespace halo::reach {
    void game_variant_data::read(bitreader& stream) {
@@ -115,8 +118,6 @@ namespace halo::reach {
                   file_hash file_hash = {};
                   if (!block_type_is_gvar) {
                      stream.read(file_hash);
-                     stream.skip(4 * 8); // skip four unused bytes
-                     stream.skip(4 * 8); // == size of variant data in big-endian, i.e. offset_after_hashable - offset_before_hashable
                   }
                   size_t offset_before_hashable = stream.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
                   //
@@ -138,7 +139,7 @@ namespace halo::reach {
                         #endif
                         break;
                      case game_variant_type::firefight:
-                        this->data = new GameVariantDataFirefight();
+                        this->data = new firefight_variant_data();
                         break;
                      case game_variant_type::none: // TODO: Ask the user what type we should use.
                         // fall through

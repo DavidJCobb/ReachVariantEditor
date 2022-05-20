@@ -41,6 +41,7 @@ namespace halo {
          void _advance_offset_by_bytes(size_t bytes);
          void _byte_align();
          void _consume_byte(uint8_t& out, uint8_t bitcount, int& consumed); // reads {std::min(std::min(8, bitcount), (8 - this->_position.bits))} bits from the buffer
+         uint64_t _read_bits(uint8_t bitcount);
 
       public:
          bitreader() {}

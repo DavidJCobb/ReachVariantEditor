@@ -6,13 +6,35 @@
 #include "helpers/apply_sign_bit.h"
 
 namespace halo {
+   namespace impl::bitnumber {
+      template<typename T> struct type_to_integer;
+
+      template<typename T> requires (std::is_integral_v<T> || std::is_enum_v<T>) struct type_to_integer<T> {
+         using type = cobb::strip_enum_t<T>;
+      };
+
+      template<typename T> concept has_custom_underlying_type = requires(T& x) {
+         typename T::underlying_type;
+         requires std::is_integral_v<typename T::underlying_type>;
+         requires requires(typename T::underlying_type i) {
+            { T(i) };
+            { x = i };
+         };
+      };
+
+      template<typename T> requires has_custom_underlying_type<T>
+      struct type_to_integer<T> {
+         using type = typename T::underlying_type;
+      };
+   }
+
    template<typename Underlying> struct bitnumber_params {
       protected:
          template<typename T> using optional = cobb::template_parameters::optional<T>;
       public:
          using underlying_type     = Underlying;
          using underlying_optional = optional<underlying_type>;
-         using underlying_int      = cobb::strip_enum_t<underlying_type>;
+         using underlying_int      = impl::bitnumber::type_to_integer<underlying_type>::type;
 
          optional<underlying_type> if_absent = {};
          underlying_type initial  = {};
@@ -48,7 +70,7 @@ namespace halo {
          static constexpr auto params = Params;
       public:
          using underlying_type = Underlying;
-         using underlying_int  = cobb::strip_enum_t<underlying_type>;
+         using underlying_int  = impl::bitnumber::type_to_integer<underlying_type>::type;
          using underlying_uint = std::make_unsigned_t<underlying_int>;
 
          static constexpr size_t bitcount        = Bitcount;
