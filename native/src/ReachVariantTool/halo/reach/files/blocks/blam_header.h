@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "halo/util/fixed_string.h"
+#include "../../bytereader.h"
 #include "./base.h"
 
 namespace halo::reach {
@@ -11,5 +12,7 @@ namespace halo::reach {
             util::fixed_string<char, 0x20> unk0E; // Matchmaking Firefight variants use the text "game var" here; screenshots default it to "reach saved screenshot"
             uint16_t unk2E = 0;
          } data;
+
+         void read(bytereader&);
    };
 }

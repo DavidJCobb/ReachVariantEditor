@@ -20,6 +20,19 @@ namespace halo::reach {
       public:
          file_block_header header;
 
+         static bool header_is_as_expected(const file_block_header& header) {
+            if constexpr (signature != 0)
+               if (header.signature != signature)
+                  return false;
+            if constexpr (expected_size != 0)
+               if (header.size != expected_size)
+                  return false;
+            return true;
+         }
+         bool is_as_expected() const {
+            return header_is_as_expected(this->header);
+         }
+
          struct {
             struct {
                uint32_t pos = 0; // location of the start of the header in bytes, not bits
@@ -29,6 +42,9 @@ namespace halo::reach {
             } save;
          } state;
 
+      protected:
+         void _error_if_eof(bytereader&);
+      public:
          void read(bytereader&);
 
          /*//

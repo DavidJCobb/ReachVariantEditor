@@ -114,7 +114,7 @@ namespace halo {
       if (count > max_count) {
          if constexpr (decltype(stream)::has_load_process) {
             stream.load_process().emit_error({
-               halo::common::load_errors::string_table_too_large_count{
+               .data = halo::common::load_errors::string_table_too_large_count{
                   .count     = count,
                   .max_count = max_count,
                }
@@ -172,7 +172,7 @@ namespace halo {
                      //
                      if constexpr (decltype(stream)::has_load_process) {
                         stream.load_process().emit_error({
-                           halo::common::load_errors::string_table_entry_offset_out_of_bounds{
+                           .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
                               .string_index  = i,
                               .string_offset = off,
                               .language      = (localization_language)j,
@@ -184,7 +184,7 @@ namespace halo {
                   if (off >= uncompressed_size) {
                      if constexpr (decltype(stream)::has_load_process) {
                         stream.load_process().emit_error({
-                           halo::common::load_errors::string_table_entry_offset_out_of_bounds{
+                           .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
                               .string_index  = i,
                               .string_offset = off,
                               .language      = (localization_language)j,
@@ -200,7 +200,7 @@ namespace halo {
                      //
                      if constexpr (bitreader::has_load_process) {
                         stream.load_process().emit_error({
-                           halo::common::load_errors::string_table_entries_not_null_separated{
+                           .data = halo::common::load_errors::string_table_entries_not_null_separated{
                               .string_index  = i,
                               .string_offset = off,
                               .language      = (localization_language)j,
@@ -215,7 +215,7 @@ namespace halo {
          } else {
             if constexpr (decltype(stream)::has_load_process) {
                stream.load_process().emit_error({
-                  halo::common::load_errors::string_table_cannot_allocate_buffer{
+                  .data = halo::common::load_errors::string_table_cannot_allocate_buffer{
                      .compressed_size   = serialized_size,
                      .uncompressed_size = uncompressed_size,
                      .max_buffer_size   = max_buffer_size,

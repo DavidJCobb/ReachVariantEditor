@@ -7,20 +7,9 @@
 #include "./bytereader.h"
 #include "halo/util/fixed_string.h"
 #include "./ugc_author.h"
+#include "./ugc_file_type.h"
 
 namespace halo::reach {
-   enum class ugc_file_type : int8_t {
-      none = -1,
-      dlc,
-      campaign_save,
-      screenshot,
-      film,
-      film_clip,
-      map_variant,
-      game_variant,
-      playlist,
-   };
-
    enum class ugc_game_mode : uint8_t {
       none,
       campaign,

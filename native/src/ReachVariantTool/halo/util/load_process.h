@@ -3,11 +3,21 @@
 #include <vector>
 
 namespace halo::util {
+   namespace impl::load_process {
+      template<typename T> concept load_process_message = requires(T& message) {
+         { message.data };
+      };
+   }
+
    template<typename T> concept load_process = requires (T& process, const T& const_process) {
       typename T::notice;
       typename T::warning;
       typename T::error;
       typename T::fatal;
+      requires impl::load_process::load_process_message<typename T::notice>;
+      requires impl::load_process::load_process_message<typename T::warning>;
+      requires impl::load_process::load_process_message<typename T::error>;
+      requires impl::load_process::load_process_message<typename T::fatal>;
       { process.emit_notice(typename T::notice{}) };
       { process.emit_warning(typename T::warning{}) };
       { process.emit_error(typename T::error{}) };
