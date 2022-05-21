@@ -23,7 +23,7 @@ namespace halo::reach::custom_game_options {
       struct {
          bytenumber<uint32_t>  primary; // xRGB
          bytenumber<uint32_t>  secondary; // xRGB
-         bytenumber<uint32_t>  ui; // ARGB or RGBA
+         bytenumber<uint32_t>  ui; // ARGB
       } colors;
       bitnumber<5, uint8_t> fireteam_count = 1;
 

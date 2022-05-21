@@ -1,8 +1,10 @@
 #pragma once
 #include <array>
+#include <concepts>
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace halo::util {
    template<
@@ -93,5 +95,19 @@ namespace halo::util {
          inline const_iterator rbegin() const { crbegin(); }
          inline iterator rend() { return rend(); }
          inline const_iterator rend() const { crend(); }
+   };
+   
+   template<typename T> concept is_fixed_string = requires (T& x) {
+      typename T::value_type;
+      typename T::traits_type;
+      { T::max_length } -> std::same_as<const size_t&>;
+      requires std::is_same_v<
+         std::decay_t<T>,
+         fixed_string<
+            typename T::value_type,
+            (size_t)T::max_length,
+            typename T::traits_type
+         >
+      >;
    };
 }

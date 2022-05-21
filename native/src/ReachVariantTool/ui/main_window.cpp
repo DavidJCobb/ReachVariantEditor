@@ -27,6 +27,7 @@
 #include "../helpers/stream.h"
 #include "../helpers/qt/tree_widget.h"
 #include "../services/ini.h"
+#include "ui/debug_commands/new_backend_load.h"
 
 #include "options_window.h"
 #include "script_editor.h"
@@ -226,6 +227,11 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       QObject::connect(this->ui.actionDebugbreak, &QAction::triggered, DebugHelperFunctions::break_on_variant);
       QObject::connect(this->ui.actionDebugExportTriggersText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_triggers_english(this); });
       QObject::connect(this->ui.actionDebugExportStringsText, &QAction::triggered, [this]() { DebugHelperFunctions::export_variant_strings(this); });
+      if (auto* action = new QAction(this)) {
+         action->setText("Test new loader");
+         QObject::connect(action, &QAction::triggered, this, [this]() { rvt::debug_commands::new_backend_load(this); });
+         this->ui.menuTools->addAction(action);
+      }
    #else
       this->ui.actionDebugbreak->setEnabled(false);
       this->ui.actionDebugbreak->setVisible(false);

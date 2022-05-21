@@ -10,7 +10,6 @@
 
 namespace halo {
    namespace impl::loc_string_table {
-      extern void* load_buffer(size_t bytecount, bool is_compressed, size_t uncompressed_size, cobb::ibitreader&);
       extern void warn_on_loading_excess_strings(size_t claimed, size_t maximum);
    }
 
@@ -73,6 +72,9 @@ namespace halo {
             std::vector<sort_pair> pairs;
             uint32_t uncompressed_size = 0;
          } cached_export;
+
+         template<typename LoadProcess>
+         void* _read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, bitreader<LoadProcess>&);
 
       public:
          template<typename LoadProcess>

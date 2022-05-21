@@ -52,6 +52,6 @@ namespace halo::reach {
             firefight::wave data;
          } bonus_wave;
 
-         void read(bitreader&);
+         virtual void read(bitreader&) override;
    };
 }

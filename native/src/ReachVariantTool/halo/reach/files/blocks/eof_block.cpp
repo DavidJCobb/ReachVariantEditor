@@ -2,7 +2,7 @@
 
 namespace halo::reach {
    void eof_block::read(bytereader& stream) {
-      stream.read(
+      stream.read<std::endian::big>(
          length,
          unk04
       );

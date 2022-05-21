@@ -21,8 +21,6 @@ namespace halo::reach {
 
    class ugc_header {
       public:
-         ugc_header();
-         
          struct {
             bytenumber<uint16_t> major; // chdr-only
             bytenumber<uint16_t> minor; // chdr-only

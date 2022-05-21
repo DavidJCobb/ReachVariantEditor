@@ -41,7 +41,7 @@ namespace cobb::template_parameters {
          }
 
          inline constexpr value_type value() const {
-            if (!value())
+            if (!has_value())
                throw std::bad_optional_access();
             return _value;
          }

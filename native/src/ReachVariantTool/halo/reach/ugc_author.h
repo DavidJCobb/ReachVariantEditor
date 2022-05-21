@@ -8,10 +8,8 @@
 namespace halo::reach {
    class ugc_author {
       public:
-         ugc_author();
-         
-         bytenumber<uint64_t> timestamp; // seconds since Jan 1 1970 midnight GMT
-         bytenumber<uint64_t> xuid;
+         bytenumber<uint64_t> timestamp = 0; // seconds since Jan 1 1970 midnight GMT
+         bytenumber<uint64_t> xuid      = 0;
          util::fixed_string<char, 16> gamertag; // includes null terminator
          bitbool is_online_id;
 

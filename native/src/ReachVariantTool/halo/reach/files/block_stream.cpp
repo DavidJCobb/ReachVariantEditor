@@ -17,7 +17,7 @@ namespace halo::reach {
          return file_block_stream::create_invalid();
       }
       uint32_t pos_block_end = pos_block_start + header.size;
-      if (header.signature == '_cmp') {
+      if (header.signature == '_cmp') { // compressed block
          uint8_t  decompressed_unk00 = 0;
          uint32_t decompressed_size  = 0;
          {
@@ -48,8 +48,11 @@ namespace halo::reach {
          return result;
       }
       stream.set_position(pos_block_end);
-      file_block_stream result(stream.data() + pos_block_start, header.size);
-      result.header = header;
+      //
+      cobb::generic_buffer result_buffer(header.size);
+      memcpy(result_buffer.data(), stream.data() + pos_block_start, header.size);
+      file_block_stream result(std::move(result_buffer));
+      result.read(result.header);
       return result;
    }
 }

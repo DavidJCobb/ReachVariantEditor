@@ -1,8 +1,12 @@
 #pragma once
 #include "loc_string_table.h"
+extern "C" {
+   #include "../../zlib/zlib.h" // interproject ref
+}
 #include "halo/common/load_errors/string_table_cannot_allocate_buffer.h"
 #include "halo/common/load_errors/string_table_entries_not_null_separated.h"
 #include "halo/common/load_errors/string_table_entry_offset_out_of_bounds.h"
+#include "halo/common/load_errors/string_table_mismatched_sizes.h"
 #include "halo/common/load_errors/string_table_too_large_buffer.h"
 #include "halo/common/load_errors/string_table_too_large_count.h"
 
@@ -53,8 +57,88 @@ namespace halo {
    }
    #pragma endregion
 
+
+   CLASS_TEMPLATE_PARAMS
+   template<typename LoadProcess>
+   void* CLASS_NAME::_read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, bitreader<LoadProcess>& stream) {
+      constexpr bool load_process_is_valid = bitreader<LoadProcess>::has_load_process;
+      //
+      void* buffer = malloc(serialized_size);
+      for (uint32_t i = 0; i < serialized_size; i++)
+         *(uint8_t*)((std::uintptr_t)buffer + i) = stream.read_bits<uint8_t>(8);
+      if (is_compressed) {
+         //
+         // The buffer has four bytes indicating the length of the decompressed data, which is 
+         // redundant. We'll read those four bytes just as a sanity check, but we need to skip 
+         // them -- zlib needs to receive (buffer + 4) as its input.
+         //
+         uint32_t uncompressed_size_2 = *(uint32_t*)(buffer);
+         if constexpr (load_process_is_valid) {
+            if (uncompressed_size_2 != uncompressed_size) {
+               if (_byteswap_ulong(uncompressed_size_2) != uncompressed_size) {
+                  stream.load_process().emit_warning({
+                     .data = halo::common::load_errors::string_table_mismatched_sizes{
+                        .bungie_size = uncompressed_size,
+                        .zlib_size   = uncompressed_size_2,
+                     }
+                  });
+               }
+            }
+         }
+         void* result = malloc(uncompressed_size);
+         if (!result) {
+            if constexpr (load_process_is_valid) {
+               stream.load_process().emit_error({
+                  .data = halo::common::load_errors::string_table_cannot_allocate_buffer{
+                     .compressed_size   = serialized_size,
+                     .uncompressed_size = uncompressed_size,
+                     .max_buffer_size   = max_buffer_size,
+                     .is_compressed     = is_compressed,
+                     //
+                     .is_zlib = false,
+                  }
+               });
+            }
+            return nullptr;
+         }
+         //
+         // It's normally pointless to check that an allocation succeeded because if it didn't, 
+         // that means you're out of memory and there's basically nothing you can do about that 
+         // anyway. However, if we screwed up and misread the size, then we may try to allocate 
+         // a stupidly huge amount of memory. In that case, allocation will (hopefully) fail and 
+         // (final) will be nullptr, and that's worth handling.
+         //
+         if (result) {
+            Bytef* input = (Bytef*)((std::uintptr_t)buffer + sizeof(uncompressed_size_2));
+            int zlib_result = uncompress((Bytef*)result, (uLongf*)&uncompressed_size_2, input, serialized_size - sizeof(uncompressed_size_2));
+            if (zlib_result != Z_OK) {
+               free(result);
+               result = nullptr;
+               //
+               if constexpr (load_process_is_valid) {
+                  stream.load_process().emit_error({
+                     .data = halo::common::load_errors::string_table_cannot_allocate_buffer{
+                        .compressed_size   = serialized_size,
+                        .uncompressed_size = uncompressed_size,
+                        .max_buffer_size   = max_buffer_size,
+                        .is_compressed     = is_compressed,
+                        //
+                        .is_zlib   = true,
+                        .zlib_code = zlib_result,
+                     }
+                  });
+               }
+            }
+         }
+         free(buffer);
+         buffer = result;
+      }
+      return buffer;
+   }
+
    CLASS_TEMPLATE_PARAMS
    template<typename LoadProcess> loc_string_table_load_result CLASS_NAME::read(bitreader<LoadProcess>& stream) {
+      constexpr bool load_process_is_valid = bitreader<LoadProcess>::has_load_process;
       //
       // The game engine retains the string table in memory as...
       // 
@@ -112,7 +196,7 @@ namespace halo {
       // 
       size_t count = stream.read_bits(count_bitlength);
       if (count > max_count) {
-         if constexpr (decltype(stream)::has_load_process) {
+         if constexpr (load_process_is_valid) {
             stream.load_process().emit_error({
                .data = halo::common::load_errors::string_table_too_large_count{
                   .count     = count,
@@ -143,7 +227,7 @@ namespace halo {
          bool   is_compressed;
          size_t uncompressed_size = stream.read_bits(buffer_size_bitlength);
          size_t serialized_size   = uncompressed_size;
-         if constexpr (decltype(stream)::has_load_process) {
+         if constexpr (load_process_is_valid) {
             if (uncompressed_size >= max_buffer_size) {
                stream.load_process().emit_error({
                   halo::common::load_errors::string_table_too_large_buffer{
@@ -156,7 +240,7 @@ namespace halo {
          is_compressed = stream.read_bits(1) != 0;
          if (is_compressed)
             serialized_size = stream.read_bits(buffer_size_bitlength);
-         buffer = impl::loc_string_table::load_buffer(serialized_size, is_compressed, uncompressed_size, stream);
+         buffer = this->_read_buffer(serialized_size, is_compressed, uncompressed_size, stream);
          //
          // Read buffer:
          //
@@ -170,7 +254,7 @@ namespace halo {
                      //
                      // Negative offsets fail validation in-game.
                      //
-                     if constexpr (decltype(stream)::has_load_process) {
+                     if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
                               .string_index  = i,
@@ -182,7 +266,7 @@ namespace halo {
                      continue;
                   }
                   if (off >= uncompressed_size) {
-                     if constexpr (decltype(stream)::has_load_process) {
+                     if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
                               .string_index  = i,
@@ -198,7 +282,7 @@ namespace halo {
                      // Strings that aren't null-separated will fail validation in-game. You aren't allowed 
                      // to overlap strings unless they are exactly identical.
                      //
-                     if constexpr (bitreader::has_load_process) {
+                     if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entries_not_null_separated{
                               .string_index  = i,
@@ -213,16 +297,6 @@ namespace halo {
             }
             free(buffer);
          } else {
-            if constexpr (decltype(stream)::has_load_process) {
-               stream.load_process().emit_error({
-                  .data = halo::common::load_errors::string_table_cannot_allocate_buffer{
-                     .compressed_size   = serialized_size,
-                     .uncompressed_size = uncompressed_size,
-                     .max_buffer_size   = max_buffer_size,
-                     .is_compressed     = is_compressed,
-                  }
-               });
-            }
             return load_result{ load_result::failure_reason::unable_to_allocate_buffer };
          }
       }

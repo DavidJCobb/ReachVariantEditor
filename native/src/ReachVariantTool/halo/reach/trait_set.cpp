@@ -7,9 +7,9 @@ namespace halo::reach {
          using Trait = TraitBitnumber::underlying_type;
          constexpr auto& info = halo::trait_information_for<Trait>;
          //
-         if (v.to_int() < info.minimum || v.to_int() > info.maximum) {
+         if (v.to_int() < info.min || v.to_int() > info.max) {
             v = halo::default_trait_value<Trait>;
-            if constexpr (decltype(stream)::has_load_process) {
+            if constexpr (bitreader::has_load_process) {
                if constexpr (game_silently_corrects) {
                   // TODO: emit warning via stream's load_process
                } else {
@@ -19,7 +19,7 @@ namespace halo::reach {
          }
       }
       template<bool game_silently_corrects, typename... Types> void _correct_traits(bitreader& stream, Types&... values) {
-         (_correct_trait(stream, values), ...);
+         (_correct_trait<game_silently_corrects>(stream, values), ...);
       }
    }
 

@@ -52,16 +52,30 @@ namespace halo::reach::custom_game_options {
 
    void teams::read(bitreader& stream) {
       stream.read(
+         scoring,
          species,
          designator_switch_type,
          definitions
       );
+      if (scoring > 3)
+         scoring = 0;
    }
 
    void loadouts::read(bitreader& stream) {
       stream.read(
          flags,
          palettes
+      );
+   }
+
+   void all::read(bitreader& stream) {
+      stream.read(
+         general,
+         respawn,
+         social,
+         map,
+         teams,
+         loadouts
       );
    }
 }

@@ -1,4 +1,5 @@
 #include "game_variant.h"
+#include <QByteArray>
 
 #include "files/block_stream.h"
 #include "halo/common/load_errors/file_is_for_the_wrong_game.h"
@@ -17,6 +18,12 @@ namespace halo::reach {
       );
    }
 
+   bytereader::load_process_type game_variant::read(const QByteArray& buffer) {
+      bytereader stream;
+      stream.set_buffer((const uint8_t*)buffer.data(), buffer.size());
+      this->read(stream);
+      return stream.load_process();
+   }
    void game_variant::read(bytereader& stream) {
       bool athr = false;
       bool blam = false;
@@ -69,12 +76,9 @@ namespace halo::reach {
             case 'mpvr':
             case 'gvar':
                {
-                  file_block_header header;
-                  block.read(header);
-                  //
                   bool block_type_is_gvar = false;
-                  if (header.signature == 'mpvr') {
-                     if (header.version == (uint16_t)game_variant_data::block_version::halo_2_annie) {
+                  if (block.header.signature == 'mpvr') {
+                     if (block.header.version == (uint16_t)game_variant_data::block_version::halo_2_annie) {
                         //
                         // Note: This won't catch all Halo 2 Anniversary variants; some use a new file chunk, "athr", 
                         // so those trip the "no 'chdr' block" check instead.
@@ -89,26 +93,26 @@ namespace halo::reach {
                         }
                         return;
                      }
-                     if (header.size != game_variant_data::file_block_size) {
+                     if (block.header.size != game_variant_data::file_block_size) {
                         if constexpr (bytereader::has_load_process) {
                            stream.load_process().emit_error({
                               .data = halo::common::load_errors::invalid_file_block_header{
                                  .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                                 .found    = { .signature = header.signature, .size = header.size },
+                                 .found    = { .signature = block.header.signature, .size = block.header.size },
                               }
                            });
                         }
                         return;
                      }
-                  } else if (header.signature == 'gvar') {
+                  } else if (block.header.signature == 'gvar') {
                      block_type_is_gvar = true;
-                     header.signature = 'mpvr'; // fix this for when we save
+                     block.header.signature = 'mpvr'; // fix this for when we save
                   } else {
                      if constexpr (bytereader::has_load_process) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::invalid_file_block_header{
                               .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                              .found    = { .signature = header.signature, .size = header.size },
+                              .found    = { .signature = block.header.signature, .size = block.header.size },
                            }
                         });
                      }
@@ -117,13 +121,14 @@ namespace halo::reach {
                   //
                   file_hash file_hash = {};
                   if (!block_type_is_gvar) {
-                     stream.read(file_hash);
+                     block.read(file_hash);
                   }
-                  size_t offset_before_hashable = stream.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
+                  size_t offset_before_hashable = block.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
+                  //stream.load_process().import_from(block.load_process()); // TODO
                   //
                   bitreader bitstream;
-                  bitstream.set_buffer(stream.data(), stream.size());
-                  bitstream.set_bytepos(stream.get_position());
+                  bitstream.set_buffer(block.data(), block.size());
+                  bitstream.set_bytepos(block.get_position());
                   //
                   bitstream.read(this->type);
                   switch (this->type) {
@@ -156,6 +161,7 @@ namespace halo::reach {
                         v->file_hash = file_hash;
                      v->read(bitstream);
                   }
+                  stream.load_process().import_from(bitstream.load_process());
                }
                mpvr = true;
                break;

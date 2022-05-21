@@ -8,7 +8,7 @@
 //
 namespace halo::reach {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_error_if_eof(bytereader& stream) {
-      if constexpr (decltype(stream)::has_load_process) {
+      if constexpr (bytereader::has_load_process) {
          if (!stream.is_at_end())
             return;
          stream.load_process().emit_error({
@@ -27,7 +27,7 @@ namespace halo::reach {
       this->read_state.pos = stream.get_position();
       stream.read(this->header);
       //
-      if constexpr (decltype(stream)::has_load_process) {
+      if constexpr (bytereader::has_load_process) {
          bool valid = true;
          if constexpr (signature != util::four_cc(0)) {
             if (this->header.signature != signature)

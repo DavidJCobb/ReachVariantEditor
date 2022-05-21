@@ -28,3 +28,5 @@ namespace halo {
          inline const decltype(translations)& get_all_translations() const { return this->translations; }
    };
 }
+
+#include "loc_string.inl"

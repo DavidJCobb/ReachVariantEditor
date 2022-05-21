@@ -12,6 +12,7 @@
       #include "halo/common/load_errors/string_table_cannot_allocate_buffer.h"
       #include "halo/common/load_errors/string_table_entries_not_null_separated.h"
       #include "halo/common/load_errors/string_table_entry_offset_out_of_bounds.h"
+      #include "halo/common/load_errors/string_table_mismatched_sizes.h"
       #include "halo/common/load_errors/string_table_too_large_buffer.h"
       #include "halo/common/load_errors/string_table_too_large_count.h"
    #pragma endregion
@@ -43,6 +44,11 @@ namespace halo::reach {
       struct notice : public message_base {
       };
       struct warning : public message_base {
+         using inner_data = std::variant<
+            halo::common::load_errors::string_table_mismatched_sizes//,
+         >;
+
+         inner_data data;
       };
       struct error : public message_base {
          using inner_data = std::variant<

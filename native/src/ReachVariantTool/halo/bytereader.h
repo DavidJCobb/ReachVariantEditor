@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "helpers/byteswap.h"
 #include "helpers/memory.h"
+#include "helpers/type_traits/strip_enum.h"
 #include "./util/fixed_string.h"
 #include "./util/has_read_method.h"
 #include "./util/load_process.h"
@@ -52,58 +53,11 @@ namespace halo {
             void set_buffer(const uint8_t* b, size_t s);
             void set_position(uint32_t bytepos);
 
-            // Multi-read call
-            template<typename... Types> requires (sizeof...(Types) > 1)
-            void read(Types&... args) {
-               (this->read(args), ...);
-            }
-            template<std::endian Endianness, typename... Types> requires (sizeof...(Types) > 1)
-            void read(Types&... args) {
-               auto e = this->endianness();
-               this->set_endianness(Endianness);
-               (this->read(args), ...);
-               this->set_endianness(e);
-            }
-
             cobb::generic_buffer read_buffer(size_t size) {
                auto out = cobb::generic_buffer(size);
                this->_read_impl(out.data(), size);
                return out;
             }
-         
-            #pragma region read
-            template<typename T> requires util::has_read_method<bytereader_base, T>
-            void read(T& v) {
-               v.read(*this);
-            }
-
-            template<typename T> requires (!std::is_pointer_v<T>)
-            void read(T& out) {
-               this->_read_impl(&out, sizeof(T));
-               this->_apply_endianness(out);
-            }
-
-            template<typename T> requires (!std::is_pointer_v<T>)
-            void read(T* list, size_t count) {
-               for (size_t i = 0; i < count; ++i)
-                  this->read(*list[count]);
-            }
-
-            template<typename T, size_t count> requires (!std::is_pointer_v<T>)
-            void read(std::array<T, count>& out) {
-               for (auto& item : out)
-                  this->read(item);
-            }
-
-            template<typename CharT, size_t size>
-            void read(util::fixed_string<CharT, size>& out) {
-               this->_read_impl(out.data(), size * sizeof(CharT));
-               if constexpr (sizeof(CharT) > 1) {
-                  for (auto& c : out)
-                     this->_apply_endianness(c);
-               }
-            }
-            #pragma endregion
 
             template<typename T>
             void peek(T& out) const noexcept {
@@ -140,5 +94,52 @@ namespace halo {
          const load_process_type& load_process() const requires (!std::is_same_v<load_process_type, void>) {
             return this->_load_process;
          }
+
+         // Multi-read call
+         template<typename... Types> requires (sizeof...(Types) > 1)
+            void read(Types&... args) {
+            (this->read(args), ...);
+         }
+         template<std::endian Endianness, typename... Types> requires (sizeof...(Types) > 1)
+            void read(Types&... args) {
+            auto e = this->endianness();
+            this->set_endianness(Endianness);
+            (this->read(args), ...);
+            this->set_endianness(e);
+         }
+         
+         #pragma region read
+         template<typename T> requires util::has_read_method<bytereader, T>
+         void read(T& v) {
+            v.read(*this);
+         }
+
+         template<typename CharT, size_t size>
+         void read(util::fixed_string<CharT, size>& out) {
+            this->_read_impl(out.data(), size * sizeof(CharT));
+            if constexpr (sizeof(CharT) > 1) {
+               for (auto& c : out)
+                  this->_apply_endianness(c);
+            }
+         }
+
+         template<typename T> requires (!std::is_pointer_v<T> && !util::has_read_method<bytereader, T> && !util::is_fixed_string<T>)
+         void read(T& out) {
+            this->_read_impl(&out, sizeof(T));
+            this->_apply_endianness(out);
+         }
+
+         template<typename T> requires (!std::is_pointer_v<T>)
+         void read(T* list, size_t count) {
+            for (size_t i = 0; i < count; ++i)
+               this->read(*list[i]);
+         }
+
+         template<typename T, size_t count> requires (!std::is_pointer_v<T>)
+         void read(std::array<T, count>& out) {
+            for (auto& item : out)
+               this->read(item);
+         }
+         #pragma endregion
    };
 }

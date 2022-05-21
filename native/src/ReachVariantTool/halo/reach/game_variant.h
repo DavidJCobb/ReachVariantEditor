@@ -16,6 +16,8 @@
 #include "./ugc_header.h"
 #include "./custom_game_options/all.h"
 
+class QByteArray;
+
 namespace halo::reach {
    class game_variant_data {
       public:
@@ -26,7 +28,7 @@ namespace halo::reach {
          static constexpr size_t file_block_size = 0x5028;
 
       public:
-         virtual ~game_variant_data();
+         virtual ~game_variant_data() {}
          virtual game_variant_type type() const { return game_variant_type::none; };
 
          file_hash file_hash;
@@ -39,7 +41,7 @@ namespace halo::reach {
          bitbool    is_built_in;
          custom_game_options::all options;
 
-         void read(bitreader&);
+         virtual void read(bitreader&);
    };
 
    class game_variant {
@@ -54,6 +56,7 @@ namespace halo::reach {
          eof_block eof_block;
          std::vector<unknown_file_block> unknown_blocks;
 
+         bytereader::load_process_type read(const QByteArray&); // returns a load process so that the caller can check status, errors, etc.
          void read(bytereader&);
    };
 }
