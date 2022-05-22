@@ -194,6 +194,7 @@
     <ClCompile Include="halo\reach\trait_set.cpp" />
     <ClCompile Include="halo\reach\ugc_author.cpp" />
     <ClCompile Include="halo\reach\ugc_header.cpp" />
+    <ClCompile Include="halo\util\reflectable_enum.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
@@ -402,6 +403,8 @@
     <ClInclude Include="halo\reach\game_variant.h" />
     <ClInclude Include="halo\reach\game_variant_type.h" />
     <ClInclude Include="halo\reach\load_process.h" />
+    <ClInclude Include="halo\reach\megalo\opcode_function.h" />
+    <ClInclude Include="halo\reach\megalo\operand_typeinfo.h" />
     <ClInclude Include="halo\reach\ugc_file_type.h" />
     <ClInclude Include="halo\util\compressed_float.h" />
     <ClInclude Include="halo\reach\files\blocks\author_header.h" />
@@ -458,6 +461,7 @@
     <ClInclude Include="halo\util\indexed_list.h" />
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
+    <ClInclude Include="halo\util\reflectable_enum.h" />
     <ClInclude Include="halo\util\scalar_trait.h" />
     <ClInclude Include="helpers\apply_sign_bit.h" />
     <ClInclude Include="helpers\bitarray.h" />
