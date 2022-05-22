@@ -176,6 +176,7 @@
     <ClCompile Include="halo\loc_string_table.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\all.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\loadout.cpp" />
+    <ClCompile Include="halo\reach\custom_game_options\loadout_palette.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\team_definition.cpp" />
     <ClCompile Include="halo\reach\files\blocks\author_header.cpp" />
     <ClCompile Include="halo\reach\files\blocks\base.cpp" />
@@ -194,7 +195,6 @@
     <ClCompile Include="halo\reach\trait_set.cpp" />
     <ClCompile Include="halo\reach\ugc_author.cpp" />
     <ClCompile Include="halo\reach\ugc_header.cpp" />
-    <ClCompile Include="halo\util\reflectable_enum.cpp" />
     <ClCompile Include="helpers\bitwriter.cpp" />
     <ClCompile Include="helpers\bytewriter.cpp" />
     <ClCompile Include="helpers\endianness.cpp" />
@@ -371,11 +371,13 @@
     <ClInclude Include="halo\bitbool.h" />
     <ClInclude Include="halo\bitreader.h" />
     <ClInclude Include="halo\bytereader.h" />
+    <ClInclude Include="halo\reach\bytestreams.fwd.h" />
     <ClInclude Include="halo\common\load_errors\file_block_unexpected_end.h" />
     <ClInclude Include="halo\common\load_errors\file_is_for_the_wrong_game.h" />
     <ClInclude Include="halo\common\load_errors\first_file_block_is_not_blam_header.h" />
     <ClInclude Include="halo\common\load_errors\game_variant_no_file_block_for_data.h" />
     <ClInclude Include="halo\common\load_errors\invalid_file_block_header.h" />
+    <ClInclude Include="halo\common\load_errors\player_trait_out_of_bounds.h" />
     <ClInclude Include="halo\common\load_errors\string_table_cannot_allocate_buffer.h" />
     <ClInclude Include="halo\common\load_errors\string_table_entries_not_null_separated.h" />
     <ClInclude Include="halo\common\load_errors\string_table_entry_offset_out_of_bounds.h" />
@@ -383,8 +385,10 @@
     <ClInclude Include="halo\common\load_errors\string_table_too_large_buffer.h" />
     <ClInclude Include="halo\common\load_errors\string_table_too_large_count.h" />
     <ClInclude Include="halo\game.h" />
-    <ClInclude Include="halo\reach\bitreader.h" />
-    <ClInclude Include="halo\reach\bytereader.h" />
+    <ClInclude Include="halo\player_trait.h" />
+    <ClInclude Include="halo\reach\bitstreams.fwd.h" />
+    <ClInclude Include="halo\reach\bitstreams.h" />
+    <ClInclude Include="halo\reach\bytestreams.h" />
     <ClInclude Include="halo\reach\custom_game_options\all.h" />
     <ClInclude Include="halo\reach\custom_game_options\loadout.h" />
     <ClInclude Include="halo\reach\custom_game_options\loadout_palette.h" />
@@ -643,6 +647,7 @@
     <None Include="halo\loc_string.inl" />
     <None Include="halo\loc_string_table.inl" />
     <None Include="halo\reach\files\blocks\base.inl" />
+    <None Include="halo\reach\trait_set.inl" />
     <None Include="halo\trait_information.inl" />
     <None Include="halo\bitnumber.inl" />
   </ItemGroup>

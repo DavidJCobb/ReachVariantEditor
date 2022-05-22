@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include "../bitreader.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "./loadout.h"
 
 namespace halo::reach::custom_game_options {
@@ -16,7 +16,7 @@ namespace halo::reach::custom_game_options {
    struct loadout_palette {
       std::array<loadout, 5> loadouts;
 
-      void read(bitreader& stream) { stream.read(loadouts); }
+      void read(bitreader& stream);
    };
    
    struct loadout_palette_set : public std::array<loadout_palette, 6> {

@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "helpers/stream.h"
 #include "halo/util/four_cc.h"
-#include "halo/reach/bytereader.h"
+#include "halo/reach/bytestreams.fwd.h"
 
 namespace halo::reach {
    extern bool file_block_signature_is_suspicious(util::four_cc);

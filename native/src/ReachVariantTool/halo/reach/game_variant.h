@@ -2,9 +2,8 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
-#include "halo/bitnumber.h"
-#include "./bitreader.h"
-#include "./bytereader.h"
+#include "halo/reach/bitstreams.fwd.h"
+#include "halo/reach/bytestreams.fwd.h"
 #include "./files/blocks/blam_header.h"
 #include "./files/blocks/author_header.h"
 #include "./files/blocks/content_header.h"

@@ -1,4 +1,5 @@
 #include "all.h"
+#include "halo/reach/bitstreams.h"
 
 namespace halo::reach::custom_game_options {
    void general::read(bitreader& stream) {

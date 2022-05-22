@@ -12,13 +12,18 @@
 #include "./util/load_process.h"
 
 namespace halo {
+   namespace impl::bitreader {
+      template<typename T> concept is_bitreadable = !std::is_const_v<T> && (std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_same_v<T, bool>);
+   }
+
    template<
       typename LoadProcess = void
    > class bitreader {
       public:
-         using load_process_type = LoadProcess;
+         using load_process_type = std::remove_reference_t<LoadProcess>;
 
-         static constexpr bool has_load_process = util::load_process<load_process_type>;
+         static constexpr bool has_load_process    = util::load_process<load_process_type>;
+         static constexpr bool shares_load_process = has_load_process && std::is_reference_v<LoadProcess>;
 
       protected:
          template<typename T> static constexpr size_t bitcount_of_type = std::bit_width(std::numeric_limits<std::make_unsigned_t<cobb::strip_enum_t<T>>>::max());
@@ -34,7 +39,7 @@ namespace halo {
             size_t  bytes    = 0;
             uint8_t bits     = 0; // bit offset within current byte
          } _position;
-         std::conditional_t<std::is_same_v<load_process_type, void>, _dummy, load_process_type> _load_process;
+         std::conditional_t<!has_load_process, _dummy, LoadProcess> _load_process;
 
       protected:
          void _advance_offset_by_bits(size_t bits);
@@ -44,7 +49,8 @@ namespace halo {
          uint64_t _read_bits(uint8_t bitcount);
 
       public:
-         bitreader() {}
+         bitreader() requires (!shares_load_process) {}
+         bitreader(load_process_type& lp) requires (shares_load_process) : _load_process(lp) {}
          
          inline const uint8_t* data() const noexcept { return this->_buffer; }
          inline uint32_t size() const noexcept { return this->_size; }
@@ -89,18 +95,22 @@ namespace halo {
             v.read(*this);
          }
 
-         template<typename T> requires (std::is_arithmetic_v<T> || std::is_enum_v<T>)
+         template<typename T> requires (!util::has_read_method<bitreader, T> && impl::bitreader::is_bitreadable<T>)
          void read(T& out) {
-            out = this->read_bits<T>(bitcount_of_type<cobb::strip_enum_t<T>>);
+            if constexpr (std::is_same_v<T, bool>) {
+               out = this->read_bits<bool>(1);
+            } else if constexpr (std::is_same_v<T, float>) {
+               out = std::bit_cast<float>(this->read_bits<uint32_t>(32));
+            } else {
+               out = this->read_bits<T>(bitcount_of_type<cobb::strip_enum_t<T>>);
+            }
          }
 
-         template<typename T, size_t count>
+         template<typename T, size_t count> requires (util::has_read_method<bitreader, T> || impl::bitreader::is_bitreadable<T>)
          void read(std::array<T, count>& out) {
             for (auto& item : out)
                this->read(item);
          }
-         void read(bool& out);
-         void read(float& out);
          #pragma endregion
 
          template<typename T = uint32_t> T read_bits(uint8_t bitcount);

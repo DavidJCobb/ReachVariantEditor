@@ -1,8 +1,6 @@
 #pragma once
 #include <array>
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
-#include "../bitreader.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "./loadout.h"
 #include "./loadout_palette.h"
 #include "./match_species.h"

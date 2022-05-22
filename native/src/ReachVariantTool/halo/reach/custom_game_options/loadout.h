@@ -1,7 +1,5 @@
 #pragma once
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
-#include "../bitreader.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "halo/reach/traits/ability.h"
 #include "halo/reach/traits/weapon.h"
 

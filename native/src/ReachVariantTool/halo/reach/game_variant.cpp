@@ -1,6 +1,8 @@
 #include "game_variant.h"
 #include <QByteArray>
 
+#include "halo/reach/bitstreams.h"
+#include "halo/reach/bytestreams.h"
 #include "files/block_stream.h"
 #include "halo/common/load_errors/file_is_for_the_wrong_game.h"
 #include "halo/common/load_errors/first_file_block_is_not_blam_header.h"
@@ -19,10 +21,11 @@ namespace halo::reach {
    }
 
    bytereader::load_process_type game_variant::read(const QByteArray& buffer) {
-      bytereader stream;
+      load_process process;
+      bytereader   stream = bytereader(process);
       stream.set_buffer((const uint8_t*)buffer.data(), buffer.size());
       this->read(stream);
-      return stream.load_process();
+      return process;
    }
    void game_variant::read(bytereader& stream) {
       bool athr = false;
@@ -126,7 +129,7 @@ namespace halo::reach {
                   size_t offset_before_hashable = block.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
                   //stream.load_process().import_from(block.load_process()); // TODO
                   //
-                  bitreader bitstream;
+                  bitreader bitstream(stream.load_process());
                   bitstream.set_buffer(block.data(), block.size());
                   bitstream.set_bytepos(block.get_position());
                   //

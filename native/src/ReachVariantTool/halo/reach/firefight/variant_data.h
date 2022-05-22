@@ -1,6 +1,5 @@
 #pragma once
 #include <array>
-#include "../bitreader.h"
 #include "../game_variant.h"
 #include "../trait_set.h"
 #include "./custom_skull.h"

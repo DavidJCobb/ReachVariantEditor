@@ -1,4 +1,5 @@
 #include "wave.h"
+#include "halo/reach/bitstreams.h"
 
 namespace halo::reach::firefight {
    void wave::read(bitreader& stream) {

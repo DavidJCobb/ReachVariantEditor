@@ -1,8 +1,6 @@
 #pragma once
 #include <array>
-#include "halo/reach/bitreader.h"
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "./squad_type.h"
 
 namespace halo::reach::firefight {

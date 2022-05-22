@@ -1,6 +1,5 @@
 #pragma once
-#include "halo/bitnumber.h"
-#include "halo/reach/bitreader.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "./skull.h"
 #include "./wave.h"
 

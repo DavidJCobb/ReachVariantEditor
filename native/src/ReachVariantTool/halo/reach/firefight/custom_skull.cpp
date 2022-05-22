@@ -1,4 +1,5 @@
 #include "custom_skull.h"
+#include "halo/reach/bitstreams.h"
 
 namespace halo::reach::firefight {
    void custom_skull::read(bitreader& stream) {

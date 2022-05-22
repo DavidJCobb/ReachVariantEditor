@@ -1,8 +1,6 @@
 #pragma once
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
-#include "./bitreader.h"
-#include "./bytereader.h"
+#include "halo/reach/bitstreams.fwd.h"
+#include "halo/reach/bytestreams.fwd.h"
 #include "halo/util/fixed_string.h"
 
 namespace halo::reach {

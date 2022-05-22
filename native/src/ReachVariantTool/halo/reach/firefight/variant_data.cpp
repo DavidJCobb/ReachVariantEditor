@@ -1,4 +1,5 @@
 #include "variant_data.h"
+#include "halo/reach/bitstreams.h"
 
 namespace halo::reach {
    void firefight_variant_data::read(bitreader& stream) {

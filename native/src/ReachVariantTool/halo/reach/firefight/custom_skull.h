@@ -1,5 +1,5 @@
 #pragma once
-#include "halo/reach/bitreader.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "halo/reach/trait_set.h"
 #include "./wave_traits.h"
 

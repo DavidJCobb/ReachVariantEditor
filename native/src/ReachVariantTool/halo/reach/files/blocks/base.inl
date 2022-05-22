@@ -1,5 +1,6 @@
 #pragma once
 #include "base.h"
+#include "halo/reach/bytestreams.h"
 #include "halo/common/load_errors/file_block_unexpected_end.h"
 #include "halo/common/load_errors/invalid_file_block_header.h"
 

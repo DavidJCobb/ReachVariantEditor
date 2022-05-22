@@ -23,11 +23,10 @@ namespace halo::util {
       { process.emit_error(typename T::error{}) };
       { process.throw_fatal(typename T::fatal{}) };
       { const_process.has_fatal() } -> std::same_as<bool>;
-      { const_process.get_fatal() } -> std::same_as<const typename T::error&>;
+      { const_process.get_fatal() } -> std::same_as<const typename T::fatal&>;
       { const_process.notices() }   -> std::same_as<const std::vector<typename T::notice>&>;
       { const_process.warnings() }  -> std::same_as<const std::vector<typename T::warning>&>;
       { const_process.errors() }    -> std::same_as<const std::vector<typename T::error>&>;
-      { process.import_from(const_process) };
    };
 
    template<typename T> struct extract_load_process_types {

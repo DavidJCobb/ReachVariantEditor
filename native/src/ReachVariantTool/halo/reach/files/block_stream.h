@@ -3,21 +3,21 @@
 #include "helpers/memory.h"
 #include "helpers/stream.h"
 #include "./blocks/base.h"
-#include "../bytereader.h"
+#include "halo/reach/bytestreams.fwd.h"
 
 namespace halo::reach {
    class file_block_stream : public bytereader {
       protected:
-         file_block_stream() {}
+         file_block_stream(bytereader::load_process_type& p) : bytereader(p) {}
       public:
-         file_block_stream(cobb::generic_buffer&& source) {
+         file_block_stream(bytereader::load_process_type& p, cobb::generic_buffer&& source) : bytereader(p) {
             this->decompressed = std::move(source);
             this->set_buffer(this->decompressed.data(), this->decompressed.size());
          };
-         file_block_stream(cobb::generic_buffer& source) = delete; // use std::move on the buffer
+         file_block_stream(bytereader::load_process_type& p, cobb::generic_buffer& source) = delete; // use std::move on the buffer
 
-         static file_block_stream create_invalid() {
-            file_block_stream out;
+         static file_block_stream create_invalid(bytereader::load_process_type& p) {
+            file_block_stream out(p);
             out.is_invalid = true;
             return out;
          }

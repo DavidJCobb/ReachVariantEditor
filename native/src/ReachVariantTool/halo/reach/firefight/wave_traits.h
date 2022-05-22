@@ -1,7 +1,5 @@
 #pragma once
-#include "halo/reach/bitreader.h"
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "halo/common/traits/bool_trait.h"
 #include "../traits/damage_multiplier.h"
 #include "../traits/damage_resistance.h"

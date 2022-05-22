@@ -113,18 +113,6 @@ namespace halo {
       return (T)result;
    }
 
-   CLASS_TEMPLATE_PARAMS void CLASS_NAME::read(bool& out) {
-      out = this->read_bits<uint8_t>(1);
-   }
-   CLASS_TEMPLATE_PARAMS void CLASS_NAME::read(float& out) {
-      union {
-         uint32_t i;
-         float    f;
-      } value;
-      value.i = this->read_bits<uint32_t>(32);
-      out = value.f;
-   }
-
    CLASS_TEMPLATE_PARAMS float CLASS_NAME::read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool guarantee_exact_bounds) noexcept {
       uint8_t raw = this->read_bits<uint8_t>(bitcount);
       return util::decode_compressed_float(raw, bitcount, min, max, is_signed, guarantee_exact_bounds);

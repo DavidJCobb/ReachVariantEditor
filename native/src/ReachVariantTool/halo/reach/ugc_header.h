@@ -1,10 +1,8 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
-#include "./bitreader.h"
-#include "./bytereader.h"
+#include "halo/reach/bitstreams.fwd.h"
+#include "halo/reach/bytestreams.fwd.h"
 #include "halo/util/fixed_string.h"
 #include "./ugc_author.h"
 #include "./ugc_file_type.h"

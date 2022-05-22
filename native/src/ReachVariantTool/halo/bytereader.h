@@ -72,9 +72,10 @@ namespace halo {
 
    template<typename LoadProcess> class bytereader : public impl::bytereader_base {
       public:
-         using load_process_type = LoadProcess;
+         using load_process_type = std::remove_reference_t<LoadProcess>;
 
-         static constexpr bool has_load_process = util::load_process<load_process_type>;
+         static constexpr bool has_load_process    = util::load_process<load_process_type>;
+         static constexpr bool shares_load_process = has_load_process && std::is_reference_v<LoadProcess>;
 
       protected:
          template<typename T> static constexpr size_t bitcount_of_type = std::bit_width(std::numeric_limits<std::make_unsigned_t<cobb::strip_enum_t<T>>>::max());
@@ -83,10 +84,11 @@ namespace halo {
          struct _dummy {};
 
       protected:
-         std::conditional_t<std::is_same_v<load_process_type, void>, _dummy, load_process_type> _load_process;
+         std::conditional_t<!has_load_process, _dummy, LoadProcess> _load_process;
 
       public:
-         bytereader() {}
+         bytereader() requires (!shares_load_process) {}
+         bytereader(load_process_type& lp) requires (shares_load_process) : _load_process(lp) {}
 
          load_process_type& load_process() requires (!std::is_same_v<load_process_type, void>) {
             return this->_load_process;

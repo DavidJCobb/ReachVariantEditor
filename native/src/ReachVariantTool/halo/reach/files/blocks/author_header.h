@@ -2,7 +2,6 @@
 #include <array>
 #include "base.h"
 #include "halo/util/fixed_string.h"
-#include "../../bytereader.h"
 
 namespace halo::reach {
    class author_header : public file_block<'athr', 0x50> { // used to indicate authorship information for internal content

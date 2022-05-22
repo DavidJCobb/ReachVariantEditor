@@ -1,7 +1,6 @@
 #pragma once
 #include <array>
 #include "./base.h"
-#include "../../bytereader.h"
 
 namespace halo::reach {
    // This is an MCC-specific chunk, and is read by the main MCC executable, not haloreach.dll. 

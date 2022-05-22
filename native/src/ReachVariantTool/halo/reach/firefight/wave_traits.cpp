@@ -1,4 +1,5 @@
 #include "wave_traits.h"
+#include "halo/reach/bitstreams.h"
 
 namespace halo::reach::firefight {
    void wave_trait_set::read(bitreader& stream) {

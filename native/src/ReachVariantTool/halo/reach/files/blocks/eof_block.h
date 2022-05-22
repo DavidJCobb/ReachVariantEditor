@@ -1,6 +1,5 @@
 #pragma once
-#include "base.h"
-#include "../../bytereader.h"
+#include "./base.h"
 
 namespace halo::reach {
    class eof_block : public file_block<'_eof'> {

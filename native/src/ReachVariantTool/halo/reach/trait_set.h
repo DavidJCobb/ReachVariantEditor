@@ -1,7 +1,9 @@
 #pragma once
+#include <type_traits>
+#include "halo/reach/bitstreams.fwd.h"
+#include "halo/player_trait.h"
+#include "halo/trait_bitnumber.h"
 #include "traits/_all.h"
-#include "../trait_bitnumber.h"
-#include "./bitreader.h"
 
 namespace halo::reach {
    struct trait_set {
@@ -52,5 +54,24 @@ namespace halo::reach {
       } sensors;
 
       void read(bitreader&);
+
+      private:
+         template<halo::player_trait Id> struct _access_trait {
+            template<typename TraitSet> static constexpr void get(TraitSet& ts) { return; } // templated so we don't have to define a const overload
+         };
+         template<halo::player_trait Id> using _accessor_type = decltype(_access_trait<Id>::template get<trait_set>);
+         template<halo::player_trait Id> using _accessed_trait_id = std::invoke_result_t<_accessor_type<Id>, trait_set&>;
+
+      public:
+         template<halo::player_trait Id> static constexpr bool has_trait = !std::is_same_v<_accessed_trait_id<Id>, void>;
+
+         template<halo::player_trait Id> requires has_trait<Id> constexpr _accessed_trait_id<Id>& trait() {
+            return _access_trait<Id>::get(*this);
+         }
+         template<halo::player_trait Id> requires has_trait<Id> constexpr const _accessed_trait_id<Id>& trait() const {
+            return _access_trait<Id>::get(*this);
+         }
    };
 }
+
+#include "trait_set.inl"

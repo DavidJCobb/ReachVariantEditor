@@ -1,4 +1,5 @@
 #include "base.h"
+#include "halo/bytereader.h"
 
 namespace halo::reach {
    extern bool file_block_signature_is_suspicious(util::four_cc signature) {

@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include "halo/util/fixed_string.h"
-#include "../../bytereader.h"
 #include "./base.h"
 
 namespace halo::reach {

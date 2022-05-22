@@ -1,7 +1,5 @@
 #pragma once
-#include "halo/reach/bitreader.h"
-#include "halo/bitbool.h"
-#include "halo/bitnumber.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "halo/loc_string_table.h"
 
 namespace halo::reach::custom_game_options {

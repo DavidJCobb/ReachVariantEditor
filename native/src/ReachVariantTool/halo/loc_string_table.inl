@@ -230,7 +230,7 @@ namespace halo {
          if constexpr (load_process_is_valid) {
             if (uncompressed_size >= max_buffer_size) {
                stream.load_process().emit_error({
-                  halo::common::load_errors::string_table_too_large_buffer{
+                  .data = halo::common::load_errors::string_table_too_large_buffer{
                      .max_buffer_size   = max_buffer_size,
                      .uncompressed_size = uncompressed_size,
                   }
@@ -257,8 +257,8 @@ namespace halo {
                      if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
-                              .string_index  = i,
-                              .string_offset = off,
+                              .string_index  = (size_t)i,
+                              .string_offset = (size_t)off,
                               .language      = (localization_language)j,
                            }
                         });
@@ -269,8 +269,8 @@ namespace halo {
                      if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entry_offset_out_of_bounds{
-                              .string_index  = i,
-                              .string_offset = off,
+                              .string_index  = (size_t)i,
+                              .string_offset = (size_t)off,
                               .language      = (localization_language)j,
                            }
                         });
@@ -285,8 +285,8 @@ namespace halo {
                      if constexpr (load_process_is_valid) {
                         stream.load_process().emit_error({
                            .data = halo::common::load_errors::string_table_entries_not_null_separated{
-                              .string_index  = i,
-                              .string_offset = off,
+                              .string_index  = (size_t)i,
+                              .string_offset = (size_t)off,
                               .language      = (localization_language)j,
                            }
                         });

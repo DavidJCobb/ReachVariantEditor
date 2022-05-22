@@ -1,4 +1,6 @@
 #include "ugc_author.h"
+#include "halo/reach/bitstreams.h"
+#include "halo/reach/bytestreams.h"
 
 namespace halo::reach {
    void ugc_author::read(bitreader& stream) {
