@@ -2,6 +2,10 @@
 
 namespace halo {
    namespace impl {
+      const uint8_t* bytereader_base::data_at_current_position() const {
+         return this->_buffer + this->_position.bytes;
+      }
+
       void bytereader_base::_read_impl(void* out, size_t size) {
          this->_peek_impl(out, size);
          this->_position.bytes += size;

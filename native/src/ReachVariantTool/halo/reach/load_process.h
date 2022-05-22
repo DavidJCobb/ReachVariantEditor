@@ -22,6 +22,9 @@
 
 namespace halo::reach {
    namespace load_errors {
+      struct arena_stat_cannot_be_infinity {
+         size_t stat_index = 0;
+      };
       struct not_a_game_variant {
          ugc_file_type type = ugc_file_type::none;
       };
@@ -59,6 +62,7 @@ namespace halo::reach {
       };
       struct error : public message_base {
          using inner_data = std::variant<
+            halo::reach::load_errors::arena_stat_cannot_be_infinity,
             halo::common::load_errors::file_block_unexpected_end,
             halo::common::load_errors::invalid_file_block_header,
             halo::common::load_errors::player_trait_out_of_bounds,

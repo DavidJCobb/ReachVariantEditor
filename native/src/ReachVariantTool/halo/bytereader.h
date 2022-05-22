@@ -41,6 +41,8 @@ namespace halo {
             inline std::endian endianness() const noexcept { return this->_endianness; }
             void set_endianness(std::endian);
 
+            const uint8_t* data_at_current_position() const;
+
             bool is_at_end() const noexcept {
                return this->_position.bytes >= this->size();
             }
@@ -143,5 +145,17 @@ namespace halo {
                this->read(item);
          }
          #pragma endregion
+
+         bytereader slice_forward(size_t size) const {
+            if constexpr (shares_load_process) {
+               bytereader out(this->load_process());
+               out.set_buffer(this->data_at_current_position(), this->size() - this->get_position());
+               return out;
+            } else {
+               bytereader out;
+               out.set_buffer(this->data_at_current_position(), this->size() - this->get_position());
+               return out;
+            }
+         }
    };
 }
