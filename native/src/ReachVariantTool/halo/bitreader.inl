@@ -2,8 +2,8 @@
 #include "bitreader.h"
 #include "util/compressed_float.h"
 
-#define CLASS_TEMPLATE_PARAMS template<typename LoadProcess>
-#define CLASS_NAME bitreader<LoadProcess>
+#define CLASS_TEMPLATE_PARAMS template<typename Subclass, typename LoadProcess>
+#define CLASS_NAME bitreader<Subclass, LoadProcess>
 //
 namespace halo {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_advance_offset_by_bits(size_t bits) {

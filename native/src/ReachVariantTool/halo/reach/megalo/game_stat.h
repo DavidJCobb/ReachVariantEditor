@@ -1,5 +1,4 @@
 #pragma once
-#include "halo/util/dirty.h"
 #include "halo/util/dummyable.h"
 #include "halo/util/indexed.h"
 #include "halo/util/refcount.h"
@@ -7,8 +6,7 @@
 #include "./strings.h"
 
 namespace halo::reach::megalo {
-   class game_stat;
-   class game_stat : public util::dirtiable<game_stat>, public util::passively_refcounted, public util::dummyable, public util::indexed {
+   class game_stat : public util::passively_refcounted, public util::dummyable, public util::indexed {
       public:
          enum class format_type {
             number,

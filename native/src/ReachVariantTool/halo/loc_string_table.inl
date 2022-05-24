@@ -137,8 +137,8 @@ namespace halo {
    }
 
    CLASS_TEMPLATE_PARAMS
-   template<typename LoadProcess> loc_string_table_load_result CLASS_NAME::read(bitreader<LoadProcess>& stream) {
-      constexpr bool load_process_is_valid = bitreader<LoadProcess>::has_load_process;
+   template<bitreader_subclass Reader> loc_string_table_load_result CLASS_NAME::read(Reader& stream) {
+      constexpr bool load_process_is_valid = Reader::has_load_process;
       //
       // The game engine retains the string table in memory as...
       // 
@@ -302,6 +302,14 @@ namespace halo {
       }
       this->set_dirty();
       return {};
+   }
+
+
+   CLASS_TEMPLATE_PARAMS typename CLASS_NAME::entry_type* CLASS_NAME::string_by_index(size_t i) {
+      return &this->strings[i];
+   }
+   CLASS_TEMPLATE_PARAMS const typename CLASS_NAME::entry_type* CLASS_NAME::string_by_index(size_t i) const {
+      return &this->strings[i];
    }
 
    CLASS_TEMPLATE_PARAMS const typename CLASS_NAME::entry_type* CLASS_NAME::lookup(const QString& english, bool& matched_multiple) const {

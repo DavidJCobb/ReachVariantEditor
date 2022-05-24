@@ -11,15 +11,37 @@
 #include "./util/has_read_method.h"
 #include "./util/load_process.h"
 
+namespace halo::util {
+   class dummyable;
+}
+
 namespace halo {
    namespace impl::bitreader {
       template<typename T> concept is_bitreadable = !std::is_const_v<T> && (std::is_arithmetic_v<T> || std::is_enum_v<T> || std::is_same_v<T, bool>);
+
+      template<typename T> concept is_indexed_list = requires(T& x) {
+         typename T::value_type;
+         typename T::entry_type;
+         requires std::is_same_v<typename T::value_type*, typename T::entry_type>;
+         { T::max_count } -> std::same_as<size_t>;
+         { x[0] } -> std::same_as<typename T::value_type&>;
+         { x.emplace_back() } -> std::same_as<typename T::entry_type>; // require default-constructible element type
+      };
+
+      template<typename Reader, typename T> concept is_bitreadable_indexed_list = requires(T & x) {
+         requires is_indexed_list<T>;
+         requires is_bitreadable<T> || util::has_read_method<Reader, T>;
+      };
    }
 
    template<
+      typename Subclass, // use the curiously recurring template pattern (CRTP): forward-declare your subclass, and then template it on itself
       typename LoadProcess = void
    > class bitreader {
       public:
+         using my_type   = Subclass;
+         using base_type = bitreader<Subclass, LoadProcess>; // helper for call-super; useful if your subclass is, say, some_namespace::bitreader
+
          using load_process_type = std::remove_reference_t<LoadProcess>;
 
          static constexpr bool has_load_process    = util::load_process<load_process_type>;
@@ -90,12 +112,12 @@ namespace halo {
          }
          
          #pragma region read
-         template<typename T> requires util::has_read_method<bitreader, T>
+         template<typename T> requires util::has_read_method<my_type, T>
          void read(T& v) {
             v.read(*this);
          }
 
-         template<typename T> requires (!util::has_read_method<bitreader, T> && impl::bitreader::is_bitreadable<T>)
+         template<typename T> requires (!util::has_read_method<my_type, T> && impl::bitreader::is_bitreadable<T>)
          void read(T& out) {
             if constexpr (std::is_same_v<T, bool>) {
                out = this->read_bits<bool>(1);
@@ -106,7 +128,23 @@ namespace halo {
             }
          }
 
-         template<typename T, size_t count> requires (util::has_read_method<bitreader, T> || impl::bitreader::is_bitreadable<T>)
+         template<typename T> requires (impl::bitreader::is_bitreadable_indexed_list<my_type, T>)
+         void read(T& out) {
+            size_t count = this->read_bits(std::bit_width(T::max_count));
+            if constexpr (std::is_base_of_v<util::dummyable, T::value_type>) {
+               assert(out.size() == T::max_count);
+               for (size_t i = 0; i < count; ++i) {
+                  auto& item = out[i];
+                  item.is_defined = true;
+                  this->read(item);
+               }
+            } else {
+               for (size_t i = 0; i < count; ++i)
+                  this->read(out.emplace_back());
+            }
+         }
+
+         template<typename T, size_t count> requires (util::has_read_method<my_type, T> || impl::bitreader::is_bitreadable<T>)
          void read(std::array<T, count>& out) {
             for (auto& item : out)
                this->read(item);
@@ -120,6 +158,28 @@ namespace halo {
          template<typename CharT> void read_string(CharT* out, size_t max_length);
          
          void skip(uint32_t bitcount);
+   };
+
+   template<typename T> concept bitreader_subclass = requires(T& x) {
+      typename T::my_type;
+      std::is_same_v<T, typename T::my_type>;
+
+      typename T::load_process_type;
+      //
+      { T::has_load_process }    -> std::same_as<const bool&>;
+      { T::shares_load_process } -> std::same_as<const bool&>;
+
+      std::is_base_of_v<
+         bitreader<
+            typename T::my_type,
+            std::conditional_t<
+               T::shares_load_process,
+               typename T::load_process_type&,
+               typename T::load_process_type
+            >
+         >,
+         typename T::my_type
+      >;
    };
 }
 

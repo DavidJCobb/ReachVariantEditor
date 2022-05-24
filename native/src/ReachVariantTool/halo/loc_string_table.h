@@ -36,9 +36,12 @@ namespace halo {
       bool is_error() const { return error != failure_reason::none; }
    };
 
-   template<size_t max_count, size_t max_buffer_size> class loc_string_table; // forward-declare for CRTP
-   template<size_t max_count, size_t max_buffer_size> class loc_string_table : public util::dirtiable<loc_string_table<max_count, max_buffer_size>> {
+   template<size_t MaxCount, size_t MaxBufferSize> class loc_string_table; // forward-declare for CRTP
+   template<size_t MaxCount, size_t MaxBufferSize> class loc_string_table : public util::dirtiable<loc_string_table<MaxCount, MaxBufferSize>> {
       public:
+         static constexpr size_t max_count       = MaxCount;
+         static constexpr size_t max_buffer_size = MaxBufferSize;
+         //
          static constexpr size_t offset_bitlength      = std::bit_width(max_buffer_size - 1);
          static constexpr size_t buffer_size_bitlength = std::bit_width(max_buffer_size);
          static constexpr size_t count_bitlength       = std::bit_width(max_count);
@@ -77,8 +80,11 @@ namespace halo {
          void* _read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, bitreader<LoadProcess>&);
 
       public:
-         template<typename LoadProcess>
-         loc_string_table_load_result read(bitreader<LoadProcess>&);
+         template<bitreader_subclass Reader>
+         loc_string_table_load_result read(Reader&);
+
+         entry_type* string_by_index(size_t);
+         const entry_type* string_by_index(size_t) const;
 
          entry_type*       lookup(const QString& english, bool& matched_multiple);
          const entry_type* lookup(const QString& english, bool& matched_multiple) const;
