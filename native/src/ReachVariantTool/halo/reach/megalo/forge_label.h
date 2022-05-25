@@ -5,8 +5,8 @@
 #include "halo/util/indexed.h"
 #include "halo/util/refcount.h"
 #include "halo/reach/bitstreams.fwd.h"
-#include "./const_team.h"
 #include "./limits.h"
+#include "./static_team.h"
 #include "./strings.h"
 
 namespace halo::reach::megalo {
@@ -31,7 +31,7 @@ namespace halo::reach::megalo {
       struct {
          bitnumber<3, uint8_t> flags;
          object_type_index object_type;
-         const_team_index  team = const_team::none;
+         static_team_index team = static_team::none;
          bytenumber<int16_t>   number = 0;
          bitnumber<7, uint8_t> map_must_have_at_least = 0;
       } requirements;

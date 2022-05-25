@@ -10,6 +10,7 @@
 #include "./object_type_mask.h"
 #include "./option_toggles.h"
 #include "./strings.h"
+#include "./variable_declarations.h"
 
 #include "../arena_parameters.h"
 #include "../map_permissions.h"
@@ -69,10 +70,10 @@ namespace halo::reach {
             util::indexed_list<megalo::trigger, megalo::limits::triggers> triggers;
             megalo::trigger_entry_points entry_points;
             struct {
-               Megalo::VariableDeclarationSet global = Megalo::VariableDeclarationSet(Megalo::variable_scope::global);
-               Megalo::VariableDeclarationSet player = Megalo::VariableDeclarationSet(Megalo::variable_scope::player);
-               Megalo::VariableDeclarationSet object = Megalo::VariableDeclarationSet(Megalo::variable_scope::object);
-               Megalo::VariableDeclarationSet team = Megalo::VariableDeclarationSet(Megalo::variable_scope::team);
+               megalo::variable_declaration_set<megalo::variable_scope::global> global;
+               megalo::variable_declaration_set<megalo::variable_scope::player> player;
+               megalo::variable_declaration_set<megalo::variable_scope::object> object;
+               megalo::variable_declaration_set<megalo::variable_scope::team>   team;
             } variables;
          } script;
          struct {
