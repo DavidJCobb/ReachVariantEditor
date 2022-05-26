@@ -55,7 +55,7 @@ namespace cobb {
 
          public:
             template<typename Functor> static constexpr void for_each(Functor&& f) {
-               (f.template operator()<Members> (), ...);
+               (f.template operator()<Members>(), ...);
             }
 
             static constexpr std::array<const char*, count> all_names() {

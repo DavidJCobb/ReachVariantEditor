@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <string>
 
 namespace halo::reach::megalo {
    class operand_typeinfo {
@@ -20,8 +19,8 @@ namespace halo::reach::megalo {
 
       public:
          uint32_t    flags = 0;
-         std::string friendly_name; // translation key to pass to QObject::tr
-         std::string internal_name;
+         const char* friendly_name; // translation key to pass to QObject::tr
+         const char* internal_name;
          uint8_t     static_count = 0; // e.g. 8 for player[7]
 
          constexpr bool can_be_static() const noexcept {
@@ -34,4 +33,10 @@ namespace halo::reach::megalo {
             return this->flags & flag::can_hold_variables;
          }
    };
+
+   namespace operand_types {
+      constexpr operand_typeinfo no_type = {
+         .internal_name = "<none>"
+      };
+   }
 }
