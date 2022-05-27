@@ -1,5 +1,6 @@
 #pragma once
 #include <concepts>
+#include <type_traits>
 #include "./member_list.h"
 #include "./cs.h"
 #include "./member.h"
@@ -24,13 +25,15 @@ namespace cobb {
          >;
 
          static constexpr bool members_are_valid = (
-            (is_member_type<Members> && ...) && (explicit_underlying_type || is_member_type<First>)
+            ((is_member_type<Members> || std::is_same_v<Members, reflex_enum_gap>) && ...)
+         && (explicit_underlying_type || (is_member_type<First> || std::is_same_v<First, reflex_enum_gap>))
          && members::all_member_names_unique
          && members::template all_explicit_member_values_representable<underlying_type>
          );
       };
    }
 
+   // A reimplementation of enums using templates, allowing for reflection.
    template<typename... Parameters> requires impl::reflex_enum::extract_typeinfo<Parameters...>::members_are_valid
    struct reflex_enum {
       protected:
@@ -44,7 +47,7 @@ namespace cobb {
          static constexpr size_t member_count = _extractor::member_count;
          static constexpr size_t missing_type = std::numeric_limits<size_t>::max(); // returned by index_of, etc.
 
-         template<cs Name> static constexpr size_t index_of = members::index_of_name<Name> + 0; // addition operator is a bandaid to fix MSVC 2022 C2760 as of 5/25/22
+         template<cs Name> static constexpr size_t index_of = members::index_of_name<Name>();
          template<cs Name> static constexpr bool has = (index_of<Name> != missing_type);
 
       protected:
@@ -56,6 +59,16 @@ namespace cobb {
 
          template<typename Functor> static constexpr void _for_each_member_type(Functor&& f) {
             members::for_each(f);
+         }
+
+      public:
+         constexpr reflex_enum() {}
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         static constexpr reflex_enum from_int(V v) {
+            reflex_enum out;
+            out._value = v;
+            return out;
          }
 
       public:
@@ -83,25 +96,14 @@ namespace cobb {
             return v;
          })();
 
-         static constexpr reflex_enum min_value = ([]() {
+         static constexpr reflex_enum min_value() {
             return from_int(min_underlying_value);
-         })();
-         static constexpr reflex_enum max_value = ([]() {
+         };
+         static constexpr reflex_enum max_value() {
             return from_int(max_underlying_value);
-         })();
+         };
 
       public:
-         constexpr reflex_enum() {}
-         template<cs Name> requires has<Name> static constexpr reflex_enum make() {
-            return value_of<Name>;
-         }
-
-         static constexpr reflex_enum from_int(underlying_type v) {
-            reflex_enum out;
-            out._value = v;
-            return out;
-         }
-
          template<typename Functor> static constexpr void for_each_member(Functor&& f) {
             members::for_each(f);
          }
@@ -138,6 +140,14 @@ namespace cobb {
             else
                return false;
          }
+
+         // Is this instance's current value an actual valid enum member? Useful after assigning/constructing via from_int.
+         constexpr bool valid() const {
+            for (auto v : _underlying_values)
+               if (v == this->_value)
+                  return true;
+            return false;
+         }
    };
 
    namespace impl::reflex_enum {
@@ -152,7 +162,7 @@ namespace cobb {
          using type = ::cobb::reflex_enum<Underlying, Members...>;
       };
    }
-
+   //
    template<typename T> concept is_reflex_enum = requires {
       typename T::underlying_type;
       typename T::members;
@@ -167,4 +177,21 @@ namespace cobb {
          >::type
       >;
    };
+}
+
+// You can using-declaration this namespace for faster, unprefixed access to reflex enum and its related content.
+namespace cobb::reflex_enum_incl {
+   template<size_t Size>
+   using cs = cobb::cs<Size>;
+
+   template<typename... Parameters>
+   using reflex_enum = cobb::reflex_enum<Parameters...>;
+
+   template<
+      cobb::cs Name,
+      impl::reflex_enum::compile_time_value_type Value = impl::reflex_enum::undefined
+   >
+   using reflex_enum_member = cobb::reflex_enum_member<Name, Value>;
+
+   using reflex_enum_gap = cobb::reflex_enum_gap;
 }

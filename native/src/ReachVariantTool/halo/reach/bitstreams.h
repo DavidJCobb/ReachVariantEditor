@@ -1,5 +1,6 @@
 #pragma once
 #include <bit>
+#include <cstdint>
 #include <vector>
 #include "halo/bitreader.h"
 #include "./load_process.h"
@@ -7,6 +8,8 @@
 #include "./megalo/strings.h"
 
 namespace halo::reach {
+   class game_variant_data;
+
    class bitreader : public halo::bitreader<bitreader, class load_process> {
       public:
          using base_type::bitreader;
@@ -18,6 +21,7 @@ namespace halo::reach {
             int32_t index = -1;
          };
 
+         game_variant_data* current_variant_data = nullptr;
          struct {
             std::vector<_pending_string_ref<megalo::string_ref>> required;
             std::vector<_pending_string_ref<megalo::string_ref_optional>> optional;
@@ -27,15 +31,27 @@ namespace halo::reach {
          static constexpr size_t string_ref_bitcount = std::bit_width(megalo::string_table::max_count - 1);
          static constexpr size_t string_ref_bitcount_optional = std::bit_width(megalo::string_table::max_count);
 
-         template<bool optional> using string_index = bitnumber<
-            std::bit_width(megalo::string_table::max_count - (optional ? 0 : 1)),
-            int32_t,
-            bitnumber_params<int32_t>{
-               .offset = (optional ? 1 : 0)
-            }
-         >;
+         template<bool Optional> struct _derive_string_index {
+            using value_type = int32_t;
+            //
+            static constexpr bool    optional = Optional;
+            static constexpr int32_t offset   = optional ? 1 : 0;
+            static constexpr auto params = bitnumber_params<int32_t>{
+                  .offset = offset,
+            };
+            //
+            using type = bitnumber<
+               std::bit_width(megalo::string_table::max_count - (optional ? 0 : 1)),
+               int32_t,
+               params
+            >;
+         };
+         template<bool Optional> using string_index = typename _derive_string_index<Optional>::type;
 
       public:
+         game_variant_data* get_game_variant_data() const { return this->current_variant_data; }
+         void set_game_variant_data(game_variant_data* v) { this->current_variant_data = v; }
+
          void read(megalo::string_ref& ref) {
             constexpr auto test_a = util::has_read_method<my_type, string_index<false>>;
 

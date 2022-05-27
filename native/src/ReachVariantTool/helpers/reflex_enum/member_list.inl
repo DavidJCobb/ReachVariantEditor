@@ -7,8 +7,9 @@
 //
 namespace cobb {
    namespace impl::reflex_enum {
+      /*
       CLASS_TEMPLATE_PARAMS
-      template<typename Functor> /*static*/ constexpr size_t CLASS_NAME::index_of_matching(Functor&& f) {
+      template<typename Functor> constexpr size_t CLASS_NAME::index_of_matching(Functor&& f) {
          size_t index = 0;
          (
             (f.template operator()<Members>() ?
@@ -20,6 +21,7 @@ namespace cobb {
          );
          return index < count ? index : index_of_none;
       }
+      //*/
    }
 }
 //

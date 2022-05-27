@@ -6,25 +6,40 @@
 #include "../operand.h"
 
 namespace halo::reach::megalo::operands {
-   template<cobb::cs Name, typename T> requires cobb::is_reflex_enum<T> class base_enum_operand : public operand {
+   //
+   // Base type for enum operands. If the lowest underlying value is -1, then it's read using 
+   // a bitnumber with an offset.
+   //
+   template<cobb::cs Name, typename T> requires (cobb::is_reflex_enum<T> && T::min_underlying_value >= -1)
+   class base_enum_operand : public operand {
       public:
          static constexpr auto name = Name;
-
-         using value_type     = T;
-         using bitnumber_type = bitnumber<
-            std::bit_width(value_type::member_count),
-            value_type
-         >;
-
          static constexpr operand_typeinfo typeinfo = {
             .internal_name = name.c_str(),
          };
 
+         using value_type = T;
+
+      protected:
+         // We can't specify bitnumber params unless the bitnumber type is a structural type. Reflex enums 
+         // are not structural types.
+
+         using bitnumber_type = bitnumber<
+            std::bit_width(value_type::member_count),
+            T::underlying_type,
+            bitnumber_params<T::underlying_type>{
+               .offset = (value_type::min_underlying_value < 0 ? -value_type::min_underlying_value : 0),
+            }
+         >;
+
+
       public:
-         bitnumber_type value;
+         value_type value;
 
          virtual void read(bitreader& stream) override {
-            stream.read(this->value);
+            bitnumber_type bn;
+            stream.read(bn);
+            this->value = value_type::from_int(bn);
          }
    };
 }

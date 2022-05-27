@@ -48,4 +48,32 @@ namespace cobb {
    constexpr auto test_val_eq2 = test_val == test_enum::value_of<cs("ack")>;
 
    */
+
+   /*
+   using test_ml = impl::reflex_enum::member_list<
+      reflex_enum_member<cs("0")>,
+      reflex_enum_gap,
+      reflex_enum_member<cs("2")>,
+      reflex_enum_gap,
+      reflex_enum_member<cs("4")>
+   >;
+   using test_ml_tuple = test_ml::as_tuple;
+   constexpr auto x = test_ml::index_of_name<(cobb::cs("4"))>();
+
+
+   using test_enum = reflex_enum<
+      reflex_enum_member<cs("0")>,
+      reflex_enum_gap,
+      reflex_enum_member<cs("2")>,
+      reflex_enum_gap,
+      reflex_enum_member<cs("4")>
+   >;
+   using test_enum_members = test_enum::members;
+   using ta = test_enum_members::nth_type<0>;
+   using tb = test_enum_members::nth_type<1>;
+   using tc = test_enum_members::nth_type<2>;
+   constexpr auto counta = test_enum_members::count;
+   constexpr auto ia = test_enum::index_of<cobb::cs("2")>;
+   constexpr auto a = test_enum::underlying_value_of<cobb::cs("2")>;
+   //*/
 }

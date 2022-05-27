@@ -83,8 +83,7 @@ namespace halo {
 
       public:
          bitnumber() {};
-         bitnumber(int v) : value(underlying_type(v)) {};
-         bitnumber(underlying_type v) : value(v) {};
+         template<typename V> requires std::is_convertible_v<V, underlying_type> bitnumber(V v) : value(underlying_type(v)) {};
 
       protected:
          underlying_type value = params.initial;

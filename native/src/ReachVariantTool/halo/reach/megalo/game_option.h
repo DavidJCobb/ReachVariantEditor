@@ -8,7 +8,7 @@
 #include "./strings.h"
 
 namespace halo::reach::megalo {
-   class game_option {
+   class game_option : public util::dummyable, public util::indexed, public util::passively_refcounted {
       public:
          using value_type  = bitnumber<10, int16_t>;
          using value_index = bitnumber<std::bit_width(limits::script_option_values - 1), uint8_t>;

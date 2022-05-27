@@ -162,7 +162,9 @@ namespace halo::reach {
                   if (auto* v = this->data) {
                      if (!block_type_is_gvar)
                         v->file_hash = file_hash;
+                     bitstream.set_game_variant_data(v);
                      v->read(bitstream);
+                     bitstream.set_game_variant_data(nullptr);
                   }
                   stream.load_process().import_from(bitstream.load_process());
                }

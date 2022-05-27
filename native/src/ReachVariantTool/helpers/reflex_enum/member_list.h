@@ -2,19 +2,35 @@
 #include <array>
 #include <limits>
 #include <tuple>
+#include "helpers/tuple_filter.h"
+#include "helpers/tuple_foreach.h"
+#include "helpers/tuple_index_of.h"
+#include "helpers/tuple_unpack.h"
 #include "./constants.h"
 #include "./cs.h"
 #include "./member.h"
 
 namespace cobb {
    namespace impl::reflex_enum {
-      template<typename... Members> requires (is_member_type<Members> && ...) class member_list {
+      template<typename... Members> requires ((is_member_type<Members> || std::is_same_v<Members, reflex_enum_gap>) && ...) class member_list {
          public:
             static constexpr size_t index_of_none = std::numeric_limits<size_t>::max();
 
-            static constexpr size_t count = sizeof...(Members);
+         protected:
+            static constexpr size_t count_including_gaps = sizeof...(Members);
 
-            using as_tuple = std::tuple<Members...>;
+            using as_tuple_with_gaps = std::tuple<Members...>;
+
+            template<size_t i> requires (i < count_including_gaps) using nth_type_with_gaps = typename std::tuple_element_t<i, as_tuple_with_gaps>;
+
+         public:
+            using as_tuple = tuple_filter_t<
+               []<typename T>() {
+                  return !std::is_same_v<T, reflex_enum_gap>;
+               },
+               as_tuple_with_gaps
+            >;
+            static constexpr size_t count = std::tuple_size_v<as_tuple>;
             template<size_t i> requires (i < count) using nth_type = typename std::tuple_element_t<i, as_tuple>;
 
          private:
@@ -33,20 +49,28 @@ namespace cobb {
                   return true;
                })();
             };
-            template<typename Underlying, typename T> struct _member_value_representable {
-               static constexpr bool value =
-                  (T::value == impl::reflex_enum::undefined) || 
-                  (
-                     T::value >= std::numeric_limits<Underlying>::lowest()
-                  && T::value <= std::numeric_limits<Underlying>::max()
-                  );
+            template<typename Underlying, typename T> requires (is_member_type<T> || std::is_same_v<T, reflex_enum_gap>) struct _member_value_representable {
+               static constexpr bool value = ([]() {
+                  if constexpr (std::is_same_v<T, reflex_enum_gap>) {
+                     return true;
+                  } else {
+                     if (T::value == impl::reflex_enum::undefined)
+                        return true;
+                     //
+                     using limits = std::numeric_limits<Underlying>;
+                     if (T::value < limits::lowest())
+                        return false;
+                     if (T::value > limits::max())
+                        return false;
+                     return true;
+                  }
+               })();
             };
 
          public:
             static constexpr bool all_member_names_unique = ([]() {
-               if constexpr (sizeof...(Members) > 1) {
-                  return _all_member_names_unique<Members...>::value;
-               }
+               if constexpr (std::tuple_size_v<as_tuple> > 1)
+                  return cobb::tuple_unpack_t<_all_member_names_unique, as_tuple>::value;
                return true;
             })();
             template<typename Underlying> static constexpr bool all_explicit_member_values_representable = ([]() {
@@ -55,7 +79,7 @@ namespace cobb {
 
          public:
             template<typename Functor> static constexpr void for_each(Functor&& f) {
-               (f.template operator()<Members>(), ...);
+               cobb::tuple_foreach<as_tuple>(std::forward<Functor&&>(f));
             }
 
             static constexpr std::array<const char*, count> all_names() {
@@ -69,50 +93,38 @@ namespace cobb {
             };
             template<typename Underlying> static constexpr std::array<Underlying, count> all_underlying_values() {
                std::array<Underlying, count> out = {};
-
+               //
                Underlying v = -1;
-
-               size_t i = 0;
-               for_each([&out, &v, &i]<typename Current>() {
-                  if constexpr (Current::value == undefined)
+               size_t     i = 0;
+               cobb::tuple_foreach<as_tuple_with_gaps>([&out, &v, &i]<typename Current>() {
+                  if constexpr (std::is_same_v<Current, reflex_enum_gap>) {
                      ++v;
-                  else
-                     v = (Underlying)Current::value;
-                  out[i] = v;
-                  ++i;
+                  } else {
+                     if constexpr (Current::value == undefined)
+                        ++v;
+                     else
+                        v = (Underlying)Current::value;
+                     out[i] = v;
+                     ++i;
+                  }
                });
-
+               //
                return out;
             };
 
-            template<cs Name> static constexpr size_t index_of_name = ([]() {
-               size_t index = 0;
-               (
-                  (Members::name == Name ?
-                     false             // if match: set result to current index; use false to short-circuit the "and" operator and stop iteration
-                  :
-                     ((++index), true) // no match: increment current index; use true to avoid short-circuiting, and continue iteration
-                  )
-                  && ...
-               );
-               return index < count ? index : index_of_none;
-            })();
-
             template<typename T> static constexpr size_t index_of = ([]() {
-               size_t index = 0;
-               (
-                  (std::is_same_v<T, Members> ?
-                     false             // if match: set result to current index; use false to short-circuit the "and" operator and stop iteration
-                  :
-                     ((++index), true) // no match: increment current index; use true to avoid short-circuiting, and continue iteration
-                  )
-                  && ...
-               );
-               return index < count ? index : std::numeric_limits<size_t>::max();
+               return cobb::tuple_index_of<T, as_tuple>;
             })();
+            template<cs Name> static constexpr size_t index_of_name() { return cobb::tuple_index_of_matching<
+               as_tuple,
+               []<typename Current>() -> bool {
+                  return Current::name == Name;
+               }
+            >(); }
 
-            template<typename Functor> static constexpr size_t index_of_matching(Functor&& f);
-
+            template<typename Functor> static constexpr size_t index_of_matching(Functor&& f) {
+               return cobb::tuple_index_of_matching<as_tuple>(std::forward<Functor&&>(f));
+            }
       };
 
       template<typename T> struct member_list_from_tuple {
