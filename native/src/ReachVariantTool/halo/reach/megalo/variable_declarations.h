@@ -42,7 +42,7 @@ namespace halo::reach::megalo {
    template<variable_scope S> class variable_declaration_set {
       public:
          static constexpr variable_scope scope = S;
-         static constexpr const auto& scope_metadata = variable_scope_metadata_from_enum<S>();
+         static constexpr const variable_scope_metadata& scope_metadata = variable_scope_metadata_from_enum<S>();
 
       protected:
          template<variable_type V> static constexpr size_t bit_offset() {
@@ -58,10 +58,10 @@ namespace halo::reach::megalo {
             //
             if constexpr (V == variable_type::player)
                return result;
-            result += scope_metadata.maximum_of_type<variable_type::player>()
+            result += scope_metadata.maximum_of_type<variable_type::player>();
             //
             if constexpr (V == variable_type::team)
-                  return result;
+               return result;
             result += scope_metadata.maximum_of_type<variable_type::team>();
             //
             if constexpr (V == variable_type::timer)
@@ -70,8 +70,10 @@ namespace halo::reach::megalo {
             cobb::unreachable();
          }
 
-         template<variable_type V> using variable_list = public std::array<variable_declaration<V>, scope_metadata.maximum_of_type<V>()>;
+      public:
+         template<variable_type V> using variable_list = std::array<variable_declaration<V>, (scope_metadata.maximum_of_type<V>())>;
 
+      protected:
          template<variable_type V> variable_list<V>& _list_by_type() {
             switch (V) {
                using enum variable_type;

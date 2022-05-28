@@ -75,4 +75,36 @@ namespace halo::reach::megalo {
       }
       cobb::unreachable();
    }
+
+   constexpr variable_scope variable_scope_enum_from_metadata(const variable_scope_metadata& m) {
+      if (&m == &variable_scopes::global)
+         return variable_scope::global;
+      if (&m == &variable_scopes::object)
+         return variable_scope::object;
+      if (&m == &variable_scopes::player)
+         return variable_scope::player;
+      if (&m == &variable_scopes::team)
+         return variable_scope::team;
+      cobb::unreachable();
+   }
+
+   constexpr bool variable_type_has_a_scope(variable_type t) {
+      switch (t) {
+         using enum variable_type;
+         case object:
+         case player:
+         case team:
+            return true;
+      }
+      return false;
+   }
+   constexpr variable_scope variable_scope_for_type(variable_type t) {
+      switch (t) {
+         using enum variable_type;
+         case object: return variable_scope::object;
+         case player: return variable_scope::player;
+         case team:   return variable_scope::team;
+      }
+      cobb::unreachable();
+   }
 }

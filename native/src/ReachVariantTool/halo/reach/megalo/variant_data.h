@@ -7,8 +7,13 @@
 
 #include "./limits.h"
 
+#include "./forge_label.h"
+#include "./game_option.h"
+#include "./game_stat.h"
+#include "./hud_widget.h"
 #include "./object_type_mask.h"
 #include "./option_toggles.h"
+#include "./player_trait_set.h"
 #include "./strings.h"
 #include "./variable_declarations.h"
 

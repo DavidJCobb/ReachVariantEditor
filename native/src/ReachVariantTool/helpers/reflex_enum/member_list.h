@@ -6,8 +6,8 @@
 #include "helpers/tuple_foreach.h"
 #include "helpers/tuple_index_of.h"
 #include "helpers/tuple_unpack.h"
+#include "../cs.h"
 #include "./constants.h"
-#include "./cs.h"
 #include "./member.h"
 
 namespace cobb {
@@ -135,5 +135,3 @@ namespace cobb {
       };
    }
 }
-
-#include "./member_list.inl"

@@ -1,6 +1,6 @@
 #pragma once
+#include "../cs.h"
 #include "./constants.h"
-#include "./cs.h"
 
 namespace cobb {
 

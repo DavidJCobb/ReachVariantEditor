@@ -1,8 +1,8 @@
 #pragma once
 #include <concepts>
 #include <type_traits>
+#include "../cs.h"
 #include "./member_list.h"
-#include "./cs.h"
 #include "./member.h"
 
 namespace cobb {
@@ -180,7 +180,7 @@ namespace cobb {
 }
 
 // You can using-declaration this namespace for faster, unprefixed access to reflex enum and its related content.
-namespace cobb::reflex_enum_incl {
+namespace cobb::reflex_enum_types {
    template<size_t Size>
    using cs = cobb::cs<Size>;
 
