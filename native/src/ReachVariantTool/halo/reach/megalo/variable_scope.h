@@ -107,4 +107,13 @@ namespace halo::reach::megalo {
       }
       cobb::unreachable();
    }
+   constexpr variable_type variable_type_for_scope(variable_scope t) {
+      switch (t) {
+         using enum variable_scope;
+         case object: return variable_type::object;
+         case player: return variable_type::player;
+         case team:   return variable_type::team;
+      }
+      cobb::unreachable();
+   }
 }

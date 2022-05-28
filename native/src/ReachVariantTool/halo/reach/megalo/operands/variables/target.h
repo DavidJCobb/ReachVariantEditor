@@ -60,6 +60,55 @@ namespace halo::reach::megalo::operands {
                out.flags |= flag::readonly;
                return out;
             }
+
+         public:
+            constexpr bool has_which() const {
+               return this->scopes.outer.has_value();
+            }
+            constexpr bool has_index() const {
+               switch (this->type) {
+                  using enum target_type;
+                  case immediate:
+                  case variable:
+                  case indexed_data:
+                     return true;
+               }
+               return false;
+            }
+
+            constexpr bool is_valid() const {
+               if (this->type == target_type::immediate) {
+                  if (this->bitcount == 0) // immediate values are stored via the index; bitcount must be known
+                     return false;
+                  if (this->scopes.outer.has_value()) // immediates cannot be scoped
+                     return false;
+                  if (this->scopes.inner.has_value()) // immediates cannot be scoped
+                     return false;
+               }
+               if (this->type == target_type::engine_data) {
+                  if (this->scopes.outer == variable_scope::global) // engine data should have no scope set when it is not a member of any object
+                     return false;
+               }
+               if (this->scopes.inner.has_value()) {
+                  if (!this->scopes.outer.has_value()) // inner scopes are only valid if an outer scope is present
+                     return false;
+                  if (this->scopes.inner.value() == variable_scope::global) // the "global" scope cannot be nested
+                     return false;
+               }
+               if (this->has_index()) {
+                  //
+                  // Access to elements of an indexed collection requires that we be able to 
+                  // know the index bitcount.
+                  //
+                  if (this->bitcount == 0) {
+                     if (!this->scopes.inner.has_value()) // bitcount can be deduced from inner scope
+                        return false;
+                     if (this->type != target_type::variable) // bitcount can be deduced from variable type
+                        return false;
+                  }
+               }
+               return true;
+            }
       };
 
       template<typename IndexedData> struct target_definition {
@@ -181,101 +230,6 @@ namespace halo::reach::megalo::operands {
                   // and the megalo_variant_data& and calls the relevant accessor for the table entry?
                   //
       };
-
-      
-      template<
-         cobb::cs Name,
-         variable_type Type,
-         const auto& DefinitionList
-      > class base : public impl::base {
-         public:
-            static constexpr variable_type type = Type;
-            static constexpr operand_typeinfo typeinfo = {
-               .internal_name = Name.c_str(),
-            };
-
-            static constexpr auto& definition_list = DefinitionList;
-            using definition_list_type = std::decay_t<decltype(definition_list)>;
-            using indexed_data_variant = typename definition_list_type::indexed_data_variant;
-
-         #pragma region Functor table for indexed data accessors
-         protected:
-            template<size_t N> struct _extract_indexed_accessor {
-               static void access(megalo_variant_data&, indexed_data_variant& v, size_t index) {
-                  v = std::monostate{};
-               }
-            };
-            template<size_t N> requires (!std::is_same_v<void, typename definition_list_type::nth_indexed_type<N>>) struct _extract_indexed_accessor<N> {
-               static void access(megalo_variant_data& v, indexed_data_variant& v, size_t index) {
-                  v = ((std::get<N>(definition_list.entries)).accessor)(v, index);
-               }
-            };
-
-         public:
-            using type_erased_accessor_type = void* (*)(megalo_variant_data&, size_t index);
-            //
-            static constexpr auto type_erased_accessors = ([]() {
-               std::array<type_erased_accessor_type, definition_list_type::size> out = {};
-               cobb::constexpr_for<0, definition_list_type::size, 1>([&out]<size_t I>() {
-                  out[I] = &_extract_indexed_accessor<I>::access;
-               });
-               return out;
-            })();
-         #pragma endregion
-         #pragma region List of target metadata
-         public:
-            static constexpr auto all_target_metadata = ([]() {
-               std::array<target_metadata, definition_list_type::size> out = {};
-               cobb::constexpr_for<0, definition_list_type::size, 1>([&out]<size_t I>() {
-                  if constexpr (std::is_same_v<definition_list_type::nth_type<N>, target_metadata>) {
-                     out[I] = std::get<N>(definition_list.entries);
-                  } else {
-                     out[I] = std::get<N>(definition_list.entries).metadata;
-                  }
-               });
-               return out;
-            })();
-         #pragma endregion
-
-         public:
-            indexed_data_variant indexed_data = std::monostate{};
-
-            virtual void read(bitreader& stream) override {
-               impl::base::read(stream);
-               //
-               static_assert(false, "TODO: FINISH ME");
-                  // - call-super won't work the way we want it to
-                  // - we need functions to read each of the three individual fields, passing bitcounts as appropriate
-
-               static_assert(false, "TODO: FINISH ME");
-                  // - get the register_set_definition by index
-                  //    - how do we do that if they're different types?
-                  // - if it's indexed data, set our (indexed_data) variant to the right pointer
-                  //
-                  // - we only need to handle indexed data at this step
-                  //    - so...
-                  //       - for-each template to generate a function table to handle it with?
-                  //
-                  // - actually, here's a better idea:
-                  //   
-                  //    - define a non-templated type `register_set_metadata`
-                  //   
-                  //    - have a templated wrapper `register_set_definition` which holds the 
-                  //      metadata along with template-specific info (i.e. the indexed-data 
-                  //      accessor)
-                  //   
-                  //    - now we can generate a constexpr list of metadata
-                  //   
-                  //       - we can access that by index, at run-time
-                  //   
-                  //       - we can also iterate it at run-time
-                  //   
-                  //    - as a bonus, instead of taking a tuple getter (to work around the 
-                  //      structs we're using not being structural types), maybe we can just 
-                  //      template the variable type on a const reference?
-                  //   
-                  //       - tested in godbolt and it works
-            }
-      };
+      //
    }
 }
