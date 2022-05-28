@@ -73,6 +73,41 @@ namespace halo::reach::megalo::operands::variables {
       public:
          all_indexed_types indexed_data = {};
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader& stream) override {
+            impl::base::read(stream);
+            //
+            static_assert(false, "TODO: FINISH ME");
+               // - call-super won't work the way we want it to
+               // - we need functions to read each of the three individual fields, passing bitcounts as appropriate
+
+            static_assert(false, "TODO: FINISH ME");
+               // - get the register_set_definition by index
+               //    - how do we do that if they're different types?
+               // - if it's indexed data, set our (indexed_data) variant to the right pointer
+               //
+               // - we only need to handle indexed data at this step
+               //    - so...
+               //       - for-each template to generate a function table to handle it with?
+               //
+               // - actually, here's a better idea:
+               //   
+               //    - define a non-templated type `register_set_metadata`
+               //   
+               //    - have a templated wrapper `register_set_definition` which holds the 
+               //      metadata along with template-specific info (i.e. the indexed-data 
+               //      accessor)
+               //   
+               //    - now we can generate a constexpr list of metadata
+               //   
+               //       - we can access that by index, at run-time
+               //   
+               //       - we can also iterate it at run-time
+               //   
+               //    - as a bonus, instead of taking a tuple getter (to work around the 
+               //      structs we're using not being structural types), maybe we can just 
+               //      template the variable type on a const reference?
+               //   
+               //       - tested in godbolt and it works
+         }
    };
 }

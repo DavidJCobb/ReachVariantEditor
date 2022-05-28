@@ -7,5 +7,8 @@ namespace cobb {
       using type = UnpackInto<Types...>;
    };
 
+   //
+   // Unpack a tuple's type list and pass the types as parameters into another template.
+   //
    template<template<typename...> class UnpackInto, typename Tuple> using tuple_unpack_t = typename tuple_unpack<UnpackInto, Tuple>::type;
 }
