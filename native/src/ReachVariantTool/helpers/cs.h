@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <type_traits>
 
 namespace cobb {
    // Compile-time string suitable for use as a template parameter
@@ -48,5 +49,10 @@ namespace cobb {
                out.value[i + Size] = o.value[i];
             return out;
          }
+   };
+
+   template<typename T> concept is_cs = requires (T x){
+      { T::length };
+      requires std::is_same_v<std::decay_t<T>, cobb::cs<T::length>>;
    };
 }

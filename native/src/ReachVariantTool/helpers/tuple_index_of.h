@@ -64,6 +64,9 @@ namespace cobb {
    template<typename Tuple, auto Predicate> constexpr size_t tuple_index_of_matching() {
       return impl::tuple_index_of_matching::exec_tp<Tuple, Predicate>::value;
    }
+
+   // TIP: Invoking a constexpr lambda within the definition of a templated class may fail using this overload. 
+   //      If the lambda is non-capturing, try passing it as a template parameter instead!
    template<typename Tuple, typename Functor> constexpr size_t tuple_index_of_matching(Functor&& f) {
       return impl::tuple_index_of_matching::exec_arg<Tuple, Functor>::execute(f);
    }
