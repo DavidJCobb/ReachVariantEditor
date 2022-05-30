@@ -108,7 +108,7 @@ namespace _cobb::reflex::tests::enumeration {
       constexpr auto underlying_by = test_enum::underlying_value_of<cobb::cs("B"), cobb::cs("Y")>;
       constexpr auto underlying_bz = test_enum::underlying_value_of<cobb::cs("B"), cobb::cs("Z")>;
       //
-      constexpr auto underlying_bx_by_b = test_enum::member_type<cobb::cs("B")>::enumeration::underlying_value_of<cobb::cs("X")>;
+      constexpr auto underlying_bx_by_b = test_enum::underlying_value_of<cobb::cs("B")> + test_enum::member_type<cobb::cs("B")>::enumeration::underlying_value_of<cobb::cs("X")>;
       static_assert(underlying_bx == underlying_bx_by_b);
 
       constexpr auto value_a = test_enum::value_of<cobb::cs("A")>;
@@ -130,6 +130,8 @@ namespace _cobb::reflex::tests::enumeration {
       constexpr auto cast_subset_to_superset = test_enum(bx_unwrapped);
       static_assert(cast_subset_to_superset == test_enum::value_of<cobb::cs("B"), cobb::cs("X")>);
       static_assert(cast_subset_to_superset == bx_unwrapped);
+
+      constexpr auto to_string = cast_subset_to_superset.to_c_str();
    }
 
    namespace test_explicit_underlying_type {
@@ -159,19 +161,28 @@ namespace _cobb::reflex::tests::enumeration {
       );
 
 
-      constexpr auto bad_type_params = is_valid_specialization<
-         void,
-         void,
-         void
-      >;
-      constexpr auto explicit_value_out_of_range = is_valid_specialization<
-         uint8_t,
-         member<cobb::cs("A"), 1234>
-      >;
-      constexpr auto non_unique_names = is_valid_specialization<
-         member<cobb::cs("A")>,
-         member<cobb::cs("B")>,
-         member<cobb::cs("B")>
-      >;
+      static_assert(
+         false == is_valid_specialization<
+            void,
+            void,
+            void
+         >,
+         "Test failed: bad type params"
+      );
+      static_assert(
+         false == is_valid_specialization<
+            uint8_t,
+            member<cobb::cs("A"), 1234>
+         >,
+         "Test failed: member with explicit value not representable in underlying type"
+      );
+      static_assert(
+         false == is_valid_specialization<
+            member<cobb::cs("A")>,
+            member<cobb::cs("B")>,
+            member<cobb::cs("B")>
+         >,
+         "Test failed: members with non-unique names"
+      );
    }
 }

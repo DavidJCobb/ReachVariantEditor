@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include "helpers/numeric_min_max.h"
@@ -94,22 +95,18 @@ namespace cobb::reflex {
          static constexpr bool   explicit_underlying_type = _extractor::explicit_underlying_type;
          static constexpr size_t member_count = member_list::member_count();
 
+         static constexpr auto underlying_value_metadata = member_list::underlying_value_metadata(); // DEBUG
+
       protected:
          template<cs Name> static constexpr size_t index_of = member_list::template index_of<Name>();
 
-         template<typename Subset> static constexpr size_t index_of_subset = cobb::tuple_index_of_matching<
-            member_list::as_tuple,
-            []<typename Current>() {
-               if constexpr (is_nested_enum<Current>)
-                  return std::is_same_v<Subset, typename Current::enumeration>;
-               return false;
-            }
-         >();
-
       public:
          template<cs Name> static constexpr bool has = (index_of<Name> != _index_of_none);
-         template<typename Subset> static constexpr bool has_subset = index_of_subset<Subset> != std::numeric_limits<size_t>::max();
+         template<typename Subset> static constexpr bool has_subset = member_list::template index_of_subset<Subset>() != std::numeric_limits<size_t>::max();
          template<typename Subset> static constexpr auto name_of_subset = member_list::template subset_name<Subset>();
+
+         static constexpr auto all_names = member_list::all_names();
+         static constexpr auto all_underlying_values = member_list::all_underlying_values();
 
       public:
          constexpr enumeration() {}
@@ -127,6 +124,16 @@ namespace cobb::reflex {
          constexpr underlying_type to_int() const {
             return this->_value;
          }
+         constexpr const char* to_c_str() const {
+            auto i = member_list::underlying_value_to_type_index(this->_value);
+            if (i == std::numeric_limits<size_t>::max())
+               return nullptr;
+            return all_names[i];
+         }
+         std::string to_string() const {
+            auto p = to_c_str();
+            return p ? p : std::string{};
+         }
 
          constexpr bool operator==(const enumeration&) const = default;
          constexpr bool operator!=(const enumeration&) const = default;
@@ -139,9 +146,6 @@ namespace cobb::reflex {
 
       public:
          template<cs Name> requires has<Name> using member_type = std::tuple_element_t<index_of<Name>, typename member_list::as_tuple>;
-         
-         static constexpr auto all_names = member_list::all_names();
-         static constexpr auto all_underlying_values = member_list::all_underlying_values();
 
          static constexpr underlying_type min_underlying_value = cobb::min(all_underlying_values);
          static constexpr underlying_type max_underlying_value = cobb::max(all_underlying_values);

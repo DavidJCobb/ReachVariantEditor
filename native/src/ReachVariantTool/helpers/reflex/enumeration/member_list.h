@@ -16,6 +16,12 @@ namespace cobb::reflex::impl::enumeration {
    template<typename Underlying, typename... Members> struct member_list {
       using underlying_type = Underlying;
       using as_tuple = std::tuple<Members...>;
+
+      struct value_metadata {
+         underlying_type value;
+         size_t type_index;
+         size_t type_sub = 0;
+      };
          
       static constexpr size_t value_count() {
          size_t count = 0;
@@ -36,7 +42,7 @@ namespace cobb::reflex::impl::enumeration {
          });
          return count;
       };
-      static constexpr size_t member_count() {
+      static constexpr size_t member_count() { // including gaps
          return std::tuple_size_v<as_tuple>;
       }
       static constexpr size_t named_member_count() {
@@ -48,22 +54,19 @@ namespace cobb::reflex::impl::enumeration {
          >;
       }
 
-      //
-         
-      template<typename Functor> static constexpr void for_each_underlying_value(Functor&& f) {
+      static constexpr auto underlying_value_metadata() {
+         std::array<value_metadata, value_count()> out = {};
+         //
          underlying_type v = -1;
-         cobb::tuple_foreach<as_tuple>([&f, &v]<typename Current>() {
-            //
-            // At the end of each pass, "v" should be equal to the last value for any 
-            // given entry. If an entry is a single value, "v" should equal its value 
-            // at the end of the pass.  If the entry is a range, "v" should equal its 
-            // last value.  If the entry is a nested enum,  "v" should equal its last 
-            // entry's underlying value within this superset enum.
-            //
+         size_t type_index  = -1;
+         size_t value_index = -1;
+         cobb::tuple_foreach<as_tuple>([&v, &type_index, &value_index, &out]<typename Current>() {
+            ++type_index;
             if constexpr (std::is_same_v<Current, member_gap>) {
                ++v;
                return;
             }
+            //
             if constexpr (is_member<Current> || is_member_range<Current>) {
                if (Current::value != undefined)
                   v = Current::value;
@@ -71,11 +74,17 @@ namespace cobb::reflex::impl::enumeration {
                   ++v;
                //
                if constexpr (is_member<Current>) {
-                  (f)(v);
-               }
-               if constexpr (is_member_range<Current>) {
+                  out[++value_index] = {
+                     .value      = v,
+                     .type_index = type_index,
+                  };
+               } else if constexpr (is_member_range<Current>) {
                   for (size_t i = 0; i < Current::count; ++i) {
-                     (f)(v);
+                     out[++value_index] = {
+                        .value      = v,
+                        .type_index = type_index,
+                        .type_sub   = i,
+                     };
                      ++v;
                   }
                   --v;
@@ -88,14 +97,24 @@ namespace cobb::reflex::impl::enumeration {
                constexpr auto nested_list = nested::all_underlying_values;
                //
                ++v;
-               for (auto item : nested_list) {
-                  (f)(v + (underlying_type)(item - nested::min_underlying_value));
+               for (size_t i = 0; i < nested_list.size(); ++i) {
+                  auto item = nested_list[i];
+                  //
+                  out[++value_index] = {
+                     .value      = (v + (underlying_type)(item - nested::min_underlying_value)),
+                     .type_index = type_index,
+                     .type_sub   = i,
+                  };
                }
                v += nested_span;
                return;
             }
          });
-      }
+         //
+         return out;
+      };
+
+      //
 
       template<cs Name> static constexpr size_t index_of() {
          return cobb::tuple_index_of_matching<
@@ -107,14 +126,16 @@ namespace cobb::reflex::impl::enumeration {
             }
          >();
       }
-
-      // ---
-
-      static constexpr size_t underlying_value_count = []() {
-         size_t c = 0;
-         for_each_underlying_value([&c](underlying_type) { ++c; });
-         return c;
-      }();
+      template<typename Subset> static constexpr size_t index_of_subset() {
+         return cobb::tuple_index_of_matching<
+            as_tuple,
+            []<typename Current>() {
+               if constexpr (is_nested_enum<Current>)
+                  return std::is_same_v<Subset, typename Current::enumeration>;
+               return false;
+            }
+         >();
+      };
 
       // ---
 
@@ -129,62 +150,26 @@ namespace cobb::reflex::impl::enumeration {
          });
          return out;
       };
-      static constexpr std::array<underlying_type, member_list::underlying_value_count> all_underlying_values() {
-         std::array<underlying_type, member_list::underlying_value_count> out = {};
+      static constexpr auto all_underlying_values() {
+         constexpr auto meta = underlying_value_metadata();
          //
-         size_t i = 0;
-         for_each_underlying_value([&i, &out](underlying_type v) {
-            out[i++] = v;
-         });
+         std::array<underlying_type, meta.size()> out = {};
+         for (size_t i = 0; i < meta.size(); ++i)
+            out[i] = meta[i].value;
          return out;
       }
 
       template<cobb::cs Name> static constexpr underlying_type underlying_value_of() {
-         bool found = false;
-         underlying_type v = -1;
-         //
-         cobb::tuple_foreach<as_tuple>([&found, &v]<typename Current>() {
-            if (found) {
-               return;
-            }
-            if constexpr (is_named_member<Current>) {
-               found = Current::name == Name;
-            }
-            //
-            // At the end of each pass, "v" should be equal to the last value for any 
-            // given entry. If an entry is a single value, "v" should equal its value 
-            // at the end of the pass.  If the entry is a range, "v" should equal its 
-            // last value.  If the entry is a nested enum,  "v" should equal its last 
-            // entry's underlying value within this superset enum.
-            //
-            if constexpr (std::is_same_v<Current, member_gap>) {
-               ++v;
-            } else if constexpr (is_member<Current> || is_member_range<Current>) {
-               if (Current::value != undefined)
-                  v = Current::value;
-               else
-                  ++v;
-               if (!found) {
-                  if constexpr (is_member_range<Current>) {
-                     v += Current::count - 1;
-                  }
-               }
-               return;
-            } else if constexpr (is_nested_enum<Current>) {
-               using nested = Current::enumeration;
-               //
-               if (!found) {
-                  v += (nested::max_underlying_value - nested::min_underlying_value);
-               }
-            }
-         });
-         //
-         if (found)
-            return v;
+         constexpr auto index = index_of<Name>();
+         for (const auto& item : underlying_value_metadata())
+            if (item.type_index == index)
+               return item.value;
          cobb::unreachable();
       }
-         
+      
       template<typename Subset> static constexpr size_t subset_name_length() {
+         return std::tuple_element_t<index_of_subset<Subset>(), as_tuple>::name.capacity();
+
          size_t length = 0;
          cobb::tuple_foreach<as_tuple>([&length]<typename Current>() {
             if constexpr (is_nested_enum<Current>)
@@ -202,6 +187,15 @@ namespace cobb::reflex::impl::enumeration {
                name = Current::name;
          });
          return name;
+      }
+
+      static constexpr size_t underlying_value_to_type_index(underlying_type v) {
+         for (const auto& item : underlying_value_metadata()) {
+            if (item.value == v) {
+               return item.type_index;
+            }
+         }
+         return std::numeric_limits<size_t>::max();
       }
    };
 }

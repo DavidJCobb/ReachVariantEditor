@@ -41,6 +41,7 @@ namespace cobb::reflex::impl::enumeration {
          return true;
       }
       //
+      static_assert(is_underlying_type<Underlying>);
       using limits = std::numeric_limits<Underlying>;
       //
       if constexpr (is_member<Member> || is_member_range<Member>) {
@@ -51,11 +52,13 @@ namespace cobb::reflex::impl::enumeration {
       }
       return true;
    }
+   template<typename First, typename... Types> struct member_explicit_values_are_representable_worker;
+   template<typename First, typename... Types> requires (is_underlying_type<First>) struct member_explicit_values_are_representable_worker<First, Types...> {
+      static constexpr bool value = (member_explicit_value_is_representable<First, Types>() && ...);
+   };
+   template<typename First, typename... Types> requires (!is_underlying_type<First>) struct member_explicit_values_are_representable_worker<First, Types...> {
+      static constexpr bool value = member_explicit_value_is_representable<default_underlying_enum_type, First>() && (member_explicit_value_is_representable<default_underlying_enum_type, Types>() && ...);
+   };
 
-   template<typename First, typename... Types> concept member_explicit_values_are_representable =
-      (is_underlying_type<First> ?
-         (member_explicit_value_is_representable<First, Types>() && ...)
-      :
-         member_explicit_value_is_representable<default_underlying_enum_type, First>() && (member_explicit_value_is_representable<default_underlying_enum_type, Types>() && ...)
-      );
+   template<typename First, typename... Types> concept member_explicit_values_are_representable = member_explicit_values_are_representable_worker<First, Types...>::value;
 }
