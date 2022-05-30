@@ -9,10 +9,10 @@ namespace cobb::reflex::impl::enumeration {
 
    template<typename A, typename... B> class member_names_are_unique_worker {
       protected:
-         template<typename A, typename B> struct compare {
-            static constexpr bool value = true;
+         template<typename, typename> struct compare {
+            static constexpr bool value = false;
          };
-         template<typename A, typename B> requires (is_named_member<A> && is_named_member<B>) struct compare<A, B> {
+         template<is_named_member A, is_named_member B> struct compare<A, B> {
             static constexpr bool value = (A::name == B::name);
          };
 
@@ -29,7 +29,7 @@ namespace cobb::reflex::impl::enumeration {
             return true;
          })();
    };
-   template<is_named_member A> class member_names_are_unique_worker<A> {
+   template<typename A> class member_names_are_unique_worker<A> {
       public:
          static constexpr bool value = true;
    };
@@ -39,18 +39,18 @@ namespace cobb::reflex::impl::enumeration {
    template<typename Underlying, typename Member> constexpr bool member_explicit_value_is_representable() {
       if constexpr (std::is_same_v<Member, member_gap>) {
          return true;
+      } else {
+         static_assert(is_underlying_type<Underlying>);
+         using limits = std::numeric_limits<Underlying>;
+         //
+         if constexpr (is_member<Member> || is_member_range<Member>) {
+            constexpr auto value = Member::value;
+            if (value == undefined)
+               return true;
+            return (value >= limits::lowest()) && (value <= limits::max());
+         }
+         return true;
       }
-      //
-      static_assert(is_underlying_type<Underlying>);
-      using limits = std::numeric_limits<Underlying>;
-      //
-      if constexpr (is_member<Member> || is_member_range<Member>) {
-         constexpr auto value = Member::value;
-         if (value == undefined)
-            return true;
-         return (value >= limits::lowest()) && (value <= limits::max());
-      }
-      return true;
    }
    template<typename First, typename... Types> struct member_explicit_values_are_representable_worker;
    template<typename First, typename... Types> requires (is_underlying_type<First>) struct member_explicit_values_are_representable_worker<First, Types...> {

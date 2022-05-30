@@ -40,6 +40,28 @@ namespace _cobb::reflex::tests::enumeration {
       constexpr auto underlying_d = test_enum::underlying_value_of<cobb::cs("D")>;
    }
 
+   namespace test_gaps {
+      using test_enum = ::cobb::reflex::enumeration<
+         member<cobb::cs("A")>,
+         member_gap,
+         member<cobb::cs("B")>,
+         member_gap,
+         member<cobb::cs("C")>,
+         member_gap,
+         member<cobb::cs("D"), 1234>
+      >;
+
+      static_assert(test_enum::has<cobb::cs("A")>);
+      static_assert(test_enum::has<cobb::cs("XXX")> == false);
+
+      constexpr auto all_underlying = test_enum::all_underlying_values;
+
+      constexpr auto underlying_a = test_enum::underlying_value_of<cobb::cs("A")>;
+      constexpr auto underlying_b = test_enum::underlying_value_of<cobb::cs("B")>;
+      constexpr auto underlying_c = test_enum::underlying_value_of<cobb::cs("C")>;
+      constexpr auto underlying_d = test_enum::underlying_value_of<cobb::cs("D")>;
+   }
+
    namespace test_range {
       using test_enum = cobb::reflex::enumeration<
          member<cobb::cs("A")>,
@@ -122,6 +144,11 @@ namespace _cobb::reflex::tests::enumeration {
       static_assert(value_bz.to_int() == underlying_bz);
 
       using b_enum = typeof_b::enumeration;
+
+      constexpr auto all_underlying_b = b_enum::all_underlying_values;
+      constexpr auto min_underlying_b = b_enum::min_underlying_value;
+      constexpr auto max_underlying_b = b_enum::max_underlying_value;
+
       constexpr b_enum bx_unwrapped = b_enum::value_of<cobb::cs("X")>;
 
       static_assert(test_enum::has_subset<b_enum>);
@@ -146,6 +173,29 @@ namespace _cobb::reflex::tests::enumeration {
       using underlying = test_enum::underlying_type;
 
       constexpr auto all_underlying = test_enum::all_underlying_values;
+   }
+
+   namespace test_metadata {
+      struct metadata {
+         int id = {};
+      };
+      
+      using test_enum = cobb::reflex::enumeration<
+         member<cobb::cs("A"), undefined, metadata{ .id = 123 }>,
+         member<cobb::cs("B")>,
+         member<cobb::cs("C"), undefined, metadata{ .id = 456 }>,
+         member<cobb::cs("D"), 5678>
+      >;
+
+      using metadata_type = test_enum::metadata_type;
+      static_assert(std::is_same_v<metadata_type, test_enum::member_type<cobb::cs("A")>::metadata_type>);
+
+      constexpr auto value = test_enum::value_of<cobb::cs("C")>;
+
+      constexpr auto to_string = value.to_c_str();
+
+      constexpr auto meta = value.to_metadata();
+      constexpr auto id = meta->id;
    }
 
    namespace test_all_constraints {

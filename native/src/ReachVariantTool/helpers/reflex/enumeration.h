@@ -92,10 +92,10 @@ namespace cobb::reflex {
          underlying_type _value = {};
 
       public:
-         static constexpr bool   explicit_underlying_type = _extractor::explicit_underlying_type;
-         static constexpr size_t member_count = member_list::member_count();
+         static constexpr bool explicit_underlying_type = _extractor::explicit_underlying_type;
 
-         static constexpr auto underlying_value_metadata = member_list::underlying_value_metadata(); // DEBUG
+      public:
+         using metadata_type = member_list::metadata_type;
 
       protected:
          template<cs Name> static constexpr size_t index_of = member_list::template index_of<Name>();
@@ -103,10 +103,11 @@ namespace cobb::reflex {
       public:
          template<cs Name> static constexpr bool has = (index_of<Name> != _index_of_none);
          template<typename Subset> static constexpr bool has_subset = member_list::template index_of_subset<Subset>() != std::numeric_limits<size_t>::max();
-         template<typename Subset> static constexpr auto name_of_subset = member_list::template subset_name<Subset>();
+         template<typename Subset> requires has_subset<Subset> static constexpr auto name_of_subset = member_list::template subset_name<Subset>();
 
          static constexpr auto all_names = member_list::all_names();
          static constexpr auto all_underlying_values = member_list::all_underlying_values();
+         static constexpr auto all_metadata = member_list::all_metadata();
 
       public:
          constexpr enumeration() {}
@@ -135,6 +136,13 @@ namespace cobb::reflex {
             return p ? p : std::string{};
          }
 
+         constexpr const metadata_type* to_metadata() const {
+            auto i = member_list::underlying_value_to_type_index(this->_value);
+            if (i == std::numeric_limits<size_t>::max())
+               return nullptr;
+            return &all_metadata[i];
+         }
+
          constexpr bool operator==(const enumeration&) const = default;
          constexpr bool operator!=(const enumeration&) const = default;
          template<typename V> requires has_subset<V> constexpr bool operator==(const V& v) const {
@@ -149,6 +157,11 @@ namespace cobb::reflex {
 
          static constexpr underlying_type min_underlying_value = cobb::min(all_underlying_values);
          static constexpr underlying_type max_underlying_value = cobb::max(all_underlying_values);
+         static constexpr enumeration min_value() { return from_int(min_underlying_value); }
+         static constexpr enumeration max_value() { return from_int(max_underlying_value); }
+
+         static constexpr underlying_type underlying_value_range = max_underlying_value - min_underlying_value;
+         static constexpr size_t value_count = member_list::value_count();
 
          template<cs Name, auto Detail = impl::enumeration::underlying_value_of::no_detail{}>
          requires (has<Name> && impl::enumeration::underlying_value_of::detail_is_valid<enumeration, Name, std::decay_t<decltype(Detail)>>)
@@ -180,4 +193,22 @@ namespace cobb::reflex {
             return from_int(underlying_value_of<Name, Detail>);
          }();
    };
+
+   // You can using-declare this namespace for quick access to the "cs" and "reflex_enum" templates.
+   namespace quick::enumeration {
+      template<size_t S> using cs = ::cobb::cs<S>;
+
+      template<typename... Parameters> using reflex_enum = ::cobb::reflex::enumeration<Parameters...>;
+
+      using reflex_enum_gap = member_gap;
+
+      template<cobb::cs Name, auto Value = undefined, auto Metadata = no_member_metadata{}>
+      using reflex_member = ::cobb::reflex::member<Name, Value, Metadata>;
+
+      template<cobb::cs Name, size_t Count, auto BaseValue = undefined, auto Metadata = no_member_metadata{}>
+      using reflex_member_range = member_range<Name, Count, BaseValue, Metadata>;
+
+      template<cobb::cs Name, typename Enum>
+      using reflex_nested_enum = nested_enum<Name, Enum>;
+   }
 }

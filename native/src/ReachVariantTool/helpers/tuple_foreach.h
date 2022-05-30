@@ -9,12 +9,18 @@ namespace cobb {
             (Predicate.template operator()<Types>(), ...);
          }
       };
+      template<auto Predicate> struct exec_tp<std::tuple<>, Predicate> {
+         static constexpr void execute() {}
+      };
 
       template<typename Tuple, typename Functor> struct exec_arg;
       template<typename Functor, typename... Types> struct exec_arg<std::tuple<Types...>, Functor> {
          static constexpr void execute(Functor&& f) {
             (f.template operator()<Types>(), ...);
          }
+      };
+      template<typename Functor> struct exec_arg<std::tuple<>, Functor> {
+         static constexpr void execute(Functor&& f) {}
       };
    }
 
