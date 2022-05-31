@@ -2,163 +2,169 @@
 #include <bit>
 #include <tuple>
 #include "./base.h"
-#include "./register_type.h"
+#include "./target.h"
 
 #include "halo/reach/megalo/limits.h"
 #include "halo/reach/megalo/variant_data.h"
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      constexpr auto number_registers = std::make_tuple(
-         register_set_definition<>{
+      constexpr auto number_registers = make_target_definition_list(
+         target_metadata{
             .name = "constant",
-            .type = register_type::immediate,
+            .type = target_type::immediate,
             //
             .bitcount = 16,
-            .flags    = register_set_flag::readonly,
+            .flags    = target_metadata::flag::readonly,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "player[w].number[i]",
-            .type = register_type::variable,
+            .type = target_type::variable,
             //
-            .scope = variable_scope::player,
+            .scopes = variable_scope::player,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "object[w].number[i]",
-            .type = register_type::variable,
+            .type = target_type::variable,
             //
-            .scope = variable_scope::object,
+            .scopes = variable_scope::object,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "team[w].number[i]",
-            .type = register_type::variable,
+            .type = target_type::variable,
             //
-            .scope = variable_scope::team,
+            .scopes = variable_scope::team,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "global.number[i]",
-            .type = register_type::variable,
+            .type = target_type::variable,
             //
-            .scope = variable_scope::global,
+            .scopes = variable_scope::global,
          },
-         register_set_definition<game_option>{
-            .name = "script_option[i]",
-            .type = register_type::indexed_data,
-            //
+         target_definition<game_option>{
+            .metadata = {
+               .name = "script_option[i]",
+               .type = target_type::indexed_data,
+               //
+               .bitcount = std::bit_width(limits::script_options - 1),
+               .flags    = target_metadata::flag::readonly,
+            },
             .accessor = [](megalo_variant_data& v, size_t index) -> game_option* {
                auto& list = v.script.options;
                if (index < list.size())
                   return &list[index];
                return nullptr;
             },
-            .bitcount = std::bit_width(limits::script_options - 1),
-            .flags    = register_set_flag::readonly,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "object[w].spawn_sequence",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .flags = register_set_flag::readonly,
-            .scope = variable_scope::object,
+            .flags = target_metadata::flag::readonly,
+            .scopes = variable_scope::object,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "team[w].score",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .flags = register_set_flag::readonly, // use the setter opcode to modify a team's score; do not write to the register
-            .scope = variable_scope::team,
+            .flags = target_metadata::flag::readonly, // use the setter opcode to modify a team's score; do not write to the register
+            .scopes = variable_scope::team,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "player[w].score",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .flags = register_set_flag::readonly, // use the setter opcode to modify a team's score; do not write to the register
-            .scope = variable_scope::player,
+            .flags = target_metadata::flag::readonly, // use the setter opcode to modify a team's score; do not write to the register
+            .scopes = variable_scope::player,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "player[w].unk09",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .scope = variable_scope::player,
+            .scopes = variable_scope::player,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "player[w].rating",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .scope = variable_scope::player,
+            .scopes = variable_scope::player,
          },
-         register_set_definition<game_stat>{
-            .name = "player[w].script_stat[i]",
-            .type = register_type::indexed_data,
-            //
+         target_definition<game_stat>{
+            .metadata = {
+               .name = "player[w].script_stat[i]",
+               .type = target_type::indexed_data,
+               //
+               .bitcount = std::bit_width(limits::script_stats - 1),
+               .flags    = target_metadata::flag::readonly,
+               .scopes   = variable_scope::player,
+            },
             .accessor = [](megalo_variant_data& v, size_t index) -> game_stat* {
                auto& list = v.script.stats;
                if (index < list.size())
                   return &list[index];
                return nullptr;
             },
-            .bitcount = std::bit_width(limits::script_stats - 1),
-            .flags    = register_set_flag::readonly,
-            .scope    = variable_scope::player,
          },
-         register_set_definition<game_stat>{
-            .name = "team[w].script_stat[i]",
-            .type = register_type::indexed_data,
-            //
+         target_definition<game_stat>{
+            .metadata = {
+               .name = "team[w].script_stat[i]",
+               .type = target_type::indexed_data,
+               //
+               .bitcount = std::bit_width(limits::script_stats - 1),
+               .flags    = target_metadata::flag::readonly,
+               .scopes   = variable_scope::team,
+            },
             .accessor = [](megalo_variant_data& v, size_t index) -> game_stat* {
                auto& list = v.script.stats;
                if (index < list.size())
                   return &list[index];
                return nullptr;
             },
-            .bitcount = std::bit_width(limits::script_stats - 1),
-            .flags    = register_set_flag::readonly,
-            .scope    = variable_scope::team,
          },
-         register_set_definition<>::engine_data_readonly({ .name = "game.current_round" }),
-         register_set_definition<>{
+         target_metadata::engine_data_readonly({ .name = "game.current_round" }),
+         target_metadata{
             .name = "game.symmetry_get",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .flags = register_set_flag::readonly,
+            .flags = target_metadata::flag::readonly,
          },
-         register_set_definition<>{ // only accessible from a "pregame" trigger
+         target_metadata{ // only accessible from a "pregame" trigger
             .name = "game.symmetry",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
          },
-         register_set_definition<>{
+         target_metadata{
             .name = "game.score_to_win",
-            .type = register_type::engine_data,
+            .type = target_type::engine_data,
             //
-            .flags = register_set_flag::readonly,
+            .flags = target_metadata::flag::readonly,
          },
-         register_set_definition<>::engine_data_readonly({ .name = "game.fireteams_enabled" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.teams_enabled" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.round_time_limit" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.round_limit" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.perfection_enabled" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.rounds_to_win" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.sudden_death_time" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.grace_period" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.lives_per_round" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.team_lives_per_round" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.respawn_time" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.suicide_penalty" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.betrayal_penalty" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.respawn_growth" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.loadout_cam_time" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.respawn_traits_time" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.friendly_fire" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.betrayal_booting" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.proximity_voice" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.dont_team_restrict_chat" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.dead_players_can_talk" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.grenades_on_map" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.indestructible_vehicles" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.powerup_duration_r" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.powerup_duration_b" }),
-         register_set_definition<>::engine_data_readonly({ .name = "game.powerup_duration_y" }),
-         register_set_definition<>::engine_data_readonly({ .name = "death_event_damage_type" })
+         target_metadata::engine_data_readonly({ .name = "game.fireteams_enabled" }),
+         target_metadata::engine_data_readonly({ .name = "game.teams_enabled" }),
+         target_metadata::engine_data_readonly({ .name = "game.round_time_limit" }),
+         target_metadata::engine_data_readonly({ .name = "game.round_limit" }),
+         target_metadata::engine_data_readonly({ .name = "game.perfection_enabled" }),
+         target_metadata::engine_data_readonly({ .name = "game.rounds_to_win" }),
+         target_metadata::engine_data_readonly({ .name = "game.sudden_death_time" }),
+         target_metadata::engine_data_readonly({ .name = "game.grace_period" }),
+         target_metadata::engine_data_readonly({ .name = "game.lives_per_round" }),
+         target_metadata::engine_data_readonly({ .name = "game.team_lives_per_round" }),
+         target_metadata::engine_data_readonly({ .name = "game.respawn_time" }),
+         target_metadata::engine_data_readonly({ .name = "game.suicide_penalty" }),
+         target_metadata::engine_data_readonly({ .name = "game.betrayal_penalty" }),
+         target_metadata::engine_data_readonly({ .name = "game.respawn_growth" }),
+         target_metadata::engine_data_readonly({ .name = "game.loadout_cam_time" }),
+         target_metadata::engine_data_readonly({ .name = "game.respawn_traits_time" }),
+         target_metadata::engine_data_readonly({ .name = "game.friendly_fire" }),
+         target_metadata::engine_data_readonly({ .name = "game.betrayal_booting" }),
+         target_metadata::engine_data_readonly({ .name = "game.proximity_voice" }),
+         target_metadata::engine_data_readonly({ .name = "game.dont_team_restrict_chat" }),
+         target_metadata::engine_data_readonly({ .name = "game.dead_players_can_talk" }),
+         target_metadata::engine_data_readonly({ .name = "game.grenades_on_map" }),
+         target_metadata::engine_data_readonly({ .name = "game.indestructible_vehicles" }),
+         target_metadata::engine_data_readonly({ .name = "game.powerup_duration_r" }),
+         target_metadata::engine_data_readonly({ .name = "game.powerup_duration_b" }),
+         target_metadata::engine_data_readonly({ .name = "game.powerup_duration_y" }),
+         target_metadata::engine_data_readonly({ .name = "death_event_damage_type" })
       );
    }
 }
@@ -169,8 +175,7 @@ namespace halo::reach::megalo::operands {
       using number = base<
          cobb::cs("number"),
          variable_type::number,
-         decltype(number_registers),
-         []() { return number_registers; }
+         number_registers
       >;
    }
 }

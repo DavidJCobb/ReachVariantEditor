@@ -73,6 +73,13 @@ namespace halo::reach::megalo::operands {
                   case indexed_data:
                      return true;
                }
+               if (this->type == target_type::engine_data) {
+                  if (this->scopes.inner.has_value())
+                     //
+                     // Properties on nested variables will use the index value to identify which nested variable.
+                     //
+                     return true;
+               }
                return false;
             }
 
@@ -84,7 +91,16 @@ namespace halo::reach::megalo::operands {
                      return false;
                   if (this->scopes.inner.has_value()) // immediates cannot be scoped
                      return false;
+                  return true;
                }
+               if (this->type == target_type::variable) {
+                  if (!this->scopes.outer.has_value())
+                     return false;
+                  if (this->scopes.inner.has_value())
+                     return false;
+                  return true;
+               }
+               //
                if (this->type == target_type::engine_data) {
                   if (this->scopes.outer == variable_scope::global) // engine data should have no scope set when it is not a member of any object
                      return false;
@@ -195,41 +211,36 @@ namespace halo::reach::megalo::operands {
          public:
             std::tuple<Types...> entries;
 
-            template<size_t N> struct _extract_indexed_accessor {
-               static void* access(megalo_variant_data&, size_t index) {
-                  return nullptr;
-               }
-            };
-            template<size_t N> requires (!std::is_same_v<void, nth_indexed_type<N>>) struct _extract_indexed_accessor<N> {
-               static void* access(megalo_variant_data& v, size_t index) {
-                  return (void*) (std::get<N>(this->entries)).accessor(v, index);
-               }
-            };
-
-            using type_erased_accessor_type = void* (*)(megalo_variant_data&, size_t index);
-
-            static constexpr auto type_erased_accessors = ([]() {
-               static constexpr auto size = sizeof...(Types);
-               //
-               std::array<type_erased_accessor_type, size> out = {};
-               cobb::constexpr_for<0, size, 1>([&out]<size_t I>() {
-                  out[I] = &_extract_indexed_accessor<I>::access;
-               });
-               return out;
-            })();
-
          public:
-            constexpr target_definition_list(Types&&... items) : entries(items) {}
+            constexpr target_definition_list(Types&&... items) : entries(items...) {}
 
             const target_metadata& metadata_for(size_t index) const;
 
-            indexed_data_variant pull_indexed_data(megalo_variant_data&, size_t index) const;
-               static_assert(false, "TODO: Okay, but how do we pick an accessor by index when the types vary?");
-                  //
-                  // maybe generate a function table, indexable at run-time, which takes a variant reference 
-                  // and the megalo_variant_data& and calls the relevant accessor for the table entry?
-                  //
+            constexpr size_t index_of_first_invalid() const {
+               size_t i   = -1;
+               bool   bad = false;
+               cobb::constexpr_for<0, size, 1>([this, &i, &bad]<size_t I>() {
+                  if (bad) {
+                     return;
+                  }
+                  bool valid = true;
+                  if constexpr (std::is_same_v<nth_indexed_type<I>, void>) {
+                     valid = std::get<I>(this->entries).is_valid();
+                  } else {
+                     valid = std::get<I>(this->entries).metadata.is_valid();
+                  }
+                  if (!valid) {
+                     i = I;
+                     bad = true;
+                     return;
+                  }
+               });
+               return i;
+            }
       };
       //
+      template<typename... Types> constexpr target_definition_list<Types...> make_target_definition_list(Types&&... args) {
+         return target_definition_list<Types...>(std::forward<Types&&>(args)...);
+      }
    }
 }

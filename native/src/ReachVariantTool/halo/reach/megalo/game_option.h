@@ -8,12 +8,12 @@
 #include "./strings.h"
 
 namespace halo::reach::megalo {
-   class game_option : public util::dummyable, public util::indexed, public util::passively_refcounted {
+   class game_option : public util::passively_refcounted, public util::dummyable, public util::indexed {
       public:
          using value_type  = bitnumber<10, int16_t>;
          using value_index = bitnumber<std::bit_width(limits::script_option_values - 1), uint8_t>;
 
-         struct enum_value {
+         struct enum_value : public util::indexed {
             string_ref name;
             string_ref desc;
             value_type value;

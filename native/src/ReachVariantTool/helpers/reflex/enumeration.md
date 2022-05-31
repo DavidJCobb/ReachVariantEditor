@@ -287,7 +287,7 @@ constexpr auto c_z = outer::underlying_value_of<cobb::cs("C"), cobb::cs("Z")>; /
 ```
 
 #### `underlying_value_range`
-A `static constexpr underlying_type` member equal to `max_underlying_value - min_underlying_value`. This value represents the full range of enum members' values, including any gaps between members.
+A `static constexpr underlying_type` member equal to `max_underlying_value - min_underlying_value + 1`. This value represents the full range of enum members' values, including any gaps between members.
 
 #### `value_count`
 A `static constexpr size_t` member indicating the number of defined members and their values within the enumeration.

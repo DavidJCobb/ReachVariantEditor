@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <bitset>
-#include "halo/reach/bitstreams.fwd.h"
+#include "halo/reach/bitstreams.h"
 #include "./static_team.h"
 #include "./variable_scope.h"
 #include "./variable_type.h"
@@ -42,7 +42,7 @@ namespace halo::reach::megalo {
    template<variable_scope S> class variable_declaration_set {
       public:
          static constexpr variable_scope scope = S;
-         static constexpr const variable_scope_metadata& scope_metadata = variable_scope_metadata_from_enum<S>();
+         static constexpr const variable_scope_metadata& scope_metadata = variable_scope_metadata_from_enum(scope);
 
       protected:
          template<variable_type V> static constexpr size_t bit_offset() {
@@ -50,19 +50,19 @@ namespace halo::reach::megalo {
             //
             if constexpr (V == variable_type::number)
                return result;
-            result += scope_metadata.maximum_of_type<variable_type::number>();
+            result += scope_metadata.maximum_of_type(variable_type::number);
             //
             if constexpr (V == variable_type::object)
                return result;
-            result += scope_metadata.maximum_of_type<variable_type::object>();
+            result += scope_metadata.maximum_of_type(variable_type::object);
             //
             if constexpr (V == variable_type::player)
                return result;
-            result += scope_metadata.maximum_of_type<variable_type::player>();
+            result += scope_metadata.maximum_of_type(variable_type::player);
             //
             if constexpr (V == variable_type::team)
                return result;
-            result += scope_metadata.maximum_of_type<variable_type::team>();
+            result += scope_metadata.maximum_of_type(variable_type::team);
             //
             if constexpr (V == variable_type::timer)
                return result;
@@ -71,7 +71,7 @@ namespace halo::reach::megalo {
          }
 
       public:
-         template<variable_type V> using variable_list = std::array<variable_declaration<V>, (scope_metadata.maximum_of_type<V>())>;
+         template<variable_type V> using variable_list = std::array<variable_declaration<V>, (scope_metadata.maximum_of_type(V))>;
 
       protected:
          template<variable_type V> variable_list<V>& _list_by_type() {
@@ -87,7 +87,7 @@ namespace halo::reach::megalo {
          }
 
          template<variable_type V> void _read_list(bitreader& stream) {
-            size_t count = stream.read_bits(std::bit_width(scope_metadata.maximum_of_type<V>()));
+            size_t count = stream.read_bits(std::bit_width(scope_metadata.maximum_of_type(V)));
             for (size_t i = 0; i < count; ++i) {
                this->set_variable_is_defined<V>(i, true);
             }

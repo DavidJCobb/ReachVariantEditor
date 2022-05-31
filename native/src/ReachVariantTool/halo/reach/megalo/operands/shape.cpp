@@ -9,7 +9,7 @@ namespace halo::reach::megalo::operands {
             break;
          case shape_type::underlying_value_of<cobb::cs("sphere")>:
             stream.read(
-               readius
+               radius
             );
             break;
          case shape_type::underlying_value_of<cobb::cs("cylinder")>:

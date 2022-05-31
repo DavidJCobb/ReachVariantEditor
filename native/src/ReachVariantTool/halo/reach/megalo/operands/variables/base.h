@@ -6,10 +6,13 @@
 #include "helpers/tuple_transform.h"
 #include "helpers/tuple_unpack.h"
 #include "halo/util/refcount.h"
+#include "halo/reach/bitstreams.fwd.h"
 #include "../../operand.h"
 #include "../../operand_typeinfo.h"
+#include "../../variable_scope.h"
 
 #include "./target.h"
+#include "./top_level_values.h"
 
 namespace halo::reach::megalo::operands::variables {
    namespace impl {
@@ -21,8 +24,8 @@ namespace halo::reach::megalo::operands::variables {
             int16_t index = 0;
             
          protected:
-            void read_target_id(bitreader&, size_t bitcount);
-            void read_which(bitreader&, size_t bitcount);
+            void read_target_id(bitreader&, size_t target_count);
+            void read_which(bitreader&, variable_scope which);
             void read_index(bitreader&, size_t bitcount);
       };
    }
@@ -42,6 +45,20 @@ namespace halo::reach::megalo::operands::variables {
          using definition_list_type = std::decay_t<decltype(definition_list)>;
          using indexed_data_variant = typename definition_list_type::indexed_data_variant;
 
+         static constexpr size_t target_count = definition_list_type::size;
+
+      protected:
+         template<size_t I> struct _nth_indexed_type {
+            using type = void;
+         };
+         template<size_t I> requires requires {
+            typename std::tuple_element_t<I, definition_list_type>::indexed_data_type;
+         } struct _nth_indexed_type<I> {
+            using type = typename definition_list_type::template nth_type<I>::indexed_data_type;
+         };
+      public:
+         template<size_t I> using nth_indexed_type = _nth_indexed_type<I>::type;
+
       #pragma region Functor table for indexed data accessors
       protected:
          template<size_t N> struct _extract_indexed_accessor {
@@ -49,17 +66,17 @@ namespace halo::reach::megalo::operands::variables {
                v = std::monostate{};
             }
          };
-         template<size_t N> requires (!std::is_same_v<void, typename definition_list_type::nth_indexed_type<N>>) struct _extract_indexed_accessor<N> {
-            static void access(megalo_variant_data& v, indexed_data_variant& v, size_t index) {
-               v = ((std::get<N>(definition_list.entries)).accessor)(v, index);
+         template<size_t N> requires (!std::is_same_v<void, nth_indexed_type<N>>) struct _extract_indexed_accessor<N> {
+            static void access(megalo_variant_data& gv, indexed_data_variant& data, size_t index) {
+               data = ((std::get<N>(definition_list.entries)).accessor)(gv, index);
             }
          };
 
       public:
-         using type_erased_accessor_type = void* (*)(megalo_variant_data&, size_t index);
+         using indexed_accessors_type = void (*)(megalo_variant_data&, indexed_data_variant&, size_t index);
          //
-         static constexpr auto type_erased_accessors = [](){
-            std::array<type_erased_accessor_type, definition_list_type::size> out = {};
+         static constexpr auto indexed_accessors = [](){
+            std::array<indexed_accessors_type, definition_list_type::size> out = {};
             cobb::constexpr_for<0, definition_list_type::size, 1>([&out]<size_t I>() {
                out[I] = &_extract_indexed_accessor<I>::access;
             });
@@ -69,12 +86,12 @@ namespace halo::reach::megalo::operands::variables {
       #pragma region List of target metadata
       public:
          static constexpr auto all_target_metadata = [](){
-            std::array<target_metadata, definition_list_type::size> out = {};
-            cobb::constexpr_for<0, definition_list_type::size, 1>([&out]<size_t I>() {
-               if constexpr (std::is_same_v<definition_list_type::nth_type<N>, target_metadata>) {
-                  out[I] = std::get<N>(definition_list.entries);
+            std::array<target_metadata, target_count> out = {};
+            cobb::constexpr_for<0, target_count, 1>([&out]<size_t I>() {
+               if constexpr (std::is_same_v<typename definition_list_type::template nth_type<I>, target_metadata>) {
+                  out[I] = std::get<I>(definition_list.entries);
                } else {
-                  out[I] = std::get<N>(definition_list.entries).metadata;
+                  out[I] = std::get<I>(definition_list.entries).metadata;
                }
             });
             return out;
@@ -82,86 +99,73 @@ namespace halo::reach::megalo::operands::variables {
       #pragma endregion
 
          static_assert(
-            [](){
-               for (const auto& item : all_target_metadata)
-                  if (!item.is_valid())
-                     return false;
-               return true;
-            }(),
+            definition_list.index_of_first_invalid() == size_t(-1),
             "One or more of the target_metadata for this variable type is invalid."
          );
 
-      #pragma region List of bitcounts
       protected:
-         struct target_bitcount_data {
-            size_t which = 0;
-            size_t index = 0;
-         };
-
-         static constexpr auto all_target_bitcounts = [](){
-            std::array<target_bitcount_data, definition_list_type::size> out = {};
-            for (size_t i = 0; i < definition_list_type::size; ++i) {
-               const auto& md = all_target_metadata[i];
+         static constexpr auto all_target_index_bitcounts = [](){
+            std::array<size_t, target_count> out = {};
+            for (size_t i = 0; i < target_count; ++i) {
+               const auto& src = all_target_metadata[i];
+               auto& dst = out[i];
+               dst = 0;
                //
-               // Get wihch:
-               //
-               if (md.scopes.outer.has_value()) {
-                  auto& s = variable_scope_metadata_from_enum(md.scopes.outer.value());
-                  out[i].which = std::bit_width(s.maximum_of_type<Type>());
-                     static_assert(false, "TODO: This doesn't work for the global scope, because static variables e.g. killer_player are held there too.");
-                     static_assert(false, "TODO: Actually, this doesn't work at all...");
-                        //
-                        // We need to define a list of "top-level values" of each type, which will include things like 
-                        // hud_player and killed_object. We'd then want to query that here.
-                        //
+               if (src.bitcount) {
+                  dst = src.bitcount;
+                  continue;
                }
-               //
-               // Get index:
-               //
-               if (md.bitcount) {
-                  out[i].index = md.bitcount;
-               } else if (md.has_index()) {
-                  if (md.type == target_type::variable) {
-
-                  } else if (md.scopes.inner.has_value()) {
-                     if (!md.scopes.outer.has_value())
+               if (src.has_index()) {
+                  if (src.type == target_type::variable) {
+                     if (!src.scopes.outer.has_value())
                         cobb::unreachable();
-                     auto outer = md.scopes.outer.value();
-                     auto inner = md.scopes.inner.value();
-                     auto& s = variable_scope_metadata_from_enum(outer);
-                     out[i].index = std::bit_width(s.maximum_of_type<inner>()); static_assert(false, "TODO: fails here: variable as template parameter");
-                  } else {
-                     cobb::unreachable();
+                     auto scope_id = src.scopes.outer.value();
+                     if (scope_id == variable_scope::global) {
+                        //
+                        // All top-level values, including global variables, share a target ID.
+                        //
+                        dst = std::bit_width(top_level_values::max_of_type(Type) - 1);
+                     } else {
+                        auto& s = variable_scope_metadata_from_enum(scope_id);
+                        dst = std::bit_width(s.maximum_of_type(Type) - 1);
+                     }
+                     continue;
                   }
+                  //
+                  if (src.scopes.inner.has_value()) {
+                     if (!src.scopes.outer.has_value())
+                        cobb::unreachable();
+                     auto  outer = src.scopes.outer.value();
+                     auto  inner = src.scopes.inner.value();
+                     auto& s     = variable_scope_metadata_from_enum(outer);
+                     dst = std::bit_width(s.maximum_of_type(variable_type_for_scope(inner)) - 1);
+                     continue;
+                  }
+                  cobb::unreachable();
                }
-               //
-               // Done with this item.
             }
             return out;
          }();
-
-      #pragma endregion
 
       public:
          indexed_data_variant indexed_data = std::monostate{};
 
          virtual void read(bitreader& stream) override {
-            impl::base::read_target_id(stream, static_assert(false, "TODO: target-index bitcount here"));
-            static_asserT(false, "TODO: validate the target ID; if it's out of range, that should be a fatal error.");
+            impl::base::read_target_id(stream, std::bit_width((std::max)(1, target_count - 1)));
             //
             const target_metadata& metadata = all_target_metadata[this->target_id];
             if (metadata.has_which()) {
-               impl::base::read_which(stream, static_assert(false, "TODO: Get the bitcount for the which-value somehow."));
+               impl::base::read_which(stream, metadata.scopes.outer.value());
             }
             if (metadata.has_index()) {
+               impl::base::read_index(stream, all_target_index_bitcounts[this->target_id]);
                //
-               static_assert(false, "TODO: Bitcount can be computed implicitly in specific cases, e.g. object[w].player[i].biped, and in those cases it'll be 0 on the metadata object. We need to figure out how to do that.");
-               // - maybe a constexpr list akin to all_target_metadata?
+               // TODO: We can't validate indices if we're only keeping bitcounts. We should keep 
+               //       maximums instead, falling back to bitcounts for immediates only.
                //
-               impl::base::read_index(stream, metadata.bitcount);
+               static_assert(false, "using stream.get_game_variant_data here requires that the full bitreader defs be included; can we move that somewhere else?");
+               indexed_accessors[this->target_id](*(megalo_variant_data*)stream.get_game_variant_data(), this->indexed_data, this->index);
             }
-            //
-            static_assert(false, "TODO: code to validate the target ID, which, and index");
          }
    };
 }

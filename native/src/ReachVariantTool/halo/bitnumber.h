@@ -18,7 +18,7 @@ namespace halo {
          requires std::is_integral_v<typename T::underlying_type>;
          requires requires(typename T::underlying_type i) {
             { T(i) };
-            { x = i };
+            { x = (T)i };
          };
       };
 
@@ -26,18 +26,37 @@ namespace halo {
       struct type_to_integer<T> {
          using type = typename T::underlying_type;
       };
+
+      template<typename T, T Inst> struct _params_worker {};
+      template<typename T> concept can_use_params = requires { // Detect whether T is a default-constructible structural class type
+         { _params_worker<T, T{}>{} };
+      };
    }
 
    template<typename Underlying> struct bitnumber_params {
       protected:
          template<typename T> using optional = cobb::template_parameters::optional<T>;
       public:
-         using underlying_type     = Underlying;
-         using underlying_optional = optional<underlying_type>;
-         using underlying_int      = impl::bitnumber::type_to_integer<underlying_type>::type;
+         using underlying_type = Underlying;
+         using underlying_int  = impl::bitnumber::type_to_integer<underlying_type>::type;
 
          optional<underlying_type> if_absent = {};
          underlying_type initial  = {};
+         underlying_int  offset   = underlying_int(0);
+         optional<bool>  presence = {};
+   };
+   //
+   // If Underlying is not a structural class type, then bitnumber params must take the underlying int type, if any.
+   template<typename Underlying> requires (!impl::bitnumber::can_use_params<Underlying>)
+   struct bitnumber_params<Underlying> {
+      protected:
+         template<typename T> using optional = cobb::template_parameters::optional<T>;
+      public:
+         using underlying_type = Underlying;
+         using underlying_int  = impl::bitnumber::type_to_integer<underlying_type>::type;
+
+         optional<underlying_int> if_absent = {};
+         underlying_int  initial  = underlying_int(0);
          underlying_int  offset   = underlying_int(0);
          optional<bool>  presence = {};
    };

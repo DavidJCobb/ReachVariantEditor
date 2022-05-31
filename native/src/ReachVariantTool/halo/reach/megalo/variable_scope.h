@@ -17,8 +17,8 @@ namespace halo::reach::megalo {
       size_t max_teams   = 0;
       size_t max_timers  = 0;
 
-      template<variable_type V> constexpr size_t maximum_of_type() const {
-         switch (V) {
+      constexpr size_t maximum_of_type(variable_type v) const {
+         switch (v) {
             using enum variable_type;
             case number: return max_numbers;
             case object: return max_objects;
@@ -35,6 +35,8 @@ namespace halo::reach::megalo {
    };
 
    namespace variable_scopes {
+      static constexpr variable_scope_metadata none = {};
+
       static constexpr variable_scope_metadata global = {
          .max_numbers = 12,
          .max_objects = 16,
@@ -65,15 +67,18 @@ namespace halo::reach::megalo {
       };
    }
 
-   template<variable_scope S> constexpr const variable_scope_metadata& variable_scope_metadata_from_enum() {
-      switch (S) {
+   constexpr const variable_scope_metadata& variable_scope_metadata_from_enum(variable_scope s) {
+      switch (s) {
          using enum variable_scope;
          case global: return variable_scopes::global;
          case object: return variable_scopes::object;
          case player: return variable_scopes::player;
          case team:   return variable_scopes::team;
       }
-      cobb::unreachable();
+      if (std::is_constant_evaluated()) {
+         throw;
+      }
+      return variable_scopes::none;
    }
 
    constexpr variable_scope variable_scope_enum_from_metadata(const variable_scope_metadata& m) {

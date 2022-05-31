@@ -111,6 +111,7 @@ namespace cobb::reflex {
 
       public:
          constexpr enumeration() {}
+         explicit constexpr enumeration(underlying_type v) { return from_int(v); }
          template<typename V> requires std::is_convertible_v<V, underlying_type> constexpr static enumeration from_int(V v) {
             enumeration out;
             out._value = v;
@@ -136,6 +137,8 @@ namespace cobb::reflex {
             return p ? p : std::string{};
          }
 
+         explicit operator underlying_type() const { return this->_value; }
+
          constexpr const metadata_type* to_metadata() const {
             auto i = member_list::underlying_value_to_type_index(this->_value);
             if (i == std::numeric_limits<size_t>::max())
@@ -160,7 +163,7 @@ namespace cobb::reflex {
          static constexpr enumeration min_value() { return from_int(min_underlying_value); }
          static constexpr enumeration max_value() { return from_int(max_underlying_value); }
 
-         static constexpr underlying_type underlying_value_range = max_underlying_value - min_underlying_value;
+         static constexpr underlying_type underlying_value_range = max_underlying_value - min_underlying_value + 1;
          static constexpr size_t value_count = member_list::value_count();
 
          template<cs Name, auto Detail = impl::enumeration::underlying_value_of::no_detail{}>

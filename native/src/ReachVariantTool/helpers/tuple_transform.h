@@ -30,5 +30,5 @@ namespace cobb {
    //
    // template<typename T> struct my_transform { using type = some_permutation_of<T>; };
    //
-   template<template<typename T> typename Transform, typename Tuple> using tuple_transform = impl::tuple_transform::exec<Transform, Tuple>;
+   template<template<typename T> typename Transform, typename Tuple> using tuple_transform = impl::tuple_transform::exec<Transform, Tuple>::type;
 }
