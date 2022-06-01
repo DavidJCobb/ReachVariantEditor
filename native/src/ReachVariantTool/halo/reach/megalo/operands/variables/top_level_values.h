@@ -80,8 +80,8 @@ namespace halo::reach::megalo::operands::variables::top_level_values {
          case variable_type::number: return number::underlying_value_range;
          case variable_type::object: return object::underlying_value_range;
          case variable_type::player: return player::underlying_value_range;
-         case variable_type::team: return team::underlying_value_range;
-         case variable_type::timer: return timer::underlying_value_range;
+         case variable_type::team:   return team::underlying_value_range;
+         case variable_type::timer:  return timer::underlying_value_range;
       }
       if (std::is_constant_evaluated()) {
          throw;

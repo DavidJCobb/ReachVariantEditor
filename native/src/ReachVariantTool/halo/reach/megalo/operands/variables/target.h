@@ -44,6 +44,7 @@ namespace halo::reach::megalo::operands {
 
                constexpr scope_set() {}
                constexpr scope_set(variable_scope o) : outer(o) {}
+               constexpr scope_set(variable_scope o, variable_scope i) : outer(o), inner(i) {}
             };
 
          public:
