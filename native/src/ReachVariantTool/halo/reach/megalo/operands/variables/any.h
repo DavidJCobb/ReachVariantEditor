@@ -1,10 +1,5 @@
 #pragma once
 #include "halo/reach/bitstreams.fwd.h"
-#include "number.h"
-#include "object.h"
-#include "player.h"
-#include "team.h"
-#include "timer.h"
 
 namespace halo::reach::megalo::operands {
    namespace variables {
@@ -16,7 +11,7 @@ namespace halo::reach::megalo::operands {
 
          public:
             bitnumber<3, variable_type> type;
-            impl::base* value = nullptr;
+            unknown_type* value = nullptr;
 
             virtual void read(bitreader& stream) override;
       };

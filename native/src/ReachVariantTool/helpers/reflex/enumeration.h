@@ -5,6 +5,7 @@
 #include <type_traits>
 #include "helpers/numeric_min_max.h"
 #include "helpers/tuple_index_of.h"
+#include "helpers/tuple_unpack.h"
 #include "helpers/unreachable.h"
 #include "../cs.h"
 #include "./member.h"
@@ -84,7 +85,8 @@ namespace cobb::reflex {
          static constexpr auto _index_of_none = std::numeric_limits<size_t>::max();
 
       public:
-         using underlying_type = _extractor::underlying_type;
+         using original_parameters = std::tuple<Parameters...>;
+         using underlying_type     = _extractor::underlying_type;
 
       protected:
          using member_list = _extractor::member_list;
@@ -195,6 +197,17 @@ namespace cobb::reflex {
          static constexpr enumeration value_of = [](){
             return from_int(underlying_value_of<Name, Detail>);
          }();
+   };
+
+   template<typename T> concept is_enumeration = requires {
+      typename T::original_parameters;
+      requires std::is_same_v<
+         std::decay_t<T>,
+         cobb::tuple_unpack_t<
+            enumeration,
+            typename T::original_parameters
+         >
+      >;
    };
 
    // You can using-declare this namespace for quick access to the "cs" and "reflex_enum" templates.

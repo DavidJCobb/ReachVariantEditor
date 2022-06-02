@@ -7,12 +7,18 @@
 #include "../operands/all_flags_operands.h"
 #include "../operands/all_icon_operands.h"
 #include "../operands/constant_bool.h"
+#include "../operands/fireteam_list.h"
 #include "../operands/forge_label.h"
+#include "../operands/format_string.h"
+#include "../operands/hud_meter_parameters.h"
+#include "../operands/hud_widget.h"
 #include "../operands/object_type.h"
 #include "../operands/player_set.h"
 #include "../operands/player_traits.h"
 #include "../operands/shape.h"
 #include "../operands/sound.h"
+#include "../operands/timer_rate.h"
+#include "../operands/trigger.h"
 #include "../operands/variant_string.h"
 #include "../operands/vector3.h"
 #include "../operands/variables/any.h"
@@ -20,8 +26,10 @@
 #include "../operands/variables/object.h"
 #include "../operands/variables/player.h"
 #include "../operands/variables/player_or_group.h"
+#include "../operands/variables/relative_member.h"
 #include "../operands/variables/team.h"
 #include "../operands/variables/timer.h"
+#include "../operands/variables/variable_and_member.h"
 #include "../operands/waypoint_icon.h"
 
 namespace halo::reach::megalo {
@@ -137,7 +145,7 @@ namespace halo::reach::megalo {
                .name     = "context",
             },
             opcode_function::operand_info{
-               .typeinfo = operands::object_timer_member::typeinfo,
+               .typeinfo = operands::variables::object_timer_relative_member::typeinfo,
                .name     = "timer",
             },
          }
@@ -254,7 +262,7 @@ namespace halo::reach::megalo {
                .name     = "who",
             },
             opcode_function::operand_info{
-               .typeinfo = operands::object_timer_member::typeinfo,
+               .typeinfo = operands::variables::object_timer_relative_member::typeinfo,
                .name     = "timer",
             },
          }
@@ -1409,7 +1417,7 @@ namespace halo::reach::megalo {
          .name     = "apply_shape_color_from_player_member",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::object_and_player_member::typeinfo,
+               .typeinfo = operands::variables::object_and_player_member::typeinfo,
                .name     = "member",
             },
          }

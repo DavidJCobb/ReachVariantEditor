@@ -27,8 +27,13 @@ namespace halo::reach::megalo::operands::variables {
             void read_target_id(bitreader&, size_t target_count);
             void read_which(bitreader&, variable_scope which);
             void read_index(bitreader&, size_t bitcount);
+
+            virtual variable_type get_type() const = 0;
       };
    }
+
+   // for things that don't care what they have a pointer to:
+   using unknown_type = impl::base;
    
    template<
       cobb::cs Name,
@@ -166,6 +171,10 @@ namespace halo::reach::megalo::operands::variables {
                static_assert(false, "using stream.get_game_variant_data here requires that the full bitreader defs be included; can we move that somewhere else?");
                indexed_accessors[this->target_id](*(megalo_variant_data*)stream.get_game_variant_data(), this->indexed_data, this->index);
             }
+         }
+
+         virtual variable_type get_type() const override {
+            return Type;
          }
    };
 }
