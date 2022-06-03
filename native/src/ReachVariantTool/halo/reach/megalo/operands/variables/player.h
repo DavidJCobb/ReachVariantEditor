@@ -36,10 +36,16 @@ namespace halo::reach::megalo::operands {
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      using player = base<
-         cobb::cs("object"),
+      class player : public base<
+         cobb::cs("player"),
          variable_type::player,
          player_registers
-      >;
+      > {
+         public:
+            static constexpr operand_typeinfo typeinfo = {
+               .internal_name = "player",
+               .static_count  = 16,
+            };
+      };
    }
 }

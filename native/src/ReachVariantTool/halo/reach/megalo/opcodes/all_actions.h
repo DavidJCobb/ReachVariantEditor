@@ -12,7 +12,9 @@
 #include "../operands/format_string.h"
 #include "../operands/hud_meter_parameters.h"
 #include "../operands/hud_widget.h"
+#include "../operands/incident.h"
 #include "../operands/object_type.h"
+#include "../operands/player_req_palette.h"
 #include "../operands/player_set.h"
 #include "../operands/player_traits.h"
 #include "../operands/shape.h"
@@ -33,7 +35,7 @@
 #include "../operands/waypoint_icon.h"
 
 namespace halo::reach::megalo {
-   constexpr auto all_conditions = std::array{
+   constexpr auto all_actions = std::array{
       opcode_function{ // 0
          .name     = "none",
          .operands = {}

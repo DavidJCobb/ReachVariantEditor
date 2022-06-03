@@ -18,10 +18,10 @@ namespace halo::reach::megalo {
          };
 
       public:
-         uint32_t    flags = 0;
-         const char* friendly_name; // translation key to pass to QObject::tr
-         const char* internal_name;
-         uint8_t     static_count = 0; // e.g. 8 for player[7]
+         uint32_t    flags         = 0;
+         const char* friendly_name = nullptr; // translation key to pass to QObject::tr
+         const char* internal_name = nullptr;
+         uint8_t     static_count  = 0; // e.g. 8 for player[7]
 
          constexpr bool can_be_static() const noexcept {
             return this->static_count > 0;

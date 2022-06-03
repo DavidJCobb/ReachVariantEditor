@@ -15,22 +15,19 @@
 #include "./option_toggles.h"
 #include "./player_trait_set.h"
 #include "./strings.h"
+#include "./trigger.h"
+#include "./trigger_entry_points.h"
+#include "./tu1_data.h"
 #include "./variable_declarations.h"
 
 #include "../arena_parameters.h"
 #include "../map_permissions.h"
 #include "../trait_set.h"
 
-namespace halo::reach {
-   namespace megalo {
-      struct forge_label;
-      class game_option;
-      class game_stat;
-      struct hud_widget;
-      struct player_trait_set;
-      class trigger;
-   }
+#include "./opcodes/action.h"
+#include "./opcodes/condition.h"
 
+namespace halo::reach {
    class megalo_variant_data : public game_variant_data {
       public:
 

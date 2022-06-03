@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 #include <optional>
 #include <type_traits>
 #include "helpers/template_parameters/optional.h"

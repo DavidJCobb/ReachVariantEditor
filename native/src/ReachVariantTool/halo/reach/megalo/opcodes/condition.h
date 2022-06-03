@@ -11,15 +11,14 @@ namespace halo::reach::megalo {
 
    class condition : public opcode {
       public:
-         struct load_state {
+         bitbool invert = false;
+         condition_index or_group = 0; // values are per-trigger. conditions with the same or-group value are treated as being OR'd with each other
+         struct {
             //
             // Data used only during load.
             //
             action_index execute_before = 0; // cannot be none, which implies that a condition can't be the last opcode in a trigger
-         };
-
-         bool invert = false;
-         condition_index or_group = 0; // values are per-trigger. conditions with the same or-group value are treated as being OR'd with each other
+         } load_state;
 
          virtual void read(bitreader&) override;
    };

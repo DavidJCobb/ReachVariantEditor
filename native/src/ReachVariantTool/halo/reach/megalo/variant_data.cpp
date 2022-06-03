@@ -1,4 +1,5 @@
 #include "variant_data.h"
+#include <bit>
 #include "halo/reach/bitstreams.h"
 #include "./forge_label.h"
 #include "./game_option.h"
@@ -35,9 +36,37 @@ namespace halo::reach {
       );
       //
       {  // Read Megalo code
-
-         static_assert(false, "FINISH ME");
-
+         {  // Conditions
+            size_t count = stream.read_bits(std::bit_width(megalo::limits::conditions));
+            auto&  list  = this->raw.conditions;
+            //
+            list.resize(count);
+            for (size_t i = 0; i < count; ++i) {
+               auto& item = list[i];
+               stream.read(item);
+            }
+         }
+         {  // Actions
+            size_t count = stream.read_bits(std::bit_width(megalo::limits::actions));
+            auto&  list  = this->raw.actions;
+            //
+            list.resize(count);
+            for (size_t i = 0; i < count; ++i) {
+               auto& item = list[i];
+               stream.read(item);
+            }
+         }
+         {  // Triggers
+            size_t count = stream.read_bits(std::bit_width(megalo::limits::triggers));
+            auto&  list  = this->script.triggers;
+            //
+            list.resize(count);
+            for (size_t i = 0; i < count; ++i) {
+               auto& item = list[i];
+               stream.read(item);
+               item.extract_opcodes(this->raw.conditions, this->raw.actions);
+            }
+         }
          stream.read(
             script.stats,
             script.variables.global,
@@ -53,7 +82,10 @@ namespace halo::reach {
       if (this->metadata.version.encoding >= 0x6B) {
          stream.read(this->title_update_data.tu1);
       }
-      if (static_assert(false, "TODO: 'is forge' check")) {
+      if (false) {
+         #if !_DEBUG
+            static_assert(false, "TODO: 'is forge' check")
+         #endif
          stream.read(
             forge_data.flags,
             forge_data.edit_mode_type,
