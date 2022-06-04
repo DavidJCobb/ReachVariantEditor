@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#include <cassert>
+#include <type_traits>
 #include <vector>
 #include "../../helpers/type_traits/set_const.h"
 #include "../../helpers/bitnumber.h"
@@ -123,6 +125,9 @@ namespace halo::util {
          bool tear_down_dummies(std::vector<size_type>* indices) requires std::is_base_of_v<dummyable, value_type> {
             assert(this->_size == max_count); // dummies should've been created
             bool referenced_dummies = false;
+            if (indices) {
+               indices->clear();
+            }
             for (size_type i = 0; i < max_count; ++i) {
                auto& iptr = this->_data[max_count - i - 1];
                auto& item = *iptr;
@@ -218,4 +223,22 @@ namespace halo::util {
          inline const_reverse_iterator rend()   const noexcept { return this->rcend(); }
          #pragma endregion
    };
+
+   template<typename T> concept is_indexed_list = requires {
+      typename T::value_type;
+      { T::max_count };
+      requires std::is_same_v<
+         std::decay_t<T>,
+         indexed_list<typename T::value_type, T::max_count>
+      >;
+   };
+
+   template<typename... Types> requires (is_indexed_list<Types> && ...) void set_up_indexed_dummies(Types&... lists) {
+      (lists.set_up_dummies(), ...);
+   }
+
+   // discouraged; do lists one by one so you can report warnings more meaningfully:
+   template<typename... Types> requires (is_indexed_list<Types> && ...) void tear_down_indexed_dummies(Types&... lists) {
+      (lists.tear_down_dummies(), ...);
+   }
 }

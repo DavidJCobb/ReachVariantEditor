@@ -9,6 +9,14 @@
 
 namespace halo::reach {
    void megalo_variant_data::read(bitreader& stream) {
+      set_up_indexed_dummies(
+         script.forge_labels,
+         script.options,
+         script.stats,
+         script.traits,
+         script.widgets
+      );
+      //
       stream.read(
          metadata.version.encoding,
          metadata.version.engine
@@ -93,10 +101,40 @@ namespace halo::reach {
             forge_data.editor_traits
          );
       }
-
       //
-      // post-load steps here
+      // And now for post-load steps.
       //
-      static_assert(false, "FINISH ME");
+      if constexpr (bitreader::has_load_process) {
+         std::vector<size_t> referenced_dummies;
+         //
+         this->script.forge_labels.tear_down_dummies(&referenced_dummies);
+         if (!referenced_dummies.empty()) {
+            static_assert(false, "TODO: emit warning");
+         }
+         this->script.options.tear_down_dummies(&referenced_dummies);
+         if (!referenced_dummies.empty()) {
+            static_assert(false, "TODO: emit warning");
+         }
+         this->script.stats.tear_down_dummies(&referenced_dummies);
+         if (!referenced_dummies.empty()) {
+            static_assert(false, "TODO: emit warning");
+         }
+         this->script.traits.tear_down_dummies(&referenced_dummies);
+         if (!referenced_dummies.empty()) {
+            static_assert(false, "TODO: emit warning");
+         }
+         this->script.widgets.tear_down_dummies(&referenced_dummies);
+         if (!referenced_dummies.empty()) {
+            static_assert(false, "TODO: emit warning");
+         }
+      } else {
+         tear_down_indexed_dummies(
+            script.forge_labels,
+            script.options,
+            script.stats,
+            script.traits,
+            script.widgets
+         );
+      }
    }
 }

@@ -17,7 +17,7 @@ namespace halo::reach::megalo {
             //
             // Data used only during load.
             //
-            action_index execute_before = 0; // cannot be none, which implies that a condition can't be the last opcode in a trigger
+            action_index execute_before = 0; // trigger-relative action index. if exceeds the number of actions in the trigger, put the condition at the end?
          } load_state;
 
          virtual void read(bitreader&) override;
