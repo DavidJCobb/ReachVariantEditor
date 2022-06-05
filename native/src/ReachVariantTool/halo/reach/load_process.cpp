@@ -23,33 +23,15 @@ namespace halo::reach {
       }
    }
    void load_process::throw_fatal(const fatal& item) {
-      if (this->contents.fatal_error.has_value())
-         return;
       auto& dst = this->contents.fatal_error;
-      dst = item;
+      if (dst.has_value())
+         return;
+      dst.emplace(item);
       if (std::holds_alternative<std::monostate>(dst.value().where)) { // "where" not set by the caller?
          dst.value().where = this->where;
       }
       //
       // TODO: Throw exception?
       //
-   }
-
-   void load_process::import_from(const load_process& other) {
-      auto _append = []<typename List>(List& a, const List& b) {
-         auto i    = a.size();
-         auto size = i + b.size();
-         a.resize(size);
-         for (; i < size; ++i)
-            a[i] = b[i];
-      };
-      //
-      _append(this->contents.notices,  other.notices());
-      _append(this->contents.warnings, other.warnings());
-      _append(this->contents.errors,   other.errors());
-      if (other.has_fatal()) {
-         this->contents.fatal_error = other.get_fatal();
-      }
-      this->where = other.where;
    }
 }

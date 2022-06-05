@@ -1,35 +1,11 @@
 #pragma once
+#include <memory>
 #include <optional>
 #include <variant>
 #include <vector>
-#pragma region Load process
-   #pragma region Errors
-      #include "halo/common/load_errors/file_block_unexpected_end.h"
-      #include "halo/common/load_errors/file_is_for_the_wrong_game.h"
-      #include "halo/common/load_errors/game_variant_no_file_block_for_data.h"
-      #include "halo/common/load_errors/first_file_block_is_not_blam_header.h"
-      #include "halo/common/load_errors/invalid_file_block_header.h"
-      #include "halo/common/load_errors/player_trait_out_of_bounds.h"
-      #include "halo/common/load_errors/string_table_cannot_allocate_buffer.h"
-      #include "halo/common/load_errors/string_table_entries_not_null_separated.h"
-      #include "halo/common/load_errors/string_table_entry_offset_out_of_bounds.h"
-      #include "halo/common/load_errors/string_table_mismatched_sizes.h"
-      #include "halo/common/load_errors/string_table_too_large_buffer.h"
-      #include "halo/common/load_errors/string_table_too_large_count.h"
-   #pragma endregion
-#pragma endregion
-#include "./ugc_file_type.h"
+#include "halo/load_process_message_data.h"
 
 namespace halo::reach {
-   namespace load_errors {
-      struct arena_stat_cannot_be_infinity {
-         size_t stat_index = 0;
-      };
-      struct not_a_game_variant {
-         ugc_file_type type = ugc_file_type::none;
-      };
-   }
-
    namespace load_process_messages {
       namespace megalo {
          enum class where {
@@ -43,47 +19,35 @@ namespace halo::reach {
 
       struct message_base {
          where_t where;
+         std::unique_ptr<load_process_message_data_base> data;
+
+         message_base() {}
+         message_base(const message_base& o) {
+            this->where = o.where;
+            this->data.reset((o.data) ? (o.data->clone()) : nullptr);
+         }
+         message_base(const load_process_message_data_base& d) {
+            this->data.reset(d.clone());
+         }
+
+         template<typename T> requires load_process_message_wraps_content<T>
+         message_base(const typename T::message_content& info) {
+            this->data = std::make_unique<T>();
+            ((T*)this->data)->info = info;
+         }
       };
 
       struct notice : public message_base {
-         using inner_data = std::variant<
-            std::monostate // placeholder until we have any notices to emit
-         >;
-
-         inner_data data;
+         using message_base::message_base;
       };
       struct warning : public message_base {
-         using inner_data = std::variant<
-            halo::common::load_errors::player_trait_out_of_bounds,
-            halo::common::load_errors::string_table_mismatched_sizes//,
-         >;
-
-         inner_data data;
+         using message_base::message_base;
       };
       struct error : public message_base {
-         using inner_data = std::variant<
-            halo::reach::load_errors::arena_stat_cannot_be_infinity,
-            halo::common::load_errors::file_block_unexpected_end,
-            halo::common::load_errors::invalid_file_block_header,
-            halo::common::load_errors::player_trait_out_of_bounds,
-            halo::common::load_errors::string_table_cannot_allocate_buffer,
-            halo::common::load_errors::string_table_entries_not_null_separated,
-            halo::common::load_errors::string_table_entry_offset_out_of_bounds,
-            halo::common::load_errors::string_table_too_large_buffer,
-            halo::common::load_errors::string_table_too_large_count//,
-         >;
-
-         inner_data data;
+         using message_base::message_base;
       };
       struct fatal : public message_base {
-         using inner_data = std::variant<
-            halo::common::load_errors::file_is_for_the_wrong_game,
-            halo::common::load_errors::first_file_block_is_not_blam_header,
-            halo::common::load_errors::game_variant_no_file_block_for_data,
-            halo::reach::load_errors::not_a_game_variant//,
-         >;
-
-         inner_data data;
+         using message_base::message_base;
       };
    }
 
@@ -108,6 +72,39 @@ namespace halo::reach {
          void emit_warning(const warning&);
          void emit_error(const error&);
          void throw_fatal(const fatal&);
+         
+         template<typename T> requires load_process_message_wraps_content<T> void emit_notice(const typename T::message_content& info) {
+            static_assert(T::compile_time_message_type == load_process_message_data_base::message_type::notice);
+            //
+            notice item;
+            item.data = std::make_unique<T>();
+            ((T*)item.data.get())->info = info;
+            this->emit_notice(item);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_warning(const typename T::message_content& info) {
+            static_assert(T::compile_time_message_type == load_process_message_data_base::message_type::warning);
+            //
+            warning item;
+            item.data = std::make_unique<T>();
+            ((T*)item.data.get())->info = info;
+            this->emit_warning(item);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_error(const typename T::message_content& info) {
+            static_assert(T::compile_time_message_type == load_process_message_data_base::message_type::error);
+            //
+            error item;
+            item.data = std::make_unique<T>();
+            ((T*)item.data.get())->info = info;
+            this->emit_error(item);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void throw_fatal(const typename T::message_content& info) {
+            static_assert(T::compile_time_message_type == load_process_message_data_base::message_type::fatal);
+            //
+            fatal item;
+            item.data = std::make_unique<T>();
+            ((T*)item.data.get())->info = info;
+            this->throw_fatal(item);
+         }
 
          bool has_fatal() const { return this->contents.fatal_error.has_value(); }
          const fatal& get_fatal() const { return this->contents.fatal_error.value(); }
@@ -115,7 +112,5 @@ namespace halo::reach {
          inline const std::vector<notice>& notices() const { return this->contents.notices; }
          inline const std::vector<warning>& warnings() const { return this->contents.warnings; }
          inline const std::vector<error>& errors() const { return this->contents.errors; }
-
-         void import_from(const load_process&);
    };
 }

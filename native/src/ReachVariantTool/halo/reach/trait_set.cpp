@@ -3,6 +3,8 @@
 #include "halo/trait_information.h"
 #include "halo/reach/bitstreams.h"
 
+#include "halo/common/load_process_messages/player_traits/out_of_bounds.h"
+
 namespace halo::reach {
    namespace {
       template<bool game_silently_corrects, player_trait Id> void _correct_trait(trait_set& ts, bitreader& stream) {
@@ -19,7 +21,7 @@ namespace halo::reach {
             v = halo::default_trait_value<Trait>;
             //
             if constexpr (bitreader::has_load_process) {
-               auto message_data = halo::common::load_errors::player_trait_out_of_bounds{
+               auto message_data = halo::common::load_process_messages::player_trait_out_of_bounds_message_content{
                   .trait       = Id,
                   .value       = vi,
                   .allowed_min = info.min,
@@ -27,9 +29,9 @@ namespace halo::reach {
                };
                //
                if constexpr (game_silently_corrects) {
-                  stream.load_process().emit_warning({ .data = message_data });
+                  stream.load_process().emit_warning<halo::common::load_process_messages::player_trait_out_of_bounds_warning>(message_data);
                } else {
-                  stream.load_process().emit_error({ .data = message_data });
+                  stream.load_process().emit_error<halo::common::load_process_messages::player_trait_out_of_bounds_error>(message_data);
                }
             }
          }

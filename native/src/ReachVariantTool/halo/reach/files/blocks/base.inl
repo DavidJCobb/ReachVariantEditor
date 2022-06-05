@@ -1,8 +1,8 @@
 #pragma once
 #include "base.h"
 #include "halo/reach/bytestreams.h"
-#include "halo/common/load_errors/file_block_unexpected_end.h"
-#include "halo/common/load_errors/invalid_file_block_header.h"
+#include "halo/common/load_process_messages/file_blocks/invalid_file_block_header.h"
+#include "halo/common/load_process_messages/file_blocks/unexpected_end.h"
 
 #define CLASS_TEMPLATE_PARAMS template<util::four_cc signature, size_t expected_size>
 #define CLASS_NAME file_block<signature, expected_size>
@@ -12,14 +12,12 @@ namespace halo::reach {
       if constexpr (bytereader::has_load_process) {
          if (!stream.is_at_end())
             return;
-         stream.load_process().emit_error({
-            .data = halo::common::load_errors::file_block_unexpected_end{
-               .block = {
-                  .signature = this->header.signature,
-                  .size      = this->header.size 
-               },
-               .overshoot = stream.get_overshoot(),
-            }
+         stream.load_process().emit_error<halo::common::load_process_messages::file_block_unexpected_end>({
+            .block = {
+               .signature = this->header.signature,
+               .size      = this->header.size 
+            },
+            .overshoot = stream.get_overshoot(),
          });
       }
    }
@@ -39,11 +37,9 @@ namespace halo::reach {
                valid = false;
          }
          if (!valid) {
-            stream.load_process().emit_error({
-               .data = halo::common::load_errors::invalid_file_block_header{
-                  .expected = { .signature = signature, .size = expected_size },
-                  .found    = { .signature = this->header.signature, .size = this->header.size },
-               }
+            stream.load_process().emit_error<halo::common::load_process_messages::invalid_file_block_header>({
+               .expected = { .signature = signature, .size = expected_size },
+               .found    = { .signature = this->header.signature, .size = this->header.size },
             });
          }
       }

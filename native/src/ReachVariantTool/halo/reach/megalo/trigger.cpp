@@ -2,6 +2,9 @@
 #include "halo/reach/bitstreams.h"
 #include "halo/reach/megalo/variant_data.h"
 
+#include "halo/reach/megalo/load_process_messages/trigger/bad_forge_label.h"
+#include "halo/reach/megalo/load_process_messages/trigger/bad_opcode_slice.h"
+
 namespace halo::reach::megalo {
    void trigger::read(bitreader& stream) {
       stream.read(
@@ -18,7 +21,9 @@ namespace halo::reach::megalo {
             auto& list = vd->script.forge_labels;
             if (idx >= list.size()) {
                if constexpr (bitreader::has_load_process) {
-                  static_assert(false, "TODO: emit non-fatal error");
+                  stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_forge_label>({
+                     .label_index = idx,
+                  });
                }
             } else {
                this->loop_forge_label = &list[idx];
@@ -40,13 +45,23 @@ namespace halo::reach::megalo {
       if (ls.action_start + ls.action_count > all_actions.size()) {
          valid = false;
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "TODO: emit non-fatal error");
+            stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
+               .opcode_type  = opcode_type::action,
+               .start        = ls.action_start,
+               .end          = (size_t)(ls.action_start + ls.action_count),
+               .count_of_all = all_actions.size(),
+            });
          }
       }
       if (ls.condition_start + ls.condition_count > all_conditions.size()) {
          valid = false;
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "TODO: emit non-fatal error");
+            stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
+               .opcode_type  = opcode_type::condition,
+               .start        = ls.condition_start,
+               .end          = (size_t)(ls.condition_start + ls.condition_count),
+               .count_of_all = all_conditions.size(),
+            });
          }
       }
       if (!valid)

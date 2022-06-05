@@ -3,6 +3,8 @@
 #include "halo/reach/bitstreams.h"
 #include "halo/reach/load_process.h"
 
+#include "halo/reach/load_process_messages/arena_stat_cannot_be_infinity.h"
+
 namespace halo::reach {
    void arena_parameters::read(bitreader& stream) {
       stream.read(
@@ -14,13 +16,12 @@ namespace halo::reach {
          for (size_t i = 0; i < this->values.size(); ++i) {
             constexpr uint32_t infinity_as_dword = 0x7F800000;
             if (std::bit_cast<uint32_t>(this->values[i]) == infinity_as_dword) {
-               stream.load_process().emit_error({
-                  .data = halo::reach::load_errors::arena_stat_cannot_be_infinity{
-                     .stat_index = i,
-                  }
+               stream.load_process().emit_error<halo::reach::load_process_messages::arena_stat_cannot_be_infinity>({
+                  .stat_index = i,
                });
             }
          }
       }
+      // Done.
    }
 }

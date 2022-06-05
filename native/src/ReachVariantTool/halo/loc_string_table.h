@@ -9,10 +9,6 @@
 #include "./loc_string.h"
 
 namespace halo {
-   namespace impl::loc_string_table {
-      extern void warn_on_loading_excess_strings(size_t claimed, size_t maximum);
-   }
-
    struct loc_string_table_load_result {
       enum class failure_reason {
          none,
@@ -76,8 +72,8 @@ namespace halo {
             uint32_t uncompressed_size = 0;
          } cached_export;
 
-         template<typename LoadProcess>
-         void* _read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, bitreader<LoadProcess>&);
+         template<bitreader_subclass Reader>
+         void* _read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, Reader&);
 
       public:
          template<bitreader_subclass Reader>

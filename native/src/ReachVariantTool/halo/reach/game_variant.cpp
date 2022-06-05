@@ -4,10 +4,11 @@
 #include "halo/reach/bitstreams.h"
 #include "halo/reach/bytestreams.h"
 #include "files/block_stream.h"
-#include "halo/common/load_errors/file_is_for_the_wrong_game.h"
-#include "halo/common/load_errors/first_file_block_is_not_blam_header.h"
-#include "halo/common/load_errors/game_variant_no_file_block_for_data.h"
-#include "halo/common/load_errors/invalid_file_block_header.h"
+#include "halo/common/load_process_messages/file_blocks/first_file_block_is_not_blam_header.h"
+#include "halo/common/load_process_messages/file_blocks/game_variant_no_file_block_for_data.h"
+#include "halo/common/load_process_messages/file_blocks/invalid_file_block_header.h"
+#include "halo/common/load_process_messages/file_is_for_the_wrong_game.h"
+#include "halo/reach/load_process_messages/not_a_game_variant.h"
 
 #include "firefight/variant_data.h"
 
@@ -41,13 +42,9 @@ namespace halo::reach {
             //
             if (block.header.signature != '_blf') {
                if constexpr (bytereader::has_load_process) {
-                  stream.load_process().throw_fatal({
-                     .data = halo::common::load_errors::first_file_block_is_not_blam_header{
-                        .found = {
-                           .signature = block.header.signature,
-                           .size      = block.header.size,
-                        }
-                     }
+                  stream.load_process().throw_fatal<halo::common::load_process_messages::first_file_block_is_not_blam_header>({
+                     .signature = block.header.signature,
+                     .size      = block.header.size,
                   });
                }
                return;
@@ -67,10 +64,8 @@ namespace halo::reach {
                chdr = true;
                if (this->content_header.data.type != ugc_file_type::game_variant) {
                   if constexpr (bytereader::has_load_process) {
-                     stream.load_process().throw_fatal({
-                        .data = halo::reach::load_errors::not_a_game_variant{
-                           .type = this->content_header.data.type,
-                        }
+                     stream.load_process().throw_fatal<halo::reach::load_process_messages::not_a_game_variant>({
+                        .type = this->content_header.data.type,
                      });
                   }
                   return;
@@ -87,22 +82,18 @@ namespace halo::reach {
                         // so those trip the "no 'chdr' block" check instead.
                         //
                         if constexpr (bytereader::has_load_process) {
-                           stream.load_process().throw_fatal({
-                              .data = halo::common::load_errors::file_is_for_the_wrong_game{
-                                 .expected = game::halo_reach,
-                                 .found    = game::halo_2_annie,
-                              }
+                           stream.load_process().throw_fatal<halo::common::load_process_messages::file_is_for_the_wrong_game>({
+                              .expected = game::halo_reach,
+                              .found    = game::halo_2_annie,
                            });
                         }
                         return;
                      }
                      if (block.header.size != game_variant_data::file_block_size) {
                         if constexpr (bytereader::has_load_process) {
-                           stream.load_process().emit_error({
-                              .data = halo::common::load_errors::invalid_file_block_header{
-                                 .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                                 .found    = { .signature = block.header.signature, .size = block.header.size },
-                              }
+                           stream.load_process().emit_error<halo::common::load_process_messages::invalid_file_block_header>({
+                              .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
+                              .found    = { .signature = block.header.signature, .size = block.header.size },
                            });
                         }
                         return;
@@ -112,11 +103,9 @@ namespace halo::reach {
                      block.header.signature = 'mpvr'; // fix this for when we save
                   } else {
                      if constexpr (bytereader::has_load_process) {
-                        stream.load_process().emit_error({
-                           .data = halo::common::load_errors::invalid_file_block_header{
-                              .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                              .found    = { .signature = block.header.signature, .size = block.header.size },
-                           }
+                        stream.load_process().emit_error<halo::common::load_process_messages::invalid_file_block_header>({
+                           .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
+                           .found    = { .signature = block.header.signature, .size = block.header.size },
                         });
                      }
                      return;
@@ -166,7 +155,6 @@ namespace halo::reach {
                      v->read(bitstream);
                      bitstream.set_game_variant_data(nullptr);
                   }
-                  stream.load_process().import_from(bitstream.load_process());
                }
                mpvr = true;
                break;
@@ -198,8 +186,7 @@ namespace halo::reach {
       }
       if (!mpvr) {
          if constexpr (bytereader::has_load_process) {
-            stream.load_process().throw_fatal({
-               .data = halo::common::load_errors::game_variant_no_file_block_for_data{}
+            stream.load_process().throw_fatal<halo::common::load_process_messages::game_variant_no_file_block_for_data>({
             });
          }
          return;

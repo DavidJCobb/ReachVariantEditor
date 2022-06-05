@@ -114,7 +114,7 @@ namespace halo {
          #pragma region read
          template<typename T> requires util::has_read_method<my_type, T>
          void read(T& v) {
-            v.read(*this);
+            v.read(*(Subclass*)this);
          }
 
          template<typename T> requires (!util::has_read_method<my_type, T> && impl::bitreader::is_bitreadable<T>)

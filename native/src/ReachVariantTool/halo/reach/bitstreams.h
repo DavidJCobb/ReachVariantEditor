@@ -10,7 +10,7 @@
 namespace halo::reach {
    class game_variant_data;
 
-   class bitreader : public halo::bitreader<bitreader, class load_process> {
+   class bitreader : public halo::bitreader<bitreader, load_process&> {
       public:
          using base_type::bitreader;
          using base_type::read;

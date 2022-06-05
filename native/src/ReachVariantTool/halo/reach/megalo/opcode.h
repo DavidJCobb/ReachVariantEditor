@@ -6,6 +6,12 @@ namespace halo::reach::megalo {
    class operand;
    class opcode_function;
 
+   enum class opcode_type {
+      unknown,
+      action,
+      condition,
+   };
+
    class opcode {
       public:
          virtual ~opcode() {
