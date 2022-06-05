@@ -90,10 +90,20 @@ namespace halo::reach::megalo {
             this->opcodes.push_back(std::unique_ptr<opcode>(instance));
             continue;
          }
+         //
+         constexpr size_t none = -1;
+         auto& list = this->opcodes;
+         //
          const auto* before = local_actions[item.load_state.execute_before];
-         auto it = std::find(this->opcodes.begin(), this->opcodes.end(), before);
-         assert(it != this->opcodes.end() && "Action not present in the opcode list, even though we have to have inserted it?!");
-         this->opcodes.insert(it, std::unique_ptr<opcode>(instance));
+         size_t index = none;
+         for (size_t j = 0; j < list.size(); ++j) {
+            if (list[j].get() == before) { // unique_ptr is irritating. breaks std::find(); isn't implicitly comparable to bare pointers; etc., etc.
+               index = j;
+               break;
+            }
+         }
+         assert(index != none && "Action not present in the opcode list, even though we have to have inserted it?!");
+         list.insert(list.begin() + index, std::unique_ptr<opcode>(instance));
       }
    }
 }

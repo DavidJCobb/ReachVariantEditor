@@ -4,6 +4,7 @@
 #include <concepts>
 #include <cstdint>
 #include <limits>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 #include "helpers/type_traits/strip_enum.h"
@@ -23,14 +24,15 @@ namespace halo {
          typename T::value_type;
          typename T::entry_type;
          requires std::is_same_v<typename T::value_type*, typename T::entry_type>;
-         { T::max_count } -> std::same_as<size_t>;
+         { T::max_count } -> std::same_as<const size_t&>;
          { x[0] } -> std::same_as<typename T::value_type&>;
          { x.emplace_back() } -> std::same_as<typename T::entry_type>; // require default-constructible element type
       };
 
-      template<typename Reader, typename T> concept is_bitreadable_indexed_list = requires(T & x) {
+      template<typename Reader, typename T> concept is_bitreadable_indexed_list = requires(T& x) {
          requires is_indexed_list<T>;
-         requires is_bitreadable<T> || util::has_read_method<Reader, T>;
+         typename T::value_type;
+         requires (is_bitreadable<typename T::value_type> || util::has_read_method<Reader, typename T::value_type>);
       };
    }
 
@@ -108,7 +110,7 @@ namespace halo {
          // Multi-read call
          template<typename... Types> requires (sizeof...(Types) > 1)
          void read(Types&... args) {
-            (this->read(args), ...);
+            (((Subclass*)this)->read(args), ...);
          }
          
          #pragma region read
@@ -136,18 +138,18 @@ namespace halo {
                for (size_t i = 0; i < count; ++i) {
                   auto& item = out[i];
                   item.is_defined = true;
-                  this->read(item);
+                  ((Subclass*)this)->read(item);
                }
             } else {
                for (size_t i = 0; i < count; ++i)
-                  this->read(out.emplace_back());
+                  ((Subclass*)this)->read(*out.emplace_back());
             }
          }
 
          template<typename T, size_t count> requires (util::has_read_method<my_type, T> || impl::bitreader::is_bitreadable<T>)
          void read(std::array<T, count>& out) {
             for (auto& item : out)
-               this->read(item);
+               ((Subclass*)this)->read(item);
          }
          #pragma endregion
 

@@ -82,9 +82,9 @@ namespace halo {
                // all of the representable values in the range (min, max).
                //
                if (raw == 0)
-                  result = min;
+                  result = params.min;
                else if (raw == bit_range - 1)
-                  result = max;
+                  result = params.max;
                else {
                   float interval = (val_range / (float)(bit_range - 2));
                   result = params.min + ((float)raw - 0.5F) * interval;
@@ -100,7 +100,7 @@ namespace halo {
             }
             if constexpr (params.is_signed) {
                if (raw * 2 == bit_range - 1)
-                  result  = ((double)min + (double)max) * 0.5; // not sure if Xbox 360 version used double-precision, but haloreach.dll in MCC does as of May 2022
+                  result  = ((double)params.min + (double)params.max) * 0.5; // not sure if Xbox 360 version used double-precision, but haloreach.dll in MCC does as of May 2022
             }
             return result;
          }

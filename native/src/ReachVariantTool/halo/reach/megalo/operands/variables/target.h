@@ -119,9 +119,8 @@ namespace halo::reach::megalo::operands {
                   //
                   if (this->bitcount == 0) {
                      if (!this->scopes.inner.has_value()) // bitcount can be deduced from inner scope
-                        return false;
-                     if (this->type != target_type::variable) // bitcount can be deduced from variable type
-                        return false;
+                        if (this->type != target_type::variable) // bitcount can be deduced from variable type
+                           return false;
                   }
                }
                return true;
@@ -180,7 +179,7 @@ namespace halo::reach::megalo::operands {
          protected:
             struct _indexed_type_variant {
                template<typename Current> struct transformer {
-                  using type = util::refcount_ptr<Current>;
+                  using type = util::refcount_ptr<typename Current::indexed_data_type>;
                };
 
                //
@@ -214,8 +213,6 @@ namespace halo::reach::megalo::operands {
 
          public:
             constexpr target_definition_list(Types&&... items) : entries(items...) {}
-
-            const target_metadata& metadata_for(size_t index) const;
 
             constexpr size_t index_of_first_invalid() const {
                size_t i   = -1;

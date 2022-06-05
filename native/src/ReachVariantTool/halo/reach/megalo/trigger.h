@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "halo/util/indexed.h"
 #include "halo/util/refcount.h"
 #include "halo/reach/bitstreams.fwd.h"
 #include "./opcodes/action.h"
@@ -29,7 +30,7 @@ namespace halo::reach::megalo {
       // Halo 4: incident
    };
 
-   class trigger {
+   class trigger : public util::indexed {
       protected:
          struct {
             //

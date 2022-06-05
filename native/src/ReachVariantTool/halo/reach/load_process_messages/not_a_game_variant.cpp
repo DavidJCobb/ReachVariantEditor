@@ -22,6 +22,6 @@ namespace halo::reach::load_process_messages {
          case ugc_file_type::screenshot:
             return QString("According to the UGC header data, this is not a game variant. It appears to be a screenshot.");
       }
-      return QString("According to the UGC header data, this is not a game variant. It's using unknown file type %1.", (int)this->info.type);
+      return QString("According to the UGC header data, this is not a game variant. It's using unknown file type %1.").arg((int)this->info.type);
    }
 }

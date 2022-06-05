@@ -26,7 +26,18 @@ namespace halo::reach::megalo {
             case team:   return max_teams;
             case timer:  return max_timers;
          }
-         cobb::unreachable();
+         return 0;
+      }
+      template<variable_type v> constexpr size_t maximum_of_type() const { // if MSVC functioned properly, the argument version would be constexpr-usable in all cases...
+         switch (v) {
+            using enum variable_type;
+            case number: return max_numbers;
+            case object: return max_objects;
+            case player: return max_players;
+            case team:   return max_teams;
+            case timer:  return max_timers;
+         }
+         return 0;
       }
 
       constexpr size_t total() const {
@@ -35,30 +46,30 @@ namespace halo::reach::megalo {
    };
 
    namespace variable_scopes {
-      static constexpr variable_scope_metadata none = {};
+      constexpr variable_scope_metadata none = {};
 
-      static constexpr variable_scope_metadata global = {
+      constexpr variable_scope_metadata global = {
          .max_numbers = 12,
          .max_objects = 16,
          .max_players =  8,
          .max_teams   =  8,
          .max_timers  =  8,
       };
-      static constexpr variable_scope_metadata object = {
+      constexpr variable_scope_metadata object = {
          .max_numbers = 8,
          .max_objects = 4,
          .max_players = 4,
          .max_teams   = 2,
          .max_timers  = 4,
       };
-      static constexpr variable_scope_metadata player = {
+      constexpr variable_scope_metadata player = {
          .max_numbers = 8,
          .max_objects = 4,
          .max_players = 4,
          .max_teams   = 4,
          .max_timers  = 4,
       };
-      static constexpr variable_scope_metadata team = {
+      constexpr variable_scope_metadata team = {
          .max_numbers = 8,
          .max_objects = 6,
          .max_players = 4,

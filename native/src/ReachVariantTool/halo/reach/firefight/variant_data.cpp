@@ -26,18 +26,5 @@ namespace halo::reach {
          bonus_wave.skulls,
          bonus_wave.data
       );
-      if (stream.get_overshoot_bits() > 0) {
-         if constexpr (bitreader::has_load_process) {
-            #if !_DEBUG
-               static_assert(false, "TODO: Improve error reporting for this case. Current error-report only allows byte offsets, and we can't get the block size from here.");
-            #endif
-            stream.load_process().emit_error({
-               .data = halo::common::load_errors::file_block_unexpected_end{
-                  .block     = {},
-                  .overshoot = stream.get_overshoot_bits(),
-               }
-            });
-         }
-      }
    }
 }

@@ -6,11 +6,9 @@
 #include "./variable_scope.h"
 #include "./variable_type.h"
 
-namespace halo::reach::megalo {
-   namespace operands {
-      class variable_number;
-   }
+#include "halo/reach/megalo/operands/variables/base.h"
 
+namespace halo::reach::megalo {
    namespace impl {
       class variable_declaration {
          public:
@@ -22,7 +20,7 @@ namespace halo::reach::megalo {
 
             bitnumber<2, network_priority_type> network_priority = network_priority_type::low;
             struct {
-               operands::variable_number* number = nullptr;
+               operands::variables::unknown_type* value = nullptr; // can't use number type directly due to circular include issues
                static_team_index team = static_team::none;
             } initial;
 
@@ -42,7 +40,15 @@ namespace halo::reach::megalo {
    template<variable_scope S> class variable_declaration_set {
       public:
          static constexpr variable_scope scope = S;
-         static constexpr const variable_scope_metadata& scope_metadata = variable_scope_metadata_from_enum(scope);
+
+      protected:
+         static constexpr const variable_scope_metadata scope_metadata = variable_scope_metadata_from_enum(scope);
+         // using a reference type breaks MSVC's handling of constant epxressions. Not using a 
+         // reference type means that
+         // 
+         //    &varialbe_declaration_set<S>::scope_metadata != variable_scope_metadata_from_enum(S)
+         //
+         // which is undesirable, so just make this private. *sigh*
 
       protected:
          template<variable_type V> static constexpr size_t bit_offset() {
@@ -71,19 +77,28 @@ namespace halo::reach::megalo {
          }
 
       public:
-         template<variable_type V> using variable_list = std::array<variable_declaration<V>, (scope_metadata.maximum_of_type(V))>;
+         template<variable_type V> using variable_list = std::array<variable_declaration<V>, scope_metadata.maximum_of_type<V>()>;
 
       protected:
          template<variable_type V> variable_list<V>& _list_by_type() {
-            switch (V) {
-               using enum variable_type;
-               case number: return numbers;
-               case object: return objects;
-               case player: return players;
-               case team:   return teams;
-               case timer:  return timers;
-            }
-            cobb::unreachable();
+            //
+            // Can't use switch-cases here because they're not constexpr; even if we 
+            // never follow a case, it returning a value inconsistent with our return 
+            // type rather understandably causes the compiler to choke.
+            //
+            using enum variable_type;
+            if constexpr (V == number)
+               return numbers;
+            else if constexpr (V == object)
+               return objects;
+            else if constexpr (V == player)
+               return players;
+            else if constexpr (V == team)
+               return teams;
+            else if constexpr (V == timer)
+               return timers;
+            else
+               cobb::unreachable();
          }
 
          template<variable_type V> void _read_list(bitreader& stream) {
@@ -91,8 +106,9 @@ namespace halo::reach::megalo {
             for (size_t i = 0; i < count; ++i) {
                this->set_variable_is_defined<V>(i, true);
             }
+            auto& list = this->_list_by_type<V>();
             for (size_t i = 0; i < count; ++i) {
-               this->_list_by_type<V>[i].read(stream);
+               list[i].read(stream);
             }
          }
 
@@ -109,7 +125,7 @@ namespace halo::reach::megalo {
          template<variable_type V> bool variable_is_defined(size_t index) const {
             return this->presence.test(bit_offset<V>() + index);
          }
-         template<variable_type V> void set_variable_is_defined(size_t index, bool v) const {
+         template<variable_type V> void set_variable_is_defined(size_t index, bool v) {
             auto& bs = this->presence;
             auto  bi = bit_offset<V>() + index;
             if (v)
@@ -130,11 +146,11 @@ namespace halo::reach::megalo {
          }
 
          void read(bitreader& stream) {
-            _read_list<variable_type::number>();
-            _read_list<variable_type::object>();
-            _read_list<variable_type::player>();
-            _read_list<variable_type::team>();
-            _read_list<variable_type::timer>();
+            _read_list<variable_type::number>(stream);
+            _read_list<variable_type::object>(stream);
+            _read_list<variable_type::player>(stream);
+            _read_list<variable_type::team>(stream);
+            _read_list<variable_type::timer>(stream);
          }
    };
 }

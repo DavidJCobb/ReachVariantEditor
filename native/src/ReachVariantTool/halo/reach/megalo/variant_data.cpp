@@ -7,6 +7,8 @@
 #include "./hud_widget.h"
 #include "./player_trait_set.h"
 
+#include "./load_process_messages/referenced_undefined_indexed_data.h"
+
 namespace halo::reach {
    void megalo_variant_data::read(bitreader& stream) {
       set_up_indexed_dummies(
@@ -72,7 +74,7 @@ namespace halo::reach {
             for (size_t i = 0; i < count; ++i) {
                auto& item = list[i];
                stream.read(item);
-               item.extract_opcodes(this->raw.conditions, this->raw.actions);
+               item.extract_opcodes(stream, this->raw.conditions, this->raw.actions);
             }
          }
          stream.read(
@@ -105,27 +107,50 @@ namespace halo::reach {
       // And now for post-load steps.
       //
       if constexpr (bitreader::has_load_process) {
-         std::vector<size_t> referenced_dummies;
+         using message_type = halo::reach::load_process_messages::megalo::referenced_undefined_indexed_data;
          //
-         this->script.forge_labels.tear_down_dummies(&referenced_dummies);
+         std::vector<size_t> referenced_dummies;
+         size_t last_referenced_index;
+         //
+         this->script.forge_labels.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            static_assert(false, "TODO: emit warning");
+            stream.load_process().emit_error<message_type>({
+               .indices   = referenced_dummies,
+               .max_count = last_referenced_index + 1,
+               .type      = message_type::data_type::forge_label,
+            });
          }
-         this->script.options.tear_down_dummies(&referenced_dummies);
+         this->script.options.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            static_assert(false, "TODO: emit warning");
+            stream.load_process().emit_error<message_type>({
+               .indices   = referenced_dummies,
+               .max_count = last_referenced_index + 1,
+               .type      = message_type::data_type::game_option,
+            });
          }
-         this->script.stats.tear_down_dummies(&referenced_dummies);
+         this->script.stats.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            static_assert(false, "TODO: emit warning");
+            stream.load_process().emit_error<message_type>({
+               .indices   = referenced_dummies,
+               .max_count = last_referenced_index + 1,
+               .type      = message_type::data_type::game_stat,
+            });
          }
-         this->script.traits.tear_down_dummies(&referenced_dummies);
+         this->script.traits.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            static_assert(false, "TODO: emit warning");
+            stream.load_process().emit_error<message_type>({
+               .indices   = referenced_dummies,
+               .max_count = last_referenced_index + 1,
+               .type      = message_type::data_type::player_trait_set,
+            });
          }
-         this->script.widgets.tear_down_dummies(&referenced_dummies);
+         this->script.widgets.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            static_assert(false, "TODO: emit warning");
+            stream.load_process().emit_error<message_type>({
+               .indices   = referenced_dummies,
+               .max_count = last_referenced_index + 1,
+               .type      = message_type::data_type::hud_widget,
+            });
          }
       } else {
          tear_down_indexed_dummies(

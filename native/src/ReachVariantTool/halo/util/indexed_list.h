@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cassert>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 #include "../../helpers/type_traits/set_const.h"
@@ -41,6 +42,7 @@ namespace halo::util {
 
       protected:
          template<bool is_const> class _iterator_base {
+            friend class indexed_list;
             protected:
                using access_type = cobb::set_const<value_type**, is_const>;
 
@@ -49,8 +51,7 @@ namespace halo::util {
             public:
                _iterator_base() {}
                _iterator_base(std::nullptr_t) : item(nullptr) {}
-               _iterator_base(access_type* v) : item(v) {}
-               _iterator_base(access_type& r) : item(&r) {}
+               _iterator_base(access_type& r) : item(r) {}
 
                value_type* operator->() const noexcept { return *this->item; }
                value_type& operator*() const noexcept { return **this->item; }
@@ -90,7 +91,8 @@ namespace halo::util {
          template<typename It> It _iterator_at(const size_type i) const noexcept {
             if (this->empty())
                return It(nullptr);
-            return It(&this->_data[i]);
+            auto v = const_cast<value_type**>((value_type** const)&this->_data[i]);
+            return It(v);
          }
 
       public:
@@ -122,7 +124,7 @@ namespace halo::util {
 
          // Returns true if any referenced dummies exist. Accepts an optional list 
          // which will be filled with the indices of any referenced dummies.
-         bool tear_down_dummies(std::vector<size_type>* indices) requires std::is_base_of_v<dummyable, value_type> {
+         bool tear_down_dummies(std::vector<size_type>* indices = nullptr, size_t* last_defined_index = nullptr) requires std::is_base_of_v<dummyable, value_type> {
             assert(this->_size == max_count); // dummies should've been created
             bool referenced_dummies = false;
             if (indices) {
@@ -131,14 +133,17 @@ namespace halo::util {
             for (size_type i = 0; i < max_count; ++i) {
                auto& iptr = this->_data[max_count - i - 1];
                auto& item = *iptr;
-               if (item.is_defined)
+               if (item.is_defined) {
+                  if (last_defined_index)
+                     *last_defined_index = i;
                   break;
+               }
                if constexpr (std::is_base_of_v<passively_refcounted, T>) {
                   if (item.is_referenced()) {
                      referenced_dummies = true;
                      item.is_defined = true;
                      if (indices)
-                        indices.push_back(max_count - i - 1);
+                        indices->push_back(max_count - i - 1);
                      continue;
                   }
                }
@@ -164,8 +169,10 @@ namespace halo::util {
                return nullptr;
             entry_type item = new value_type(std::forward<Args>(args)...);
             this->_data[this->_size] = item;
-            item->index      = this->_size;
-            item->is_defined = true;
+            item->index = this->_size;
+            if constexpr (std::is_base_of_v<dummyable, value_type>) {
+               item->is_defined = true;
+            }
             ++this->_size;
             return item;
          }
@@ -181,10 +188,35 @@ namespace halo::util {
                dst = nullptr;
             }
             dst = new value_type(src);
-            dst->is_defined = true;
-            dst->index      = this->_size;
+            if constexpr (std::is_base_of_v<dummyable, value_type>) {
+               dst->is_defined = true;
+            }
+            dst->index = this->_size;
             ++this->_size;
             return true;
+         }
+         void resize(size_type i) {
+            if (i == size())
+               return;
+            if (i < size()) {
+               for (size_t n = i; n < size(); ++n) {
+                  delete this->_data[n];
+                  this->_data[n] = nullptr;
+               }
+               this->_size = i;
+            }
+            if (i > size()) {
+               if (i > max_count)
+                  throw std::domain_error("desired size exceeded max allowed count");
+               for (size_t n = size(); n < i; ++n) {
+                  auto* dst = this->_data[n] = new value_type;
+                  if constexpr (std::is_base_of_v<dummyable, value_type>) {
+                     dst->is_defined = true;
+                  }
+                  dst->index = n;
+               }
+               this->_size = i;
+            }
          }
          void swap_items(size_type a, size_type b) {
             auto& x = this->_data[a];

@@ -1,6 +1,6 @@
 #pragma once
 #include <bit>
-#include "./base.h"
+#include "./base_template.h"
 #include "./target.h"
 
 #include "halo/reach/megalo/limits.h"

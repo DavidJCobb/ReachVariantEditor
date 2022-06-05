@@ -18,12 +18,12 @@ namespace cobb {
          underlying_type _value = {};
 
       public:
-         constexpr reflex_flags() {}
-         template<reflex_flags... Flags> constexpr reflex_flags() {
+         constexpr reflex_flags_from_enum() {}
+         template<reflex_flags... Flags> constexpr reflex_flags_from_enum() {
             ((this->_value |= Flags._value), ...);
          }
 
-         static constexpr reflex_enum from_int(underlying_type v) {
+         static constexpr reflex_flags_from_enum from_int(underlying_type v) {
             reflex_flags out;
             out._value = 1 << v;
             return out;
@@ -32,9 +32,9 @@ namespace cobb {
          template<cs Name> static constexpr bool allows = enumeration::has<Name>;
 
          template<cs Name> static constexpr underlying_type underlying_value_of = (1 << enumeration::underlying_value_of<Name>);
-         template<cs Name> static constexpr reflex_flags value_of = from_int(enumeration::underlying_value_of<Name>);
+         template<cs Name> static constexpr reflex_flags_from_enum value_of() { return from_int(enumeration::underlying_value_of<Name>); }
 
-         static constexpr reflex_flags all_set = ([]() {
+         static constexpr underlying_type all_set = ([]() {
             underlying_type v;
             enumeration::for_each_member([&v]<typename Current>() {
                v |= reflex_flags::underlying_value_of<Current::name>;

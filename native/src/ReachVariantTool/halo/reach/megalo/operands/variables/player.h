@@ -1,5 +1,5 @@
 #pragma once
-#include "./base.h"
+#include "./base_template.h"
 #include "./target.h"
 
 namespace halo::reach::megalo::operands {

@@ -1,18 +1,26 @@
 #include "game_option.h"
 #include "halo/reach/bitstreams.h"
 
+#include "halo/reach/megalo/load_process_messages/game_option/current_index_out_of_bounds.h"
+#include "halo/reach/megalo/load_process_messages/game_option/initial_index_out_of_bounds.h"
+#include "halo/reach/megalo/load_process_messages/game_option/value_out_of_bounds.h"
+
 namespace halo::reach::megalo {
    void _validate_option_value(bitreader& stream, game_option::value_type& v) {
       if (v < -500) {
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "report error");
+            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
+               .value = v,
+            });
          }
          v = -500;
          return;
       }
       if (v > 500) {
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "report error");
+            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
+               .value = v,
+            });
          }
          v = 500;
          return;
@@ -52,32 +60,33 @@ namespace halo::reach::megalo {
          );
       } else {
          value_index initial_index;
-         stream.read(initial_index);
-
-         bitnumber<std::bit_width(limits::script_option_values), uint8_t> count;
-         stream.read(count);
-
-         this->enumeration.values.resize(count);
-         for (size_t i = 0; i < count; ++i) {
-            stream.read(this->enumeration.values[i]);
-         }
-
          value_index current_index;
-         stream.read(current_index);
+         stream.read(
+            initial_index,
+            this->enumeration.values,
+            current_index
+         );
+         auto count = this->enumeration.values.size();
 
          if (initial_index < count) {
-            this->enumeration.initial = this->enumeration.values[initial_index];
+            this->enumeration.initial = &this->enumeration.values[initial_index];
          } else {
             if constexpr (bitreader::has_load_process) {
-               static_assert(false, "report error");
+               stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_initial_index_out_of_bounds>({
+                  .index = initial_index,
+                  .count = count,
+               });
             }
          }
          if (current_index < count) {
-            this->enumeration.current = this->enumeration.values[current_index];
+            this->enumeration.current = &this->enumeration.values[current_index];
          } else {
             if constexpr (bitreader::has_load_process) {
                // TODO: did the game ever actually validate this?
-               static_assert(false, "report error");
+               stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_current_index_out_of_bounds>({
+                  .index = current_index,
+                  .count = count,
+               });
             }
          }
 

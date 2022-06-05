@@ -75,7 +75,7 @@ namespace halo::reach {
          void make_anniversary();
          void make_zero_bloom() {
             this->make_patched();
-            this->precisionBloom = 0.0F;
+            this->precision_bloom = 0.0F;
          }
 
          bool is_vanilla() const; // true if all values are within format margin of error of vanilla settings

@@ -1,5 +1,6 @@
 #pragma once
 #include "halo/reach/bitstreams.fwd.h"
+#include "./base.h"
 
 namespace halo::reach::megalo::operands {
    namespace variables {

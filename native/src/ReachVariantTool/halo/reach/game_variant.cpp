@@ -154,6 +154,17 @@ namespace halo::reach {
                      bitstream.set_game_variant_data(v);
                      v->read(bitstream);
                      bitstream.set_game_variant_data(nullptr);
+                     if (bitstream.get_overshoot_bits() > 0) {
+                        if constexpr (bitreader::has_load_process) {
+                           stream.load_process().emit_error<halo::common::load_process_messages::file_block_unexpected_end>({
+                              .block = {
+                                 .signature = block.header.signature,
+                                 .size      = block.header.size,
+                              },
+                              .overshoot = bitstream.get_overshoot_bits(),
+                           });
+                        }
+                     }
                   }
                }
                mpvr = true;

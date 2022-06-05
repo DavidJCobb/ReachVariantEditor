@@ -19,12 +19,13 @@ namespace halo::reach::megalo::operands {
          };
 
          using value_type = T;
+         using underlying_type = value_type::underlying_type;
 
       protected:
          using bitnumber_type = bitnumber<
             std::bit_width(std::max(1, value_type::value_count - 1)),
-            T::underlying_type,
-            bitnumber_params<T::underlying_type>{
+            underlying_type,
+            bitnumber_params<underlying_type>{
                .offset = (value_type::min_underlying_value < 0 ? -value_type::min_underlying_value : 0),
             }
          >;

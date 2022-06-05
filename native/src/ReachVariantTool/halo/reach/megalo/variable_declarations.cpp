@@ -1,6 +1,8 @@
 #include "./variable_declarations.h"
 #include "halo/reach/bitstreams.h"
 
+#include "halo/reach/megalo/operands/variables/number.h"
+
 namespace halo::reach::megalo {
    namespace impl {
       void variable_declaration::read(variable_type t, bitreader& stream) {
@@ -11,9 +13,9 @@ namespace halo::reach::megalo {
             case variable_type::number:
                [[fallthrough]];
             case variable_type::timer:
-               if (!this->initial.number)
-                  this->initial.number = new operands::variable_number;
-               stream.read(*this->initial.number);
+               if (!this->initial.value)
+                  this->initial.value = new operands::variables::number;
+               stream.read(*this->initial.value);
                break;
          }
          switch (t) {

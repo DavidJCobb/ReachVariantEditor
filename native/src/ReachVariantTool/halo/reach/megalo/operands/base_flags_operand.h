@@ -1,5 +1,5 @@
 #pragma once
-#include "helpers/reflex_enum/cs.h"
+#include "helpers/cs.h"
 #include "helpers/reflex_enum/reflex_flags.h"
 #include "halo/reach/bitstreams.fwd.h"
 #include "../operand_typeinfo.h"
