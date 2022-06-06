@@ -1,7 +1,7 @@
 #pragma once
 #include "./member_concepts.h"
 
-namespace cobb::reflex::impl::enumeration {
+namespace cobb::reflex::impl::flags_mask {
    template<typename First, typename... Types> concept member_types_are_valid = (
       (is_underlying_type<First> || is_valid_member<First> || std::is_same_v<First, member_gap>) &&
       ((is_valid_member<Types> || std::is_same_v<Types, member_gap>) && ...)

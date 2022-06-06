@@ -5,22 +5,6 @@ namespace _cobb::reflex { // please live up to your name, IntelliSense
 }
 
 namespace _cobb::reflex::tests::enumeration {
-   namespace test_constraits {
-      constexpr bool types = impl::enumeration::member_types_are_valid<
-         member<cobb::cs("A")>,
-         member<cobb::cs("B")>,
-         member<cobb::cs("C")>,
-         member<cobb::cs("D"), 1234>
-      >;
-
-      constexpr bool names = impl::enumeration::member_names_are_unique<
-         member<cobb::cs("A")>,
-         member<cobb::cs("B")>,
-         member<cobb::cs("C")>,
-         member<cobb::cs("D"), 1234>
-      >;
-   }
-
    namespace test_basic {
       using test_enum = ::cobb::reflex::enumeration<
          member<cobb::cs("A")>,

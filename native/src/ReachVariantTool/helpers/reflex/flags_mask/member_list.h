@@ -7,24 +7,25 @@
 #include "helpers/tuple_foreach.h"
 #include "helpers/tuple_index_of.h"
 #include "helpers/unreachable.h"
+#include "../member_concepts/type_has_metadata.h"
 #include "../member.h"
 #include "../member_range.h"
 #include "../nested_enum.h"
 #include "./member_concepts.h"
 
-namespace cobb::reflex::impl::enumeration {
-   template<typename Underlying, typename... Members> struct member_list {
-      using underlying_type = Underlying;
+namespace cobb::reflex::impl::flags_mask {
+   template<typename... Members> struct member_list {
       using as_tuple = std::tuple<Members...>;
 
-      struct value_metadata {
-         underlying_type value;
+      struct entry_details {
+         size_t flag_index;
          size_t type_index;
          size_t type_sub = 0;
+         bool   has_metadata = false;
          #pragma warning(suppress: 26495)
       };
          
-      static constexpr size_t value_count() {
+      static constexpr size_t flag_count() {
          size_t count = 0;
          cobb::tuple_foreach<as_tuple>([&count]<typename Current>() {
             if constexpr (is_member<Current> || std::is_same_v<Current, member_gap>) {
@@ -33,11 +34,6 @@ namespace cobb::reflex::impl::enumeration {
             }
             if constexpr (is_member_range<Current>) {
                count += Current::count;
-               return;
-            }
-            if constexpr (is_nested_enum<Current>) {
-               using nested = Current::enumeration;
-               count += (nested::max_underlying_value - nested::min_underlying_value) + 1;
                return;
             }
             cobb::unreachable();
@@ -56,65 +52,66 @@ namespace cobb::reflex::impl::enumeration {
          >;
       }
 
-      static constexpr auto underlying_value_metadata() {
-         std::array<value_metadata, value_count()> out = {};
+      static constexpr auto all_entry_details() {
+         std::array<entry_details, flag_count()> out = {};
          //
-         underlying_type v = -1;
+         size_t flag_index  = -1;
          size_t type_index  = -1;
          size_t value_index = -1;
-         cobb::tuple_foreach<as_tuple>([&v, &type_index, &value_index, &out]<typename Current>() {
+         cobb::tuple_foreach<as_tuple>([&flag_index, &type_index, &value_index, &out]<typename Current>() {
             ++type_index;
             if constexpr (std::is_same_v<Current, member_gap>) {
-               ++v;
+               ++flag_index;
                return;
             }
             //
             if constexpr (is_member<Current> || is_member_range<Current>) {
                if (Current::value != undefined)
-                  v = Current::value;
+                  flag_index = Current::value;
                else
-                  ++v;
+                  ++flag_index;
                //
                if constexpr (is_member<Current>) {
                   out[++value_index] = {
-                     .value      = v,
-                     .type_index = type_index,
+                     .flag_index   = flag_index,
+                     .type_index   = type_index,
+                     .has_metadata = member_concepts::type_has_metadata<Current>,
                   };
                } else if constexpr (is_member_range<Current>) {
                   for (size_t i = 0; i < Current::count; ++i) {
                      out[++value_index] = {
-                        .value      = v,
-                        .type_index = type_index,
-                        .type_sub   = i,
+                        .flag_index   = flag_index,
+                        .type_index   = type_index,
+                        .type_sub     = i,
+                        .has_metadata = member_concepts::type_has_metadata<Current>,
                      };
-                     ++v;
+                     ++flag_index;
                   }
-                  --v;
+                  --flag_index;
                }
-               return;
-            }
-            if constexpr (is_nested_enum<Current>) {
-               using nested = Current::enumeration;
-               constexpr auto nested_span = (nested::max_underlying_value - nested::min_underlying_value);
-               constexpr auto nested_list = nested::all_underlying_values;
-               //
-               ++v;
-               for (size_t i = 0; i < nested_list.size(); ++i) {
-                  auto item = nested_list[i];
-                  //
-                  out[++value_index] = {
-                     .value      = (v + (underlying_type)(item - nested::min_underlying_value)),
-                     .type_index = type_index,
-                     .type_sub   = i,
-                  };
-               }
-               v += nested_span;
                return;
             }
          });
          //
          return out;
       };
+
+      // ---
+
+      static constexpr size_t lowest_flag_index() {
+         size_t i = std::numeric_limits<size_t>::max();
+         for (auto& details : all_entry_details())
+            if (i > details.flag_index)
+               i = details.flag_index;
+         return i;
+      }
+      static constexpr size_t highest_flag_index() {
+         size_t i = 0;
+         for (auto& details : all_entry_details())
+            if (i < details.flag_index)
+               i = details.flag_index;
+         return i;
+      }
 
       //
 
@@ -128,16 +125,14 @@ namespace cobb::reflex::impl::enumeration {
             }
          >();
       }
-      template<typename Subset> static constexpr size_t index_of_subset() {
-         return cobb::tuple_index_of_matching<
-            as_tuple,
-            []<typename Current>() {
-               if constexpr (is_nested_enum<Current>)
-                  return std::is_same_v<Subset, typename Current::enumeration>;
-               return false;
-            }
-         >();
-      };
+
+      template<cobb::cs Name> static constexpr size_t base_flag_index_of() {
+         constexpr auto index = member_list::template index_of<Name>();
+         for (const auto& item : member_list::all_entry_details())
+            if (item.type_index == index)
+               return item.flag_index;
+         cobb::unreachable();
+      }
 
       // ---
 
@@ -152,49 +147,9 @@ namespace cobb::reflex::impl::enumeration {
          });
          return out;
       };
-      static constexpr auto all_underlying_values() {
-         constexpr auto meta = underlying_value_metadata();
-         //
-         std::array<underlying_type, meta.size()> out = {};
-         for (size_t i = 0; i < meta.size(); ++i)
-            out[i] = meta[i].value;
-         return out;
-      }
-
-      template<cobb::cs Name> static constexpr underlying_type underlying_value_of() {
-         constexpr auto index = index_of<Name>();
-         for (const auto& item : underlying_value_metadata())
-            if (item.type_index == index)
-               return item.value;
-         cobb::unreachable();
-      }
-      
-      template<typename Subset> static constexpr size_t subset_name_length() {
-         return std::tuple_element_t<index_of_subset<Subset>(), as_tuple>::name.capacity();
-      }
-      template<typename Subset> static constexpr cobb::cs<subset_name_length<Subset>()> subset_name() {
-         constexpr auto length = subset_name_length<Subset>();
-         //
-         const char initial[length] = {};
-         cobb::cs<length> name(initial);
-         cobb::tuple_foreach<as_tuple>([&name]<typename Current>() {
-            if constexpr (is_nested_enum<Current>)
-               name = Current::name;
-         });
-         return name;
-      }
-
-      static constexpr size_t underlying_value_to_type_index(underlying_type v) {
-         for (const auto& item : underlying_value_metadata()) {
-            if (item.value == v) {
-               return item.type_index;
-            }
-         }
-         return std::numeric_limits<size_t>::max();
-      }
 
       using metadata_having_members = cobb::tuple_filter_t<
-         []<typename Current>() { return member_type_has_metadata<Current>; },
+         []<typename Current>() { return member_concepts::type_has_metadata<Current>; },
          as_tuple
       >;
       static constexpr bool uniform_metadata_types = [](){
@@ -237,7 +192,7 @@ namespace cobb::reflex::impl::enumeration {
          if constexpr (uniform_metadata_types) {
             size_t i = 0;
             cobb::tuple_foreach<as_tuple>([&i, &out]<typename Current>(){
-               if constexpr (member_type_has_metadata<Current>) {
+               if constexpr (member_concepts::type_has_metadata<Current>) {
                   //out[i] = (metadata_type)Current::metadata;
                   // 
                   // IntelliSense thinks the array element is const, yet also doesn't fail static assertions 

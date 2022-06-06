@@ -1,4 +1,5 @@
 #include "./constraints.h"
+#include "../member_concepts/names_are_unique.h"
 
 namespace cobb::reflex::tests::enumeration {
    constexpr bool types1 = impl::enumeration::member_types_are_valid<
@@ -15,20 +16,20 @@ namespace cobb::reflex::tests::enumeration {
       member<cobb::cs("D"), 1234>
    >;
 
-   constexpr bool names1 = impl::enumeration::member_names_are_unique<
+   constexpr bool names1 = member_concepts::names_are_unique<
       member<cobb::cs("A")>,
       member<cobb::cs("B")>,
       member<cobb::cs("C")>,
       member<cobb::cs("D"), 1234>
    >;
-   constexpr bool names2 = impl::enumeration::member_names_are_unique<
+   constexpr bool names2 = member_concepts::names_are_unique<
       int,
       member<cobb::cs("A")>,
       member<cobb::cs("B")>,
       member<cobb::cs("C")>,
       member<cobb::cs("D"), 1234>
    >;
-   constexpr bool names3 = impl::enumeration::member_names_are_unique<
+   constexpr bool names3 = member_concepts::names_are_unique<
       member<cobb::cs("A")>,
       member_gap,
       member<cobb::cs("B")>,

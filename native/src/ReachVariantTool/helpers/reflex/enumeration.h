@@ -11,6 +11,7 @@
 #include "./member.h"
 #include "./member_range.h"
 #include "./nested_enum.h"
+#include "member_concepts/names_are_unique.h"
 #include "enumeration/member_concepts.h"
 #include "enumeration/constraints.h"
 
@@ -20,7 +21,7 @@ namespace cobb::reflex {
    namespace impl::enumeration {
       template<typename First, typename... Types> concept members_are_valid =
          member_types_are_valid<First, Types...> &&
-         member_names_are_unique<First, Types...> &&
+         member_concepts::names_are_unique<First, Types...> &&
          member_explicit_values_are_representable<First, Types...>;
 
       template<typename First, typename... Members> struct extract_parameters {
