@@ -7,6 +7,7 @@
 #include "helpers/tuple_foreach.h"
 #include "helpers/tuple_index_of.h"
 #include "helpers/unreachable.h"
+#include "../member_concepts/named.h"
 #include "../member_concepts/type_has_metadata.h"
 #include "../member.h"
 #include "../member_range.h"
@@ -46,7 +47,7 @@ namespace cobb::reflex::impl::flags_mask {
       static constexpr size_t named_member_count() {
          return std::tuple_size_v<
             cobb::tuple_filter_t<
-               []<typename Current>(){ return is_named_member<Current>; },
+               []<typename Current>(){ return member_concepts::named<Current>; },
                as_tuple
             >
          >;
@@ -119,7 +120,7 @@ namespace cobb::reflex::impl::flags_mask {
          return cobb::tuple_index_of_matching<
             as_tuple,
             []<typename Current>() -> bool {
-               if constexpr (is_named_member<Current>)
+               if constexpr (member_concepts::named<Current>)
                   return Current::name == Name;
                return false;
             }
@@ -141,7 +142,7 @@ namespace cobb::reflex::impl::flags_mask {
          //
          size_t i = 0;
          cobb::tuple_foreach<as_tuple>([&i, &out]<typename Current>() {
-            if constexpr (is_named_member<Current>) {
+            if constexpr (member_concepts::named<Current>) {
                out[i++] = Current::name.c_str();
             }
          });

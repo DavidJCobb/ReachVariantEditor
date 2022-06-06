@@ -16,7 +16,6 @@ namespace cobb::reflex::tests::flags_mask {
       static_assert(test_mask::has<cobb::cs("XXX")> == false);
 
       constexpr auto all_underlying = test_mask::all_underlying_values;
-      constexpr auto all_indices    = test_mask::all_indices;
 
       constexpr auto underlying_a = test_mask::underlying_value_of<cobb::cs("A")>;
       constexpr auto underlying_b = test_mask::underlying_value_of<cobb::cs("B")>;
@@ -25,7 +24,7 @@ namespace cobb::reflex::tests::flags_mask {
 
       constexpr auto test_modify = [](){
          test_mask mask = {};
-         mask.modify_flags<cobb::cs("B"), cobb::cs("D")>(true);
+         mask.modify_flags<(cobb::cs("B")), (cobb::cs("D"))>(true);
          return mask.to_int();
       }();
    }
@@ -97,6 +96,37 @@ namespace cobb::reflex::tests::flags_mask {
       using underlying = test_mask::underlying_type;
 
       constexpr auto all_underlying = test_mask::all_underlying_values;
+   }
+
+   namespace test_names_per_bit {
+      using test_mask = cobb::reflex::flags_mask<
+         member<cobb::cs("1")>,
+         member<cobb::cs("22")>,
+         member<cobb::cs("333")>,
+         member<cobb::cs("4444")>
+      >;
+
+      constexpr size_t _strlen(const char* c) {
+         size_t i = 0;
+         if (c) {
+            for (; c[i]; ++i)
+               ;
+         }
+         return i;
+      }
+
+      constexpr auto names = test_mask::names_per_bit;
+      constexpr auto length_1 = _strlen(test_mask::names_per_bit[0]);
+      constexpr auto length_2 = _strlen(test_mask::names_per_bit[1]);
+      constexpr auto length_4 = _strlen(test_mask::names_per_bit[3]);
+
+      constexpr auto total_length = [](){
+         size_t total = 0;
+         for (const char* const item : test_mask::names_per_bit) {
+            total += _strlen(item);
+         }
+         return total;
+      }();
    }
 
    namespace test_metadata {

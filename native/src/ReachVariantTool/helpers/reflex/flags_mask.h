@@ -105,19 +105,12 @@ namespace cobb::reflex {
       public:
          template<cs Name> static constexpr bool has = (index_of<Name> != _index_of_none);
 
-         static constexpr auto all_names = member_list::all_names();
-         static constexpr auto all_indices = [](){
+         static constexpr auto all_underlying_values = [](){
             constexpr auto meta = member_list::all_entry_details();
             //
-            std::array<size_t, meta.size()> out = {};
+            std::array<underlying_type, meta.size()> out = {};
             for (size_t i = 0; i < meta.size(); ++i)
-               out[i] = meta[i].flag_index;
-            return out;
-         }();
-         static constexpr auto all_underlying_values = [](){
-            std::array<underlying_type, all_indices.size()> out = {};
-            for (size_t i = 0; i < all_indices.size(); ++i)
-               out[i] = underlying_type(1) << all_indices[i];
+               out[i] = underlying_type(1) << meta[i].flag_index;
             return out;
          }();
 
@@ -157,6 +150,26 @@ namespace cobb::reflex {
             return out;
          }();
 
+         static constexpr auto names_per_bit = []() {
+            constexpr size_t size = max_flag_index + 1;
+            //
+            std::array<const char*, size> out = {};
+            //
+            size_t i = 0;
+            cobb::tuple_foreach<member_list::as_tuple>([&i, &out]<typename Current>() {
+               if constexpr (member_concepts::named<Current>) {
+                  for (auto& item : member_list::all_entry_details()) {
+                     if (item.type_index == i) {
+                        out[item.flag_index] = Current::name.c_str();
+                        break;
+                     }
+                  }
+               }
+               ++i;
+            });
+            return out;
+         }();
+
       public:
          constexpr flags_mask() {}
          explicit constexpr flags_mask(underlying_type v) { return from_int(v); }
@@ -170,8 +183,8 @@ namespace cobb::reflex {
             return this->_value;
          }
 
-         template<cs Name> requires has<Name> constexpr bool flag() const {
-            return (this->_value & underlying_value_of<Name>) != 0;
+         template<cs Name, auto Detail = impl::flags_mask::underlying_value_of::no_detail{}> requires has<Name> constexpr bool flag() const {
+            return (this->_value & underlying_value_of<Name, Detail>) != 0;
          }
          template<auto... Names> requires (is_cs<decltype(Names)> && ...) constexpr bool any_set() const {
             constexpr auto all = (underlying_value_of<Names> | ...);
@@ -219,11 +232,22 @@ namespace cobb::reflex {
          }
 
          template<typename Functor> requires (member_list::uniform_metadata_types) constexpr void for_each_metadata(Functor&& f) const {
+            auto limited = this->_value & metadata_presence_per_bit; // only check bits that have metadata
             for (size_t i = min_flag_index; i <= max_flag_index; ++i) {
                auto bit = (underlying_type(1) << i);
-               if (((this->_value | metadata_presence_per_bit) & bit) == 0) // bit either is not set or has no metadata
+               if ((limited & bit) == 0) // bit either is not set or has no metadata
                   continue;
                (f)(metadata_per_bit[i]);
+            }
+         }
+         template<typename Functor> constexpr void for_each_name(Functor&& f) const {
+            for (size_t i = min_flag_index; i <= max_flag_index; ++i) {
+               auto bit = (underlying_type(1) << i);
+               if ((this->_value & bit) == 0) // bit is not set
+                  continue;
+               if (!names_per_bit[i])
+                  continue;
+               (f)(names_per_bit[i]);
             }
          }
 

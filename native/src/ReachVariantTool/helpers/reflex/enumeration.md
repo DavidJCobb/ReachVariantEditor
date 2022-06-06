@@ -117,6 +117,8 @@ constexpr auto* c_meta = c.to_metadata(); // ->id == 10
 
 ## API reference
 
+The template parameters for `enumration` can be either a list of members, or an underlying type followed by a list of members.
+
 The following constraints apply to reflex enums:
 
 * The underlying type, if specified, must be arithmetic and integral.
@@ -131,6 +133,7 @@ The following constraints apply to reflex enums:
 ### Constructors
 
 * A `constexpr` default constructor
+* A `constexpr` constructor taking the underlying type or any type convertible to it
 * A `constexpr` constructor templated on any `cobb::reflex::enumeration` specialization; the constructor is valid if the other enumeration is a member of this one via a `nested_enum`.
 
 ### Operators
