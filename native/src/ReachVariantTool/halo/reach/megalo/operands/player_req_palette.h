@@ -14,7 +14,7 @@ namespace halo::reach::megalo::operands {
          using value_type = bitnumber<
             4,
             int,
-            bitnumber_params<uint8_t>{
+            bitnumber_params<int>{
                .if_absent = -1,
                .initial   = -1,
                .presence  = false, // absence bit

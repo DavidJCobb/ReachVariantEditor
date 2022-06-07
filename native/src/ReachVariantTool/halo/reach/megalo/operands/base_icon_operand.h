@@ -18,6 +18,17 @@ namespace halo::reach::megalo::operands {
             .internal_name = name.c_str(),
          };
 
+      protected:
+         using underlying_type = typename value_type::underlying_type;
+         using bitnumber_type  = bitnumber<
+            std::bit_width(std::max((size_t)1, value_type::value_count - 1)),
+            underlying_type,
+            bitnumber_params<underlying_type>{}
+         >;
+         // MSVC is choking on attempts at using the reflex enum as the bitnumber's value type
+         // it also isn't reporting any useful error information and i have better things to do than try and figure out what it's thinking
+         // just use the underlying type
+
       public:
          std::optional<value_type> icon;
 
@@ -28,7 +39,7 @@ namespace halo::reach::megalo::operands {
                this->icon.reset();
                return;
             }
-            bitnumber<bitcount, value_type> index;
+            bitnumber_type index;
             stream.read(index);
             this->icon = value_type::from_int(index);
          }

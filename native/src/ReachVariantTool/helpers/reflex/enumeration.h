@@ -109,21 +109,22 @@ namespace cobb::reflex {
          template<typename Subset> requires has_subset<Subset> static constexpr auto name_of_subset = member_list::template subset_name<Subset>();
 
          static constexpr auto all_names = member_list::all_names();
-         static constexpr auto all_underlying_values = member_list::all_underlying_values();
-         static constexpr auto all_metadata = member_list::all_metadata();
+         static constexpr auto all_underlying_values = member_list::all_underlying_values;
+         static constexpr auto all_metadata = member_list::all_metadata;
 
       public:
          constexpr enumeration() {}
-         explicit constexpr enumeration(underlying_type v) { return from_int(v); }
-         template<typename V> requires std::is_convertible_v<V, underlying_type> constexpr static enumeration from_int(V v) {
-            enumeration out;
-            out._value = v;
-            return out;
-         }
+         explicit constexpr enumeration(underlying_type v) : _value(v) {}
          template<typename V> requires has_subset<V> constexpr enumeration(const V& v) {
             constexpr auto base = underlying_value_of<name_of_subset<V>>;
             //
             this->_value = base + (underlying_type)(v.to_int() - V::min_underlying_value);
+         }
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type> constexpr static enumeration from_int(V v) {
+            enumeration out;
+            out._value = v;
+            return out;
          }
 
          constexpr underlying_type to_int() const {
@@ -167,7 +168,7 @@ namespace cobb::reflex {
          static constexpr enumeration max_value() { return from_int(max_underlying_value); }
 
          static constexpr underlying_type underlying_value_range = max_underlying_value - min_underlying_value + 1;
-         static constexpr size_t value_count = member_list::value_count();
+         static constexpr size_t value_count = member_list::value_count;
 
          template<cs Name, auto Detail = impl::enumeration::underlying_value_of::no_detail{}>
          requires (has<Name> && impl::enumeration::underlying_value_of::detail_is_valid<enumeration, Name, std::decay_t<decltype(Detail)>>)

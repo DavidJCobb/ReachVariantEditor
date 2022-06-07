@@ -1,7 +1,7 @@
 #pragma once
 #include "helpers/cs.h"
 #include "helpers/reflex/enumeration.h"
-#include "halo/reach/bitstreams.fwd.h"
+#include "halo/reach/bitstreams.h"
 #include "../operand_typeinfo.h"
 #include "../operand.h"
 
@@ -23,7 +23,7 @@ namespace halo::reach::megalo::operands {
 
       protected:
          using bitnumber_type = bitnumber<
-            std::bit_width(std::max(1, value_type::value_count - 1)),
+            std::bit_width(std::max((size_t)1, value_type::value_count - 1)),
             underlying_type,
             bitnumber_params<underlying_type>{
                .offset = (value_type::min_underlying_value < 0 ? -value_type::min_underlying_value : 0),

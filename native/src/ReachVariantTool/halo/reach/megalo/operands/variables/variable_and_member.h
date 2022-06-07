@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "helpers/cs.h"
 #include "halo/reach/bitstreams.h"
 #include "../../operand.h"
@@ -32,11 +33,13 @@ namespace halo::reach::megalo::operands::variables {
          >;
 
       public:
-         base_type* owner = nullptr;
+         std::unique_ptr<base_type> owner = nullptr;
          index_type index;
 
          virtual void read(bitreader& stream) override {
-            stream.read(owner);
+            if (!owner)
+               owner = std::make_unique<base_type>();
+            stream.read(*owner.get());
             stream.read(index);
          }
    };

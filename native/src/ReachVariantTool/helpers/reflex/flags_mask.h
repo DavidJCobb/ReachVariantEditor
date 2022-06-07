@@ -106,7 +106,7 @@ namespace cobb::reflex {
          template<cs Name> static constexpr bool has = (index_of<Name> != _index_of_none);
 
          static constexpr auto all_underlying_values = [](){
-            constexpr auto meta = member_list::all_entry_details();
+            constexpr auto meta = member_list::all_entry_details;
             //
             std::array<underlying_type, meta.size()> out = {};
             for (size_t i = 0; i < meta.size(); ++i)
@@ -128,7 +128,7 @@ namespace cobb::reflex {
             std::array<metadata_type, size> out = {};
             if constexpr (member_list::uniform_metadata_types) {
                constexpr auto meta = member_list::all_metadata();
-               for (const auto& item : member_list::all_entry_details()) {
+               for (const auto& item : member_list::all_entry_details) {
                   //out[item.flag_index] = meta[item.type_index];
                   // 
                   // IntelliSense thinks the array element is const, yet also doesn't fail static assertions 
@@ -143,7 +143,7 @@ namespace cobb::reflex {
          static constexpr underlying_type metadata_presence_per_bit = [](){
             underlying_type out = {};
             if constexpr (member_list::uniform_metadata_types) {
-               for (const auto& item : member_list::all_entry_details())
+               for (const auto& item : member_list::all_entry_details)
                   if (item.has_metadata)
                      out |= underlying_type(1) << item.flag_index;
             }
@@ -158,7 +158,7 @@ namespace cobb::reflex {
             size_t i = 0;
             cobb::tuple_foreach<member_list::as_tuple>([&i, &out]<typename Current>() {
                if constexpr (member_concepts::named<Current>) {
-                  for (auto& item : member_list::all_entry_details()) {
+                  for (auto& item : member_list::all_entry_details) {
                      if (item.type_index == i) {
                         out[item.flag_index] = Current::name.c_str();
                         break;
@@ -172,7 +172,7 @@ namespace cobb::reflex {
 
       public:
          constexpr flags_mask() {}
-         explicit constexpr flags_mask(underlying_type v) { return from_int(v); }
+         explicit constexpr flags_mask(underlying_type v) : _value(v) {}
          template<typename V> requires std::is_convertible_v<V, underlying_type> constexpr static flags_mask from_int(V v) {
             flags_mask out;
             out._value = v;

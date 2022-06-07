@@ -37,7 +37,7 @@ namespace halo::reach {
             static constexpr bool    optional = Optional;
             static constexpr int32_t offset   = optional ? 1 : 0;
             static constexpr auto params = bitnumber_params<int32_t>{
-                  .offset = offset,
+               .offset = offset,
             };
             //
             using type = bitnumber<

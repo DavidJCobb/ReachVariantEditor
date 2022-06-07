@@ -106,7 +106,7 @@ namespace halo {
          template<typename V> requires std::is_convertible_v<V, underlying_type> bitnumber(V v) : value(underlying_type(v)) {};
 
       protected:
-         underlying_type value = params.initial;
+         underlying_type value = underlying_type(params.initial);
          
       protected:
          template<class Stream> requires impl::bitnumber::read_bitstream<Stream, underlying_uint>
@@ -117,9 +117,9 @@ namespace halo {
             if (bit == params.presence.value())
                return true;
             if constexpr (params.if_absent.has_value()) {
-               this->value = params.if_absent.value();
+               this->value = underlying_type(params.if_absent.value());
             } else {
-               this->value = params.initial;
+               this->value = underlying_type(params.initial); // need to use constructor syntax if the type has an explicit constructor from int
             }
             return false;
          }

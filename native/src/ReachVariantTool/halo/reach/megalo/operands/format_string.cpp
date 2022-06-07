@@ -15,19 +15,19 @@ namespace halo::reach::megalo::operands {
          case token_type::none:
             break;
          case token_type::number:
-            this->variable = new variables::number;
+            this->variable.reset(new variables::number);
             break;
          case token_type::object:
-            this->variable = new variables::object;
+            this->variable.reset(new variables::object);
             break;
          case token_type::player:
-            this->variable = new variables::player;
+            this->variable.reset(new variables::player);
             break;
          case token_type::team:
-            this->variable = new variables::team;
+            this->variable.reset(new variables::team);
             break;
          case token_type::timer:
-            this->variable = new variables::timer;
+            this->variable.reset(new variables::timer);
             break;
          default:
             if constexpr (bitreader::has_load_process) {
@@ -35,7 +35,7 @@ namespace halo::reach::megalo::operands {
             }
             return;
       }
-      if (this->variable)
+      if (this->variable.get())
          this->variable->read(stream);
    }
 

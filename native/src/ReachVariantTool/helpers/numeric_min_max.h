@@ -1,5 +1,6 @@
 #pragma once
 #include <limits>
+#include <type_traits>
 
 namespace cobb {
    template<typename First, typename... Rest> requires (sizeof...(Rest) > 0)
@@ -17,7 +18,8 @@ namespace cobb {
 
    namespace impl::numeric_min_max {
       template<typename T> concept collection = requires(const T& list) {
-      typename T::value_type;
+         typename T::value_type;
+         requires std::is_arithmetic_v<typename T::value_type>;
          { list.begin() };
          { list.end() };
          { ++(list.begin()) };

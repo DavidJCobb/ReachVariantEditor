@@ -53,7 +53,7 @@ namespace cobb::reflex::impl::flags_mask {
          >;
       }
 
-      static constexpr auto all_entry_details() {
+      static constexpr auto all_entry_details = []() {
          std::array<entry_details, flag_count()> out = {};
          //
          size_t flag_index  = -1;
@@ -95,20 +95,20 @@ namespace cobb::reflex::impl::flags_mask {
          });
          //
          return out;
-      };
+      }();
 
       // ---
 
       static constexpr size_t lowest_flag_index() {
          size_t i = std::numeric_limits<size_t>::max();
-         for (auto& details : all_entry_details())
+         for (auto& details : all_entry_details)
             if (i > details.flag_index)
                i = details.flag_index;
          return i;
       }
       static constexpr size_t highest_flag_index() {
          size_t i = 0;
-         for (auto& details : all_entry_details())
+         for (auto& details : all_entry_details)
             if (i < details.flag_index)
                i = details.flag_index;
          return i;
@@ -129,7 +129,7 @@ namespace cobb::reflex::impl::flags_mask {
 
       template<cobb::cs Name> static constexpr size_t base_flag_index_of() {
          constexpr auto index = member_list::template index_of<Name>();
-         for (const auto& item : member_list::all_entry_details())
+         for (const auto& item : member_list::all_entry_details)
             if (item.type_index == index)
                return item.flag_index;
          cobb::unreachable();
