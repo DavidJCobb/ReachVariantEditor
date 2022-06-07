@@ -1,6 +1,8 @@
 #include "hud_meter_parameters.h"
 #include "halo/reach/bitstreams.h"
 
+#include "halo/reach/megalo/load_process_messages/operand/hud_meter_parameters/bad_type.h"
+
 namespace halo::reach::megalo::operands {
    void hud_meter_parameters::read(bitreader& stream) {
       stream.read(type);
@@ -20,7 +22,9 @@ namespace halo::reach::megalo::operands {
             break;
          default:
             if constexpr (bitreader::has_load_process) {
-               static_assert(false, "TODO: emit fatal error");
+               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::hud_meter_parameters::bad_type>({
+                  .type_value = (size_t)type.to_int(),
+               });
             }
             return;
       }

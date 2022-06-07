@@ -60,10 +60,10 @@ namespace cobb::reflex {
 
       public:
          constexpr massive_enumeration() {}
-         explicit constexpr massive_enumeration(underlying_type v) { return from_int(v); }
+         explicit constexpr massive_enumeration(underlying_type v) : _value(v) {}
 
          template<typename V> requires std::is_convertible_v<V, underlying_type> constexpr static massive_enumeration from_int(V v) {
-            enumeration out;
+            massive_enumeration out;
             out._value = v;
             return out;
          }

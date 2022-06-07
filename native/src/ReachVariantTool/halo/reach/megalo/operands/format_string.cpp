@@ -7,6 +7,9 @@
 #include "variables/team.h"
 #include "variables/timer.h"
 
+#include "halo/reach/megalo/load_process_messages/operand/format_string/bad_token_type.h"
+#include "halo/reach/megalo/load_process_messages/operand/format_string/token_count_too_large.h"
+
 namespace halo::reach::megalo::operands {
    void format_string::token::read(bitreader& stream) {
       token_type_bitnumber type;
@@ -31,7 +34,9 @@ namespace halo::reach::megalo::operands {
             break;
          default:
             if constexpr (bitreader::has_load_process) {
-               static_assert(false, "TODO: emit fatal error");
+               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::format_string::bad_token_type>({
+                  .type_value = (size_t)type,
+               });
             }
             return;
       }
@@ -46,7 +51,10 @@ namespace halo::reach::megalo::operands {
       );
       if (this->token_count > max_token_count) {
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "TODO: emit fatal error");
+            stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::format_string::token_count_too_large>({
+               .count     = (size_t)this->token_count,
+               .max_count = max_token_count,
+            });
          }
          return;
       }

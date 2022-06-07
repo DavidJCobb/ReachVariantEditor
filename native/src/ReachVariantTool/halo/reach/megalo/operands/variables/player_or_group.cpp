@@ -1,6 +1,8 @@
 #include "player_or_group.h"
 #include "halo/reach/bitstreams.h"
 
+#include "halo/reach/megalo/load_process_messages/operand/player_or_group/bad_type.h"
+
 namespace halo::reach::megalo::operands {
    namespace variables {
       void player_or_group::read(bitreader& stream) {
@@ -18,7 +20,9 @@ namespace halo::reach::megalo::operands {
                break;
             default:
                if constexpr (bitreader::has_load_process) {
-                  static_assert(false, "TODO: emit fatal error");
+                  stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::player_or_group::bad_type>({
+                     .type_value = (size_t)which,
+                  });
                }
                return;
 

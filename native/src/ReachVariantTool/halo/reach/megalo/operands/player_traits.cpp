@@ -3,6 +3,8 @@
 
 #include "halo/reach/megalo/variant_data.h"
 
+#include "halo/reach/megalo/load_process_messages/operand/player_traits/index_out_of_max_bounds.h"
+
 namespace halo::reach::megalo::operands {
    void player_traits::read(bitreader& stream) {
       this->value = nullptr;
@@ -16,7 +18,10 @@ namespace halo::reach::megalo::operands {
       auto& list = vd->script.traits;
       if (index >= limits::script_traits) {
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "TODO: report out-of-bounds player trait set");
+            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::operands::player_traits::index_out_of_max_bounds>({
+               .maximum = limits::script_traits - 1,
+               .value   = (size_t)index,
+            });
          }
          return;
       }

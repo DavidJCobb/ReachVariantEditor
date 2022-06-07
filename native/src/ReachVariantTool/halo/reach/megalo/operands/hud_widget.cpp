@@ -3,6 +3,8 @@
 
 #include "halo/reach/megalo/variant_data.h"
 
+#include "halo/reach/megalo/load_process_messages/operand/hud_widget/index_out_of_max_bounds.h"
+
 namespace halo::reach::megalo::operands {
    void hud_widget::read(bitreader& stream) {
       this->value = nullptr;
@@ -18,7 +20,10 @@ namespace halo::reach::megalo::operands {
       auto& list = vd->script.widgets;
       if (index >= limits::script_widgets) {
          if constexpr (bitreader::has_load_process) {
-            static_assert(false, "TODO: report out-of-bounds widget");
+            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::operands::hud_widget::index_out_of_max_bounds>({
+               .maximum = limits::script_widgets - 1,
+               .value   = (size_t)index,
+            });
          }
          return;
       }

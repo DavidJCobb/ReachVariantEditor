@@ -16,7 +16,7 @@ namespace halo::reach::megalo::operands {
       public:
          bitnumber<
             std::bit_width(limits::triggers - 1),
-            int32_t
+            size_t
          > index;
 
          virtual void read(bitreader& stream) override;
