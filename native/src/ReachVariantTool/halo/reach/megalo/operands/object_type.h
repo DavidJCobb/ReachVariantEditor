@@ -8,7 +8,7 @@
 namespace halo::reach::megalo::operands {
    class object_type : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "object_type",
          };
 

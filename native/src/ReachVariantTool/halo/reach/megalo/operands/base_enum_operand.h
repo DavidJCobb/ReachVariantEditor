@@ -14,12 +14,16 @@ namespace halo::reach::megalo::operands {
    class base_enum_operand : public operand {
       public:
          static constexpr auto name = Name;
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = name.c_str(),
          };
 
          using value_type = T;
-         using underlying_type = value_type::underlying_type;
+         using underlying_type = std::conditional_t<
+            T::min_underlying_value < 0,
+            typename value_type::underlying_type,
+            std::make_unsigned_t<typename value_type::underlying_type>
+         >;
 
       protected:
          using bitnumber_type = bitnumber<

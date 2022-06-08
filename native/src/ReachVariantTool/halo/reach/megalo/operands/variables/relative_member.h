@@ -10,7 +10,7 @@ namespace halo::reach::megalo::operands::variables {
    template<cobb::cs Name, variable_scope Scope, variable_type Member>
    class relative_member : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = Name.c_str(),
          };
 

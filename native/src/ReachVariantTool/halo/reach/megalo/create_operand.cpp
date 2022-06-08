@@ -8,21 +8,24 @@ namespace halo::reach::megalo {
       using operand_spawn_function = operand* (*)();
 
       struct operand_type_table_entry {
-         const operand_typeinfo* typeinfo;
-         operand_spawn_function  spawn;
+         const operand_typeinfo& typeinfo = operand_types::no_type;
+         operand_spawn_function  spawn    = nullptr;
       };
 
       template<typename T> operand* _spawn() { return new T; }
 
-      constexpr auto operand_type_table = [](){
+      static constexpr auto operand_type_table = [](){
          std::array<operand_type_table_entry, std::tuple_size_v<all_operands_tuple>> out = {};
          //
          size_t i = 0;
          cobb::tuple_foreach<all_operands_tuple>([&out, &i]<typename Type>() {
-            out[i++] = {
-               .typeinfo = &Type::typeinfo,
-               .spawn    = &_spawn<Type>,
-            };
+            std::construct_at(
+               &out[i++],
+               operand_type_table_entry{
+                  .typeinfo = Type::typeinfo,
+                  .spawn    = &_spawn<Type>,
+               }
+            );
          });
          return out;
       }();
@@ -30,7 +33,7 @@ namespace halo::reach::megalo {
 
    extern operand* create_operand(const operand_typeinfo& info) {
       for (auto& item : operand_type_table) {
-         if (item.typeinfo == &info)
+         if (item.typeinfo == info)
             return (item.spawn)();
       }
       return nullptr;

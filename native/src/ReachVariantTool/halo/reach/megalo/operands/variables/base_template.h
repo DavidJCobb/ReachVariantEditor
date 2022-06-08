@@ -21,7 +21,7 @@ namespace halo::reach::megalo::operands::variables {
    > class base : public unknown_type {
       public:
          static constexpr variable_type type = Type;
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = Name.c_str(),
          };
 

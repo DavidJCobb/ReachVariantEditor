@@ -1,4 +1,5 @@
 #pragma once
+#include <bit>
 #include <cstring>
 #include <type_traits>
 
@@ -20,6 +21,6 @@ namespace cobb {
          ++a;
          ++b;
       }
-      return *(const UT*)a - *(const UT*)b;
+      return std::bit_cast<UT>(*a) - std::bit_cast<UT>(*b);
    }
 }

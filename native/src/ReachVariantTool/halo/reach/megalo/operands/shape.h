@@ -9,7 +9,7 @@
 namespace halo::reach::megalo::operands {
    class shape : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "shape",
          };
       public:

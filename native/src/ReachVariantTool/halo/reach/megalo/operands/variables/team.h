@@ -56,7 +56,7 @@ namespace halo::reach::megalo::operands {
          team_registers
       > {
          public:
-            static constexpr operand_typeinfo typeinfo = {
+            inline static constexpr operand_typeinfo typeinfo = {
                .internal_name = "team",
                .static_count  = 8,
             };

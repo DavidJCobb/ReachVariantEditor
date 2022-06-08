@@ -91,7 +91,7 @@ namespace halo::util {
          template<typename It> It _iterator_at(const size_type i) const noexcept {
             if (this->empty())
                return It(nullptr);
-            auto v = const_cast<value_type**>((value_type** const)&this->_data[i]);
+            auto v = const_cast<value_type**>(&this->_data[0] + i);
             return It(v);
          }
 

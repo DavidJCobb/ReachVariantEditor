@@ -10,7 +10,7 @@
 namespace halo::reach::megalo::operands {
    class waypoint_icon : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "waypoint_icon",
          };
 

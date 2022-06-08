@@ -6,7 +6,7 @@
 namespace halo::reach::megalo::operands {
    class player_req_palette : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "player_req_palette",
          };
 

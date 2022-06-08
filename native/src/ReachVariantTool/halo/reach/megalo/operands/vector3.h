@@ -6,7 +6,7 @@
 namespace halo::reach::megalo::operands {
    class vector3 : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "vector3",
          };
 

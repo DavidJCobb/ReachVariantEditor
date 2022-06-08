@@ -23,7 +23,7 @@ namespace halo::reach {
             if constexpr (bitreader::has_load_process) {
                auto message_data = halo::common::load_process_messages::player_trait_out_of_bounds_message_content{
                   .trait       = Id,
-                  .value       = vi,
+                  .value       = (int)vi,
                   .allowed_min = info.min,
                   .allowed_max = info.max,
                };

@@ -6,7 +6,7 @@
 namespace halo::reach::megalo::operands {
    class fireteam_list : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "fireteam_list",
          };
 

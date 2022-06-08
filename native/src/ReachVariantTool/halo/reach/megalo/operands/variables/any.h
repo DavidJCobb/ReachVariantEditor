@@ -6,7 +6,7 @@ namespace halo::reach::megalo::operands {
    namespace variables {
       class any : public operand {
          public:
-            static constexpr operand_typeinfo typeinfo = {
+            inline static constexpr operand_typeinfo typeinfo = {
                .internal_name = "any_variable",
             };
 

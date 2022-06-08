@@ -10,7 +10,7 @@
 namespace halo::reach::megalo::operands {
    class hud_meter_parameters : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "hud_meter_parameters",
          };
       public:

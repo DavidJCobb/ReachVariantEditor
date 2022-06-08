@@ -6,7 +6,7 @@
 namespace halo::reach::megalo::operands {
    namespace variables {
       void player_or_group::read(bitreader& stream) {
-         bitnumber<3, int> which;
+         bitnumber<3, unsigned int> which;
          stream.read(which);
          switch (which) {
             case 0:

@@ -3,7 +3,7 @@
 #include "../../trait_information.h"
 
 namespace halo::reach::traits {
-   enum class shield_multiplier {
+   enum class shield_multiplier : uint8_t {
       unchanged = 0,
       value_000 = 1,
       value_100 = 2,

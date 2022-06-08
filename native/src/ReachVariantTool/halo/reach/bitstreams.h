@@ -68,6 +68,10 @@ namespace halo::reach {
             string_index<true> index;
             base_type::read(index);
             if (this->main_string_table) {
+               if (index < 0) {
+                  ref = nullptr;
+                  return;
+               }
                ref = this->main_string_table->string_by_index(index);
             } else {
                ref = nullptr;

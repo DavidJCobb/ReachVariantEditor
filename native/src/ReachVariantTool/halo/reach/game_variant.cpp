@@ -11,6 +11,7 @@
 #include "halo/reach/load_process_messages/not_a_game_variant.h"
 
 #include "firefight/variant_data.h"
+#include "megalo/variant_data.h"
 
 namespace halo::reach {
    void game_variant_data::read(bitreader& stream) {
@@ -134,6 +135,7 @@ namespace halo::reach {
                            //
                            static_assert(false, "TODO: FINISH ME");
                         #endif
+                        this->data = new megalo_variant_data();
                         break;
                      case game_variant_type::firefight:
                         this->data = new firefight_variant_data();

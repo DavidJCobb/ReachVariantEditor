@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::file_block&lt;*&gt;">
+      <DisplayString Condition="$T2 == 0">block $T1</DisplayString>
+      <DisplayString>block $T1 with expected size $T2</DisplayString>
+   </Type>
+</AutoVisualizer>

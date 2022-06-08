@@ -9,7 +9,7 @@
 namespace halo::reach::megalo::operands {
    class player_set : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "player_set",
          };
 

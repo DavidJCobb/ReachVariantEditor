@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "helpers/string/strcmp.h"
 
 namespace halo::reach::megalo {
    class operand_typeinfo {
@@ -20,7 +21,7 @@ namespace halo::reach::megalo {
       public:
          uint32_t    flags         = 0;
          const char* friendly_name = nullptr; // translation key to pass to QObject::tr
-         const char* internal_name = nullptr;
+         const char* internal_name = nullptr; // unique identifier for the typeinfo
          uint8_t     static_count  = 0; // e.g. 8 for player[7]
 
          constexpr bool can_be_static() const noexcept {
@@ -31,6 +32,12 @@ namespace halo::reach::megalo {
          }
          constexpr bool can_have_variables() const noexcept {
             return this->flags & flag::can_hold_variables;
+         }
+
+         // identity comparisons are broken for constexpr objects when those objects are 
+         // referred to from different places.
+         constexpr bool operator==(const operand_typeinfo& o) const {
+            return cobb::strcmp(internal_name, o.internal_name) == 0;
          }
    };
 

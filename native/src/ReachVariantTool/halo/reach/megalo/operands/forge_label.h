@@ -11,7 +11,7 @@
 namespace halo::reach::megalo::operands {
    class forge_label : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "forge_label",
          };
 

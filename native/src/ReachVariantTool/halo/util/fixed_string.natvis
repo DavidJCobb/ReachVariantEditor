@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::util::fixed_string&lt;*&gt;">
+      <DisplayString Condition="sizeof($T1) == 1">{&amp;_data,s}</DisplayString>
+      <DisplayString Condition="sizeof($T1) == 2">{&amp;_data,su}</DisplayString>
+   </Type>
+</AutoVisualizer>

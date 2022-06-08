@@ -8,7 +8,7 @@
 namespace halo::reach::megalo::operands {
    class variant_string : public operand {
       public:
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = "variant_string",
          };
 

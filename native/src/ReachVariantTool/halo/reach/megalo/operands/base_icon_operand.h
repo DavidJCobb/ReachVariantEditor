@@ -14,7 +14,7 @@ namespace halo::reach::megalo::operands {
 
          using value_type = T;
 
-         static constexpr operand_typeinfo typeinfo = {
+         inline static constexpr operand_typeinfo typeinfo = {
             .internal_name = name.c_str(),
          };
 

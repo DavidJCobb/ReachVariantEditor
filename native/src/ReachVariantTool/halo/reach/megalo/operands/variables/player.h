@@ -42,7 +42,7 @@ namespace halo::reach::megalo::operands {
          player_registers
       > {
          public:
-            static constexpr operand_typeinfo typeinfo = {
+            inline static constexpr operand_typeinfo typeinfo = {
                .internal_name = "player",
                .static_count  = 16,
             };

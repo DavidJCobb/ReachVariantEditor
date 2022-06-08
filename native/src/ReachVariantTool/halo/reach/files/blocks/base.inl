@@ -10,7 +10,7 @@
 namespace halo::reach {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_error_if_eof(bytereader& stream) {
       if constexpr (bytereader::has_load_process) {
-         if (!stream.is_at_end())
+         if (stream.get_overshoot() == 0)
             return;
          stream.load_process().emit_error<halo::common::load_process_messages::file_block_unexpected_end>({
             .block = {

@@ -80,6 +80,17 @@ namespace halo {
       };
    }
 
+   //
+   // Helper for bitstreams; creates a number that will be read with a given bitcount. 
+   // Features include:
+   // 
+   //  - If the underlying type is signed (including an enum with a signed underlying 
+   //    type, so be careful), then the highest bit is a sign bit.
+   // 
+   //  - Supports a "presence/absence" bit
+   // 
+   //  - Supports an offset subtracted/added on load/save
+   //
    template<
       size_t Bitcount,
       typename Underlying,

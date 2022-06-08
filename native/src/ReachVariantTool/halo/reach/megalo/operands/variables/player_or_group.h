@@ -7,7 +7,7 @@ namespace halo::reach::megalo::operands {
    namespace variables {
       class player_or_group : public operand {
          public:
-            static constexpr operand_typeinfo typeinfo = {
+            inline static constexpr operand_typeinfo typeinfo = {
                .internal_name = "player_or_group",
             };
 

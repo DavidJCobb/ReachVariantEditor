@@ -3,7 +3,7 @@
 #include "../../trait_information.h"
 
 namespace halo::reach::traits {
-   enum class health_multiplier {
+   enum class health_multiplier : unsigned int {
       unchanged = 0,
       value_000 = 1,
       value_100 = 2,

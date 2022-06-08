@@ -239,9 +239,12 @@ namespace halo {
                auto& current_offsets = offsets[i];
                for (size_t j = 0; j < current_offsets.size(); j++) {
                   auto off = current_offsets[j];
+                  if (off == -1 || off == 0) { // game skips these values
+                     continue;
+                  }
                   if (off < 0) {
                      //
-                     // Negative offsets fail validation in-game.
+                     // Negative offsets (besides -1) fail validation in-game.
                      //
                      if constexpr (load_process_is_valid) {
                         stream.load_process().template emit_error<halo::common::load_process_messages::string_table_entry_offset_out_of_bounds>({
