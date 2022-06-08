@@ -8,8 +8,8 @@
 
 namespace halo::reach::megalo {
    struct player_trait_set : public trait_set, public util::passively_refcounted, public util::dummyable, public util::indexed{
-      string_ref_optional name;
-      string_ref_optional desc;
+      string_ref name; // run-time validation permits index -1, but these values aren't read as if they're optional (no offset)
+      string_ref desc; // run-time validation permits index -1, but these values aren't read as if they're optional (no offset)
 
       void read(bitreader&);
    };

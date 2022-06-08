@@ -135,14 +135,19 @@ namespace halo::reach::megalo::operands::variables {
          indexed_data_variant indexed_data = std::monostate{};
 
          virtual void read(bitreader& stream) override {
-            impl::base::read_target_id(stream, std::bit_width((std::max)((size_t)1, target_count - 1)));
+            impl::base::read_target_id(stream, target_count);
             //
             const target_metadata& metadata = all_target_metadata[this->target_id];
             if (metadata.has_which()) {
                impl::base::read_which(stream, metadata.scopes.outer.value());
             }
             if (metadata.has_index()) {
-               impl::base::read_index(stream, all_target_index_bitcounts[this->target_id]);
+               auto index_bc = all_target_index_bitcounts[this->target_id];
+               if (metadata.type == target_type::immediate) {
+                  impl::base::read_immediate(stream, index_bc);
+               } else {
+                  impl::base::read_index(stream, index_bc);
+               }
                //
                // TODO: We can't validate indices if we're only keeping bitcounts. We should keep 
                //       maximums instead, falling back to bitcounts for immediates only.

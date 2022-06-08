@@ -9,7 +9,12 @@
 namespace halo::reach::megalo::operands::variables {
    namespace impl {
       void base::read_target_id(bitreader& stream, size_t target_count) {
-         this->target_id = stream.read_bits(std::bit_width(target_count - 1));
+         this->target_id = stream.read_bits(
+            std::max(
+               (size_t)1, 
+               std::bit_width(target_count - 1)
+            )
+         );
          if (this->target_id >= target_count) {
             if constexpr (bitreader::has_load_process) {
                stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::variable_base::bad_target>({
@@ -40,7 +45,12 @@ namespace halo::reach::megalo::operands::variables {
       void base::read_index(bitreader& stream, size_t bitcount) {
          if (!bitcount)
             return;
-         this->index = stream.read_bits(bitcount);
+         this->index = stream.read_bits<uint16_t>(bitcount);
+      }
+      void base::read_immediate(bitreader& stream, size_t bitcount) {
+         if (!bitcount)
+            return;
+         this->index = stream.read_bits<int16_t>(bitcount);
       }
    }
 }

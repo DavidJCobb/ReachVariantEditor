@@ -11,7 +11,6 @@ namespace halo::reach::megalo::operands {
             };
 
          public:
-            bitnumber<3, variable_type> type;
             unknown_type* value = nullptr;
 
             virtual void read(bitreader& stream) override;

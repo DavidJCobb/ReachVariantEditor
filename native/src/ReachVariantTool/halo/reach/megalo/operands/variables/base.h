@@ -16,7 +16,8 @@ namespace halo::reach::megalo::operands::variables {
          protected:
             void read_target_id(bitreader&, size_t target_count);
             void read_which(bitreader&, variable_scope which);
-            void read_index(bitreader&, size_t bitcount);
+            void read_index(bitreader&, size_t bitcount); // forces unsigned
+            void read_immediate(bitreader&, size_t bitcount); // forces signed
 
             virtual variable_type get_type() const = 0;
       };

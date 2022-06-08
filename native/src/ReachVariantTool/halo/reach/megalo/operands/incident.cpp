@@ -5,6 +5,9 @@ namespace halo::reach::megalo::operands {
    void incident::read(bitreader& stream) {
       bitnumber_type bn;
       stream.read(bn);
-      this->value = value_type::from_int((int32_t)bn);
+      //
+      auto to_signed = (int32_t)(bn); // HACK until bitnumber's sign handling is made less awful
+      //
+      this->value = value_type::from_int(to_signed);
    }
 }

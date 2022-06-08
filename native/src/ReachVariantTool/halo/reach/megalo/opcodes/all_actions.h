@@ -924,7 +924,11 @@ namespace halo::reach::megalo {
          .operands = {
             opcode_function::operand_info{
                .typeinfo = operands::variables::object::typeinfo,
-               .name     = "context",
+               .name     = "a",
+            },
+            opcode_function::operand_info{
+               .typeinfo = operands::variables::object::typeinfo,
+               .name     = "b",
             },
             opcode_function::operand_info{
                .typeinfo     = operands::variables::number::typeinfo,

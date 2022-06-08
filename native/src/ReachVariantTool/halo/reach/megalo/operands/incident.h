@@ -6,6 +6,8 @@
 #include "../operand_typeinfo.h"
 #include "../operand.h"
 
+#include "../limits.h"
+
 namespace halo::reach::megalo::operands {
    class incident : public operand {
       public:
@@ -17,10 +19,10 @@ namespace halo::reach::megalo::operands {
 
       protected:
          using bitnumber_type = bitnumber<
-            std::bit_width(value_type::value_count),
-            value_type,
-            bitnumber_params<value_type>{
-               .initial = -1,
+            std::bit_width(limits::incident_types - 1),
+            uint32_t, // HACK until bitnumber's sign handling is made less awful
+            bitnumber_params<uint32_t>{
+               .initial = (uint32_t) -1, // cast is part of the HACK
                .offset  =  1,
             }
          >;

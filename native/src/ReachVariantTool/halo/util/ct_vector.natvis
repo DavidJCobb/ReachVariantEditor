@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::util::ct_vector&lt;*,*&gt;">
+      <DisplayString>{{ size={_size} }}</DisplayString>
+      <Expand>
+         <ArrayItems>
+            <Size>_size</Size>
+            <ValuePointer>&amp;_list[0]</ValuePointer>
+         </ArrayItems>
+         <Synthetic Name="[Empty Slots]" Condition="$T2 - _size > 0">
+            <DisplayString>{$T2 - _size} empty slots</DisplayString>
+            <Expand>
+               <ArrayItems>
+                  <Size>$T2 - _size</Size>
+                  <ValuePointer>&amp;_list[_size]</ValuePointer>
+               </ArrayItems>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+</AutoVisualizer>

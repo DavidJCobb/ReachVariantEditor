@@ -64,7 +64,10 @@ namespace halo::reach::megalo::operands {
 
          public:
             constexpr bool has_which() const {
-               return this->scopes.outer.has_value();
+               if (this->scopes.outer.has_value()) {
+                  return this->scopes.outer.value() != variable_scope::global;
+               }
+               return false;
             }
             constexpr bool has_index() const {
                switch (this->type) {

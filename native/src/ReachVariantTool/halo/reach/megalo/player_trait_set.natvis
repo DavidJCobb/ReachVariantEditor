@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::player_trait_set">
+      <DisplayString Condition="name.target != nullptr">script_traits[{index}] ({name.target-&gt;translations[0].data(),s})</DisplayString>
+      <DisplayString Condition="name.target == nullptr">script_traits[{index}] &lt;no name or name not yet loaded&gt;</DisplayString>
+      <Expand>
+         <ExpandedItem>name</ExpandedItem>
+         <ExpandedItem>desc</ExpandedItem>
+         <ExpandedItem>*(halo::reach::trait_set*)this,nd</ExpandedItem>
+      </Expand>
+   </Type>
+</AutoVisualizer>
