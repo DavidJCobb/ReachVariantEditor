@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::action">
+      <DisplayString Condition="function != nullptr">megalo action: {function->name,sb}</DisplayString>
+      <DisplayString Condition="function == nullptr">megalo action &lt;no function&gt;</DisplayString>
+      <Expand>
+         <ExpandedItem>*(halo::reach::megalo::opcode*)this,nd</ExpandedItem>
+      </Expand>
+   </Type>
+</AutoVisualizer>

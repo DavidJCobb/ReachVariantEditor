@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::base&lt;*&gt;">
+      <AlternativeType Name="halo::reach::megalo::operands::variables::base&lt;*,*,*&gt;" />
+      <DisplayString>{typeinfo.internal_name}</DisplayString>
+      <Expand>
+         <ExpandedItem>*(halo::reach::megalo::operands::variables::impl::base*)this,nd</ExpandedItem>
+      </Expand>
+   </Type>
+</AutoVisualizer>

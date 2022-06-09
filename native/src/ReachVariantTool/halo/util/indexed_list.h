@@ -105,13 +105,13 @@ namespace halo::util {
             this->_size = 0;
          }
 
-         const std::array<entry_type, max_count>& data() const { return _data; }
-         inline bool empty() const { return _size == 0; }
-         inline bool full() const { return _size >= max_count; }
-         inline size_type size() const { return _size; }
+         constexpr const std::array<entry_type, max_count>& data() const { return _data; }
+         constexpr bool empty() const { return _size == 0; }
+         constexpr bool full() const { return _size >= max_count; }
+         constexpr size_type size() const { return _size; }
 
-         inline reference operator[](size_type i) noexcept { return *this->_data[i]; }
-         inline const_reference operator[](size_type i) const noexcept { return *this->_data[i]; }
+         constexpr reference operator[](size_type i) noexcept { return *this->_data[i]; }
+         constexpr const_reference operator[](size_type i) const noexcept { return *this->_data[i]; }
 
          reference back()  noexcept { return operator[](this->_size - 1); }
          reference front() noexcept { return operator[](0); }

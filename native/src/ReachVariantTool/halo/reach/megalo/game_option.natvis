@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::game_option">
+      <DisplayString Condition="name.target != nullptr">script_option[{index}] ({name.target-&gt;translations[0].c_str(),s8})</DisplayString>
+      <DisplayString Condition="name.target == nullptr">script_option[{index}] &lt;no name or name not yet loaded&gt;</DisplayString>
+      <Expand>
+         <Item Name="name">name</Item>
+         <Item Name="desc">desc</Item>
+         <Synthetic Name="range" Condition="is_range.value == true">
+            <Expand>
+               <ExpandedItem>range</ExpandedItem>
+            </Expand>
+         </Synthetic>
+         <Synthetic Name="enumeration" Condition="is_range.value == false">
+            <Expand>
+               <Item Name="values">enumeration.values</Item>
+               <Item Name="current">enumeration.current,na</Item>
+               <Item Name="initial">enumeration.initial,na</Item>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+   <Type Name="halo::reach::megalo::game_option::enum_value">
+      <DisplayString Condition="name.target != nullptr">{value}: {name.target-&gt;translations[0].c_str(),s8}</DisplayString>
+      <DisplayString Condition="name.target == nullptr">{value}: &lt;no name or name not yet loaded&gt;</DisplayString>
+      <Expand>
+         <Item Name="name">name</Item>
+         <Item Name="desc">desc</Item>
+         <Item Name="value">value</Item>
+      </Expand>
+   </Type>
+</AutoVisualizer>

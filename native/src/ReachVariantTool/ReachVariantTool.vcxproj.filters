@@ -2258,5 +2258,9 @@
     <Natvis Include="halo\reach\megalo\player_trait_set.natvis" />
     <Natvis Include="halo\util\ct_vector.natvis" />
     <Natvis Include="helpers\reflex\flags_mask.natvis" />
+    <Natvis Include="halo\reach\megalo\opcode_function.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\vector3.natvis" />
+    <Natvis Include="halo\loc_string_table.natvis" />
+    <Natvis Include="halo\reach\arena_parameters.natvis" />
   </ItemGroup>
 </Project>

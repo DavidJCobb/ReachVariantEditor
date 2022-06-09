@@ -21,7 +21,7 @@ namespace halo::reach::megalo::operands {
       protected:
          using underlying_type = typename value_type::underlying_type;
          using bitnumber_type  = bitnumber<
-            std::bit_width(std::max((size_t)1, value_type::value_count - 1)),
+            bitcount,
             underlying_type,
             bitnumber_params<underlying_type>{}
          >;

@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
    <Type Name="cobb::reflex::flags_mask&lt;*&gt;">
-      <DisplayString>{_value}</DisplayString>
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*&gt;"
+      />
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*,*&gt;"
+      />
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*,*,*&gt;"
+      />
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*,*,*,*&gt;"
+      />
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*,*,*,*,*&gt;"
+      />
+      <AlternativeType
+         Name="cobb::reflex::flags_mask&lt;*,*,*,*,*,*,*&gt;"
+      />
+      <DisplayString>raw flags: {_value}</DisplayString>
       <Expand>
          <CustomListItems>
             <Variable Name="pName" InitialValue="(const char*)nullptr" />

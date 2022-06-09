@@ -867,7 +867,11 @@
   <ItemGroup>
     <Natvis Include="halo\bitnumber.natvis" />
     <Natvis Include="halo\loc_string_base.natvis" />
+    <Natvis Include="halo\loc_string_table.natvis" />
+    <Natvis Include="halo\reach\arena_parameters.natvis" />
     <Natvis Include="halo\reach\files\blocks\base.natvis" />
+    <Natvis Include="halo\reach\megalo\opcode_function.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\vector3.natvis" />
     <Natvis Include="halo\reach\megalo\player_trait_set.natvis" />
     <Natvis Include="halo\util\ct_vector.natvis" />
     <Natvis Include="halo\util\fixed_string.natvis" />

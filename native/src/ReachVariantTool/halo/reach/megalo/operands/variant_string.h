@@ -5,6 +5,8 @@
 #include "../operand_typeinfo.h"
 #include "../operand.h"
 
+#include "../limits.h"
+
 namespace halo::reach::megalo::operands {
    class variant_string : public operand {
       public:
@@ -55,7 +57,7 @@ namespace halo::reach::megalo::operands {
          >;
 
          using index_type = bitnumber<
-            std::bit_width((unsigned int)value_type::underlying_value_range),
+            std::bit_width(limits::variant_strings),
             value_type,
             bitnumber_params<value_type>{
                .initial  = -1,

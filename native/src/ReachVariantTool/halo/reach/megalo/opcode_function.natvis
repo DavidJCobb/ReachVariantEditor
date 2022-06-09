@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::opcode_function">
+      <DisplayString>function {name,s} with {operands.size()} operands</DisplayString>
+   </Type>
+   <Type Name="halo::reach::megalo::opcode_function::operand_info">
+      <DisplayString Condition="is_out_param">out {name,s} of type {typeinfo.internal_name,s}</DisplayString>
+      <DisplayString Condition="!is_out_param">in {name,s} of type {typeinfo.internal_name,s}</DisplayString>
+   </Type>
+</AutoVisualizer>

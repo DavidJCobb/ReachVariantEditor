@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::arena_parameters">
+      <Expand>
+         <Item Name="Rating Scale">values[0]</Item>
+         <Item Name="Kill Weight">values[1]</Item>
+         <Item Name="Assist Weight">values[2]</Item>
+         <Item Name="Betrayal Weight">values[3]</Item>
+         <Item Name="Death Weight">values[4]</Item>
+         <Item Name="Normalize by Max Kills">values[5]</Item>
+         <Item Name="Base">values[6]</Item>
+         <Item Name="Range">values[7]</Item>
+         <Item Name="Loss Scalar">values[8]</Item>
+         <Synthetic Name="Scripted Scoreboard Stats">
+            <DisplayString>{values[9]}, {values[10]}, {values[11]}, {values[12]}</DisplayString>
+            <Expand>
+               <ArrayItems>
+                  <Size>4</Size>
+                  <ValuePointer>&amp;values[9]</ValuePointer>
+               </ArrayItems>
+            </Expand>
+         </Synthetic>
+         <Synthetic Name="Reserved for Future Use">
+            <DisplayString>{values[13]}, {values[14]}</DisplayString>
+            <Expand>
+               <ArrayItems>
+                  <Size>2</Size>
+                  <ValuePointer>&amp;values[13]</ValuePointer>
+               </ArrayItems>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+</AutoVisualizer>

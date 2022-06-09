@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::vector3">
+      <DisplayString>megalo operand: vector3 ({x.to_int(),d}, {y.to_int(),d}, {z.to_int(),d})</DisplayString>
+   </Type>
+</AutoVisualizer>

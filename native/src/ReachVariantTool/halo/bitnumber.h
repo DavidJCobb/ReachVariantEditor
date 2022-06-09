@@ -183,7 +183,7 @@ namespace halo {
             stream.write(this->value);
          }
          
-         underlying_int to_int() const noexcept { return (underlying_int)this->value; } // printf helper to avoid C4477
+         constexpr underlying_int to_int() const noexcept { return (underlying_int)this->value; } // printf helper to avoid C4477
 
          #pragma region Operators
          bitnumber& operator=(const underlying_type& other);
@@ -196,10 +196,10 @@ namespace halo {
          bitnumber& operator&=(const underlying_type& other) requires (is_integer_type);
          bitnumber& operator^=(const underlying_type& other) requires (is_integer_type);
 
-         operator underlying_type() const noexcept { return this->value; }; // implicitly creates compare operators if underlying_type is integer
+         constexpr operator underlying_type() const noexcept { return this->value; }; // implicitly creates compare operators if underlying_type is integer
          #pragma endregion
 
-         template<typename T> explicit operator T() const noexcept { // needed for explicit enum-to-int casts
+         template<typename T> explicit constexpr operator T() const noexcept { // needed for explicit enum-to-int casts
             return (T)this->value;
          }
    };
