@@ -93,9 +93,9 @@ namespace halo::reach::custom_game_options {
    struct loadout {
       bitbool visible;
       bitnumber<7, loadout_name, bitnumber_params<loadout_name>{ .initial = loadout_name::none, .presence = false }> name;
-      bitnumber<8, traits::weapon>  weapon_primary   = traits::weapon::unchanged;
-      bitnumber<8, traits::weapon>  weapon_secondary = traits::weapon::unchanged;
-      bitnumber<8, traits::ability> ability = traits::ability::unchanged;
+      bitnumber<8, traits::weapon,  bitnumber_params<traits::weapon>{ .has_sign_bit = true }>  weapon_primary   = traits::weapon::unchanged;
+      bitnumber<8, traits::weapon,  bitnumber_params<traits::weapon>{ .has_sign_bit = true }>  weapon_secondary = traits::weapon::unchanged;
+      bitnumber<8, traits::ability, bitnumber_params<traits::ability>{ .has_sign_bit = true }> ability = traits::ability::unchanged;
       bitnumber<4, uint8_t> grenade_count;
 
       void read(bitreader&);

@@ -874,6 +874,7 @@
     <Natvis Include="halo\util\four_cc.natvis" />
     <Natvis Include="halo\util\refcount.natvis" />
     <Natvis Include="helpers\cs.natvis" />
+    <Natvis Include="helpers\reflex\flags_mask.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

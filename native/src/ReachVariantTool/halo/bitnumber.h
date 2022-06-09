@@ -41,10 +41,11 @@ namespace halo {
          using underlying_type = Underlying;
          using underlying_int  = impl::bitnumber::type_to_integer<underlying_type>::type;
 
+         bool has_sign_bit = false; // if true, the highest bit will be sign-extended on read
          optional<underlying_type> if_absent = {};
          underlying_type initial  = {};
-         underlying_int  offset   = underlying_int(0);
-         optional<bool>  presence = {};
+         underlying_int  offset   = underlying_int(0); // value subtracted post-read, and added pre-write
+         optional<bool>  presence = {}; // if true, value has a presence bit; if false, value has an absence bit
    };
    //
    // If Underlying is not a structural class type, then bitnumber params must take the underlying int type, if any.
@@ -56,6 +57,7 @@ namespace halo {
          using underlying_type = Underlying;
          using underlying_int  = impl::bitnumber::type_to_integer<underlying_type>::type;
 
+         bool has_sign_bit = false;
          optional<underlying_int> if_absent = {};
          underlying_int  initial  = underlying_int(0);
          underlying_int  offset   = underlying_int(0);
@@ -71,9 +73,9 @@ namespace halo {
          { stream.read(value) } -> std::same_as<Uint>;
       };
 
-      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value, bool write_as_signed) {
+      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value, bool has_sign_bit) {
          { stream.write_bits(value, bitcount) };
-         { stream.write_bits(value, bitcount, write_as_signed) };
+         { stream.write_bits(value, bitcount, has_sign_bit) };
       };
       template<typename Stream, typename Uint> concept write_bytestream = requires (Stream& stream, Uint value) {
          { stream.write(value) };
@@ -84,10 +86,9 @@ namespace halo {
    // Helper for bitstreams; creates a number that will be read with a given bitcount. 
    // Features include:
    // 
-   //  - If the underlying type is signed (including an enum with a signed underlying 
-   //    type, so be careful), then the highest bit is a sign bit.
-   // 
    //  - Supports a "presence/absence" bit
+   // 
+   //  - Supports extending a sign bit
    // 
    //  - Supports an offset subtracted/added on load/save
    //
@@ -108,7 +109,7 @@ namespace halo {
          static constexpr bool   has_presence    = params.presence.has_value();
          static constexpr bool   is_integer_type = std::is_same_v<underlying_type, underlying_int>;
          static constexpr bool   uses_offset     = params.offset != underlying_int(0);
-         static constexpr bool   write_as_signed = std::is_signed_v<underlying_int> && !has_presence && !uses_offset;
+         static constexpr bool   has_sign_bit    = params.has_sign_bit;
 
          static constexpr size_t max_bitcount = bitcount + (has_presence ? 1 : 0);
 
@@ -157,7 +158,7 @@ namespace halo {
             if (!this->_read_presence(stream))
                return;
             this->value = underlying_type((underlying_int)stream.read_bits<underlying_uint>(bitcount) - (uses_offset ? params.offset : 0));
-            if constexpr (write_as_signed)
+            if constexpr (has_sign_bit)
                //
                // We have to apply the sign bit ourselves, to ensure that Params::offset 
                // doesn't break for signed values.
@@ -174,7 +175,7 @@ namespace halo {
          void write(Stream& stream) const noexcept {
             if (!this->_write_presence(stream))
                return;
-            stream.write_bits((underlying_int)this->value + (uses_offset ? params.offset : 0), bitcount, write_as_signed);
+            stream.write_bits((underlying_int)this->value + (uses_offset ? params.offset : 0), bitcount, has_sign_bit);
          }
 
          template<class Stream> requires impl::bitnumber::write_bytestream<Stream, underlying_uint>
@@ -204,7 +205,13 @@ namespace halo {
    };
 
    template<typename T> requires ((std::is_arithmetic_v<T> && !std::is_floating_point_v<T>) || std::is_enum_v<T>)
-   using bytenumber = bitnumber<(sizeof(T) * 8), T>;
+   using bytenumber = bitnumber<
+      (sizeof(T) * 8),
+      T,
+      bitnumber_params<T>{
+         .has_sign_bit = !std::is_enum_v<T> && std::is_signed_v<T>, // enums apparently always test as unsigned regardless of underlying type, but let's make this explicit
+      }
+   >;
 }
 
 #include "./bitnumber.inl"

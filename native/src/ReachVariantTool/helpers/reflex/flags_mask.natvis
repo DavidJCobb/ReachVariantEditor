@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="cobb::reflex::flags_mask&lt;*&gt;">
+      <DisplayString>{_value}</DisplayString>
+      <Expand>
+         <CustomListItems>
+            <Variable Name="pName" InitialValue="(const char*)nullptr" />
+            <Variable Name="iIndex" InitialValue="0" />
+
+            <Size>flag_count</Size>
+            <Exec>pBucket = nullptr</Exec>
+            <Loop>
+               <If Condition="iIndex &lt;= max_flag_index">
+                  <Exec>pName = names_per_bit._Elems[iIndex]</Exec>
+                  <Break Condition="pName != nullptr" />
+                  <Exec>iIndex++</Exec>
+               </If>
+               <Item Condition="pName != nullptr" Name="{pName,s}">(_value &amp; (1u &lt;&lt; iIndex)) != 0</Item>
+               <Exec>iIndex++</Exec>
+            </Loop>
+         </CustomListItems>
+      </Expand>
+      <!--
+         Sadly, natvis doesn't seem to recognize the type at all. Even with just a simple 
+         definition that shows "test" as the DisplayString, nothing gets applied. Maybe 
+         the number or complexity of the template parameters is enough to make natvis 
+         fail to match variables' types to this definition?
+      -->
+   </Type>
+</AutoVisualizer>

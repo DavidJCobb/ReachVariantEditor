@@ -2257,5 +2257,6 @@
     <Natvis Include="halo\util\refcount.natvis" />
     <Natvis Include="halo\reach\megalo\player_trait_set.natvis" />
     <Natvis Include="halo\util\ct_vector.natvis" />
+    <Natvis Include="helpers\reflex\flags_mask.natvis" />
   </ItemGroup>
 </Project>

@@ -27,6 +27,7 @@ namespace halo::impl {
          .bitcount = 8,
          .min      = -4,
          .max      = 15,
+         .uses_sign_bit = true,
       });
    };
 }

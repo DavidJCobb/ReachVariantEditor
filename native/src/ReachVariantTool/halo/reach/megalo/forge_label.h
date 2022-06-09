@@ -22,8 +22,9 @@ namespace halo::reach::megalo {
          std::bit_width(limits::object_types),
          int32_t,
          bitnumber_params<int32_t>{
-            .initial = -1, // "none"
-            .offset  =  1,
+            .has_sign_bit = true,
+            .initial      = -1, // "none"
+            .offset       =  1,
          }
       >;
 

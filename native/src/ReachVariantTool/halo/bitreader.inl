@@ -108,8 +108,6 @@ namespace halo {
       using uT = std::make_unsigned_t<cobb::strip_enum_t<T>>;
       //
       uT result = this->_read_bits(bitcount);
-      if (std::is_signed_v<T>)
-         result = cobb::apply_sign_bit(result, bitcount);
       return (T)result;
    }
 

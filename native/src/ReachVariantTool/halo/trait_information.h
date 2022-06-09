@@ -33,6 +33,7 @@ namespace halo {
          type_erased_enum max = 0; // Highest enum value that the game considers valid.
          //
          bool uses_presence_bit = false;
+         bool uses_sign_bit     = false;
       };
    }
    struct trait_information : public impl::bare_trait_information {

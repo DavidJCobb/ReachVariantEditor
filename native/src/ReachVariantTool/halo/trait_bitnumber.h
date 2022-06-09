@@ -16,6 +16,8 @@ namespace halo {
             };
             if (info.uses_presence_bit)
                v.presence = true;
+            if (info.uses_sign_bit)
+               v.has_sign_bit = true;
             return v;
          })();
 

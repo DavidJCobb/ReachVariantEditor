@@ -1,5 +1,6 @@
 #include "base.h"
 #include <bit>
+#include "helpers/apply_sign_bit.h"
 #include "top_level_values.h"
 #include "halo/reach/bitstreams.h"
 
@@ -45,12 +46,13 @@ namespace halo::reach::megalo::operands::variables {
       void base::read_index(bitreader& stream, size_t bitcount) {
          if (!bitcount)
             return;
-         this->index = stream.read_bits<uint16_t>(bitcount);
+         this->index = stream.read_bits(bitcount);
       }
       void base::read_immediate(bitreader& stream, size_t bitcount) {
          if (!bitcount)
             return;
-         this->index = stream.read_bits<int16_t>(bitcount);
+         this->index = stream.read_bits(bitcount);
+         this->index = cobb::apply_sign_bit(this->index, bitcount);
       }
    }
 }

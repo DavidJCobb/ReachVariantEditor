@@ -10,7 +10,7 @@
 namespace halo::reach::megalo {
    class game_option : public util::passively_refcounted, public util::dummyable, public util::indexed {
       public:
-         using value_type  = bitnumber<10, int16_t>;
+         using value_type  = bitnumber<10, int16_t, bitnumber_params<int16_t>{ .has_sign_bit = true }>;
          using value_index = bitnumber<std::bit_width(limits::script_option_values - 1), uint8_t>;
 
          struct enum_value : public util::indexed {
