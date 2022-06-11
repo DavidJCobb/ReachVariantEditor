@@ -10,7 +10,7 @@ namespace halo::reach::megalo {
       constexpr auto& list = all_conditions;
 
       size_t fi = stream.read_bits(std::bit_width(list.size() - 1));
-      if (fi > list.size()) {
+      if (fi >= list.size()) {
          if constexpr (bitreader::has_load_process) {
             stream.load_process().throw_fatal<load_process_messages::megalo::opcode_bad_function_index>({
                .opcode_type = opcode_type::condition,

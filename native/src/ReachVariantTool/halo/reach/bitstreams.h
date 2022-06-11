@@ -53,8 +53,6 @@ namespace halo::reach {
          void set_game_variant_data(game_variant_data* v) { this->current_variant_data = v; }
 
          void read(megalo::string_ref& ref) {
-            constexpr auto test_a = util::has_read_method<my_type, string_index<false>>;
-
             string_index<false> index;
             base_type::read(index);
             if (this->main_string_table) {

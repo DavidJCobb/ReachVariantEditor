@@ -464,6 +464,7 @@
     <ClInclude Include="halo\common\load_process_messages\string_table\mismatched_sizes.h" />
     <ClInclude Include="halo\common\load_process_messages\string_table\too_large_buffer.h" />
     <ClInclude Include="halo\common\load_process_messages\string_table\too_large_count.h" />
+    <ClInclude Include="halo\load_process_fatal_error.h" />
     <ClInclude Include="halo\load_process_message_data.h" />
     <ClInclude Include="halo\reach\arena_parameters.h" />
     <ClInclude Include="halo\reach\bytestreams.fwd.h" />
@@ -870,7 +871,9 @@
     <Natvis Include="halo\loc_string_table.natvis" />
     <Natvis Include="halo\reach\arena_parameters.natvis" />
     <Natvis Include="halo\reach\files\blocks\base.natvis" />
+    <Natvis Include="halo\reach\megalo\forge_label.natvis" />
     <Natvis Include="halo\reach\megalo\game_option.natvis" />
+    <Natvis Include="halo\reach\megalo\game_stat.natvis" />
     <Natvis Include="halo\reach\megalo\opcode.natvis" />
     <Natvis Include="halo\reach\megalo\opcodes\action.natvis" />
     <Natvis Include="halo\reach\megalo\opcode_function.natvis" />
@@ -882,6 +885,7 @@
     <Natvis Include="halo\reach\megalo\operands\variables\timer.natvis" />
     <Natvis Include="halo\reach\megalo\operands\vector3.natvis" />
     <Natvis Include="halo\reach\megalo\player_trait_set.natvis" />
+    <Natvis Include="halo\reach\megalo\trigger.natvis" />
     <Natvis Include="halo\util\ct_vector.natvis" />
     <Natvis Include="halo\util\fixed_string.natvis" />
     <Natvis Include="halo\util\four_cc.natvis" />

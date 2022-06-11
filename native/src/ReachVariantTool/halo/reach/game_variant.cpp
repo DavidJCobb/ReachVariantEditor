@@ -1,6 +1,7 @@
 #include "game_variant.h"
 #include <QByteArray>
 
+#include "halo/load_process_fatal_error.h"
 #include "halo/reach/bitstreams.h"
 #include "halo/reach/bytestreams.h"
 #include "files/block_stream.h"
@@ -24,9 +25,11 @@ namespace halo::reach {
 
    bytereader::load_process_type game_variant::read(const QByteArray& buffer) {
       load_process process;
-      bytereader   stream = bytereader(process);
-      stream.set_buffer((const uint8_t*)buffer.data(), buffer.size());
-      this->read(stream);
+      try {
+         bytereader   stream = bytereader(process);
+         stream.set_buffer((const uint8_t*)buffer.data(), buffer.size());
+         this->read(stream);
+      } catch (load_process_fatal_error&) {}
       return process;
    }
    void game_variant::read(bytereader& stream) {

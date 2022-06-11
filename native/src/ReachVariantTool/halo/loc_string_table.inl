@@ -239,7 +239,7 @@ namespace halo {
                auto& current_offsets = offsets[i];
                for (size_t j = 0; j < current_offsets.size(); j++) {
                   auto off = current_offsets[j];
-                  if (off == -1 || off == 0) { // game skips these values
+                  if (off == -1) { // game skips this
                      continue;
                   }
                   if (off < 0) {

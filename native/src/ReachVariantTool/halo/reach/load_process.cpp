@@ -1,4 +1,5 @@
 #include "load_process.h"
+#include "halo/load_process_fatal_error.h"
 
 namespace halo::reach {
    void load_process::emit_notice(const notice& item) {
@@ -30,8 +31,6 @@ namespace halo::reach {
       if (std::holds_alternative<std::monostate>(dst.value().where)) { // "where" not set by the caller?
          dst.value().where = this->where;
       }
-      //
-      // TODO: Throw exception?
-      //
+      throw load_process_fatal_error{};
    }
 }

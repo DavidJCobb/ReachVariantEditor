@@ -273,7 +273,7 @@ namespace halo::reach::megalo {
          .name     = "show_message_to",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::player_set::typeinfo,
+               .typeinfo = operands::variables::player_or_group::typeinfo,
                .name     = "who",
             },
             opcode_function::operand_info{
@@ -988,7 +988,7 @@ namespace halo::reach::megalo {
          .name     = "set_device_power",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::variables::player::typeinfo,
+               .typeinfo = operands::variables::object::typeinfo,
                .name     = "context",
             },
             opcode_function::operand_info{
@@ -1001,7 +1001,7 @@ namespace halo::reach::megalo {
          .name     = "get_device_power",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::variables::player::typeinfo,
+               .typeinfo = operands::variables::object::typeinfo,
                .name     = "context",
             },
             opcode_function::operand_info{
@@ -1015,7 +1015,7 @@ namespace halo::reach::megalo {
          .name     = "set_device_position",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::variables::player::typeinfo,
+               .typeinfo = operands::variables::object::typeinfo,
                .name     = "context",
             },
             opcode_function::operand_info{
@@ -1028,7 +1028,7 @@ namespace halo::reach::megalo {
          .name     = "get_device_position",
          .operands = {
             opcode_function::operand_info{
-               .typeinfo = operands::variables::player::typeinfo,
+               .typeinfo = operands::variables::object::typeinfo,
                .name     = "context",
             },
             opcode_function::operand_info{

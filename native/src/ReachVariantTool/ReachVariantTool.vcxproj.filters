@@ -2211,6 +2211,9 @@
     <ClInclude Include="halo\reach\megalo\load_process_messages\operand\player_or_group\bad_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\load_process_fatal_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2272,5 +2275,8 @@
     <Natvis Include="halo\reach\megalo\operands\variables\timer.natvis" />
     <Natvis Include="halo\reach\megalo\opcode.natvis" />
     <Natvis Include="halo\reach\megalo\operands\variables\any.natvis" />
+    <Natvis Include="halo\reach\megalo\forge_label.natvis" />
+    <Natvis Include="halo\reach\megalo\game_stat.natvis" />
+    <Natvis Include="halo\reach\megalo\trigger.natvis" />
   </ItemGroup>
 </Project>

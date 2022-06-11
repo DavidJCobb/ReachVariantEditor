@@ -5,17 +5,18 @@
       <Intrinsic Name="_is_static"    Expression="index >= 1 &amp;&amp; index &lt;= 8" />
       <Intrinsic Name="_static_index" Expression="index - 1" />
 
-      <Intrinsic Name="_is_global"    Expression="index >= 9 &amp;&amp; index &lt;= 16" />
-      <Intrinsic Name="_global_index" Expression="index - 9" />
+      <Intrinsic Name="_is_global"    Expression="index >= 10 &amp;&amp; index &lt;= 17" />
+      <Intrinsic Name="_global_index" Expression="index - 10" />
 
       <DisplayString Condition="target_id == 0 &amp;&amp; index == 0">megalo operand: team: no_team</DisplayString>
       <DisplayString Condition="target_id == 0 &amp;&amp; _is_static()">megalo operand: team: team[{_static_index()}]</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 9">megalo operand: team: neutral_team</DisplayString>
       <DisplayString Condition="target_id == 0 &amp;&amp; _is_global()">megalo operand: team: global.team[{_global_index()}]</DisplayString>
-      <DisplayString Condition="target_id == 0 &amp;&amp; index == 17">megalo operand: team: current_team</DisplayString>
-      <DisplayString Condition="target_id == 0 &amp;&amp; index == 18">megalo operand: team: hud_player_team</DisplayString>
-      <DisplayString Condition="target_id == 0 &amp;&amp; index == 19">megalo operand: team: hud_target_player_team</DisplayString>
-      <DisplayString Condition="target_id == 0 &amp;&amp; index == 20">megalo operand: team: hud_target_object_team</DisplayString>
-      <DisplayString Condition="target_id == 0 &amp;&amp; index == 21">megalo operand: team: unk_15_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 18">megalo operand: team: current_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 19">megalo operand: team: hud_player_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 20">megalo operand: team: hud_target_player_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 21">megalo operand: team: hud_target_object_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 22">megalo operand: team: unk_15_team</DisplayString>
       <!-- -->
       <DisplayString Condition="target_id == 0">megalo operand: team: global.team[{index}]</DisplayString>
       <DisplayString Condition="target_id == 1">megalo operand: team: player[_{which}].team[{index}]</DisplayString>
