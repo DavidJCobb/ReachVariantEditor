@@ -147,10 +147,10 @@ namespace halo::reach::megalo {
 
          void read(bitreader& stream) {
             _read_list<variable_type::number>(stream);
-            _read_list<variable_type::object>(stream);
-            _read_list<variable_type::player>(stream);
-            _read_list<variable_type::team>(stream);
             _read_list<variable_type::timer>(stream);
+            _read_list<variable_type::team>(stream);
+            _read_list<variable_type::player>(stream);
+            _read_list<variable_type::object>(stream);
          }
    };
 }

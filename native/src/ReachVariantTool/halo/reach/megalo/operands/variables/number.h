@@ -171,10 +171,14 @@ namespace halo::reach::megalo::operands {
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      using number = base<
-         cobb::cs("number"),
+      class number : public base<
          variable_type::number,
          number_registers
-      >;
+      > {
+         public:
+            inline static constexpr operand_typeinfo typeinfo = {
+               .internal_name = "number",
+            };
+      };
    }
 }

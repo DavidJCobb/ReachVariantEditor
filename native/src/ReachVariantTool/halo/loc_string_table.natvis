@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
    <Type Name="halo::loc_string_table&lt;1,*&gt;">
-      <DisplayString Condition="strings.size() >= 1">{strings.data()[0]}</DisplayString>
-      <DisplayString Condition="strings.empty()">&lt;empty&gt;</DisplayString>
+      <DisplayString Condition="strings._size >= 1">{strings._data[0]}</DisplayString>
+      <DisplayString Condition="strings._size == 0">&lt;empty&gt;</DisplayString>
    </Type>
 </AutoVisualizer>

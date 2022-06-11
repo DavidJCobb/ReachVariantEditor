@@ -1199,6 +1199,10 @@ namespace halo::reach::megalo {
                .name     = "context",
             },
             opcode_function::operand_info{
+               .typeinfo = operands::weapon_slot::typeinfo,
+               .name     = "which",
+            },
+            opcode_function::operand_info{
                .typeinfo     = operands::variables::object::typeinfo,
                .name         = "result",
                .is_out_param = true,

@@ -133,7 +133,7 @@ namespace halo {
          template<typename T> requires (impl::bitreader::is_bitreadable_indexed_list<my_type, T>)
          void read(T& out) {
             size_t count = this->read_bits(std::bit_width(T::max_count));
-            if constexpr (std::is_base_of_v<util::dummyable, T::value_type>) {
+            if constexpr (std::is_base_of_v<util::dummyable, typename T::value_type>) {
                assert(out.size() == T::max_count);
                for (size_t i = 0; i < count; ++i) {
                   auto& item = out[i];

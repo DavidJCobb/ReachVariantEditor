@@ -2262,5 +2262,15 @@
     <Natvis Include="halo\reach\megalo\operands\vector3.natvis" />
     <Natvis Include="halo\loc_string_table.natvis" />
     <Natvis Include="halo\reach\arena_parameters.natvis" />
+    <Natvis Include="halo\reach\megalo\opcodes\action.natvis" />
+    <Natvis Include="halo\util\indexed_list.natvis" />
+    <Natvis Include="halo\reach\megalo\game_option.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\number.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\player.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\team.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\object.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\timer.natvis" />
+    <Natvis Include="halo\reach\megalo\opcode.natvis" />
+    <Natvis Include="halo\reach\megalo\operands\variables\any.natvis" />
   </ItemGroup>
 </Project>

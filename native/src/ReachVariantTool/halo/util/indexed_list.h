@@ -118,8 +118,10 @@ namespace halo::util {
 
          #pragma region Helpers for halo::util::dummyable
          template<typename... Args> void set_up_dummies(Args&&... args) requires std::is_base_of_v<dummyable, value_type> {
-            for (size_type i = 0; i < max_count; i++)
-               this->emplace_back(std::forward<Args>(args)...);
+            for (size_type i = 0; i < max_count; i++) {
+               auto* dummy = this->emplace_back(std::forward<Args>(args)...);
+               dummy->is_defined = false;
+            }
          }
 
          // Returns true if any referenced dummies exist. Accepts an optional list 
@@ -131,8 +133,8 @@ namespace halo::util {
                indices->clear();
             }
             for (size_type i = 0; i < max_count; ++i) {
-               auto& iptr = this->_data[max_count - i - 1];
-               auto& item = *iptr;
+               auto*& iptr = this->_data[max_count - i - 1];
+               auto & item = *iptr;
                if (item.is_defined) {
                   if (last_defined_index)
                      *last_defined_index = i;

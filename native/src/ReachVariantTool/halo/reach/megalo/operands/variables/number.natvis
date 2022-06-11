@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::number">
+      <DisplayString Condition="target_id == 0">megalo operand: number: immediate ({index})</DisplayString>
+      <DisplayString Condition="target_id == 1">megalo operand: number: player[_{which}].number[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 2">megalo operand: number: object[_{which}].number[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 3">megalo operand: number: team[_{which}].number[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 4">megalo operand: number: global.number[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 5">megalo operand: number: script_option[{index}] (pointer: {indexed_data})</DisplayString>
+      <DisplayString Condition="target_id == 6">megalo operand: number: object[_{which}].spawn_sequence</DisplayString>
+      <DisplayString Condition="target_id == 7">megalo operand: number: team[_{which}].score</DisplayString>
+      <DisplayString Condition="target_id == 8">megalo operand: number: player[_{which}].score</DisplayString>
+      <DisplayString Condition="target_id == 9">megalo operand: number: player[_{which}].unk09</DisplayString>
+      <DisplayString Condition="target_id == 10">megalo operand: number: player[_{which}].rating</DisplayString>
+      <DisplayString Condition="target_id == 11">megalo operand: number: player[_{which}].script_stat[{index}] (pointer: {indexed_data})</DisplayString>
+      <DisplayString Condition="target_id == 12">megalo operand: number: team[_{which}].script_stat[{index}] (pointer: {indexed_data})</DisplayString>
+      <DisplayString Condition="target_id == 13">megalo operand: number: game.current_round</DisplayString>
+      <DisplayString Condition="target_id == 14">megalo operand: number: game.symmetry_get</DisplayString>
+      <DisplayString Condition="target_id == 15">megalo operand: number: game.symmetry</DisplayString>
+      <DisplayString Condition="target_id == 16">megalo operand: number: game.score_to_win</DisplayString>
+      <DisplayString Condition="target_id == 17">megalo operand: number: game.fireteams_enabled</DisplayString>
+      <DisplayString Condition="target_id == 18">megalo operand: number: game.teams_enabled</DisplayString>
+      <DisplayString Condition="target_id == 19">megalo operand: number: game.round_time_limit</DisplayString>
+      <DisplayString Condition="target_id == 20">megalo operand: number: game.round_limit</DisplayString>
+      <DisplayString Condition="target_id == 21">megalo operand: number: game.perfection_enabled</DisplayString>
+      <DisplayString Condition="target_id == 22">megalo operand: number: game.rounds_to_win</DisplayString>
+      <DisplayString Condition="target_id == 23">megalo operand: number: game.sudden_death_time</DisplayString>
+      <DisplayString Condition="target_id == 24">megalo operand: number: game.grace_period</DisplayString>
+      <DisplayString Condition="target_id == 25">megalo operand: number: game.lives_per_round</DisplayString>
+      <DisplayString Condition="target_id == 26">megalo operand: number: game.team_lives_per_round</DisplayString>
+      <DisplayString Condition="target_id == 27">megalo operand: number: game.respawn_time</DisplayString>
+      <DisplayString Condition="target_id == 28">megalo operand: number: game.suicide_penalty</DisplayString>
+      <DisplayString Condition="target_id == 29">megalo operand: number: game.betrayal_penalty</DisplayString>
+      <DisplayString Condition="target_id == 30">megalo operand: number: game.respawn_growth</DisplayString>
+      <DisplayString Condition="target_id == 31">megalo operand: number: game.loadout_cam_time</DisplayString>
+      <DisplayString Condition="target_id == 32">megalo operand: number: game.respawn_traits_time</DisplayString>
+      <DisplayString Condition="target_id == 33">megalo operand: number: game.friendly_fire</DisplayString>
+      <DisplayString Condition="target_id == 34">megalo operand: number: game.betrayal_booting</DisplayString>
+      <DisplayString Condition="target_id == 35">megalo operand: number: game.proximity_voice</DisplayString>
+      <DisplayString Condition="target_id == 36">megalo operand: number: game.dont_team_restrict_chat</DisplayString>
+      <DisplayString Condition="target_id == 37">megalo operand: number: game.dead_players_can_talk</DisplayString>
+      <DisplayString Condition="target_id == 38">megalo operand: number: game.grenades_on_map</DisplayString>
+      <DisplayString Condition="target_id == 39">megalo operand: number: game.indestructible_vehicles</DisplayString>
+      <DisplayString Condition="target_id == 40">megalo operand: number: game.powerup_duration_r</DisplayString>
+      <DisplayString Condition="target_id == 41">megalo operand: number: game.powerup_duration_b</DisplayString>
+      <DisplayString Condition="target_id == 42">megalo operand: number: game.powerup_duration_y</DisplayString>
+      <DisplayString Condition="target_id == 43">megalo operand: number: death_event_damage_type</DisplayString>
+
+      <DisplayString Condition="indexed_data.index() != 0">megalo operand: number: indexed data ({indexed_data})</DisplayString>
+      <DisplayString>megalo operand: number</DisplayString>
+   </Type>
+</AutoVisualizer>

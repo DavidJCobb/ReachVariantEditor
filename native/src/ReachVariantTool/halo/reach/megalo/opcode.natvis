@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::opcode">
+      <Intrinsic Name="operand_size" Expression="(size_t)(operands._Mypair._Myval2._Mylast - operands._Mypair._Myval2._Myfirst)" />
+      <Intrinsic Name="operand_data" Expression="operands._Mypair._Myval2._Myfirst" />
+      
+      <DisplayString Condition="function != nullptr">megalo opcode: {function->name,sb}</DisplayString>
+      <DisplayString Condition="function == nullptr">megalo opcode &lt;no function&gt;</DisplayString>
+      <Expand>
+         <Item Name="function">function</Item>
+         <Synthetic Name="operands">
+            <DisplayString>{operand_size()} operands</DisplayString>
+            <Expand>
+               <IndexListItems>
+                  <Size>operand_size()</Size>
+                  <ValueNode>*(operand_data()[$i]),na</ValueNode>
+               </IndexListItems>
+            </Expand>
+         </Synthetic>
+      </Expand>
+   </Type>
+</AutoVisualizer>

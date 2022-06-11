@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::timer">
+
+      <Intrinsic Name="_is_global"    Expression="index >= 1 &amp;&amp; index &lt;= 8" />
+      <Intrinsic Name="_global_index" Expression="index - 1" />
+
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 0">megalo operand: timer: no_timer</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; _is_global()">megalo operand: timer: global.timer[{_global_index()}]</DisplayString>
+      <!-- -->
+      <DisplayString Condition="target_id == 0">megalo operand: timer: global.timer[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 1">megalo operand: timer: player[_{which}].timer[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 2">megalo operand: timer: team[_{which}].timer[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 3">megalo operand: timer: object[_{which}].timer[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 4">megalo operand: timer: game.round_timer</DisplayString>
+      <DisplayString Condition="target_id == 5">megalo operand: timer: game.sudden_death_timer</DisplayString>
+      <DisplayString Condition="target_id == 6">megalo operand: timer: game.grace_period_timer</DisplayString>
+
+      <DisplayString Condition="indexed_data.index() != 0">megalo operand: timer: indexed data ({indexed_data})</DisplayString>
+      <DisplayString>megalo operand: timer</DisplayString>
+   </Type>
+</AutoVisualizer>

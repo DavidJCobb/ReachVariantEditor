@@ -64,10 +64,14 @@ namespace halo::reach::megalo::operands {
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      using object = base<
-         cobb::cs("object"),
+      class object : public base<
          variable_type::object,
          object_registers
-      >;
+      > {
+         public:
+            inline static constexpr operand_typeinfo typeinfo = {
+               .internal_name = "object",
+            };
+      };
    }
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::object">
+
+      <Intrinsic Name="_is_global"    Expression="index >= 1 &amp;&amp; index &lt;= 16" />
+      <Intrinsic Name="_global_index" Expression="index - 1" />
+
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 0">megalo operand: object: no_object</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; _is_global()">megalo operand: object: global.object[{_global_index()}]</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 17">megalo operand: object: current_object</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 18">megalo operand: object: hud_target_object</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 19">megalo operand: object: killed_object</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 20">megalo operand: object: killer_object</DisplayString>
+      <!-- -->
+      <DisplayString Condition="target_id == 0">megalo operand: object: global.object[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 1">megalo operand: object: player[_{which}].object[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 2">megalo operand: object: object[_{which}].object[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 3">megalo operand: object: team[_{which}].object[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 4">megalo operand: object: player[_{which}].biped</DisplayString>
+      <DisplayString Condition="target_id == 5">megalo operand: object: player[_{which}].player[{index}].biped</DisplayString>
+      <DisplayString Condition="target_id == 6">megalo operand: object: object[_{which}].player[{index}].biped</DisplayString>
+      <DisplayString Condition="target_id == 7">megalo operand: object: team[_{which}].player[{index}].biped</DisplayString>
+
+      <DisplayString Condition="indexed_data.index() != 0">megalo operand: object: indexed data ({indexed_data})</DisplayString>
+      <DisplayString>megalo operand: object</DisplayString>
+   </Type>
+</AutoVisualizer>

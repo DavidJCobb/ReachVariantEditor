@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::team">
+
+      <Intrinsic Name="_is_static"    Expression="index >= 1 &amp;&amp; index &lt;= 8" />
+      <Intrinsic Name="_static_index" Expression="index - 1" />
+
+      <Intrinsic Name="_is_global"    Expression="index >= 9 &amp;&amp; index &lt;= 16" />
+      <Intrinsic Name="_global_index" Expression="index - 9" />
+
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 0">megalo operand: team: no_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; _is_static()">megalo operand: team: team[{_static_index()}]</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; _is_global()">megalo operand: team: global.team[{_global_index()}]</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 17">megalo operand: team: current_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 18">megalo operand: team: hud_player_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 19">megalo operand: team: hud_target_player_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 20">megalo operand: team: hud_target_object_team</DisplayString>
+      <DisplayString Condition="target_id == 0 &amp;&amp; index == 21">megalo operand: team: unk_15_team</DisplayString>
+      <!-- -->
+      <DisplayString Condition="target_id == 0">megalo operand: team: global.team[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 1">megalo operand: team: player[_{which}].team[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 2">megalo operand: team: object[_{which}].team[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 3">megalo operand: team: team[_{which}].team[{index}]</DisplayString>
+      <DisplayString Condition="target_id == 4">megalo operand: team: player[_{which}].team</DisplayString>
+      <DisplayString Condition="target_id == 5">megalo operand: team: object[_{which}].team</DisplayString>
+
+      <DisplayString Condition="indexed_data.index() != 0">megalo operand: team: indexed data ({indexed_data})</DisplayString>
+      <DisplayString>megalo operand: team</DisplayString>
+   </Type>
+</AutoVisualizer>

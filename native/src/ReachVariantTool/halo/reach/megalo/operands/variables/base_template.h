@@ -15,15 +15,11 @@
 
 namespace halo::reach::megalo::operands::variables {
    template<
-      cobb::cs Name,
       variable_type Type,
       const auto& DefinitionList
    > class base : public unknown_type {
       public:
          static constexpr variable_type type = Type;
-         inline static constexpr operand_typeinfo typeinfo = {
-            .internal_name = Name.c_str(),
-         };
 
          static constexpr auto& definition_list = DefinitionList;
          using definition_list_type = std::decay_t<decltype(definition_list)>;

@@ -30,7 +30,7 @@ namespace halo::reach::megalo {
 
       string_ref_optional name;
       struct {
-         bitnumber<3, uint8_t> flags;
+         bitnumber<3, uint8_t> flags = 0;
          object_type_index object_type;
          static_team_index team = static_team::none;
          bytenumber<int16_t>   number = 0;

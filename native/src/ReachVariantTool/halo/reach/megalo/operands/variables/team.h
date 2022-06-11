@@ -51,7 +51,6 @@ namespace halo::reach::megalo::operands {
 namespace halo::reach::megalo::operands {
    namespace variables {
       class team : public base<
-         cobb::cs("team"),
          variable_type::team,
          team_registers
       > {

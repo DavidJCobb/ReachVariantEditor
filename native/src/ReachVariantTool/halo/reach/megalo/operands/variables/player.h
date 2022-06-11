@@ -37,7 +37,6 @@ namespace halo::reach::megalo::operands {
 namespace halo::reach::megalo::operands {
    namespace variables {
       class player : public base<
-         cobb::cs("player"),
          variable_type::player,
          player_registers
       > {

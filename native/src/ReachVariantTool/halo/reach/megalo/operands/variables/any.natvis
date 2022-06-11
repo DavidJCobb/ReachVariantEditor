@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::operands::variables::any">
+      <DisplayString Condition="value != nullptr">{value}</DisplayString>
+      <DisplayString>megalo operand: any &lt;no value or not loaded&gt;</DisplayString>
+   </Type>
+</AutoVisualizer>

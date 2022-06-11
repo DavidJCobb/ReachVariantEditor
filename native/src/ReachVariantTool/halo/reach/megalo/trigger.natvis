@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::trigger">
+      <Intrinsic Name="_is_nested" Expression="entry_type.value == trigger_entry_type::subroutine" />
+
+      <Intrinsic Name="_is_for_each_of_label" Expression="block_type.value == trigger_block_type::for_each_object_with_label" />
+      <Intrinsic Name="_has_forge_label" Expression="loop_forge_label.target != nullptr" />
+      <Intrinsic Name="_has_named_forge_label" Expression="_has_forge_label() &amp;&amp; loop_forge_label.target->name.target != nullptr" />
+      <Intrinsic Name="_forge_label_name" Expression="loop_forge_label.target->name.target" />
+
+      <DisplayString Condition="_is_nested() &amp;&amp; block_type.value == trigger_block_type::normal">nested block</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; block_type.value == trigger_block_type::for_each_player">[nested] for each player do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; block_type.value == trigger_block_type::for_each_player_randomly">[nested] for each player randomly do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; block_type.value == trigger_block_type::for_each_team">[nested] for each team do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; block_type.value == trigger_block_type::for_each_object">[nested] for each object do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; _is_for_each_of_label() &amp;&amp; _has_named_forge_label()">[nested] for each object with label {_forge_label_name(),na} do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; _is_for_each_of_label() &amp;&amp; _has_forge_label()">[nested] for each object with label {loop_forge_label.target->index} do...</DisplayString>
+      <DisplayString Condition="_is_nested() &amp;&amp; _is_for_each_of_label() &amp;&amp; _has_forge_label()">[nested] for each object with label &lt;missing label&gt; do...</DisplayString>
+      <DisplayString Condition="_is_nested()">[nested] [no summary available]</DisplayString>
+
+      <DisplayString Condition="block_type.value == trigger_block_type::normal">top-level block</DisplayString>
+      <DisplayString Condition="block_type.value == trigger_block_type::for_each_player">for each player do...</DisplayString>
+      <DisplayString Condition="block_type.value == trigger_block_type::for_each_player_randomly">for each player randomly do...</DisplayString>
+      <DisplayString Condition="block_type.value == trigger_block_type::for_each_team">for each team do...</DisplayString>
+      <DisplayString Condition="block_type.value == trigger_block_type::for_each_object">for each object do...</DisplayString>
+      <DisplayString Condition="_is_for_each_of_label() &amp;&amp; _has_named_forge_label()">for each object with label {_forge_label_name(),na} do...</DisplayString>
+      <DisplayString Condition="_is_for_each_of_label() &amp;&amp; _has_forge_label()">for each object with label {loop_forge_label.target->index} do...</DisplayString>
+      <DisplayString Condition="_is_for_each_of_label() &amp;&amp; _has_forge_label()">for each object with label &lt;missing label&gt; do...</DisplayString>
+   </Type>
+</AutoVisualizer>

@@ -39,10 +39,14 @@ namespace halo::reach::megalo::operands {
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      using timer = base<
-         cobb::cs("timer"),
+      class timer : public base<
          variable_type::timer,
          timer_registers
-      >;
+      > {
+         public:
+            inline static constexpr operand_typeinfo typeinfo = {
+               .internal_name = "timer",
+            };
+      };
    }
 }
