@@ -77,7 +77,7 @@ namespace halo::reach::megalo {
          *instance = item;
          //
          local_actions[i] = instance;
-         this->opcodes.push_back(std::unique_ptr<opcode>(instance));
+         this->opcodes.push_back(instance);
       }
       //
       for (size_t i = 0; i < ls.condition_count; ++i) {
@@ -87,7 +87,7 @@ namespace halo::reach::megalo {
          *instance = item;
          //
          if (item.load_state.execute_before >= ls.action_count) {
-            this->opcodes.push_back(std::unique_ptr<opcode>(instance));
+            this->opcodes.push_back(instance);
             continue;
          }
          //
@@ -95,15 +95,9 @@ namespace halo::reach::megalo {
          auto& list = this->opcodes;
          //
          const auto* before = local_actions[item.load_state.execute_before];
-         size_t index = none;
-         for (size_t j = 0; j < list.size(); ++j) {
-            if (list[j].get() == before) { // unique_ptr is irritating. breaks std::find(); isn't implicitly comparable to bare pointers; etc., etc.
-               index = j;
-               break;
-            }
-         }
-         assert(index != none && "Action not present in the opcode list, even though we have to have inserted it?!");
-         list.insert(list.begin() + index, std::unique_ptr<opcode>(instance));
+         auto it = std::find(list.begin(), list.end(), before);
+         assert(it != list.end() && "Action not present in the opcode list, even though we have to have inserted it?!");
+         list.insert(it, instance);
       }
    }
 }

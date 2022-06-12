@@ -781,6 +781,9 @@
     <ClCompile Include="halo\reach\megalo\operands\all.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\load_process_base.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2214,6 +2217,21 @@
     <ClInclude Include="halo\load_process_fatal_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\load_process_location.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\eight_cc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\load_process_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\owned_ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\split_vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2278,5 +2296,6 @@
     <Natvis Include="halo\reach\megalo\forge_label.natvis" />
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
     <Natvis Include="halo\reach\megalo\trigger.natvis" />
+    <Natvis Include="helpers\eight_cc.natvis" />
   </ItemGroup>
 </Project>

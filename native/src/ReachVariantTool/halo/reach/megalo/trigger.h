@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include <memory>
 #include <vector>
+#include "helpers/owned_ptr.h"
 #include "halo/util/indexed.h"
 #include "halo/util/refcount.h"
 #include "halo/reach/bitstreams.fwd.h"
@@ -54,7 +54,7 @@ namespace halo::reach::megalo {
          bitnumber<3, trigger_entry_type> entry_type = trigger_entry_type::normal;
          util::refcount_ptr<forge_label> loop_forge_label;
          //
-         std::vector<std::unique_ptr<opcode>> opcodes;
+         std::vector<cobb::owned_ptr<opcode>> opcodes;
          
          void read(bitreader&);
          void extract_opcodes(bitreader&, const std::vector<condition>&, const std::vector<action>&);
