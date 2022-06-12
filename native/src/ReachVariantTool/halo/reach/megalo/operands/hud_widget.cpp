@@ -19,12 +19,13 @@ namespace halo::reach::megalo::operands {
       //
       auto& list = vd->script.widgets;
       if (index >= limits::script_widgets) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::operands::hud_widget::index_out_of_max_bounds>({
+         stream.emit_error_at<halo::reach::load_process_messages::megalo::operands::hud_widget::index_out_of_max_bounds>(
+            {
                .maximum = limits::script_widgets - 1,
                .value   = (size_t)index,
-            });
-         }
+            },
+            stream.get_position().rewound_by_bits(index_type::max_bitcount)
+         );
          return;
       }
       this->value = list[index];

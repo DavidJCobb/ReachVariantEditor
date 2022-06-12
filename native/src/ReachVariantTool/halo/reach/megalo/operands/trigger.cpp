@@ -9,12 +9,13 @@ namespace halo::reach::megalo::operands {
          index
       );
       if (this->index >= limits::triggers) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::operands::trigger::index_out_of_max_bounds>({
+         stream.emit_error_at<halo::reach::load_process_messages::megalo::operands::trigger::index_out_of_max_bounds>(
+            {
                .maximum = limits::triggers - 1,
                .value   = this->index,
-            });
-         }
+            },
+            stream.get_position().rewound_by_bits(decltype(index)::max_bitcount)
+         );
       }
    }
 }

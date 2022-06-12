@@ -10,18 +10,21 @@
 namespace halo::reach::megalo::operands::variables {
    namespace impl {
       void base::read_target_id(bitreader& stream, size_t target_count) {
+         auto bitcount = std::bit_width(target_count - 1);
+         //
          this->target_id = stream.read_bits(
             std::max(
                (size_t)1, 
-               std::bit_width(target_count - 1)
+               bitcount
             )
          );
          if (this->target_id >= target_count) {
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::variable_base::bad_target>({
+            stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::variable_base::bad_target>(
+               {
                   .target_id = this->target_id,
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(bitcount)
+            );
             return;
          }
       }
@@ -31,15 +34,17 @@ namespace halo::reach::megalo::operands::variables {
          size_t count = top_level_values::max_of_type(variable_type_for_scope(which));
          if (!count)
             return;
-         this->which = stream.read_bits(std::bit_width(count - 1));
+         auto bitcount = std::bit_width(count - 1);
+         this->which = stream.read_bits(bitcount);
          if (this->which >= count) {
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().emit_error<halo::reach::load_process_messages::megalo::operands::variable_base::bad_which>({
+            stream.emit_error_at<halo::reach::load_process_messages::megalo::operands::variable_base::bad_which>(
+               {
                   .index   = this->which,
                   .maximum = count - 1,
                   .type    = which,
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(bitcount)
+            );
             return;
          }
       }

@@ -7,16 +7,18 @@
 
 namespace halo::reach::megalo {
    void condition::read(bitreader& stream) {
-      constexpr auto& list = all_conditions;
+      constexpr auto& list           = all_conditions;
+      constexpr auto  index_bitcount = std::bit_width(list.size() - 1);
 
-      size_t fi = stream.read_bits(std::bit_width(list.size() - 1));
+      size_t fi = stream.read_bits(index_bitcount);
       if (fi >= list.size()) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().throw_fatal<load_process_messages::megalo::opcode_bad_function_index>({
+         stream.throw_fatal_at<load_process_messages::megalo::opcode_bad_function_index>(
+            {
                .opcode_type = opcode_type::condition,
                .function_id = fi,
-            });
-         }
+            },
+            stream.get_position().rewound_by_bits(index_bitcount)
+         );
          return;
       }
       this->function = &list[fi];

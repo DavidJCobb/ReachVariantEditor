@@ -13,18 +13,27 @@ namespace halo {
          load_process_base() {}
 
       protected:
+         struct stream_position {
+            size_t  bytes = 0;
+            uint8_t bits  = 0;
+         };
+
+      protected:
          struct message_base {
             cobb::owned_ptr<load_process_message_data_base> data;
             std::vector<load_process_location> location;
+            stream_position stream_offsets;
 
             message_base() {}
             message_base(message_base&& o) noexcept {
                std::swap(this->location, o.location);
                std::swap(this->data,     o.data);
+               std::swap(this->stream_offsets, o.stream_offsets);
             }
             message_base(const message_base& o) {
                this->location = o.location;
                this->data     = (o.data) ? (o.data->clone()) : nullptr;
+               this->stream_offsets = o.stream_offsets;
             }
             message_base(const load_process_message_data_base& d) {
                this->data = d.clone();
@@ -53,10 +62,9 @@ namespace halo {
             std::optional<fatal> fatal_error;
          } contents;
          cobb::split_vector<load_process_location, 10> location; // current location
-         struct {
-            size_t  bytes = 0;
-            uint8_t bits  = 0;
-         } stream_offsets;
+         stream_position stream_offsets;
+
+         void _update_locational_info(message_base&);
 
       public:
          void emit_notice(notice&&);

@@ -33,11 +33,12 @@ namespace halo::reach::megalo::operands {
             this->variable.reset(new variables::timer);
             break;
          default:
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::format_string::bad_token_type>({
+            stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::format_string::bad_token_type>(
+               {
                   .type_value = (size_t)type,
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(decltype(type)::max_bitcount)
+            );
             return;
       }
       if (this->variable.get())
@@ -50,12 +51,13 @@ namespace halo::reach::megalo::operands {
          token_count
       );
       if (this->token_count > max_token_count) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::format_string::token_count_too_large>({
+         stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::format_string::token_count_too_large>(
+            {
                .count     = (size_t)this->token_count,
                .max_count = max_token_count,
-            });
-         }
+            },
+            stream.get_position().rewound_by_bits(decltype(token_count)::max_bitcount)
+         );
          return;
       }
       for (size_t i = 0; i < this->token_count; ++i)

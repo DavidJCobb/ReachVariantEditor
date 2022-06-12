@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "loc_string_table.h"
 extern "C" {
    #include "../../zlib/zlib.h" // interproject ref
@@ -61,7 +62,6 @@ namespace halo {
    CLASS_TEMPLATE_PARAMS
    template<bitreader_subclass Reader>
    void* CLASS_NAME::_read_buffer(size_t serialized_size, bool is_compressed, size_t uncompressed_size, Reader& stream) {
-      constexpr bool load_process_is_valid = Reader::has_load_process;
       //
       void* buffer = malloc(serialized_size);
       for (uint32_t i = 0; i < serialized_size; i++)
@@ -73,28 +73,24 @@ namespace halo {
          // them -- zlib needs to receive (buffer + 4) as its input.
          //
          uint32_t uncompressed_size_2 = *(uint32_t*)(buffer);
-         if constexpr (load_process_is_valid) {
-            if (uncompressed_size_2 != uncompressed_size) {
-               if (_byteswap_ulong(uncompressed_size_2) != uncompressed_size) {
-                  stream.load_process().template emit_warning<halo::common::load_process_messages::string_table_mismatched_sizes>({
-                     .bungie_size = uncompressed_size,
-                     .zlib_size   = uncompressed_size_2,
-                  });
-               }
+         if (uncompressed_size_2 != uncompressed_size) {
+            if (_byteswap_ulong(uncompressed_size_2) != uncompressed_size) {
+               stream.template emit_warning<halo::common::load_process_messages::string_table_mismatched_sizes>({
+                  .bungie_size = uncompressed_size,
+                  .zlib_size   = uncompressed_size_2,
+               });
             }
          }
          void* result = malloc(uncompressed_size);
          if (!result) {
-            if constexpr (load_process_is_valid) {
-               stream.load_process().template emit_error<halo::common::load_process_messages::string_table_cannot_allocate_buffer>({
-                  .compressed_size   = serialized_size,
-                  .uncompressed_size = uncompressed_size,
-                  .max_buffer_size   = max_buffer_size,
-                  .is_compressed     = is_compressed,
-                  //
-                  .is_zlib = false,
-               });
-            }
+            stream.template emit_error<halo::common::load_process_messages::string_table_cannot_allocate_buffer>({
+               .compressed_size   = serialized_size,
+               .uncompressed_size = uncompressed_size,
+               .max_buffer_size   = max_buffer_size,
+               .is_compressed     = is_compressed,
+               //
+               .is_zlib = false,
+            });
             return nullptr;
          }
          //
@@ -111,17 +107,15 @@ namespace halo {
                free(result);
                result = nullptr;
                //
-               if constexpr (load_process_is_valid) {
-                  stream.load_process().template emit_error<halo::common::load_process_messages::string_table_cannot_allocate_buffer>({
-                     .compressed_size   = serialized_size,
-                     .uncompressed_size = uncompressed_size,
-                     .max_buffer_size   = max_buffer_size,
-                     .is_compressed     = is_compressed,
-                     //
-                     .is_zlib   = true,
-                     .zlib_code = zlib_result,
-                  });
-               }
+               stream.load_process().template emit_error<halo::common::load_process_messages::string_table_cannot_allocate_buffer>({
+                  .compressed_size   = serialized_size,
+                  .uncompressed_size = uncompressed_size,
+                  .max_buffer_size   = max_buffer_size,
+                  .is_compressed     = is_compressed,
+                  //
+                  .is_zlib   = true,
+                  .zlib_code = zlib_result,
+               });
             }
          }
          free(buffer);
@@ -132,7 +126,6 @@ namespace halo {
 
    CLASS_TEMPLATE_PARAMS
    template<bitreader_subclass Reader> loc_string_table_load_result CLASS_NAME::read(Reader& stream) {
-      constexpr bool load_process_is_valid = Reader::has_load_process;
       //
       // The game engine retains the string table in memory as...
       // 
@@ -190,15 +183,17 @@ namespace halo {
       // 
       size_t count = stream.read_bits(count_bitlength);
       if (count > max_count) {
-         if constexpr (load_process_is_valid) {
-            stream.load_process().template emit_error<halo::common::load_process_messages::string_table_too_large_count>({
+         stream.template emit_error_at<halo::common::load_process_messages::string_table_too_large_count>(
+            {
                .count     = count,
                .max_count = max_count,
-            });
-         }
+            },
+            stream.get_position().rewound_by_bits(count_bitlength)
+         );
          count = max_count;
       }
       //
+      const auto pos_before_offsets = stream.get_position();
       std::vector<offset_list> offsets(count);
       for (size_t i = 0; i < count; i++) {
          auto& string = *this->strings.emplace_back(*this);
@@ -218,13 +213,14 @@ namespace halo {
          bool   is_compressed;
          size_t uncompressed_size = stream.read_bits(buffer_size_bitlength);
          size_t serialized_size   = uncompressed_size;
-         if constexpr (load_process_is_valid) {
-            if (uncompressed_size >= max_buffer_size) {
-               stream.load_process().template emit_error<halo::common::load_process_messages::string_table_too_large_buffer>({
+         if (uncompressed_size >= max_buffer_size) {
+            stream.template emit_error_at<halo::common::load_process_messages::string_table_too_large_buffer>(
+               {
                   .max_buffer_size   = max_buffer_size,
                   .uncompressed_size = uncompressed_size,
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(buffer_size_bitlength)
+            );
          }
          is_compressed = stream.read_bits(1) != 0;
          if (is_compressed)
@@ -246,23 +242,21 @@ namespace halo {
                      //
                      // Negative offsets (besides -1) fail validation in-game.
                      //
-                     if constexpr (load_process_is_valid) {
-                        stream.load_process().template emit_error<halo::common::load_process_messages::string_table_entry_offset_out_of_bounds>({
+                     stream.template emit_error<halo::common::load_process_messages::string_table_entry_offset_out_of_bounds>(
+                        {
                            .string_index  = (size_t)i,
                            .string_offset = (size_t)off,
                            .language      = (localization_language)j,
-                        });
-                     }
+                        }
+                     );
                      continue;
                   }
                   if (off >= uncompressed_size) {
-                     if constexpr (load_process_is_valid) {
-                        stream.load_process().template emit_error<halo::common::load_process_messages::string_table_entry_offset_out_of_bounds>({
-                           .string_index  = (size_t)i,
-                           .string_offset = (size_t)off,
-                           .language      = (localization_language)j,
-                        });
-                     }
+                     stream.template emit_error<halo::common::load_process_messages::string_table_entry_offset_out_of_bounds>({
+                        .string_index  = (size_t)i,
+                        .string_offset = (size_t)off,
+                        .language      = (localization_language)j,
+                     });
                      continue;
                   }
                   if (off > 0 && ((const char*)buffer)[off - 1] != '\0') {
@@ -270,13 +264,11 @@ namespace halo {
                      // Strings that aren't null-separated will fail validation in-game. You aren't allowed 
                      // to overlap strings unless they are exactly identical.
                      //
-                     if constexpr (load_process_is_valid) {
-                        stream.load_process().template emit_error<halo::common::load_process_messages::string_table_entries_not_null_separated>({
-                           .string_index  = (size_t)i,
-                           .string_offset = (size_t)off,
-                           .language      = (localization_language)j,
-                        });
-                     }
+                     stream.template emit_error<halo::common::load_process_messages::string_table_entries_not_null_separated>({
+                        .string_index  = (size_t)i,
+                        .string_offset = (size_t)off,
+                        .language      = (localization_language)j,
+                     });
                   }
                   current_string.set_translation((localization_language)j, (const char*)((std::uintptr_t)buffer + off));
                }

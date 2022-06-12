@@ -7,46 +7,22 @@
 //
 namespace halo {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_advance_offset_by_bits(size_t bits) {
-      if (this->_position.bits) {
-         size_t to_consume = 8 - this->_position.bits;
-         if (bits < to_consume) {
-            this->_position.bits += bits;
-            return;
-         }
-         this->_position.bits = 0;
-         this->_position.bytes += 1;
-         bits -= to_consume;
-      }
-      if (bits) {
-         this->_position.bytes += bits / 8;
-         this->_position.bits = bits % 8;
-      }
-      if (this->_position.bytes > this->_size) {
-         this->_position.overflow = (this->_position.bytes - this->_size) * 8 + this->_position.bits;
-         this->_position.bytes    = this->_size;
-         this->_position.bits     = 0;
-      }
+      this->_position.advance_by_bits(bits);
+      this->_position.clamp_to_size(this->_size);
    }
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_advance_offset_by_bytes(size_t bytes) {
-      this->_position.bits = 0;
-      this->_position.bytes += bytes;
-      if (this->offset > this->length) {
-         this->_position.overflow = (this->_position.bytes - this->_size) * 8;
-         this->_position.bytes    = this->_size;
-      }
+      this->_position.advance_by_bytes(bytes);
+      this->_position.clamp_to_size(this->_size);
    }
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_byte_align() {
-      if (this->_position.bits) {
-         if (++this->_position.bytes > this->_size)
-            this->_position.bytes = _size;
-      }
-      this->_position.bits = 0;
+      this->_position.advance_to_next_byte();
+      this->_position.clamp_to_size(this->_size);
    }
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_consume_byte(uint8_t& out, uint8_t bitcount, int& consumed) {
       auto bytepos = this->get_bytepos();
       if (bytepos >= this->_size) {
          out = 0;
-         this->_position.overflow += bitcount;
+         this->_position.add_overshoot_bits(bitcount);
          consumed = bitcount;
          return;
       }
@@ -88,18 +64,20 @@ namespace halo {
       this->_position.bytes = bytepos;
       this->_position.bits  = bitpos % 8;
       if (bytepos > this->size()) {
-         this->_position.bytes    = this->size();
-         this->_position.overflow = bitpos - (this->size() * 8);
+         this->_position.bytes = this->size();
+         this->_position.bits  = 0;
+         this->_position.set_overshoot_bits(bitpos - (this->size() * 8));
       } else
-         this->_position.overflow = 0;
+         this->_position.overshoot = {};
    }
    CLASS_TEMPLATE_PARAMS inline void CLASS_NAME::set_bytepos(uint32_t bytepos) {
+      this->_position.bits  = 0;
       this->_position.bytes = bytepos;
       if (bytepos > this->size()) {
-         this->_position.bytes    = this->size();
-         this->_position.overflow = (bytepos - this->size()) * 8;
+         this->_position.bytes = this->size();
+         this->_position.set_overshoot_bytes(bytepos - this->size());
       } else
-         this->_position.overflow = 0;
+         this->_position.overshoot = {};
    }
 
    CLASS_TEMPLATE_PARAMS

@@ -8,20 +8,16 @@
 namespace halo::reach::megalo {
    void _validate_option_value(bitreader& stream, game_option::value_type& v) {
       if (v < -500) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
-               .value = v,
-            });
-         }
+         stream.emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
+            .value = v,
+         });
          v = -500;
          return;
       }
       if (v > 500) {
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
-               .value = v,
-            });
-         }
+         stream.emit_error<halo::reach::load_process_messages::megalo::game_option_value_out_of_bounds>({
+            .value = v,
+         });
          v = 500;
          return;
       }
@@ -71,23 +67,19 @@ namespace halo::reach::megalo {
          if (initial_index < count) {
             this->enumeration.initial = &this->enumeration.values[initial_index];
          } else {
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_initial_index_out_of_bounds>({
-                  .index = initial_index,
-                  .count = count,
-               });
-            }
+            stream.emit_error<halo::reach::load_process_messages::megalo::game_option_initial_index_out_of_bounds>({
+               .index = initial_index,
+               .count = count,
+            });
          }
          if (current_index < count) {
             this->enumeration.current = &this->enumeration.values[current_index];
          } else {
-            if constexpr (bitreader::has_load_process) {
-               // TODO: did the game ever actually validate this?
-               stream.load_process().emit_error<halo::reach::load_process_messages::megalo::game_option_current_index_out_of_bounds>({
-                  .index = current_index,
-                  .count = count,
-               });
-            }
+            // TODO: did the game ever actually validate this?
+            stream.emit_error<halo::reach::load_process_messages::megalo::game_option_current_index_out_of_bounds>({
+               .index = current_index,
+               .count = count,
+            });
          }
 
          for (auto& item : this->enumeration.values)

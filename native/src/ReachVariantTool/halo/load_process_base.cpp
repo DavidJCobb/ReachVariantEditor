@@ -2,51 +2,66 @@
 #include "load_process_fatal_error.h"
 
 namespace halo {
+   void load_process_base::_update_locational_info(message_base& item) {
+      this->location.copy_to(item.location);
+      item.stream_offsets = this->stream_offsets;
+   }
+
    void load_process_base::emit_notice(notice&& item) {
       auto& list = this->contents.notices;
       list.push_back(std::move(item));
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::emit_warning(warning&& item) {
       auto& list = this->contents.warnings;
       list.push_back(std::move(item));
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::emit_error(error&& item) {
       auto& list = this->contents.errors;
       list.push_back(std::move(item));
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::throw_fatal(fatal&& item) {
       auto& dst = this->contents.fatal_error;
       if (dst.has_value())
          return;
       dst.emplace(std::move(item));
-      this->location.copy_to(dst.value().location);
+      //
+      this->_update_locational_info(dst.value());
+      //
       throw load_process_fatal_error{};
    }
 
    void load_process_base::emit_notice(const notice& item) {
       auto& list = this->contents.notices;
       list.push_back(item);
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::emit_warning(const warning& item) {
       auto& list = this->contents.warnings;
       list.push_back(item);
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::emit_error(const error& item) {
       auto& list = this->contents.errors;
       list.push_back(item);
-      this->location.copy_to(list.back().location);
+      //
+      this->_update_locational_info(list.back());
    }
    void load_process_base::throw_fatal(const fatal& item) {
       auto& dst = this->contents.fatal_error;
       if (dst.has_value())
          return;
       dst.emplace(item);
-      this->location.copy_to(dst.value().location);
+      //
+      this->_update_locational_info(dst.value());
+      //
       throw load_process_fatal_error{};
    }
 

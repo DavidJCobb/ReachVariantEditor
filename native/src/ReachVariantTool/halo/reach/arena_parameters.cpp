@@ -7,19 +7,21 @@
 
 namespace halo::reach {
    void arena_parameters::read(bitreader& stream) {
+      const auto pos = stream.get_position();
       stream.read(
          values,
          show_in_scoreboard
       );
-      if constexpr (bitreader::has_load_process) {
-         // arena_stat_cannot_be_infinity
-         for (size_t i = 0; i < this->values.size(); ++i) {
-            constexpr uint32_t infinity_as_dword = 0x7F800000;
-            if (std::bit_cast<uint32_t>(this->values[i]) == infinity_as_dword) {
-               stream.load_process().emit_error<halo::reach::load_process_messages::arena_stat_cannot_be_infinity>({
+      // arena_stat_cannot_be_infinity
+      for (size_t i = 0; i < this->values.size(); ++i) {
+         constexpr uint32_t infinity_as_dword = 0x7F800000;
+         if (std::bit_cast<uint32_t>(this->values[i]) == infinity_as_dword) {
+            stream.emit_error_at<halo::reach::load_process_messages::arena_stat_cannot_be_infinity>(
+               {
                   .stat_index = i,
-               });
-            }
+               },
+               pos.advanced_by_bits(sizeof(float) * 8 * i)
+            );
          }
       }
       // Done.

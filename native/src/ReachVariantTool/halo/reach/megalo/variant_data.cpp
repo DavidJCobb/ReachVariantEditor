@@ -106,7 +106,7 @@ namespace halo::reach {
       //
       // And now for post-load steps.
       //
-      if constexpr (bitreader::has_load_process) {
+      {
          using message_type = halo::reach::load_process_messages::megalo::referenced_undefined_indexed_data;
          //
          std::vector<size_t> referenced_dummies;
@@ -114,7 +114,7 @@ namespace halo::reach {
          //
          this->script.forge_labels.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            stream.load_process().emit_error<message_type>({
+            stream.emit_error<message_type>({
                .indices   = referenced_dummies,
                .max_count = last_referenced_index + 1,
                .type      = message_type::data_type::forge_label,
@@ -122,7 +122,7 @@ namespace halo::reach {
          }
          this->script.options.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            stream.load_process().emit_error<message_type>({
+            stream.emit_error<message_type>({
                .indices   = referenced_dummies,
                .max_count = last_referenced_index + 1,
                .type      = message_type::data_type::game_option,
@@ -130,7 +130,7 @@ namespace halo::reach {
          }
          this->script.stats.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            stream.load_process().emit_error<message_type>({
+            stream.emit_error<message_type>({
                .indices   = referenced_dummies,
                .max_count = last_referenced_index + 1,
                .type      = message_type::data_type::game_stat,
@@ -138,7 +138,7 @@ namespace halo::reach {
          }
          this->script.traits.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            stream.load_process().emit_error<message_type>({
+            stream.emit_error<message_type>({
                .indices   = referenced_dummies,
                .max_count = last_referenced_index + 1,
                .type      = message_type::data_type::player_trait_set,
@@ -146,20 +146,12 @@ namespace halo::reach {
          }
          this->script.widgets.tear_down_dummies(&referenced_dummies, &last_referenced_index);
          if (!referenced_dummies.empty()) {
-            stream.load_process().emit_error<message_type>({
+            stream.emit_error<message_type>({
                .indices   = referenced_dummies,
                .max_count = last_referenced_index + 1,
                .type      = message_type::data_type::hud_widget,
             });
          }
-      } else {
-         tear_down_indexed_dummies(
-            script.forge_labels,
-            script.options,
-            script.stats,
-            script.traits,
-            script.widgets
-         );
       }
    }
 }

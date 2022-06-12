@@ -19,11 +19,12 @@ namespace halo::reach::megalo::operands {
                this->value = nullptr;
                break;
             default:
-               if constexpr (bitreader::has_load_process) {
-                  stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::player_or_group::bad_type>({
+               stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::player_or_group::bad_type>(
+                  {
                      .type_value = (size_t)which,
-                  });
-               }
+                  },
+                  stream.get_position().rewound_by_bits(decltype(which)::max_bitcount)
+               );
                return;
 
          }

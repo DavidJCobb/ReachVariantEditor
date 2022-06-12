@@ -26,7 +26,7 @@ namespace halo::reach {
    bytereader::load_process_type game_variant::read(const QByteArray& buffer) {
       load_process process;
       try {
-         bytereader   stream = bytereader(process);
+         bytereader stream = bytereader(process);
          stream.set_buffer((const uint8_t*)buffer.data(), buffer.size());
          this->read(stream);
       } catch (load_process_fatal_error&) {}
@@ -160,15 +160,13 @@ namespace halo::reach {
                      v->read(bitstream);
                      bitstream.set_game_variant_data(nullptr);
                      if (bitstream.get_overshoot_bits() > 0) {
-                        if constexpr (bitreader::has_load_process) {
-                           stream.load_process().emit_error<halo::common::load_process_messages::file_block_unexpected_end>({
-                              .block = {
-                                 .signature = block.header.signature,
-                                 .size      = block.header.size,
-                              },
-                              .overshoot = bitstream.get_overshoot_bits(),
-                           });
-                        }
+                        stream.load_process().emit_error<halo::common::load_process_messages::file_block_unexpected_end>({
+                           .block = {
+                              .signature = block.header.signature,
+                              .size      = block.header.size,
+                           },
+                           .overshoot = bitstream.get_overshoot_bits(),
+                        });
                      }
                   }
                }

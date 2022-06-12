@@ -20,19 +20,17 @@ namespace halo::reach {
             //
             v = halo::default_trait_value<Trait>;
             //
-            if constexpr (bitreader::has_load_process) {
-               auto message_data = halo::common::load_process_messages::player_trait_out_of_bounds_message_content{
-                  .trait       = Id,
-                  .value       = (int)vi,
-                  .allowed_min = info.min,
-                  .allowed_max = info.max,
-               };
-               //
-               if constexpr (game_silently_corrects) {
-                  stream.load_process().emit_warning<halo::common::load_process_messages::player_trait_out_of_bounds_warning>(message_data);
-               } else {
-                  stream.load_process().emit_error<halo::common::load_process_messages::player_trait_out_of_bounds_error>(message_data);
-               }
+            auto message_data = halo::common::load_process_messages::player_trait_out_of_bounds_message_content{
+               .trait       = Id,
+               .value       = (int)vi,
+               .allowed_min = info.min,
+               .allowed_max = info.max,
+            };
+            //
+            if constexpr (game_silently_corrects) {
+               stream.emit_warning<halo::common::load_process_messages::player_trait_out_of_bounds_warning>(message_data);
+            } else {
+               stream.emit_error<halo::common::load_process_messages::player_trait_out_of_bounds_error>(message_data);
             }
          }
       }

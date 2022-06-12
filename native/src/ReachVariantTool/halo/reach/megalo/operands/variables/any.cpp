@@ -7,7 +7,9 @@
 namespace halo::reach::megalo::operands {
    namespace variables {
       void any::read(bitreader& stream) {
-         auto type = stream.read_bits(3);
+         constexpr size_t type_bitcount = 3;
+         //
+         auto type = stream.read_bits(type_bitcount);
          switch (type) {
             case 0:
                this->value = new number;
@@ -26,11 +28,12 @@ namespace halo::reach::megalo::operands {
                break;
          }
          if (!this->value) {
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::any::bad_type>({
+            stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::any::bad_type>(
+               {
                   .type_value = (size_t)this->value,
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(type_bitcount)
+            );
             return;
          }
          this->value->read(stream);

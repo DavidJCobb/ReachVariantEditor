@@ -21,11 +21,12 @@ namespace halo::reach::megalo::operands {
             );
             break;
          default:
-            if constexpr (bitreader::has_load_process) {
-               stream.load_process().throw_fatal<halo::reach::load_process_messages::megalo::operands::hud_meter_parameters::bad_type>({
+            stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::hud_meter_parameters::bad_type>(
+               {
                   .type_value = (size_t)type.to_int(),
-               });
-            }
+               },
+               stream.get_position().rewound_by_bits(decltype(type)::max_bitcount)
+            );
             return;
       }
    }

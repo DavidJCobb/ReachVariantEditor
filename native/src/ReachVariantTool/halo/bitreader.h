@@ -9,8 +9,10 @@
 #include <vector>
 #include "helpers/type_traits/strip_enum.h"
 #include "helpers/apply_sign_bit.h"
-#include "./util/has_read_method.h"
-#include "./util/load_process.h"
+#include "halo/util/has_read_method.h"
+#include "halo/util/load_process.h"
+#include "halo/util/stream_position.h"
+#include "halo/load_process_base.h"
 
 namespace halo::util {
    class dummyable;
@@ -38,32 +40,26 @@ namespace halo {
 
    template<
       typename Subclass, // use the curiously recurring template pattern (CRTP): forward-declare your subclass, and then template it on itself
-      typename LoadProcess = void
+      typename LoadProcess = load_process_base
    > class bitreader {
       public:
          using my_type   = Subclass;
          using base_type = bitreader<Subclass, LoadProcess>; // helper for call-super; useful if your subclass is, say, some_namespace::bitreader
 
-         using load_process_type = std::remove_reference_t<LoadProcess>;
+         using load_process_type   = std::remove_reference_t<LoadProcess>;
+         using basic_position_type = util::stream_position;
+         using position_type       = util::full_stream_position;
 
-         static constexpr bool has_load_process    = util::load_process<load_process_type>;
-         static constexpr bool shares_load_process = has_load_process && std::is_reference_v<LoadProcess>;
+         static constexpr bool shares_load_process = std::is_reference_v<LoadProcess>;
 
       protected:
          template<typename T> static constexpr size_t bitcount_of_type = std::bit_width(std::numeric_limits<std::make_unsigned_t<cobb::strip_enum_t<T>>>::max());
 
-         using load_process_member_types = util::extract_load_process_types<load_process_type>;
-         struct _dummy {};
-
       protected:
          const uint8_t* _buffer = nullptr;
-         size_t _size = 0;
-         struct {
-            size_t  overflow = 0; // number of bits by which we have passed the end of the file
-            size_t  bytes    = 0;
-            uint8_t bits     = 0; // bit offset within current byte
-         } _position;
-         std::conditional_t<!has_load_process, _dummy, LoadProcess> _load_process;
+         size_t _size = 0; // bytes
+         position_type _position;
+         LoadProcess _load_process;
 
       protected:
          void _advance_offset_by_bits(size_t bits);
@@ -79,19 +75,25 @@ namespace halo {
          inline const uint8_t* data() const noexcept { return this->_buffer; }
          inline uint32_t size() const noexcept { return this->_size; }
 
-         load_process_type& load_process() requires (!std::is_same_v<load_process_type, void>) {
+         load_process_type& load_process() const requires (shares_load_process) {
             return this->_load_process;
          }
-         const load_process_type& load_process() const requires (!std::is_same_v<load_process_type, void>) {
+         load_process_type& load_process() requires (!shares_load_process) {
             return this->_load_process;
          }
-         
-         inline uint32_t get_bitpos() const noexcept { return this->_position.bytes * 8 + this->_position.bits; }
+         const load_process_type& load_process() const requires (!shares_load_process) {
+            return this->_load_process;
+         }
+
+         const basic_position_type get_position() const { return this->_position; }
+         const position_type get_full_position() const { return this->_position; }
+         //
+         inline uint32_t get_bitpos() const noexcept { return this->_position.in_bits(); }
          inline uint32_t get_bitshift() const noexcept { return this->_position.bits; }
          inline uint32_t get_bytepos() const noexcept { return this->_position.bytes; }
-         inline uint32_t get_bytespan() const noexcept { return this->_position.bytes + (this->_position.bits ? 1 : 0); }
-         inline uint32_t get_overshoot_bits()  const noexcept { return this->_position.overflow; }
-         inline uint32_t get_overshoot_bytes() const noexcept { return this->_position.overflow / 8; }
+         inline uint32_t get_bytespan() const noexcept { return this->_position.bytespan(); }
+         inline uint32_t get_overshoot_bits()  const noexcept { return this->_position.overshoot_in_bits(); }
+         inline uint32_t get_overshoot_bytes() const noexcept { return this->_position.overshoot_in_bytes(); }
 
          bool is_at_end() const noexcept {
             return this->_position.bytes >= this->size();
@@ -160,6 +162,52 @@ namespace halo {
          template<typename CharT> void read_string(CharT* out, size_t max_length);
          
          void skip(uint32_t bitcount);
+
+         #pragma region Load process messages
+         void emit_notice(load_process_base::notice&& m) { this->_load_process.emit_notice(std::forward(m)); }
+         void emit_warning(load_process_base::warning&& m) { this->_load_process.emit_warning(std::forward(m)); }
+         void emit_error(load_process_base::error&& m) { this->_load_process.emit_error(std::forward(m)); }
+         void throw_fatal(load_process_base::fatal&& m) { this->_load_process.throw_fatal(std::forward(m)); }
+
+         void emit_notice(const load_process_base::notice& m) { this->_load_process.emit_notice(std::forward(m)); }
+         void emit_warning(const load_process_base::warning& m) { this->_load_process.emit_warning(std::forward(m)); }
+         void emit_error(const load_process_base::error& m) { this->_load_process.emit_error(std::forward(m)); }
+         void throw_fatal(const load_process_base::fatal& m) { this->_load_process.throw_fatal(std::forward(m)); }
+
+         template<typename T> requires load_process_message_wraps_content<T> void emit_notice(const typename T::message_content& info) {
+            this->_load_process.set_stream_offsets(this->_position.bytes, this->_position.bits);
+            this->_load_process.template emit_notice<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_warning(const typename T::message_content& info) {
+            this->_load_process.set_stream_offsets(this->_position.bytes, this->_position.bits);
+            this->_load_process.template emit_warning<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_error(const typename T::message_content& info) {
+            this->_load_process.set_stream_offsets(this->_position.bytes, this->_position.bits);
+            this->_load_process.template emit_error<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void throw_fatal(const typename T::message_content& info) {
+            this->_load_process.set_stream_offsets(this->_position.bytes, this->_position.bits);
+            this->_load_process.template throw_fatal<T>(info);
+         }
+         
+         template<typename T> requires load_process_message_wraps_content<T> void emit_notice_at(const typename T::message_content& info, const basic_position_type& pos) {
+            this->_load_process.set_stream_offsets(pos.bytes, pos.bits);
+            this->_load_process.template emit_notice<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_warning_at(const typename T::message_content& info, const basic_position_type& pos) {
+            this->_load_process.set_stream_offsets(pos.bytes, pos.bits);
+            this->_load_process.template emit_warning<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void emit_error_at(const typename T::message_content& info, const basic_position_type& pos) {
+            this->_load_process.set_stream_offsets(pos.bytes, pos.bits);
+            this->_load_process.template emit_error<T>(info);
+         }
+         template<typename T> requires load_process_message_wraps_content<T> void throw_fatal_at(const typename T::message_content& info, const basic_position_type& pos) {
+            this->_load_process.set_stream_offsets(pos.bytes, pos.bits);
+            this->_load_process.template throw_fatal<T>(info);
+         }
+         #pragma endregion
    };
 
    template<typename T> concept bitreader_subclass = requires(T& x) {
@@ -168,7 +216,6 @@ namespace halo {
 
       typename T::load_process_type;
       //
-      { T::has_load_process }    -> std::same_as<const bool&>;
       { T::shares_load_process } -> std::same_as<const bool&>;
 
       std::is_base_of_v<

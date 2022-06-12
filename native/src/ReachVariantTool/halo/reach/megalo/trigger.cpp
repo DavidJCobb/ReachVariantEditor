@@ -20,11 +20,12 @@ namespace halo::reach::megalo {
             //
             auto& list = vd->script.forge_labels;
             if (idx >= list.size()) {
-               if constexpr (bitreader::has_load_process) {
-                  stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_forge_label>({
+               stream.emit_error_at<load_process_messages::megalo::trigger_bad_forge_label>(
+                  {
                      .label_index = idx,
-                  });
-               }
+                  },
+                  stream.get_position().rewound_by_bits(decltype(idx)::max_bitcount)
+               );
             } else {
                this->loop_forge_label = &list[idx];
             }
@@ -44,25 +45,21 @@ namespace halo::reach::megalo {
       bool valid = true;
       if (ls.action_start + ls.action_count > all_actions.size()) {
          valid = false;
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
-               .opcode_type  = opcode_type::action,
-               .start        = ls.action_start,
-               .end          = (size_t)(ls.action_start + ls.action_count),
-               .count_of_all = all_actions.size(),
-            });
-         }
+         stream.emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
+            .opcode_type  = opcode_type::action,
+            .start        = ls.action_start,
+            .end          = (size_t)(ls.action_start + ls.action_count),
+            .count_of_all = all_actions.size(),
+         });
       }
       if (ls.condition_start + ls.condition_count > all_conditions.size()) {
          valid = false;
-         if constexpr (bitreader::has_load_process) {
-            stream.load_process().emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
-               .opcode_type  = opcode_type::condition,
-               .start        = ls.condition_start,
-               .end          = (size_t)(ls.condition_start + ls.condition_count),
-               .count_of_all = all_conditions.size(),
-            });
-         }
+         stream.emit_error<load_process_messages::megalo::trigger_bad_opcode_slice>({
+            .opcode_type  = opcode_type::condition,
+            .start        = ls.condition_start,
+            .end          = (size_t)(ls.condition_start + ls.condition_count),
+            .count_of_all = all_conditions.size(),
+         });
       }
       if (!valid)
          return;
