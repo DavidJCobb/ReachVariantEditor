@@ -22,7 +22,7 @@ namespace halo::reach::megalo::operands {
          >;
 
       public:
-         value_type value;
+         value_type value; // unsigned; values >= 0xD are treated as 0; probable enum; further details unknown
 
          virtual void read(bitreader& stream) override;
    };

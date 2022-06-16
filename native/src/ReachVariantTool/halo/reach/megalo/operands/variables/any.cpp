@@ -14,11 +14,11 @@ namespace halo::reach::megalo::operands {
             case 0:
                this->value = new number;
                break;
-            case 2:
-               this->value = new object;
-               break;
             case 1:
                this->value = new player;
+               break;
+            case 2:
+               this->value = new object;
                break;
             case 3:
                this->value = new team;

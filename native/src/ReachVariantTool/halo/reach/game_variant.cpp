@@ -45,12 +45,10 @@ namespace halo::reach {
             // _blf must be the first block in the file
             //
             if (block.header.signature != '_blf') {
-               if constexpr (bytereader::has_load_process) {
-                  stream.load_process().throw_fatal<halo::common::load_process_messages::first_file_block_is_not_blam_header>({
-                     .signature = block.header.signature,
-                     .size      = block.header.size,
-                  });
-               }
+               stream.throw_fatal<halo::common::load_process_messages::first_file_block_is_not_blam_header>({
+                  .signature = block.header.signature,
+                  .size      = block.header.size,
+               });
                return;
             }
             blam = true;
@@ -67,11 +65,9 @@ namespace halo::reach {
                this->content_header.read(block);
                chdr = true;
                if (this->content_header.data.type != ugc_file_type::game_variant) {
-                  if constexpr (bytereader::has_load_process) {
-                     stream.load_process().throw_fatal<halo::reach::load_process_messages::not_a_game_variant>({
-                        .type = this->content_header.data.type,
-                     });
-                  }
+                  stream.throw_fatal<halo::reach::load_process_messages::not_a_game_variant>({
+                     .type = this->content_header.data.type,
+                  });
                   return;
                }
                break;
@@ -85,33 +81,27 @@ namespace halo::reach {
                         // Note: This won't catch all Halo 2 Anniversary variants; some use a new file chunk, "athr", 
                         // so those trip the "no 'chdr' block" check instead.
                         //
-                        if constexpr (bytereader::has_load_process) {
-                           stream.load_process().throw_fatal<halo::common::load_process_messages::file_is_for_the_wrong_game>({
-                              .expected = game::halo_reach,
-                              .found    = game::halo_2_annie,
-                           });
-                        }
+                        stream.throw_fatal<halo::common::load_process_messages::file_is_for_the_wrong_game>({
+                           .expected = game::halo_reach,
+                           .found    = game::halo_2_annie,
+                        });
                         return;
                      }
                      if (block.header.size != game_variant_data::file_block_size) {
-                        if constexpr (bytereader::has_load_process) {
-                           stream.load_process().emit_error<halo::common::load_process_messages::invalid_file_block_header>({
-                              .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                              .found    = { .signature = block.header.signature, .size = block.header.size },
-                           });
-                        }
+                        stream.emit_error<halo::common::load_process_messages::invalid_file_block_header>({
+                           .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
+                           .found    = { .signature = block.header.signature, .size = block.header.size },
+                        });
                         return;
                      }
                   } else if (block.header.signature == 'gvar') {
                      block_type_is_gvar = true;
                      block.header.signature = 'mpvr'; // fix this for when we save
                   } else {
-                     if constexpr (bytereader::has_load_process) {
-                        stream.load_process().emit_error<halo::common::load_process_messages::invalid_file_block_header>({
-                           .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
-                           .found    = { .signature = block.header.signature, .size = block.header.size },
-                        });
-                     }
+                     stream.emit_error<halo::common::load_process_messages::invalid_file_block_header>({
+                        .expected = { .signature = 'mpvr', .size = game_variant_data::file_block_size },
+                        .found    = { .signature = block.header.signature, .size = block.header.size },
+                     });
                      return;
                   }
                   //
@@ -199,10 +189,8 @@ namespace halo::reach {
          #endif
       }
       if (!mpvr) {
-         if constexpr (bytereader::has_load_process) {
-            stream.load_process().throw_fatal<halo::common::load_process_messages::game_variant_no_file_block_for_data>({
-            });
-         }
+         stream.throw_fatal<halo::common::load_process_messages::game_variant_no_file_block_for_data>({
+         });
          return;
       }
       if (!chdr) {

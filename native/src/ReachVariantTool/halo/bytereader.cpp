@@ -8,7 +8,8 @@ namespace halo {
 
       void bytereader_base::_read_impl(void* out, size_t size) {
          this->_peek_impl(out, size);
-         this->_position.bytes += size;
+         this->_position.advance_by_bytes(size);
+         this->_position.clamp_to_size(this->size());
       }
       void bytereader_base::_peek_impl(void* out, size_t size) {
          if (!this->is_in_bounds(size)) {
@@ -28,17 +29,14 @@ namespace halo {
          this->_size     = s;
          this->_position = {};
       }
-      void bytereader_base::set_position(uint32_t bytepos) {
-         this->_position.bytes = bytepos;
-         if (bytepos > this->size()) {
-            this->_position.bytes    = this->size();
-            this->_position.overflow = (bytepos - this->size()) * 8;
-         } else
-            this->_position.overflow = 0;
+      void bytereader_base::set_position(size_t bytepos) {
+         this->_position.set_in_bytes(bytepos);
+         this->_position.clamp_to_size(this->size());
       }
 
       void bytereader_base::skip(size_t bytecount) {
-         this->set_position(this->get_position() + bytecount);
+         this->_position.advance_by_bytes(bytecount);
+         this->_position.clamp_to_size(this->size());
       }
    }
 }

@@ -564,6 +564,10 @@ namespace halo::reach::megalo {
                .name     = "context",
             },
             opcode_function::operand_info{
+               .typeinfo = operands::variables::number::typeinfo,
+               .name     = "enable",
+            },
+            opcode_function::operand_info{
                .typeinfo = operands::player_req_purchase_modes::typeinfo,
                .name     = "modes",
             },
@@ -1153,7 +1157,7 @@ namespace halo::reach::megalo {
          }
       },
       opcode_function{ // 80
-         .name     = "set_device_acutal_position",
+         .name     = "set_device_actual_position",
          .operands = {
             opcode_function::operand_info{
                .typeinfo = operands::variables::object::typeinfo,
@@ -1166,7 +1170,7 @@ namespace halo::reach::megalo {
          }
       },
       opcode_function{ // 81
-         .name     = "insert_theater_film_markers",
+         .name     = "insert_theater_film_marker",
          .operands = {
             opcode_function::operand_info{
                .typeinfo = operands::variables::number::typeinfo,

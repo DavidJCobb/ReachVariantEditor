@@ -1,0 +1,113 @@
+
+Megalo executes a trigger by  first initializing a  condition index variable to 0. 
+It then loops  over every action in the trigger. Within  that outer loop, there is 
+an inner loop which reuses the condition index (without ever resetting it) to loop 
+over all conditions in the trigger. If we find a condition that executes after the 
+current action, then we stop the condition loop.
+
+More simply:  for each action, we loop over all conditions that  we haven't looped 
+over before, and  that come before the action. If those conditions,  in sum, fail, 
+then we stop trigger execution. Otherwise, we execute the current action.
+
+But what  does it mean for the conditions to succeed or fail  "in sum?" Conditions 
+can be linked  by "AND" or "OR;" how does this work? Well,  every condition has an 
+"or-group" value.  If two consecutive  conditions share the same  "or-group," then 
+they are OR-linked; otherwise, they are AND-linked. The game remembers the last or-
+group it saw for the current action  (but not for previous actions), and uses that 
+to clear a  "has any condition passed for this action" bool. It also  uses the end 
+of any or-group  (i.e. the  start of a  new or-group, or  the end  of all relevant 
+conditions for the current action) to check that bool and potentially stop trigger 
+execution early.
+
+Here's a translation of the raw assembly:
+
+   Trigger::Execute(const MegaloScriptCode& script) const {
+      size_t ci = 0; // condition index
+
+      for(size_t ai = 0; ai < this->action_count; ++ai) {
+
+         // Last seen or-group for this action.
+         int32_t current_or_group = -1;
+
+         // True if all conditions for the current "or-group" for the current 
+         // action have matched. An "or-group" is a group of conditions that 
+         // have been OR'd together.
+         bool group_still_valid = true;
+
+         for(; ci < this->condition_count; ++ci) {
+            const auto& condition = script.conditions[this->condition_start + j];
+
+            if (condition.exec_before > i)
+               //
+               // This condition applies to actions later in the trigger.
+               //
+               break;
+
+            if (condition.or_group != current_or_group) {
+               if (!group_still_valid)
+                  //
+                  // If we reach the end of an "or-group" and none of the 
+                  // conditions have matched, then stop the trigger.
+                  //
+                  return;
+               current_or_group  = condition.or_group;
+               group_still_valid = false;
+            }
+            group_still_valid |= condition.Execute();
+         }
+         if (!group_still_valid)
+            //
+            // If we reach the end of an "or-group" and none of the conditions 
+            // have matched, then stop the trigger.
+            //
+            return;
+
+         const auto& action = script.actions[this->action_start + i];
+         action.Execute();
+      }
+   }
+   
+This functionality has a few implications. First: conditions must be serialized in 
+ascending order  of their "execute before" values. If a condition  with an earlier 
+"execute before" value is serialized after one with a later value, then the former 
+will not run when it should, because  condition checking stops upon encountering a 
+condition with a later value.
+
+Additionally, or-groups are only relevant for consecutive conditions. This implies 
+that or-group values can be reused within  a trigger, though editing tools may not 
+react well to that.  The game doesn't remember what or-groups  it has seen before; 
+it only  remembers the last  or-group it has seen  (and even then, only  among the 
+conditions relevant for the current action). Consider the following script:
+
+   if  condition_a1 or condition_a2
+   and condition_a3 or condition_a4
+   and condition_a5 or condition_a6
+   then
+      action_a
+      if condition_b1 or condition b2 then
+         action_b
+         action_c
+         if condition_d1 then
+            action_d
+         end
+      end
+   end
+
+The following sets of or-group values would all execute as expected:
+
+   A1 A2 A3 A4 A5 A6 B1 B2 D1 | NOTE
+   0  0  1  1  2  2  3  3  4  | No reused or-group values
+   0  0  1  1  0  0  1  1  0  | Reusing or-groups by alternating values
+   0  0  1  1  2  2  0  0  0  | Reusing or-groups past each new action
+   0  0  1  1  0  0  0  0  0  | Reusing or-groups in both ways
+        ^     ^     ^     ^   | Marked: boundaries between or-groups
+                    ^     ^   | Marked: actions
+
+You can reuse or-group  values starting from any action,  because the game forgets 
+the last  or-group it saw when processing  a new action. Between  actions, you can 
+alternate between  just two values:  the game only remembers  the last or-group it 
+saw, so all that matters is that one group of OR-linked conditions uses a separate 
+value from the group immediately before it and the group immediately after it.
+
+Again, though, RVT will  serialize or-groups using strictly  increasing values per 
+trigger, to avoid generating code that may confuse other editing tools.
