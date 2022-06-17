@@ -9,4 +9,11 @@ namespace halo::reach::firefight {
          traits_wave
       );
    }
+   void custom_skull::write(bitwriter& stream) const {
+      stream.write(
+         traits_spartan,
+         traits_elite,
+         traits_wave
+      );
+   }
 }

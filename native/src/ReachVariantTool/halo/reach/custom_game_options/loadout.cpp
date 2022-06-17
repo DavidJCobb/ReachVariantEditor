@@ -12,4 +12,14 @@ namespace halo::reach::custom_game_options {
          grenade_count
       );
    }
+   void loadout::write(bitwriter& stream) const {
+      stream.write(
+         visible,
+         name,
+         weapon_primary,
+         weapon_secondary,
+         ability,
+         grenade_count
+      );
+   }
 }

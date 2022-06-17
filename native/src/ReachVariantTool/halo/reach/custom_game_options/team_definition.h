@@ -26,5 +26,6 @@ namespace halo::reach::custom_game_options {
       bitnumber<5, uint8_t> fireteam_count = 1;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

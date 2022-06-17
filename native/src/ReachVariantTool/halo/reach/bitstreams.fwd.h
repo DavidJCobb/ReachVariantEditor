@@ -6,4 +6,5 @@
 
 namespace halo::reach {
    class bitreader;
+   class bitwriter;
 }

@@ -21,5 +21,6 @@ namespace halo::reach::firefight {
          // in Set 2, Round 1 will use: Initial Wave squad 1; Main Wave squads 1, 2, and 3; and Boss Wave squad 1.
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

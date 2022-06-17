@@ -22,6 +22,13 @@ namespace halo::reach {
          options
       );
    }
+   void game_variant_data::write(bitwriter& stream) const {
+      stream.write(
+         ugc_header,
+         is_built_in,
+         options
+      );
+   }
 
    bytereader::load_process_type game_variant::read(const QByteArray& buffer) {
       load_process process;

@@ -18,5 +18,6 @@ namespace halo::reach {
          bitnumber<1, permission_type> type;
          
          void read(bitreader&);
+         void write(bitwriter&);
    };
 }

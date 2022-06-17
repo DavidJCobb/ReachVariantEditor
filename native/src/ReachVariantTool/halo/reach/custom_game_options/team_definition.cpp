@@ -14,4 +14,16 @@ namespace halo::reach::custom_game_options {
          fireteam_count
       );
    }
+   void team_definition::write(bitwriter& stream) const {
+      stream.write(
+         flags,
+         name,
+         initial_designator,
+         spartan_or_elite,
+         colors.primary,
+         colors.secondary,
+         colors.ui,
+         fireteam_count
+      );
+   }
 }

@@ -41,6 +41,7 @@ namespace halo::reach {
          custom_game_options::all options;
 
          virtual void read(bitreader&);
+         virtual void write(bitwriter&) const;
    };
 
    class game_variant {

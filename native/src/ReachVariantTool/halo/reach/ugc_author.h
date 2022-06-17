@@ -13,6 +13,8 @@ namespace halo::reach {
 
          void read(bitreader&);
          void read(bytereader&);
+
+         void write(bitwriter&) const;
          
          bool has_xuid() const noexcept;
          void erase_xuid() noexcept;

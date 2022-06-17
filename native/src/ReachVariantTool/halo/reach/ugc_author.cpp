@@ -20,4 +20,13 @@ namespace halo::reach {
       );
       stream.skip(3); // padding
    }
+
+   void ugc_author::write(bitwriter& stream) const {
+      stream.write(
+         timestamp,
+         xuid
+      );
+      stream.write_string(gamertag.data(), gamertag.max_size());
+      stream.write(is_online_id);
+   }
 }

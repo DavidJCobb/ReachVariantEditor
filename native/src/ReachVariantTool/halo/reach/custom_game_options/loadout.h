@@ -99,5 +99,6 @@ namespace halo::reach::custom_game_options {
       bitnumber<4, uint8_t> grenade_count;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

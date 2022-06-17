@@ -30,6 +30,7 @@ namespace halo::reach::custom_game_options {
       bitnumber<5, uint8_t> grace_period_time; // seconds
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
    
    struct respawn {
@@ -55,6 +56,7 @@ namespace halo::reach::custom_game_options {
       trait_set traits;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
    
    struct social {
@@ -80,6 +82,7 @@ namespace halo::reach::custom_game_options {
       bitnumber<5, uint8_t> flags;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
    
    struct map {
@@ -106,6 +109,7 @@ namespace halo::reach::custom_game_options {
       } powerups;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
    
    struct teams {
@@ -115,6 +119,7 @@ namespace halo::reach::custom_game_options {
       std::array<team_definition, 8> definitions;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
    
    struct loadouts {
@@ -122,6 +127,7 @@ namespace halo::reach::custom_game_options {
       loadout_palette_set palettes;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 
    struct all {
@@ -133,5 +139,6 @@ namespace halo::reach::custom_game_options {
       loadouts loadouts;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

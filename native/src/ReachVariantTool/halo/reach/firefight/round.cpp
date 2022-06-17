@@ -10,4 +10,12 @@ namespace halo::reach::firefight {
          waves.boss
       );
    }
+   void round::write(bitwriter& stream) const {
+      stream.write(
+         skull_flags,
+         waves.initial,
+         waves.main,
+         waves.boss
+      );
+   }
 }

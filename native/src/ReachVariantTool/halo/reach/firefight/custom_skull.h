@@ -10,5 +10,6 @@ namespace halo::reach::firefight {
       wave_trait_set traits_wave;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

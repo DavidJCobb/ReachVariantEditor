@@ -184,6 +184,7 @@
     <ClCompile Include="halo\common\load_process_messages\string_table\mismatched_sizes.cpp" />
     <ClCompile Include="halo\common\load_process_messages\string_table\too_large_buffer.cpp" />
     <ClCompile Include="halo\common\load_process_messages\string_table\too_large_count.cpp" />
+    <ClCompile Include="halo\load_process_base.cpp" />
     <ClCompile Include="halo\loc_string_base.cpp" />
     <ClCompile Include="halo\loc_string_table.cpp" />
     <ClCompile Include="halo\reach\arena_parameters.cpp" />
@@ -267,6 +268,7 @@
     <ClCompile Include="halo\reach\trait_set.cpp" />
     <ClCompile Include="halo\reach\ugc_author.cpp" />
     <ClCompile Include="halo\reach\ugc_header.cpp" />
+    <ClCompile Include="halo\util\stream_position.cpp" />
     <ClCompile Include="helpers\cpuinfo.cpp" />
     <ClCompile Include="helpers\qt\four_cc_to_string.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test.cpp" />
@@ -448,9 +450,11 @@
     <ClInclude Include="game_variants\io_process.h" />
     <ClInclude Include="game_variants\types\firefight.h" />
     <ClInclude Include="game_variants\warnings.h" />
+    <ClInclude Include="halo\bad_data_on_write_exception.h" />
     <ClInclude Include="halo\bitbool.h" />
     <ClInclude Include="halo\bitfloat.h" />
     <ClInclude Include="halo\bitreader.h" />
+    <ClInclude Include="halo\bitwriter.h" />
     <ClInclude Include="halo\bytereader.h" />
     <ClInclude Include="halo\common\load_process_messages\file_blocks\first_file_block_is_not_blam_header.h" />
     <ClInclude Include="halo\common\load_process_messages\file_blocks\game_variant_no_file_block_for_data.h" />
@@ -464,7 +468,9 @@
     <ClInclude Include="halo\common\load_process_messages\string_table\mismatched_sizes.h" />
     <ClInclude Include="halo\common\load_process_messages\string_table\too_large_buffer.h" />
     <ClInclude Include="halo\common\load_process_messages\string_table\too_large_count.h" />
+    <ClInclude Include="halo\load_process_base.h" />
     <ClInclude Include="halo\load_process_fatal_error.h" />
+    <ClInclude Include="halo\load_process_location.h" />
     <ClInclude Include="halo\load_process_message_data.h" />
     <ClInclude Include="halo\reach\arena_parameters.h" />
     <ClInclude Include="halo\reach\bytestreams.fwd.h" />
@@ -635,14 +641,18 @@
     <ClInclude Include="halo\util\fixed_string.h" />
     <ClInclude Include="halo\util\four_cc.h" />
     <ClInclude Include="halo\util\has_read_method.h" />
+    <ClInclude Include="halo\util\has_write_method.h" />
     <ClInclude Include="halo\util\indexed.h" />
     <ClInclude Include="halo\util\indexed_list.h" />
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
+    <ClInclude Include="halo\util\stream_position.h" />
     <ClInclude Include="helpers\constexpr_for_functor.h" />
     <ClInclude Include="helpers\cpuinfo.h" />
+    <ClInclude Include="helpers\eight_cc.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
     <ClInclude Include="helpers\numeric_min_max.h" />
+    <ClInclude Include="helpers\owned_ptr.h" />
     <ClInclude Include="helpers\qt\four_cc_to_string.h" />
     <ClInclude Include="helpers\reflex\constants.h" />
     <ClInclude Include="helpers\reflex\enumeration.h" />
@@ -717,6 +727,7 @@
     <ClInclude Include="helpers\qt\tree_widget.h" />
     <ClInclude Include="helpers\qt\widget.h" />
     <ClInclude Include="helpers\refcounting.h" />
+    <ClInclude Include="helpers\split_vector.h" />
     <ClInclude Include="helpers\standalones\unique_pointer.h" />
     <ClInclude Include="helpers\steam.h" />
     <ClInclude Include="helpers\string\strcmp.h" />
@@ -851,10 +862,12 @@
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
+    <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="halo\bitreader.inl" />
+    <None Include="halo\bitwriter.inl" />
     <None Include="halo\loc_string.inl" />
     <None Include="halo\loc_string_table.inl" />
     <None Include="halo\reach\files\blocks\base.inl" />
@@ -892,6 +905,7 @@
     <Natvis Include="halo\util\indexed_list.natvis" />
     <Natvis Include="halo\util\refcount.natvis" />
     <Natvis Include="helpers\cs.natvis" />
+    <Natvis Include="helpers\eight_cc.natvis" />
     <Natvis Include="helpers\reflex\flags_mask.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

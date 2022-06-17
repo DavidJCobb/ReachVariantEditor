@@ -10,4 +10,12 @@ namespace halo::reach::firefight {
          squads
       );
    }
+   void wave::write(bitwriter& stream) const {
+      stream.write(
+         uses_dropship,
+         ordered_squads,
+         squad_count,
+         squads
+      );
+   }
 }

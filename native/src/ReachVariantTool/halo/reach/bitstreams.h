@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include "halo/bitreader.h"
+#include "halo/bitwriter.h"
 #include "./load_process.h"
 #include "./bitstreams.fwd.h"
 #include "./megalo/strings.h"
@@ -96,5 +97,12 @@ namespace halo::reach {
                this->_pending_string_refs = {}; // fast clear
             }
          }
+   };
+
+   class bitwriter : public halo::bitwriter<bitwriter> {
+      public:
+         using base_type::bitwriter;
+         using base_type::write;
+         using base_type::write_bits;
    };
 }

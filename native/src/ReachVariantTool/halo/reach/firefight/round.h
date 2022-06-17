@@ -38,5 +38,6 @@ namespace halo::reach::firefight {
       } waves;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

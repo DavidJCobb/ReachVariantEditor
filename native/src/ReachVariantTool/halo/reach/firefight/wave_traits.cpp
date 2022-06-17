@@ -16,4 +16,18 @@ namespace halo::reach::firefight {
          damage_multiplier
       );
    }
+   void wave_trait_set::write(bitwriter& stream) const {
+      stream.write(
+         vision,
+         hearing,
+         luck,
+         shootiness,
+         grenades,
+         dont_drop_equipment,
+         immunity_assassinations,
+         immunity_headshots,
+         damage_resistance,
+         damage_multiplier
+      );
+   }
 }

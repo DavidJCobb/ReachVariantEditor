@@ -54,5 +54,6 @@ namespace halo::reach::firefight {
          bitnumber<4, traits::damage_multiplier>  damage_multiplier;
 
          void read(bitreader&);
+         void write(bitwriter&) const;
    };
 }

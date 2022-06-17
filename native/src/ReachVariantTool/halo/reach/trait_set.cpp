@@ -138,4 +138,47 @@ namespace halo::reach {
          player_trait::radar_range
       >(*this, stream);
    }
+   void trait_set::write(bitwriter& stream) {
+      stream.write(
+         defense.damage_resistance,
+         defense.health_multiplier,
+         defense.health_rate,
+         defense.shield_multiplier,
+         defense.shield_rate,
+         defense.overshield_rate,
+         defense.immunity_headshot,
+         defense.shield_vampirism,
+         defense.immunity_assassination,
+         defense.cannot_die_from_damage,
+         //
+         offense.damage_multiplier,
+         offense.melee_multiplier,
+         offense.weapon_primary,
+         offense.weapon_secondary,
+         offense.grenade_count,
+         offense.infinite_ammo,
+         offense.grenade_regen,
+         offense.weapon_pickup,
+         offense.ability_usage,
+         offense.abilities_drop_on_death,
+         offense.infinite_ability,
+         offense.ability,
+         //
+         movement.speed,
+         movement.gravity,
+         movement.vehicle_usage,
+         movement.double_jump,
+         movement.jump_height,
+         //
+         appearance.active_camo,
+         appearance.visible_waypoint,
+         appearance.visible_name,
+         appearance.aura,
+         appearance.forced_color,
+         //
+         sensors.radar_state,
+         sensors.radar_range,
+         sensors.directional_damage_indicator
+      );
+   }
 }

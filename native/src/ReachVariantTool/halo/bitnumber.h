@@ -73,12 +73,12 @@ namespace halo {
          { stream.read(value) } -> std::same_as<Uint>;
       };
 
-      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value, bool has_sign_bit) {
-         { stream.write_bits(value, bitcount) };
-         { stream.write_bits(value, bitcount, has_sign_bit) };
+      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value) {
+         { stream.write_bits(bitcount, value) };
       };
       template<typename Stream, typename Uint> concept write_bytestream = requires (Stream& stream, Uint value) {
          { stream.write(value) };
+         requires !write_bitstream<Stream, Uint>;
       };
    }
 
@@ -137,16 +137,18 @@ namespace halo {
          }
 
          template<class Stream> requires impl::bitnumber::write_bitstream<Stream, underlying_uint>
-         bool _write_presence(Stream& stream) const noexcept { // returns bool indicating whether a value is present
+         bool _write_presence(Stream& stream) const { // returns bool indicating whether a value is present
             if constexpr (!has_presence)
                return true;
-            constexpr bool presence = params.presence.value();
-            if (this->value == params.if_absent) {
-               stream.write_bits(!presence, 1);
-               return false;
+            else {
+               constexpr bool presence = params.presence.value();
+               if (this->value == params.if_absent) {
+                  stream.write_bits(1, !presence);
+                  return false;
+               }
+               stream.write_bits(1, presence);
+               return true;
             }
-            stream.write_bits(presence, 1);
-            return true;
          }
 
       public:
@@ -172,14 +174,23 @@ namespace halo {
          }
 
          template<class Stream> requires impl::bitnumber::write_bitstream<Stream, underlying_uint>
-         void write(Stream& stream) const noexcept {
+         void write(Stream& stream) const {
             if (!this->_write_presence(stream))
                return;
-            stream.write_bits((underlying_int)this->value + (uses_offset ? params.offset : 0), bitcount, has_sign_bit);
+            auto result = (underlying_int)this->value;
+            if constexpr (uses_offset) {
+               result += params.offset;
+            }
+            if constexpr (has_sign_bit) {
+               result &= (1 << bitcount) - 1;
+               if ((underlying_int)this->value < 0) {
+                  result = cobb::apply_sign_bit(result, bitcount);               }
+            }
+            stream.write_bits(bitcount, result);
          }
 
          template<class Stream> requires impl::bitnumber::write_bytestream<Stream, underlying_uint>
-         void write(Stream& stream) const noexcept {
+         void write(Stream& stream) const {
             stream.write(this->value);
          }
          

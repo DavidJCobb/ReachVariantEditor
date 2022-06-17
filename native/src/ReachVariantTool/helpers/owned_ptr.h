@@ -53,7 +53,7 @@ namespace cobb {
          template<typename Derived> requires std::is_base_of_v<value_type, Derived> owned_ptr(Derived* b) : _target(b) {}
 
          template<typename U> owned_ptr(const owned_ptr<U>&) = delete;
-         owned_ptr(owned_ptr&& v) : _target(v.release()) {}
+         owned_ptr(owned_ptr&& v) noexcept : _target(v.release()) {}
 
          template<typename U> owned_ptr& operator=(const owned_ptr<U>&) = delete;
          owned_ptr& operator=(owned_ptr&& v) {

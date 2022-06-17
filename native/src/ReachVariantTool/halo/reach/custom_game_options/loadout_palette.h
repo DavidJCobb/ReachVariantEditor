@@ -17,6 +17,7 @@ namespace halo::reach::custom_game_options {
       std::array<loadout, 5> loadouts;
 
       void read(bitreader& stream);
+      void write(bitwriter&) const;
    };
    
    struct loadout_palette_set : public std::array<loadout_palette, 6> {

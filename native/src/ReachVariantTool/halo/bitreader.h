@@ -112,13 +112,13 @@ namespace halo {
          // Multi-read call
          template<typename... Types> requires (sizeof...(Types) > 1)
          void read(Types&... args) {
-            (((Subclass*)this)->read(args), ...);
+            (((my_type*)this)->read(args), ...);
          }
          
          #pragma region read
          template<typename T> requires util::has_read_method<my_type, T>
          void read(T& v) {
-            v.read(*(Subclass*)this);
+            v.read(*(my_type*)this);
          }
 
          template<typename T> requires (!util::has_read_method<my_type, T> && impl::bitreader::is_bitreadable<T>)
@@ -140,18 +140,18 @@ namespace halo {
                for (size_t i = 0; i < count; ++i) {
                   auto& item = out[i];
                   item.is_defined = true;
-                  ((Subclass*)this)->read(item);
+                  ((my_type*)this)->read(item);
                }
             } else {
                for (size_t i = 0; i < count; ++i)
-                  ((Subclass*)this)->read(*out.emplace_back());
+                  ((my_type*)this)->read(*out.emplace_back());
             }
          }
 
          template<typename T, size_t count> requires (util::has_read_method<my_type, T> || impl::bitreader::is_bitreadable<T>)
          void read(std::array<T, count>& out) {
             for (auto& item : out)
-               ((Subclass*)this)->read(item);
+               ((my_type*)this)->read(item);
          }
          #pragma endregion
 

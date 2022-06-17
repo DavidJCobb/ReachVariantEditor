@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <optional>
 #include <type_traits>
 #include "helpers/template_parameters/optional.h"
@@ -15,12 +16,13 @@ namespace halo {
          { stream.read(value) } -> std::same_as<Uint>;
       };
 
-      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value, bool write_as_signed) {
-         { stream.write_bits(value, bitcount) };
-         { stream.write_bits(value, bitcount, write_as_signed) };
+      template<typename Stream, typename Uint> concept write_bitstream = requires (Stream& stream, size_t bitcount, Uint value) {
+         { stream.write_bits(bitcount, value) };
+         { stream.template write_bits<Uint>(bitcount, value) };
       };
       template<typename Stream, typename Uint> concept write_bytestream = requires (Stream& stream, Uint value) {
          { stream.write(value) };
+         requires !write_bitstream<Stream, Uint>;
       };
    }
 
@@ -34,7 +36,7 @@ namespace halo {
          static constexpr bool   has_presence    = false;
          static constexpr bool   is_integer_type = false;
          static constexpr bool   uses_offset     = false;
-         static constexpr bool   write_as_signed = false;
+         static constexpr bool   has_sign_bit    = false;
 
          static constexpr size_t max_bitcount = bitcount + (has_presence ? 1 : 0);
 
@@ -57,12 +59,12 @@ namespace halo {
          }
 
          template<class Stream> requires impl::bitbool::write_bitstream<Stream, underlying_uint>
-         void write(Stream& stream) const noexcept {
-            stream.write_bits((underlying_int)this->value, 1, false);
+         void write(Stream& stream) const {
+            stream.write_bits<underlying_uint>(1, (underlying_uint)this->value);
          }
 
          template<class Stream> requires impl::bitbool::write_bytestream<Stream, underlying_uint>
-         void write(Stream& stream) const noexcept {
+         void write(Stream& stream) const {
             stream.write(this->value);
          }
          

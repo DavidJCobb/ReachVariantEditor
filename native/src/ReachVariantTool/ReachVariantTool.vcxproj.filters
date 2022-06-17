@@ -2238,6 +2238,15 @@
     <ClInclude Include="halo\util\stream_position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\bitwriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\bad_data_on_write_exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\util\has_write_method.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2247,6 +2256,7 @@
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
+    <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="halo\loc_string_table.inl">
@@ -2273,6 +2283,9 @@
     <None Include="halo\reach\megalo\operands\variables\README.md" />
     <None Include="helpers\reflex\enumeration.md" />
     <None Include="helpers\reflex\flags_mask.md" />
+    <None Include="halo\bitwriter.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="helpers\cs.natvis" />

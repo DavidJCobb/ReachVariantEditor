@@ -52,5 +52,6 @@ namespace halo::reach {
          } bonus_wave;
 
          virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

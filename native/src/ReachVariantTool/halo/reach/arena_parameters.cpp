@@ -26,4 +26,10 @@ namespace halo::reach {
       }
       // Done.
    }
+   void arena_parameters::write(bitwriter& stream) {
+      stream.write(
+         values,
+         show_in_scoreboard
+      );
+   }
 }
