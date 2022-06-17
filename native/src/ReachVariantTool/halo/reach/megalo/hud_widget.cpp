@@ -7,4 +7,9 @@ namespace halo::reach::megalo {
          position
       );
    }
+   void hud_widget::write(bitwriter& stream) const {
+      stream.write(
+         position
+      );
+   }
 }

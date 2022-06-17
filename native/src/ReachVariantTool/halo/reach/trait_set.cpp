@@ -138,7 +138,7 @@ namespace halo::reach {
          player_trait::radar_range
       >(*this, stream);
    }
-   void trait_set::write(bitwriter& stream) {
+   void trait_set::write(bitwriter& stream) const {
       stream.write(
          defense.damage_resistance,
          defense.health_multiplier,

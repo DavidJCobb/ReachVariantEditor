@@ -154,4 +154,84 @@ namespace halo::reach {
          }
       }
    }
+   void megalo_variant_data::write(bitwriter& stream) const {
+      stream.write(
+         metadata.version.encoding,
+         metadata.version.engine
+      );
+      game_variant_data::write(stream);
+      stream.write(
+         script.traits,
+         script.options,
+         script.strings,
+         script.generic_name,
+         metadata.localized_info.name,
+         metadata.localized_info.description,
+         metadata.localized_info.category,
+         metadata.engine_icon,
+         metadata.engine_category,
+         map_permissions,
+         arena_parameters,
+         options_mp.score_to_win,
+         options_mp.fireteams_enabled,
+         options_mp.symmetric,
+         option_toggles.engine.disabled,
+         option_toggles.engine.hidden,
+         option_toggles.megalo.disabled,
+         option_toggles.megalo.hidden
+      );
+      //
+      {  // Read Megalo code
+         static_assert(false, "TODO: Implement generating raw opcode lists from our triggers!");
+
+         auto _write_opcodes = [&stream](const auto& list, size_t max_count) {
+            assert(list.size() < max_count);
+            stream.write_bits(std::bit_width(max_count), list.size());
+            for (const auto& item : list)
+               stream.write(item);
+         };
+         _write_opcodes(this->raw.conditions, megalo::limits::conditions);
+         _write_opcodes(this->raw.actions,    megalo::limits::actions);
+         {  // Triggers
+            auto&  list = this->script.triggers;
+            stream.write_bits(std::bit_width(megalo::limits::triggers), list.size());
+            //
+            for (auto& item : list) {
+               stream.write(item);
+               item.extract_opcodes(stream, this->raw.conditions, this->raw.actions);
+
+               static_assert(false, "TODO: Implement writing triggers back out!");
+            }
+         }
+         stream.write(
+            script.stats,
+            script.variables.global,
+            script.variables.player,
+            script.variables.object,
+            script.variables.team,
+            script.widgets,
+            script.entry_points,
+            script.used_object_types,
+            script.forge_labels
+         );
+      }
+      if (this->metadata.version.encoding >= 0x6B) {
+         stream.write(this->title_update_data.tu1);
+      }
+      if (false) {
+         #if !_DEBUG
+            static_assert(false, "TODO: 'is forge' check")
+         #endif
+         stream.write(
+            forge_data.flags,
+            forge_data.edit_mode_type,
+            forge_data.respawn_time,
+            forge_data.editor_traits
+         );
+      }
+      //
+      // And now for post-load steps.
+      //
+      static_assert(false, "TODO: Clear 'is dummy' flag off of all dummy elements in indexed lists!");
+   }
 }

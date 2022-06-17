@@ -54,7 +54,7 @@ namespace halo::reach {
       } sensors;
 
       void read(bitreader&);
-      void write(bitwriter&);
+      void write(bitwriter&) const;
 
       private:
          template<halo::player_trait Id> struct _access_trait {

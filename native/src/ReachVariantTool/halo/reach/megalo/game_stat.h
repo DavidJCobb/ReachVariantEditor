@@ -27,5 +27,6 @@ namespace halo::reach::megalo {
          bitbool group_by_team;
 
          void read(bitreader&);
+         void write(bitwriter&) const;
    };
 }

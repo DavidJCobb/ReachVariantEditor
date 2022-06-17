@@ -10,4 +10,12 @@ namespace halo::reach::megalo {
          group_by_team
       );
    }
+   void game_stat::write(bitwriter& stream) const {
+      stream.write(
+         name,
+         format,
+         sort,
+         group_by_team
+      );
+   }
 }

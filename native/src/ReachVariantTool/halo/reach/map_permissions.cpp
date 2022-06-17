@@ -26,7 +26,7 @@ namespace halo::reach {
          this->map_ids[i] = stream.read_bits<uint16_t>(16);
       this->type.read(stream);
    }
-   void map_permissions::write(bitwriter& stream) {
+   void map_permissions::write(bitwriter& stream) const {
       if (this->map_ids.size() > max_count)
          throw bad_data_on_write_exception("Map ID count is too high.");
       //

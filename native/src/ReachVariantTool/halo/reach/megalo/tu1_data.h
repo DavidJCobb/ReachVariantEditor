@@ -69,6 +69,7 @@ namespace halo::reach {
          } magnum;
          
          void read(bitreader&);
+         void write(bitwriter&) const;
 
          void make_vanilla();
          void make_patched();

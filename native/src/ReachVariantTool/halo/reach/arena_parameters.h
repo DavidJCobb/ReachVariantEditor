@@ -41,6 +41,6 @@ namespace halo::reach {
          inline const float& operator[](arena_parameter p) const { return values[(size_t)p]; }
          
          void read(bitreader&);
-         void write(bitwriter&);
+         void write(bitwriter&) const;
    };
 }

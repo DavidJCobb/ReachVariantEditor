@@ -27,5 +27,30 @@ namespace halo::reach::megalo {
                break;
          }
       }
+      void variable_declaration::write(variable_type t, bitwriter& stream) const {
+         switch (t) {
+            case variable_type::team:
+               stream.write(this->initial.team);
+               break;
+            case variable_type::number:
+               [[fallthrough]];
+            case variable_type::timer:
+               if (!this->initial.value) {
+                  auto dummy = operands::variables::number();
+                  dummy.set_to_immediate(0);
+                  stream.write(dummy);
+               }
+               stream.write(*this->initial.value);
+               break;
+         }
+         switch (t) {
+            case variable_type::number:
+            case variable_type::player:
+            case variable_type::object:
+            case variable_type::team:
+               stream.write(this->network_priority);
+               break;
+         }
+      }
    }
 }

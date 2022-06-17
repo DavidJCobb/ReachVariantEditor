@@ -19,6 +19,7 @@ namespace halo::reach::megalo {
             value_type value;
 
             void read(bitreader&);
+            void write(bitwriter&) const;
          };
 
       public:
@@ -38,5 +39,6 @@ namespace halo::reach::megalo {
          } range;
 
          void read(bitreader&);
+         void write(bitwriter&) const;
    };
 }

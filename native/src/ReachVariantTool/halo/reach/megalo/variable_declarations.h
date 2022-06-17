@@ -25,6 +25,7 @@ namespace halo::reach::megalo {
             } initial;
 
             void read(variable_type, bitreader&);
+            void write(variable_type, bitwriter&) const;
       };
    }
 

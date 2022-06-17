@@ -17,4 +17,19 @@ namespace halo::reach::megalo {
          stream.read(req.number);
       stream.read(req.map_must_have_at_least);
    }
+   void forge_label::write(bitwriter& stream) const {
+      stream.write(
+         name,
+         requirements.flags
+      );
+      //
+      auto& req = this->requirements;
+      if (req.flags & requirement_flag::objects_of_type)
+         stream.write(req.object_type);
+      if (req.flags & requirement_flag::assigned_team)
+         stream.write(req.team);
+      if (req.flags & requirement_flag::number)
+         stream.write(req.number);
+      stream.write(req.map_must_have_at_least);
+   }
 }

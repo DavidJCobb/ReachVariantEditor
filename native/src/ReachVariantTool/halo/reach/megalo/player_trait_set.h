@@ -12,5 +12,6 @@ namespace halo::reach::megalo {
       string_ref desc; // run-time validation permits index -1, but these values aren't read as if they're optional (no offset)
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

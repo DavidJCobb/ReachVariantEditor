@@ -21,6 +21,7 @@ namespace halo::reach::megalo {
             operands.clear();
          }
          virtual void read(bitreader&) = 0;
+         virtual void write(bitwriter&) const = 0;
 
          const opcode_function* function = nullptr;
          std::vector<operand*> operands;

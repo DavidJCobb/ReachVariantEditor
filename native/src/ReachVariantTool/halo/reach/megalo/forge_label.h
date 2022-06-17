@@ -38,5 +38,6 @@ namespace halo::reach::megalo {
       } requirements;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

@@ -113,5 +113,6 @@ namespace halo::reach {
 
       public:
          virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

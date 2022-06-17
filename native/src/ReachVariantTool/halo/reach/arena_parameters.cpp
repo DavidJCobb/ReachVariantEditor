@@ -26,7 +26,7 @@ namespace halo::reach {
       }
       // Done.
    }
-   void arena_parameters::write(bitwriter& stream) {
+   void arena_parameters::write(bitwriter& stream) const {
       stream.write(
          values,
          show_in_scoreboard

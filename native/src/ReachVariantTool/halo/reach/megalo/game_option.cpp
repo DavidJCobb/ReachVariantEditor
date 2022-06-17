@@ -33,6 +33,13 @@ namespace halo::reach::megalo {
          desc
       );
    }
+   void game_option::enum_value::write(bitwriter& stream) const {
+      stream.write(
+         value,
+         name,
+         desc
+      );
+   }
 
    void game_option::read(bitreader& stream) {
       stream.read(
@@ -84,6 +91,38 @@ namespace halo::reach::megalo {
 
          for (auto& item : this->enumeration.values)
             _validate_option_value(stream, item.value);
+      }
+   }
+   void game_option::write(bitwriter& stream) const {
+      stream.write(
+         name,
+         desc,
+         is_range
+      );
+      if (this->is_range) {
+         stream.write(
+            range.initial,
+            range.min,
+            range.max,
+            range.current
+         );
+      } else {
+         value_index initial_index;
+         value_index current_index;
+         if (auto* item = this->enumeration.initial)
+            initial_index = static_cast<util::indexed*>(item)->index;
+         else
+            initial_index = 0;
+         if (auto* item = this->enumeration.current)
+            current_index = static_cast<util::indexed*>(item)->index;
+         else
+            current_index = 0;
+         //
+         stream.write(
+            initial_index,
+            this->enumeration.values,
+            current_index
+         );
       }
    }
 }

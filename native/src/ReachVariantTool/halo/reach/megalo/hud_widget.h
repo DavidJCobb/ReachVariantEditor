@@ -24,5 +24,6 @@ namespace halo::reach::megalo {
       bitnumber<4, screen_position> position;
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }

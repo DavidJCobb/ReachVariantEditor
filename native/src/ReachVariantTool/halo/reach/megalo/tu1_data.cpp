@@ -14,6 +14,18 @@ namespace halo::reach {
          magnum.fire_delay
       );
    }
+   void tu1_data::write(bitwriter& stream) const {
+      stream.write(
+         flags,
+         precision_bloom,
+         armor_lock_damage_drain.base,
+         armor_lock_damage_drain.limit,
+         active_camo_energy_curve.max,
+         active_camo_energy_curve.min,
+         magnum.damage,
+         magnum.fire_delay
+      );
+   }
 
    void tu1_data::make_vanilla() {
       this->flags = 0;

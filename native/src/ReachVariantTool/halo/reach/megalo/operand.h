@@ -11,6 +11,7 @@ namespace halo::reach::megalo {
       public:
          virtual ~operand() {}
 
-         virtual void read(bitreader& stream) = 0;
+         virtual void read(bitreader&) = 0;
+         virtual void write(bitwriter&) const = 0;
    };
 }

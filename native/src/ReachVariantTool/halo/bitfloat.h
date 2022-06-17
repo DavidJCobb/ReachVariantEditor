@@ -114,7 +114,7 @@ namespace halo {
          template<class Stream> requires impl::bitfloat::write_bitstream<Stream, binary_type>
          void write(Stream& stream) const noexcept {
             binary_type raw = encode(this->value);
-            stream.write_bits(raw, params.bitcount);
+            stream.write_bits(params.bitcount, raw);
          }
 
          bool within_epsilon_of(underlying_type o) const {

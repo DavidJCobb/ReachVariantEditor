@@ -28,5 +28,6 @@ namespace halo::reach::megalo {
       };
 
       void read(bitreader&);
+      void write(bitwriter&) const;
    };
 }
