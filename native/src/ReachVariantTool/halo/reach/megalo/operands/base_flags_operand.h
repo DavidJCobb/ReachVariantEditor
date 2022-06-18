@@ -26,5 +26,8 @@ namespace halo::reach::megalo::operands {
          virtual void read(bitreader& stream) override {
             stream.read(this->value);
          }
+         virtual void write(bitwriter& stream) const override {
+            stream.write(this->value);
+         }
    };
 }

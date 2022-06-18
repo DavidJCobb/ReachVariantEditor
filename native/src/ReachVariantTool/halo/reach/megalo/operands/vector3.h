@@ -15,6 +15,7 @@ namespace halo::reach::megalo::operands {
          bytenumber<int8_t> y;
          bytenumber<int8_t> z;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

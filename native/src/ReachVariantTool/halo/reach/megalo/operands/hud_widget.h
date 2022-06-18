@@ -29,6 +29,7 @@ namespace halo::reach::megalo::operands {
       public:
          util::refcount_ptr<halo::reach::megalo::hud_widget> value;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

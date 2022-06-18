@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include <cstdint>
 #include <vector>
 #include "helpers/owned_ptr.h"
@@ -8,6 +9,11 @@
 #include "./opcodes/action.h"
 #include "./opcodes/condition.h"
 #include "./forge_label.h"
+#include "./limits.h"
+
+namespace halo::reach {
+   class megalo_variant_data;
+}
 
 namespace halo::reach::megalo {
    enum class trigger_block_type : uint8_t {
@@ -31,8 +37,11 @@ namespace halo::reach::megalo {
    };
 
    class trigger : public util::indexed {
+      public:
+         using seen_indices_list = std::bitset<limits::triggers>;
+
       protected:
-         struct {
+         mutable struct {
             //
             // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 
             // serialize trigger data, writing all conditions followed by all actions and then headers 
@@ -58,5 +67,9 @@ namespace halo::reach::megalo {
          
          void read(bitreader&);
          void extract_opcodes(bitreader&, const std::vector<condition>&, const std::vector<action>&);
+
+         void extract_nested_trigger_indices(const megalo_variant_data&, std::vector<size_t>& indices, seen_indices_list& seen, bool recursively) const;
+
+         void flatten_opcodes(std::vector<const condition*>&, std::vector<const action*>&) const;
    };
 }

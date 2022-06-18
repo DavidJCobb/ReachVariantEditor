@@ -188,6 +188,7 @@
     <ClCompile Include="halo\loc_string_base.cpp" />
     <ClCompile Include="halo\loc_string_table.cpp" />
     <ClCompile Include="halo\reach\arena_parameters.cpp" />
+    <ClCompile Include="halo\reach\bitstreams.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\all.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\loadout.cpp" />
     <ClCompile Include="halo\reach\custom_game_options\loadout_palette.cpp" />

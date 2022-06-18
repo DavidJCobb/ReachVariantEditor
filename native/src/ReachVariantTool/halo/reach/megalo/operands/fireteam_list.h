@@ -13,6 +13,7 @@ namespace halo::reach::megalo::operands {
       public:
          bytenumber<uint8_t> value = 0; // flags -- one per valid fireteam index
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

@@ -43,5 +43,18 @@ namespace halo::reach::megalo::operands {
             stream.read(index);
             this->icon = value_type::from_int(index);
          }
+         virtual void write(bitwriter& stream) const override {
+            bitbool absence;
+            if (this->icon.has_value()) {
+               absence = false;
+               stream.write(absence);
+               //
+               bitnumber_type index = this->icon;
+               stream.write(index);
+            } else {
+               absence = true;
+               stream.write(absence);
+            }
+         }
    };
 }

@@ -12,5 +12,8 @@ namespace halo::reach::megalo {
    class action : public opcode {
       public:
          virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
+
+         action* clone() const;
    };
 }

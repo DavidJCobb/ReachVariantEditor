@@ -42,6 +42,10 @@ namespace halo::reach::megalo::operands::variables {
             stream.read(*owner.get());
             stream.read(index);
          }
+         virtual void write(bitwriter& stream) const override {
+            stream.write(*owner.get());
+            stream.write(index);
+         }
    };
 
    using object_and_player_member = variable_and_member<

@@ -7,4 +7,9 @@ namespace halo::reach::megalo::operands {
          value
       );
    }
+   void fireteam_list::write(bitwriter& stream) const {
+      stream.write(
+         value
+      );
+   }
 }

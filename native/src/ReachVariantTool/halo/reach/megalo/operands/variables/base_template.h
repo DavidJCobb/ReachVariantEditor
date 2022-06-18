@@ -155,6 +155,22 @@ namespace halo::reach::megalo::operands::variables {
                indexed_accessors[this->target_id](*(megalo_variant_data*)stream.get_game_variant_data(), this->indexed_data, this->index);
             }
          }
+         virtual void write(bitwriter& stream) const override {
+            impl::base::write_target_id(stream, target_count);
+            //
+            const target_metadata& metadata = all_target_metadata[this->target_id];
+            if (metadata.has_which()) {
+               impl::base::write_which(stream, metadata.scopes.outer.value());
+            }
+            if (metadata.has_index()) {
+               auto index_bc = all_target_index_bitcounts[this->target_id];
+               if (metadata.type == target_type::immediate) {
+                  impl::base::write_immediate(stream, index_bc);
+               } else {
+                  impl::base::write_index(stream, index_bc);
+               }
+            }
+         }
 
          virtual variable_type get_type() const override {
             return Type;

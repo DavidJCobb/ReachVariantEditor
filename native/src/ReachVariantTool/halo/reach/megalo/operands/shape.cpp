@@ -29,4 +29,31 @@ namespace halo::reach::megalo::operands {
             break;
       }
    }
+   void shape::write(bitwriter& stream) const {
+      stream.write(type);
+      switch (type.to_int()) {
+         case shape_type::underlying_value_of<cobb::cs("none")>:
+            break;
+         case shape_type::underlying_value_of<cobb::cs("sphere")>:
+            stream.write(
+               radius
+            );
+            break;
+         case shape_type::underlying_value_of<cobb::cs("cylinder")>:
+            stream.write(
+               radius,
+               top,
+               bottom
+            );
+            break;
+         case shape_type::underlying_value_of<cobb::cs("box")>:
+            stream.write(
+               radius,
+               length,
+               top,
+               bottom
+            );
+            break;
+      }
+   }
 }

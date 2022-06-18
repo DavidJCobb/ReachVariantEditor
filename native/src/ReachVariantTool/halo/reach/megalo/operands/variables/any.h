@@ -13,7 +13,8 @@ namespace halo::reach::megalo::operands {
          public:
             unknown_type* value = nullptr;
 
-            virtual void read(bitreader& stream) override;
+            virtual void read(bitreader&) override;
+            virtual void write(bitwriter&) const override;
       };
    }
 }

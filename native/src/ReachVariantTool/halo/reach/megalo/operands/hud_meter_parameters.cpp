@@ -2,6 +2,7 @@
 #include "halo/reach/bitstreams.h"
 
 #include "halo/reach/megalo/load_process_messages/operand/hud_meter_parameters/bad_type.h"
+#include "halo/bad_data_on_write_exception.h"
 
 namespace halo::reach::megalo::operands {
    void hud_meter_parameters::read(bitreader& stream) {
@@ -28,6 +29,26 @@ namespace halo::reach::megalo::operands {
                stream.get_position().rewound_by_bits(decltype(type)::max_bitcount)
             );
             return;
+      }
+   }
+   void hud_meter_parameters::write(bitwriter& stream) const {
+      stream.write(type);
+      switch (type.to_int()) {
+         case meter_type::underlying_value_of<cobb::cs("none")>:
+            break;
+         case meter_type::underlying_value_of<cobb::cs("timer")>:
+            stream.write(
+               timer
+            );
+            break;
+         case meter_type::underlying_value_of<cobb::cs("number")>:
+            stream.write(
+               numerator,
+               denominator
+            );
+            break;
+         default:
+            throw bad_data_on_write_exception("Invalid type on HUD Meter Parameters operand.");
       }
    }
 }

@@ -14,4 +14,15 @@ namespace halo::reach::megalo::operands {
             break;
       }
    }
+   void player_set::write(bitwriter& stream) const {
+      stream.write(this->type);
+      switch (this->type) {
+         case set_type::specific_player:
+            stream.write(
+               this->player,
+               this->add_or_remove
+            );
+            break;
+      }
+   }
 }

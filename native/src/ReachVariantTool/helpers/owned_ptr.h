@@ -50,7 +50,7 @@ namespace cobb {
       public:
          owned_ptr() {}
          owned_ptr(pointer v) : _target(v) {}
-         template<typename Derived> requires std::is_base_of_v<value_type, Derived> owned_ptr(Derived* b) : _target(b) {}
+         template<typename Derived> requires (std::is_base_of_v<value_type, Derived> && !std::is_same_v<Derived, value_type>) owned_ptr(Derived* b) : _target(b) {}
 
          template<typename U> owned_ptr(const owned_ptr<U>&) = delete;
          owned_ptr(owned_ptr&& v) noexcept : _target(v.release()) {}
@@ -82,6 +82,10 @@ namespace cobb {
 
          template<typename Other> bool operator==(const Other* o) {
             return o == get();
+         }
+
+         bool operator==(std::nullptr_t) const {
+            return get() == nullptr;
          }
 
          constexpr pointer get() const {

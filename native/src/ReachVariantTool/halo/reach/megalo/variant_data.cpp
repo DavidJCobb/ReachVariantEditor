@@ -182,24 +182,38 @@ namespace halo::reach {
       );
       //
       {  // Read Megalo code
-         static_assert(false, "TODO: Implement generating raw opcode lists from our triggers!");
-
+         std::bitset<megalo::limits::triggers> seen_triggers;
+         std::vector<size_t> indices;
+         for (size_t ti = 0; ti < this->script.triggers.size(); ++ti) {
+            if (seen_triggers.test(ti))
+               continue;
+            indices.push_back(ti);
+            seen_triggers.set(ti);
+            this->script.triggers[ti].extract_nested_trigger_indices(*this, indices, seen_triggers, true);
+         }
+         //
+         std::vector<const megalo::condition*> all_conditions;
+         std::vector<const megalo::action*>    all_actions;
+         for (size_t ti : indices) {
+            const auto& item = this->script.triggers[ti];
+            item.flatten_opcodes(all_conditions, all_actions);
+         }
+         //
          auto _write_opcodes = [&stream](const auto& list, size_t max_count) {
             assert(list.size() < max_count);
             stream.write_bits(std::bit_width(max_count), list.size());
-            for (const auto& item : list)
-               stream.write(item);
+            for (const auto* item : list)
+               stream.write(*item);
          };
-         _write_opcodes(this->raw.conditions, megalo::limits::conditions);
-         _write_opcodes(this->raw.actions,    megalo::limits::actions);
+         _write_opcodes(all_conditions, megalo::limits::conditions);
+         _write_opcodes(all_actions,    megalo::limits::actions);
+         //
          {  // Triggers
             auto&  list = this->script.triggers;
             stream.write_bits(std::bit_width(megalo::limits::triggers), list.size());
             //
             for (auto& item : list) {
                stream.write(item);
-               item.extract_opcodes(stream, this->raw.conditions, this->raw.actions);
-
                static_assert(false, "TODO: Implement writing triggers back out!");
             }
          }

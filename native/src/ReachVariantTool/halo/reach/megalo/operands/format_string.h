@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "helpers/owned_ptr.h"
 #include "halo/reach/bitstreams.fwd.h"
 #include "../operand_typeinfo.h"
 #include "../operand.h"
@@ -35,9 +36,10 @@ namespace halo::reach::megalo::operands {
          >;
 
          struct token {
-            std::unique_ptr<variables::unknown_type> variable;
+            cobb::owned_ptr<variables::unknown_type> variable;
 
-            void read(bitreader& stream);
+            void read(bitreader&);
+            void write(bitwriter&) const;
          };
 
       public:
@@ -45,6 +47,7 @@ namespace halo::reach::megalo::operands {
          bitnumber<std::bit_width(max_token_count), uint8_t> token_count;
          std::array<token, max_token_count> tokens;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

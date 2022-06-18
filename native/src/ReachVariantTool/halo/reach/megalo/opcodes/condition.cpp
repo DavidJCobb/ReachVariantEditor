@@ -6,22 +6,24 @@
 #include "halo/reach/megalo/load_process_messages/opcode/bad_function_index.h"
 
 namespace halo::reach::megalo {
-   void condition::read(bitreader& stream) {
-      constexpr auto& list           = all_conditions;
-      constexpr auto  index_bitcount = std::bit_width(list.size() - 1);
+   namespace {
+      constexpr auto& function_list = all_conditions;
+      constexpr auto  function_index_bitcount = std::bit_width(function_list.size() - 1);
+   }
 
-      size_t fi = stream.read_bits(index_bitcount);
-      if (fi >= list.size()) {
+   void condition::read(bitreader& stream) {
+      size_t fi = stream.read_bits(function_index_bitcount);
+      if (fi >= function_list.size()) {
          stream.throw_fatal_at<load_process_messages::megalo::opcode_bad_function_index>(
             {
                .opcode_type = opcode_type::condition,
                .function_id = fi,
             },
-            stream.get_position().rewound_by_bits(index_bitcount)
+            stream.get_position().rewound_by_bits(function_index_bitcount)
          );
          return;
       }
-      this->function = &list[fi];
+      this->function = &function_list[fi];
       if (fi == 0) { // "none" opcode
          return;
       }
@@ -42,5 +44,48 @@ namespace halo::reach::megalo {
          assert(entry);
          stream.read(*entry);
       }
+   }
+   void condition::write(bitwriter& stream) const {
+      size_t fi = 0;
+      for (size_t i = 0; i < function_list.size(); ++i) {
+         if (this->function == &function_list[i]) {
+            fi = i;
+            break;
+         }
+      }
+      //
+      stream.write_bits(function_index_bitcount, fi);
+      if (fi == 0)
+         return;
+      //
+      stream.write(
+         invert,
+         or_group,
+         load_state.execute_before
+      );
+      //
+      size_t count = this->function->operands.size();
+      assert(this->operands.size() == count);
+      for (size_t i = 0; i < count; ++i) {
+         const auto* item = this->operands[i];
+         assert(item);
+         item->write(stream);
+      }
+   }
+
+   condition* condition::clone() const {
+      auto* dst = new condition;
+      dst->function   = this->function;
+      dst->invert     = this->invert;
+      dst->or_group   = this->or_group;
+      dst->load_state = this->load_state;
+
+      auto size = this->operands.size();
+      dst->operands.resize(size);
+      for (size_t i = 0; i < size; ++i) {
+         dst->operands[i] = clone_operand(*this->operands[i]);
+      }
+
+      return dst;
    }
 }

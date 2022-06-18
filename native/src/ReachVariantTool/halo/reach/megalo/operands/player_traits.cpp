@@ -28,4 +28,10 @@ namespace halo::reach::megalo::operands {
       }
       this->value = list[index];
    }
+   void player_traits::write(bitwriter& stream) const {
+      index_type index = -1;
+      if (this->value)
+         index = this->value->index;
+      stream.write(index);
+   }
 }

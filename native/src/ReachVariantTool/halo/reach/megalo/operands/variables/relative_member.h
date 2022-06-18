@@ -33,6 +33,9 @@ namespace halo::reach::megalo::operands::variables {
          virtual void read(bitreader& stream) override {
             stream.read(index);
          }
+         virtual void write(bitwriter& stream) const override {
+            stream.write(index);
+         }
    };
 
    using object_timer_relative_member = relative_member<

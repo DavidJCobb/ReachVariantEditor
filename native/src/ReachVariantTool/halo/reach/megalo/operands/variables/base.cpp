@@ -59,5 +59,27 @@ namespace halo::reach::megalo::operands::variables {
          this->index = stream.read_bits(bitcount);
          this->index = cobb::apply_sign_bit(this->index, bitcount);
       }
+
+      void base::write_target_id(bitwriter& stream, size_t target_count) const {
+         auto bitcount = std::bit_width(target_count - 1);
+         stream.write_bits(bitcount, this->target_id);
+      }
+      void base::write_which(bitwriter& stream, variable_scope which) const {
+         size_t count = top_level_values::max_of_type(variable_type_for_scope(which));
+         assert(count);
+         auto bitcount = std::bit_width(count - 1);
+         //
+         stream.write_bits(bitcount, this->which);
+      }
+      void base::write_index(bitwriter& stream, size_t bitcount) const {
+         if (!bitcount)
+            return;
+         stream.write_bits(bitcount, this->index);
+      }
+      void base::write_immediate(bitwriter& stream, size_t bitcount) const {
+         if (!bitcount)
+            return;
+         stream.write_bits(bitcount, this->index);
+      }
    }
 }

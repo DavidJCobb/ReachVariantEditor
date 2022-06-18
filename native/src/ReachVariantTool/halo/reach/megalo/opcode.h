@@ -25,5 +25,15 @@ namespace halo::reach::megalo {
 
          const opcode_function* function = nullptr;
          std::vector<operand*> operands;
+
+         opcode() {}
+         opcode(const opcode& o) = delete;
+         opcode(opcode&& o) noexcept { *this = std::forward<opcode&&>(o); }
+
+         opcode& operator=(const opcode& o) = delete;
+         opcode& operator=(opcode&& o) noexcept {
+            std::swap(this->function, o.function);
+            std::swap(this->operands, o.operands);
+         }
    };
 }

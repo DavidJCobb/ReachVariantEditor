@@ -28,6 +28,7 @@ namespace halo::reach::megalo::operands {
          variables::player player;
          variables::number add_or_remove;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

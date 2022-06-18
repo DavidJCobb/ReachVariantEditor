@@ -8,4 +8,9 @@ namespace halo::reach::megalo::operands {
       if (this->icon == value_type::value_of<cobb::cs("territory_a")>)
          stream.read(this->number);
    }
+   void waypoint_icon::write(bitwriter& stream) const {
+      stream.write(this->icon);
+      if (this->icon == value_type::value_of<cobb::cs("territory_a")>)
+         stream.write(this->number);
+   }
 }

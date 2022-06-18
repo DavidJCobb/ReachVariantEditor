@@ -123,52 +123,69 @@ namespace cobb {
          }
          //
          underlying_int to_int() const noexcept { return (underlying_int)this->value; } // printf helper to avoid C4477
-         //
-         // Operators:
-         //
-         bitnumber& operator=(const underlying_type& other) noexcept {
+
+         #pragma region Operators
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator=(const V& other) noexcept {
             this->value = other;
             return *this;
          }
-         bitnumber& operator+=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator+=(const V& other) noexcept {
             this->value += other;
             return *this;
          }
-         bitnumber& operator-=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator-=(const V& other) noexcept {
             this->value -= other;
             return *this;
          }
-         bitnumber& operator*=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator*=(const V& other) noexcept {
             this->value *= other;
             return *this;
          }
-         bitnumber& operator/=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator/=(const V& other) noexcept {
             this->value /= other;
             return *this;
          }
-         bitnumber& operator%=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator%=(const V& other) noexcept {
             this->value %= other;
             return *this;
          }
-         bitnumber& operator|=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator|=(const V& other) noexcept {
             this->value |= other;
             return *this;
          }
-         bitnumber& operator&=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator&=(const V& other) noexcept {
             this->value &= other;
             return *this;
          }
-         bitnumber& operator^=(const underlying_type& other) noexcept {
+
+         template<typename V> requires std::is_convertible_v<V, underlying_type>
+         bitnumber& operator^=(const V& other) noexcept {
             this->value ^= other;
             return *this;
          }
-         //
+
          // Having an implicit cast-to-int for enums breaks switch-cases. :(
          operator underlying_type() const noexcept { return this->value; }; // implicitly creates compare operators if underlying_type is integer
-         //
+         
          template<typename T> explicit operator T() const noexcept { // needed for explicit enum-to-int casts
             return (T)this->value;
          }
+         #pragma endregion
    };
    class bitbool {
       public:

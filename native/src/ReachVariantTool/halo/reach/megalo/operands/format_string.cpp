@@ -18,19 +18,19 @@ namespace halo::reach::megalo::operands {
          case token_type::none:
             break;
          case token_type::number:
-            this->variable.reset(new variables::number);
+            this->variable = new variables::number;
             break;
          case token_type::object:
-            this->variable.reset(new variables::object);
+            this->variable = new variables::object;
             break;
          case token_type::player:
-            this->variable.reset(new variables::player);
+            this->variable = new variables::player;
             break;
          case token_type::team:
-            this->variable.reset(new variables::team);
+            this->variable = new variables::team;
             break;
          case token_type::timer:
-            this->variable.reset(new variables::timer);
+            this->variable = new variables::timer;
             break;
          default:
             stream.throw_fatal_at<halo::reach::load_process_messages::megalo::operands::format_string::bad_token_type>(
@@ -41,8 +41,36 @@ namespace halo::reach::megalo::operands {
             );
             return;
       }
-      if (this->variable.get())
+      if (this->variable)
          this->variable->read(stream);
+   }
+   void format_string::token::write(bitwriter& stream) const {
+      token_type_bitnumber type;
+      if (this->variable == nullptr) {
+         type = token_type::none;
+      } else {
+         switch (this->variable->get_type()) {
+            case variable_type::number:
+               type = token_type::number;
+               break;
+            case variable_type::object:
+               type = token_type::object;
+               break;
+            case variable_type::player:
+               type = token_type::player;
+               break;
+            case variable_type::team:
+               type = token_type::team;
+               break;
+            case variable_type::timer:
+               type = token_type::timer;
+               break;
+         }
+      }
+      stream.write(type);
+      if (this->variable) {
+         this->variable->write(stream);
+      }
    }
 
    void format_string::read(bitreader& stream) {
@@ -62,5 +90,14 @@ namespace halo::reach::megalo::operands {
       }
       for (size_t i = 0; i < this->token_count; ++i)
          stream.read(this->tokens[i]);
+   }
+   void format_string::write(bitwriter& stream) const {
+      stream.write(
+         string,
+         token_count
+      );
+      assert(this->token_count <= max_token_count);
+      for (size_t i = 0; i < this->token_count; ++i)
+         stream.write(this->tokens[i]);
    }
 }

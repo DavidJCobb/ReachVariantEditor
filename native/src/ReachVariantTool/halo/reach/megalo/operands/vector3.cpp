@@ -9,4 +9,11 @@ namespace halo::reach::megalo::operands {
          z
       );
    }
+   void vector3::write(bitwriter& stream) const {
+      stream.write(
+         x,
+         y,
+         z
+      );
+   }
 }

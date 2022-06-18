@@ -18,4 +18,9 @@ namespace halo::reach::megalo::operands {
          );
       }
    }
+   void trigger::write(bitwriter& stream) const {
+      stream.write(
+         index
+      );
+   }
 }

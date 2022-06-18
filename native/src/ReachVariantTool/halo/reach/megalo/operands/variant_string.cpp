@@ -6,4 +6,7 @@ namespace halo::reach::megalo::operands {
    void variant_string::read(bitreader& stream) {
       stream.read(this->value);
    }
+   void variant_string::write(bitwriter& stream) const {
+      stream.write(this->value);
+   }
 }

@@ -12,45 +12,6 @@ namespace halo {
          return this->value == params.if_absent.value();
       return this->value == params.initial;
    }
-   
-   #pragma region Operators
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator=(const underlying_type& other) {
-      this->value = other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator+=(const underlying_type& other) requires (is_integer_type) {
-      this->value += other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator-=(const underlying_type& other) requires (is_integer_type) {
-      this->value -= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator*=(const underlying_type& other) requires (is_integer_type) {
-      this->value *= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator/=(const underlying_type& other) requires (is_integer_type) {
-      this->value /= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator%=(const underlying_type& other) requires (is_integer_type) {
-      this->value %= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator|=(const underlying_type& other) requires (is_integer_type) {
-      this->value |= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator&=(const underlying_type& other) requires (is_integer_type) {
-      this->value &= other;
-      return *this;
-   }
-   CLASS_TEMPLATE_PARAMS CLASS_NAME& CLASS_NAME::operator^=(const underlying_type& other) requires (is_integer_type) {
-      this->value ^= other;
-      return *this;
-   }
-   #pragma endregion
 }
 //
 #undef CLASS_TEMPLATE_PARAMS

@@ -59,7 +59,8 @@ namespace halo::reach::megalo::operands {
          index_type icon;
          variables::number number;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }
 

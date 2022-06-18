@@ -7,4 +7,9 @@ namespace halo::reach::megalo::operands {
          value
       );
    }
+   void player_req_palette::write(bitwriter& stream) const {
+      stream.write(
+         value
+      );
+   }
 }

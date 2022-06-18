@@ -24,6 +24,7 @@ namespace halo::reach::megalo::operands {
       public:
          util::refcount_ptr<halo::reach::megalo::player_trait_set> value;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

@@ -13,6 +13,7 @@ namespace halo::reach::megalo::operands {
       public:
          bitbool value;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

@@ -6,9 +6,11 @@
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      void any::read(bitreader& stream) {
+      namespace {
          constexpr size_t type_bitcount = 3;
-         //
+      }
+
+      void any::read(bitreader& stream) {
          auto type = stream.read_bits(type_bitcount);
          switch (type) {
             case 0:
@@ -37,6 +39,29 @@ namespace halo::reach::megalo::operands {
             return;
          }
          this->value->read(stream);
+      }
+      void any::write(bitwriter& stream) const {
+         assert(this->value);
+         auto type = this->value->get_type();
+         switch (type) {
+            using enum variable_type;
+            case number:
+               stream.write_bits(type_bitcount, 0);
+               break;
+            case player:
+               stream.write_bits(type_bitcount, 1);
+               break;
+            case object:
+               stream.write_bits(type_bitcount, 2);
+               break;
+            case team:
+               stream.write_bits(type_bitcount, 3);
+               break;
+            case timer:
+               stream.write_bits(type_bitcount, 4);
+               break;
+         }
+         this->value->write(stream);
       }
    }
 }

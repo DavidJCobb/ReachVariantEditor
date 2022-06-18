@@ -197,15 +197,15 @@ namespace halo {
          constexpr underlying_int to_int() const noexcept { return (underlying_int)this->value; } // printf helper to avoid C4477
 
          #pragma region Operators
-         bitnumber& operator=(const underlying_type& other);
-         bitnumber& operator+=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator-=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator*=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator/=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator%=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator|=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator&=(const underlying_type& other) requires (is_integer_type);
-         bitnumber& operator^=(const underlying_type& other) requires (is_integer_type);
+         template<typename V> requires (std::is_convertible_v<V, underlying_type>&& is_integer_type) bitnumber& operator=(const V& other) { value = other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator+=(const V& other) { value += other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator-=(const V& other) { value -= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator*=(const V& other) { value *= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator/=(const V& other) { value /= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator%=(const V& other) { value %= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator|=(const V& other) { value |= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator&=(const V& other) { value &= other; return *this; }
+         template<typename V> requires (std::is_convertible_v<V, underlying_type> && is_integer_type) bitnumber& operator^=(const V& other) { value ^= other; return *this; }
 
          constexpr operator underlying_type() const noexcept { return this->value; }; // implicitly creates compare operators if underlying_type is integer
          #pragma endregion

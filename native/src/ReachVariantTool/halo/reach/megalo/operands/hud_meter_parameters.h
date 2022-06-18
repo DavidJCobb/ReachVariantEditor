@@ -26,6 +26,7 @@ namespace halo::reach::megalo::operands {
          variables::number numerator;
          variables::number denominator;
 
-         virtual void read(bitreader& stream) override;
+         virtual void read(bitreader&) override;
+         virtual void write(bitwriter&) const override;
    };
 }

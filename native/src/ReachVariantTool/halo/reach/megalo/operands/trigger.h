@@ -20,5 +20,6 @@ namespace halo::reach::megalo::operands {
          > index;
 
          virtual void read(bitreader& stream) override;
+         virtual void write(bitwriter&) const override;
    };
 }
