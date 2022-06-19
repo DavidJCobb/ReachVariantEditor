@@ -790,6 +790,12 @@
     <ClCompile Include="halo\reach\bitstreams.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\bytewriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\files\hash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2248,6 +2254,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\util\has_write_method.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\bytewriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\hashing\sha1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\byteswap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -242,4 +242,24 @@ namespace halo::reach::megalo {
          }
       }
    }
+
+   void trigger::write(bitwriter& stream) const {
+      stream.write(
+         block_type,
+         entry_type
+      );
+      if (this->block_type == trigger_block_type::for_each_object_with_label) {
+         forge_label_index_optional idx = -1;
+         if (this->loop_forge_label) {
+            idx = this->loop_forge_label->index;
+         }
+         stream.write(idx);
+      }
+      stream.write(
+         load_state.condition_start,
+         load_state.condition_count,
+         load_state.action_start,
+         load_state.action_count
+      );
+   }
 }

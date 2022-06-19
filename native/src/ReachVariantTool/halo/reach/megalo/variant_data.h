@@ -30,6 +30,7 @@
 namespace halo::reach {
    class megalo_variant_data : public game_variant_data {
       public:
+         virtual ~megalo_variant_data();
 
          //
          // Be aware that members here are not grouped or listed in the order they're read in.

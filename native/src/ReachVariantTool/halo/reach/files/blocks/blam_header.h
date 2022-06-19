@@ -13,5 +13,6 @@ namespace halo::reach {
          } data;
 
          void read(bytereader&);
+         void write(bytewriter&) const;
    };
 }

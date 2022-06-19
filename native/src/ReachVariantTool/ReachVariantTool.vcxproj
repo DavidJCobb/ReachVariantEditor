@@ -172,6 +172,7 @@
     <ClCompile Include="game_variants\types\multiplayer.cpp" />
     <ClCompile Include="halo\bitbool.cpp" />
     <ClCompile Include="halo\bytereader.cpp" />
+    <ClCompile Include="halo\bytewriter.cpp" />
     <ClCompile Include="halo\common\load_process_messages\file_blocks\game_variant_no_file_block_for_data.cpp" />
     <ClCompile Include="halo\common\load_process_messages\file_blocks\invalid_file_block_header.cpp" />
     <ClCompile Include="halo\common\load_process_messages\file_blocks\unexpected_end.cpp" />
@@ -200,6 +201,7 @@
     <ClCompile Include="halo\reach\files\blocks\eof_block.cpp" />
     <ClCompile Include="halo\reach\files\blocks\file_share_metadata_block.cpp" />
     <ClCompile Include="halo\reach\files\block_stream.cpp" />
+    <ClCompile Include="halo\reach\files\hash.cpp" />
     <ClCompile Include="halo\reach\firefight\custom_skull.cpp" />
     <ClCompile Include="halo\reach\firefight\round.cpp" />
     <ClCompile Include="halo\reach\firefight\variant_data.cpp" />
@@ -457,6 +459,7 @@
     <ClInclude Include="halo\bitreader.h" />
     <ClInclude Include="halo\bitwriter.h" />
     <ClInclude Include="halo\bytereader.h" />
+    <ClInclude Include="halo\bytewriter.h" />
     <ClInclude Include="halo\common\load_process_messages\file_blocks\first_file_block_is_not_blam_header.h" />
     <ClInclude Include="halo\common\load_process_messages\file_blocks\game_variant_no_file_block_for_data.h" />
     <ClInclude Include="halo\common\load_process_messages\file_blocks\invalid_file_block_header.h" />
@@ -648,9 +651,11 @@
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
     <ClInclude Include="halo\util\stream_position.h" />
+    <ClInclude Include="helpers\byteswap.h" />
     <ClInclude Include="helpers\constexpr_for_functor.h" />
     <ClInclude Include="helpers\cpuinfo.h" />
     <ClInclude Include="helpers\eight_cc.h" />
+    <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
     <ClInclude Include="helpers\numeric_min_max.h" />
     <ClInclude Include="helpers\owned_ptr.h" />

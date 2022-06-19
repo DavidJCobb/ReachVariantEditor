@@ -7,4 +7,11 @@ namespace halo::reach {
       );
       _error_if_eof(stream);
    }
+   void content_header::write(bytewriter& stream) const {
+      this->_write_header(stream);
+      stream.write(
+         data
+      );
+      this->_write_finalize(stream);
+   }
 }

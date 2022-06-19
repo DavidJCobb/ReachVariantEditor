@@ -8,4 +8,12 @@ namespace halo::reach {
       );
       _error_if_eof(stream);
    }
+   void eof_block::write(bytewriter& stream) const {
+      this->_write_header(stream);
+      stream.write<std::endian::big>(
+         length,
+         unk04
+      );
+      this->_write_finalize(stream);
+   }
 }

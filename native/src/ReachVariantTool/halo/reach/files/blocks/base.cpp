@@ -29,4 +29,12 @@ namespace halo::reach {
          flags
       );
    }
+   void file_block_header::write(bytewriter& stream) {
+      stream.write<std::endian::big>(
+         signature,
+         size,
+         version,
+         flags
+      );
+   }
 }

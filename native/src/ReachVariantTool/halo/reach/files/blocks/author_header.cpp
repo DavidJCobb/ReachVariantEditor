@@ -10,4 +10,14 @@ namespace halo::reach {
       );
       _error_if_eof(stream);
    }
+   void author_header::write(bytewriter& stream) const {
+      this->_write_header(stream);
+      stream.write(
+         data.unk00,
+         data.build_number,
+         data.unk14,
+         data.build_string
+      );
+      this->_write_finalize(stream);
+   }
 }

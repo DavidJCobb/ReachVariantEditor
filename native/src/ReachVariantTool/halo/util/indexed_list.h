@@ -157,6 +157,14 @@ namespace halo::util {
             }
             return referenced_dummies;
          }
+
+         template<typename... Args> void clear_all_dummy_flags(Args&&... args) requires std::is_base_of_v<dummyable, value_type> {
+            for (size_type i = 0; i < this->_size; ++i) {
+               auto*& iptr = this->_data[max_count - i - 1];
+               auto&  item = *iptr;
+               item.is_defined = true;
+            }
+         }
          #pragma endregion
 
          void clear() {
@@ -274,5 +282,9 @@ namespace halo::util {
    // discouraged; do lists one by one so you can report warnings more meaningfully:
    template<typename... Types> requires (is_indexed_list<Types> && ...) void tear_down_indexed_dummies(Types&... lists) {
       (lists.tear_down_dummies(), ...);
+   }
+
+   template<typename... Types> requires (is_indexed_list<Types> && ...) void clear_all_indexed_dummy_flags(Types&... lists) {
+      (lists.clear_all_dummy_flags(), ...);
    }
 }

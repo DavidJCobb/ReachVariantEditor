@@ -29,4 +29,13 @@ namespace halo::reach {
       stream.write_string(gamertag.data(), gamertag.max_size());
       stream.write(is_online_id);
    }
+   void ugc_author::write(bytewriter& stream) const {
+      stream.write(
+         timestamp,
+         xuid,
+         gamertag,
+         is_online_id
+      );
+      stream.skip(3); // padding
+   }
 }

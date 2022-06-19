@@ -230,4 +230,46 @@ namespace halo::reach {
          //*/
       }
    }
+   void game_variant::write(bytewriter& stream) const {
+      this->blam_header.write(stream);
+      if (this->author_header.has_value())
+         this->author_header.value().write(stream);
+      this->content_header.write(stream);
+      {
+         auto start  = stream.get_position();
+         auto header = file_block_header{};
+         header.signature = 'mpvr';
+         header.version   = (uint16_t)game_variant_data::block_version::halo_reach;
+         header.flags     = 0x0001;
+         header.size      = 0x5028;
+         //
+         stream.write(header);
+         //
+         assert(this->data);
+         bitwriter bitstream;
+         bitstream.set_game_variant_data(this->data);
+         bitstream.write(this->type);
+         bitstream.write(*this->data);
+         //
+         file_hash hash;
+         hash.calculate(bitstream.data(), bitstream.get_bitpos());
+         stream.write(hash);
+         size_t offset_before_hashable = stream.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
+         stream.write((const void*)bitstream.data(), bitstream.size());
+         //
+         stream.pad_to_bytepos(start + header.size);
+
+      }
+      this->eof_block.length = stream.get_position();
+      this->eof_block.write(stream);
+   }
+   QByteArray game_variant::write() const {
+      bytewriter stream;
+      this->write(stream);
+      //
+      QByteArray result;
+      result.resize(stream.size());
+      memcpy(result.data(), stream.data(), stream.size());
+      return result;
+   }
 }

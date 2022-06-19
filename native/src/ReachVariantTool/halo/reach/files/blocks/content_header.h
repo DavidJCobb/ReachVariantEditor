@@ -8,5 +8,6 @@ namespace halo::reach {
          ugc_header data;
 
          void read(bytereader&);
+         void write(bytewriter&) const;
    };
 }

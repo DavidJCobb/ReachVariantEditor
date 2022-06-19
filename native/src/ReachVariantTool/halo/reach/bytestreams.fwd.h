@@ -4,4 +4,5 @@
 
 namespace halo::reach {
    class bytereader;
+   class bytewriter;
 }

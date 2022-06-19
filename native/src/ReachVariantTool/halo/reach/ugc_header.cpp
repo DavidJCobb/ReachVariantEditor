@@ -126,4 +126,44 @@ namespace halo::reach {
             break;
       }
    }
+   void ugc_header::write(bytewriter& stream) const {
+      stream.write(
+         build.major,
+         build.minor,
+         type
+      );
+      stream.skip(3);
+      stream.write(
+         file_length,
+         unk08,
+         unk10,
+         unk18,
+         unk20,
+         activity,
+         game_mode,
+         engine
+      );
+      stream.skip(1);
+      stream.write(
+         map_id,
+         engine_category
+      );
+      stream.skip(4);
+      stream.write(
+         created_by,
+         modified_by
+      );
+      stream.write(
+         title,
+         description,
+         engine_icon,
+         unk284,
+         campaign.id,
+         campaign.difficulty,
+         campaign.metagame_scoring,
+         campaign.rally_point,
+         campaign.unk2A4,
+         unk2A8
+      );
+   }
 }

@@ -1,22 +1,17 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include "halo/reach/bytestreams.h"
+#include "halo/reach/bytestreams.fwd.h"
 
 namespace halo::reach {
    struct file_hash {
       std::array<uint8_t, 20> data = {};
       uint32_t hashed_size = 0;
 
-      void read(bytereader& stream) {
-         stream.read(data);
-         stream.skip(4);
-         //
-         auto e = stream.endianness();
-         stream.set_endianness(std::endian::big);
-         stream.read(hashed_size);
-         stream.set_endianness(e);
-      }
+      void read(bytereader& stream);
+      void write(bytewriter& stream) const;
+
+      void calculate(const uint8_t* buffer, size_t bitcount);
 
       static constexpr auto salt = std::array<uint8_t, 34>{
          0xED, 0xD4, 0x30, 0x09,

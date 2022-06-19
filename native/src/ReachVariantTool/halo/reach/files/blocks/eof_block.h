@@ -8,5 +8,6 @@ namespace halo::reach {
          uint8_t  unk04  = 0;
 
          void read(bytereader&);
+         void write(bytewriter&) const;
    };
 }

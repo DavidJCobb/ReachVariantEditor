@@ -14,6 +14,7 @@ namespace halo::reach {
       uint16_t flags     = 0;
 
       void read(bytereader&);
+      void write(bytewriter&);
    };
 
    template<util::four_cc signature, size_t expected_size = 0> class file_block {
@@ -33,17 +34,21 @@ namespace halo::reach {
             return header_is_as_expected(this->header);
          }
 
-         struct {
+         mutable struct {
             struct {
-               uint32_t pos = 0; // location of the start of the header in bytes, not bits
+               size_t pos = 0; // location of the start of the header in bytes, not bits
             } load;
             struct {
-               uint32_t pos = 0; // location of the start of the header in bytes, not bits
+               size_t pos = 0; // location of the start of the header in bytes, not bits
             } save;
          } state;
 
       protected:
          void _error_if_eof(bytereader&);
+
+         void _write_header(bytewriter&) const;
+         void _write_finalize(bytewriter&) const;
+
       public:
          void read(bytereader&);
 

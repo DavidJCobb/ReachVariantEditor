@@ -40,6 +40,16 @@ namespace halo::reach {
          });
       }
    }
+
+   CLASS_TEMPLATE_PARAMS void CLASS_NAME::_write_header(bytewriter& stream) const {
+      this->state.save.pos = stream.get_position();
+      stream.write(this->header);
+   }
+   CLASS_TEMPLATE_PARAMS void CLASS_NAME::_write_finalize(bytewriter& stream) const {
+      auto now  = stream.get_position();
+      auto size = now - this->state.save.pos;
+      stream.write_to_offset<std::endian::big>(this->state.save.pos + 4, (decltype(file_block_header::size))size);
+   }
 }
 //
 #undef CLASS_TEMPLATE_PARAMS

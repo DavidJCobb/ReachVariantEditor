@@ -69,7 +69,7 @@ namespace halo::reach::megalo {
          void extract_opcodes(bitreader&, const std::vector<condition>&, const std::vector<action>&);
 
          void extract_nested_trigger_indices(const megalo_variant_data&, std::vector<size_t>& indices, seen_indices_list& seen, bool recursively) const;
-
          void flatten_opcodes(std::vector<const condition*>&, std::vector<const action*>&) const;
+         void write(bitwriter&) const;
    };
 }

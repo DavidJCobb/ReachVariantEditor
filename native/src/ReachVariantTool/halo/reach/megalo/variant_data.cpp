@@ -10,6 +10,8 @@
 #include "./load_process_messages/referenced_undefined_indexed_data.h"
 
 namespace halo::reach {
+   megalo_variant_data::~megalo_variant_data() {}
+
    void megalo_variant_data::read(bitreader& stream) {
       set_up_indexed_dummies(
          script.forge_labels,
@@ -214,7 +216,6 @@ namespace halo::reach {
             //
             for (auto& item : list) {
                stream.write(item);
-               static_assert(false, "TODO: Implement writing triggers back out!");
             }
          }
          stream.write(
@@ -246,6 +247,12 @@ namespace halo::reach {
       //
       // And now for post-load steps.
       //
-      static_assert(false, "TODO: Clear 'is dummy' flag off of all dummy elements in indexed lists!");
+      clear_all_indexed_dummy_flags(
+         script.forge_labels,
+         script.options,
+         script.stats,
+         script.traits,
+         script.widgets
+      );
    }
 }

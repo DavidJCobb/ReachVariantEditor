@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <optional>
 #include <vector>
+#include <QByteArray>
 #include "halo/reach/bitstreams.fwd.h"
 #include "halo/reach/bytestreams.fwd.h"
 #include "./files/blocks/blam_header.h"
@@ -21,7 +22,7 @@ namespace halo::reach {
    class game_variant_data {
       public:
          enum class block_version : uint16_t {
-            halo_reach   = 0x0032,
+            halo_reach   = 0x0036,
             halo_2_annie = 0x0089,
          };
          static constexpr size_t file_block_size = 0x5028;
@@ -53,10 +54,12 @@ namespace halo::reach {
          bitnumber<4, game_variant_type> type = game_variant_type::none;
          game_variant_data* data = nullptr;
          //
-         eof_block eof_block;
+         mutable eof_block eof_block;
          std::vector<unknown_file_block> unknown_blocks;
 
          bytereader::load_process_type read(const QByteArray&); // returns a load process so that the caller can check status, errors, etc.
          void read(bytereader&);
+         void write(bytewriter&) const;
+         QByteArray write() const;
    };
 }
