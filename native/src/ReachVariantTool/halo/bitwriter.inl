@@ -9,7 +9,7 @@
 namespace halo {
    CLASS_TEMPLATE_PARAMS CLASS_NAME::~bitwriter() {
       if (this->_buffer) {
-         delete this->_buffer;
+         free(this->_buffer);
          this->_buffer = nullptr;
       }
       this->_size = 0;
@@ -22,7 +22,7 @@ namespace halo {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::_ensure_room_for(unsigned int bitcount) {
       size_t bitsize = (size_t)this->_size * 8;
       size_t target  = (size_t)this->get_bitpos() + bitcount;
-      if (target > bitsize) {
+      if (target >= bitsize) {
          target += 8 - (target % 8);
          this->resize(target / 8);
       }
@@ -65,14 +65,25 @@ namespace halo {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::enlarge_by(size_t bytes) {
       this->resize(this->_size + bytes);
    }
-   CLASS_TEMPLATE_PARAMS void CLASS_NAME::resize(size_t size) {
-      if (this->_size == size)
+   CLASS_TEMPLATE_PARAMS void CLASS_NAME::reserve(size_t size) {
+      if (this->_size >= size)
          return;
       this->_buffer = (uint8_t*)realloc(this->_buffer, size);
       assert(this->_buffer != nullptr); // resize failed; old memory not freed
       this->_size = size;
-      this->_position.bytes = size;
-      this->_position.bits  = 0;
+   }
+   CLASS_TEMPLATE_PARAMS void CLASS_NAME::resize(size_t size) {
+      if (this->_size == size)
+         return;
+      if (size == 0) {
+         if (this->_buffer)
+            free(this->_buffer);
+         this->_buffer = nullptr;
+      } else {
+         this->_buffer = (uint8_t*)realloc(this->_buffer, size);
+         assert(this->_buffer != nullptr); // resize failed; old memory not freed
+      }
+      this->_size = size;
    }
 
    CLASS_TEMPLATE_PARAMS
@@ -91,7 +102,7 @@ namespace halo {
          if (!shift) {
             if (bitcount < 8) {
                target = value << (8 - bitcount);
-               this->_position.advance_by_bytes(1);
+               this->_position.advance_by_bits(bitcount);
                return;
             }
             target = (value >> (bitcount - 8));

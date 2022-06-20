@@ -61,7 +61,8 @@ namespace halo {
          inline uint32_t get_bytespan() const noexcept { return this->_position.bytespan(); }
 
          void enlarge_by(size_t bytes);
-         void resize(size_t size);
+         void reserve(size_t bytes);
+         void resize(size_t bytes);
          
 
          // Multi-write call

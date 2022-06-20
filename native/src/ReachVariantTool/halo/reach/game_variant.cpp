@@ -62,13 +62,16 @@ namespace halo::reach {
          }
          switch (block.header.signature) {
             case '_blf':
+               this->blam_header.header = block.header;
                this->blam_header.read(block);
                break;
             case 'athr':
                athr = true;
                this->author_header.emplace().read(block);
+               this->author_header.value().header = block.header;
                break;
             case 'chdr':
+               this->content_header.header = block.header;
                this->content_header.read(block);
                chdr = true;
                if (this->content_header.data.type != ugc_file_type::game_variant) {
@@ -248,6 +251,7 @@ namespace halo::reach {
          assert(this->data);
          bitwriter bitstream;
          bitstream.set_game_variant_data(this->data);
+         bitstream.reserve(0x5000); // size for Reach; H4 is larger
          bitstream.write(this->type);
          bitstream.write(*this->data);
          //
@@ -255,7 +259,7 @@ namespace halo::reach {
          hash.calculate(bitstream.data(), bitstream.get_bitpos());
          stream.write(hash);
          size_t offset_before_hashable = stream.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
-         stream.write((const void*)bitstream.data(), bitstream.size());
+         stream.write((const void*)bitstream.data(), bitstream.get_bytespan());
          //
          stream.pad_to_bytepos(start + header.size);
 

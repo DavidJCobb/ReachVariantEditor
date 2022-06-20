@@ -14,7 +14,7 @@ namespace halo::reach {
       uint16_t flags     = 0;
 
       void read(bytereader&);
-      void write(bytewriter&);
+      void write(bytewriter&) const;
    };
 
    template<util::four_cc signature, size_t expected_size = 0> class file_block {

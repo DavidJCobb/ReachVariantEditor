@@ -9,9 +9,11 @@ namespace halo::impl {
 
    bytewriter_base::~bytewriter_base() {
       if (this->_buffer) {
-         delete this->_buffer;
+         free(this->_buffer);
          this->_buffer = nullptr;
       }
+      this->_position = {};
+      this->_size = 0;
    }
 
    uint8_t* bytewriter_base::data_at(size_t offset) const noexcept {
@@ -45,5 +47,6 @@ namespace halo::impl {
       if (this->_size == size)
          return;
       this->_buffer = (uint8_t*)realloc(this->_buffer, size);
+      this->_size = size;
    }
 }
