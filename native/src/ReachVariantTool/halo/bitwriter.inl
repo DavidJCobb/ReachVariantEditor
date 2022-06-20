@@ -144,6 +144,8 @@ namespace halo {
       const uint8_t* src      = other.data();
       const size_t   bytesize = other.size();
       const size_t   bitshift = other.get_bitshift();
+      if (bytesize == 0) // input is empty
+         return;
       this->_ensure_room_for(other.get_bitpos());
       //
       size_t copy = bytesize;
@@ -155,7 +157,8 @@ namespace halo {
          // We're byte-aligned, so we can just memcpy most or maybe even all 
          // of the input.
          //
-         memcpy(this->data() + this->get_bytepos(), src, copy);
+         if (copy) // can be zero if the data spans more than 0 bytes but less than 1 byte (bytesize == 1; bitshift != 0; copy = bytesize - 1)
+            memcpy(this->data() + this->get_bytepos(), src, copy);
          if (bitshift) {
             //
             // If the input isn't byte-aligned, then the last byte will be a 
@@ -168,8 +171,10 @@ namespace halo {
       //
       // We're not byte-aligned, though the input may be.
       //
-      for (size_t i = 0; i < copy - 1; ++i) {
-         this->write_bits(8, src[i]);
+      if (copy) { // can be zero if the data spans more than 0 bytes but less than 1 byte (bytesize == 1; bitshift != 0; copy = bytesize - 1)
+         for (size_t i = 0; i < copy - 1; ++i) {
+            this->write_bits(8, src[i]);
+         }
       }
       if (bitshift) {
          this->write_bits(bitshift, src[bytesize - 1]);

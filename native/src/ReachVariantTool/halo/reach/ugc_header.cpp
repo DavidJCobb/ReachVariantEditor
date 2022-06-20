@@ -132,7 +132,7 @@ namespace halo::reach {
          build.minor,
          type
       );
-      stream.skip(3);
+      stream.pad(3);
       stream.write(
          file_length,
          unk08,
@@ -143,12 +143,12 @@ namespace halo::reach {
          game_mode,
          engine
       );
-      stream.skip(1);
+      stream.pad(1);
       stream.write(
          map_id,
          engine_category
       );
-      stream.skip(4);
+      stream.pad(4);
       stream.write(
          created_by,
          modified_by

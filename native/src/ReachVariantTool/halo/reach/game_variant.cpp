@@ -173,6 +173,7 @@ namespace halo::reach {
                mpvr = true;
                break;
             case '_eof':
+               this->eof_block.header = block.header;
                this->eof_block.read(block);
                _eof = true;
                break;
