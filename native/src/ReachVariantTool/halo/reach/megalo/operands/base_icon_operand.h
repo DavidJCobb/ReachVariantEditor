@@ -49,7 +49,7 @@ namespace halo::reach::megalo::operands {
                absence = false;
                stream.write(absence);
                //
-               bitnumber_type index = this->icon;
+               bitnumber_type index = this->icon.value().to_int();
                stream.write(index);
             } else {
                absence = true;

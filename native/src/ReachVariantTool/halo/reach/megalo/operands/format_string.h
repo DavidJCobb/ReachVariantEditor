@@ -40,6 +40,8 @@ namespace halo::reach::megalo::operands {
 
             void read(bitreader&);
             void write(bitwriter&) const;
+
+            void copy_from(const token&);
          };
 
       public:
@@ -49,5 +51,7 @@ namespace halo::reach::megalo::operands {
 
          virtual void read(bitreader&) override;
          virtual void write(bitwriter&) const override;
+
+         format_string& operator=(const format_string&);
    };
 }

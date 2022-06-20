@@ -77,7 +77,7 @@ namespace halo::reach {
          game_variant_data* get_game_variant_data() const { return this->current_variant_data; }
          void set_game_variant_data(game_variant_data* v);
 
-         void write(megalo::string_ref& ref);
-         void write(megalo::string_ref_optional& ref);
+         void write(const megalo::string_ref& ref);
+         void write(const megalo::string_ref_optional& ref);
    };
 }

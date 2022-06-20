@@ -179,6 +179,12 @@ namespace halo::reach::megalo::operands {
             inline static constexpr operand_typeinfo typeinfo = {
                .internal_name = "number",
             };
+
+            void set_to_immediate(int16_t v) {
+               this->target_id = 0;
+               this->which     = 0;
+               this->index     = v;
+            }
       };
    }
 }

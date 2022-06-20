@@ -44,14 +44,15 @@ namespace halo::util {
          template<bool is_const> class _iterator_base {
             friend class indexed_list;
             protected:
-               using access_type = cobb::set_const<value_type**, is_const>;
+               using access_type = std::add_pointer_t<cobb::set_const<value_type*, is_const>>;
 
                access_type item = nullptr;
 
             public:
                _iterator_base() {}
                _iterator_base(std::nullptr_t) : item(nullptr) {}
-               _iterator_base(access_type& r) : item(r) {}
+               _iterator_base(value_type** r) : item(r) {}
+               _iterator_base(access_type r) requires !std::is_same_v<access_type, value_type**> : item(r) {}
 
                value_type* operator->() const noexcept { return *this->item; }
                value_type& operator*() const noexcept { return **this->item; }

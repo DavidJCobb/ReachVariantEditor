@@ -1,6 +1,8 @@
 #include "player_or_group.h"
 #include "halo/reach/bitstreams.h"
 
+#include "../../create_operand.h"
+
 #include "halo/reach/megalo/load_process_messages/operand/player_or_group/bad_type.h"
 
 namespace halo::reach::megalo::operands {
@@ -30,6 +32,32 @@ namespace halo::reach::megalo::operands {
          }
          if (this->value)
             this->value->read(stream);
+      }
+
+      void player_or_group::write(bitwriter& stream) const {
+         bitnumber<2, unsigned int> which = 2; // none
+         if (this->value) {
+            switch (this->value->get_type()) {
+               case variable_type::player:
+                  which = 1;
+                  break;
+               case variable_type::team:
+                  which = 0;
+                  break;
+               default:
+                  assert(false);
+            }
+         }
+         stream.write(which);
+         if (this->value)
+            this->value->write(stream);
+      }
+
+      player_or_group& player_or_group::operator=(const player_or_group& other) {
+         this->value = nullptr;
+         if (other.value)
+            this->value = (impl::base*)clone_operand(*other.value.get());
+         return *this;
       }
    }
 }

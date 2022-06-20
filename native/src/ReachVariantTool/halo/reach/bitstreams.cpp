@@ -59,12 +59,12 @@ namespace halo::reach {
          }
       }
 
-      void bitwriter::write(megalo::string_ref& ref) {
+      void bitwriter::write(const megalo::string_ref& ref) {
          assert(ref != nullptr);
          string_index<false> index = static_cast<halo::util::indexed&>(*ref).index;
          base_type::write(index);
       }
-      void bitwriter::write(megalo::string_ref_optional& ref) {
+      void bitwriter::write(const megalo::string_ref_optional& ref) {
          string_index<true> index = -1;
          if (ref != nullptr) {
             index = static_cast<halo::util::indexed&>(*ref).index;

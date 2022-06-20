@@ -36,6 +36,9 @@ namespace halo::reach::megalo {
          void read(bitreader& stream) {
             impl::variable_declaration::read(type, stream);
          }
+         void write(bitwriter& stream) const {
+            impl::variable_declaration::write(type, stream);
+         }
    };
 
    template<variable_scope S> class variable_declaration_set {
@@ -101,6 +104,21 @@ namespace halo::reach::megalo {
             else
                cobb::unreachable();
          }
+         template<variable_type V> const variable_list<V>& _list_by_type() const {
+            using enum variable_type;
+            if constexpr (V == number)
+               return numbers;
+            else if constexpr (V == object)
+               return objects;
+            else if constexpr (V == player)
+               return players;
+            else if constexpr (V == team)
+               return teams;
+            else if constexpr (V == timer)
+               return timers;
+            else
+               cobb::unreachable();
+         }
 
          template<variable_type V> void _read_list(bitreader& stream) {
             size_t count = stream.read_bits(std::bit_width(scope_metadata.maximum_of_type(V)));
@@ -111,6 +129,19 @@ namespace halo::reach::megalo {
             for (size_t i = 0; i < count; ++i) {
                list[i].read(stream);
             }
+         }
+         template<variable_type V> void _write_list(bitwriter& stream) const {
+            constexpr size_t max_count = scope_metadata.maximum_of_type(V);
+            size_t size = 0;
+            for (size_t i = 0; i < max_count; ++i) {
+               if (this->variable_is_defined<V>(i))
+                  size = i + 1;
+            }
+
+            auto& list = this->_list_by_type<V>();
+            stream.write_bits(std::bit_width(max_count), size);
+            for (size_t i = 0; i < size; ++i)
+               list[i].write(stream);
          }
 
       protected:
@@ -152,6 +183,13 @@ namespace halo::reach::megalo {
             _read_list<variable_type::team>(stream);
             _read_list<variable_type::player>(stream);
             _read_list<variable_type::object>(stream);
+         }
+         void write(bitwriter& stream) const {
+            _write_list<variable_type::number>(stream);
+            _write_list<variable_type::timer>(stream);
+            _write_list<variable_type::team>(stream);
+            _write_list<variable_type::player>(stream);
+            _write_list<variable_type::object>(stream);
          }
    };
 }

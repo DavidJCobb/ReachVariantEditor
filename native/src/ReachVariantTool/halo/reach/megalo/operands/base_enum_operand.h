@@ -43,7 +43,7 @@ namespace halo::reach::megalo::operands {
             this->value = value_type::from_int(bn);
          }
          virtual void write(bitwriter& stream) const override {
-            bitnumber_type bn = this->value;
+            bitnumber_type bn = this->value.to_int();
             stream.write(bn);
          }
    };

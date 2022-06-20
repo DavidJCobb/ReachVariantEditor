@@ -2,6 +2,10 @@
 #include "helpers/hashing/sha1.h"
 #include "halo/reach/bytestreams.h"
 
+namespace {
+   constexpr bool use_salt = true;
+}
+
 namespace halo::reach {
    void file_hash::read(bytereader& stream) {
       stream.read(data);
@@ -19,7 +23,12 @@ namespace halo::reach {
    }
 
    void file_hash::calculate(const uint8_t* buffer, size_t bitcount) {
-      auto hash = cobb::hashing::sha1(buffer, bitcount);
+      std::array<uint32_t, 5> hash;
+      if constexpr (use_salt) {
+         hash = cobb::hashing::sha1_with_prepended_salt(salt, buffer, bitcount);
+      } else {
+         hash = cobb::hashing::sha1(buffer, bitcount);
+      }
       for (int i = 0; i < hash.size(); ++i) {
          auto chunk = hash[i];
          for (int j = 0; j < 4; ++j) {

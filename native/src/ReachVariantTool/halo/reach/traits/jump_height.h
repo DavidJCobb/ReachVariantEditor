@@ -5,7 +5,7 @@
 
 namespace halo::reach::traits {
    struct jump_height : public util::scalar_trait<int16_t, -1> {
-      using scalar_trait::scalar_trait;
+      using scalar_trait<int16_t, -1>::scalar_trait;
    };
    //
    // Value -1 means "unchanged." All other negative values are invalid. Positive values above 400 are invalid.

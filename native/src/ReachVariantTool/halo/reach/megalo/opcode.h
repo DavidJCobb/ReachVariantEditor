@@ -34,6 +34,7 @@ namespace halo::reach::megalo {
          opcode& operator=(opcode&& o) noexcept {
             std::swap(this->function, o.function);
             std::swap(this->operands, o.operands);
+            return *this;
          }
    };
 }

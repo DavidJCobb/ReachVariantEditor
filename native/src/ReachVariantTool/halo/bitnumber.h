@@ -142,7 +142,11 @@ namespace halo {
                return true;
             else {
                constexpr bool presence = params.presence.value();
-               if (this->value == params.if_absent) {
+               auto comparator = underlying_type(params.initial);
+               if constexpr (params.if_absent.has_value()) {
+                  comparator = underlying_type(params.if_absent.value());
+               }
+               if (this->value == comparator) {
                   stream.write_bits(1, !presence);
                   return false;
                }

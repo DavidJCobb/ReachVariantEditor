@@ -6,7 +6,9 @@
 #include "halo/util/dirty.h"
 #include "halo/util/indexed_list.h"
 #include "./bitreader.h"
+#include "./bitwriter.h"
 #include "./loc_string.h"
+#include "./loc_string_table_details.h"
 
 namespace halo {
    struct loc_string_table_load_result {
@@ -45,17 +47,10 @@ namespace halo {
          using entry_type  = loc_string<loc_string_table<max_count, max_buffer_size>>;
          using load_result = loc_string_table_load_result;
 
-         enum class save_error {
-            none,
-            data_too_large,
-            out_of_memory,
-            zlib_memory_error,
-            zlib_buffer_error,
-         };
+         using offset_type = loc_string_table_details::offset_type;
+         using offset_list = loc_string_table_details::offset_list;
 
       protected:
-         using offset_type = int16_t; // same as used by the game internally
-         using offset_list = std::array<offset_type, loc_string_base::translation_count>;
          struct sort_pair {
             entry_type* entry = nullptr;
             std::optional<localization_language> language;
@@ -66,8 +61,8 @@ namespace halo {
       public:
          util::indexed_list<entry_type, max_count> strings;
       protected:
-         struct {
-            cobb::bitwriter raw;
+         mutable struct {
+            basic_bitwriter raw;
             std::vector<sort_pair> pairs;
             uint32_t uncompressed_size = 0;
          } cached_export;
@@ -78,6 +73,11 @@ namespace halo {
       public:
          template<bitreader_subclass Reader>
          loc_string_table_load_result read(Reader&);
+
+         void generate_export_data() const;
+
+         template<bitwriter_subclass Writer>
+         void write(Writer&) const;
 
          entry_type* string_by_index(size_t);
          const entry_type* string_by_index(size_t) const;

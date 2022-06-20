@@ -33,6 +33,7 @@ namespace halo::reach::megalo {
             std::swap(this->or_group,   o.or_group);
             std::swap(this->load_state, o.load_state);
             opcode::operator=(std::forward<opcode&&>(o));
+            return *this;
          }
 
          condition* clone() const;

@@ -2,6 +2,7 @@
 #include <array>
 #include <string>
 #include "./localization_language.h"
+#include "./loc_string_table_details.h"
 
 namespace halo {
    class loc_string_base {
@@ -15,5 +16,7 @@ namespace halo {
 
          bool can_be_forge_label() const;
          bool empty() const;
+
+         void serialize_to_blob(std::string& blob, loc_string_table_details::offset_list& offsets) const;
    };
 }

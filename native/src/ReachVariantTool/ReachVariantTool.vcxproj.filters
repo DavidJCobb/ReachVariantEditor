@@ -2265,6 +2265,15 @@
     <ClInclude Include="helpers\byteswap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\memory\memcpy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\memory\memset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\loc_string_table_details.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

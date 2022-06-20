@@ -23,9 +23,15 @@ namespace halo::util {
    template<class Subclass> class dirtiable {
       //friend template<class Other> class dirtiable<Other>;
       protected:
-         bool dirty = false;
+         mutable bool dirty = false;
 
-         void set_dirty() {
+         // Here's where things get a bit ugly: we want an object to be able to clear 
+         // its dirty flag during "const" code, e.g. because some const-qualified 
+         // write process is underway and will result in the object no longer being 
+         // dirty. Only way to accomplish that is to make all our member functions 
+         // here const, and make the flag mutable.
+
+         void set_dirty() const {
             this->dirty = true;
             if constexpr (impl::dirty::has_dirtiable_owner<Subclass>) {
                this->owner.set_dirty();
@@ -34,7 +40,7 @@ namespace halo::util {
 
          // Subclasses that contain dirtiable objects will need to define their own "clear dirty" function 
          // which loops over those and calls this.
-         void _clear_dirty() {
+         void _clear_dirty() const {
             this->dirty = false;
          }
 

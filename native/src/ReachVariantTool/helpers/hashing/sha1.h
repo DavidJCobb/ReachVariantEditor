@@ -1,8 +1,11 @@
 #pragma once
 #include <array>
 #include <bit>
+#include <cassert>
 #include <cstdint>
-#include <vector>
+#include "helpers/memory/memcpy.h"
+#include "helpers/memory/memset.h"
+#include "helpers/byteswap.h"
 
 namespace cobb::hashing {
    namespace impl::sha1 {
@@ -74,7 +77,7 @@ namespace cobb::hashing {
       }
 
       // Next, we have to account for a partial final chunk.
-      std::array<uint8_t, 512 / 8> working;
+      std::array<uint8_t, 512 / 8> working = {};
       {
          auto bytecount = bitcount / 8 + (bitcount % 8 ? 1 : 0);
          if (std::is_constant_evaluated()) {
@@ -94,10 +97,118 @@ namespace cobb::hashing {
          }
          //
          auto* dst = (uint64_t*)(working.data() + (512 / 8) - sizeof(uint64_t));
-         *dst = _byteswap_uint64(message_bitcount);
+         if constexpr (std::endian::native == std::endian::big) {
+            *dst = message_bitcount;
+         } else {
+            *dst = cobb::byteswap<uint64_t>(message_bitcount);
+         }
       }
       impl::sha1::process_block(state, working.data());
 
       return state;
    }
+   
+   template<size_t SaltBytecount>
+   constexpr std::array<uint32_t, 5> sha1_with_prepended_salt(const std::array<uint8_t, SaltBytecount>& salt, const uint8_t* data, const size_t message_bitcount) {
+      std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+      std::array<uint8_t, 512 / 8> working = {};
+
+      cobb::memcpy(working.data(), salt.data(), salt.size());
+      cobb::memcpy(
+         working.data() + salt.size(),
+         data,
+         std::min(
+            working.size() - salt.size(),
+            message_bitcount / 8
+         )
+      );
+      size_t bitcount = message_bitcount;
+      if (message_bitcount / 8 + salt.size() >= 512) {
+         //
+         // Process any whole chunks, if the input plus salt is larger than one chunk.
+         //
+         impl::sha1::process_block(state, working.data());
+         //
+         bitcount = message_bitcount - 512;
+         data += (512 / 8) - salt.size();
+
+         // Loop for chunks sans salt:
+         while (bitcount >= 512) {
+            impl::sha1::process_block(state, data);
+            data += (512 / 8);
+            bitcount -= 512;
+         }
+      }
+      //
+      // Process partial chunks:
+      //
+      auto bytecount = bitcount / 8 + (bitcount % 8 ? 1 : 0);
+      //
+      auto& last = working[bytecount + salt.size()];
+      if (auto shift = bitcount % 8) {
+         last = data[bitcount / 8];
+         last &= (0xFF << shift); // keep MSBs; ditch LSBs
+         last |= (1 << (shift - 1)); // append a set bit
+      } else {
+         last = 0x80; // append a set bit
+      }
+      //
+      auto* dst = (uint64_t*)(working.data() + (512 / 8) - sizeof(uint64_t));
+      {
+         uint64_t used_bitcount = message_bitcount + (salt.size() * 8);
+         if constexpr (std::endian::native == std::endian::big) {
+            *dst = used_bitcount;
+         } else {
+            *dst = cobb::byteswap<uint64_t>(used_bitcount);
+         }
+      }
+      impl::sha1::process_block(state, working.data());
+
+      return state;
+   }
+
+   // Only supports whole bytes, not bits
+   struct byte_iterative_sha1 {
+      protected:
+         std::array<uint8_t, 512> stored = {};
+         size_t chunk_size = 0; // bytes
+         size_t total_bits = 0; // bits
+
+      public:
+         std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+
+         constexpr void accumulate(const uint8_t* data, const size_t bytecount) {
+            this->total_bits += bytecount * 8;
+            //
+            if (bytecount + this->chunk_size <= 512) {
+               cobb::memcpy(this->stored.data() + this->chunk_size, data, bytecount);
+               this->chunk_size += bytecount;
+               if (this->chunk_size == 512) {
+                  impl::sha1::process_block(this->state, this->stored.data());
+                  this->chunk_size = 0;
+               }
+               return;
+            } else {
+               size_t diff = bytecount + this->chunk_size - 512;
+               cobb::memcpy(this->stored.data() + this->chunk_size, data, diff);
+               data += diff;
+               //
+               impl::sha1::process_block(this->state, this->stored.data());
+               this->chunk_size = 0;
+               return;
+            }
+         }
+         constexpr void finalize() {
+            this->stored[this->chunk_size] = 0x80; // append a set bit
+            cobb::memset(this->stored.data() + this->chunk_size + 1, 0, 512 - this->chunk_size - 1);
+            //
+            auto* dst = (uint64_t*)(this->stored.data() + this->stored.size() - sizeof(uint64_t));
+            if constexpr (std::endian::native == std::endian::big) {
+               *dst = this->total_bits;
+            } else {
+               *dst = cobb::byteswap<uint64_t>(this->total_bits);
+            }
+            impl::sha1::process_block(state, this->stored.data());
+         }
+   };
 }

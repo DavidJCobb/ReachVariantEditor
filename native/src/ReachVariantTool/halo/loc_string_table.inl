@@ -282,6 +282,108 @@ namespace halo {
       return {};
    }
 
+   CLASS_TEMPLATE_PARAMS void CLASS_NAME::generate_export_data() const {
+      if (!this->is_dirty() && this->cached_export.raw.get_bitpos() > 0)
+         return;
+      //
+      // The format for a string table in the file is as follows:
+      //
+      //  - First, the number of ReachStrings.
+      //
+      //  - Then, the offsets for each localization in each ReachString.
+      //
+      //     - Each offset is written as a presence bit followed, if the bit is 1, by the offset 
+      //       value.
+      //
+      //  - Then, the size of the uncompressed data in the next bullet point.
+      //
+      //  - Then, a buffer containing all of the content of all localizations of all ReachStrings. 
+      //    This buffer may optionally be zlib-compressed. The ReachString offsets mentioned above 
+      //    are relative to the start of this buffer's uncompressed content.
+      //
+      auto& stream = this->cached_export.raw;
+      stream.resize(0); // clear the cached data
+      this->cached_export.uncompressed_size = 0;
+      //
+      stream.write_bits(count_bitlength, this->strings.size());
+      std::string combined; // UTF-8 buffer holding all string data including null terminators
+      if (!this->strings.size()) {
+         this->_clear_dirty();
+         return;
+      }
+      //
+      {
+         std::vector<offset_list> offsets(this->strings.size());
+         for (size_t i = 0; i < this->strings.size(); ++i) {
+            auto& current_string  = this->strings[i];
+            auto& current_offsets = offsets[i];
+            current_string.serialize_to_blob(combined, offsets[i]);
+            //
+            for (size_t i = 0; i < current_offsets.size(); i++) {
+               if (current_offsets[i] == -1) {
+                  stream.write_bits(1, false);
+                  continue;
+               }
+               stream.write_bits(1, true);
+               stream.write_bits(offset_bitlength, current_offsets[i]);
+            }
+         }
+      }
+      //
+      uint32_t uncompressed_size = combined.size();
+      this->cached_export.uncompressed_size = uncompressed_size;
+      if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+         #if _DEBUG
+            __debugbreak();
+         #endif
+         return;
+      }
+      stream.write(uncompressed_size, this->buffer_size_bitlength);
+      //
+      bool should_compress = uncompressed_size >= 0x80;
+      stream.write(should_compress, 1);
+      //
+      if (!should_compress) {
+         for (size_t i = 0; i < uncompressed_size; i++)
+            stream.write((uint8_t)combined[i]);
+         this->_clear_dirty();
+         return;
+      }
+      //
+      // Compress the data with zlib, and then write it to the stream.
+      //
+      auto bound  = compressBound(uncompressed_size);
+      auto buffer = malloc(bound);
+      uint32_t compressed_size = bound;
+      int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+      assert(result != Z_MEM_ERROR); // malloc failed within zlib; if we're out of memory, there's not really anything we can do about that
+      if (result == Z_BUF_ERROR) {
+         //
+         // Destination buffer not large enough to hold compressed data. This should not be possible here, 
+         // but just to be sure, let's try it again.
+         //
+         bound *= 2;
+         buffer = realloc(buffer, bound);
+         assert(buffer != nullptr);
+         result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+         assert(result != Z_MEM_ERROR); // malloc failed within zlib; if we're out of memory, there's not really anything we can do about that
+         assert(result != Z_BUF_ERROR); // destination buffer not large enough to hold input; this should not be possible here
+      }
+      stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
+      static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
+      stream.write(uncompressed_size); // redundant uncompressed size
+      for (size_t i = 0; i < compressed_size; i++)
+         stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+      free(buffer);
+      this->_clear_dirty();
+   }
+
+   CLASS_TEMPLATE_PARAMS
+   template<bitwriter_subclass Writer> void CLASS_NAME::write(Writer& stream) const {
+      this->generate_export_data();
+      stream.write_bitstream(this->cached_export.raw);
+   }
+
 
    CLASS_TEMPLATE_PARAMS typename CLASS_NAME::entry_type* CLASS_NAME::string_by_index(size_t i) {
       return &this->strings[i];

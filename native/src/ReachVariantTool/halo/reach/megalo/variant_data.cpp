@@ -247,6 +247,7 @@ namespace halo::reach {
       //
       // And now for post-load steps.
       //
+      /*// TODO: We can't do this as const
       clear_all_indexed_dummy_flags(
          script.forge_labels,
          script.options,
@@ -254,5 +255,6 @@ namespace halo::reach {
          script.traits,
          script.widgets
       );
+      //*/
    }
 }

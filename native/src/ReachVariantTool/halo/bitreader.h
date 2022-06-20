@@ -212,13 +212,13 @@ namespace halo {
 
    template<typename T> concept bitreader_subclass = requires(T& x) {
       typename T::my_type;
-      std::is_same_v<T, typename T::my_type>;
+      requires std::is_same_v<T, typename T::my_type>;
 
       typename T::load_process_type;
       //
       { T::shares_load_process } -> std::same_as<const bool&>;
 
-      std::is_base_of_v<
+      requires std::is_base_of_v<
          bitreader<
             typename T::my_type,
             std::conditional_t<

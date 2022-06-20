@@ -7,7 +7,12 @@ namespace halo::impl {
          this->resize(target);
    }
 
-   bytewriter_base::~bytewriter_base();
+   bytewriter_base::~bytewriter_base() {
+      if (this->_buffer) {
+         delete this->_buffer;
+         this->_buffer = nullptr;
+      }
+   }
 
    uint8_t* bytewriter_base::data_at(size_t offset) const noexcept {
       return this->_buffer + offset;

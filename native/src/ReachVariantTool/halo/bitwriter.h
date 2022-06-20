@@ -51,7 +51,8 @@ namespace halo {
       public:
          ~bitwriter();
 
-         inline uint8_t* data() const noexcept { return this->_buffer; }
+         inline uint8_t* data() noexcept { return this->_buffer; }
+         inline const uint8_t* data() const noexcept { return this->_buffer; }
          inline uint32_t size() const noexcept { return this->_size; }
 
          inline uint32_t get_bitpos() const noexcept { return this->_position.in_bits(); }
@@ -65,37 +66,37 @@ namespace halo {
 
          // Multi-write call
          template<typename... Types> requires (sizeof...(Types) > 1)
-         void write(Types&... args) {
+         void write(const Types&... args) {
             (((my_type*)this)->write(args), ...);
          }
          
          #pragma region write
          template<typename T> requires util::has_write_method<my_type, T>
-         void write(const T& v) {
-            v.write(*(my_type*)this);
+         void write(const T& value) {
+            value.write(*(my_type*)this);
          }
 
          template<typename T> requires (!util::has_write_method<my_type, T> && impl::bitwriter::is_bitwriteable<T>)
-         void write(const T out) {
+         void write(const T value) {
             if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
-               this->write_bits<bool>(1, out);
+               this->write_bits<bool>(1, value);
             } else if constexpr (std::is_same_v<std::decay_t<T>, float>) {
-               this->write_bits<uint32_t>(32, std::bit_cast<float>(out));
+               this->write_bits<uint32_t>(32, std::bit_cast<float>(value));
             } else {
-               this->write_bits<std::decay_t<T>>(bitcount_of_type<cobb::strip_enum_t<std::decay_t<T>>>, out);
+               this->write_bits<std::decay_t<T>>(bitcount_of_type<cobb::strip_enum_t<std::decay_t<T>>>, value);
             }
          }
 
          template<typename T> requires (impl::bitwriter::is_bitwriteable_indexed_list<my_type, T>)
-         void write(const T& out) {
-            size_t count = this->write_bits(std::bit_width(T::max_count));
-            for (const auto& item : out)
+         void write(const T& list) {
+            this->write_bits(std::bit_width(T::max_count), list.size());
+            for (const auto& item : list)
                ((my_type*)this)->write(item);
          }
 
          template<typename T, size_t count> requires (util::has_write_method<my_type, T> || impl::bitwriter::is_bitwriteable<T>)
-         void write(const std::array<T, count>& out) {
-            for (const auto& item : out)
+         void write(const std::array<T, count>& list) {
+            for (const auto& item : list)
                ((my_type*)this)->write(item);
          }
          #pragma endregion
@@ -105,7 +106,23 @@ namespace halo {
          void write_compressed_float(float value, const int bitcount, float min, float max, bool is_signed, bool guarantee_exact_bounds);
 
          template<typename CharT> void write_string(const CharT*, size_t max_length);
+
+         template<typename T> void write_bitstream(const bitwriter<T>&);
    };
+
+   template<typename T> concept bitwriter_subclass = requires(T& x) {
+      typename T::my_type;
+      requires std::is_same_v<T, typename T::my_type>;
+
+         requires std::is_base_of_v<
+         bitwriter<
+            typename T::my_type
+         >,
+         typename T::my_type
+      >;
+   };
+
+   class basic_bitwriter : public bitwriter<basic_bitwriter> {};
 }
 
 #include "bitwriter.inl"

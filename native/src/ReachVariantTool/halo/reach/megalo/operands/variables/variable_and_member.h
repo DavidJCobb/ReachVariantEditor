@@ -1,7 +1,9 @@
 #pragma once
 #include <memory>
 #include "helpers/cs.h"
+#include "helpers/owned_ptr.h"
 #include "halo/reach/bitstreams.h"
+#include "../../create_operand.h"
 #include "../../operand.h"
 #include "../../operand_typeinfo.h"
 #include "../../variable_scope.h"
@@ -33,18 +35,25 @@ namespace halo::reach::megalo::operands::variables {
          >;
 
       public:
-         std::unique_ptr<base_type> owner = nullptr;
+         cobb::owned_ptr<base_type> owner = nullptr;
          index_type index;
 
          virtual void read(bitreader& stream) override {
             if (!owner)
-               owner = std::make_unique<base_type>();
+               owner = new base_type;
             stream.read(*owner.get());
             stream.read(index);
          }
          virtual void write(bitwriter& stream) const override {
+            assert(owner != nullptr);
             stream.write(*owner.get());
             stream.write(index);
+         }
+
+         variable_and_member& operator=(const variable_and_member& other) {
+            this->owner = (base_type*)clone_operand(*other.owner.get());
+            this->index = other.index;
+            return *this;
          }
    };
 

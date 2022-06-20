@@ -1,6 +1,7 @@
 #pragma once
 #include "helpers/bitset.h"
 #include "halo/bitreader.h"
+#include "halo/bitwriter.h"
 
 namespace halo::util {
    template<size_t Count>
@@ -25,6 +26,10 @@ namespace halo::util {
                      this->bits.set(index + j);
                }
             }
+         }
+         template<bitwriter_subclass Writer> void write(Writer& stream) const {
+            for (size_t i = 0; i < bits.dword_count(); ++i)
+               stream.write_bits(32, bits.dword(i));
          }
    };
 }

@@ -3,6 +3,7 @@
 #include <type_traits>
 #include "helpers/type_traits/strip_enum.h"
 #include "helpers/byteswap.h"
+#include "halo/util/fixed_string.h"
 #include "halo/util/has_write_method.h"
 #include "halo/util/stream_position.h"
 
