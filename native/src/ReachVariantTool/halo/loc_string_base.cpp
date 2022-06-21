@@ -19,6 +19,12 @@ namespace halo {
 
    void loc_string_base::serialize_to_blob(std::string& blob, loc_string_table_details::offset_list& offsets) const {
       if constexpr (loc_string_table_details::optimization == loc_string_table_details::optimization_type::bungie) {
+         //
+         // Bungie's optimization strategy is as follows: if a single string's localizations are all 
+         // exactly identical, then they serialize just one localization and reuse its offset for 
+         // the others. However, they don't reuse localizations across string table entries, nor do 
+         // they reuse anything if even a single localization differs.
+         //
          bool all_equal = true;
          for (size_t i = 1; i < this->translations.size(); ++i) {
             auto& a = this->translations[i - 1];
@@ -42,10 +48,17 @@ namespace halo {
       }
       for (size_t i = 0; i < offsets.size(); i++) {
          auto& s = this->translations[i];
-         //
-         // NOTE: DO NOT serialize empty strings with a -1 offset; Bungie doesn't do that and I assume it's for a 
-         // reason.
-         //
+         if (s.empty()) {
+            //
+            // NOTE: When mimicking Bungie's optimization, a string table whose localizations are all 
+            // empty will hit the optimization above, which should produce output consistent with the 
+            // official files. This branch will be hit when a string has different translations, and 
+            // some languages are omitted. (Official gametypes seem to exclude simplified Chinese and 
+            // Polish.)
+            //
+            offsets[i] = -1;
+            continue;
+         }
          if constexpr (loc_string_table_details::optimization == loc_string_table_details::optimization_type::duplicates) {
             //
             // If the string table buffer already contains a string that is exactly identical to 

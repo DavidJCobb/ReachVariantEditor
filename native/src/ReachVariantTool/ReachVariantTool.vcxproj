@@ -476,6 +476,7 @@
     <ClInclude Include="halo\load_process_fatal_error.h" />
     <ClInclude Include="halo\load_process_location.h" />
     <ClInclude Include="halo\load_process_message_data.h" />
+    <ClInclude Include="halo\loc_string_table_details.h" />
     <ClInclude Include="halo\reach\arena_parameters.h" />
     <ClInclude Include="halo\reach\bytestreams.fwd.h" />
     <ClInclude Include="halo\game.h" />
@@ -657,6 +658,8 @@
     <ClInclude Include="helpers\eight_cc.h" />
     <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
+    <ClInclude Include="helpers\memory\memcpy.h" />
+    <ClInclude Include="helpers\memory\memset.h" />
     <ClInclude Include="helpers\numeric_min_max.h" />
     <ClInclude Include="helpers\owned_ptr.h" />
     <ClInclude Include="helpers\qt\four_cc_to_string.h" />

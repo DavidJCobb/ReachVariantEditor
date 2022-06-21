@@ -36,6 +36,6 @@ namespace halo::reach {
          gamertag,
          is_online_id
       );
-      stream.skip(3); // padding
+      stream.pad(3);
    }
 }

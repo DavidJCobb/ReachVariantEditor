@@ -110,50 +110,67 @@ namespace cobb::hashing {
    
    template<size_t SaltBytecount>
    constexpr std::array<uint32_t, 5> sha1_with_prepended_salt(const std::array<uint8_t, SaltBytecount>& salt, const uint8_t* data, const size_t message_bitcount) {
-      std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
-      std::array<uint8_t, 512 / 8> working = {};
+      constexpr size_t bits_per_chunk  = 512;
+      constexpr size_t bytes_per_chunk = bits_per_chunk / 8;
 
-      cobb::memcpy(working.data(), salt.data(), salt.size());
+      std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+      std::array<uint8_t, bytes_per_chunk> working = {};
+
+      size_t salt_pos = 0; // bytes
+
+      if constexpr (SaltBytecount >= bytes_per_chunk) {
+         //
+         // If the salt is larger than one chunk, process all salt-only chunks.
+         //
+         for (; salt_pos + bytes_per_chunk - 1 < SaltBytecount; salt_pos += bytes_per_chunk) {
+            cobb::memcpy(working.data(), &salt[salt_pos], bytes_per_chunk);
+            impl::sha1::process_block(state, working.data());
+         }
+      }
+
+      size_t salt_remaining = SaltBytecount - salt_pos;
+      cobb::memcpy(working.data(), &salt[salt_pos], salt_remaining);
       cobb::memcpy(
-         working.data() + salt.size(),
+         working.data() + salt_remaining,
          data,
          std::min(
-            working.size() - salt.size(),
+            working.size() - salt_remaining,
             message_bitcount / 8
          )
       );
       size_t bitcount = message_bitcount;
-      if (message_bitcount / 8 + salt.size() >= 512) {
+      if (message_bitcount / 8 + salt_remaining >= bits_per_chunk) {
          //
          // Process any whole chunks, if the input plus salt is larger than one chunk.
          //
          impl::sha1::process_block(state, working.data());
          //
-         bitcount = message_bitcount - 512;
-         data += (512 / 8) - salt.size();
+         bitcount -= bits_per_chunk;
+         data     += bytes_per_chunk - salt_remaining;
+         salt_remaining = 0;
 
-         // Loop for chunks sans salt:
+         // Loop for full data chunks:
          while (bitcount >= 512) {
             impl::sha1::process_block(state, data);
-            data += (512 / 8);
-            bitcount -= 512;
+            data     += bytes_per_chunk;
+            bitcount -= bits_per_chunk;
          }
       }
       //
-      // Process partial chunks:
+      // Process final chunk:
       //
-      auto bytecount = bitcount / 8 + (bitcount % 8 ? 1 : 0);
+      auto bytecount = bitcount / 8 + (bitcount % 8 ? 1 : 0); // We only account for partial bits here, since they'll go in the final chunk.
       //
-      auto& last = working[bytecount + salt.size()];
+      auto& last = working[bytecount + salt_remaining];
       if (auto shift = bitcount % 8) {
-         last = data[bitcount / 8];
+         last  = data[bitcount / 8];
          last &= (0xFF << shift); // keep MSBs; ditch LSBs
          last |= (1 << (shift - 1)); // append a set bit
       } else {
          last = 0x80; // append a set bit
       }
       //
-      auto* dst = (uint64_t*)(working.data() + (512 / 8) - sizeof(uint64_t));
+      auto* dst = (uint64_t*)(working.data() + bytes_per_chunk - sizeof(uint64_t));
       {
          uint64_t used_bitcount = message_bitcount + (salt.size() * 8);
          if constexpr (std::endian::native == std::endian::big) {

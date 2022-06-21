@@ -303,6 +303,7 @@ namespace halo {
       //
       auto& stream = this->cached_export.raw;
       stream.resize(0); // clear the cached data
+      stream.reserve(max_count * offset_bitlength / 8);
       this->cached_export.uncompressed_size = 0;
       //
       stream.write_bits(count_bitlength, this->strings.size());
@@ -331,50 +332,66 @@ namespace halo {
       }
       //
       uint32_t uncompressed_size = combined.size();
+      uint32_t compressed_size   = 0;
       this->cached_export.uncompressed_size = uncompressed_size;
-      if (uncompressed_size > cobb::bitmax(this->buffer_size_bitlength)) {
+      if (uncompressed_size > cobb::bitmax(buffer_size_bitlength)) {
          #if _DEBUG
             __debugbreak();
          #endif
          return;
       }
-      stream.write(uncompressed_size, this->buffer_size_bitlength);
+      stream.write_bits(buffer_size_bitlength, uncompressed_size);
       //
-      bool should_compress = uncompressed_size >= 0x80;
-      stream.write(should_compress, 1);
-      //
-      if (!should_compress) {
-         for (size_t i = 0; i < uncompressed_size; i++)
-            stream.write((uint8_t)combined[i]);
-         this->_clear_dirty();
-         return;
-      }
-      //
-      // Compress the data with zlib, and then write it to the stream.
-      //
-      auto bound  = compressBound(uncompressed_size);
-      auto buffer = malloc(bound);
-      uint32_t compressed_size = bound;
-      int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
-      assert(result != Z_MEM_ERROR); // malloc failed within zlib; if we're out of memory, there's not really anything we can do about that
-      if (result == Z_BUF_ERROR) {
+      bool  should_compress = uncompressed_size >= 0x80;
+      void* buffer = nullptr;
+      if (should_compress) {
          //
-         // Destination buffer not large enough to hold compressed data. This should not be possible here, 
-         // but just to be sure, let's try it again.
+         // Compress the data with zlib, and then write it to the stream.
          //
-         bound *= 2;
-         buffer = realloc(buffer, bound);
-         assert(buffer != nullptr);
-         result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+         compressed_size = compressBound(uncompressed_size);
+         buffer = malloc(compressed_size);
+         int result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
          assert(result != Z_MEM_ERROR); // malloc failed within zlib; if we're out of memory, there's not really anything we can do about that
-         assert(result != Z_BUF_ERROR); // destination buffer not large enough to hold input; this should not be possible here
+         if (result == Z_BUF_ERROR) {
+            //
+            // Destination buffer not large enough to hold compressed data. This should not be possible here, 
+            // but just to be sure, let's try it again.
+            //
+            compressed_size *= 2;
+            buffer = realloc(buffer, compressed_size);
+            assert(buffer != nullptr);
+            result = compress2((Bytef*)buffer, (uLongf*)&compressed_size, (const Bytef*)combined.data(), uncompressed_size, Z_BEST_COMPRESSION);
+            assert(result != Z_MEM_ERROR); // malloc failed within zlib; if we're out of memory, there's not really anything we can do about that
+            assert(result != Z_BUF_ERROR); // destination buffer not large enough to hold input; this should not be possible here
+         }
+         if (result == Z_BUF_ERROR || compressed_size > max_buffer_size) {
+            //
+            // If any further errors occur, then just write the data uncompressed.
+            //
+            should_compress = false;
+            if (uncompressed_size >= max_buffer_size) {
+               #if _DEBUG
+                  __debugbreak();
+               #endif
+               assert(false && "String table won't fit!"); // TODO: error handling
+            }
+         }
       }
-      stream.write(compressed_size + 4, this->buffer_size_bitlength); // this value in the file includes the size of the next uint32_t
-      static_assert(sizeof(uncompressed_size) == sizeof(uint32_t), "The redundant uncompressed size stored in with the compressed data must be 4 bytes.");
-      stream.write(uncompressed_size); // redundant uncompressed size
-      for (size_t i = 0; i < compressed_size; i++)
-         stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
-      free(buffer);
+      //
+      stream.write_bits(1, should_compress);
+      if (should_compress) {
+         stream.write_bits(buffer_size_bitlength, compressed_size + 4); // this value in the file includes the size of the next uint32_t
+         stream.write_bits(32, uncompressed_size); // redundant uncompressed size
+         stream.reserve(compressed_size);
+         for (size_t i = 0; i < compressed_size; i++)
+            stream.write(*(uint8_t*)((std::intptr_t)buffer + i));
+      } else {
+         stream.reserve(combined.size());
+         for (size_t i = 0; i < combined.size(); i++)
+            stream.write((uint8_t)combined[i]);
+      }
+      if (buffer)
+         free(buffer);
       this->_clear_dirty();
    }
 

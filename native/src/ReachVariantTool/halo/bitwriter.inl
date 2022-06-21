@@ -68,6 +68,8 @@ namespace halo {
    CLASS_TEMPLATE_PARAMS void CLASS_NAME::reserve(size_t size) {
       if (this->_size >= size)
          return;
+      if (size == 0)
+         return;
       this->_buffer = (uint8_t*)realloc(this->_buffer, size);
       assert(this->_buffer != nullptr); // resize failed; old memory not freed
       this->_size = size;
@@ -84,6 +86,10 @@ namespace halo {
          assert(this->_buffer != nullptr); // resize failed; old memory not freed
       }
       this->_size = size;
+      if (size <= this->_position.bytes) {
+         this->_position.bytes = size;
+         this->_position.bits  = 0;
+      }
    }
 
    CLASS_TEMPLATE_PARAMS
@@ -91,33 +97,48 @@ namespace halo {
    void CLASS_NAME::write_bits(size_t bitcount, T value) {
       this->_ensure_room_for(bitcount);
 
+      // Types like char (as in const char*) are actually signed, and bitshifting them 
+      // to the right will extend the sign bit. We really, really don't want that.
+      using unsigned_t = std::make_unsigned_t<
+         std::conditional_t<
+            std::is_integral_v<T> && !std::is_same_v<T, bool>,
+            T,
+            std::conditional_t<
+               std::is_same_v<T, bool>,
+               uint8_t,
+               void
+            >
+         >
+      >;
+      unsigned_t to_write = std::bit_cast<unsigned_t>(value);
+
       // For signed values, the extra bits will always be 1 (i.e. sign-extended), so we 
       // need to shear those off for the write to work properly.
-      value &= cobb::bitmax(bitcount);
-      
+      to_write &= cobb::bitmax(bitcount);
+
       while (bitcount > 0) {
          uint8_t& target = this->_access_byte(this->get_bytepos());
          int shift = this->get_bitshift();
          //
          if (!shift) {
             if (bitcount < 8) {
-               target = value << (8 - bitcount);
+               target = to_write << (8 - bitcount);
                this->_position.advance_by_bits(bitcount);
                return;
             }
-            target = (value >> (bitcount - 8));
+            target = (to_write >> (bitcount - 8));
             this->_position.advance_by_bytes(1);
             bitcount -= 8;
             continue;
          }
          int extra = 8 - shift;
          if (bitcount <= extra) {
-            target |= (value << (extra - bitcount));
+            target |= (to_write << (extra - bitcount));
             this->_position.advance_by_bits(bitcount);
             return;
          }
          target &= ~(uint8_t(0xFF) >> shift); // clear the bits we're about to write
-         target |= ((value >> (bitcount - extra)) & 0xFF);
+         target |= ((to_write >> (bitcount - extra)) & 0xFF);
          this->_position.advance_by_bits(extra);
          bitcount -= extra;
       }
@@ -142,7 +163,7 @@ namespace halo {
    template<typename T>
    void CLASS_NAME::write_bitstream(const bitwriter<T>& other) {
       const uint8_t* src      = other.data();
-      const size_t   bytesize = other.size();
+      const size_t   bytesize = other.get_bytespan();
       const size_t   bitshift = other.get_bitshift();
       if (bytesize == 0) // input is empty
          return;
@@ -164,7 +185,7 @@ namespace halo {
             // If the input isn't byte-aligned, then the last byte will be a 
             // partial one.
             //
-            this->write_bits(bitshift, src[bytesize - 1]);
+            this->write_bits(bitshift, src[bytesize - 1] >> (8 - bitshift));
          }
          return;
       }
@@ -172,12 +193,12 @@ namespace halo {
       // We're not byte-aligned, though the input may be.
       //
       if (copy) { // can be zero if the data spans more than 0 bytes but less than 1 byte (bytesize == 1; bitshift != 0; copy = bytesize - 1)
-         for (size_t i = 0; i < copy - 1; ++i) {
+         for (size_t i = 0; i < copy; ++i) {
             this->write_bits(8, src[i]);
          }
       }
       if (bitshift) {
-         this->write_bits(bitshift, src[bytesize - 1]);
+         this->write_bits(bitshift, src[bytesize - 1] >> (8 - bitshift));
       }
    }
 }
