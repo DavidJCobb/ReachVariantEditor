@@ -82,7 +82,7 @@ namespace halo {
             if constexpr (std::is_same_v<std::decay_t<T>, bool>) {
                this->write_bits<bool>(1, value);
             } else if constexpr (std::is_same_v<std::decay_t<T>, float>) {
-               this->write_bits<uint32_t>(32, std::bit_cast<float>(value));
+               this->write_bits<uint32_t>(32, std::bit_cast<uint32_t, T>(value));
             } else {
                this->write_bits<std::decay_t<T>>(bitcount_of_type<cobb::strip_enum_t<std::decay_t<T>>>, value);
             }

@@ -32,6 +32,7 @@ namespace halo::reach {
       //
       stream.write_bits(count_bitcount, this->map_ids.size());
       for (auto& id : this->map_ids)
-         stream.write(id);
+         stream.write_bits(16, id);
+      this->type.write(stream);
    }
 }

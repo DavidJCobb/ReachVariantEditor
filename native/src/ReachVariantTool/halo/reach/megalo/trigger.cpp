@@ -207,10 +207,10 @@ namespace halo::reach::megalo {
                if (seen.test(index))
                   continue;
                seen.set(index);
-               out.push_back(index);
                if (recursively) {
                   all_triggers[index].extract_nested_trigger_indices(variant, out, seen, recursively);
                }
+               out.push_back(index);
             }
          }
       }

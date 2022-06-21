@@ -189,9 +189,9 @@ namespace halo::reach {
          for (size_t ti = 0; ti < this->script.triggers.size(); ++ti) {
             if (seen_triggers.test(ti))
                continue;
-            indices.push_back(ti);
             seen_triggers.set(ti);
             this->script.triggers[ti].extract_nested_trigger_indices(*this, indices, seen_triggers, true);
+            indices.push_back(ti);
          }
          //
          std::vector<const megalo::condition*> all_conditions;
