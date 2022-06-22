@@ -35,7 +35,7 @@
 #include "../operands/waypoint_icon.h"
 
 namespace halo::reach::megalo {
-   constexpr auto all_actions = std::array{
+   inline constexpr auto all_actions = std::array{
       opcode_function{ // 0
          .name     = "none",
          .operands = {}

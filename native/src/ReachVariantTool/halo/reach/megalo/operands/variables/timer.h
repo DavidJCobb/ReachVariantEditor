@@ -4,7 +4,7 @@
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      constexpr auto timer_registers = make_target_definition_list(
+      inline constexpr auto timer_registers = make_target_definition_list(
          target_metadata{
             .name = "global.timer[i]",
             .type = target_type::variable,

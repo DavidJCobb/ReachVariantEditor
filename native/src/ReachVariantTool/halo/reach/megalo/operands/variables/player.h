@@ -4,7 +4,7 @@
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      constexpr auto player_registers = make_target_definition_list(
+      inline constexpr auto player_registers = make_target_definition_list(
          target_metadata{
             .name = "global.player[i]", // or any top-level value
             .type = target_type::variable,

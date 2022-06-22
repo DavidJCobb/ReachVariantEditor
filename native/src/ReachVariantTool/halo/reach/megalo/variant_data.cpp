@@ -186,13 +186,8 @@ namespace halo::reach {
       {  // Read Megalo code
          std::bitset<megalo::limits::triggers> seen_triggers;
          std::vector<size_t> indices;
-         for (size_t ti = 0; ti < this->script.triggers.size(); ++ti) {
-            if (seen_triggers.test(ti))
-               continue;
-            seen_triggers.set(ti);
-            this->script.triggers[ti].extract_nested_trigger_indices(*this, indices, seen_triggers, true);
-            indices.push_back(ti);
-         }
+         for (const auto& trigger : this->script.triggers)
+            trigger.extract_nested_trigger_indices(*this, indices, seen_triggers, true);
          //
          std::vector<const megalo::condition*> all_conditions;
          std::vector<const megalo::action*>    all_actions;

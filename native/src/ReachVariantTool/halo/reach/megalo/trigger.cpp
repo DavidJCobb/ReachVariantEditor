@@ -15,10 +15,13 @@
 
 namespace halo::reach::megalo {
    namespace {
-      constexpr const auto& call_opcode = [](){
+      // This MUST be a pointer.  If it's a reference, then MSVC incorrectly creates a 
+      // COPY of the call opcode rather than a REFERENCE to the call opcode. Yes, even 
+      // though the opcode lists are inline-constexpr specifically.
+      constexpr const auto* call_opcode = [](){
          for (const auto& item : all_actions) {
             if (cobb::strcmp(item.name, "call") == 0)
-               return item;
+               return &item;
          }
          throw;
       }();
@@ -188,33 +191,34 @@ namespace halo::reach::megalo {
       // limitation of avoiding duplicates in the list, since we allow user-defined functions (i.e. triggers nested 
       // under multiple places).
       //
-      auto& all_triggers  = variant.script.triggers;
-      auto  trigger_count = all_triggers.size();
+      const auto my_index = static_cast<const util::indexed*>(this)->index;
+      if (seen.test(my_index))
+         return;
+      seen.set(my_index);
       //
-      auto& list = this->opcodes;
-      auto  size = list.size();
-      for (size_t i = 0; i < size; i++) {
-         const auto* opcode = list[i].get();
-         const auto* casted = dynamic_cast<const action*>(opcode);
-         if (casted) {
-            if (casted->function == &call_opcode) {
-               const auto* target = dynamic_cast<const operands::trigger*>(casted->operands[0]);
-               assert(target && "Found a Run Nested Trigger action with no argument specifying the trigger?!");
-               //
-               auto index = target->index;
-               assert(index >= 0);
-               assert(index < variant.script.triggers.size());
-               if (seen.test(index))
-                  continue;
-               seen.set(index);
-               if (recursively) {
-                  all_triggers[index].extract_nested_trigger_indices(variant, out, seen, recursively);
-               }
-               out.push_back(index);
-            }
+      const auto& all_triggers = variant.script.triggers;
+      for (const auto& opcode : this->opcodes) {
+         if (opcode->function != call_opcode)
+            continue;
+         assert(dynamic_cast<const action*>(opcode.get()) && "A condition opcode should not be using an action function!");
+         assert(opcode->operands.size() > 0 && "A Run Nested Trigger action should have an operand!");
+         const auto* target = dynamic_cast<const operands::trigger*>(opcode->operands[0]);
+         assert(target && "Found a Run Nested Trigger action with no operand specifying the trigger?!");
+         //
+         const auto index = target->index;
+         assert(index >= 0);
+         assert(index < all_triggers.size());
+         if (recursively) {
+            all_triggers[index].extract_nested_trigger_indices(variant, out, seen, recursively);
+         } else {
+            if (seen.test(index))
+               continue;
+            seen.set(index);
+            out.push_back(index);
          }
       }
-      // Done.
+      //
+      out.push_back(my_index);
    }
 
    void trigger::flatten_opcodes(std::vector<const condition*>& all_conditions, std::vector<const action*>& all_actions) const {

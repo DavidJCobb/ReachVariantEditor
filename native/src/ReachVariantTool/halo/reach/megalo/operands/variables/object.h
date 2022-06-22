@@ -4,7 +4,7 @@
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      constexpr auto object_registers = make_target_definition_list(
+      inline constexpr auto object_registers = make_target_definition_list(
          target_metadata{
             .name = "global.object[i]", // or any top-level value
             .type = target_type::variable,

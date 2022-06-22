@@ -8,7 +8,7 @@
 
 namespace halo::reach::megalo::operands {
    namespace variables {
-      constexpr auto number_registers = make_target_definition_list(
+      inline constexpr auto number_registers = make_target_definition_list(
          target_metadata{
             .name = "constant",
             .type = target_type::immediate,

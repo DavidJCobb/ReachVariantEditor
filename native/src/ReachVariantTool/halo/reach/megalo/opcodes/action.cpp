@@ -7,13 +7,12 @@
 
 namespace halo::reach::megalo {
    namespace {
-      constexpr auto& function_list = all_actions;
-      constexpr auto  function_index_bitcount = std::bit_width(function_list.size() - 1);
+      inline constexpr auto function_index_bitcount = std::bit_width(all_actions.size() - 1);
    }
 
    void action::read(bitreader& stream) {
       size_t fi = stream.read_bits(function_index_bitcount);
-      if (fi >= function_list.size()) {
+      if (fi >= all_actions.size()) {
          stream.throw_fatal_at<load_process_messages::megalo::opcode_bad_function_index>(
             {
                .opcode_type = opcode_type::action,
@@ -23,7 +22,7 @@ namespace halo::reach::megalo {
          );
          return;
       }
-      this->function = &function_list[fi];
+      this->function = &all_actions[fi];
       if (fi == 0) { // "none" opcode
          return;
       }
@@ -42,8 +41,8 @@ namespace halo::reach::megalo {
    }
    void action::write(bitwriter& stream) const {
       size_t fi = 0;
-      for (size_t i = 0; i < function_list.size(); ++i) {
-         if (this->function == &function_list[i]) {
+      for (size_t i = 0; i < all_actions.size(); ++i) {
+         if (this->function == &all_actions[i]) {
             fi = i;
             break;
          }

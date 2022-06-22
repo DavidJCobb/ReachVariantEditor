@@ -15,7 +15,7 @@
 #include "../operands/variables/timer.h"
 
 namespace halo::reach::megalo {
-   constexpr auto all_conditions = std::array{
+   inline constexpr auto all_conditions = std::array{
       opcode_function{ // 0
          .name     = "none",
          .operands = {}
