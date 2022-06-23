@@ -3,12 +3,13 @@
 #include <type_traits>
 
 namespace cobb {
-   constexpr void memcpy(void* dst, const void* src, size_t size) {
+   template<typename D, typename S> requires (sizeof(D) == 1 && sizeof(S) == 1)
+   constexpr void memcpy(D* dst, const S* src, size_t size) {
       if (std::is_constant_evaluated()) {
-         auto* dc = (uint8_t*)dst;
-         auto* sc = (uint8_t*)src;
+         auto* dc = dst;
+         auto* sc = src;
          for (size_t i = 0; i < size; ++i)
-            dc[i] = sc[i];
+            dc[i] = std::bit_cast<D>(sc[i]);
       } else {
          ::memcpy(dst, src, size);
       }

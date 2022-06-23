@@ -1,9 +1,11 @@
 #include "hash.h"
 #include "helpers/hashing/sha1.h"
+#include "helpers/byteswap.h"
 #include "halo/reach/bytestreams.h"
 
 namespace {
-   constexpr bool use_salt = true;
+   constexpr bool use_length = true;
+   constexpr bool use_salt   = true;
 }
 
 namespace halo::reach {
@@ -23,11 +25,35 @@ namespace halo::reach {
    }
 
    void file_hash::calculate(const uint8_t* buffer, size_t bitcount) {
+      this->hashed_size = (bitcount / 8) + (bitcount % 8 ? 1 : 0);
+      //
       std::array<uint32_t, 5> hash;
-      if constexpr (use_salt) {
-         hash = cobb::hashing::sha1_with_prepended_salt(salt, buffer, bitcount);
+      if constexpr (use_length) {
+         size_t bytecount = this->hashed_size;
+         //
+         cobb::hashing::byte_iterative_sha1 hasher;
+         if constexpr (use_salt) {
+            hasher.accumulate(salt.data(), salt.size());
+         }
+         {
+            uint32_t dword = (uint32_t)bytecount;
+            if constexpr (std::endian::native != std::endian::big)
+               dword = cobb::byteswap(dword);
+
+            std::array<uint8_t, 4> count;
+            *(uint32_t*)(count.data()) = dword;
+            hasher.accumulate(count.data(), count.size());
+         }
+         hasher.accumulate(buffer, bytecount);
+         hasher.finalize();
+         //
+         hash = hasher.state;
       } else {
-         hash = cobb::hashing::sha1(buffer, bitcount);
+         if constexpr (use_salt) {
+            hash = cobb::hashing::sha1_with_prepended_salt(salt, buffer, bitcount);
+         } else {
+            hash = cobb::hashing::sha1(buffer, bitcount);
+         }
       }
       for (int i = 0; i < hash.size(); ++i) {
          auto chunk = hash[i];

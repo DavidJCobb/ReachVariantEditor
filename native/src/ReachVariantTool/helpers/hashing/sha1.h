@@ -186,44 +186,89 @@ namespace cobb::hashing {
 
    // Only supports whole bytes, not bits
    struct byte_iterative_sha1 {
+      public:
+         static constexpr size_t bits_per_chunk  = 512;
+         static constexpr size_t bytes_per_chunk = bits_per_chunk / 8;
+
       protected:
-         std::array<uint8_t, 512> stored = {};
+         std::array<uint8_t, bytes_per_chunk> stored = {};
          size_t chunk_size = 0; // bytes
          size_t total_bits = 0; // bits
 
       public:
          std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
 
-         constexpr void accumulate(const uint8_t* data, const size_t bytecount) {
+         template<typename Byte> requires (sizeof(Byte) == 1)
+         constexpr void accumulate(const Byte* data, const size_t bytecount) {
             this->total_bits += bytecount * 8;
             //
-            if (bytecount + this->chunk_size <= 512) {
+            size_t pending_bytes = (bytecount + this->chunk_size);
+            if (pending_bytes <= bytes_per_chunk) {
+               //
+               // The added input won't pass the current chunk's end, though we may 
+               // reach the end and fill the chunk.
+               //
                cobb::memcpy(this->stored.data() + this->chunk_size, data, bytecount);
                this->chunk_size += bytecount;
-               if (this->chunk_size == 512) {
+               //
+               if (this->chunk_size == bytes_per_chunk) {
+                  //
+                  // Chunk filled. Hash it!
+                  //
                   impl::sha1::process_block(this->state, this->stored.data());
                   this->chunk_size = 0;
                }
                return;
             } else {
-               size_t diff = bytecount + this->chunk_size - 512;
-               cobb::memcpy(this->stored.data() + this->chunk_size, data, diff);
-               data += diff;
                //
+               // The added input will bring us past a chunk boundary.
+               //
+               size_t remaining = bytes_per_chunk - this->chunk_size;
+               cobb::memcpy(this->stored.data() + this->chunk_size, data, remaining);
+               pending_bytes -= remaining;
+               data          += remaining;
                impl::sha1::process_block(this->state, this->stored.data());
+               //
+               while (pending_bytes > bytes_per_chunk) {
+                  cobb::memcpy(this->stored.data(), data, bytes_per_chunk);
+                  pending_bytes -= bytes_per_chunk;
+                  data          += bytes_per_chunk;
+                  impl::sha1::process_block(this->state, this->stored.data());
+               }
+               //
                this->chunk_size = 0;
                return;
             }
          }
          constexpr void finalize() {
             this->stored[this->chunk_size] = 0x80; // append a set bit
-            cobb::memset(this->stored.data() + this->chunk_size + 1, 0, 512 - this->chunk_size - 1);
+            cobb::memset(this->stored.data() + this->chunk_size + 1, 0, bytes_per_chunk - this->chunk_size - 1);
+            if (this->chunk_size + 1 == bytes_per_chunk) {
+               impl::sha1::process_block(state, this->stored.data());
+               this->chunk_size = 0;
+               cobb::memset(this->stored.data(), 0, bytes_per_chunk);
+            }
             //
-            auto* dst = (uint64_t*)(this->stored.data() + this->stored.size() - sizeof(uint64_t));
-            if constexpr (std::endian::native == std::endian::big) {
-               *dst = this->total_bits;
+            if (std::is_constant_evaluated()) {
+               uint64_t to_serialize = this->total_bits;
+               if constexpr (std::endian::native == std::endian::big)
+                  to_serialize = cobb::byteswap(to_serialize);
+               //
+               for (size_t j = 0; j < sizeof(to_serialize); ++j) {
+                  auto& dst = this->stored[this->stored.size() - sizeof(to_serialize) + j];
+                  //
+                  auto shifted = to_serialize >> (decltype(to_serialize)(0x08) * (sizeof(to_serialize) - j - 1));
+                  shifted &= 0xFF;
+                  //
+                  dst = (uint8_t)(shifted);
+               }
             } else {
-               *dst = cobb::byteswap<uint64_t>(this->total_bits);
+               auto* dst = (uint64_t*)(this->stored.data() + this->stored.size() - sizeof(uint64_t));
+               if constexpr (std::endian::native == std::endian::big) {
+                  *dst = this->total_bits;
+               } else {
+                  *dst = cobb::byteswap<uint64_t>(this->total_bits);
+               }
             }
             impl::sha1::process_block(state, this->stored.data());
          }

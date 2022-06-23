@@ -273,6 +273,7 @@
     <ClCompile Include="halo\reach\ugc_header.cpp" />
     <ClCompile Include="halo\util\stream_position.cpp" />
     <ClCompile Include="helpers\cpuinfo.cpp" />
+    <ClCompile Include="helpers\hashing\sha1.cpp" />
     <ClCompile Include="helpers\qt\four_cc_to_string.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test_constraints.cpp" />
