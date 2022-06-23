@@ -9,7 +9,27 @@
 
 namespace cobb::hashing {
    namespace impl::sha1 {
-      constexpr void process_block(std::array<uint32_t, 5>& state, const uint8_t* data) {
+      constexpr size_t bits_per_chunk  = 512;
+      constexpr size_t bytes_per_chunk = bits_per_chunk / 8;
+
+      constexpr std::array<uint32_t, 5> initial_state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+
+      template<typename T> concept byte_type = requires {
+         requires sizeof(T) == 1;
+      };
+
+      template<byte_type Byte>
+      constexpr uint32_t _extract_dword(const Byte* data, size_t offset) {
+         uint32_t result = 0;
+         result |= (uint32_t)std::bit_cast<uint8_t>(data[offset + 0]) << 0x18;
+         result |= (uint32_t)std::bit_cast<uint8_t>(data[offset + 1]) << 0x10;
+         result |= (uint32_t)std::bit_cast<uint8_t>(data[offset + 2]) << 0x08;
+         result |= (uint32_t)std::bit_cast<uint8_t>(data[offset + 3]);
+         return result;
+      }
+
+      template<byte_type Byte>
+      constexpr void process_block(std::array<uint32_t, 5>& state, const Byte* data) {
          auto a = state[0];
          auto b = state[1];
          auto c = state[2];
@@ -18,7 +38,7 @@ namespace cobb::hashing {
 
          std::array<uint32_t, 80> words = {};
          for (size_t i = 0; i < 16; ++i) {
-            words[i] = ((uint32_t)data[i * 4] << 0x18) | ((uint32_t)data[i * 4 + 1] << 0x10) | ((uint32_t)data[i * 4 + 2] << 0x08) | (uint32_t)data[i * 4 + 3];
+            words[i] = _extract_dword(data, i * 4);
          }
          for (size_t i = 16; i < 80; ++i) {
             words[i] = std::rotl(words[i - 3] ^ words[i - 8] ^ words[i - 14] ^ words[i - 16], 1);
@@ -62,46 +82,65 @@ namespace cobb::hashing {
          state[3] += d;
          state[4] += e;
       }
-   }
 
-   constexpr std::array<uint32_t, 5> sha1(const uint8_t* data, const size_t message_bitcount) {
-      std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+      constexpr void append_length(std::array<uint8_t, bytes_per_chunk>& chunk, size_t bitcount) {
+         if (std::is_constant_evaluated()) {
+            uint64_t to_serialize = bitcount;
+            if constexpr (std::endian::native == std::endian::big)
+               to_serialize = cobb::byteswap(to_serialize);
+            //
+            for (size_t j = 0; j < sizeof(to_serialize); ++j) {
+               auto& dst = chunk[chunk.size() - sizeof(to_serialize) + j];
+               //
+               auto shifted = to_serialize >> (decltype(to_serialize)(0x08) * (sizeof(to_serialize) - j - 1));
+               shifted &= 0xFF;
+               //
+               dst = (uint8_t)(shifted);
+            }
+         } else {
+            auto* dst = (uint64_t*)(chunk.data() + chunk.size() - sizeof(uint64_t));
+            if constexpr (std::endian::native == std::endian::big) {
+               *dst = bitcount;
+            } else {
+               *dst = cobb::byteswap<uint64_t>(bitcount);
+            }
+         }
+      }
+   }
+   
+   template<impl::sha1::byte_type Byte>
+   constexpr std::array<uint32_t, 5> sha1(const Byte* data, const size_t message_bitcount) {
+      constexpr size_t bits_per_chunk  = impl::sha1::bits_per_chunk;
+      constexpr size_t bytes_per_chunk = impl::sha1::bytes_per_chunk;
+
+      std::array<uint32_t, 5> state = impl::sha1::initial_state;
 
       auto bitcount = message_bitcount;
 
       // If the message is longer than 512 bits, process 512-bit chunks now.
-      while (bitcount >= 512) {
+      while (bitcount >= bits_per_chunk) {
          impl::sha1::process_block(state, data);
-         data += (512 / 8);
-         bitcount -= 512;
+         data     += bytes_per_chunk;
+         bitcount -= bits_per_chunk;
       }
 
       // Next, we have to account for a partial final chunk.
-      std::array<uint8_t, 512 / 8> working = {};
+      std::array<uint8_t, bytes_per_chunk> working = {};
       {
          auto bytecount = bitcount / 8 + (bitcount % 8 ? 1 : 0);
-         if (std::is_constant_evaluated()) {
-            for (size_t i = 0; i < bytecount; ++i)
-               working[i] = data[i];
-         } else {
-            memcpy(working.data(), data, bytecount);
-         }
+         cobb::memcpy(working.data(), data, bytecount);
+         //cobb::memset(working.data() + bytecount, 0, working.size() - bytecount); // unneeded; std::array of integers should zero-initialize when set to {}
          //
          auto& last = working[bytecount];
          if (auto shift = bitcount % 8) {
-            last = data[bitcount / 8];
+            last = std::bit_cast<uint8_t>(data[bitcount / 8]);
             last &= (0xFF << shift); // keep MSBs; ditch LSBs
             last |= (1 << (shift - 1)); // append a set bit
          } else {
             last = 0x80; // append a set bit
          }
          //
-         auto* dst = (uint64_t*)(working.data() + (512 / 8) - sizeof(uint64_t));
-         if constexpr (std::endian::native == std::endian::big) {
-            *dst = message_bitcount;
-         } else {
-            *dst = cobb::byteswap<uint64_t>(message_bitcount);
-         }
+         impl::sha1::append_length(working, message_bitcount);
       }
       impl::sha1::process_block(state, working.data());
 
@@ -110,10 +149,10 @@ namespace cobb::hashing {
    
    template<size_t SaltBytecount>
    constexpr std::array<uint32_t, 5> sha1_with_prepended_salt(const std::array<uint8_t, SaltBytecount>& salt, const uint8_t* data, const size_t message_bitcount) {
-      constexpr size_t bits_per_chunk  = 512;
-      constexpr size_t bytes_per_chunk = bits_per_chunk / 8;
+      constexpr size_t bits_per_chunk  = impl::sha1::bits_per_chunk;
+      constexpr size_t bytes_per_chunk = impl::sha1::bytes_per_chunk;
 
-      std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+      std::array<uint32_t, 5> state = impl::sha1::initial_state;
       std::array<uint8_t, bytes_per_chunk> working = {};
 
       size_t salt_pos = 0; // bytes
@@ -170,15 +209,7 @@ namespace cobb::hashing {
          last = 0x80; // append a set bit
       }
       //
-      auto* dst = (uint64_t*)(working.data() + bytes_per_chunk - sizeof(uint64_t));
-      {
-         uint64_t used_bitcount = message_bitcount + (salt.size() * 8);
-         if constexpr (std::endian::native == std::endian::big) {
-            *dst = used_bitcount;
-         } else {
-            *dst = cobb::byteswap<uint64_t>(used_bitcount);
-         }
-      }
+      impl::sha1::append_length(working, message_bitcount + (salt.size() * 8));
       impl::sha1::process_block(state, working.data());
 
       return state;
@@ -187,8 +218,8 @@ namespace cobb::hashing {
    // Only supports whole bytes, not bits
    struct byte_iterative_sha1 {
       public:
-         static constexpr size_t bits_per_chunk  = 512;
-         static constexpr size_t bytes_per_chunk = bits_per_chunk / 8;
+         static constexpr size_t bits_per_chunk  = impl::sha1::bits_per_chunk;
+         static constexpr size_t bytes_per_chunk = impl::sha1::bytes_per_chunk;
 
       protected:
          std::array<uint8_t, bytes_per_chunk> stored = {};
@@ -196,80 +227,70 @@ namespace cobb::hashing {
          size_t total_bits = 0; // bits
 
       public:
-         std::array<uint32_t, 5> state = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+         std::array<uint32_t, 5> state = impl::sha1::initial_state;
 
-         template<typename Byte> requires (sizeof(Byte) == 1)
+         template<impl::sha1::byte_type Byte>
          constexpr void accumulate(const Byte* data, const size_t bytecount) {
             this->total_bits += bytecount * 8;
             //
-            size_t pending_bytes = (bytecount + this->chunk_size);
-            if (pending_bytes <= bytes_per_chunk) {
-               //
-               // The added input won't pass the current chunk's end, though we may 
-               // reach the end and fill the chunk.
-               //
-               cobb::memcpy(this->stored.data() + this->chunk_size, data, bytecount);
-               this->chunk_size += bytecount;
-               //
-               if (this->chunk_size == bytes_per_chunk) {
-                  //
-                  // Chunk filled. Hash it!
-                  //
-                  impl::sha1::process_block(this->state, this->stored.data());
-                  this->chunk_size = 0;
-               }
-               return;
-            } else {
+            size_t pending_bytes = bytecount;
+            if (pending_bytes + this->chunk_size > bytes_per_chunk) {
                //
                // The added input will bring us past a chunk boundary.
                //
-               size_t remaining = bytes_per_chunk - this->chunk_size;
-               cobb::memcpy(this->stored.data() + this->chunk_size, data, remaining);
-               pending_bytes -= remaining;
-               data          += remaining;
-               impl::sha1::process_block(this->state, this->stored.data());
+               {
+                  size_t remaining = bytes_per_chunk - this->chunk_size;
+                  cobb::memcpy(this->stored.data() + this->chunk_size, data, remaining);
+                  impl::sha1::process_block(this->state, this->stored.data());
+                  data          += remaining;
+                  pending_bytes -= remaining;
+               }
+               //
+               // The above code should mirror the below loop. The only difference 
+               // between them is that after the first iteration, all chunks except 
+               // the last will be whole chunks; remaining is always bytes_per_chunk.
                //
                while (pending_bytes > bytes_per_chunk) {
-                  cobb::memcpy(this->stored.data(), data, bytes_per_chunk);
-                  pending_bytes -= bytes_per_chunk;
+                  impl::sha1::process_block(this->state, data);
                   data          += bytes_per_chunk;
-                  impl::sha1::process_block(this->state, this->stored.data());
+                  pending_bytes -= bytes_per_chunk;
                }
                //
                this->chunk_size = 0;
-               return;
+               //
+               // Fall through and handle any partial chunks.
             }
+            //
+            // The (remaining) input won't pass the current chunk's end, though we may 
+            // reach the end and fill the chunk.
+            //
+            cobb::memcpy(this->stored.data() + this->chunk_size, data, pending_bytes);
+            this->chunk_size += pending_bytes;
+            //
+            if (this->chunk_size == bytes_per_chunk) {
+               //
+               // Chunk filled. Hash it!
+               //
+               impl::sha1::process_block(this->state, this->stored.data());
+               this->chunk_size = 0;
+            }
+            // Done!
          }
+
          constexpr void finalize() {
             this->stored[this->chunk_size] = 0x80; // append a set bit
             cobb::memset(this->stored.data() + this->chunk_size + 1, 0, bytes_per_chunk - this->chunk_size - 1);
-            if (this->chunk_size + 1 == bytes_per_chunk) {
+            if (this->chunk_size + 1 + sizeof(uint64_t) > bytes_per_chunk) {
+               //
+               // If the appended content (sentinel bit, padding bits, and length) reaches 
+               // across chunk boundaries, then handle the new chunk.
+               //
                impl::sha1::process_block(state, this->stored.data());
                this->chunk_size = 0;
                cobb::memset(this->stored.data(), 0, bytes_per_chunk);
             }
             //
-            if (std::is_constant_evaluated()) {
-               uint64_t to_serialize = this->total_bits;
-               if constexpr (std::endian::native == std::endian::big)
-                  to_serialize = cobb::byteswap(to_serialize);
-               //
-               for (size_t j = 0; j < sizeof(to_serialize); ++j) {
-                  auto& dst = this->stored[this->stored.size() - sizeof(to_serialize) + j];
-                  //
-                  auto shifted = to_serialize >> (decltype(to_serialize)(0x08) * (sizeof(to_serialize) - j - 1));
-                  shifted &= 0xFF;
-                  //
-                  dst = (uint8_t)(shifted);
-               }
-            } else {
-               auto* dst = (uint64_t*)(this->stored.data() + this->stored.size() - sizeof(uint64_t));
-               if constexpr (std::endian::native == std::endian::big) {
-                  *dst = this->total_bits;
-               } else {
-                  *dst = cobb::byteswap<uint64_t>(this->total_bits);
-               }
-            }
+            impl::sha1::append_length(this->stored, this->total_bits);
             impl::sha1::process_block(state, this->stored.data());
          }
    };
