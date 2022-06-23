@@ -57,12 +57,11 @@ namespace halo::reach::megalo::operands {
          >;
 
          using index_type = bitnumber<
-            std::bit_width(limits::variant_strings),
+            std::bit_width(limits::variant_strings - 1),
             value_type,
             bitnumber_params<value_type>{
-               .initial  = -1,
-               .offset   = 1,
-               .presence = false, // absence bit
+               .initial = -1,
+               .offset  = 1,
             }
          >;
 

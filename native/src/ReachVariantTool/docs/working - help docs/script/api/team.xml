@@ -37,13 +37,15 @@
                <p>
                   This function checks a team's alliance status toward another team.
                </p>
+               <p>
+                  If either of the two teams are <code>neutral_team</code>, then the alliance 
+                  status is <code>neutral</code>. If either of the two teams are <code>no_team</code>, 
+                  then the alliance status is <code>enemy</code>. Otherwise, the alliance status 
+                  is <code>friendly</code> if both teams are the same team, or <code>enemy</code> 
+                  otherwise. This is a hardcoded check; there is no way to modify the alliance 
+                  status of any two teams.
+               </p>
             </description>
-            <note>
-               During the <i>Halo: Reach</i> beta, Invasion apparently implemented fireteams as 
-               separate teams: instead of having two teams invisibly divided into three pairs 
-               of two players, the game had six teams, and the teams' alliance statuses were 
-               altered to ally them with each other.
-            </note>
          </method>
          <method name="has_any_players" id="7">
             <blurb>Check whether a team still has players on it.</blurb>

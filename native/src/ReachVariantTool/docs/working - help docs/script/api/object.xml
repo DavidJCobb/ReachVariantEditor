@@ -553,7 +553,9 @@
          <method name="set_invincibility" id="24">
             <args>
                <arg name="state" type="number">
-                  If this value is non-zero, the object is made invincible.
+                  If this value is -1, then no change is made to the object. Otherwise, the 
+                  object is made invincible if this value is non-zero, or made normally 
+                  vulnerable otherwise.
                </arg>
             </args>
             <blurb>Make an object invincible.</blurb>
@@ -715,7 +717,7 @@
                   Bipeds in an attached vehicle will lose most animations. Passengers' 
                   hands may move slightly (and incorrectly) while reloading their weapon; 
                   though they have no reloading or weapon swap animations, appropriate 
-                  sounds still play, and they cannot fire their animations while the 
+                  sounds still play, and they cannot fire their weapons while the 
                   animations would be taking place. Some animations have player model 
                   jiggle physics; these jiggle physics remain functional even though 
                   the rest of the animation does not. <!-- i swear to god i'm not making 
@@ -724,7 +726,7 @@
                <p>
                   If a Banshee is performing an evasive maneuver at the moment it is 
                   attached, the maneuver will end instantly; no such maneuvers can be 
-                  performed once the vehicle is attached.
+                  performed while the vehicle is attached.
                </p>
             </note>
             <note>
@@ -833,7 +835,10 @@
             <description>
                <p>
                   This function detaches an object from anything it has been attached 
-                  to &mdash; even if that attachment wasn't set up by script.
+                  to &mdash; even if that attachment wasn't set up by script. Detachment 
+                  is one-way; if A is attached to B and B is attached to C, then calling 
+                  this function on B will break B's attachment to C, but not A's attachment 
+                  to B.
                </p>
             </description>
             <example>
@@ -1002,6 +1007,7 @@
             <note>
                The text will be truncated to about 15 characters.
             </note>
+            <category id="object-waypoint" />
          </method>
          <method name="get_distance_to" id="66" returns="number">
             <args>
@@ -1013,7 +1019,11 @@
                   This function returns the distance between the context object and 
                   the object supplied as an argument. The distance is measured in 
                   tenths of Forge units, i.e. a value of 10 represents 1.0 units in 
-                  Forge.
+                  Forge. The distance is rounded to the nearest integer.
+               </p>
+               <p>
+                  If either object is <code>no_object</code>, then the value returned 
+                  is 0.
                </p>
             </description>
             <example>
@@ -1031,6 +1041,10 @@
                <arg name="power" type="number" />
             </args>
             <blurb>Sets the current power level of a device machine.</blurb>
+            <p>
+               Sets the current power level of a device machine. The value you pass 
+               in will be clamped to the range [0, 100].
+            </p>
             <example>
                current_object.set_device_power(100)
             </example>
@@ -1047,14 +1061,18 @@
             <args>
                <arg name="position" type="number" />
             </args>
-            <blurb>Sets the current position level of a device machine.</blurb>
+            <blurb>Sets the current position of a device machine.</blurb>
+            <description>
+               Sets the current position of a device machine. The value you pass
+               in will be clamped to the range [0, 100].
+            </description>
             <example>
                current_object.set_device_position(100)
             </example>
             <category id="device-machines" />
          </method>
          <method name="get_device_position" id="73" returns="number">
-            <blurb>Gets the current position level of a device machine.</blurb>
+            <blurb>Gets the current position of a device machine.</blurb>
             <example>
                global.number[0] = current_object.get_device_position()
             </example>
@@ -1170,8 +1188,10 @@
                   The other object to use as a basis.
                </arg>
                <arg name="type"  type="object-type" />
-               <arg name="radius" type="number">Unknown. Testing has not revealed any 
-               obvious effect. A value of 0 seems safe.</arg>
+               <arg name="radius" type="number">
+                  A distance value; how it's used is unknown. Testing has not revealed any obvious 
+                  effect. A value of 0 seems safe.
+            </arg>
             </args>
             <blurb>Spawn a new object between this object and another.</blurb>
             <example>
@@ -1186,7 +1206,9 @@
                If the same object is used as both basis objects &mdash; that is, if the object 
                that you call this function on is the same object that you pass as an argument 
                &mdash; then the created object will be rotated. Its rotation will be equivalent 
-               to -90 pitch, 0 yaw, and 180 roll as shown in Forge.
+               to -90 pitch, 0 yaw, and 180 roll as shown in Forge. Another way to describe this 
+               rotation is that the created object's local-forward will match world-up, and the 
+               created object's local-up will match world-forward.
             </note>
             <category id="object-lifetime" />
          </method>
@@ -1248,7 +1270,7 @@
                </p>
             </description>
             <example>
-               global.object[0].copy_rotation_from(global.object[1], true)
+               global.object[0].face_toward(global.object[1], 0, 0, 0)
             </example>
             <note>
                <p>
@@ -1425,8 +1447,21 @@
          <blurb>The object's current shields.</blurb>
          <description>
             <p>
-               This accessor holds the object's current shields. A value of 100 
+               This accessor holds the object's current shields. A value of 100
                represents 100% shields.
+            </p>
+            <p>
+               When reading this property, its value is capped to 400, so if an 
+               object has more than 400% shields, you will not be able to read 
+               its true shields value. Additionally, <code>no_object.shields</code> 
+               has no defined value. If you attempt to store the shields property 
+               of an object variable that refers to no object, the number variable 
+               you use to hold the result will not actually be modified.
+            </p>
+            <p>
+               When writing to this property, the value you supply is clamped 
+               to the range [0, 400]. Additionally, writes to a dead object's 
+               shield value will not have any effect.
             </p>
          </description>
          <example>
@@ -1443,8 +1478,22 @@
          <blurb>The object's current health.</blurb>
          <description>
             <p>
-               This accessor holds the object's current health. A value of 100 
+               This accessor holds the object's current health. A value of 100
                represents 100% health.
+            </p>
+            <p>
+               When reading this property, its value is capped to 100, so if an
+               object has more than 100% health, you will not be able to read
+               its true health value. Objects that aren't dead will never report 
+               a health value below 1. Additionally, <code>no_object.health</code>
+               has no defined value. If you attempt to store the health property
+               of an object variable that refers to no object, the number variable
+               you use to hold the result will not actually be modified.
+            </p>
+            <p>
+               When writing to this property, the value you supply is clamped
+               to the range [0, 100]. Additionally, writes to a dead object's
+               health value will not have any effect.
             </p>
          </description>
          <example>
@@ -1475,7 +1524,12 @@
          <blurb>The object's maximum health.</blurb>
          <description>
             <p>
-               This accessor can be used to set an object's maximum health.
+               This accessor can be used to set an object's maximum health. 
+               Objects' maximum health is clamped to a minimum of 0.
+            </p>
+            <p>
+               An attempt to modify the maximum health of a dead object will 
+               have no effect.
             </p>
          </description>
          <example>
@@ -1483,6 +1537,15 @@
                current_player.biped.max_health = 50
             end
          </example>
+         <note>
+            Setting the maximum health of a player's biped to zero will make 
+            the biped invulnerable, and will prevent soft boundaries from 
+            affecting it. However, Spartan and Elite bipeds will also lose 
+            the ability to look around: the player can turn their camera, but 
+            if they fire their weapon, it will always fire from whatever 
+            direction they were looking in at the time their maximum health 
+            was set to zero.
+         </note>
          <category id="object-stats" />
       </accessor>
    </accessors>

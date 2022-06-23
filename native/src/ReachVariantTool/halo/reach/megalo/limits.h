@@ -12,7 +12,6 @@ namespace halo::reach::megalo::limits {
    constexpr size_t script_stats    = 4;
    constexpr size_t script_traits   = 16;
    constexpr size_t script_widgets  = 4;
-   constexpr size_t string_ids      = 256;
    constexpr size_t triggers        = 320;
-   constexpr size_t variant_strings = 112;
+   constexpr size_t variant_strings = 256; // as in, object variants, not game variants
 }

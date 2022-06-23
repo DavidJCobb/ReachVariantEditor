@@ -127,7 +127,7 @@ namespace halo::reach::megalo {
          }
       },
       opcode_function{ // 6
-         .name     = "set_waypoint_icon",
+         .name     = "set_waypoint_priority",
          .operands = {
             opcode_function::operand_info{
                .typeinfo = operands::variables::object::typeinfo,

@@ -88,10 +88,22 @@
             <dd>Scales the player's Jump Height. The "Unchanged" value is "below" zero.</dd>
          <dt>Player Gravity</dt>
             <dd>Scales the player's gravity.</dd>
-         <dt>Unknown</dt>
-            <dd>Community reverse-engineering efforts identify this as enabling or 
-            disabling the ability to double-jump, but testing fails to produce the 
-            expected result.</dd>
+         <dt>Double Jump</dt>
+            <dd>
+               <p>
+                  This setting would ordinarily control whether players can double jump and 
+                  triple jump. However, settings in the map files prevent this from working: 
+                  among other things, the vertical speed for double jumps is set to zero.
+               </p>
+               <p>
+                  This setting would be functional when playing on a modded map, where 
+                  the <code>matg/globals</code> tag has been modified to supply different
+                  values for the double-jump settings under the "Player Control" section.
+                  However, even then, community testing establishes that the double-jump
+                  mechanics are strange: double jumping only works while you have enough
+                  upward velocity.
+               </p>
+            </dd>
          <dt>Vehicle Use</dt>
             <dd>Controls whether the player can enter vehicles, and which seats they 
             can enter.</dd>

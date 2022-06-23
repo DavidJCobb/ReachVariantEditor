@@ -390,6 +390,10 @@
          </method>
          <method name="set_req_purchase_modes" id="39">
             <args>
+               <arg name="enable" tyoe="number">
+                  If this value is 0, the purchase modes are disabled; otherwise, they are 
+                  enabled.
+               </arg>
                <arg name="modes">
                   <p>The word <var>none</var>, or one or more of the following flags 
                   separated with the <code>|</code> symbol:</p>
@@ -470,7 +474,10 @@
          </method>
          <method name="force_into_vehicle" id="41">
             <args>
-               <arg name="vehicle" type="object">The vehicle to force the player into.</arg>
+               <arg name="vehicle" type="object">
+                  The vehicle to force the player into. If this is <code>no_object</code>, then 
+                  the player is instead forcibly removed from any vehicle they are currently in.
+               </arg>
             </args>
             <blurb>Force a player into a vehicle if any seat is available.</blurb>
             <example>
@@ -1023,7 +1030,10 @@
          </method>
          <method name="record_griefer_penalty" id="97">
             <args>
-               <arg name="unknown"  type="number" />
+               <arg name="unknown" type="number">
+                  The meaning of this value is unknown. Reverse-engineering suggests that
+                  it's a percentage in the range [0, 100].
+               </arg>
             </args>
             <blurb>The specific function of this action is not known. Presumably it has something 
             to do with keeping track of bad behavior in-game.</blurb>

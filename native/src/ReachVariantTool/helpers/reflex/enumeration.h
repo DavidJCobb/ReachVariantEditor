@@ -150,8 +150,7 @@ namespace cobb::reflex {
             return &all_metadata[i];
          }
 
-         constexpr bool operator==(const enumeration&) const = default;
-         constexpr bool operator!=(const enumeration&) const = default;
+         constexpr bool operator==(const enumeration&) const = default; // in C++20, implicitly defines != as well
          template<typename V> requires has_subset<V> constexpr bool operator==(const V& v) const {
             return *this == enumeration(v);
          }

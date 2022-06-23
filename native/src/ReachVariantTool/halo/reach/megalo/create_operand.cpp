@@ -44,7 +44,7 @@ namespace halo::reach::megalo {
 
    extern operand* create_operand(const operand_typeinfo& info) {
       for (auto& item : operand_type_table) {
-         if (item.typeinfo == info)
+         if (&item.typeinfo == &info)
             return (item.spawn)();
       }
       return nullptr;

@@ -15,13 +15,10 @@
 
 namespace halo::reach::megalo {
    namespace {
-      // This MUST be a pointer.  If it's a reference, then MSVC incorrectly creates a 
-      // COPY of the call opcode rather than a REFERENCE to the call opcode. Yes, even 
-      // though the opcode lists are inline-constexpr specifically.
-      constexpr const auto* call_opcode = [](){
+      constexpr const auto& call_opcode = []() -> auto& { // trailing return type required to avoid unexpected compile-time copy
          for (const auto& item : all_actions) {
             if (cobb::strcmp(item.name, "call") == 0)
-               return &item;
+               return item;
          }
          throw;
       }();
@@ -198,7 +195,7 @@ namespace halo::reach::megalo {
       //
       const auto& all_triggers = variant.script.triggers;
       for (const auto& opcode : this->opcodes) {
-         if (opcode->function != call_opcode)
+         if (opcode->function != &call_opcode)
             continue;
          assert(dynamic_cast<const action*>(opcode.get()) && "A condition opcode should not be using an action function!");
          assert(opcode->operands.size() > 0 && "A Run Nested Trigger action should have an operand!");
