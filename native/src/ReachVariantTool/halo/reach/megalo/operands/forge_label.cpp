@@ -35,7 +35,5 @@ namespace halo::reach::megalo::operands {
       if (this->value)
          index = this->value->index;
       stream.write(index);
-      if (this->value)
-         this->value->write(stream);
    }
 }

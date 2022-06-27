@@ -130,15 +130,15 @@ namespace halo::reach {
                   switch (this->type) {
                      case game_variant_type::multiplayer:
                      case game_variant_type::forge:
-                        #if !_DEBUG
+                        this->data = new megalo_variant_data();
+                        if (this->type == game_variant_type::forge) {
                            //
                            // In the vanilla game, Forge variants are a subclass of Megalo variants; however, 
                            // we want to be able to easily switch a variant between the two types. There's 
                            // very little Forge-unique data, so we may as well use a single class for both.
                            //
-                           static_assert(false, "TODO: FINISH ME");
-                        #endif
-                        this->data = new megalo_variant_data();
+                           ((megalo_variant_data*)this->data)->is_forge_variant = true;
+                        }
                         break;
                      case game_variant_type::firefight:
                         this->data = new firefight_variant_data();

@@ -178,8 +178,10 @@ namespace halo {
          // We're byte-aligned, so we can just memcpy most or maybe even all 
          // of the input.
          //
-         if (copy) // can be zero if the data spans more than 0 bytes but less than 1 byte (bytesize == 1; bitshift != 0; copy = bytesize - 1)
+         if (copy) { // can be zero if the data spans more than 0 bytes but less than 1 byte (bytesize == 1; bitshift != 0; copy = bytesize - 1)
             memcpy(this->data() + this->get_bytepos(), src, copy);
+            this->_position.advance_by_bytes(copy);
+         }
          if (bitshift) {
             //
             // If the input isn't byte-aligned, then the last byte will be a 

@@ -10,6 +10,10 @@ namespace halo::loc_string_table_details {
       duplicates, // optimize any identical localizations, even across different strings
    };
 
-   //constexpr optimization_type optimization = optimization_type::duplicates;
-   constexpr optimization_type optimization = optimization_type::bungie; // for testing
+   #if _DEBUG
+      //constexpr optimization_type optimization = optimization_type::duplicates;
+      constexpr optimization_type optimization = optimization_type::bungie; // for testing
+   #else
+      constexpr optimization_type optimization = optimization_type::duplicates;
+   #endif
 }

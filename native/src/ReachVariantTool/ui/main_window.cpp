@@ -28,6 +28,7 @@
 #include "../helpers/qt/tree_widget.h"
 #include "../services/ini.h"
 #include "ui/debug_commands/new_backend_load.h"
+#include "ui/debug_commands/new_backend_resave.h"
 
 #include "options_window.h"
 #include "script_editor.h"
@@ -230,6 +231,11 @@ ReachVariantTool::ReachVariantTool(QWidget *parent) : QMainWindow(parent) {
       if (auto* action = new QAction(this)) {
          action->setText("Test new loader");
          QObject::connect(action, &QAction::triggered, this, [this]() { rvt::debug_commands::new_backend_load(this); });
+         this->ui.menuTools->addAction(action);
+      }
+      if (auto* action = new QAction(this)) {
+         action->setText("Test new loader (bulk resave)");
+         QObject::connect(action, &QAction::triggered, this, [this]() { rvt::debug_commands::new_backend_resave(this); });
          this->ui.menuTools->addAction(action);
       }
    #else

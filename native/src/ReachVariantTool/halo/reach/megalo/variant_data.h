@@ -36,6 +36,8 @@ namespace halo::reach {
          // Be aware that members here are not grouped or listed in the order they're read in.
          //
 
+         bool is_forge_variant = false;
+
          struct {
             struct {
                bytenumber<uint32_t> encoding;
@@ -60,7 +62,7 @@ namespace halo::reach {
          //
          struct {
             megalo::string_table strings;
-            megalo::string_ref   generic_name; // more specific than the category name but less specific than the name; could possibly also be a "fallback name"
+            megalo::string_ref_optional generic_name; // more specific than the category name but less specific than the name; could possibly also be a "fallback name"
             
             util::indexed_list<megalo::forge_label,      megalo::limits::forge_labels>   forge_labels;
             util::indexed_list<megalo::game_option,      megalo::limits::script_options> options;

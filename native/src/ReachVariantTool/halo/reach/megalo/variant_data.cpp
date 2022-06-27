@@ -94,10 +94,7 @@ namespace halo::reach {
       if (this->metadata.version.encoding >= 0x6B) {
          stream.read(this->title_update_data.tu1);
       }
-      if (false) {
-         #if !_DEBUG
-            static_assert(false, "TODO: 'is forge' check")
-         #endif
+      if (this->is_forge_variant) {
          stream.read(
             forge_data.flags,
             forge_data.edit_mode_type,
@@ -228,10 +225,7 @@ namespace halo::reach {
       if (this->metadata.version.encoding >= 0x6B) {
          stream.write(this->title_update_data.tu1);
       }
-      if (false) {
-         #if !_DEBUG
-            static_assert(false, "TODO: 'is forge' check")
-         #endif
+      if (this->is_forge_variant) {
          stream.write(
             forge_data.flags,
             forge_data.edit_mode_type,
