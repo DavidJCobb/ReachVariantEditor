@@ -55,10 +55,10 @@ namespace halo {
          inline const uint8_t* data() const noexcept { return this->_buffer; }
          inline uint32_t size() const noexcept { return this->_size; }
 
-         inline uint32_t get_bitpos() const noexcept { return this->_position.in_bits(); }
-         inline uint32_t get_bitshift() const noexcept { return this->_position.bits; }
-         inline uint32_t get_bytepos() const noexcept { return this->_position.bytes; }
-         inline uint32_t get_bytespan() const noexcept { return this->_position.bytespan(); }
+         inline size_t get_bitpos() const noexcept { return this->_position.in_bits(); }
+         inline size_t get_bitshift() const noexcept { return this->_position.bits; }
+         inline size_t get_bytepos() const noexcept { return this->_position.bytes; }
+         inline size_t get_bytespan() const noexcept { return this->_position.bytespan(); }
 
          void enlarge_by(size_t bytes);
          void reserve(size_t bytes);

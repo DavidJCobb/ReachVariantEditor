@@ -81,6 +81,30 @@ namespace cobb::hashing {
             return success;
          }()
       );
+      static_assert( // Long input, iterative
+         []() -> bool {
+            std::string input;
+            input.reserve(1505);
+            for (size_t i = 0; i <= (1500 / 7); ++i)
+               input += "Reach! ";
+            //
+            size_t size_a = input.size() / 5;
+            size_t size_b = input.size() - size_a;
+            //
+            byte_iterative_sha1 hasher;
+            hasher.accumulate(input.data(), size_a);
+            hasher.accumulate(input.data() + size_a, size_b);
+            hasher.finalize();
+
+            auto& hash = hasher.state;
+            bool success = (hash[0] == 0x32574a98);
+            success &= (hash[1] == 0x265fe214);
+            success &= (hash[2] == 0xa4c787fd);
+            success &= (hash[3] == 0x6447f737);
+            success &= (hash[4] == 0x78312e94);
+            return success;
+         }()
+      );
       #pragma endregion
    }
 }

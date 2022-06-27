@@ -257,7 +257,7 @@ namespace halo::reach {
          bitstream.write(*this->data);
          //
          file_hash hash;
-         hash.calculate(bitstream.data(), bitstream.get_bitpos());
+         hash.calculate(bitstream.data(), bitstream.get_bitpos(), 0x5000);
          stream.write(hash);
          size_t offset_before_hashable = stream.get_position(); // TODO: We can use this to re-hash the file and validate its hash.
          stream.write((const void*)bitstream.data(), bitstream.get_bytespan());
@@ -267,6 +267,10 @@ namespace halo::reach {
       }
       this->eof_block.length = stream.get_position();
       this->eof_block.write(stream);
+      //
+      // If we wanted to preserve the _fsm chunk, we'd write it here. Yes, its length is 
+      // not included in the _eof chunk.
+      //
    }
    QByteArray game_variant::write() const {
       bytewriter stream;

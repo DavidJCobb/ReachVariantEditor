@@ -11,7 +11,7 @@ namespace halo::reach {
       void read(bytereader& stream);
       void write(bytewriter& stream) const;
 
-      void calculate(const uint8_t* buffer, size_t bitcount);
+      void calculate(const uint8_t* buffer, size_t bitcount, size_t max_bytecount);
 
       static constexpr auto salt = std::array<uint8_t, 34>{
          0xED, 0xD4, 0x30, 0x09,

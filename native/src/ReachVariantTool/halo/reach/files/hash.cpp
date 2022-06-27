@@ -5,7 +5,7 @@
 
 namespace {
    constexpr bool use_length = true;
-   constexpr bool use_salt   = true;
+   constexpr bool use_salt   = false; // MCC!Reach does not use a salt. Per KSoft, Xbox!Reach did.
 }
 
 namespace halo::reach {
@@ -24,7 +24,7 @@ namespace halo::reach {
       stream.write<std::endian::big>(hashed_size);
    }
 
-   void file_hash::calculate(const uint8_t* buffer, size_t bitcount) {
+   void file_hash::calculate(const uint8_t* buffer, size_t bitcount, size_t max_bytecount) {
       this->hashed_size = (bitcount / 8) + (bitcount % 8 ? 1 : 0);
       //
       std::array<uint32_t, 5> hash;
@@ -37,8 +37,14 @@ namespace halo::reach {
          }
          {
             uint32_t dword = (uint32_t)bytecount;
-            if constexpr (std::endian::native != std::endian::big)
+            if (dword > max_bytecount) {
+               //
+               // The game doesn't update the hash if the size is out of bounds, looks like, but eh.
+               //
+            }
+            if constexpr (std::endian::native != std::endian::big) {
                dword = cobb::byteswap(dword);
+            }
 
             std::array<uint8_t, 4> count;
             *(uint32_t*)(count.data()) = dword;
