@@ -799,6 +799,21 @@
     <ClCompile Include="helpers\hashing\sha1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\debug_commands\new_backend_resave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\megalo\AST\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\megalo\AST\scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\megalo\AST\literal_number.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\megalo\AST\token_pos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2277,6 +2292,54 @@
     <ClInclude Include="halo\loc_string_table_details.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui\debug_commands\new_backend_resave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\_base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\function_call.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\alias.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\user_defined_enum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\declaration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\expression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\operator_metadata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\literal_number.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\token_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\literal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\token_pos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2287,6 +2350,7 @@
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
+    <Text Include="halo\reach\megalo\AST\_grammar.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="halo\loc_string_table.inl">
@@ -2314,6 +2378,12 @@
     <None Include="helpers\reflex\enumeration.md" />
     <None Include="helpers\reflex\flags_mask.md" />
     <None Include="halo\bitwriter.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\reach\megalo\AST\parser.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\reach\megalo\AST\scanner.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

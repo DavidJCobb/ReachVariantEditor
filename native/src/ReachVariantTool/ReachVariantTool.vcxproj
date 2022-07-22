@@ -212,6 +212,10 @@
     <ClCompile Include="halo\reach\load_process_messages\arena_stat_cannot_be_infinity.cpp" />
     <ClCompile Include="halo\reach\load_process_messages\not_a_game_variant.cpp" />
     <ClCompile Include="halo\reach\map_permissions.cpp" />
+    <ClCompile Include="halo\reach\megalo\AST\literal_number.cpp" />
+    <ClCompile Include="halo\reach\megalo\AST\parser.cpp" />
+    <ClCompile Include="halo\reach\megalo\AST\scanner.cpp" />
+    <ClCompile Include="halo\reach\megalo\AST\token_pos.cpp" />
     <ClCompile Include="halo\reach\megalo\create_operand.cpp" />
     <ClCompile Include="halo\reach\megalo\forge_label.cpp" />
     <ClCompile Include="halo\reach\megalo\game_option.cpp" />
@@ -509,6 +513,21 @@
     <ClInclude Include="halo\reach\load_process_messages\not_a_game_variant.h" />
     <ClInclude Include="halo\reach\map_ids.h" />
     <ClInclude Include="halo\reach\map_permissions.h" />
+    <ClInclude Include="halo\reach\megalo\AST\alias.h" />
+    <ClInclude Include="halo\reach\megalo\AST\declaration.h" />
+    <ClInclude Include="halo\reach\megalo\AST\expression.h" />
+    <ClInclude Include="halo\reach\megalo\AST\function_call.h" />
+    <ClInclude Include="halo\reach\megalo\AST\literal.h" />
+    <ClInclude Include="halo\reach\megalo\AST\literal_number.h" />
+    <ClInclude Include="halo\reach\megalo\AST\operator_metadata.h" />
+    <ClInclude Include="halo\reach\megalo\AST\parser.h" />
+    <ClInclude Include="halo\reach\megalo\AST\scanner.h" />
+    <ClInclude Include="halo\reach\megalo\AST\token.h" />
+    <ClInclude Include="halo\reach\megalo\AST\token_pos.h" />
+    <ClInclude Include="halo\reach\megalo\AST\token_type.h" />
+    <ClInclude Include="halo\reach\megalo\AST\user_defined_enum.h" />
+    <ClInclude Include="halo\reach\megalo\AST\_base.h" />
+    <ClInclude Include="halo\reach\megalo\AST\block.h" />
     <ClInclude Include="halo\reach\megalo\create_operand.h" />
     <ClInclude Include="halo\reach\megalo\load_process_messages\game_option\current_index_out_of_bounds.h" />
     <ClInclude Include="halo\reach\megalo\load_process_messages\game_option\initial_index_out_of_bounds.h" />
@@ -874,6 +893,7 @@
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
+    <Text Include="halo\reach\megalo\AST\_grammar.txt" />
     <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
     <Text Include="README.txt" />
   </ItemGroup>
@@ -883,6 +903,8 @@
     <None Include="halo\loc_string.inl" />
     <None Include="halo\loc_string_table.inl" />
     <None Include="halo\reach\files\blocks\base.inl" />
+    <None Include="halo\reach\megalo\AST\parser.inl" />
+    <None Include="halo\reach\megalo\AST\scanner.inl" />
     <None Include="halo\reach\megalo\operands\variables\README.md" />
     <None Include="halo\reach\trait_set.inl" />
     <None Include="halo\trait_information.inl" />

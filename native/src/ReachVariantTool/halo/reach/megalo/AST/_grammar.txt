@@ -1,0 +1,352 @@
+﻿
+"Crafting Interpreters," a book by Robert Nystrom, uses a bespoke notation (with 
+similarities to Becker-Naus) to describe language grammars. I will here be using 
+a modified variation on this notation.
+
+Rules take the form  of a name followed by an arrow and  then the content of the 
+rule (the "production"),  with a semicolon terminating the rule.  Quoted text or 
+symbols within  a production represent literal text that must be present  in the 
+source code being parsed. Unquoted words  in a production represent the names of 
+other rules. This syntax can be used to describe itself:
+
+   rule → IDENTIFIER "→" rule_content ";"
+
+(Where identifiers are all-caps,  they refer to language constructs that have no 
+written rules, i.e. things that would be cumbersome  to specify in this notation 
+such as "any base-10 numeric digit.")
+
+Within a production,  parentheses can be used to group  multiple constructs that 
+should together be affected by some other operator. The other operators are:
+
+   Pipe (|)
+      Indicates  that either of the constructs on either side,  but not both nor 
+      neither, may appear.
+
+   Asterisk (*) postfix
+      Indicates that the preceding construct must appear zero or more times in a 
+      row.
+
+   Plus (+) postfix
+      Indicates that the preceding construct  must appear one or more times in a 
+      row.
+
+   Question (?) postfix
+      Indicates that the preceding construct  is optional; it may appear zero or 
+      one time, but may not appear multiple times in a row.
+
+   Forward-slash (/) delimiters with possible suffix "i"
+      Delimits a regular expression;  text which matches that regular expression 
+      must appear. We use JavaScript notation,  including features such as back-
+      references.
+
+Additionally, a rule's name may be suffixed with a requirement; this notation is 
+used for things that are difficult to express using the rule notation:
+
+   rule → IDENTIFIER ( "requires" requirement+ )? "→" rule_content ";"
+
+The list of requirements include:
+   
+   "inside(...)"
+      The rule is only checked while we're inside of any of the other rules that 
+      are listed in the parentheses.
+
+Outside of a rule, "//" indicates comments documenting the rules and why they're 
+set up the way that they are.
+
+
+== SO WHAT IS THIS LANGUAGE? ===================================================
+
+Previously, the language I created for ReachVariantTool had no formal name. When-
+ever I needed to  distinguish it from Megalo as a bytecode  or from Megalo as an 
+official,  developer-only language, I'd improvise terms like  "RVT!Megalo." More 
+recently, however, I thought of a few names to use.
+
+"Bolt," or more formally "Bolt Megalo," is the language that made its debut with 
+ReachVariantTool.  This language mimics the aesthetics of Lua,  but is otherwise 
+very low-level; code that you write in Bolt  maps almost directly to the opcodes 
+in a compiled script. Bolt's key feature set includes:
+
+ - Block-scoped  user-defined functions  which  take no arguments  and return no 
+   values.
+
+ - Predefined variables that map directly and exactly to the "variables" present 
+   in the bytecode. You could argue that  these are really just registers, as in 
+   an assembly language.
+
+ - Block-scoped "aliases:" the ability  to create identifiers that map to any of 
+   the predefined variables.  Aliases could also be mapped  to integer constants 
+   and to built-in identifiers (e.g. game object types like "warthog").
+
+ - No support for  run-time expressions, except for assignment  and modification 
+   operators, and comparison  operators. The first version  of Bolt supported no 
+   other operators (i.e. "a = b + c" was a syntax error; "a = b a += c" was what 
+   you needed instead), while the second version of Bolt supports the use of the 
+   other operators only within constant (compile-time) expressions.
+
+"Rivet," or more formally "Rivet Megalo," is a hypothetical future language that 
+could make its  debut in a future version of ReachVariantTool.  The name derives 
+from the acronym for the program: "RiVeT." Rivet's key features would include:
+
+ - Symbolic, strictly-typed block-scoped variables declared by the script author 
+   and mapped to registers  as needed by the compiler.  There would be no access 
+   to the underlying registers in source  code, and "aliases" as a feature would 
+   no longer exist nor need to exist.
+
+ - Support for run-time expressions.  This will of course be subject to register 
+   allocation limits given that we have no stack to work with.  (We could handle 
+   register allocation using graph coloring or the Sethi-Ullman algorithm.)
+
+ - Block-scoped user-defined functions which can accept arguments and return one 
+   value. This, too, will be subject to register allocation limits, and may only 
+   be possible if we're willing to inline some function calls.
+
+This document,  then, describes the  grammar for Bolt.  Describing a grammar for 
+Rivet is left as future work.
+
+
+== RULES =======================================================================
+
+=== BOLT v1 ====================================================================
+
+comment       → block-comment | line-comment ;
+line-comment  → "--" /[^\n]*/ ;
+block-comment → "--" /\[(=*)\[.+\]\1\]/ "--"
+
+// This is one of the main things that changed in Bolt v2: assignments and calls 
+// became ordinary expressions.
+statement → keyword | assignment | function-call ;
+
+keyword → alias | variable-declaration | user-defined-enum | block ;
+
+
+
+// This is one of the main things that changed in Bolt v2: assignments became 
+// ordinary expressions.
+assignment → IDENTIFIER "=" ( function-call | IDENTIFIER | NUMBER ) ;
+
+// This is one of the main things that changed in Bolt v2. In v1, arguments 
+// would be blindly extracted via a string search, and then parsed in a bespoke 
+// manner by each operand type. Helper functions existed but ultimately, the 
+// parser basically fragmented into tons of tiny little bespoke parsers per 
+// argument. In Bolt v2, arguments are parsed in a unified manner.
+function-argument → /[^,\)]+/ ; // actually, it's bit more complicated, but it's not even worth trying to dive into the cursed details
+function-call     → IDENTIFIER "(" (
+                       function-argument
+                       ( "," function-argument )*
+                    )? ")" ;
+
+
+
+// Variable management:
+
+// VARIABLE_REGISTER refers to scope.type[index]; we avoid "REGISTER" as the name 
+// because that would technically include built-ins like "game.round_time_limit".
+
+alias → "alias" IDENTIFIER "=" ( IDENTIFIER | NUMBER | VARIABLE_REGISTER ) ;
+
+variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priority" ( "local" | "low" | "high" ) )? ( "=" ( IDENTIFIER | NUMBER ) )? ;
+   // the identifier must be an alias of an integer constant, but this is irrelevant to the grammar
+
+
+
+// Odds and ends:
+
+user-defined-enum-value → IDENTIFIER ( "=" ( NUMBER | IDENTIFIER ) )?
+user-defined-enum       → "enum" IDENTIFIER user-defined-enum-value* "end"
+
+
+
+// Blocks:
+
+block → condition-blocks | action-block
+
+condition-list   → condition ( ( "and" | "or" ) condition )* ;
+condition-blocks → "if" condition-list "then"
+                      statement*
+                   ( "altif" condition-list "then" statement* )*
+                   ( "alt" statement* )
+                   "end" ;
+
+action-block → block-event? (
+           "do" |
+           ( "for each"
+              "team" |
+              ( "player" "randomly"? ) |
+              ( "object" ( "with label" forge-label | "of type" object-type )? "do" )
+           ) |
+           ( "function" identifier "()" )
+        ) statement* "end" ;
+
+block-event → "on" (
+                 ( "double"? "host migration" ) |
+                 "init" |
+                 ( "local" "init"? ) |
+                 "object death" |
+                 "pregame"
+              ) ":" ;
+
+
+=== BOLT v2 ====================================================================
+
+comment       → block-comment | line-comment ;
+line-comment  → "--" /[^\n]*/ ;
+block-comment → "--" /\[(=*)\[.+\]\1\]/ "--"
+
+pragma requires inside(comment) → "$pragma" pragma-name ( "(" pragma-args ")" )? ;
+
+
+
+// Code:
+
+statement → keyword | expression ;
+
+keyword → alias | variable-declaration | user-defined-enum | block ;
+
+
+
+// Variable management:
+
+// VARIABLE_REGISTER refers to scope.type[index]; we avoid "REGISTER" as the name 
+// because that would technically include built-ins like "game.round_time_limit".
+
+alias → "alias" IDENTIFIER "=" ( IDENTIFIER | NUMBER | VARIABLE_REGISTER ) ;
+
+variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priority" ( "local" | "low" | "high" ) )? ( "=" ( IDENTIFIER | NUMBER ) )? ;
+   // the identifier must be an alias of an integer constant, but this is irrelevant to the grammar
+
+
+
+// Odds and ends:
+
+user-defined-enum-value → IDENTIFIER ( "=" ( NUMBER | IDENTIFIER ) )?
+user-defined-enum       → "enum" IDENTIFIER user-defined-enum-value* "end"
+
+
+
+// Blocks:
+
+block → condition-blocks | action-block
+
+condition-list   → condition ( ( "and" | "or" ) condition )* ;
+condition-blocks → "if" condition-list "then"
+                      statement*
+                   ( "altif" condition-list "then" statement* )*
+                   ( "alt" statement* )
+                   "end" ;
+
+action-block → block-event? (
+           "do" |
+           ( "for each"
+              "team" |
+              ( "player" "randomly"? ) |
+              ( "object" ( "with label" forge-label | "of type" object-type )? "do" )
+           ) |
+           ( "function" identifier "()" )
+        ) statement* "end" ;
+
+block-event → "on" (
+                 ( "double"? "host migration" ) |
+                 "init" |
+                 ( "local" "init"? ) |
+                 "object death" |
+                 "pregame"
+              ) ":" ;
+
+
+
+// The identifier and equal sign is for named arguments in function calls. 
+// We have to allow VARIABLE_REGISTER here because some specific operands 
+// (and therefore arguments to specific built-in functions) need them, e.g. 
+// "apply_shape_color_from_player_member" wanting values like "object.player[3]".
+function-call-argument      → ( IDENTIFIER "=" )? expression | VARIABLE_REGISTER ;
+function-call-argument-list → "(" (
+                                 function-call-argument
+                                 ( "," function-call-argument )*
+                              )? ")" ;
+
+
+
+// Rules for expression parsing.
+//
+expression → equality ;
+equality   → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term       → factor ( ( "-" | "+" ) factor )* ;
+factor     → unary ( ( "/" | "*" ) unary )* ;
+unary      → ( "!" | "-" ) unary | primary ;
+primary    → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER function-call-argument-list? ;
+//
+// --- Notes on how individual rules behave ------------------------------------
+//
+// Primary expressions include function calls. Lox, the language Nystrom created 
+// to serve as a  teaching subject in his  book, treats functions  as values and 
+// allows "function currying;" it also uses explicit statement terminators (semi-
+// colons). In Bolt, however, functions are exclusively a compile-time construct 
+// and so can't be treated as values; therefore, there is no reason to implement 
+// function currying.
+//
+// Removing function  currying also removes some ambiguities  that exist when no 
+// explicit statement terminator is present. For example, what should be done if 
+// two parenthesized expression statements are placed back to back?
+//
+//    (a = b) (c = d)
+//
+// Lua solves the ambiguity by requiring assignments to be top-level statements; 
+// they cannot appear as expressions. Additionally, when Lua finds two top-level 
+// parenthesis pairs, it always treats that content as a function call.
+//
+// Bolt's grammar will allow assignment operators to be used in expressions, but 
+// because Bolt only allows constant expressions, such usage will be invalid; it 
+// will at least  *parse* properly, however. Rivet could in  theory handle these 
+// sorts of constructs using the same grammar.
+//
+//
+// --- Notes on how these rules are structured ---------------------------------
+//
+// This may seem strange, but these rules are set up this way in order to handle
+// operator precedence matching C. The lowest-precedence operators appear at the 
+// top and fall through to the highest-precedence operators. When a parser reads 
+// code appearing to these rules, it will parse written expressions as a tree of 
+// operators wherein the highest-precedence operators are leaf nodes.
+//
+// If you read the above  literally, then it says  that an "equality" expression 
+// can be any of:
+//
+//  - Two lower-precedence expressions separated with "!=" or "==".
+//
+//  - Any single lower-precedence expression.
+//
+// That might imply that  "a + b" is an "equality"  expression... but it's worth 
+// remembering that these rules are just  a tool to describe how the language is 
+// parsed; they don't need to also serve as definitions of semantics. If we were 
+// to try and communicate how expressions are parsed *and* what they *are* using 
+// a single set of rules, then we would write the above as
+//
+//    expression → ( equality | comparison | term | factor | unary | primary ) ;
+//    equality   → ( comparison | term | factor | unary | primary ) ( ( "!=" | "==" ) ( comparison | term | factor | unary | primary ) )* ;
+//    comparison → ( term | factor | unary | primary ) ( ( ">" | ">=" | "<" | "<=" ) ( term | factor | unary | primary ) )* ;
+//    term       → ( factor | unary | primary ) ( ( "-" | "+" ) ( factor | unary | primary ) )* ;
+//    factor     → ( unary | primary ) ( ( "/" | "*" ) ( unary | primary ) )* ;
+//    unary      → ( "!" | "-" ) unary | primary ;
+//    primary    → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ( "(" arguments? ")" )* ;
+//
+// and while these rules would be functionally equivalent to the set of rules we 
+// have above, they would also be far more cumbersome to write and to implement. 
+// Better to just remember that grammar and meaning aren't the same thing.
+//
+
+
+== RULE EXPLANATIONS ==
+
+=== Pragma ===
+
+A means to pass options to the compiler. For backwards-compatibility, these must 
+appear inside of code comments.
+
+The following pragma names are supported:
+
+   compiler-language
+
+      Takes a single argument:  an unquoted identifier indicating the RVT Megalo 
+      language this  script was written for. Planned identifiers  are "bolt" and 
+      "rivet".
