@@ -47,6 +47,8 @@ namespace halo::reach::megalo::AST {
          QChar _pull_next_char(); // advance() in tutorial
          bool _consume_desired_character(QChar); // advances only if the next character is the desired character
 
+         QString _pull_next_word();
+
          void _add_token(token_type);
          void _add_token(token_type, literal_base*);
 
