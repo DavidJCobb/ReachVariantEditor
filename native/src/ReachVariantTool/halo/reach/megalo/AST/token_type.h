@@ -1,37 +1,70 @@
 #pragma once
 
 namespace halo::reach::megalo::AST {
+
+   //
+   // Code interpretation works in two passes: scanning and parsing. The 
+   // scanner identifies the most basic possible tokens, and the parser 
+   // then consumes those tokens to identify situational constructs and 
+   // generate an AST.
+   // 
+   // For example, the character sequence "+=" is always identifiable as 
+   // the add-assign operator; however, a lone "+" is only situationally 
+   // identifiable (as a unary prefix operator or an infix operator used 
+   // between two terms). As such, we have a token for "add-assign," but 
+   // we don't have a token for "addition" or "unary positive;" instead 
+   // there is a "plus" token.
+   //
    enum class token_type {
       none,
       eof,
 
-      pragma,
-
-      // single character
+      // Single characters.
       paren_l,
       paren_r,
+      angle_bracket_l,
+      angle_bracket_r,
       square_bracket_l,
       square_bracket_r,
+      ampersand,   // '&'
+      asterisk,    // '*'
+      caret,       // '^'
+      equal,       // '='
+      exclamation, // '!'
+      minus,       // '-'
+      percent,     // '%'
+      period,      // '.'
+      pipe,        // '|'
+      plus,        // '+'
+      slash_fwd,   // '/'
+      tilde,       // '~'
+
+      // "Semantic" tokens are below. Values should only be defined for 
+      // character sequences that are uniquely recognizable without any 
+      // intelligent parsing. By definition, that means multi-character 
+      // tokens only.
 
       // operators
       operator_compare_eq, // "=="
       operator_compare_ne, // "!="
-      operator_compare_l,  // '<'
       operator_compare_le, // "<="
-      operator_compare_g,  // '>'
       operator_compare_ge, // ">="
 
-      operator_binary_add, // '+'
-      operator_binary_div, // '/'
-      operator_binary_mod, // '%'
-      operator_binary_mul, // '*'
-      operator_binary_shl, // "<<"
-      operator_binary_shr, // ">>"
-      operator_binary_sub, // '-'
+      operator_assign_bare, // "=="
+      operator_assign_add,  // "+="
+      operator_assign_and,  // "&="
+      operator_assign_div,  // "/="
+      operator_assign_mod,  // "%="
+      operator_assign_mul,  // "*="
+      operator_assign_not,  // "~="
+      operator_assign_or,   // "|="
+      operator_assign_shl,  // "<<=" // Megalo has no bitshifts, but we can just multiply by a hardcoded power of 2
+      operator_assign_shr,  // ">>=" // Megalo has no bitshifts, but we can do a division by a hardcoded power of 2
+      operator_assign_sub,  // "-="
+      operator_assign_xor,  // "^="
 
-      operator_unary_negate, // '-'
-      operator_unary_not,    // '!'
-      operator_unary_plus,   // '+'
+      operator_binary_shl, // "<<" // Megalo has no bitshifts, but we can just multiply by a hardcoded power of 2
+      operator_binary_shr, // ">>" // Megalo has no bitshifts, but we can do a division by a hardcoded power of 2
 
       // literals
       identifier,
@@ -52,5 +85,8 @@ namespace halo::reach::megalo::AST {
       keyword_if,
       keyword_on,
       keyword_or,
+
+      // misc
+      pragma,
    };
 }

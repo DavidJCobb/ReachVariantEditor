@@ -3,33 +3,18 @@
 #include <QString>
 #include "helpers/owned_ptr.h"
 #include "./_base.h"
+#include "./token_type.h"
 
 namespace halo::reach::megalo::AST {
+   class literal_base;
+
    enum class expression_type {
       none,
       unary,
       binary,
       call,
       primary,
-   };
-   enum class expression_op {
-      none,
-      compare_eq,
-      compare_ne,
-      compare_l,
-      compare_le,
-      compare_g,
-      compare_ge,
-      binary_add,
-      binary_sub,
-      binary_mul,
-      binary_div,
-      binary_mod,
-      binary_shl,
-      binary_shr,
-      unary_positive,
-      unary_negate,
-      unary_not,
+      literal,
    };
 
    struct expression;
@@ -40,14 +25,17 @@ namespace halo::reach::megalo::AST {
 
    struct expression : public item_base {
       expression_type type = expression_type::none;
-      expression_op   op   = expression_op::none;
+      token_type      op   = token_type::none;
 
+      cobb::owned_ptr<literal_base> literal; // literals only.
       cobb::owned_ptr<expression> lhs; // binary or call  only. binary: LHS; call: function to call
       cobb::owned_ptr<expression> rhs; // binary or unary only.
       std::vector<cobb::owned_ptr<function_call_argument>> arguments;
 
-      static expression* alloc_binary(expression* lhs, expression_op, expression* rhs);
+      static expression* alloc_binary(expression* lhs, token_type op, expression* rhs);
       static expression* alloc_call(expression* callee);
-      static expression* alloc_unary(expression_op, expression* subject);
+      static expression* alloc_grouping(expression* content); // for parentheticals in expressions
+      static expression* alloc_literal(literal_base* content);
+      static expression* alloc_unary(token_type op, expression* subject);
    };
 };

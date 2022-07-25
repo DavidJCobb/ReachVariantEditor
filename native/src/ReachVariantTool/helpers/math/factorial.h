@@ -30,7 +30,7 @@ namespace cobb {
    }
 
    // Function for incremental factorials, when running loops in which you are 
-   // taking the factorial of an increasingly large number.
+   // taking the factorial of an increasingly large number (e.g. a Taylor series).
    // 
    // factorial(n) == factorial_to(n, s) * factorial(s)
    template<typename T> requires (std::is_arithmetic_v<T>)

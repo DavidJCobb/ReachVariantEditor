@@ -2,19 +2,47 @@
 #include "./parser.h"
 
 namespace halo::reach::megalo::AST {
-   template<const binary_operator_tier_definition& Tier> expression* parser::_try_rule_expression_binary<Tier>() {
-      constexpr auto* Next = Tier.next;
+   template<token_type... TokenTypes>
+   bool parser::_consume_any_token_of_types() {
+      bool result = false;
+      (
+         (result ?
+            (this->_check_next_token(TokenTypes) ? (result = true) : false)
+         :
+            false
+         ),
+         ...
+      );
+      if (result)
+         ++this->next_token;
+      return result;
+   }
+   template<size_t Size, std::array<token_type, Size> TokenTypes>
+   bool parser::_consume_any_token_of_types<Size, TokenTypes>() {
+      for (auto t : TokenTypes) {
+         if (t == token_type::none)
+            break;
+         if (this->_check_next_token<t>()) {
+            ++this->next_token;
+            return true;
+         }
+      }
+      return false;
+   }
 
-      auto _get_side = [this, Next]() {
-         if constexpr (Next)
-            return this->try_parse_binary_op<*Next>();
+   template<size_t TierIndex> expression* parser::_try_rule_expression_binary<TierIndex>() {
+      constexpr auto& tier = binary_operator_tiers[TierIndex];
+
+      auto _get_side = [this]() {
+         if constexpr (TierIndex + 1 < binary_operator_tiers.size())
+            return this->_try_rule_expression_binary<TierIndex + 1>();
          else
-            return this->try_parse_unary_op();
+            return this->_try_rule_expression_unary();
       };
 
       auto* expr = _get_side();
-      while (consume(Tier._operators)) { static_assert(false, "TODO: implement a 'consume' function that will work here");
-         auto  op  = previous_token(); static_assert(false, "TODO: implement a 'previous_token' function that will work here");
+      while (this->_consume_any_token_of_types<tier.operators>()) {
+         auto  op  = this->_previous_token();
          auto* rhs = _get_side();
          expr = expression::alloc_binary(expr, op, rhs);
       }
