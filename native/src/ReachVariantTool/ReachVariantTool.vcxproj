@@ -212,7 +212,7 @@
     <ClCompile Include="halo\reach\load_process_messages\arena_stat_cannot_be_infinity.cpp" />
     <ClCompile Include="halo\reach\load_process_messages\not_a_game_variant.cpp" />
     <ClCompile Include="halo\reach\map_permissions.cpp" />
-    <ClCompile Include="halo\reach\megalo\AST\literal_number.cpp" />
+    <ClCompile Include="halo\reach\megalo\AST\literal_data_number.cpp" />
     <ClCompile Include="halo\reach\megalo\AST\parser.cpp" />
     <ClCompile Include="halo\reach\megalo\AST\scanner.cpp" />
     <ClCompile Include="halo\reach\megalo\AST\token_pos.cpp" />
@@ -513,15 +513,20 @@
     <ClInclude Include="halo\reach\load_process_messages\not_a_game_variant.h" />
     <ClInclude Include="halo\reach\map_ids.h" />
     <ClInclude Include="halo\reach\map_permissions.h" />
+    <ClInclude Include="halo\reach\megalo\AST\action_block.h" />
     <ClInclude Include="halo\reach\megalo\AST\alias.h" />
+    <ClInclude Include="halo\reach\megalo\AST\condition_block.h" />
     <ClInclude Include="halo\reach\megalo\AST\declaration.h" />
     <ClInclude Include="halo\reach\megalo\AST\expression.h" />
     <ClInclude Include="halo\reach\megalo\AST\function_call.h" />
     <ClInclude Include="halo\reach\megalo\AST\literal.h" />
-    <ClInclude Include="halo\reach\megalo\AST\literal_number.h" />
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_number.h" />
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_string.h" />
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_identifier_or_word.h" />
     <ClInclude Include="halo\reach\megalo\AST\operator_metadata.h" />
     <ClInclude Include="halo\reach\megalo\AST\parser.h" />
     <ClInclude Include="halo\reach\megalo\AST\scanner.h" />
+    <ClInclude Include="halo\reach\megalo\AST\statement.h" />
     <ClInclude Include="halo\reach\megalo\AST\token.h" />
     <ClInclude Include="halo\reach\megalo\AST\token_pos.h" />
     <ClInclude Include="halo\reach\megalo\AST\token_type.h" />
@@ -679,6 +684,7 @@
     <ClInclude Include="helpers\eight_cc.h" />
     <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
+    <ClInclude Include="helpers\list_items_are_unique.h" />
     <ClInclude Include="helpers\memory\memcpy.h" />
     <ClInclude Include="helpers\memory\memset.h" />
     <ClInclude Include="helpers\numeric_min_max.h" />
@@ -784,6 +790,7 @@
     <ClInclude Include="helpers\type_traits\set_const.h" />
     <ClInclude Include="helpers\type_traits\strip_enum.h" />
     <ClInclude Include="helpers\type_traits\value_type_of.h" />
+    <ClInclude Include="helpers\unreachable.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />

@@ -808,7 +808,7 @@
     <ClCompile Include="halo\reach\megalo\AST\scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\literal_number.cpp">
+    <ClCompile Include="halo\reach\megalo\AST\literal_data_number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="halo\reach\megalo\AST\token_pos.cpp">
@@ -2322,7 +2322,7 @@
     <ClInclude Include="halo\reach\megalo\AST\operator_metadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\literal_number.h">
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_number.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\reach\megalo\AST\token_type.h">
@@ -2338,6 +2338,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\reach\megalo\AST\token_pos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\unreachable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\list_items_are_unique.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\statement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\literal_data_identifier_or_word.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\action_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\AST\condition_block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

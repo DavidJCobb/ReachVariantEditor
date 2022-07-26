@@ -4,6 +4,7 @@
 namespace halo::reach::megalo::AST {
    class item_base {
       public:
-         item_base* parent = nullptr;
+         token_pos start;
+         token_pos end;
    };
 }

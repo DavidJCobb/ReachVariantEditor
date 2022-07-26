@@ -35,6 +35,16 @@ namespace halo::reach::megalo::AST {
 
    // --- Rules ---
 
+   void parser::_try_rule_statement();
+   bool parser::_try_rule_keyword();
+   bool parser::_try_rule_alias();
+   bool parser::_try_rule_declare();
+   bool parser::_try_rule_enum();
+   bool parser::_try_rule_block();
+   bool parser::_try_rule_block_actions();
+   bool parser::_try_rule_block_event();
+   bool parser::_try_rule_block_conditions();
+
    expression* parser::_try_rule_expression() {
       return this->_try_rule_expression_binary<0>();
    }

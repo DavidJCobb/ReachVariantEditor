@@ -3,11 +3,10 @@
 #include <QString>
 #include "helpers/owned_ptr.h"
 #include "./_base.h"
+#include "./literal.h"
 #include "./token_type.h"
 
 namespace halo::reach::megalo::AST {
-   class literal_base;
-
    enum class expression_type {
       none,
       unary,
@@ -27,7 +26,7 @@ namespace halo::reach::megalo::AST {
       expression_type type = expression_type::none;
       token_type      op   = token_type::none;
 
-      cobb::owned_ptr<literal_base> literal; // literals only.
+      literal_item lit; // literals only.
       cobb::owned_ptr<expression> lhs; // binary or call  only. binary: LHS; call: function to call
       cobb::owned_ptr<expression> rhs; // binary or unary only.
       std::vector<cobb::owned_ptr<function_call_argument>> arguments;
