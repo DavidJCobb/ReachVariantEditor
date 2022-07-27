@@ -519,6 +519,7 @@
     <ClInclude Include="halo\reach\megalo\AST\declaration.h" />
     <ClInclude Include="halo\reach\megalo\AST\expression.h" />
     <ClInclude Include="halo\reach\megalo\AST\function_call.h" />
+    <ClInclude Include="halo\reach\megalo\AST\keywords_to_tokens.h" />
     <ClInclude Include="halo\reach\megalo\AST\literal.h" />
     <ClInclude Include="halo\reach\megalo\AST\literal_data_number.h" />
     <ClInclude Include="halo\reach\megalo\AST\literal_data_string.h" />
@@ -533,6 +534,7 @@
     <ClInclude Include="halo\reach\megalo\AST\user_defined_enum.h" />
     <ClInclude Include="halo\reach\megalo\AST\_base.h" />
     <ClInclude Include="halo\reach\megalo\AST\block.h" />
+    <ClCompile Include="halo\reach\megalo\AST\_dummy.cpp" />
     <ClInclude Include="halo\reach\megalo\create_operand.h" />
     <ClInclude Include="halo\reach\megalo\load_process_messages\game_option\current_index_out_of_bounds.h" />
     <ClInclude Include="halo\reach\megalo\load_process_messages\game_option\initial_index_out_of_bounds.h" />

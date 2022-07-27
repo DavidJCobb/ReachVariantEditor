@@ -3,10 +3,10 @@
 
 namespace halo::reach::megalo::AST {
    template<size_t Base> requires (Base > 1 && Base <= 36)
-   literal_number scanner::_try_extract_number_digits<Base>() {
+   literal_data_number scanner::_try_extract_number_digits<Base>() {
       constexpr int decimal_point_not_yet_seen = -1;
 
-      literal_number result;
+      literal_data_number result;
       bool ignore  = false; // we found an invalid char, so the result will not be a valid number
       int  decimal = decimal_point_not_yet_seen; // have we found a decimal point? if so (value >= 0), how many digits after it have we read?
 

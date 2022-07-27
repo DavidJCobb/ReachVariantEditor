@@ -1,5 +1,6 @@
 #pragma once
 #include <concepts>
+#include <type_traits>
 
 namespace cobb {
    namespace impl::list_items_are_unique {
@@ -26,6 +27,20 @@ namespace cobb {
 
       template<typename T> concept is_compatible_list = is_indexable_list<T> || (has_range_loop_members<T> || has_range_loop_non_members<T>);
 
+      template<typename T> struct _extract_list_value_type {
+         using type = std::decay_t<decltype(
+            [](){
+               const auto& list = std::declval<T>();
+               if constexpr (is_indexable_list<T>) {
+                  return list[0];
+               } else if constexpr (has_range_loop_members<T> || has_range_loop_non_members<T>) {
+                  using std::begin;
+                  return *begin(list);
+               }
+            }()
+         )>;
+      };
+
       template<typename List, typename Functor> concept is_usable_functor = (
          (is_indexable_list<List> && requires(const List &x, Functor f) {
             { f(x[0], x[1]) } -> std::same_as<bool>;
@@ -37,6 +52,11 @@ namespace cobb {
             { f(*begin(x), *begin(x)) } -> std::same_as<bool>;
          })
       );
+
+      template<typename T> requires std::equality_comparable<T>
+      constexpr bool _default_comparator(const T& a, const T& b) {
+         return a != b;
+      }
    }
 
    // Test whether two list items are unique. The functor should take as arguments 
@@ -54,31 +74,34 @@ namespace cobb {
             }
          }
          return true;
-      } else {
+      } else if constexpr (has_range_loop_members<List> || has_range_loop_non_members<List>) {
          //
          // The list doesn't support access by index. The naive approach would be 
          // to use a range-based for-loop, but those are just syntactic sugar for 
          // calls to begin/end functions. If we call those functions directly, we 
          // may be able to skip some steps.
          //
-         if constexpr (has_range_loop_members<List>) {
-            const auto end = list.end();
-            for (auto it = list.begin(); it != end; ++it) {
-               for (auto jt = it, ++jt; jt != end; ++jt) {
-                  if (!uniqueness_comparator(*it, *jt))
-                     return false;
-               }
-            }
-         } else if constexpr (has_range_loop_non_members<List>) {
-            const auto end = end(list);
-            for (auto it = begin(list); it != end; ++it) {
-               for (auto jt = it, ++jt; jt != end; ++jt) {
-                  if (!uniqueness_comparator(*it, *jt))
-                     return false;
-               }
+
+         using std::begin;
+         using std::end;
+
+         const auto list_end = end(list);
+         for (auto it = begin(list); it != list_end; ++it) {
+            auto jt = it;
+            ++jt;
+            for (; jt != list_end; ++jt) {
+               if (!uniqueness_comparator(*it, *jt))
+                  return false;
             }
          }
       }
       return true;
+   }
+
+   template<typename List> requires impl::list_items_are_unique::is_compatible_list<List>
+   constexpr bool list_items_are_unique(const List& list) {
+      using namespace impl::list_items_are_unique;
+
+      return list_items_are_unique(list, &_default_comparator<typename _extract_list_value_type<List>::type>);
    }
 }

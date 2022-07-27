@@ -15,10 +15,9 @@ namespace halo::reach::megalo::AST {
       pregame,
    };
 
-   class block : public item_base {
+   class block : public item_base, public block_child {
       public:
-         block*     parent = nullptr;
-         event_type event  = event_type::none;
+         event_type event = event_type::none;
          std::vector<cobb::owned_ptr<item_base>> contents; // ordered list of aliases, user-defined functions, nested blocks, and actions
 
          constexpr bool is_event_handler() const noexcept { return this->event != event_type::none; }

@@ -22,7 +22,7 @@ namespace halo::reach::megalo::AST {
       expression* value = nullptr;
    };
 
-   struct expression : public item_base {
+   struct expression : public item_base, public block_child {
       expression_type type = expression_type::none;
       token_type      op   = token_type::none;
 

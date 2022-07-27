@@ -18,6 +18,13 @@ namespace halo::reach::megalo::AST {
    //
    // As is, this class is just a variant.
 
+      //
+      // Changes in progress. Anything that can be a block child should now subclass both 
+      // item_base and block_child. Really, that just means alias definitions and variable 
+      // declarations (we want to be able to tell what block those are in, for diagnostics 
+      // and error reporting).
+      //
+
    class statement : public item_base {
       public:
          using variant_type = std::variant<

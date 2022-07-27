@@ -7,4 +7,10 @@ namespace halo::reach::megalo::AST {
          token_pos start;
          token_pos end;
    };
+
+   class block;
+   class block_child {
+      public:
+         block* parent = nullptr;
+   };
 }

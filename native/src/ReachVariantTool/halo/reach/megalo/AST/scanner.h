@@ -3,7 +3,7 @@
 #include <optional>
 #include <vector>
 #include <QString>
-#include "./literal_number.h"
+#include "./literal_data_number.h"
 #include "./token.h"
 #include "./token_pos.h"
 
@@ -15,7 +15,7 @@ namespace halo::reach::megalo::AST {
       protected:
          QString   source;
          token_pos pos;
-         size_t    lexeme_start = 0;
+         token_pos lexeme_start;
       public:
          std::vector<token> tokens;
 
@@ -50,14 +50,14 @@ namespace halo::reach::megalo::AST {
          QString _pull_next_word();
 
          void _add_token(token_type);
-         void _add_token(token_type, literal_base*);
+         void _add_token(token_type, literal_item);
 
          // Does not extract a number literal on its own; the caller needs to check for a sign and base.
          template<size_t Base = 10> requires (Base > 1 && Base <= 36)
-         literal_number _try_extract_number_digits();
+         literal_data_number _try_extract_number_digits();
 
       public:
-         std::optional<literal_number> try_extract_number_literal();
+         std::optional<literal_data_number> try_extract_number_literal();
    };
 }
 

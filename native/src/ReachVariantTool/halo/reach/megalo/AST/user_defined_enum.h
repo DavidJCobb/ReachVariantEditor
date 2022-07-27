@@ -4,7 +4,7 @@
 #include "./_base.h"
 
 namespace halo::reach::megalo::AST {
-   class user_defined_enum : public item_base {
+   class user_defined_enum : public item_base, public block_child {
       public:
          struct member {
             QString name;

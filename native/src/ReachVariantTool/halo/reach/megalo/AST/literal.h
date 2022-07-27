@@ -22,6 +22,10 @@ namespace halo::reach::megalo::AST {
          >;
 
       public:
+         literal_item() {}
+         template<typename T> requires std::is_constructible_v<variant_type, T> literal_item(const T& v) : value(v) {}
+
+      public:
          variant_type value;
    };
 }

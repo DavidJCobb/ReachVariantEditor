@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include "helpers/list_items_are_unique.h"
+#include "./keywords_to_tokens.h"
 
 namespace halo::reach::megalo::AST {
    namespace {
@@ -32,7 +33,7 @@ namespace halo::reach::megalo::AST {
          _single_character_operator{ '/', token_type::slash_fwd,   token_type::operator_assign_div }, // / or /=
          _single_character_operator{ '~', token_type::tilde,       token_type::operator_assign_not }, // ~ or ~=
       };
-      static_assert(cobb::list_items_are_unique(all_single_character_operators, [](const auto& a, const auto& b){ return a != b; }));
+      static_assert(cobb::list_items_are_unique(all_single_character_operators));
 
       //
       // Glyphs that can represent a one-character operator, a two-character operator, or 
@@ -61,7 +62,7 @@ namespace halo::reach::megalo::AST {
             token_type::operator_binary_shr, token_type::operator_assign_shr, // >> or >>=
          },
       };
-      static_assert(cobb::list_items_are_unique(all_two_character_operators, [](const auto& a, const auto& b){ return a != b; }));
+      static_assert(cobb::list_items_are_unique(all_two_character_operators));
 
       //
       // Glyphs that are always and only part of a single-character token.
@@ -79,7 +80,7 @@ namespace halo::reach::megalo::AST {
          _single_character_token{ '[', token_type::square_bracket_l },
          _single_character_token{ ']', token_type::square_bracket_r },
       };
-      static_assert(cobb::list_items_are_unique(all_single_character_tokens, [](const auto& a, const auto& b) { return a != b; }));
+      static_assert(cobb::list_items_are_unique(all_single_character_tokens));
 
       constexpr auto all_syntax_start_characters = [](){
          constexpr auto& op_1 = all_single_character_operators;
@@ -125,6 +126,12 @@ namespace halo::reach::megalo::AST {
 
    void scanner::scan_tokens() {
       this->scan_characters([this](QChar c) {
+         this->lexeme_start = this->pos;
+
+         if (c.isSpace()) {
+            return false;
+         }
+
          for (const auto& item : all_two_character_operators) {
             if (c != item.glyph_a)
                continue;
@@ -171,24 +178,28 @@ namespace halo::reach::megalo::AST {
 
          auto word = this->_pull_next_word();
          if (!word.isEmpty()) {
-            static_assert(false, "TODO: Handle keywords here.");
-               //
-               // What about non-key words, i.e. the "subkeywords" attached to some keywords?
-               // We need to be able to later parse "declare X with network priority low"; 
-               // what sort of construct is "with"?
-               // 
-               // Should we define tokens for the different parts of these compound keywords, 
-               // e.g. a token for a declaration's network priority? That seems backwards. 
-               // Maybe "subkeywords" can just fall under "identifiers" as a token type and 
-               // syntax rule.
-               //
-
-            static_assert(false, "TODO: Handle identifiers-or-words here.");
+            //
+            // Is it a keyword?
+            //
+            for (const auto& definition : keywords_to_token_types) {
+               if (word.compare(definition.keyword, Qt::CaseInsensitive) == 0) {
+                  this->_add_token(definition.token);
+                  return false;
+               }
+            }
+            //
+            // Not a keyword.
+            //
+            this->_add_token(token_type::identifier_or_word, literal_data_identifier_or_word{
+               .content = word,
+            });
+            return false;
          }
 
          return false;
       });
-      this->tokens.push_back(token(token_type::eof, "", null, this->pos.line));
+      assert(this->is_at_end()); // we should never stop early, or else in some future revision of this code we should here handle whatever would make us want to stop early
+      this->_add_token(token_type::eof);
    }
    
    void scanner::scan_characters(character_scan_functor_t functor) {
@@ -252,8 +263,10 @@ namespace halo::reach::megalo::AST {
                continue;
             }
          }
-         if (comment_l || comment_b)
+         if (comment_l || comment_b) {
+            static_assert(false, "TODO: process tokens only valid inside of comments, i.e. pragmas.");
             continue;
+         }
          if (delim == '\0') {
             if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle line comments
                if (pos + 2 < length && text[pos + 2] == '[') {
@@ -337,11 +350,20 @@ namespace halo::reach::megalo::AST {
       return word;
    }
 
-   void scanner::_add_token(token_type type);
-   void scanner::_add_token(token_type type, literal_base* lit);
+   void scanner::_add_token(token_type type) {
+      auto& item = this->tokens.emplace_back();
+      item.type  = type;
+      item.start = this->lexeme_start;
+      item.end   = this->pos;
+   }
+   void scanner::_add_token(token_type type, literal_item lit) {
+      this->_add_token(type);
+      auto& item = this->tokens.back();
+      item.literal = lit;
+   }
 
-   std::optional<literal_number> scanner::try_extract_number_literal() {
-      std::optional<literal_number> result;
+   std::optional<literal_data_number> scanner::try_extract_number_literal() {
+      std::optional<literal_data_number> result;
 
       auto prior = this->backup_stream_state();
       //
