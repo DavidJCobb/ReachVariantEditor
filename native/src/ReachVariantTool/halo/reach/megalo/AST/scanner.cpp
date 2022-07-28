@@ -8,6 +8,15 @@ namespace halo::reach::megalo::AST {
    namespace {
 
       //
+      // Glyphs that delimit strings.
+      //
+      constexpr auto all_string_literal_delimiters = std::array{
+         '"',
+         '\'',
+         '`',
+      };
+
+      //
       // Glyphs that can represent a single-character operator (unary or binary), or an 
       // operator consisting of that character with an equal sign appended (i.e. an 
       // assign or compare operator), i.e. for some glyph '@' the constructs '@' and '@=' 
@@ -83,11 +92,7 @@ namespace halo::reach::megalo::AST {
       static_assert(cobb::list_items_are_unique(all_single_character_tokens));
 
       constexpr auto all_syntax_start_characters = [](){
-         constexpr auto& op_1 = all_single_character_operators;
-         constexpr auto& op_2 = all_two_character_operators;
-         constexpr auto& list = all_single_character_tokens;
-
-         constexpr size_t count = all_single_character_operators.size() + all_two_character_operators.size() + all_single_character_tokens.size();
+         constexpr size_t count = all_single_character_operators.size() + all_two_character_operators.size() + all_single_character_tokens.size() + all_string_literal_delimiters.size();
          
          std::array<char, count> out = {};
 
@@ -98,18 +103,18 @@ namespace halo::reach::megalo::AST {
             out[i++] = item.glyph_a;
          for (const auto& item : all_single_character_tokens)
             out[i++] = item.glyph;
+         for (const auto glyph : all_string_literal_delimiters)
+            out[i++] = glyph;
 
          return out;
       }();
    }
 
    /*static*/ bool scanner::is_quote_character(QChar c) {
-      switch (c.unicode()) {
-         case '"':
-         case '\'':
-         case '`':
+      auto code = c.unicode();
+      for (const auto glyph : all_string_literal_delimiters)
+         if (code == glyph)
             return true;
-      }
       return false;
    }
 
@@ -129,7 +134,7 @@ namespace halo::reach::megalo::AST {
          this->lexeme_start = this->pos;
 
          if (c.isSpace()) {
-            return false;
+            return character_scan_result::proceed;
          }
 
          for (const auto& item : all_two_character_operators) {
@@ -145,7 +150,7 @@ namespace halo::reach::megalo::AST {
                }
             }
             this->_add_token(tt);
-            return false;
+            return character_scan_result::proceed;
          }
          for (const auto& pair : all_single_character_operators) {
             if (c == pair.glyph) {
@@ -154,49 +159,118 @@ namespace halo::reach::megalo::AST {
                } else {
                   this->_add_token(pair.basic);
                }
-               return false;
+               return character_scan_result::proceed;
             }
          }
 
+         // Handle (possible) number literals here.
          if (c == '.' || c.isDigit()) {
             //
             // Test to see if it's a number literal. If so, store one. If not, allow a '.' glyph to fall through 
             // to the "single-character tokens" handler below.
             //
-            static_assert(false, "TODO: Handle number literals here.");
+            auto lit = this->try_extract_number_literal();
+            if (lit.has_value()) {
+               this->_add_token(token_type::number, lit.value());
+               return character_scan_result::proceed;
+               //
                static_assert(false, "TODO: Rename all built-in identifier names (incidents, variant string IDs, etc.) as necessary so that none start with numeric digits.");
+            }
          }
 
          for (const auto& item : all_single_character_tokens) {
             if (c == item.glyph) {
                this->_add_token(item.type);
-               return false;
+               return character_scan_result::proceed;
             }
          }
 
-         static_assert(false, "TODO: Handle string literals here.");
+         // Handle string literals here.
+         if (is_quote_character(c)) {
+            QString content;
 
-         auto word = this->_pull_next_word();
-         if (!word.isEmpty()) {
-            //
-            // Is it a keyword?
-            //
-            for (const auto& definition : keywords_to_token_types) {
-               if (word.compare(definition.keyword, Qt::CaseInsensitive) == 0) {
-                  this->_add_token(definition.token);
-                  return false;
+            bool escape_next = false;
+            bool terminated  = false;
+            std::optional<token_pos> first_line_break; // first line break inside the string literal; should be reported as probable error site if the literal is unterminated
+            this->scan_characters([this, delim = c, &content, &escape_next, &terminated, &first_line_break](QChar c) {
+               if (escape_next) {
+                  content += c;
+                  return character_scan_result::proceed;
                }
-            }
-            //
-            // Not a keyword.
-            //
-            this->_add_token(token_type::identifier_or_word, literal_data_identifier_or_word{
-               .content = word,
+               if (c == '\\') {
+                  escape_next = true;
+                  return character_scan_result::proceed;
+               }
+               if (c == delim) {
+                  terminated = true;
+                  return character_scan_result::stop_after;
+               }
+               if (c == '\n' && !first_line_break.has_value()) {
+                  first_line_break = this->pos;
+               }
+               content += c;
+               return character_scan_result::proceed;
             });
-            return false;
+            if (!terminated) {
+               //
+               // If (first_line_break.has_value()), then it indicates the position of the first line break 
+               // inside of the string literal. We allow multi-line string literals, but if a literal is 
+               // unterminated, then the first line break is more likely to be where the script author 
+               // forgot to write the end delimiter. We'll want to report that when reporting the error.
+               //
+               static_assert(false, "TODO: fatal parse error: unterminated string literal");
+            } else {
+               auto lit = literal_data_string{
+                  .content   = content,
+                  .delimiter = c,
+               };
+               //
+               // Is this string literal suffixed with a string table index?
+               //
+               static_assert(false, "TODO: Do we want to allow whitespace between the string literal and '#' marker? If so, skip it here.");
+               if (this->_consume_desired_character('#')) {
+                  //
+                  // Possible index tag, e.g. "My String"#3 or "My String"#some_alias.
+                  //
+                  static_assert(false, "TODO: Do we want to allow whitespace between the '#' and index? If so, skip it here.");
+
+                  auto before_index = this->backup_stream_state();
+                  if (auto number = this->try_extract_number_literal(); number.has_value()) {
+                     lit.index = number.value();
+                  } else if (auto possible_word = this->_try_extract_identifier_or_word(); !std::holds_alternative<std::monostate>(possible_word)) {
+                     //
+                     // The (_try_extract_identifier_or_word) function can return a possible identifier, 
+                     // but it can also return a keyword. Keywords wouldn't be valid here, so we'll handle 
+                     // them by assuming that the script author forgot to write an index: we report an 
+                     // error, rewind to before the keyword, and let the next go-around handle the keyword 
+                     // as a keyword.
+                     //
+                     if (const auto* p = std::get_if<token_type>(&possible_word)) {
+                        static_assert(false, "TODO: non-fatal parse error: identifier expected but keyword found; assuming missing index");
+                        this->restore_stream_state(before_index);
+                        return character_scan_result::proceed;
+                     }
+                     lit.index = std::get<literal_data_identifier_or_word>(possible_word);
+                  } else {
+                     static_assert(false, "TODO: non-fatal parse error: index tag marker '#' but no index (numeric constant or alias) provided");
+                  }
+               }
+               this->_add_token(token_type::string, lit);
+            }
+            return character_scan_result::proceed;
          }
 
-         return false;
+         // Handle keywords and non-keyword identifiers/words.
+         auto possible_word = this->_try_extract_identifier_or_word();
+         if (const auto* p = std::get_if<token_type>(&possible_word)) {
+            this->_add_token(*p);
+            return character_scan_result::proceed;
+         } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
+            this->_add_token(token_type::identifier_or_word, *p);
+            return character_scan_result::proceed;
+         }
+
+         return character_scan_result::proceed;
       });
       assert(this->is_at_end()); // we should never stop early, or else in some future revision of this code we should here handle whatever would make us want to stop early
       this->_add_token(token_type::eof);
@@ -208,7 +282,7 @@ namespace halo::reach::megalo::AST {
       auto&  pos       = this->pos.offset;
       bool   comment_l = false; // are we inside of a line comment?
       size_t comment_b = 0;     // are we inside of a block comment? if so, this is the number of equal signs between the [[s, plus 1
-      QChar  delim     = '\0';
+      QChar  delim     = '\0';  // are we inside of a string literal? if so, this is the delimiter
       bool   escape    = false;
       for (; pos < length; ++pos) {
          QChar c = text[pos];
@@ -265,11 +339,20 @@ namespace halo::reach::megalo::AST {
          }
          if (comment_l || comment_b) {
             static_assert(false, "TODO: process tokens only valid inside of comments, i.e. pragmas.");
-            continue;
+            continue; // Don't call the provided character-scan functor for the inside of comments.
          }
          if (delim == '\0') {
-            if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle line comments
+            //
+            // We aren't currently inside of a string literal, so we'll honor line and block 
+            // comments here.
+            //
+            if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle comments
                if (pos + 2 < length && text[pos + 2] == '[') {
+                  //
+                  // Let's see if this is a block comment. We've matched "--[", so now we need 
+                  // to check for a second opening square bracket, optionally with some equal 
+                  // signs between both brackets.
+                  //
                   size_t equals = 0;
                   bool   bounded = false;
                   for (uint i = pos + 3; i < length; ++i) {
@@ -288,12 +371,22 @@ namespace halo::reach::megalo::AST {
                      continue;
                   }
                }
+               //
+               // Looks like it wasn't a block comment. Must be a line comment.
+               //
                comment_l = true;
                continue;
             }
+            //
+            // The current character isn't the start of a comment.
+            //
             if (is_quote_character(c))
                delim = c;
          } else {
+            //
+            // We're currently inside of a string literal. Let's keep an eye out for the ending 
+            // delimiter -- and make sure we don't let backslash-escaping confuse us.
+            //
             if (c == '\\' && !escape)
                escape = true;
             else
@@ -301,8 +394,13 @@ namespace halo::reach::megalo::AST {
             if (c == delim && !escape)
                delim = '\0';
          }
-         if (functor(c))
+         //
+         if (auto result = functor(c); result != character_scan_result::proceed) {
+            if (result == character_scan_result::stop_after) {
+               ++pos;
+            }
             return;
+         }
       }
       //
       // Indicate EOF:
@@ -330,22 +428,19 @@ namespace halo::reach::megalo::AST {
       QString word;
       this->scan_characters([this, &word](QChar c) {
          if (c.isSpace())
-            return true; // stop
+            return character_scan_result::stop_here; // stop
          if (word.isEmpty() && c.isDigit())
-            return true; // stop: words cannot start with numbers
+            return character_scan_result::stop_here; // stop: words cannot start with numbers
 
          for (const auto d : all_syntax_start_characters)
             if (c == d)
-               return true; // stop
+               return character_scan_result::stop_here; // stop
 
          if (QString(".[]").indexOf(c) >= 0)
-            return true; // stop
-
-         if (scanner::is_quote_character(c))
-            return true; // stop
+            return character_scan_result::stop_here; // stop
 
          word += c;
-         return false;
+         return character_scan_result::proceed;
       });
       return word;
    }
@@ -360,6 +455,26 @@ namespace halo::reach::megalo::AST {
       this->_add_token(type);
       auto& item = this->tokens.back();
       item.literal = lit;
+   }
+
+   std::variant<std::monostate, token_type, literal_data_identifier_or_word> scanner::_try_extract_identifier_or_word() {
+      auto word = this->_pull_next_word();
+      if (word.isEmpty())
+         return {};
+      //
+      // Is it a keyword?
+      //
+      for (const auto& definition : keywords_to_token_types) {
+         if (word.compare(definition.keyword, Qt::CaseInsensitive) == 0) {
+            return definition.token;
+         }
+      }
+      //
+      // Not a keyword.
+      //
+      return literal_data_identifier_or_word{
+         .content = word,
+      };
    }
 
    std::optional<literal_data_number> scanner::try_extract_number_literal() {

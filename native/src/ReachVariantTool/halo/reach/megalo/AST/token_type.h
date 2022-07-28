@@ -87,6 +87,8 @@ namespace halo::reach::megalo::AST {
       keyword_or,
 
       // misc
-      pragma,
+      pragma_start, // given "$pragma pragma-name (value)": represents "$pragma"
+      pragma_name,  // given "$pragma pragma-name (value)": represents "pragma-name"
+      pragma_data,  // given "$pragma pragma-name (value)": represents "value"
    };
 }

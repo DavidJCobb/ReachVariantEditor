@@ -244,13 +244,22 @@ action-block → block-event? (
            ( "function" identifier "()" )
         ) statement* "end" ;
 
-block-event → "on" (
-                 ( "double"? "host migration" ) |
-                 "init" |
-                 ( "local" "init"? ) |
-                 "object death" |
-                 "pregame"
-              ) ":" ;
+// Bolt v1 only allowed a trigger to be the listneer for a signle event. This 
+// is because triggers are referred to by the entry point list in the game 
+// variant, but also each have an enum indicating their own event type. However, 
+// AFAIK the latter isn't actually used in-engine. Could we just list them as 
+// "no event", "subroutine" triggers and still have them properly targeted? 
+// If so, then we can allow a comma-separated list of multiple event names on 
+// a single block.
+//
+block-event      → "on" block-event-name ( "," block-event-name )* ":" ;
+block-event-name → (
+                      ( "double"? "host migration" ) |
+                      "init" |
+                      ( "local" "init"? ) |
+                      "object death" |
+                      "pregame"
+                   ) ;
 
 
 

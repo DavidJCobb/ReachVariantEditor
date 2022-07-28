@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <optional>
+#include <variant>
 #include <vector>
 #include <QString>
 #include "./literal_data_number.h"
@@ -10,7 +11,14 @@
 namespace halo::reach::megalo::AST {
    class scanner {
       public:
-         using character_scan_functor_t = std::function<bool(QChar)>;
+
+         // Return codes for functors passed to scanner::scan_characters
+         enum class character_scan_result {
+            proceed,    // continue scanning characters
+            stop_after, // advance past the current character; then stop
+            stop_here,  // stop here; the current character will be seen again by the next scan_characters call
+         };
+         using character_scan_functor_t = std::function<character_scan_result(QChar)>;
 
       protected:
          QString   source;
@@ -37,8 +45,7 @@ namespace halo::reach::megalo::AST {
          // character in the source code that isn't inside of a comment. Upon reaching the string, 
          // calls your functor again with '\0' to indicate EOF.
          //
-         // Your functor can return false to continue receiving QChars, or return true to stop the 
-         // scan early.
+         // Your functor can elect to stop the scan early by returning a "stop" code.
          void scan_characters(character_scan_functor_t);
 
       protected:
@@ -51,6 +58,9 @@ namespace halo::reach::megalo::AST {
 
          void _add_token(token_type);
          void _add_token(token_type, literal_item);
+
+         // Returns either the token_type of a keyword, or an identifier/word literal, or an empty variant if no word is found immediately.
+         std::variant<std::monostate, token_type, literal_data_identifier_or_word> _try_extract_identifier_or_word();
 
          // Does not extract a number literal on its own; the caller needs to check for a sign and base.
          template<size_t Base = 10> requires (Base > 1 && Base <= 36)
