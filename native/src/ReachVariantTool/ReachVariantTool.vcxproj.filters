@@ -802,20 +802,17 @@
     <ClCompile Include="ui\debug_commands\new_backend_resave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\parser.cpp">
+    <ClCompile Include="halo\reach\megalo\languages\bolt\parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\scanner.cpp">
+    <ClCompile Include="halo\reach\megalo\languages\bolt\scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\literal_data_number.cpp">
+    <ClCompile Include="halo\reach\megalo\languages\bolt\literal_data_number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\token_pos.cpp">
+    <ClCompile Include="halo\reach\megalo\languages\bolt\token_pos.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="halo\reach\megalo\AST\_dummy.cpp">
-      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2298,49 +2295,49 @@
     <ClInclude Include="ui\debug_commands\new_backend_resave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\block.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\_base.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\function_call.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\function_call.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\alias.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\alias.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\user_defined_enum.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\user_defined_enum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\declaration.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\declaration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\expression.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\parser.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\operator_metadata.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\operator_metadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\literal_data_number.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_number.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\token_type.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\token_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\literal.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\literal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\token.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\scanner.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\token_pos.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\token_pos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\unreachable.h">
@@ -2349,22 +2346,31 @@
     <ClInclude Include="helpers\list_items_are_unique.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\statement.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\statement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\literal_data_string.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\literal_data_identifier_or_word.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_identifier_or_word.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\action_block.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\action_block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\condition_block.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\condition_block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\AST\keywords_to_tokens.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\keywords_to_tokens.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_string_literal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\base_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2377,7 +2383,7 @@
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
-    <Text Include="halo\reach\megalo\AST\_grammar.txt" />
+    <Text Include="halo\reach\megalo\languages\bolt\_grammar.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="halo\loc_string_table.inl">
@@ -2407,10 +2413,10 @@
     <None Include="halo\bitwriter.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="halo\reach\megalo\AST\parser.inl">
+    <None Include="halo\reach\megalo\languages\bolt\parser.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="halo\reach\megalo\AST\scanner.inl">
+    <None Include="halo\reach\megalo\languages\bolt\scanner.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -3,7 +3,7 @@
 #include <QString>
 #include "./_base.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class user_defined_enum : public item_base, public block_child {
       public:
          struct member {

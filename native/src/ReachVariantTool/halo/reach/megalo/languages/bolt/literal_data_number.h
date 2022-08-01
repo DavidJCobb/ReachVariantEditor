@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class literal_data_number {
       public:
          enum format_type {

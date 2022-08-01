@@ -3,7 +3,7 @@
 #include <QString>
 #include "./_base.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class function_call_argument : public item_base {
       public:
          QString content; // TODO: PLACEHOLDER

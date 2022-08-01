@@ -1,10 +1,10 @@
 #pragma once
 #include <array>
 #include "halo/util/ct_vector.h"
-#include "expression.h"
-#include "token_type.h"
+#include "./expression.h"
+#include "./token_type.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    // A collection of binary (two-term) operators which share the same precedence.
    struct binary_operator_tier_definition {
       std::array<token_type, 6> operators = {};

@@ -3,7 +3,7 @@
 #include <QString>
 #include "./block.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class action_block : public block {
       public:
          enum block_type {

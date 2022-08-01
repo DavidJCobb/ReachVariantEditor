@@ -3,7 +3,7 @@
 #include "helpers/owned_ptr.h"
 #include "./block.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class condition;
 
    class condition_block : public block {

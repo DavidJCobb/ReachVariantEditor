@@ -5,7 +5,7 @@
 #include "./literal_data_number.h"
 #include "./literal_data_string.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
 
    // i can't name this "literal" because visual studio's syntax highlighter is very, very dumb. 
    // it always highlights C++/CLI "keywords" even in C++/extremely-not-CLI files, and "literal" 

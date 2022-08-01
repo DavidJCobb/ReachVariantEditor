@@ -3,7 +3,7 @@
 #include <QString>
 #include "./_base.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    enum class declaration_type {
       variable,
    };

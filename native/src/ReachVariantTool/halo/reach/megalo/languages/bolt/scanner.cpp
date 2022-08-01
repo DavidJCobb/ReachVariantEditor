@@ -2,9 +2,11 @@
 #include <array>
 #include <cstdint>
 #include "helpers/list_items_are_unique.h"
+#include "./errors/base_exception.h"
+#include "./errors/unterminated_string_literal.h"
 #include "./keywords_to_tokens.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    namespace {
 
       //
@@ -137,6 +139,7 @@ namespace halo::reach::megalo::AST {
             return character_scan_result::proceed;
          }
 
+         #pragma region Operators
          for (const auto& item : all_two_character_operators) {
             if (c != item.glyph_a)
                continue;
@@ -162,8 +165,8 @@ namespace halo::reach::megalo::AST {
                return character_scan_result::proceed;
             }
          }
-
-         // Handle (possible) number literals here.
+         #pragma endregion
+         #pragma region Possible number literals
          if (c == '.' || c.isDigit()) {
             //
             // Test to see if it's a number literal. If so, store one. If not, allow a '.' glyph to fall through 
@@ -177,6 +180,7 @@ namespace halo::reach::megalo::AST {
                static_assert(false, "TODO: Rename all built-in identifier names (incidents, variant string IDs, etc.) as necessary so that none start with numeric digits.");
             }
          }
+         #pragma endregion
 
          for (const auto& item : all_single_character_tokens) {
             if (c == item.glyph) {
@@ -185,15 +189,19 @@ namespace halo::reach::megalo::AST {
             }
          }
 
-         // Handle string literals here.
+         #pragma region String literals
          if (is_quote_character(c)) {
             QString content;
 
             bool escape_next = false;
             bool terminated  = false;
             std::optional<token_pos> first_line_break; // first line break inside the string literal; should be reported as probable error site if the literal is unterminated
-            this->scan_characters([this, delim = c, &content, &escape_next, &terminated, &first_line_break](QChar c) {
+            std::vector<token_pos>   escaped_closers;  // if the literal is unterminated, report all escaped delimiters to the user; one could be accidental
+            this->scan_characters([this, delim = c, &content, &escape_next, &terminated, &first_line_break, &escaped_closers](QChar c) {
                if (escape_next) {
+                  if (c == delim) {
+                     escaped_closers.push_back(this->pos);
+                  }
                   content += c;
                   return character_scan_result::proceed;
                }
@@ -218,49 +226,23 @@ namespace halo::reach::megalo::AST {
                // unterminated, then the first line break is more likely to be where the script author 
                // forgot to write the end delimiter. We'll want to report that when reporting the error.
                //
-               static_assert(false, "TODO: fatal parse error: unterminated string literal");
+               errors::unterminated_string_literal error;
+               error.pos = this->lexeme_start;
+               error.escaped_closers  = std::move(escaped_closers);
+               error.first_line_break = first_line_break;
+               //
+               throw errors::scan_exception(std::move(error));
             } else {
                auto lit = literal_data_string{
                   .content   = content,
                   .delimiter = c,
                };
-               //
-               // Is this string literal suffixed with a string table index?
-               //
-               static_assert(false, "TODO: Do we want to allow whitespace between the string literal and '#' marker? If so, skip it here.");
-               if (this->_consume_desired_character('#')) {
-                  //
-                  // Possible index tag, e.g. "My String"#3 or "My String"#some_alias.
-                  //
-                  static_assert(false, "TODO: Do we want to allow whitespace between the '#' and index? If so, skip it here.");
-
-                  auto before_index = this->backup_stream_state();
-                  if (auto number = this->try_extract_number_literal(); number.has_value()) {
-                     lit.index = number.value();
-                  } else if (auto possible_word = this->_try_extract_identifier_or_word(); !std::holds_alternative<std::monostate>(possible_word)) {
-                     //
-                     // The (_try_extract_identifier_or_word) function can return a possible identifier, 
-                     // but it can also return a keyword. Keywords wouldn't be valid here, so we'll handle 
-                     // them by assuming that the script author forgot to write an index: we report an 
-                     // error, rewind to before the keyword, and let the next go-around handle the keyword 
-                     // as a keyword.
-                     //
-                     if (const auto* p = std::get_if<token_type>(&possible_word)) {
-                        static_assert(false, "TODO: non-fatal parse error: identifier expected but keyword found; assuming missing index");
-                        this->restore_stream_state(before_index);
-                        return character_scan_result::proceed;
-                     }
-                     lit.index = std::get<literal_data_identifier_or_word>(possible_word);
-                  } else {
-                     static_assert(false, "TODO: non-fatal parse error: index tag marker '#' but no index (numeric constant or alias) provided");
-                  }
-               }
                this->_add_token(token_type::string, lit);
             }
             return character_scan_result::proceed;
          }
-
-         // Handle keywords and non-keyword identifiers/words.
+         #pragma endregion
+         #pragma region Keywords and non-keyword identifiers/words
          auto possible_word = this->_try_extract_identifier_or_word();
          if (const auto* p = std::get_if<token_type>(&possible_word)) {
             this->_add_token(*p);
@@ -269,9 +251,11 @@ namespace halo::reach::megalo::AST {
             this->_add_token(token_type::identifier_or_word, *p);
             return character_scan_result::proceed;
          }
+         #pragma endregion
 
          return character_scan_result::proceed;
       });
+
       assert(this->is_at_end()); // we should never stop early, or else in some future revision of this code we should here handle whatever would make us want to stop early
       this->_add_token(token_type::eof);
    }
@@ -341,6 +325,12 @@ namespace halo::reach::megalo::AST {
             static_assert(false, "TODO: process tokens only valid inside of comments, i.e. pragmas.");
             continue; // Don't call the provided character-scan functor for the inside of comments.
          }
+         //
+         // Code ahead changes depending on whether we're inside of a string literal or not. We don't 
+         // actually extract or process string literals here -- that's the job of whatever functor you 
+         // pass for processing code -- but we need to keep track of them so that comment-related 
+         // character sequences aren't treated as comments when they occur inside of string literals.
+         //
          if (delim == '\0') {
             //
             // We aren't currently inside of a string literal, so we'll honor line and block 

@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    struct token_pos {
       public:
          using value_type = int32_t;

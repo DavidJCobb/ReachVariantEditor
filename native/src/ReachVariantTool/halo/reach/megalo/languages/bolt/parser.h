@@ -1,11 +1,10 @@
 #pragma once
 #include <optional>
 #include <QString>
-#include "literal_number.h"
-#include "operator_metadata.h"
-#include "scanner.h"
+#include "./operator_metadata.h"
+#include "./scanner.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class expression;
 
    class parser {

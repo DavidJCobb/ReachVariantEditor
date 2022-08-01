@@ -6,7 +6,7 @@
 
 namespace halo::reach::megalo::operands::variables::top_level_values {
    using number = cobb::reflex::enumeration<
-      unsigned int, // so std::bit_width isn't bratty
+      unsigned int, // so std::bit_width doesn't complain about a signed type
       //
       cobb::reflex::member_range<
          cobb::cs("global.number[n]"),
@@ -15,7 +15,7 @@ namespace halo::reach::megalo::operands::variables::top_level_values {
    >;
 
    using object = cobb::reflex::enumeration<
-      unsigned int, // so std::bit_width isn't bratty
+      unsigned int, // so std::bit_width doesn't complain about a signed type
       //
       cobb::reflex::member<cobb::cs("no_object")>,
       cobb::reflex::member_range<
@@ -29,7 +29,7 @@ namespace halo::reach::megalo::operands::variables::top_level_values {
    >;
    
    using player = cobb::reflex::enumeration<
-      unsigned int, // so std::bit_width isn't bratty
+      unsigned int, // so std::bit_width doesn't complain about a signed type
       //
       cobb::reflex::member<cobb::cs("no_player")>,
       cobb::reflex::member_range< // static players
@@ -47,7 +47,7 @@ namespace halo::reach::megalo::operands::variables::top_level_values {
    >;
    
    using team = cobb::reflex::enumeration<
-      unsigned int, // so std::bit_width isn't bratty
+      unsigned int, // so std::bit_width doesn't complain about a signed type
       //
       cobb::reflex::member<cobb::cs("no_team")>,
       cobb::reflex::member_range< // static teams
@@ -67,7 +67,7 @@ namespace halo::reach::megalo::operands::variables::top_level_values {
    >;
    
    using timer = cobb::reflex::enumeration<
-      unsigned int, // so std::bit_width isn't bratty
+      unsigned int, // so std::bit_width doesn't complain about a signed type
       //
       cobb::reflex::member_range<
          cobb::cs("global.timer[n]"),

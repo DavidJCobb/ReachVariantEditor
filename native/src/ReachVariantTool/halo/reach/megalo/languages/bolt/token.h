@@ -6,7 +6,7 @@
 #include "./token_pos.h"
 #include "./token_type.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class token : public item_base {
       public:
          token_type type = token_type::none;

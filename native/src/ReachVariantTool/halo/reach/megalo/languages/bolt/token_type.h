@@ -1,6 +1,6 @@
 #pragma once
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
 
    //
    // Code interpretation works in two passes: scanning and parsing. The 

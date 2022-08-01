@@ -7,7 +7,7 @@
 #include "./expression.h"
 #include "./user_defined_enum.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
 
    // TODO: should we even have a "statement" class? would it not be enough to
    //

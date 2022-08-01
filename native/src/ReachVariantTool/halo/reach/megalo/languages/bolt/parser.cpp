@@ -1,7 +1,7 @@
 #include "parser.h"
-#include "expression.h"
+#include "./expression.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    bool parser::is_at_end() const {
       return this->next_token >= this->scanner.tokens.size();
    }
@@ -35,8 +35,24 @@ namespace halo::reach::megalo::AST {
 
    // --- Rules ---
 
-   void parser::_try_rule_statement();
-   bool parser::_try_rule_keyword();
+   void parser::_try_rule_statement() {
+      if (this->_try_rule_keyword())
+         return;
+      if (this->_try_rule_expression())
+         return;
+      static_assert(false, "TODO: Handle unrecognized content here");
+   }
+   bool parser::_try_rule_keyword() {
+      if (this->_try_rule_alias())
+         return true;
+      if (this->_try_rule_block())
+         return true;
+      if (this->_try_rule_declare())
+         return true;
+      if (this->_try_rule_enum())
+         return true;
+      return false;
+   }
    bool parser::_try_rule_alias();
    bool parser::_try_rule_declare();
    bool parser::_try_rule_enum();
@@ -59,6 +75,26 @@ namespace halo::reach::megalo::AST {
    expression* parser::_try_rule_expression_primary() {
       if (this->_consume_any_token_of_types<token_type::number, token_type::string>()) {
          return expression::alloc_literal(this->_previous_token()->literal);
+      }
+      if (this->_consume_any_token_of_types<token_type::identifier_or_word>()) {
+         auto lit = this->_previous_token()->literal;
+
+         static_assert(false, "TODO");
+         if (this->_consume_any_token_of_types<token_type::paren_l>()) { // function-call-argument-list
+            //
+            // Function call.
+            //
+            static_assert(false, "TODO: extract argument list contents");
+            this->_require_and_consume_token(token_type::paren_r, "Expected ')' after expression.");
+
+            static_assert(false, "TODO: create and return expression...");
+            auto* expr = expression::alloc_call(lit);
+            static_assert(false, "TODO: insert the extracted argument data");
+
+            return expr;
+         }
+         // just an identifier
+         return expression::alloc_literal(lit);
       }
       if (this->_consume_any_token_of_types<token_type::paren_l>()) {
          auto* content = this->_try_rule_expression();

@@ -8,7 +8,7 @@
 #include "./token.h"
 #include "./token_pos.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class scanner {
       public:
 
@@ -38,7 +38,7 @@ namespace halo::reach::megalo::AST {
 
          bool is_at_end() const;
 
-         void scan_tokens();
+         void scan_tokens(); // can throw
 
          // Advances through the source code, handling line and block comments as appropriate and 
          // tracking the current stream position and line number. Calls your functor for every 
@@ -46,7 +46,7 @@ namespace halo::reach::megalo::AST {
          // calls your functor again with '\0' to indicate EOF.
          //
          // Your functor can elect to stop the scan early by returning a "stop" code.
-         void scan_characters(character_scan_functor_t);
+         void scan_characters(character_scan_functor_t code);
 
       protected:
 

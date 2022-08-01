@@ -3,7 +3,7 @@
 #include "helpers/list_items_are_unique.h"
 #include "./token_type.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    namespace impl {
       struct keyword_to_token {
          const char* keyword;

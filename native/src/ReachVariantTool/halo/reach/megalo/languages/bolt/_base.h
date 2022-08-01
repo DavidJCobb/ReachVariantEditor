@@ -1,7 +1,7 @@
 #pragma once
 #include "./token_pos.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    class item_base {
       public:
          token_pos start;

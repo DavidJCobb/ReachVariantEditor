@@ -1,7 +1,7 @@
 #pragma once
 #include "./scanner.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    template<size_t Base> requires (Base > 1 && Base <= 36)
    literal_data_number scanner::_try_extract_number_digits<Base>() {
       constexpr int decimal_point_not_yet_seen = -1;

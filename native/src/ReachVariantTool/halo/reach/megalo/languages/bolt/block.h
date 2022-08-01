@@ -3,7 +3,7 @@
 #include "helpers/owned_ptr.h"
 #include "./_base.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    enum class event_type {
       none,
       init,

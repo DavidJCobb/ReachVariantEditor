@@ -1,7 +1,7 @@
 #pragma once
 #include "./parser.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    template<token_type... TokenTypes>
    bool parser::_consume_any_token_of_types() {
       bool result = false;

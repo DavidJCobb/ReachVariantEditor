@@ -1,6 +1,6 @@
 #include "literal_data_number.h"
 
-namespace halo::reach::megalo::AST {
+namespace halo::reach::megalo::bolt {
    literal_data_number::literal_data_number(const literal_data_number& n) : literal_data_number() {
       *this = n;
    }
