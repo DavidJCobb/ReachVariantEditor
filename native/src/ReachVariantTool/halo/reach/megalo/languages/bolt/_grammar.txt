@@ -192,7 +192,7 @@ comment       → block-comment | line-comment ;
 line-comment  → "--" /[^\n]*/ ;
 block-comment → "--" /\[(=*)\[.+\]\1\]/ "--"
 
-pragma requires inside(comment) → "$pragma" pragma-name ( "(" pragma-args ")" )? ;
+pragma requires inside(comment) → "$pragma" WHITESPACE_SANS_NEWLINES pragma-name ( WHITESPACE_SANS_NEWLINES "(" pragma-args ")" )? ;
 
 
 

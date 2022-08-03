@@ -316,6 +316,7 @@ namespace halo::reach {
       "respawn_tick_final",
       "",
       "",
+      #pragma region Commendations
       "multikill_comm",
       "headshot_comm",
       "spree_comm",
@@ -338,27 +339,28 @@ namespace halo::reach {
       "destroy_vehicle_comm",
       "clear_a_mission_comm",
       "campaign_level_completed_deathless",
-      "player_kills_spartan",
-      "player_kill_spartan_achieve",
-      "core_killed_achieve",
-      "m45_elite_pod",
-      "dmr_acheive",
-      "supercombine_achieve",
-      "pistol_achieve",
-      "wingman_achieve",
-      "3kiva_clear",
-      "leg_set_achieve",
-      "2_for_1_achieve",
-      "cruiser_fast_achieve",
-      "firebird_achieve",
-      "tank_survive_achieve",
-      "race_m20",
-      "race_m20_fast",
-      "terminal_vel_achieve",
-      "wildlife_achieve",
-      "skunked_achieve",
-      "m52_aa_kill",
-      "zealot_achieve",
+      #pragma endregion
+      "player_kills_spartan", // Firefight: a player-controlled Elite has killed a player-controlled Spartan.
+      "player_kill_spartan_achieve", // "Knife to a Gunfight"
+      "core_killed_achieve",  // Unknown. Matchmaking Multiplayer/Megalo only.
+      "m45_elite_pod",        // Triggered when killing a drop pod during the spaceflight section of Long Night of Solace. Used to track the "Pod Kettle Black" Challenge.
+      "dmr_acheive",          // achievements.achi: dmr_kill             | "An Elegant Weapon"
+      "supercombine_achieve", // achievements.achi: supercombine         | "A Spoonful of Blamite"
+      "pistol_achieve",       // achievements.achi: pistolero            | "I See You Favor A .45"
+      "wingman_achieve",      // achievements.achi: bro_spawn            | "Be My Wingman, Anytime"
+      "3kiva_clear",          // achievements.achi: m10special           | "They've Always Been Faster"
+      "leg_set_achieve",      // achievements.achi: legendary_deathless  | "Game, Set, Match"
+      "2_for_1_achieve",      // achievements.achi: 2_for_1              | "Two Corpses in One Grave"
+      "cruiser_fast_achieve", // achievements.achi: cruiser_fast_achieve | "Wake Up, Buttercup"
+      "firebird_achieve",     // achievements.achi: firebird             | "Lucky Me"
+      "tank_survive_achieve", // achievements.achi: m60special           | "Tank Beats Everything"
+      "race_m20",             // Reach Racer: Fires for the winning player if they finished the race in 120 seconds or less. No associated Achievement; could be cut content or, perhaps, used for Bungie-era telemetry.
+      "race_m20_fast",        // Reach Racer: Fires for the winning player if they finished the race in  60 seconds or less. No associated Achievement; could be cut content or, perhaps, used for Bungie-era telemetry.
+      "terminal_vel_achieve", // achievements.achi: m70special           | "If They Came to Hear Me Beg"
+      "wildlife_achieve",     // achievements.achi: mostkills            | "KEEP IT CLEAN"
+      "skunked_achieve",      // achievements.achi: skunked              | "Skunked"
+      "m52_aa_kill",          // achievements.achi: m52special           | "I Didn't Train to Be a Pilot" ?
+      "zealot_achieve",       // achievements.achi: m35special           | "Your Heresy Will Stay Your Feet"
       "",
       "",
       "dlc_achieve_1",
