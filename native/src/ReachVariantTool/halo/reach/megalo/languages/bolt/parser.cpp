@@ -51,6 +51,8 @@ namespace halo::reach::megalo::bolt {
          return true;
       if (this->_try_rule_enum())
          return true;
+      if (this->_try_rule_pragma())
+         return true;
       return false;
    }
    bool parser::_try_rule_alias();
@@ -78,19 +80,48 @@ namespace halo::reach::megalo::bolt {
       }
       if (this->_consume_any_token_of_types<token_type::identifier_or_word>()) {
          auto lit = this->_previous_token()->literal;
-
-         static_assert(false, "TODO");
+         //
+         // Check if this is a function call:
+         //
          if (this->_consume_any_token_of_types<token_type::paren_l>()) { // function-call-argument-list
             //
             // Function call.
             //
-            static_assert(false, "TODO: extract argument list contents");
+            std::vector<function_call_argument> args;
+            //
+            if (!this->_check_next_token(token_type::paren_r)) {
+               do {
+                  //
+                  // Extract argument.
+                  //
+                  bool    argument_is_named = false;
+                  QString argument_name;
+                  if (this->_check_token_type_sequence_ahead<token_type::identifier_or_word, token_type::equal>()) {
+                     {  // Consume argument name.
+                        auto& next = this->_pull_next_token();
+                        assert(next.type == token_type::identifier_or_word);
+                        assert(std::holds_alternative<literal_data_identifier_or_word>(next.literal.value));
+                        argument_name = std::get<literal_data_identifier_or_word>(next.literal.value).content;
+                     }
+                     {  // Consume equal sign.
+                        auto& next = this->_pull_next_token();
+                        assert(next.type == token_type::equal);
+                     }
+                  }
+                  cobb::owned_ptr expr = this->_try_rule_expression();
+                  if (!expr) {
+                     static_assert(false, "TODO: error and continue to next ',' or ')'");
+                  }
+                  auto& argument = args.emplace_back();
+                  if (argument_is_named)
+                     std::swap(argument.name, argument_name);
+                  std::swap(argument.value, expr);
+               } while (!this->_check_next_token(token_type::comma));
+            }
             this->_require_and_consume_token(token_type::paren_r, "Expected ')' after expression.");
 
-            static_assert(false, "TODO: create and return expression...");
             auto* expr = expression::alloc_call(lit);
-            static_assert(false, "TODO: insert the extracted argument data");
-
+            std::swap(expr->arguments, args);
             return expr;
          }
          // just an identifier

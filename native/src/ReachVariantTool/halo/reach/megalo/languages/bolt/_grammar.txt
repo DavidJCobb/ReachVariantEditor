@@ -190,26 +190,15 @@ block-comment → "--" /\[(=*)\[.+\]\1\]/ "--"
 
 // Pragmas:
 
-pragma-multiline-end requires(no prior non-whitespace content on same line) → "pragma end"
-
-pragma-name → ( CHAR_ASCII_ALPHANUMERIC | "-" | "_" )+ ;
-
-pragma → "pragma" pragma-name ( STRING | "begin" LITERALLY_ANY_CONTENT_EVER pragma-multiline-end )? ;
+pragma → "pragma" IDENTIFIER ( STRING )? ;
 
 //
 // Pragma statements therefore look like...
 //
-//    pragma name-of-pragma "data for pragma"
+//    pragma name_of_pragma "data for pragma"
 //
-//    pragma compiler-language  "bolt"
-//    pragma target-rvt-version "2.2"
-//
-//    pragma some-future-pragma begin
-//       syntax for multi-line pragma data
-//       any content can go here, with one exception
-//       the phrase "pragma end" can only appear if preceded by something other than whitespace on the same line
-//       because if preceded only by whitespace, that phrase marks the end of a multi-line pragma
-//    pragma end
+//    pragma compiler_language  "bolt"
+//    pragma target_rvt_version "2.2"
 //
 
 

@@ -29,6 +29,7 @@ namespace halo::reach::megalo::bolt {
       ampersand,   // '&'
       asterisk,    // '*'
       caret,       // '^'
+      comma,       // ','
       equal,       // '='
       exclamation, // '!'
       minus,       // '-'
@@ -85,10 +86,6 @@ namespace halo::reach::megalo::bolt {
       keyword_if,
       keyword_on,
       keyword_or,
-
-      // misc
-      pragma_start, // given "$pragma pragma-name (value)": represents "$pragma"
-      pragma_name,  // given "$pragma pragma-name (value)": represents "pragma-name"
-      pragma_data,  // given "$pragma pragma-name (value)": represents "value"
+      keyword_pragma,
    };
 }

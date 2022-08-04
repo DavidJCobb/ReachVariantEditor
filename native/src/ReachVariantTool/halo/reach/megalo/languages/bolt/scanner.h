@@ -5,7 +5,6 @@
 #include <vector>
 #include <QString>
 #include "./literal_data_number.h"
-#include "./pragma.h"
 #include "./token.h"
 #include "./token_pos.h"
 
@@ -20,8 +19,6 @@ namespace halo::reach::megalo::bolt {
             stop_here,  // stop here; the current character will be seen again by the next scan_characters call
          };
          using character_scan_functor_t = std::function<character_scan_result(QChar)>;
-
-         using comment_scan_functor_t = std::function<character_scan_result(QChar)>;
 
       protected:
          QString   source;
@@ -62,14 +59,9 @@ namespace halo::reach::megalo::bolt {
          // calls your functor again with '\0' to indicate EOF.
          //
          // Your functor can elect to stop the scan early by returning a "stop" code.
-         void scan_characters(character_scan_functor_t code_functor, comment_scan_functor_t comment_functor = {});
-      protected:
-         void _scan_within_comment(comment_scan_functor_t);
+         void scan_characters(character_scan_functor_t);
 
       protected:
-         bool _handle_newline_during_character_scan(); // returns true if we just exited a line comment
-         bool _is_at_block_comment_end() const; // call upon encountering a ']' while inside of a block comment
-
          QChar _peek_next_char() const;
          QChar _pull_next_char(); // advance() in tutorial
          bool _consume_desired_character(QChar); // advances only if the next character is the desired character

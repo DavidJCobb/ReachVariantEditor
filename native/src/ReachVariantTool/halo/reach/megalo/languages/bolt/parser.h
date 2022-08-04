@@ -22,6 +22,9 @@ namespace halo::reach::megalo::bolt {
          const token* _previous_token() const;
 
          template<token_type... TokenTypes>
+         bool _check_token_type_sequence_ahead() const;
+
+         template<token_type... TokenTypes>
          bool _consume_any_token_of_types();
 
          template<size_t Size, std::array<token_type, Size> TokenTypes>
@@ -38,6 +41,7 @@ namespace halo::reach::megalo::bolt {
                   bool _try_rule_block_actions();
                      bool _try_rule_block_event();
                   bool _try_rule_block_conditions();
+               bool _try_rule_pragma();
             expression* _try_rule_expression();
                template<size_t TierIndex> expression* _try_rule_expression_binary();
                expression* _try_rule_expression_unary();

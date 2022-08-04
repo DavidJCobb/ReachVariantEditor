@@ -3,6 +3,20 @@
 
 namespace halo::reach::megalo::bolt {
    template<token_type... TokenTypes>
+   bool parser::_check_token_type_sequence_ahead() const {
+      auto& list = this->scanner.tokens;
+      auto  i    = this->next_token;
+      if (i + sizeof...(TokenTypes) >= list.size())
+         return false;
+      bool result = true;
+      (
+         (result ? (result = list[i++].type == TokenTypes) : false),
+         ...
+      );
+      return result;
+   }
+
+   template<token_type... TokenTypes>
    bool parser::_consume_any_token_of_types() {
       bool result = false;
       (
