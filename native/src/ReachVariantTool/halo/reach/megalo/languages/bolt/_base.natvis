@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::item_base" Inheritable="false">
+      <DisplayString Condition="start.line != end.line">[{start.offset,d}, {end.offset,d}) [lines {start.line,d} - {end.line,d})</DisplayString>
+      <DisplayString>[{start.offset,d}, {end.offset,d}) [line {start.line,d}]</DisplayString>
+   </Type>
+</AutoVisualizer>

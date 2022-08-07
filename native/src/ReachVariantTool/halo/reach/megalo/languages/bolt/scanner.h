@@ -14,9 +14,10 @@ namespace halo::reach::megalo::bolt {
 
          // Return codes for functors passed to scanner::scan_characters
          enum class character_scan_result {
-            proceed,    // continue scanning characters
-            stop_after, // advance past the current character; then stop
-            stop_here,  // stop here; the current character will be seen again by the next scan_characters call
+            proceed,     // continue scanning characters
+            stop_after,  // advance past the current character; then stop
+            stop_here,   // stop here; the current character will be seen again by the next scan_characters call
+            stop_before, // rewind by one character (if we're not at the start of the stream) and stop
          };
          using character_scan_functor_t = std::function<character_scan_result(QChar)>;
 

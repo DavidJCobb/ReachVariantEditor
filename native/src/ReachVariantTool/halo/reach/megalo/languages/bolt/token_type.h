@@ -51,7 +51,6 @@ namespace halo::reach::megalo::bolt {
       operator_compare_le, // "<="
       operator_compare_ge, // ">="
 
-      operator_assign_bare, // "=="
       operator_assign_add,  // "+="
       operator_assign_and,  // "&="
       operator_assign_div,  // "/="

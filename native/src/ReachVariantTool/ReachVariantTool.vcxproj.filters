@@ -820,6 +820,9 @@
     <ClCompile Include="halo\reach\megalo\languages\bolt\expression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\debug_commands\bolt_compiler_pass_1_test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2394,6 +2397,9 @@
     <ClInclude Include="helpers\type_traits\is_std_array_of_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui\debug_commands\bolt_compiler_pass_1_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2470,5 +2476,9 @@
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
     <Natvis Include="halo\reach\megalo\trigger.natvis" />
     <Natvis Include="helpers\eight_cc.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\literal.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\token.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\_base.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\literal_data_number.natvis" />
   </ItemGroup>
 </Project>

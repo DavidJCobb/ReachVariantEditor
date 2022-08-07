@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::token">
+      <DisplayString Condition="type == token_type::eof">{*(item_base*)(this)} EOF</DisplayString>
+
+      <DisplayString Condition="type == token_type::paren_l">{*(item_base*)(this)} glyph: (</DisplayString>
+      <DisplayString Condition="type == token_type::paren_r">{*(item_base*)(this)} glyph: )</DisplayString>
+      <DisplayString Condition="type == token_type::angle_bracket_l">{*(item_base*)(this)} glyph: &lt;</DisplayString>
+      <DisplayString Condition="type == token_type::angle_bracket_r">{*(item_base*)(this)} glyph: &gt;</DisplayString>
+      <DisplayString Condition="type == token_type::square_bracket_l">{*(item_base*)(this)} glyph: [</DisplayString>
+      <DisplayString Condition="type == token_type::square_bracket_r">{*(item_base*)(this)} glyph: ]</DisplayString>
+      
+      <DisplayString Condition="type == token_type::ampersand  ">{*(item_base*)(this)} glyph: &amp;</DisplayString>
+      <DisplayString Condition="type == token_type::asterisk   ">{*(item_base*)(this)} glyph: *</DisplayString>
+      <DisplayString Condition="type == token_type::caret      ">{*(item_base*)(this)} glyph: ^</DisplayString>
+      <DisplayString Condition="type == token_type::comma      ">{*(item_base*)(this)} glyph: ,</DisplayString>
+      <DisplayString Condition="type == token_type::equal      ">{*(item_base*)(this)} glyph: =</DisplayString>
+      <DisplayString Condition="type == token_type::exclamation">{*(item_base*)(this)} glyph: !</DisplayString>
+      <DisplayString Condition="type == token_type::minus      ">{*(item_base*)(this)} glyph: -</DisplayString>
+      <DisplayString Condition="type == token_type::percent    ">{*(item_base*)(this)} glyph: %</DisplayString>
+      <DisplayString Condition="type == token_type::period     ">{*(item_base*)(this)} glyph: .</DisplayString>
+      <DisplayString Condition="type == token_type::pipe       ">{*(item_base*)(this)} glyph: |</DisplayString>
+      <DisplayString Condition="type == token_type::plus       ">{*(item_base*)(this)} glyph: +</DisplayString>
+      <DisplayString Condition="type == token_type::slash_fwd  ">{*(item_base*)(this)} glyph: /</DisplayString>
+      <DisplayString Condition="type == token_type::tilde      ">{*(item_base*)(this)} glyph: ~</DisplayString>
+
+      <DisplayString Condition="type == token_type::operator_compare_eq">{*(item_base*)(this)} operator: ==</DisplayString>
+      <DisplayString Condition="type == token_type::operator_compare_ne">{*(item_base*)(this)} operator: !=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_compare_le">{*(item_base*)(this)} operator: &lt;=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_compare_ge">{*(item_base*)(this)} operator: &gt;=</DisplayString>
+
+      <DisplayString Condition="type == token_type::operator_assign_add">{*(item_base*)(this)} operator: +=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_and">{*(item_base*)(this)} operator: &amp;=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_div">{*(item_base*)(this)} operator: /=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_mod">{*(item_base*)(this)} operator: %=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_mul">{*(item_base*)(this)} operator: *=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_not">{*(item_base*)(this)} operator: ~=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_or ">{*(item_base*)(this)} operator: |=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_shl">{*(item_base*)(this)} operator: &lt;&lt;=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_shr">{*(item_base*)(this)} operator: &gt;&gt;=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_sub">{*(item_base*)(this)} operator: -=</DisplayString>
+      <DisplayString Condition="type == token_type::operator_assign_xor">{*(item_base*)(this)} operator: ^=</DisplayString>
+
+      <DisplayString Condition="type == token_type::operator_binary_shl">{*(item_base*)(this)} operator: &lt;&lt;</DisplayString>
+      <DisplayString Condition="type == token_type::operator_binary_shr">{*(item_base*)(this)} operator: &gt;&gt;</DisplayString>
+
+      <DisplayString Condition="type == token_type::identifier_or_word">{*(item_base*)(this)} {literal}</DisplayString>
+      <DisplayString Condition="type == token_type::number">{*(item_base*)(this)} {literal}</DisplayString>
+      <DisplayString Condition="type == token_type::string">{*(item_base*)(this)} {literal}</DisplayString>
+
+      <DisplayString Condition="type == token_type::keyword_alias   ">{*(item_base*)(this)} keyword: alias</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_alt     ">{*(item_base*)(this)} keyword: alt</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_altif   ">{*(item_base*)(this)} keyword: altif</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_and     ">{*(item_base*)(this)} keyword: and</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_declare ">{*(item_base*)(this)} keyword: declare</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_do      ">{*(item_base*)(this)} keyword: do</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_end     ">{*(item_base*)(this)} keyword: end</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_enum    ">{*(item_base*)(this)} keyword: enum</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_for     ">{*(item_base*)(this)} keyword: for</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_function">{*(item_base*)(this)} keyword: function</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_if      ">{*(item_base*)(this)} keyword: if</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_on      ">{*(item_base*)(this)} keyword: on</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_or      ">{*(item_base*)(this)} keyword: or</DisplayString>
+      <DisplayString Condition="type == token_type::keyword_pragma  ">{*(item_base*)(this)} keyword: pragma</DisplayString>
+
+      <DisplayString></DisplayString>
+   </Type>
+</AutoVisualizer>

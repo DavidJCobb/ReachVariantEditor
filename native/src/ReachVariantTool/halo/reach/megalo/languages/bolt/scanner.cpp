@@ -144,6 +144,28 @@ namespace halo::reach::megalo::bolt {
          for (const auto& item : all_two_character_operators) {
             if (c != item.glyph_a)
                continue;
+            //
+            this->_pull_next_char(); // move past Glyph A and get to the next glyph.
+            static_assert(
+               []() -> bool {
+                  for (const auto& item : all_two_character_operators) {
+                     if (item.one == token_type::none)
+                        return false;
+                     if (item.one_equal == token_type::none)
+                        return false;
+                     if (item.two == token_type::none)
+                        return false;
+                     if (item.two_equal == token_type::none)
+                        return false;
+                  }
+                  return true;
+               }(),
+               "If this assertion ever fails, we need to revise the code here to peek characters instead of consuming them as they're read. "
+               "The logic for two-character operators hinges on the assumption that the moment we encounter Glyph A, we WILL produce SOME "
+               "sort of operator; ergo it's safe to actually advance the stream. If ever there is a case where we DO NOT produce an operator, "
+               "then we need to peek the stream instead, and advance only when we definitely do match an operator."
+            );
+            //
             token_type tt = item.one;
             if (this->_consume_desired_character('=')) {
                tt = item.one_equal;
@@ -158,6 +180,7 @@ namespace halo::reach::megalo::bolt {
          }
          for (const auto& pair : all_single_character_operators) {
             if (c == pair.glyph) {
+               this->_pull_next_char(); // move past the operator glyph and get to the next glyph in the stream.
                if (this->_consume_desired_character('=')) {
                   this->_add_token(pair.equal);
                } else {
@@ -392,14 +415,13 @@ namespace halo::reach::megalo::bolt {
          if (auto result = functor(c); result != character_scan_result::proceed) {
             if (result == character_scan_result::stop_after) {
                ++pos;
+            } else if (result == character_scan_result::stop_before) {
+               if (pos)
+                  --pos;
             }
             return;
          }
       }
-      //
-      // Indicate EOF:
-      //
-      functor('\0');
    }
 
 
@@ -421,17 +443,23 @@ namespace halo::reach::megalo::bolt {
    QString scanner::_pull_next_word() {
       QString word;
       this->scan_characters([this, &word](QChar c) {
+         //
+         // We need a special stop code so that when this function is invoked during nested character scans, 
+         // the outer scan(s) don't accidentally skip the next glyph after the word.
+         //
+         auto stop_code = word.isEmpty() ? character_scan_result::stop_here : character_scan_result::stop_before;
+
          if (c.isSpace())
-            return character_scan_result::stop_here; // stop
+            return stop_code;
          if (word.isEmpty() && c.isDigit())
-            return character_scan_result::stop_here; // stop: words cannot start with numbers
+            return character_scan_result::stop_here; // swords cannot start with numbers
 
          for (const auto d : all_syntax_start_characters)
             if (c == d)
-               return character_scan_result::stop_here; // stop
+               return stop_code;
 
          if (QString(".[]").indexOf(c) >= 0)
-            return character_scan_result::stop_here; // stop
+            return stop_code; // stop
 
          word += c;
          return character_scan_result::proceed;

@@ -11,10 +11,14 @@ namespace halo::reach::megalo::bolt {
       bool ignore  = false; // we found an invalid char, so the result will not be a valid number
       int  decimal = decimal_point_not_yet_seen; // have we found a decimal point? if so (value >= 0), how many digits after it have we read?
 
-      this->scan_characters([this, &decimal, &ignore, &result](QChar c) -> character_scan_result {
+      bool any_digits = false; // guard against '.' being considered a valid number
+
+      auto prior = this->backup_stream_state(); // HACK HACK HACK
+
+      this->scan_characters([this, &any_digits, &decimal, &ignore, &result](QChar c) -> character_scan_result {
          if (c == '.') {
             if (decimal != decimal_point_not_yet_seen) {
-               return character_scan_result::stop_here; // stop
+               return character_scan_result::stop_before; // stop: we've already seen a decimal point
             }
             decimal = 0;
             result.value.decimal = result.value.integer;
@@ -22,7 +26,7 @@ namespace halo::reach::megalo::bolt {
             return character_scan_result::proceed; // continue
          }
          if (c.isSpace()) {
-            return character_scan_result::stop_here; // stop
+            return character_scan_result::stop_before; // stop
          }
 
          auto charcode = c.unicode();
@@ -62,7 +66,7 @@ namespace halo::reach::megalo::bolt {
                digit = charcode - '0';
             } else {
                if (charcode >= 'A' && charcode <= 'Z') // to lowercase
-                  charcode -= 0x20;
+                  charcode += 0x20;
                //
                if (charcode >= 'a' && charcode <= ('a' + Base - 11)) {
                   valid = true;
@@ -74,6 +78,7 @@ namespace halo::reach::megalo::bolt {
          // We have now either extracted a digit or found a non-digit.
          //
          if (valid) {
+            any_digits = true;
             if (!ignore) { // only bother computing a value if no previous chars were invalid
                if (decimal != decimal_point_not_yet_seen) {
                   //
@@ -92,11 +97,16 @@ namespace halo::reach::megalo::bolt {
             }
          } else {
             if (!consume)
-               return character_scan_result::stop_here; // stop
+               return character_scan_result::stop_before; // stop
             ignore = true;
          }
          return character_scan_result::proceed; // continue
       });
+      if (!any_digits) {
+         this->restore_stream_state(prior); // HACK HACK HACK
+         result.format = literal_data_number::format_type::none;
+         return result;
+      }
       if (ignore) {
          result.format = literal_data_number::format_type::none;
       } else if (decimal == decimal_point_not_yet_seen) {
