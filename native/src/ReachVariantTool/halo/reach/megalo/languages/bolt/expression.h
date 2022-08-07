@@ -3,6 +3,7 @@
 #include <QString>
 #include "helpers/owned_ptr.h"
 #include "./_base.h"
+#include "./function_call_argument.h"
 #include "./literal.h"
 #include "./token_type.h"
 
@@ -14,19 +15,7 @@ namespace halo::reach::megalo::bolt {
       call,
       primary,
       literal,
-   };
-
-   struct expression;
-   struct function_call_argument : public item_base {
-      QString name; // if it's using named parameters; else, blank
-      cobb::owned_ptr<expression> value = nullptr;
-
-      function_call_argument() {}
-      function_call_argument(function_call_argument&&) noexcept;
-      function_call_argument& operator=(function_call_argument&&);
-
-      function_call_argument(const function_call_argument&) = delete;
-      function_call_argument& operator=(const function_call_argument&) = delete;
+      grouping, // parenthetical expressions
    };
 
    struct expression : public item_base, public block_child {
@@ -34,7 +23,7 @@ namespace halo::reach::megalo::bolt {
       token_type      op   = token_type::none;
 
       literal_item lit; // calls and literals only. call: function to call (identifier)
-      cobb::owned_ptr<expression> lhs; // binary only.
+      cobb::owned_ptr<expression> lhs; // binary or parenthetical only.
       cobb::owned_ptr<expression> rhs; // binary or unary only.
       std::vector<function_call_argument> arguments;
 

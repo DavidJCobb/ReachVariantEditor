@@ -814,6 +814,12 @@
     <ClCompile Include="halo\reach\megalo\languages\bolt\token_pos.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\reach\megalo\languages\bolt\function_call_argument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="halo\reach\megalo\languages\bolt\expression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2301,7 +2307,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\languages\bolt\function_call.h">
+    <ClInclude Include="halo\reach\megalo\languages\bolt\function_call_argument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\reach\megalo\languages\bolt\alias.h">

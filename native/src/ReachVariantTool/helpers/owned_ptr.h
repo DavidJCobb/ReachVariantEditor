@@ -56,7 +56,7 @@ namespace cobb {
          owned_ptr(owned_ptr&& v) noexcept : _target(v.release()) {}
 
          template<typename U> owned_ptr& operator=(const owned_ptr<U>&) = delete;
-         owned_ptr& operator=(owned_ptr&& v) {
+         owned_ptr& operator=(owned_ptr&& v) noexcept {
             this->clear();
             this->_target = v.release();
             return *this;

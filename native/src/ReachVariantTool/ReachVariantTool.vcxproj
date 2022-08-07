@@ -212,6 +212,8 @@
     <ClCompile Include="halo\reach\load_process_messages\arena_stat_cannot_be_infinity.cpp" />
     <ClCompile Include="halo\reach\load_process_messages\not_a_game_variant.cpp" />
     <ClCompile Include="halo\reach\map_permissions.cpp" />
+    <ClCompile Include="halo\reach\megalo\languages\bolt\expression.cpp" />
+    <ClCompile Include="halo\reach\megalo\languages\bolt\function_call_argument.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\literal_data_number.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\parser.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\scanner.cpp" />
@@ -525,7 +527,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_string_literal.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\expression.h" />
-    <ClInclude Include="halo\reach\megalo\languages\bolt\function_call.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\function_call_argument.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\keywords_to_tokens.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_number.h" />

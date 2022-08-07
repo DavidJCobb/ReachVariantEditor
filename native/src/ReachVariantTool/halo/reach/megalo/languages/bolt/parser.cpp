@@ -6,6 +6,16 @@
 #include "./errors/unterminated_function_call_argument_list.h"
 #include "./errors/unterminated_grouping_expression.h"
 
+namespace {
+   constexpr bool just_let_me_compile_it_for_now_so_i_can_test = false ||
+         #if _DEBUG
+            true
+         #else
+            false
+         #endif
+      ;
+}
+
 namespace halo::reach::megalo::bolt {
    parser::~parser() {
       for (auto* item : this->errors)
@@ -63,17 +73,39 @@ namespace halo::reach::megalo::bolt {
       return false;
    }
 
-   /*//
-
-   bool parser::_try_rule_alias();
-   bool parser::_try_rule_declare();
-   bool parser::_try_rule_enum();
-   bool parser::_try_rule_block();
-   bool parser::_try_rule_block_actions();
-   bool parser::_try_rule_block_event(); static_assert(false, "TODO: return flags-mask of event types instead?");
-   bool parser::_try_rule_block_conditions();
-
-   //*/
+   bool parser::_try_rule_alias() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_declare() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_enum() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_block() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_block_actions() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_block_event() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: return flags-mask of found event types instead of success bool? what about syntax errors e.g. on : do end ?");
+      return false;
+   }
+   bool parser::_try_rule_block_conditions() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
+   bool parser::_try_rule_pragma() {
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
+      return false;
+   }
 
    expression* parser::_try_rule_expression() {
       return this->_try_rule_expression_binary<0>();
