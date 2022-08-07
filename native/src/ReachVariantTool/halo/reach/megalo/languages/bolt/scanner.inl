@@ -11,19 +11,21 @@ namespace halo::reach::megalo::bolt {
       bool ignore  = false; // we found an invalid char, so the result will not be a valid number
       int  decimal = decimal_point_not_yet_seen; // have we found a decimal point? if so (value >= 0), how many digits after it have we read?
 
-      this->scan_characters([this, &decimal, &ignore, &result](QChar c) {
+      this->scan_characters([this, &decimal, &ignore, &result](QChar c) -> character_scan_result {
          if (c == '.') {
             if (decimal != decimal_point_not_yet_seen) {
-               return true; // stop
+               return character_scan_result::stop_here; // stop
             }
             decimal = 0;
             result.value.decimal = result.value.integer;
             result.format = literal_data_number::format_type::decimal;
-            return false; // continue
+            return character_scan_result::proceed; // continue
          }
          if (c.isSpace()) {
-            return true; // stop
+            return character_scan_result::stop_here; // stop
          }
+
+         auto charcode = c.unicode();
 
          size_t digit   = 0;
          bool   valid   = false;
@@ -41,12 +43,12 @@ namespace halo::reach::megalo::bolt {
                   digit = (c == '0' ? 0 : 1);
                }
             } else {
-               if (c >= '0' && c <= ('0' + Base - 1)) {
+               if (charcode >= '0' && charcode <= ('0' + Base - 1)) {
                   valid = true;
-                  digit = c - '0';
+                  digit = charcode - '0';
                }
             }
-            if (!valid && c >= '0' && c <= '9') {
+            if (!valid && charcode >= '0' && charcode <= '9') {
                consume = true;
             }
          } else {
@@ -55,16 +57,16 @@ namespace halo::reach::megalo::bolt {
             // glyphs that represent base-10 digits first, and then move into ASCII 
             // letters.
             //
-            if (c >= '0' && c <= '9') {
+            if (charcode >= '0' && charcode <= '9') {
                valid = true;
-               digit = c - '0';
+               digit = charcode - '0';
             } else {
-               if (c >= 'A' && c <= 'Z') // to lowercase
-                  c -= 0x20;
+               if (charcode >= 'A' && charcode <= 'Z') // to lowercase
+                  charcode -= 0x20;
                //
-               if (c >= 'a' && c <= ('a' + Base - 11)) {
+               if (charcode >= 'a' && charcode <= ('a' + Base - 11)) {
                   valid = true;
-                  digit = c - 'a' + 10;
+                  digit = charcode - 'a' + 10;
                }
             }
          }
@@ -90,10 +92,10 @@ namespace halo::reach::megalo::bolt {
             }
          } else {
             if (!consume)
-               return true; // stop
+               return character_scan_result::stop_here; // stop
             ignore = true;
          }
-         return false; // continue
+         return character_scan_result::proceed; // continue
       });
       if (ignore) {
          result.format = literal_data_number::format_type::none;

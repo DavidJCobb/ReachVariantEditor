@@ -2,6 +2,7 @@
 #include <optional>
 #include <vector>
 #include <QString>
+#include "helpers/type_traits/is_std_array_of_type.h"
 #include "./errors/base.h"
 #include "./operator_metadata.h"
 #include "./scanner.h"
@@ -39,7 +40,7 @@ namespace halo::reach::megalo::bolt {
          template<token_type... TokenTypes>
          bool _consume_any_token_of_types();
 
-         template<size_t Size, std::array<token_type, Size> TokenTypes>
+         template<auto TokenTypes> requires cobb::is_std_array_of_type<std::decay_t<decltype(TokenTypes)>, token_type>
          bool _consume_any_token_of_types();
 
          void _try_rule_statement();

@@ -27,18 +27,15 @@ namespace cobb {
 
       template<typename T> concept is_compatible_list = is_indexable_list<T> || (has_range_loop_members<T> || has_range_loop_non_members<T>);
 
-      template<typename T> struct _extract_list_value_type {
-         using type = std::decay_t<decltype(
-            [](){
-               const auto& list = std::declval<T>();
-               if constexpr (is_indexable_list<T>) {
-                  return list[0];
-               } else if constexpr (has_range_loop_members<T> || has_range_loop_non_members<T>) {
-                  using std::begin;
-                  return *begin(list);
-               }
-            }()
-         )>;
+      template<typename T> struct _extract_list_value_type;
+      template<typename T> requires is_indexable_list<T> struct _extract_list_value_type<T> {
+         using type = std::decay_t<decltype(std::declval<T>()[0])>;
+      };
+      template<typename T> requires (!is_indexable_list<T> && has_range_loop_members<T>) struct _extract_list_value_type<T> {
+         using type = std::decay_t<decltype(*std::declval<T>().begin())>;
+      };
+      template<typename T> requires (!(is_indexable_list<T> || has_range_loop_members<T>) && has_range_loop_non_members<T>) struct _extract_list_value_type<T> {
+         using type = std::decay_t<decltype(*begin(std::declval<T>()))>;
       };
 
       template<typename List, typename Functor> concept is_usable_functor = (

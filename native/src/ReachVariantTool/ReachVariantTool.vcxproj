@@ -792,6 +792,7 @@
     <ClInclude Include="helpers\type_traits\is_constexpr_default_constructible.h" />
     <ClInclude Include="helpers\type_traits\is_literal.h" />
     <ClInclude Include="helpers\type_traits\is_std_array.h" />
+    <ClInclude Include="helpers\type_traits\is_std_array_of_type.h" />
     <ClInclude Include="helpers\type_traits\is_std_optional_type.h" />
     <ClInclude Include="helpers\type_traits\is_std_vector.h" />
     <ClInclude Include="helpers\type_traits\is_templated_lambda.h" />

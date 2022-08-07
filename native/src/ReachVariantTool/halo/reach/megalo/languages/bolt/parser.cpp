@@ -193,6 +193,7 @@ namespace halo::reach::megalo::bolt {
          }
          return expression::alloc_grouping(content);
       }
+      return nullptr;
    }
 
 }

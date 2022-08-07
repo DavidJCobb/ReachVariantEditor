@@ -2385,6 +2385,9 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="helpers\type_traits\is_std_array_of_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

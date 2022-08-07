@@ -52,7 +52,7 @@ namespace halo::reach::megalo::bolt {
          ++this->next_token;
       return result;
    }
-   template<size_t Size, std::array<token_type, Size> TokenTypes>
+   template<auto TokenTypes> requires cobb::is_std_array_of_type<std::decay_t<decltype(TokenTypes)>, token_type>
    bool parser::_consume_any_token_of_types() {
       for (auto t : TokenTypes) {
          if (t == token_type::none)
@@ -79,7 +79,7 @@ namespace halo::reach::megalo::bolt {
       while (this->_consume_any_token_of_types<tier.operators>()) {
          auto  op  = this->_previous_token();
          auto* rhs = _get_side();
-         expr = expression::alloc_binary(expr, op, rhs);
+         expr = expression::alloc_binary(expr, op->type, rhs);
       }
       return expr;
    };
