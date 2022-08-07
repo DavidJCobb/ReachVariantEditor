@@ -14,10 +14,8 @@ namespace halo::reach::megalo::bolt {
 
          // Return codes for functors passed to scanner::scan_characters
          enum class character_scan_result {
-            proceed,     // continue scanning characters
-            stop_after,  // advance past the current character; then stop
-            stop_here,   // stop here; the current character will be seen again by the next scan_characters call
-            stop_before, // rewind by one character (if we're not at the start of the stream) and stop
+            proceed,   // continue scanning characters
+            stop_here, // stop here; the current character will be seen again by the next scan_characters call
          };
          using character_scan_functor_t = std::function<character_scan_result(QChar)>;
 
@@ -59,14 +57,32 @@ namespace halo::reach::megalo::bolt {
          // character in the source code that isn't inside of a comment. Upon reaching the string, 
          // calls your functor again with '\0' to indicate EOF.
          //
-         // Your functor can elect to stop the scan early by returning a "stop" code.
+         // Your functor can elect to stop the scan early by returning a "stop" code. Be mindful 
+         // of where your scan functor is stopping, especially when using nested scan functors 
+         // (e.g. an outer functor to handle overall logic, and a specialized inner functor to 
+         // extract specific tokens). Remember that this is basically an advanced for loop, so 
+         // nested functors are equivalent to this:
+         // 
+         //    // Outer functor:
+         //    for (size_t i = 0; i < size; ++i) {
+         //       for (; i < size; ++i) {
+         //          // ... logic ...
+         //       }
+         //    }
+         // 
+         // If the inner functor stops at some glyph in the stream, then the outer functor will 
+         // end up skipping that glyph unless it manually rewinds by one.
+         //
          void scan_characters(character_scan_functor_t);
 
       protected:
+         void _rewind_one_char();
          QChar _peek_next_char() const;
          QChar _pull_next_char(); // advance() in tutorial
          bool _consume_desired_character(QChar); // advances only if the next character is the desired character
 
+         // Extracts the next word and stops at the glyph after the end of the word, if a word is 
+         // present. Otherwise, returns an empty string and does not advance the stream.
          QString _pull_next_word();
 
          void _add_token(token_type);

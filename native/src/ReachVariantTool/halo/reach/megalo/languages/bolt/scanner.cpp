@@ -233,7 +233,7 @@ namespace halo::reach::megalo::bolt {
                }
                if (c == delim) {
                   terminated = true;
-                  return character_scan_result::stop_after;
+                  return character_scan_result::stop_here;
                }
                if (c == '\n' && !first_line_break.has_value()) {
                   first_line_break = this->pos;
@@ -261,23 +261,40 @@ namespace halo::reach::megalo::bolt {
                };
                this->_add_token(token_type::string, lit);
             }
+            //
+            // We've stopped at the closing delimiter of a string literal. Our functor will return a 
+            // "proceed" signal (equivalent to "continue" in a loop), so the next time we're called, 
+            // we'll be looking at the character after that delimiter.
+            //
             return character_scan_result::proceed;
          }
          #pragma endregion
          #pragma region Keywords and non-keyword identifiers/words
          auto possible_word = this->_try_extract_identifier_or_word();
-         if (const auto* p = std::get_if<token_type>(&possible_word)) {
+         if (!std::holds_alternative<std::monostate>(possible_word)) {
             //
-            // Branch for keywords.
+            // We found a keyword, identifier, or other word. This means that our current stream 
+            // position is at the symbol *after* the end of the word. If we wanted to examine any 
+            // additional content after the word, then we could do that now. Otherwise, however, 
+            // we actually need to rewind the stream by one character. If we don't, then the next 
+            // time we're called, we'll actually skip over the character after the word, and read 
+            // the next character after that.
             //
-            this->_add_token(*p);
-            return character_scan_result::proceed;
-         } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
-            this->_add_token(token_type::identifier_or_word, *p);
+            if (const auto* p = std::get_if<token_type>(&possible_word)) {
+               //
+               // Branch for keywords.
+               //
+               this->_add_token(*p);
+            } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
+               this->_add_token(token_type::identifier_or_word, *p);
+            }
+            --this->pos.offset; // TODO: scuffed; won't handle newlines properly
             return character_scan_result::proceed;
          }
          #pragma endregion
-
+         //
+         // Unrecognized token. How should we proceed?
+         //
          return character_scan_result::proceed;
       });
 
@@ -413,18 +430,16 @@ namespace halo::reach::megalo::bolt {
          }
          //
          if (auto result = functor(c); result != character_scan_result::proceed) {
-            if (result == character_scan_result::stop_after) {
-               ++pos;
-            } else if (result == character_scan_result::stop_before) {
-               if (pos)
-                  --pos;
-            }
             return;
          }
       }
    }
 
 
+   void scanner::_rewind_one_char() {
+      if (this->pos.offset)
+         --this->pos.offset;
+   }
    QChar scanner::_peek_next_char() const {
       return this->source[this->pos.offset];
    }
@@ -441,29 +456,28 @@ namespace halo::reach::megalo::bolt {
    }
 
    QString scanner::_pull_next_word() {
+      auto prior = this->pos;
+
       QString word;
       this->scan_characters([this, &word](QChar c) {
-         //
-         // We need a special stop code so that when this function is invoked during nested character scans, 
-         // the outer scan(s) don't accidentally skip the next glyph after the word.
-         //
-         auto stop_code = word.isEmpty() ? character_scan_result::stop_here : character_scan_result::stop_before;
-
          if (c.isSpace())
-            return stop_code;
+            return character_scan_result::stop_here;
          if (word.isEmpty() && c.isDigit())
-            return character_scan_result::stop_here; // swords cannot start with numbers
+            return character_scan_result::stop_here; // stop: words cannot start with numbers
 
          for (const auto d : all_syntax_start_characters)
             if (c == d)
-               return stop_code;
+               return character_scan_result::stop_here;
 
          if (QString(".[]").indexOf(c) >= 0)
-            return stop_code; // stop
+            return character_scan_result::stop_here;
 
          word += c;
          return character_scan_result::proceed;
       });
+
+      if (word.isEmpty())
+         this->pos = prior;
       return word;
    }
 
