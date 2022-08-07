@@ -17,6 +17,27 @@ namespace halo::reach::megalo::bolt {
    }
 
    template<token_type... TokenTypes>
+   size_t parser::_find_any_token_of_types() const {
+      auto& list = this->scanner.tokens;
+      auto  i    = this->next_token;
+      for (; i < list.size(); ++i) {
+         bool match = ((match ? match : list[i].type == TokenTypes), ...);
+         if (match)
+            return i;
+      }
+      return size_t{ -1 };
+   }
+
+   template<token_type Type>
+   bool parser::_consume_token_if_present() {
+      if (this->_check_next_token(Type)) {
+         this->_pull_next_token();
+         return true;
+      }
+      return false;
+   }
+
+   template<token_type... TokenTypes>
    bool parser::_consume_any_token_of_types() {
       bool result = false;
       (
@@ -32,11 +53,11 @@ namespace halo::reach::megalo::bolt {
       return result;
    }
    template<size_t Size, std::array<token_type, Size> TokenTypes>
-   bool parser::_consume_any_token_of_types<Size, TokenTypes>() {
+   bool parser::_consume_any_token_of_types() {
       for (auto t : TokenTypes) {
          if (t == token_type::none)
             break;
-         if (this->_check_next_token<t>()) {
+         if (this->_check_next_token(t)) {
             ++this->next_token;
             return true;
          }
@@ -44,7 +65,7 @@ namespace halo::reach::megalo::bolt {
       return false;
    }
 
-   template<size_t TierIndex> expression* parser::_try_rule_expression_binary<TierIndex>() {
+   template<size_t TierIndex> expression* parser::_try_rule_expression_binary() {
       constexpr auto& tier = binary_operator_tiers[TierIndex];
 
       auto _get_side = [this]() {

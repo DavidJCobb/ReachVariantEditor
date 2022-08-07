@@ -1,6 +1,8 @@
 #pragma once
 #include <optional>
+#include <vector>
 #include <QString>
+#include "./errors/base.h"
 #include "./operator_metadata.h"
 #include "./scanner.h"
 
@@ -9,7 +11,11 @@ namespace halo::reach::megalo::bolt {
 
    class parser {
       public:
+         ~parser();
 
+      public:
+         std::vector<errors::base*> errors;
+         
       protected:
          scanner scanner;
          size_t  next_token = 0;
@@ -25,12 +31,16 @@ namespace halo::reach::megalo::bolt {
          bool _check_token_type_sequence_ahead() const;
 
          template<token_type... TokenTypes>
+         size_t _find_any_token_of_types() const;
+
+         template<token_type Type>
+         bool _consume_token_if_present();
+
+         template<token_type... TokenTypes>
          bool _consume_any_token_of_types();
 
          template<size_t Size, std::array<token_type, Size> TokenTypes>
          bool _consume_any_token_of_types();
-
-         void _require_and_consume_token(token_type, const char* error_message_translation_key);
 
          void _try_rule_statement();
             bool _try_rule_keyword();

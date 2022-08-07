@@ -1,23 +1,24 @@
 #pragma once
 #include "./scanner.h"
+#include "./literal_data_number.h"
 
 namespace halo::reach::megalo::bolt {
    template<size_t Base> requires (Base > 1 && Base <= 36)
-   literal_data_number scanner::_try_extract_number_digits<Base>() {
+   literal_data_number scanner::_try_extract_number_digits() {
       constexpr int decimal_point_not_yet_seen = -1;
 
       literal_data_number result;
       bool ignore  = false; // we found an invalid char, so the result will not be a valid number
       int  decimal = decimal_point_not_yet_seen; // have we found a decimal point? if so (value >= 0), how many digits after it have we read?
 
-      this->scan([this, &decimal, &ignore, &result](QChar c) {
+      this->scan_characters([this, &decimal, &ignore, &result](QChar c) {
          if (c == '.') {
             if (decimal != decimal_point_not_yet_seen) {
                return true; // stop
             }
             decimal = 0;
             result.value.decimal = result.value.integer;
-            result.format = literal_number_format::decimal;
+            result.format = literal_data_number::format_type::decimal;
             return false; // continue
          }
          if (c.isSpace()) {
@@ -95,11 +96,11 @@ namespace halo::reach::megalo::bolt {
          return false; // continue
       });
       if (ignore) {
-         result.format = literal_number_format::none;
+         result.format = literal_data_number::format_type::none;
       } else if (decimal == decimal_point_not_yet_seen) {
-         result.format = literal_number_format::integer;
+         result.format = literal_data_number::format_type::integer;
       } else {
-         result.format = literal_number_format::decimal;
+         result.format = literal_data_number::format_type::decimal;
       }
       return result;
    };

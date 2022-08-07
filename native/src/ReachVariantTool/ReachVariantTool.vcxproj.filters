@@ -2373,6 +2373,18 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\base_exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\token_matches_no_grammar_rule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\function_call_argument_parse_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_function_call_argument_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />

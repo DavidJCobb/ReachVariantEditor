@@ -8,7 +8,7 @@ namespace halo::reach::megalo::bolt {
       this->format = n.format;
       switch (n.format) {
          case format_type::none:
-            return;
+            break;
          case format_type::integer:
             this->value.integer = n.value.integer;
             break;
@@ -16,6 +16,7 @@ namespace halo::reach::megalo::bolt {
             this->value.decimal = n.value.decimal;
             break;
       }
+      return *this;
    }
 
    bool literal_data_number::is_valid() const {

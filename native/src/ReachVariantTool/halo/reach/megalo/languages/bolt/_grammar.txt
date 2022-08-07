@@ -190,7 +190,7 @@ block-comment → "--" /\[(=*)\[.+\]\1\]/ "--"
 
 // Pragmas:
 
-pragma → "pragma" IDENTIFIER ( STRING )? ;
+pragma → "pragma" IDENTIFIER STRING? ;
 
 //
 // Pragma statements therefore look like...

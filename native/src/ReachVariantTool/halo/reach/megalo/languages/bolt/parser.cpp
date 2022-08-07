@@ -1,7 +1,18 @@
 #include "parser.h"
 #include "./expression.h"
+#include "./errors/base_exception.h"
+#include "./errors/function_call_argument_parse_error.h"
+#include "./errors/token_matches_no_grammar_rule.h"
+#include "./errors/unterminated_function_call_argument_list.h"
+#include "./errors/unterminated_grouping_expression.h"
 
 namespace halo::reach::megalo::bolt {
+   parser::~parser() {
+      for (auto* item : this->errors)
+         delete item;
+      this->errors.clear();
+   }
+
    bool parser::is_at_end() const {
       return this->next_token >= this->scanner.tokens.size();
    }
@@ -25,14 +36,6 @@ namespace halo::reach::megalo::bolt {
       return &this->scanner.tokens[this->next_token - 1];
    }
 
-   void parser::_require_and_consume_token(token_type t, const char* error_message_translation_key) {
-      if (this->_check_next_token(t)) {
-         this->_pull_next_token();
-         return;
-      }
-      throw error(_peek_next_token(), error_message_translation_key);
-   }
-
    // --- Rules ---
 
    void parser::_try_rule_statement() {
@@ -40,7 +43,11 @@ namespace halo::reach::megalo::bolt {
          return;
       if (this->_try_rule_expression())
          return;
-      static_assert(false, "TODO: Handle unrecognized content here");
+      //
+      errors::token_matches_no_grammar_rule error;
+      error.fault = this->_peek_next_token();
+      error.pos   = error.fault.pos;
+      throw errors::parse_exception(error);
    }
    bool parser::_try_rule_keyword() {
       if (this->_try_rule_alias())
@@ -55,13 +62,18 @@ namespace halo::reach::megalo::bolt {
          return true;
       return false;
    }
+
+   /*//
+
    bool parser::_try_rule_alias();
    bool parser::_try_rule_declare();
    bool parser::_try_rule_enum();
    bool parser::_try_rule_block();
    bool parser::_try_rule_block_actions();
-   bool parser::_try_rule_block_event();
+   bool parser::_try_rule_block_event(); static_assert(false, "TODO: return flags-mask of event types instead?");
    bool parser::_try_rule_block_conditions();
+
+   //*/
 
    expression* parser::_try_rule_expression() {
       return this->_try_rule_expression_binary<0>();
@@ -110,7 +122,45 @@ namespace halo::reach::megalo::bolt {
                   }
                   cobb::owned_ptr expr = this->_try_rule_expression();
                   if (!expr) {
-                     static_assert(false, "TODO: error and continue to next ',' or ')'");
+                     //
+                     // Unable to parse argument. Log an error, and continue to the next ',' or ')'.
+                     //
+                     auto* error = new errors::function_call_argument_parse_error;
+                     error->pos = this->_previous_token()->pos;
+                     this->errors.push_back(error);
+                     //
+                     // Skip to the next argument, or exit the argument list if this looks like it was 
+                     // the last argument.
+                     //
+                     auto   i     = this->next_token;
+                     auto&  list  = this->scanner.tokens;
+                     size_t paren = 1;
+                     for (; i < list.size(); ++i) {
+                        const auto& t = list[i];
+                        if (t.type == token_type::comma && paren == 1) {
+                           //
+                           // Comma indicating next argument.
+                           //
+                           this->next_token = i;
+                           continue;
+                        }
+                        if (t.type == token_type::paren_l) {
+                           ++paren;
+                        } else if (t.type == token_type::paren_r) {
+                           --paren;
+                           if (paren == 0) {
+                              //
+                              // End of argument list.
+                              //
+                              this->next_token = i;
+                              break;
+                           }
+                        }
+                     }
+                     //
+                     // Unterminated argument list?
+                     //
+                     continue;
                   }
                   auto& argument = args.emplace_back();
                   if (argument_is_named)
@@ -118,8 +168,12 @@ namespace halo::reach::megalo::bolt {
                   std::swap(argument.value, expr);
                } while (!this->_check_next_token(token_type::comma));
             }
-            this->_require_and_consume_token(token_type::paren_r, "Expected ')' after expression.");
-
+            if (!this->_consume_token_if_present<token_type::paren_r>()) {
+               errors::unterminated_function_call_argument_list error;
+               error.pos = this->_previous_token()->pos;
+               throw errors::parse_exception(error);
+            }
+            //
             auto* expr = expression::alloc_call(lit);
             std::swap(expr->arguments, args);
             return expr;
@@ -128,8 +182,15 @@ namespace halo::reach::megalo::bolt {
          return expression::alloc_literal(lit);
       }
       if (this->_consume_any_token_of_types<token_type::paren_l>()) {
+         const auto start_at = this->_previous_token()->pos;
+         //
          auto* content = this->_try_rule_expression();
-         this->_require_and_consume_token(token_type::paren_r, "Expected ')' after expression.");
+         if (!this->_consume_token_if_present<token_type::paren_r>()) {
+            errors::unterminated_grouping_expression error;
+            error.pos       = this->_previous_token()->pos;
+            error.opened_at = start_at;
+            throw errors::parse_exception(error);
+         }
          return expression::alloc_grouping(content);
       }
    }
