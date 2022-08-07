@@ -537,6 +537,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\operator_metadata.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\parser.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\scanner.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\character_scanner.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\statement.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_pos.h" />
@@ -923,8 +924,10 @@
     <None Include="halo\loc_string.inl" />
     <None Include="halo\loc_string_table.inl" />
     <None Include="halo\reach\files\blocks\base.inl" />
+    <None Include="halo\reach\megalo\languages\bolt\character_scanner.md" />
     <None Include="halo\reach\megalo\languages\bolt\parser.inl" />
     <None Include="halo\reach\megalo\languages\bolt\scanner.inl" />
+    <None Include="halo\reach\megalo\languages\bolt\character_scanner.inl" />
     <None Include="halo\reach\megalo\operands\variables\README.md" />
     <None Include="halo\reach\trait_set.inl" />
     <None Include="halo\trait_information.inl" />

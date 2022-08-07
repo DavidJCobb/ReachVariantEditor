@@ -4,29 +4,28 @@
 
 namespace halo::reach::megalo::bolt {
    template<size_t Base> requires (Base > 1 && Base <= 36)
-   literal_data_number scanner::_try_extract_number_digits() {
+   std::optional<literal_data_number> scanner::_try_extract_number_digits() {
       constexpr int decimal_point_not_yet_seen = -1;
 
       literal_data_number result;
       bool ignore  = false; // we found an invalid char, so the result will not be a valid number
       int  decimal = decimal_point_not_yet_seen; // have we found a decimal point? if so (value >= 0), how many digits after it have we read?
 
-      bool any_digits = false; // guard against '.' being considered a valid number
-
-      auto prior = this->backup_stream_state(); // HACK HACK HACK
+      bool any_digits = false; // guard against "." being considered a valid number
+      auto prior      = this->backup_stream_state();
 
       this->scan_characters([this, &any_digits, &decimal, &ignore, &result](QChar c) -> character_scan_result {
          if (c == '.') {
             if (decimal != decimal_point_not_yet_seen) {
-               return character_scan_result::stop_before; // stop: we've already seen a decimal point
+               return character_scan_result::stop_here; // stop: we've already seen a decimal point
             }
             decimal = 0;
             result.value.decimal = result.value.integer;
             result.format = literal_data_number::format_type::decimal;
-            return character_scan_result::proceed; // continue
+            return character_scan_result::proceed;
          }
          if (c.isSpace()) {
-            return character_scan_result::stop_before; // stop
+            return character_scan_result::stop_here;
          }
 
          auto charcode = c.unicode();
@@ -97,15 +96,15 @@ namespace halo::reach::megalo::bolt {
             }
          } else {
             if (!consume)
-               return character_scan_result::stop_before; // stop
+               return character_scan_result::stop_here;
             ignore = true;
          }
-         return character_scan_result::proceed; // continue
+         return character_scan_result::proceed;
       });
       if (!any_digits) {
-         this->restore_stream_state(prior); // HACK HACK HACK
+         this->restore_stream_state(prior);
          result.format = literal_data_number::format_type::none;
-         return result;
+         return {};
       }
       if (ignore) {
          result.format = literal_data_number::format_type::none;

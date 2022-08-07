@@ -2400,6 +2400,9 @@
     <ClInclude Include="ui\debug_commands\bolt_compiler_pass_1_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\character_scanner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2446,6 +2449,10 @@
     <None Include="halo\reach\megalo\languages\bolt\scanner.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="halo\reach\megalo\languages\bolt\character_scanner.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="halo\reach\megalo\languages\bolt\character_scanner.md" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="helpers\cs.natvis" />

@@ -4,24 +4,23 @@
 #include <variant>
 #include <vector>
 #include <QString>
+#include "./character_scanner.h"
 #include "./literal_data_number.h"
 #include "./token.h"
 #include "./token_pos.h"
 
 namespace halo::reach::megalo::bolt {
-   class scanner {
+   class scanner;
+   class scanner : public character_scanner<scanner> {
+      friend base_type; // grant access to _on_before_character_scanned
       public:
+         // Redundant using-declarations for faster IntelliSense previewing when reading this header.
+         using character_scan_result    = base_type::character_scan_result;
+         using character_scan_functor_t = base_type::character_scan_functor_t;
 
-         // Return codes for functors passed to scanner::scan_characters
-         enum class character_scan_result {
-            proceed,   // continue scanning characters
-            stop_here, // stop here; the current character will be seen again by the next scan_characters call
-         };
-         using character_scan_functor_t = std::function<character_scan_result(QChar)>;
+         using base_type::base_type; // inherit constructor
 
       protected:
-         QString   source;
-         token_pos pos;
          token_pos lexeme_start;
 
          //
@@ -35,14 +34,12 @@ namespace halo::reach::megalo::bolt {
             bool   escape    = false; // While we're inside of a string literal, was the previous glyph a backslash? If so, the next delimiter (if there is one) is escaped.
          } character_scan_state;
 
+         character_handler_result _on_before_character_scanned();
 
       public:
          std::vector<token> tokens;
 
       public:
-         scanner(const QString& s) : source(s) {}
-         scanner(QString&& s) : source(s) {}
-
          static bool is_quote_character(QChar);
 
          token_pos backup_stream_state() const;
@@ -54,29 +51,11 @@ namespace halo::reach::megalo::bolt {
 
          // Advances through the source code, handling line and block comments as appropriate and 
          // tracking the current stream position and line number. Calls your functor for every 
-         // character in the source code that isn't inside of a comment. Upon reaching the string, 
-         // calls your functor again with '\0' to indicate EOF.
-         //
-         // Your functor can elect to stop the scan early by returning a "stop" code. Be mindful 
-         // of where your scan functor is stopping, especially when using nested scan functors 
-         // (e.g. an outer functor to handle overall logic, and a specialized inner functor to 
-         // extract specific tokens). Remember that this is basically an advanced for loop, so 
-         // nested functors are equivalent to this:
-         // 
-         //    // Outer functor:
-         //    for (size_t i = 0; i < size; ++i) {
-         //       for (; i < size; ++i) {
-         //          // ... logic ...
-         //       }
-         //    }
-         // 
-         // If the inner functor stops at some glyph in the stream, then the outer functor will 
-         // end up skipping that glyph unless it manually rewinds by one.
-         //
-         void scan_characters(character_scan_functor_t);
+         // character in the source code that isn't inside of a comment. Your functor can elect to 
+         // stop the scan early by returning a "stop" code.
+         using base_type::scan_characters;
 
       protected:
-         void _rewind_one_char();
          QChar _peek_next_char() const;
          QChar _pull_next_char(); // advance() in tutorial
          bool _consume_desired_character(QChar); // advances only if the next character is the desired character
@@ -93,7 +72,7 @@ namespace halo::reach::megalo::bolt {
 
          // Does not extract a number literal on its own; the caller needs to check for a sign and base.
          template<size_t Base = 10> requires (Base > 1 && Base <= 36)
-         literal_data_number _try_extract_number_digits();
+         std::optional<literal_data_number> _try_extract_number_digits();
 
       public:
          std::optional<literal_data_number> try_extract_number_literal();

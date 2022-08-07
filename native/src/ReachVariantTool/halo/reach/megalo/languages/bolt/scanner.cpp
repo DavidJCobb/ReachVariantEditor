@@ -8,6 +8,127 @@
 #include "./keywords_to_tokens.h"
 
 namespace halo::reach::megalo::bolt {
+   scanner::character_handler_result scanner::_on_before_character_scanned() {
+      auto& pos    = this->pos.offset;
+      auto& css    = this->character_scan_state;
+      auto  length = text.size();
+      QChar c      = text[pos];
+      if (css.comment_b) {
+         if (c == ']') {
+            //
+            // Possible end of block comment?
+            // 
+            // Given a block comment that started like "--[===[", we want to check for "]===]". 
+            // We'll check whether the square bracket we just found is the last one in the 
+            // closing token.
+            //
+            if (pos < css.comment_b)
+               //
+               // Not far enough ahead.
+               //
+               return character_handler_result::skip_functor;
+            if (text[uint(pos - css.comment_b)] != ']')
+               //
+               // First square bracket in the closing token is missing.
+               //
+               return character_handler_result::skip_functor;
+            //
+            // Check for the requisite number of equal signs.
+            //
+            bool match = true;
+            for (uint i = 0; i < (css.comment_b - 1); ++i) {
+               if (text[uint(pos - (css.comment_b - 1) + i)] != '=') {
+                  match = false;
+                  break;
+               }
+            }
+            if (match) {
+               css.comment_b = false;
+            }
+            return character_handler_result::skip_functor;
+         }
+         // ...else, fall through.
+      }
+      if (c == '\n') {
+         if (css.comment_l) {
+            css.comment_l = false;
+            return character_handler_result::skip_functor;
+         }
+      }
+      if (css.comment_l || css.comment_b) {
+         return character_handler_result::skip_functor; // Don't call the provided character-scan functor for the inside of comments.
+      }
+      //
+      // Code ahead changes depending on whether we're inside of a string literal or not. We don't 
+      // actually extract or process string literals here -- that's the job of whatever functor you 
+      // pass for processing code -- but we need to keep track of them so that comment-related 
+      // character sequences aren't treated as comments when they occur inside of string literals.
+      // 
+      // Among other things, this means that the string delimiters and any backslashes used for 
+      // escaping are passed to the scan functor.
+      //
+      if (css.delim == '\0') {
+         //
+         // We aren't currently inside of a string literal, so we'll honor line and block 
+         // comments here.
+         //
+         if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle comments
+            if (pos + 2 < length && text[pos + 2] == '[') {
+               //
+               // Let's see if this is a block comment. We've matched "--[", so now we need 
+               // to check for a second opening square bracket, optionally with some equal 
+               // signs between both brackets.
+               //
+               size_t equals = 0;
+               bool   bounded = false;
+               for (uint i = pos + 3; i < length; ++i) {
+                  if (text[i] == '[') {
+                     bounded = true;
+                     break;
+                  }
+                  if (text[i] == '=') {
+                     ++equals;
+                  } else {
+                     break;
+                  }
+               }
+               if (bounded) {
+                  //
+                  // This is indeed the start of a block comment.
+                  //
+                  css.comment_b = equals + 1;
+                  return character_handler_result::skip_functor;
+               }
+            }
+            //
+            // Looks like it wasn't a block comment. Must be a line comment.
+            //
+            css.comment_l = true;
+            return character_handler_result::skip_functor;
+         }
+         //
+         // The current character isn't the start of a comment.
+         //
+         if (is_quote_character(c))
+            //
+            // The current character is the start of a string literal.
+            //
+            css.delim = c;
+      } else {
+         //
+         // We're currently inside of a string literal. Let's keep an eye out for the ending 
+         // delimiter -- and make sure we don't let backslash-escaping confuse us.
+         //
+         if (c == '\\' && !css.escape)
+            css.escape = true;
+         else
+            css.escape = false;
+         if (c == css.delim && !css.escape)
+            css.delim = '\0';
+      }
+      return character_handler_result::proceed;
+   }
+
    namespace {
       //
       // Glyphs that delimit strings.
@@ -129,7 +250,7 @@ namespace halo::reach::megalo::bolt {
    }
 
    bool scanner::is_at_end() const {
-      return this->pos.offset >= this->source.size();
+      return this->pos.offset >= this->text.size();
    }
 
    void scanner::scan_tokens() {
@@ -271,24 +392,14 @@ namespace halo::reach::megalo::bolt {
          #pragma endregion
          #pragma region Keywords and non-keyword identifiers/words
          auto possible_word = this->_try_extract_identifier_or_word();
-         if (!std::holds_alternative<std::monostate>(possible_word)) {
+         if (const auto* p = std::get_if<token_type>(&possible_word)) {
             //
-            // We found a keyword, identifier, or other word. This means that our current stream 
-            // position is at the symbol *after* the end of the word. If we wanted to examine any 
-            // additional content after the word, then we could do that now. Otherwise, however, 
-            // we actually need to rewind the stream by one character. If we don't, then the next 
-            // time we're called, we'll actually skip over the character after the word, and read 
-            // the next character after that.
+            // Branch for keywords.
             //
-            if (const auto* p = std::get_if<token_type>(&possible_word)) {
-               //
-               // Branch for keywords.
-               //
-               this->_add_token(*p);
-            } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
-               this->_add_token(token_type::identifier_or_word, *p);
-            }
-            --this->pos.offset; // TODO: scuffed; won't handle newlines properly
+            this->_add_token(*p);
+            return character_scan_result::proceed;
+         } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
+            this->_add_token(token_type::identifier_or_word, *p);
             return character_scan_result::proceed;
          }
          #pragma endregion
@@ -301,155 +412,18 @@ namespace halo::reach::megalo::bolt {
       assert(this->is_at_end()); // we should never stop early, or else in some future revision of this code we should here handle whatever would make us want to stop early
       this->_add_token(token_type::eof);
    }
-   
-   void scanner::scan_characters(character_scan_functor_t functor) {
-      auto&  text      = this->source;
-      size_t length    = this->source.size();
-      auto&  pos       = this->pos.offset;
-      auto&  css       = this->character_scan_state;
-      for (; pos < length; ++pos) {
-         QChar c = text[pos];
-         if (css.comment_b) {
-            if (c == ']') {
-               //
-               // Possible end of block comment?
-               // 
-               // Given a block comment that started like "--[===[", we want to check for "]===]". 
-               // We'll check whether the square bracket we just found is the last one in the 
-               // closing token.
-               //
-               if (pos < css.comment_b)
-                  //
-                  // Not far enough ahead.
-                  //
-                  continue;
-               if (text[uint(pos - css.comment_b)] != ']')
-                  //
-                  // First square bracket in the closing token is missing.
-                  //
-                  continue;
-               //
-               // Check for the requisite number of equal signs.
-               //
-               bool match = true;
-               for (uint i = 0; i < (css.comment_b - 1); ++i) {
-                  if (text[uint(pos - (css.comment_b - 1) + i)] != '=') {
-                     match = false;
-                     break;
-                  }
-               }
-               if (match) {
-                  css.comment_b = false;
-               }
-               continue;
-            }
-            // ...else, fall through.
-         }
-         if (c == '\n') {
-            if (this->pos.offset != this->pos.last_newline) {
-               //
-               // Before we increment the line counter, we want to double-check that we haven't seen this 
-               // specific line break before. This is because if a functor chooses to stop scanning on a 
-               // newline, the next call to (scan) will see that same newline again.
-               //
-               ++this->pos.line;
-               this->pos.last_newline = this->pos.offset;
-            }
-            if (css.comment_l) {
-               css.comment_l = false;
-               continue;
-            }
-         }
-         if (css.comment_l || css.comment_b) {
-            continue; // Don't call the provided character-scan functor for the inside of comments.
-         }
-         //
-         // Code ahead changes depending on whether we're inside of a string literal or not. We don't 
-         // actually extract or process string literals here -- that's the job of whatever functor you 
-         // pass for processing code -- but we need to keep track of them so that comment-related 
-         // character sequences aren't treated as comments when they occur inside of string literals.
-         // 
-         // Among other things, this means that the string delimiters and any backslashes used for 
-         // escaping are passed to the scan functor.
-         //
-         if (css.delim == '\0') {
-            //
-            // We aren't currently inside of a string literal, so we'll honor line and block 
-            // comments here.
-            //
-            if (c == '-' && pos < length - 1 && text[pos + 1] == '-') { // handle comments
-               if (pos + 2 < length && text[pos + 2] == '[') {
-                  //
-                  // Let's see if this is a block comment. We've matched "--[", so now we need 
-                  // to check for a second opening square bracket, optionally with some equal 
-                  // signs between both brackets.
-                  //
-                  size_t equals = 0;
-                  bool   bounded = false;
-                  for (uint i = pos + 3; i < length; ++i) {
-                     if (text[i] == '[') {
-                        bounded = true;
-                        break;
-                     }
-                     if (text[i] == '=') {
-                        ++equals;
-                     } else {
-                        break;
-                     }
-                  }
-                  if (bounded) {
-                     css.comment_b = equals + 1;
-                     continue;
-                  }
-               }
-               //
-               // Looks like it wasn't a block comment. Must be a line comment.
-               //
-               css.comment_l = true;
-               continue;
-            }
-            //
-            // The current character isn't the start of a comment.
-            //
-            if (is_quote_character(c))
-               //
-               // The current character is the start of a string literal.
-               //
-               css.delim = c;
-         } else {
-            //
-            // We're currently inside of a string literal. Let's keep an eye out for the ending 
-            // delimiter -- and make sure we don't let backslash-escaping confuse us.
-            //
-            if (c == '\\' && !css.escape)
-               css.escape = true;
-            else
-               css.escape = false;
-            if (c == css.delim && !css.escape)
-               css.delim = '\0';
-         }
-         //
-         if (auto result = functor(c); result != character_scan_result::proceed) {
-            return;
-         }
-      }
-   }
 
 
-   void scanner::_rewind_one_char() {
-      if (this->pos.offset)
-         --this->pos.offset;
-   }
    QChar scanner::_peek_next_char() const {
-      return this->source[this->pos.offset];
+      return this->text[this->pos.offset];
    }
    QChar scanner::_pull_next_char() {
-      return this->source[this->pos.offset++];
+      return this->text[this->pos.offset++];
    }
    bool scanner::_consume_desired_character(QChar desired) {
       if (this->is_at_end())
          return false;
-      if (this->source[this->pos.offset] != desired)
+      if (this->text[this->pos.offset] != desired)
          return false;
       ++this->pos.offset;
       return true;
