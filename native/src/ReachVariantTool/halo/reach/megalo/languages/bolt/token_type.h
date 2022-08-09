@@ -28,15 +28,20 @@ namespace halo::reach::megalo::bolt {
       square_bracket_r,
       ampersand,   // '&'
       asterisk,    // '*'
+      backslash,   // 
       caret,       // '^'
+      colon,       // ':'
       comma,       // ','
       equal,       // '='
       exclamation, // '!'
+      hash,        // '#'
       minus,       // '-'
+      null_char,   // character code 0
       percent,     // '%'
       period,      // '.'
       pipe,        // '|'
       plus,        // '+'
+      semicolon,   // ';'
       slash_fwd,   // '/'
       tilde,       // '~'
 

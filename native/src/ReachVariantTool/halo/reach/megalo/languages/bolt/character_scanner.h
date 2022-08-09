@@ -23,6 +23,17 @@ namespace halo::reach::megalo::bolt {
          };
          using character_scan_functor_t = std::function<character_scan_result(QChar)>;
 
+         struct state {
+            friend base_type;
+            friend my_type;
+            public:
+               token_pos pos;
+               size_t    last_newline = no_newline_found;
+
+            protected:
+               state() = default;
+         };
+
       private:
          void _update_column_number();
 
@@ -50,6 +61,9 @@ namespace halo::reach::megalo::bolt {
          // you should stop iteration upon reaching the end of that token, i.e. when 
          // the stream position is at the next glyph after the token's end.
          void scan_characters(character_scan_functor_t);
+
+         state backup_stream_state() const;
+         void restore_stream_state(const state&);
    };
 }
 

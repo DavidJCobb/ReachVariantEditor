@@ -64,7 +64,7 @@ namespace halo::reach::megalo::bolt {
             //
             --this->pos.offset; // rewind
             //
-            if (this->last_newline != no_newline_found && pos == this->last_newline - 1) {
+            if (this->last_newline != no_newline_found && this->pos.offset == this->last_newline - 1) {
                //
                // We rewound from (i.e. past) a line break, so we'll need to fix up the column number.
                //
@@ -72,6 +72,36 @@ namespace halo::reach::megalo::bolt {
                this->_update_column_number();
             }
          }
+      }
+   }
+
+   template<typename Subclass>
+   character_scanner<Subclass>::state character_scanner<Subclass>::backup_stream_state() const {
+      state out;
+      out.pos          = this->pos;
+      out.last_newline = this->last_newline;
+      return out;
+   }
+
+   template<typename Subclass>
+   void character_scanner<Subclass>::restore_stream_state(const state& s) {
+      this->pos          = s.pos;
+      this->last_newline = s.last_newline;
+      //
+      // TODO: Is this sanity check actually needed?
+      //
+      token_pos::value_type valid_col;
+      if (s.last_newline == no_newline_found) {
+         valid_col = s.pos.offset;
+      } else {
+         valid_col = s.pos.offset - s.last_newline - 1;
+      }
+      if (s.pos.col != valid_col) {
+         #if _DEBUG
+            __debugbreak();
+         #endif
+         this->last_newline = this->text.lastIndexOf('\n', this->pos.offset);
+         this->_update_column_number();
       }
    }
 }

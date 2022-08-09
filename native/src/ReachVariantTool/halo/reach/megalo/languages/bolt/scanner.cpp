@@ -165,7 +165,9 @@ namespace halo::reach::megalo::bolt {
          _single_character_operator{ '/', token_type::slash_fwd,   token_type::operator_assign_div }, // / or /=
          _single_character_operator{ '~', token_type::tilde,       token_type::operator_assign_not }, // ~ or ~=
       };
-      static_assert(cobb::list_items_are_unique(all_single_character_operators));
+      static_assert(cobb::list_items_are_unique(all_single_character_operators, [](auto& a, auto& b) { return a.glyph != b.glyph; }), "Duplicate glyph!");
+      static_assert(cobb::list_items_are_unique(all_single_character_operators, [](auto& a, auto& b) { return a.basic != b.basic; }), "Duplicate token type (basic)!");
+      static_assert(cobb::list_items_are_unique(all_single_character_operators, [](auto& a, auto& b) { return a.equal != b.equal; }), "Duplicate token type (equal)!");
 
       //
       // Glyphs that can represent a one-character operator, a two-character operator, or 
@@ -194,7 +196,6 @@ namespace halo::reach::megalo::bolt {
             token_type::operator_binary_shr, token_type::operator_assign_shr, // >> or >>=
          },
       };
-      static_assert(cobb::list_items_are_unique(all_two_character_operators));
 
       //
       // Glyphs that are always and only part of a single-character token.
@@ -206,14 +207,20 @@ namespace halo::reach::megalo::bolt {
          constexpr bool operator==(const _single_character_token&) const = default;
       };
       constexpr auto all_single_character_tokens = std::array{
+         _single_character_token{ '\\', token_type::backslash },
          _single_character_token{ ',', token_type::comma },
+         _single_character_token{ ':', token_type::colon },
+         _single_character_token{ '#', token_type::hash },
+         _single_character_token{ '\0', token_type::null_char },
          _single_character_token{ '(', token_type::paren_l },
          _single_character_token{ ')', token_type::paren_r },
          _single_character_token{ '.', token_type::period },
+         _single_character_token{ ';', token_type::semicolon },
          _single_character_token{ '[', token_type::square_bracket_l },
          _single_character_token{ ']', token_type::square_bracket_r },
       };
-      static_assert(cobb::list_items_are_unique(all_single_character_tokens));
+      static_assert(cobb::list_items_are_unique(all_single_character_tokens, [](auto& a, auto& b) { return a.glyph != b.glyph; }), "Duplicate glyph!");
+      static_assert(cobb::list_items_are_unique(all_single_character_tokens, [](auto& a, auto& b) { return a.type  != b.type;  }), "Duplicate token type!");
 
       constexpr auto all_syntax_start_characters = [](){
          constexpr size_t count = all_single_character_operators.size() + all_two_character_operators.size() + all_single_character_tokens.size() + all_string_literal_delimiters.size();
@@ -240,13 +247,6 @@ namespace halo::reach::megalo::bolt {
          if (code == glyph)
             return true;
       return false;
-   }
-
-   token_pos scanner::backup_stream_state() const {
-      return this->pos;
-   }
-   void scanner::restore_stream_state(const token_pos& o) {
-      this->pos = o;
    }
 
    bool scanner::is_at_end() const {

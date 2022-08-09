@@ -42,9 +42,6 @@ namespace halo::reach::megalo::bolt {
       public:
          static bool is_quote_character(QChar);
 
-         token_pos backup_stream_state() const;
-         void restore_stream_state(const token_pos&);
-
          bool is_at_end() const;
 
          void scan_tokens(); // can throw
@@ -54,6 +51,9 @@ namespace halo::reach::megalo::bolt {
          // character in the source code that isn't inside of a comment. Your functor can elect to 
          // stop the scan early by returning a "stop" code.
          using base_type::scan_characters;
+
+         using base_type::backup_stream_state;
+         using base_type::restore_stream_state;
 
       protected:
          QChar _peek_next_char() const;
