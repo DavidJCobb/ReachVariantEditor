@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <limits>
 #include <QString>
 #include "./token_pos.h"
 
@@ -22,9 +23,15 @@ namespace halo::reach::megalo::bolt {
          };
          using character_scan_functor_t = std::function<character_scan_result(QChar)>;
 
+      private:
+         void _update_column_number();
+
+         static constexpr size_t no_newline_found = std::numeric_limits<size_t>::max();
+
       protected:
          const QString text;
          token_pos pos;
+         size_t    last_newline = no_newline_found;
 
          enum class character_handler_result {
             proceed,

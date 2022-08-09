@@ -3,8 +3,25 @@
 
 namespace halo::reach::megalo::bolt {
    template<typename Subclass>
+   void character_scanner<Subclass>::_update_column_number() {
+      //
+      // Updating the column number with every character we scan isn't as simple as 
+      // just incrementing it, because if we run a nested scan or run two consecutive 
+      // scans, those scans will each see the same character (which would lead to 
+      // extra increments). This is the same edge-case as with handling line breaks 
+      // in the `scan_characters` function, and is explained there as well.
+      //
+      if (this->last_newline != no_newline_found)
+         this->pos.col = this->pos.offset - this->last_newline - 1; // minus one to include the line break itself
+      else
+         this->pos.col = this->pos.offset;
+   }
+
+   template<typename Subclass>
    void character_scanner<Subclass>::scan_characters(character_scan_functor_t functor) {
       for (; this->pos.offset < this->text.size(); ++this->pos.offset) {
+         this->_update_column_number();
+         //
          QChar c = this->text[this->pos.offset];
          //
          if (c == '\n') {
@@ -19,9 +36,10 @@ namespace halo::reach::megalo::bolt {
             //  - If a functor runs a nested character scan at a newline, then both the outer scan and 
             //    the inner scan will see that same newline.
             //
-            if (this->pos.offset != this->pos.last_newline) {
+            if (this->pos.offset != this->last_newline) {
+               this->last_newline = this->pos.offset;
                ++this->pos.line;
-               this->pos.last_newline = this->pos.offset;
+               this->pos.col = 0;
             }
          }
          //
@@ -33,12 +51,26 @@ namespace halo::reach::megalo::bolt {
          //
          // Run and handle the scan functor:
          //
-         auto prior  = this->pos.offset;
+         auto prior    = this->pos.offset;
+         auto prior_lb = this->last_newline;
          if (functor(c) != character_scan_result::proceed) {
             break;
          }
          if (prior < this->pos.offset) {
-            --this->pos.offset;
+            //
+            // The functor has consumed string content. Decrement to compensate for the increment at 
+            // the end of our for loop's iterations and prevent the next unread glyph from being 
+            // skipped.
+            //
+            --this->pos.offset; // rewind
+            //
+            if (this->last_newline != no_newline_found && pos == this->last_newline - 1) {
+               //
+               // We rewound from (i.e. past) a line break, so we'll need to fix up the column number.
+               //
+               this->last_newline = prior_lb;
+               this->_update_column_number();
+            }
          }
       }
    }

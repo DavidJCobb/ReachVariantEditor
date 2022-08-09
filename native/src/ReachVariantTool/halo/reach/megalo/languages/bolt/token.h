@@ -12,6 +12,5 @@ namespace halo::reach::megalo::bolt {
          token_type type = token_type::none;
          QString lexeme; // the parsed string
          literal_item literal;
-         token_pos pos;
    };
 }

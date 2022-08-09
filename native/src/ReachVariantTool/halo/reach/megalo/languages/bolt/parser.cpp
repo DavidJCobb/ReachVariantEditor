@@ -56,7 +56,7 @@ namespace halo::reach::megalo::bolt {
       //
       errors::token_matches_no_grammar_rule error;
       error.fault = this->_peek_next_token();
-      error.pos   = error.fault.pos;
+      error.pos   = error.fault.start;
       throw errors::parse_exception(error);
    }
    bool parser::_try_rule_keyword() {
@@ -158,7 +158,7 @@ namespace halo::reach::megalo::bolt {
                      // Unable to parse argument. Log an error, and continue to the next ',' or ')'.
                      //
                      auto* error = new errors::function_call_argument_parse_error;
-                     error->pos = this->_previous_token()->pos;
+                     error->pos = this->_previous_token()->start;
                      this->errors.push_back(error);
                      //
                      // Skip to the next argument, or exit the argument list if this looks like it was 
@@ -202,7 +202,7 @@ namespace halo::reach::megalo::bolt {
             }
             if (!this->_consume_token_if_present<token_type::paren_r>()) {
                errors::unterminated_function_call_argument_list error;
-               error.pos = this->_previous_token()->pos;
+               error.pos = this->_previous_token()->start;
                throw errors::parse_exception(error);
             }
             //
@@ -214,12 +214,12 @@ namespace halo::reach::megalo::bolt {
          return expression::alloc_literal(lit);
       }
       if (this->_consume_any_token_of_types<token_type::paren_l>()) {
-         const auto start_at = this->_previous_token()->pos;
+         const auto start_at = this->_previous_token()->start;
          //
          auto* content = this->_try_rule_expression();
          if (!this->_consume_token_if_present<token_type::paren_r>()) {
             errors::unterminated_grouping_expression error;
-            error.pos       = this->_previous_token()->pos;
+            error.pos       = this->_previous_token()->start;
             error.opened_at = start_at;
             throw errors::parse_exception(error);
          }
