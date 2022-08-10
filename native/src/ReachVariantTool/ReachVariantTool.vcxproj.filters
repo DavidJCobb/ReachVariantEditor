@@ -826,6 +826,9 @@
     <ClCompile Include="ui\debug_commands\bolt_compiler_pass_2_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2407,6 +2410,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\debug_commands\bolt_compiler_pass_2_test.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\qt\string\slice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

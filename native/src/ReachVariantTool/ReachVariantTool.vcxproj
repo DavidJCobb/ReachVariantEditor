@@ -223,6 +223,7 @@
     <ClCompile Include="halo\reach\megalo\game_option.cpp" />
     <ClCompile Include="halo\reach\megalo\game_stat.cpp" />
     <ClCompile Include="halo\reach\megalo\hud_widget.cpp" />
+    <ClCompile Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.cpp" />
     <ClCompile Include="halo\reach\megalo\load_process_messages\game_option\current_index_out_of_bounds.cpp" />
     <ClCompile Include="halo\reach\megalo\load_process_messages\game_option\initial_index_out_of_bounds.cpp" />
     <ClCompile Include="halo\reach\megalo\load_process_messages\game_option\value_out_of_bounds.cpp" />
@@ -544,6 +545,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_pos.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_type.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\user_defined_enum.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\_base.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\block.h" />
     <ClInclude Include="halo\reach\megalo\create_operand.h" />
@@ -703,6 +705,7 @@
     <ClInclude Include="helpers\numeric_min_max.h" />
     <ClInclude Include="helpers\owned_ptr.h" />
     <ClInclude Include="helpers\qt\four_cc_to_string.h" />
+    <ClInclude Include="helpers\qt\string\slice.h" />
     <ClInclude Include="helpers\reflex\constants.h" />
     <ClInclude Include="helpers\reflex\enumeration.h" />
     <ClInclude Include="helpers\reflex\enumeration\constraints.h" />

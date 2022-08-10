@@ -206,7 +206,7 @@ namespace halo::reach::megalo::bolt {
                   if (argument_is_named)
                      std::swap(argument.name, argument_name);
                   std::swap(argument.value, expr);
-               } while (!this->_consume_token_if_present<token_type::comma>());
+               } while (this->_consume_token_if_present<token_type::comma>());
             }
             if (!this->_consume_token_if_present<token_type::paren_r>()) {
                errors::unterminated_function_call_argument_list error;

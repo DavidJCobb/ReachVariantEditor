@@ -5,6 +5,7 @@
 #include "helpers/list_items_are_unique.h"
 #include "./errors/base_exception.h"
 #include "./errors/unterminated_string_literal.h"
+#include "./util/string_literal_escape_unescape.h"
 #include "./keywords_to_tokens.h"
 
 namespace halo::reach::megalo::bolt {
@@ -249,6 +250,8 @@ namespace halo::reach::megalo::bolt {
       return false;
    }
 
+   /*static*/ QString unescape(const QString& text);
+
    bool scanner::is_at_end() const {
       return this->pos.offset >= this->text.size();
    }
@@ -336,14 +339,28 @@ namespace halo::reach::megalo::bolt {
          if (is_quote_character(c)) {
             QString content;
 
+            // We've encountered a string literal's opening delimiter. We need to move 
+            // past it before we can read the literal's content.
+            this->_pull_next_char();
+
             bool escape_next = false;
             bool terminated  = false;
             std::optional<token_pos> first_line_break; // first line break inside the string literal; should be reported as probable error site if the literal is unterminated
             std::vector<token_pos>   escaped_closers;  // if the literal is unterminated, report all escaped delimiters to the user; one could be accidental
             this->scan_characters([this, delim = c, &content, &escape_next, &terminated, &first_line_break, &escaped_closers](QChar c) {
                if (escape_next) {
+                  escape_next = false;
                   if (c == delim) {
-                     escaped_closers.push_back(this->pos);
+                     escaped_closers.push_back(this->pos - 1); // minus one because an "escaped delimiter" is a backslash and delimiter, and we're past the backslash
+                  } else {
+                     //
+                     // Preserve the backslash for a subsequent "unescape" call, as that's needed to 
+                     // properly handle things like "\u1234" and whatnot. (We skip preserving the 
+                     // backslash for escaped string delimiters just because those will always work 
+                     // out to just be themselves, i.e. "\"hello\"" == R"("hello")", so preserving 
+                     // the backslash and letting "unescape" handle them isn't really needed.)
+                     //
+                     content += '\\';
                   }
                   content += c;
                   return character_scan_result::proceed;
@@ -376,17 +393,24 @@ namespace halo::reach::megalo::bolt {
                //
                throw errors::scan_exception(std::move(error));
             } else {
+               //
+               // The nested character scan that we used to pull the string content stopped at the end of 
+               // that content, i.e. at/before the closing delimiter. In this outer character scan, we want 
+               // to stop at the end of the entire string literal, i.e. after the closing delimiter. Let's 
+               // advance to the next glyph.
+               //
+               this->_pull_next_char();
+               //
+               // Now let's commit the string literal.
+               //
+               content = util::string_literal_unescape(content);
+               //
                auto lit = literal_data_string{
                   .content   = content,
                   .delimiter = c,
                };
                this->_add_token(token_type::string, lit);
             }
-            //
-            // We've stopped at the closing delimiter of a string literal. Our functor will return a 
-            // "proceed" signal (equivalent to "continue" in a loop), so the next time we're called, 
-            // we'll be looking at the character after that delimiter.
-            //
             return character_scan_result::proceed;
          }
          #pragma endregion

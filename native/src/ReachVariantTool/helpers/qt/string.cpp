@@ -53,18 +53,7 @@ namespace cobb {
          return is_int;
       }
       int stricmp(const QString& a, const std::string& b) {
-         size_t sa = a.size();
-         size_t sb = b.size();
-         size_t s  = sa < sb ? sa : sb;
-         for (size_t i = 0; i < s; ++i) {
-            QChar ca = a[(uint)i].toLower();
-            char  cb = tolower(b[i]);
-            if (ca != cb)
-               return ca.unicode() - cb;
-         }
-         if (sa != sb)
-            return sa > sb ? a[(uint)sb].unicode() : b[sa];
-         return 0;
+         return a.compare(QLatin1String(b.c_str()), Qt::CaseInsensitive);
       }
    }
 }

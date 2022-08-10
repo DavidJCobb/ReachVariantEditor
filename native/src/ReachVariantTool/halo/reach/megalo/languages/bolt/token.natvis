@@ -64,5 +64,7 @@
       <DisplayString Condition="type == token_type::keyword_pragma  ">{*(item_base*)(this)} keyword: pragma</DisplayString>
 
       <DisplayString></DisplayString>
+
+      <StringView Condition="type == token_type::string &amp;&amp; literal.value.index() == 3">literal</StringView>
    </Type>
 </AutoVisualizer>
