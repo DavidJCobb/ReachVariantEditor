@@ -12,10 +12,13 @@ namespace halo::reach::megalo::bolt {
 
    class parser {
       public:
+         parser(const QString& s) : scanner(s) {}
          ~parser();
 
       public:
          std::vector<errors::base*> errors;
+
+         void run_debug_test();
          
       protected:
          scanner scanner;

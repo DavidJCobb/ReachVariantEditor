@@ -41,10 +41,10 @@ namespace halo::reach::megalo::bolt {
    bool parser::_consume_any_token_of_types() {
       bool result = false;
       (
-         (result ?
+         (!result ?
             (this->_check_next_token(TokenTypes) ? (result = true) : false)
          :
-            false
+            false // no-op
          ),
          ...
       );

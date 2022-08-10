@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::expression">
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::ampersand">({lhs,na}) &amp; ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::asterisk">({lhs,na}) * ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::caret">({lhs,na}) ^ ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::equal">({lhs,na}) = ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::minus">({lhs,na}) - ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::percent">({lhs,na}) % ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::pipe">({lhs,na}) | ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::plus">({lhs,na}) + ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::slash_fwd">({lhs,na}) / ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::tilde">({lhs,na}) ~ ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::operator_binary_shl">({lhs,na}) &lt;&lt; ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary &amp;&amp; op == token_type::operator_binary_shr">({lhs,na}) &gt;&gt; ({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::binary">({lhs,na}) {op,view(operator)} ({rhs,na})</DisplayString>
+      
+      <DisplayString Condition="type == expression_type::unary &amp;&amp; op == token_type::exclamation">!({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::unary &amp;&amp; op == token_type::minus">-({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::unary &amp;&amp; op == token_type::plus">+({rhs,na})</DisplayString>
+      <DisplayString Condition="type == expression_type::unary">{op,view(operator)} ({rhs,na})</DisplayString>
+      
+      <DisplayString Condition="type == expression_type::literal">{lit}</DisplayString>
+      
+      <DisplayString Condition="type == expression_type::call">{lit}({arguments})</DisplayString>
+      
+      <DisplayString Condition="type == expression_type::grouping">({lhs})</DisplayString>
+      
+      <DisplayString>{*this,!}</DisplayString>
+   </Type>
+</AutoVisualizer>

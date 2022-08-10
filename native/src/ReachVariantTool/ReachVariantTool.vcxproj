@@ -311,6 +311,7 @@
     <ClCompile Include="services\RVTThemeEngine.cpp" />
     <ClCompile Include="services\syntax_highlight_option.cpp" />
     <ClCompile Include="ui\debug_commands\bolt_compiler_pass_1_test.cpp" />
+    <ClCompile Include="ui\debug_commands\bolt_compiler_pass_2_test.cpp" />
     <ClCompile Include="ui\debug_commands\new_backend_load.cpp" />
     <ClCompile Include="ui\debug_commands\new_backend_resave.cpp" />
     <ClCompile Include="ui\generic\AllocationMeter.cpp" />
@@ -815,6 +816,7 @@
     <QtMoc Include="services\RVTThemeEngine.h" />
     <ClInclude Include="services\syntax_highlight_option.h" />
     <ClInclude Include="ui\debug_commands\bolt_compiler_pass_1_test.h" />
+    <ClInclude Include="ui\debug_commands\bolt_compiler_pass_2_test.h" />
     <ClInclude Include="ui\debug_commands\new_backend_load.h" />
     <ClInclude Include="ui\debug_commands\new_backend_resave.h" />
     <ClInclude Include="ui\main_window\debug_helper_functions.h" />
@@ -944,6 +946,7 @@
     <Natvis Include="halo\reach\megalo\forge_label.natvis" />
     <Natvis Include="halo\reach\megalo\game_option.natvis" />
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\expression.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal_data_number.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\token.natvis" />
@@ -967,6 +970,7 @@
     <Natvis Include="halo\util\refcount.natvis" />
     <Natvis Include="helpers\cs.natvis" />
     <Natvis Include="helpers\eight_cc.natvis" />
+    <Natvis Include="helpers\owned_ptr.natvis" />
     <Natvis Include="helpers\reflex\flags_mask.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

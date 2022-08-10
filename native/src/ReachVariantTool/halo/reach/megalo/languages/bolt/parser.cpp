@@ -23,6 +23,14 @@ namespace halo::reach::megalo::bolt {
       this->errors.clear();
    }
 
+   void parser::run_debug_test() {
+      this->scanner.scan_tokens();
+      auto* result = this->_try_rule_expression();
+      __debugbreak();
+      if (result)
+         delete result;
+   }
+
    bool parser::is_at_end() const {
       return this->next_token >= this->scanner.tokens.size();
    }
@@ -198,7 +206,7 @@ namespace halo::reach::megalo::bolt {
                   if (argument_is_named)
                      std::swap(argument.name, argument_name);
                   std::swap(argument.value, expr);
-               } while (!this->_check_next_token(token_type::comma));
+               } while (!this->_consume_token_if_present<token_type::comma>());
             }
             if (!this->_consume_token_if_present<token_type::paren_r>()) {
                errors::unterminated_function_call_argument_list error;

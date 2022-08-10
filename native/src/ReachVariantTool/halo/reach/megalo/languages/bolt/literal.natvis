@@ -2,8 +2,10 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
    <Type Name="halo::reach::megalo::bolt::literal_item">
       <!-- The way we display the value will depend on the STL internals, so check the STL natvis for guidance. -->
+      <DisplayString Condition="value.index() == 0">&lt;empty&gt;</DisplayString>
       <DisplayString Condition="value.index() == 1">identifier/word: {value._Tail._Head.content}</DisplayString>
       <DisplayString Condition="value.index() == 2">number: {value._Tail._Tail._Head}</DisplayString>
       <DisplayString Condition="value.index() == 3">string: {value._Tail._Tail._Tail._Head}</DisplayString>
+      <DisplayString>{*this,!}</DisplayString>
    </Type>
 </AutoVisualizer>
