@@ -51,7 +51,7 @@ namespace halo::reach::megalo::bolt {
          template<auto TokenTypes> requires cobb::is_std_array_of_type<std::decay_t<decltype(TokenTypes)>, token_type>
          bool _consume_any_token_of_types();
 
-         bool _try_rule_statement();
+         bool _try_rule_statement(); // acts on this->current_block
             bool _try_rule_keyword();
                bool _try_rule_alias();
                bool _try_rule_declare();
@@ -60,6 +60,8 @@ namespace halo::reach::megalo::bolt {
                   std::optional<block::events_mask_type> _try_rule_block_event();
                   block* _try_rule_block_actions();
                   block* _try_rule_block_conditions();
+                     void _try_rule_block_condition_list(); // acts on this->current_block
+                  void _try_rule_block_body(); // acts on this->current_block
                bool _try_rule_pragma();
             expression* _try_rule_expression();
                template<size_t TierIndex> expression* _try_rule_expression_binary();

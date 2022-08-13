@@ -2,19 +2,9 @@
 #include <vector>
 #include "helpers/owned_ptr.h"
 #include "./_base.h"
+#include "./event_type.h"
 
 namespace halo::reach::megalo::bolt {
-   enum class event_type {
-      none,
-      init,
-      local_init,
-      host_migration,
-      double_host_migration,
-      object_death,
-      local,
-      pregame,
-   };
-
    class block : public item_base, public block_child {
       public:
          using events_mask_type = uint32_t;
