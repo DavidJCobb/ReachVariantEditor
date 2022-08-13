@@ -232,7 +232,7 @@ user-defined-enum       → "enum" IDENTIFIER user-defined-enum-value* "end"
 
 // Blocks:
 
-block → condition-blocks | action-block
+block → block-event? ( condition-blocks | action-block ) ;
 
 condition-list   → condition ( ( "and" | "or" ) condition )* ;
 condition-blocks → "if" condition-list "then"
@@ -241,15 +241,15 @@ condition-blocks → "if" condition-list "then"
                    ( "alt" statement* )
                    "end" ;
 
-action-block → block-event? (
-           "do" |
-           ( "for each"
-              "team" |
-              ( "player" "randomly"? ) |
-              ( "object" ( "with label" forge-label | "of type" object-type )? "do" )
-           ) |
-           ( "function" identifier "()" )
-        ) statement* "end" ;
+action-block → (
+                  "do" |
+                  ( "for each"
+                     "team" |
+                     ( "player" "randomly"? ) |
+                     ( "object" ( "with label" forge-label | "of type" object-type )? "do" )
+                  ) |
+                  ( "function" identifier "()" )
+               ) statement* "end" ;
 
 // Bolt v1 only allowed a trigger to be the listneer for a signle event. This 
 // is because triggers are referred to by the entry point list in the game 

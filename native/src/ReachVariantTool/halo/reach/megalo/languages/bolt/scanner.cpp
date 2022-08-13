@@ -351,7 +351,21 @@ namespace halo::reach::megalo::bolt {
                if (escape_next) {
                   escape_next = false;
                   if (c == delim) {
-                     escaped_closers.push_back(this->pos - 1); // minus one because an "escaped delimiter" is a backslash and delimiter, and we're past the backslash
+                     escaped_closers.push_back(this->pos);
+                     //
+                     // An "escaped delimiter" is a backslash immediately followed by a delimiter, 
+                     // and right now, we're just past the backslash. We need to store the position 
+                     // just behind where we normally are.
+                     //
+                     auto& ec = escaped_closers.back();
+                     ec.offset -= 1;
+                     ec.col    -= 1;
+                     //
+                     // Rewinding a token_pos like that isn't safe unless you're sure you're not 
+                     // rewinding past a line break. Rewinding past a line break without breaking 
+                     // the col value is more involved. In this case, we know for certain that the 
+                     // previous glyph isn't a line break, because we know it's a backslash.
+                     //
                   } else {
                      //
                      // Preserve the backslash for a subsequent "unescape" call, as that's needed to 

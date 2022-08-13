@@ -626,7 +626,9 @@
     <ClInclude Include="halo\reach\megalo\option_toggles.h" />
     <ClInclude Include="halo\reach\megalo\player_trait_set.h" />
     <ClInclude Include="halo\reach\megalo\trigger.h" />
+    <ClInclude Include="halo\reach\megalo\trigger_block_type.h" />
     <ClInclude Include="halo\reach\megalo\trigger_entry_points.h" />
+    <ClInclude Include="halo\reach\megalo\trigger_entry_type.h" />
     <ClInclude Include="halo\reach\megalo\tu1_data.h" />
     <ClInclude Include="halo\reach\megalo\variable_declarations.h" />
     <ClInclude Include="halo\reach\megalo\variable_scope.h" />
@@ -699,6 +701,7 @@
     <ClInclude Include="helpers\eight_cc.h" />
     <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
+    <ClInclude Include="helpers\lambda_guard.h" />
     <ClInclude Include="helpers\list_items_are_unique.h" />
     <ClInclude Include="helpers\memory\memcpy.h" />
     <ClInclude Include="helpers\memory\memset.h" />

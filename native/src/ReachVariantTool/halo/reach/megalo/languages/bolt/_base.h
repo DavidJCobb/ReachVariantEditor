@@ -11,6 +11,8 @@ namespace halo::reach::megalo::bolt {
    class block;
    class block_child {
       public:
+         virtual ~block_child() {}; // ensure no object slicing when destroying subclass instances
+      public:
          block* parent = nullptr;
    };
 }

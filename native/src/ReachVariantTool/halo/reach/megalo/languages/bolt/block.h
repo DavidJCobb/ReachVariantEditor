@@ -17,9 +17,27 @@ namespace halo::reach::megalo::bolt {
 
    class block : public item_base, public block_child {
       public:
-         event_type event = event_type::none;
-         std::vector<cobb::owned_ptr<item_base>> contents; // ordered list of aliases, user-defined functions, nested blocks, and actions
+         using events_mask_type = uint32_t;
+         static constexpr events_mask_type event_type_to_mask(event_type t) {
+            return events_mask_type{1} << (events_mask_type)t;
+         }
 
-         constexpr bool is_event_handler() const noexcept { return this->event != event_type::none; }
+      public:
+         events_mask_type events_mask = 0;
+         std::vector<cobb::owned_ptr<block_child>> contents; // ordered list of aliases, user-defined functions, nested blocks, and actions
+
+         void append(block_child&);
+
+         constexpr bool is_event_handler() const noexcept { return this->events_mask == 0; }
+
+         constexpr bool has_event_type(event_type t) const {
+            return (this->events_mask & event_type_to_mask(t)) != 0;
+         }
+         void add_event_type(event_type t) {
+            this->events_mask |= event_type_to_mask(t);
+         }
+         void remove_event_type(event_type t) {
+            this->events_mask &= ~event_type_to_mask(t);
+         }
    };
 }

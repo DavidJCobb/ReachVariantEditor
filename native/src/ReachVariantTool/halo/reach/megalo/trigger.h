@@ -10,32 +10,14 @@
 #include "./opcodes/condition.h"
 #include "./forge_label.h"
 #include "./limits.h"
+#include "./trigger_block_type.h"
+#include "./trigger_entry_type.h"
 
 namespace halo::reach {
    class megalo_variant_data;
 }
 
 namespace halo::reach::megalo {
-   enum class trigger_block_type : uint8_t {
-      normal, // not a loop, but trigger can still access loop iterators from containing triggers?
-      for_each_player,
-      for_each_player_randomly, // iterates over all players in a random order; use for things like randomly picking initial zombies in infection
-      for_each_team,
-      for_each_object, // every MP object?
-      for_each_object_with_label, // always sorted by ascending spawn sequence
-   };
-   enum class trigger_entry_type : uint8_t {
-      normal,
-      subroutine, // preserves iterator values from outer loops
-      on_init,
-      on_local_init, // unverified; not used in Bungie gametypes
-      on_host_migration, // host migrations and double host migrations
-      on_object_death,
-      local,
-      pregame,
-      // Halo 4: incident
-   };
-
    class trigger : public util::indexed {
       public:
          using seen_indices_list = std::bitset<limits::triggers>;

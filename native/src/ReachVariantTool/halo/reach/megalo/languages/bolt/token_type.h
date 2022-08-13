@@ -91,5 +91,6 @@ namespace halo::reach::megalo::bolt {
       keyword_on,
       keyword_or,
       keyword_pragma,
+      keyword_then,
    };
 }
