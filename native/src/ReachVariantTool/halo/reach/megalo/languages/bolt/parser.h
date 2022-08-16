@@ -4,6 +4,7 @@
 #include <QString>
 #include "helpers/type_traits/is_std_array_of_type.h"
 #include "./errors/base.h"
+#include "./util/phrase.h"
 #include "./block.h"
 #include "./operator_metadata.h"
 #include "./scanner.h"
@@ -25,6 +26,8 @@ namespace halo::reach::megalo::bolt {
          void run_debug_test();
          
       protected:
+         static constexpr size_t npos = size_t{ -1 };
+
          scanner scanner;
          size_t  next_token    = 0;
          block*  current_block = nullptr;
@@ -50,6 +53,11 @@ namespace halo::reach::megalo::bolt {
 
          template<auto TokenTypes> requires cobb::is_std_array_of_type<std::decay_t<decltype(TokenTypes)>, token_type>
          bool _consume_any_token_of_types();
+
+         bool _consume_word_if_present(const char*, Qt::CaseSensitivity cs = Qt::CaseInsensitive);
+
+         template<const auto& List> requires cobb::is_std_array_of_type<std::decay_t<decltype(List)>, util::phrase>
+         size_t _extract_longest_matching_phrase_of();
 
          bool _try_rule_statement(); // acts on this->current_block
             bool _try_rule_keyword();

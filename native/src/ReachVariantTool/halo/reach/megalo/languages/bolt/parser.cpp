@@ -79,6 +79,18 @@ namespace halo::reach::megalo::bolt {
       return &this->scanner.tokens[this->next_token - 1];
    }
 
+   bool parser::_consume_word_if_present(const char* word, Qt::CaseSensitivity cs) {
+      const auto& next = this->_peek_next_token();
+      if (next.type != token_type::identifier_or_word)
+         return false;
+      //
+      assert(std::holds_alternative<literal_data_identifier_or_word>(next.literal.value));
+      const auto& value = std::get<literal_data_identifier_or_word>(next.literal.value).content;
+      if (value.compare(word, cs) == 0)
+         return true;
+      return false;
+   }
+
    // --- Rules ---
 
    bool parser::_try_rule_statement() {
@@ -258,9 +270,35 @@ namespace halo::reach::megalo::bolt {
       const auto&   block_start = this->_previous_token()->start;
       switch (this->_previous_token()->type) {
          case token_type::keyword_do:
-            static_assert(false, "TODO: IMPLEMENT ME");
+            result = new action_block;
+            result->type = action_block::block_type::bare;
             break;
          case token_type::keyword_for:
+            if (!this->_consume_word_if_present("each")) {
+               static_assert(false, "TODO: THROW ERROR");
+            }
+            if (this->_consume_word_if_present("object")) {
+               if (this->_consume_word_if_present("of")) { // for each object of type <object-type>
+                  if (!this->_consume_word_if_present("type")) {
+                     static_assert(false, "TODO: THROW ERROR");
+                  }
+                  static_assert(false, "TODO: IMPLEMENT ME");
+               } else if (this->_consume_word_if_present("with")) { // for each object with label <forge-label>
+                  if (!this->_consume_word_if_present("label")) {
+                     static_assert(false, "TODO: THROW ERROR");
+                  }
+                  static_assert(false, "TODO: IMPLEMENT ME");
+               } else { // for each object
+                  static_assert(false, "TODO: IMPLEMENT ME");
+               }
+            } else if (this->_consume_word_if_present("player")) {
+               if (this->_consume_word_if_present("randomly")) {
+                  static_assert(false, "TODO: IMPLEMENT ME");
+               }
+               static_assert(false, "TODO: IMPLEMENT ME");
+            } else if (this->_consume_word_if_present("team")) {
+               static_assert(false, "TODO: IMPLEMENT ME");
+            }
             static_assert(false, "TODO: IMPLEMENT ME");
             break;
          case token_type::keyword_function:
@@ -289,6 +327,7 @@ namespace halo::reach::megalo::bolt {
       
       condition_block* result = new condition_block;
       result->start = this->_previous_token()->start;
+      result->type  = condition_block::block_type::if_block;
       this->current_block->append(*result);
       this->current_block = result;
       
@@ -302,10 +341,11 @@ namespace halo::reach::megalo::bolt {
             throw errors::parse_exception(error);
          }
       };
-      auto _open_next_branch = [this, &last_opened_block]() -> condition_block* {
+      auto _open_next_branch = [this, &last_opened_block](condition_block::block_type b) -> condition_block* {
          last_opened_block->end = this->_previous_token()->end;
          last_opened_block = new condition_block;
          last_opened_block->start = this->_previous_token()->start;
+         last_opened_block->type  = b;
          this->current_block = this->current_block->parent;
          this->current_block->append(*last_opened_block);
          this->current_block = last_opened_block;
@@ -325,35 +365,19 @@ namespace halo::reach::megalo::bolt {
       // `result` variable.
       //
       while (this->_consume_token_if_present<token_type::keyword_altif>()) {
-         auto* branch = _open_next_branch();
+         auto* branch = _open_next_branch(condition_block::block_type::altif_block);
          //
          // Next, we need to extract the condition list for this altif branch.
          //
          this->_try_rule_block_condition_list();
          _extract_keyword_then();
          //
-         // Having extracted the condition list, we now need to modify it: an altif 
-         // branch should copy the conditions of all preceding (alt)if branches, and 
-         // it should invert any conditions not already inverted (conditions that the 
-         // previous altif branches have already copied will already be inverted).
-         //
-         static_assert(false, "TODO: IMPLEMENT ME (MODIFY CONDITION LIST)");
-         //
          // Finally, we can extract the altif branch's content.
          //
          this->_try_rule_block_body();
       }
       if (this->_consume_token_if_present<token_type::keyword_alt>()) {
-         auto* branch = _open_next_branch();
-         //
-         // An alt branch specifies no conditions of its own, but still copies and 
-         // inverts the conditions of previous branches via the same process as the 
-         // altif branches.
-         //
-         static_assert(false, "TODO: IMPLEMENT ME (MODIFY CONDITION LIST)");
-         //
-         // Now, we can extract the alt branch's content.
-         //
+         auto* branch = _open_next_branch(condition_block::block_type::alt_block);
          this->_try_rule_block_body();
       }
       //

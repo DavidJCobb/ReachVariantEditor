@@ -9,8 +9,12 @@ namespace cobb {
    template<size_t Size> requires (Size >= 1) class cs {
       public:
          static constexpr size_t length = Size;
+         static constexpr size_t length_sans_null_terminator = length - 1;
 
          std::array<char, length> value = {};
+
+      private:
+         constexpr cs() {}
 
       public:
          constexpr cs(const char (&lit)[Size]) {
@@ -20,9 +24,11 @@ namespace cobb {
                throw;
          }
 
-         constexpr size_t capacity() const { return length; }
-         constexpr size_t size() const { return length - 1; }
+         constexpr size_t capacity() const { return length_sans_null_terminator; }
+         constexpr size_t size() const { return length_sans_null_terminator; }
          constexpr const char* c_str() const { return (const char*)value.data(); }
+
+         constexpr const char& operator[](size_t i) const noexcept { return this->value[i]; }
 
          template<size_t OtherSize> constexpr bool operator==(const cs<OtherSize>& o) const {
             if constexpr (Size != OtherSize)
@@ -41,12 +47,12 @@ namespace cobb {
             return false;
          }
 
-         template<size_t OtherSize> constexpr cs<Size + OtherSize> operator+(const cs<OtherSize>& o) const {
-            cs<Size + OtherSize> out = {};
-            for (size_t i = 0; i < size(); ++i)
+         template<size_t OtherSize> constexpr cs<length_sans_null_terminator + OtherSize> operator+(const cs<OtherSize>& o) const {
+            cs<length_sans_null_terminator + OtherSize> out = {};
+            for (size_t i = 0; i < length_sans_null_terminator; ++i)
                out.value[i] = value[i];
             for (size_t i = 0; i < o.size(); ++i)
-               out.value[i + Size] = o.value[i];
+               out.value[i + length_sans_null_terminator] = o.value[i];
             return out;
          }
    };

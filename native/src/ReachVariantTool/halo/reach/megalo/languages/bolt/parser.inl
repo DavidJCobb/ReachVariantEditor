@@ -1,4 +1,5 @@
 #pragma once
+#include "helpers/bitmask_t.h"
 #include "./parser.h"
 
 namespace halo::reach::megalo::bolt {
@@ -63,6 +64,72 @@ namespace halo::reach::megalo::bolt {
          }
       }
       return false;
+   }
+
+   template<const auto& List> requires cobb::is_std_array_of_type<std::decay_t<decltype(List)>, util::phrase>
+   size_t parser::_extract_longest_matching_phrase_of() {
+      using possibility_mask_type = cobb::bitmask_t<List.size()>;
+
+      constexpr size_t longest_phrase_length = [](){
+         size_t longest = 0;
+         for (const auto& phrase : List) {
+            if (phrase.size() > longest)
+               longest = phrase.size();
+         }
+         return longest;
+      }();
+
+      auto possibility_mask = []() {
+         possibility_mask_type mask = 0;
+         for (size_t i = 0; i < List.size(); ++i)
+            mask |= (1 << i);
+         return mask;
+      }();
+
+      auto token_count = this->scanner.tokens.size();
+      auto token_index = this->next_token;
+      auto max_count   = token_count - token_index;
+      if (max_count > longest_phrase_length)
+         max_count = longest_phrase_length;
+
+      size_t word_count = 0;
+      for (; word_count < max_count; ++word_count) {
+         const auto& token = this->scanner.tokens[token_index + word_count];
+         if (token.type != token_type::identifier_or_word)
+            break;
+
+         assert(std::holds_alternative<literal_data_identifier_or_word>(token.literal.value));
+         QString word = std::get<literal_data_identifier_or_word>(token.literal.value).content.toLower();
+
+         for (size_t j = 0; j < List.size(); ++j) {
+            auto mask = possibility_mask_type{ 1 } << j;
+            if ((possibility_mask & mask) == 0)
+               continue;
+
+            const auto& phrase = List[j];
+            if (word_count >= phrase.size()) {
+               possibility_mask &= ~mask;
+               continue;
+            }
+            if (phrase[word_count] != word) {
+               possibility_mask &= ~mask;
+               continue;
+            }
+         }
+      }
+
+      if (!possibility_mask)
+         return npos;
+      for (size_t i = 0; i < List.size(); ++i) {
+         auto mask = possibility_mask_type{ 1 } << i;
+         if ((possibility_mask & mask) == 0)
+            continue;
+
+         const auto& phrase = list[i];
+         if (phrase.size() == word_count)
+            return i;
+      }
+      return npos;
    }
 
    template<size_t TierIndex> expression* parser::_try_rule_expression_binary() {
