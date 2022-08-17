@@ -66,6 +66,27 @@ namespace halo::reach::megalo::bolt {
       return false;
    }
 
+   template<size_t Size>
+   void parser::_extract_and_consume_phrase(std::array<QString, Size>& out_phrase, size_t& count_extracted) {
+      out_exceeded_length = false;
+      for (auto& item : out_phrase)
+         item.clear();
+      //
+      size_t i = 0;
+      while (this->_peek_next_token().type == token_type::identifier_or_word) {
+         auto& token = this->_pull_next_token();
+
+         assert(std::holds_alternative<literal_data_identifier_or_word>(token.literal.value));
+         QString word = std::get<literal_data_identifier_or_word>(token.literal.value).content.toLower();
+
+         out_phrase[i] = word;
+         if (++i >= Size) {
+            break;
+         }
+      }
+      count_extracted = i;
+   }
+
    template<const auto& List> requires cobb::is_std_array_of_type<std::decay_t<decltype(List)>, util::phrase>
    size_t parser::_extract_longest_matching_phrase_of() {
       using possibility_mask_type = cobb::bitmask_t<List.size()>;

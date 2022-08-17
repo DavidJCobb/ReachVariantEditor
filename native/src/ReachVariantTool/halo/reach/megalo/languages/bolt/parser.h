@@ -56,6 +56,11 @@ namespace halo::reach::megalo::bolt {
 
          bool _consume_word_if_present(const char*, Qt::CaseSensitivity cs = Qt::CaseInsensitive);
 
+         // Consumes up to `Size` following word/identifier tokens, and writes them to an input array. 
+         // Returned words are forced to lowercase.
+         template<size_t Size>
+         void _extract_and_consume_phrase(std::array<QString, Size>& out_phrase, size_t& count_extracted);
+
          template<const auto& List> requires cobb::is_std_array_of_type<std::decay_t<decltype(List)>, util::phrase>
          size_t _extract_longest_matching_phrase_of();
 

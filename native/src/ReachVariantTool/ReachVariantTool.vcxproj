@@ -22,7 +22,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
@@ -552,6 +552,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_pos.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_type.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\user_defined_enum.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\util\phrase.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\_base.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\block.h" />
@@ -702,9 +703,14 @@
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
     <ClInclude Include="halo\util\stream_position.h" />
+    <ClInclude Include="helpers\bitmask_t.h" />
     <ClInclude Include="helpers\byteswap.h" />
     <ClInclude Include="helpers\constexpr_for_functor.h" />
     <ClInclude Include="helpers\cpuinfo.h" />
+    <ClInclude Include="helpers\cs_utils\common_prefix_size.h" />
+    <ClInclude Include="helpers\cs_utils\count_char_in.h" />
+    <ClInclude Include="helpers\cs_utils\all_indices_of_char.h" />
+    <ClInclude Include="helpers\cs_utils\index_of.h" />
     <ClInclude Include="helpers\eight_cc.h" />
     <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
@@ -818,6 +824,7 @@
     <ClInclude Include="helpers\type_traits\strip_enum.h" />
     <ClInclude Include="helpers\type_traits\value_type_of.h" />
     <ClInclude Include="helpers\unreachable.h" />
+    <ClInclude Include="helpers\y_combinator.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="ui\generic\ImageStackWidget.h" />
     <QtMoc Include="ui\generic\AllocationMeter.h" />

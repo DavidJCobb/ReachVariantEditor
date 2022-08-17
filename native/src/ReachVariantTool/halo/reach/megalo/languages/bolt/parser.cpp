@@ -274,35 +274,103 @@ namespace halo::reach::megalo::bolt {
             result->type = action_block::block_type::bare;
             break;
          case token_type::keyword_for:
-            if (!this->_consume_word_if_present("each")) {
-               static_assert(false, "TODO: THROW ERROR");
-            }
-            if (this->_consume_word_if_present("object")) {
-               if (this->_consume_word_if_present("of")) { // for each object of type <object-type>
-                  if (!this->_consume_word_if_present("type")) {
-                     static_assert(false, "TODO: THROW ERROR");
+            {
+               using bt = action_block::block_type;
+
+               auto type = bt::bare;
+
+               std::array<QString, 4> words;
+               size_t count;
+
+               this->_extract_and_consume_phrase(words, count);
+               if (count >= 2 && count <= 4) {
+                  if (words[0] == "each") {
+                     if (words[1] == "object") {
+                        if (count == 2)
+                           type = bt::for_each_object;
+                        else if (count >= 4) {
+                           if (words[2] == "with" && words[3] == "label")
+                              type = bt::for_each_object_with_label;
+                           else if (words[2] == "of" && words[3] == "type")
+                              type = bt::for_each_object_of_type;
+                        }
+                     } else if (words[1] == "player") {
+                        if (count == 2)
+                           type = bt::for_each_player;
+                        else if (count == 3) {
+                           if (words[2] == "randomly")
+                              type = bt::for_each_player_randomly;
+                        }
+                     } else if (words[1] == "team") {
+                        if (count == 2)
+                           type = bt::for_each_team;
+                     }
                   }
-                  static_assert(false, "TODO: IMPLEMENT ME");
-               } else if (this->_consume_word_if_present("with")) { // for each object with label <forge-label>
-                  if (!this->_consume_word_if_present("label")) {
-                     static_assert(false, "TODO: THROW ERROR");
-                  }
-                  static_assert(false, "TODO: IMPLEMENT ME");
-               } else { // for each object
-                  static_assert(false, "TODO: IMPLEMENT ME");
                }
-            } else if (this->_consume_word_if_present("player")) {
-               if (this->_consume_word_if_present("randomly")) {
-                  static_assert(false, "TODO: IMPLEMENT ME");
+
+               result = new action_block;
+               result->type = type;
+               switch (type) {
+                  case bt::bare:
+                     static_assert(false, "TODO: RAISE NON-FATAL ERROR: UNRECOGNIZED LOOP TYPE");
+                     {
+                        constexpr size_t max_tokens_to_skip = 10;
+
+                        size_t skipped = 0;
+                        for (; skipped < max_tokens_to_skip && this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>(); ++skipped) {
+                           ;
+                        }
+                        if (skipped == max_tokens_to_skip) {
+                           static_assert(false, "TODO: RAISE FATAL ERROR: LOOP MAY NEVER START (failed to find `do` within ${max_tokens_to_skip} tokens)");
+                        }
+                     }
+                     break;
+                  case bt::for_each_object_with_label:
+                     if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>()) {
+                        static_assert(false, "TODO: RAISE NON-FATAL ERROR: EXPECTED FOR LABEL (alias/identifier, label index integer, or label name string literal)");
+                     } else {
+                        auto* t = this->_previous_token();
+                        result->forge_label = t->literal;
+                     }
+                     break;
+                  case bt::for_each_object_of_type:
+                     if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number>()) {
+                        static_assert(false, "TODO: RAISE NON-FATAL ERROR: EXPECTED FOR LABEL (alias/identifier, or object type index)");
+                     } else {
+                        auto* t = this->_previous_token();
+                        result->object_type = t->literal;
+                     }
+                     break;
                }
-               static_assert(false, "TODO: IMPLEMENT ME");
-            } else if (this->_consume_word_if_present("team")) {
-               static_assert(false, "TODO: IMPLEMENT ME");
+               if (!this->_consume_token_if_present<token_type::keyword_do>()) {
+                  static_assert(false, "TODO: THROW FATAL ERROR: LOOP NEVER STARTS");
+               }
             }
-            static_assert(false, "TODO: IMPLEMENT ME");
             break;
          case token_type::keyword_function:
-            static_assert(false, "TODO: IMPLEMENT ME");
+            {
+               const token* ident = nullptr;
+               if (this->_consume_token_if_present<token_type::identifier_or_word>()) {
+                  ident = this->_previous_token();
+               } else {
+                  static_assert(false, "TODO: RAISE NON-FATAL ERROR: NO FUNCTION NAME");
+               }
+               if (!this->_consume_token_if_present<token_type::paren_l>()) {
+                  static_assert(false, "TODO: RAISE FATAL ERROR: NO ARGUMENT LIST OPENER");
+               }
+               //
+               // TODO: In the future, we could consume any specified arguments. Bolt doesn't allow 
+               // user-defined functions to have arguments,  but there's no reason that *must* be a 
+               // fatal parse error.
+               //
+               if (!this->_consume_token_if_present<token_type::paren_r>()) {
+                  static_assert(false, "TODO: RAISE FATAL ERROR: NO ARGUMENT LIST CLOSER");
+               }
+
+               result = new action_block;
+               result->type = action_block::block_type::function;
+               result->function_name = ident->literal;
+            }
             break;
       }
       assert(result);
