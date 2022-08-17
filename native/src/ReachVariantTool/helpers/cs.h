@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <type_traits>
 
 namespace cobb {
@@ -11,12 +10,10 @@ namespace cobb {
          static constexpr size_t length = Size;
          static constexpr size_t length_sans_null_terminator = length - 1;
 
-         std::array<char, length> value = {};
-
-      private:
-         constexpr cs() {}
+         char value[length] = {};
 
       public:
+         constexpr cs() {}
          constexpr cs(const char (&lit)[Size]) {
             for (size_t i = 0; i < Size; ++i)
                value[i] = lit[i];
@@ -26,7 +23,7 @@ namespace cobb {
 
          constexpr size_t capacity() const { return length_sans_null_terminator; }
          constexpr size_t size() const { return length_sans_null_terminator; }
-         constexpr const char* c_str() const { return (const char*)value.data(); }
+         constexpr const char* c_str() const { return (const char*)value; }
 
          constexpr const char& operator[](size_t i) const noexcept { return this->value[i]; }
 

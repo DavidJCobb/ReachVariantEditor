@@ -2,8 +2,11 @@
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <optional>
+#include <string_view>
 #include "helpers/string/strlen.h"
-#include "helpers/y_combinator.h"
+#include "helpers/bitmask_t.h"
+#include "helpers/cs.h"
 
 #include <string>
 #include <vector>
@@ -75,11 +78,24 @@ namespace halo::reach::megalo::bolt::util {
    //    }
    //
 
-   class phrase_tree {
+   template<cobb::cs... Phrases> class phrase_tree {
       public:
          using size_type  = uint8_t;
          using index_type = uint8_t;
          static constexpr index_type none = std::numeric_limits<index_type>::max();
+
+      public:
+         static constexpr size_t phrase_count = sizeof...(Phrases);
+         static constexpr auto phrases = std::array{ Phrases.c_str()... };
+
+         static constexpr auto phrase_blob = (Phrases + ...);
+         static constexpr auto phrase_starts = []() -> std::array<size_t, phrase_count> {
+            std::array<size_t, phrase_count> out = {};
+            size_t i    = 0;
+            size_t size = 0;
+            ((out[i++] = size, size += Phrases.size()), ...);
+            return out;
+         }();
          
       public:
          struct word {
@@ -89,6 +105,8 @@ namespace halo::reach::megalo::bolt::util {
             constexpr word() {}
             constexpr word(size_type a, size_type b) : start(a), size(b) {}
             constexpr bool operator==(const word&) const noexcept = default;
+
+            constexpr bool empty() const noexcept { return size == 0; }
          };
 
          //
@@ -100,205 +118,198 @@ namespace halo::reach::megalo::bolt::util {
          // "memory."
          //
          struct node {
-            word data;
+            word data = {};
             struct {
                index_type start = none;
                index_type count = none;
             } children;
+            bool terminator = false;
          };
 
-         std::string buffer;
-         std::array<node,   12> all_nodes;
-         std::array<size_t, 12> top_level_nodes;
+         const char* buffer = phrase_blob.c_str();
+         std::array<node,   12> all_nodes       = {};
+         std::array<size_t, 12> top_level_nodes = {};
 
-         template<size_t Count> constexpr phrase_tree(const std::array<const char*, Count>& phrases) {
-            for (const auto* phrase : phrases)
-               buffer += phrase;
+         constexpr phrase_tree() {
+            for (auto& item : top_level_nodes)
+               item = none;
+
+            //using similarity_mask_t = cobb::bitmask_t<phrase_count>;
+            using similarity_mask_t = uint32_t; // MSVC is broken
             
-            //
-            // First attempted implementation: build a heap-allocated node tree the conventional 
-            // way; then construct an equivalent constexpr tree and delete the heap-allocated 
-            // tree. Fails due to internal compiler bugs in MSVC which manifest as absurdly 
-            // wrong error messages.
-            //
-
-            struct temp_node {
+            struct phrase_state {
+               size_t            word_index        = 0;
+               uint32_t similarity_mask   = (uint32_t(1) << (phrase_count + 1)) - 1;
+               index_type        last_created_node = none;
+            };
+            struct word_info {
                word data = {};
-               std::vector<temp_node*> children;
-               
-               constexpr temp_node() {}
-               ~temp_node() { for(auto* item : children) delete item; }
+               std::string_view view;
+
+               constexpr bool empty() const noexcept { return data.empty(); }
             };
-            std::vector<temp_node*> tops;
-            
-            size_t accum = 0;
-            for (size_t i = 0; i < phrases.size(); ++i) {
-               auto*  phrase  = phrases[i];
-               auto   strlen  = cobb::strlen(phrase);
 
-               auto   size = strlen + 1;
+            std::array<phrase_state, phrase_count> phrase_states = {};
+
+            auto _get_nth_word = [](const char* phrase, size_t word_index) -> word_info {
+               word_info out;
+               out.view = std::string_view(phrase);
+
+               size_t start = 0;
+               size_t size  = 0;
+
+               size_t w    = 0;
                size_t last = 0;
-               temp_node* current = nullptr;
-               for (size_t j = 0; j < size; ++j) {
-                  if (phrase[j] == ' ' || phrase[j] == '\0') {
-                     word here = word(accum + last, accum + j - last);
-                     last = j + 1;
-
-                     temp_node* next = nullptr;
-                     if (current) {
-                        bool exists = false;
-                        for (auto* existing : current->children) {
-                           if (existing->data == here) {
-                              next   = existing;
-                              exists = true;
-                              break;
-                           }
-                        }
-                        if (!exists) {
-                           auto* child = next = new temp_node;
-                           child->data = here;
-                           current->children.push_back(child);
-                        }
-                     } else {
-                        auto* child = next = new temp_node;
-                        child->data = here;
-                        tops.push_back(child);
-                     }
-
-                     current = next;
-                     if (phrase[j] == '\0')
+               while (w <= word_index) {
+                  auto i = out.view.find_first_of(' ', last);
+                  if (w == word_index) {
+                     if (i == std::string_view::npos) {
+                        start = last;
+                        size  = out.view.size() - last;
                         break;
+                     }
+                     start = last;
+                     size  = i - last;
+                     break;
+                  }
+                  if (i < std::string_view::npos)
+                     break;
+                  last = i + 1;
+                  ++w;
+               }
+
+               out.data = word(start, size);
+               if (size)
+                  out.view = out.view.substr(start, size);
+               return out;
+            };
+            auto _get_word_content = [this](const word_info& info) -> std::string_view {
+               return std::string_view(this->buffer).substr(info.data.start, info.data.size);
+            };
+
+            size_t node_index = 0;
+            auto _create_node = [this, &node_index]() -> node& {
+               auto& n = this->all_nodes[node_index];
+               ++node_index;
+               return n;
+            };
+
+            size_t tlnl_index = 0; // top-level node list index
+            for (size_t focus_index = 0; focus_index < phrase_count; ++focus_index) {
+               auto& focus_state  = phrase_states[focus_index];
+               auto* focus_phrase = phrases[focus_index];
+
+               auto word_index = focus_state.word_index;
+
+               auto focus_word = _get_nth_word(focus_phrase, word_index);
+               focus_word.data.start += phrase_starts[focus_index];
+               if (focus_word.empty()) {
+                  if (focus_state.last_created_node != none) {
+                     this->all_nodes[focus_state.last_created_node].terminator = true;
+                  }
+                  continue;
+               }
+
+               auto& focus_node = _create_node();
+               focus_node.data = focus_word.data;
+               if (focus_state.last_created_node != none) {
+                  this->all_nodes[focus_state.last_created_node].children.start = node_index - 1;
+                  this->all_nodes[focus_state.last_created_node].children.count = 1;
+               } else {
+                  this->top_level_nodes[tlnl_index++] = node_index - 1;
+               }
+               focus_state.last_created_node = node_index - 1;
+               ++focus_state.word_index;
+
+               similarity_mask_t ruled_out_this_time = 0;
+               for (size_t other_index = 0; other_index < phrase_count; ++other_index) {
+                  if (other_index == focus_index)
+                     continue;
+                  auto& other_state  = phrase_states[other_index];
+                  auto* other_phrase = phrases[other_index];
+
+                  if ((other_state.similarity_mask & (1 << focus_index)) == 0) {
+                     //
+                     // We've already determined that this phrase doesn't overlap the subject phrase.
+                     //
+                     continue;
+                  }
+                  //
+                  // Remaining phrases are the "phrases under consideration." See if any diverge from 
+                  // the subject, and if so, clear their similarity bit with the subject and track 
+                  // them.
+                  //
+                  auto other_word = _get_nth_word(other_phrase, word_index);
+                  other_word.data.start += phrase_starts[other_index];
+                  if (!other_word.empty()) {
+                     if (_get_word_content(other_word) == _get_word_content(focus_word)) {
+                        other_state.last_created_node = focus_state.last_created_node;
+                        ++other_state.word_index;
+                        continue;
+                     }
+                     ruled_out_this_time |= (1 << other_index);
+                  } else {
+                     if (other_state.last_created_node != none)
+                        this->all_nodes[other_state.last_created_node].terminator = true;
+                  }
+                  focus_state.similarity_mask &= ~(1 << other_index);
+                  other_state.similarity_mask &= ~(1 << focus_index);
+               }
+               if (ruled_out_this_time != 0) {
+                  //
+                  // We found some phrases that diverge from the subject at this word index. We should 
+                  // now create the nodes for their current word, and test them against each other as 
+                  // we do so.
+                  //
+                  this->all_nodes[focus_state.last_created_node].children.start = node_index;
+                  for (size_t other_index = 0; other_index < phrase_count; ++other_index) {
+                     if ((ruled_out_this_time & (1 << other_index)) == 0)
+                        continue;
+                     auto& other_state  = phrase_states[other_index];
+                     auto* other_phrase = phrases[other_index];
+
+                     auto  other_word = _get_nth_word(other_phrase, word_index);
+                     other_word.data.start += phrase_starts[other_index];
+
+                     //
+                     // Loop over all ruled-out-this-time phrases that come before this one in the list. 
+                     // See if we've already created a node for this word.
+                     //
+                     bool  already = false;
+                     for (size_t prior_index = 0; prior_index < other_index; ++prior_index) {
+                        if ((ruled_out_this_time & (1 << prior_index)) == 0)
+                           continue;
+                        auto& prior_state  = phrase_states[prior_index];
+                        auto* prior_phrase = phrases[prior_index];
+                        auto  prior_word   = _get_nth_word(prior_phrase, word_index);
+                        prior_word.data.start += phrase_starts[prior_index];
+                        if (!prior_word.empty() && _get_word_content(prior_word) == _get_word_content(other_word)) {
+                           already = true;
+
+                           other_state.last_created_node = prior_state.last_created_node;
+                           other_state.word_index        = prior_state.word_index;
+                        } else {
+                           other_state.similarity_mask &= ~(1 << prior_index);
+                           prior_state.similarity_mask &= ~(1 << other_index);
+                        }
+                     }
+                     if (!already) {
+                        auto& other_node = _create_node();
+                        other_node.data = word();
+                        if (other_state.last_created_node != none) {
+                           this->all_nodes[other_state.last_created_node].children.start = node_index - 1;
+                           this->all_nodes[other_state.last_created_node].children.count = 1;
+                        } else {
+                           this->top_level_nodes[tlnl_index++] = node_index - 1;
+                        }
+                        other_state.last_created_node = node_index - 1;
+                        ++other_state.word_index;
+                        ++this->all_nodes[focus_state.last_created_node].children.count;
+                     }
                   }
                }
-               accum += strlen;
+               // Done.
             }
-            
-            size_t ni = 0;
-            size_t ti = 0;
-            for(temp_node* item : tops) {
-               auto dst_i = ni;
-
-               auto nested = [this, &ni](auto& self, const temp_node* src) mutable -> void {
-                  this->all_nodes[ni++].data = src->data;
-                  for (const temp_node* child : src->children) {
-                     self(child);
-                  }
-               };
-               auto wrapper = cobb::y_combinator{ nested };
-               wrapper(item); // this fails: MSVC thinks the lambda's second argument is const int for some reason
-               /*/
-               auto lambda = cobb::y_combinator{[this, &ni](auto& self, const temp_node* src) mutable -> void { // this fails: MSVC thinks the lambda's second argument is const int for some reason
-                  this->all_nodes[ni++].data = src->data;
-                  for (const temp_node* child : src->children) {
-                     self(child);
-                  }
-               }};
-               lambda(item);
-               //*/
-               this->top_level_nodes[ti++] = dst_i;
-            }
-            
-            for(auto* item : tops)
-               delete item;
          }
    };
-
-   // reference implementation (i.e. non-constexpr)
-   /*
-   class phrase_tree {
-      public:
-         using size_type  = uint8_t;
-         using index_type = uint8_t;
-         static constexpr index_type none = std::numeric_limits<index_type>::max();
-         
-      public:
-         struct word {
-            size_type start = 0;
-            size_type size  = 0;
-         };
-
-         struct node {
-            word data;
-            struct {
-               index_type start = none;
-               index_type count = none;
-            } children;
-         };
-
-         std::string buffer;
-         std::array<node,   12> all_nodes;
-         std::array<size_t, 12> top_level_nodes;
-
-         template<size_t Count> constexpr phrase_tree(const std::array<const char*, Count>& phrases) {
-            for (const auto* phrase : phrases)
-               buffer += phrase;
-            
-            struct temp_node {
-               word data;
-               std::vector<temp_node*> children;
-               
-               ~temp_node() { for(auto* item : children) delete item; }
-            };
-            std::vector<temp_node*> tops;
-            
-            size_t accum = 0;
-            for (size_t i = 0; i < phrases.size(); ++i) {
-               auto* current = nullptr;
-               auto* phrase  = phrases[i];
-               auto  size    = strlen(phrase) + 1;
-               size_t last = 0;
-               for (size_t j = 0; j < size; ++j) {
-                  if (phrase[j] == ' ' || phrase[j] == '\0') {
-                     word here = word{ accum + last, accum + j - last };
-
-                     temp_node* next = nullptr;
-                     if (current) {
-                        bool exists = false;
-                        for (auto* existing : current->children) {
-                           if (existing->data == here) {
-                              next   = existing;
-                              exists = true;
-                              break;
-                           }
-                        }
-                        if (!exists) {
-                           auto* child = next = new temp_node;
-                           child->data = here;
-                           current->children.push_back(child);
-                        }
-                     } else {
-                        auto* child = next = new temp_node;
-                        child->data = here;
-                        tops.push_back(child);
-                     }
-
-                     current = next;
-                     if (phrase[j] == '\0')
-                        break;
-                  }
-               }
-               accum += strlen(phrase);
-            }
-            
-            size_t ni = 0;
-            size_t ti = 0;
-            auto _traverse = [&ni, this](temp_node& src) {
-               auto& dst = this->nodes[ni];
-               dst.data = src.data;
-               for(auto* child : src.children) {
-                  _traverse(*child);
-               }
-            };
-            for(auto* item : tops) {
-               auto dst_i = ni;
-               _traverse(*item);
-               this->top_level_nodes[ti++] = dst_i;
-               
-            }
-            
-            for(auto* item : tops)
-               delete item;
-         }
-   };
-   */
 }
