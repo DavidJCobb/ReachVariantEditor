@@ -212,6 +212,7 @@
     <ClCompile Include="halo\reach\load_process_messages\arena_stat_cannot_be_infinity.cpp" />
     <ClCompile Include="halo\reach\load_process_messages\not_a_game_variant.cpp" />
     <ClCompile Include="halo\reach\map_permissions.cpp" />
+    <ClCompile Include="halo\reach\megalo\languages\bolt\block.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\expression.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\function_call_argument.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\literal_data_number.cpp" />
@@ -527,12 +528,11 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\block_event_names_not_found.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\block_event_not_followed_by_block.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\function_call_argument_parse_error.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\missing_syntax_element.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\token_matches_no_grammar_rule.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_block_event_name.h" />
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_block.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_for_loop_type.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_block_event_list.h" />
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_condition_list.h" />
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_function_call_argument_list.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_string_literal.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\event_type.h" />
@@ -548,6 +548,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\scanner.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\character_scanner.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\statement.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\syntax_element.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_pos.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\token_type.h" />

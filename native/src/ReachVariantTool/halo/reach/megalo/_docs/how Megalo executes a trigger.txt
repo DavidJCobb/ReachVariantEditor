@@ -53,7 +53,7 @@ Here's a translation of the raw assembly:
                current_or_group  = condition.or_group;
                group_still_valid = false;
             }
-            group_still_valid |= condition.Execute();
+            group_still_valid &= condition.Execute();
          }
          if (!group_still_valid)
             //

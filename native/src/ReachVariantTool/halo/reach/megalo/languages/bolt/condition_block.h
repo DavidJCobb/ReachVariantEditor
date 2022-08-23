@@ -4,7 +4,14 @@
 #include "./block.h"
 
 namespace halo::reach::megalo::bolt {
-   class condition;
+   class expression;
+
+   class condition {
+      public:
+         cobb::owned_ptr<expression> expr;
+         bool negate           = false;
+         bool or_with_previous = false;
+   };
 
    class condition_block : public block {
       public:
@@ -17,9 +24,6 @@ namespace halo::reach::megalo::bolt {
       public:
          block_type type = block_type::if_block;
 
-         struct {
-            std::vector<cobb::owned_ptr<condition>> alt;  // for alt(if) blocks, these are copied from previous (alt)if siblings and inverted
-            std::vector<cobb::owned_ptr<condition>> mine; // for all if-blocks, these are the block's own conditions
-         } conditions;
+         std::vector<condition> conditions;
    };
 }

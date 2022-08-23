@@ -22,7 +22,7 @@
       
       <DisplayString Condition="type == expression_type::literal">{lit}</DisplayString>
       
-      <DisplayString Condition="type == expression_type::call">{lit}({arguments})</DisplayString>
+      <DisplayString Condition="type == expression_type::call">function call: {lit}(...)</DisplayString>
       
       <DisplayString Condition="type == expression_type::grouping">({lhs})</DisplayString>
       

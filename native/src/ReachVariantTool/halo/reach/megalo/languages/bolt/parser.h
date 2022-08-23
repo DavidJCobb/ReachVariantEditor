@@ -5,6 +5,7 @@
 #include "helpers/type_traits/is_std_array_of_type.h"
 #include "./errors/base.h"
 #include "./util/phrase.h"
+#include "./action_block.h"
 #include "./block.h"
 #include "./operator_metadata.h"
 #include "./scanner.h"
@@ -19,14 +20,14 @@ namespace halo::reach::megalo::bolt {
 
       public:
          std::vector<errors::base*> errors;
-         cobb::owned_ptr<block> root;
+         cobb::owned_ptr<action_block> root;
 
          void parse();
 
          void run_debug_test();
          
       protected:
-         static constexpr size_t npos = size_t{ -1 };
+         static constexpr size_t npos = (size_t)-1;
 
          scanner scanner;
          size_t  next_token    = 0;
@@ -61,6 +62,7 @@ namespace halo::reach::megalo::bolt {
          template<size_t Size>
          void _extract_and_consume_phrase(std::array<QString, Size>& out_phrase, size_t& count_extracted);
 
+         // generic version of the code for event_type_phrase; not sure I need this yet
          template<const auto& List> requires cobb::is_std_array_of_type<std::decay_t<decltype(List)>, util::phrase>
          size_t _extract_longest_matching_phrase_of();
 

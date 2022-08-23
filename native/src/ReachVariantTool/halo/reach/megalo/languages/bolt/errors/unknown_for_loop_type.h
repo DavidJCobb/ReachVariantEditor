@@ -2,12 +2,12 @@
 #include "./base.h"
 
 namespace halo::reach::megalo::bolt {
-   class condition_block;
+   class action_block;
 }
 
 namespace halo::reach::megalo::bolt::errors {
-   class unterminated_condition_list : public base {
+   class unknown_for_loop_type : public base {
       public:
-         const condition_block* subject = nullptr;
+         action_block* subject = nullptr;
    };
 }

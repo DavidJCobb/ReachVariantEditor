@@ -88,6 +88,7 @@ namespace halo::reach::megalo::bolt {
       keyword_for,
       keyword_function,
       keyword_if,
+      keyword_not,
       keyword_on,
       keyword_or,
       keyword_pragma,

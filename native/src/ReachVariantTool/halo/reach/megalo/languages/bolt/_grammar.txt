@@ -235,6 +235,7 @@ user-defined-enum       → "enum" IDENTIFIER user-defined-enum-value* "end"
 block-body → statement* ;
 block      → block-event? ( condition-blocks | action-block ) ;
 
+condition        → "not"* expression ;
 condition-list   → condition ( ( "and" | "or" ) condition )* ;
 condition-blocks → "if" condition-list "then"
                       block-body

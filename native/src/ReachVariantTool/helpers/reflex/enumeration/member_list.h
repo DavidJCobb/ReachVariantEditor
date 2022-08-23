@@ -169,8 +169,7 @@ namespace cobb::reflex::impl::enumeration {
       template<typename Subset> static constexpr cobb::cs<subset_name_length<Subset>()> subset_name() {
          constexpr auto length = subset_name_length<Subset>();
          //
-         const char initial[length] = {};
-         cobb::cs<length> name(initial);
+         cobb::cs<length> name;
          cobb::tuple_foreach<as_tuple>([&name]<typename Current>() {
             if constexpr (is_nested_enum<Current>)
                name = Current::name;

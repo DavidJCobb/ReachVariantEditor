@@ -5,6 +5,8 @@
 #include <QLatin1String>
 
 namespace halo::reach::megalo::bolt::util {
+
+   // generic version of event_type_phrase; not sure I need this yet
    class phrase {
       protected:
          using size_type = uint8_t;
@@ -30,12 +32,12 @@ namespace halo::reach::megalo::bolt::util {
                auto c = str[i];
                if (c == '\0') {
                   if (i)
-                     this->words[a++] = { (str - this->string), i};
+                     this->words[a++] = word(str - this->string, i);
                   break;
                }
                if (c == ' ') {
                   #pragma warning(suppress: 28020) // IntelliSense gets confused by the postfix-increment on the array index.
-                  this->words[a++] = { (str - this->string), i };
+                  this->words[a++] = word(str - this->string, i);
                   str += i + 1;
                   i = 0;
                   continue;
@@ -50,4 +52,5 @@ namespace halo::reach::megalo::bolt::util {
          constexpr const QLatin1String operator[](size_t i) const { return QLatin1String(this->string + this->words[i].start, this->words[i].size); }
          constexpr size_t size() const noexcept { return this->count; }
    };
+
 }

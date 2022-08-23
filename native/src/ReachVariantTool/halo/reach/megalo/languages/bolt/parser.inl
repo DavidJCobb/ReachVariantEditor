@@ -68,7 +68,6 @@ namespace halo::reach::megalo::bolt {
 
    template<size_t Size>
    void parser::_extract_and_consume_phrase(std::array<QString, Size>& out_phrase, size_t& count_extracted) {
-      out_exceeded_length = false;
       for (auto& item : out_phrase)
          item.clear();
       //
@@ -146,7 +145,7 @@ namespace halo::reach::megalo::bolt {
          if ((possibility_mask & mask) == 0)
             continue;
 
-         const auto& phrase = list[i];
+         const auto& phrase = List[i];
          if (phrase.size() == word_count)
             return i;
       }

@@ -829,6 +829,9 @@
     <ClCompile Include="halo\reach\megalo\languages\bolt\util\string_literal_escape_unescape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\reach\megalo\languages\bolt\block.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2394,9 +2397,6 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\function_call_argument_parse_error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_function_call_argument_list.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2425,12 +2425,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\lambda_guard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_block.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_condition_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\block_event_not_followed_by_block.h">
@@ -2467,6 +2461,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\y_combinator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\syntax_element.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\missing_syntax_element.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_for_loop_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

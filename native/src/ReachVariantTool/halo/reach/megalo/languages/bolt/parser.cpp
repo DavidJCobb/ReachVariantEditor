@@ -4,12 +4,11 @@
 #include "./errors/block_event_names_not_found.h"
 #include "./errors/block_event_not_followed_by_block.h"
 #include "./errors/function_call_argument_parse_error.h"
+#include "./errors/missing_syntax_element.h"
 #include "./errors/token_matches_no_grammar_rule.h"
 #include "./errors/unknown_block_event_name.h"
-#include "./errors/unterminated_block.h"
+#include "./errors/unknown_for_loop_type.h"
 #include "./errors/unterminated_block_event_list.h"
-#include "./errors/unterminated_condition_list.h"
-#include "./errors/unterminated_function_call_argument_list.h"
 #include "./errors/unterminated_grouping_expression.h"
 #include "./action_block.h"
 #include "./condition_block.h"
@@ -34,26 +33,33 @@ namespace halo::reach::megalo::bolt {
    }
 
    void parser::parse() {
+      this->scanner.scan_tokens();
+
+      this->root = new action_block;
+      this->current_block = this->root.get();
+
+      bool stream_is_complete = false;
       while (!this->is_at_end()) {
-         if (!this->_try_rule_statement()) {
-            errors::token_matches_no_grammar_rule error;
-            error.fault = this->_peek_next_token();
-            error.pos   = error.fault.start;
-            throw errors::parse_exception(error);
+         if (this->_try_rule_statement())
+            continue;
+         if (this->_consume_token_if_present<token_type::eof>()) {
+            stream_is_complete = true;
+            break;
          }
+         errors::token_matches_no_grammar_rule error;
+         error.fault = this->_peek_next_token();
+         error.pos   = error.fault.start;
+         throw errors::parse_exception(error);
       }
       #if _DEBUG
          __debugbreak();
+         assert(this->root == this->current_block); // An unclosed block should've triggered a thrown exception.
          static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IS THERE ANYTHING ELSE WE NEED TO DO?");
       #endif
    }
 
    void parser::run_debug_test() {
-      this->scanner.scan_tokens();
-      auto* result = this->_try_rule_expression();
-      __debugbreak();
-      if (result)
-         delete result;
+      this->parse();
    }
 
    bool parser::is_at_end() const {
@@ -264,13 +270,14 @@ namespace halo::reach::megalo::bolt {
    }
    block* parser::_try_rule_block_actions() {
       if (!this->_consume_any_token_of_types<token_type::keyword_do, token_type::keyword_for, token_type::keyword_function>())
-         return false;
-      //
-      action_block* result      = nullptr;
-      const auto&   block_start = this->_previous_token()->start;
+         return nullptr;
+      
+      action_block* result = new action_block;
+      result->start = this->_previous_token()->start;
+      this->current_block->append(*result);
+
       switch (this->_previous_token()->type) {
          case token_type::keyword_do:
-            result = new action_block;
             result->type = action_block::block_type::bare;
             break;
          case token_type::keyword_for:
@@ -308,11 +315,9 @@ namespace halo::reach::megalo::bolt {
                   }
                }
 
-               result = new action_block;
                result->type = type;
                switch (type) {
                   case bt::bare:
-                     static_assert(false, "TODO: RAISE NON-FATAL ERROR: UNRECOGNIZED LOOP TYPE");
                      {
                         constexpr size_t max_tokens_to_skip = 10;
 
@@ -320,14 +325,26 @@ namespace halo::reach::megalo::bolt {
                         for (; skipped < max_tokens_to_skip && this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>(); ++skipped) {
                            ;
                         }
-                        if (skipped == max_tokens_to_skip) {
-                           static_assert(false, "TODO: RAISE FATAL ERROR: LOOP MAY NEVER START (failed to find `do` within ${max_tokens_to_skip} tokens)");
+                        if (skipped >= max_tokens_to_skip) {
+                           errors::unknown_for_loop_type error;
+                           error.pos     = result->start;
+                           error.subject = result;
+                           throw errors::parse_exception(error);
+                        } else {
+                           auto* error = new errors::unknown_for_loop_type;
+                           error->pos     = result->start;
+                           error->subject = result;
+                           this->errors.push_back(error);
                         }
                      }
                      break;
                   case bt::for_each_object_with_label:
                      if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>()) {
-                        static_assert(false, "TODO: RAISE NON-FATAL ERROR: EXPECTED FOR LABEL (alias/identifier, label index integer, or label name string literal)");
+                        auto* error = new errors::missing_syntax_element(syntax_element::for_loop_forge_label);
+                        error->pos         = result->start;
+                        error->fault_token = *this->_previous_token();
+                        error->subject     = result;
+                        this->errors.push_back(error);
                      } else {
                         auto* t = this->_previous_token();
                         result->forge_label = t->literal;
@@ -335,7 +352,11 @@ namespace halo::reach::megalo::bolt {
                      break;
                   case bt::for_each_object_of_type:
                      if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number>()) {
-                        static_assert(false, "TODO: RAISE NON-FATAL ERROR: EXPECTED FOR LABEL (alias/identifier, or object type index)");
+                        auto* error = new errors::missing_syntax_element(syntax_element::for_loop_object_type);
+                        error->pos         = result->start;
+                        error->fault_token = *this->_previous_token();
+                        error->subject     = result;
+                        this->errors.push_back(error);
                      } else {
                         auto* t = this->_previous_token();
                         result->object_type = t->literal;
@@ -343,20 +364,36 @@ namespace halo::reach::megalo::bolt {
                      break;
                }
                if (!this->_consume_token_if_present<token_type::keyword_do>()) {
-                  static_assert(false, "TODO: THROW FATAL ERROR: LOOP NEVER STARTS");
+                  auto error = errors::missing_syntax_element(syntax_element::for_loop_do);
+                  error.pos         = result->start;
+                  error.fault_token = *this->_previous_token();
+                  error.subject     = result;
+                  throw errors::parse_exception(error);
                }
             }
             break;
          case token_type::keyword_function:
             {
+               result->type = action_block::block_type::function;
+
                const token* ident = nullptr;
                if (this->_consume_token_if_present<token_type::identifier_or_word>()) {
                   ident = this->_previous_token();
                } else {
-                  static_assert(false, "TODO: RAISE NON-FATAL ERROR: NO FUNCTION NAME");
+                  auto* error = new errors::missing_syntax_element(syntax_element::user_defined_function_definition_name);
+                  error->pos         = this->_peek_next_token().start;
+                  error->fault_token = *this->_previous_token();
+                  error->subject     = result;
+                  this->errors.push_back(error);
                }
+               result->function_name = ident->literal;
+
                if (!this->_consume_token_if_present<token_type::paren_l>()) {
-                  static_assert(false, "TODO: RAISE FATAL ERROR: NO ARGUMENT LIST OPENER");
+                  auto error = errors::missing_syntax_element(syntax_element::user_defined_function_definition_paren_l);
+                  error.pos         = this->_peek_next_token().start;
+                  error.fault_token = *this->_previous_token();
+                  error.subject     = result;
+                  throw errors::parse_exception(error);
                }
                //
                // TODO: In the future, we could consume any specified arguments. Bolt doesn't allow 
@@ -364,34 +401,33 @@ namespace halo::reach::megalo::bolt {
                // fatal parse error.
                //
                if (!this->_consume_token_if_present<token_type::paren_r>()) {
-                  static_assert(false, "TODO: RAISE FATAL ERROR: NO ARGUMENT LIST CLOSER");
+                  auto error = errors::missing_syntax_element(syntax_element::user_defined_function_definition_paren_r);
+                  error.pos         = this->_peek_next_token().start;
+                  error.fault_token = *this->_previous_token();
+                  error.subject     = result;
+                  throw errors::parse_exception(error);
                }
-
-               result = new action_block;
-               result->type = action_block::block_type::function;
-               result->function_name = ident->literal;
             }
             break;
       }
-      assert(result);
-      result->start = block_start;
-      this->current_block->append(*result);
+
       this->current_block = result;
-      //
       this->_try_rule_block_body();
       if (!this->_consume_token_if_present<token_type::keyword_end>()) {
-         errors::unterminated_block error;
-         error.pos     = this->_previous_token()->start;
-         error.subject = result;
+         auto error = errors::missing_syntax_element(syntax_element::block_end);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = *this->_previous_token();
+         error.subject     = result;
          throw errors::parse_exception(error);
       }
       result->end = this->_previous_token()->end;
       this->current_block = this->current_block->parent;
+
       return result;
    }
    block* parser::_try_rule_block_conditions() {
       if (!this->_consume_any_token_of_types<token_type::keyword_if>())
-         return false;
+         return nullptr;
       
       condition_block* result = new condition_block;
       result->start = this->_previous_token()->start;
@@ -401,14 +437,6 @@ namespace halo::reach::megalo::bolt {
       
       condition_block* last_opened_block = result; // Used to properly set the end-position for each if/altif/alt branch.
 
-      auto _extract_keyword_then = [this, &last_opened_block]() {
-         if (!this->_consume_token_if_present<token_type::keyword_then>()) {
-            errors::unterminated_condition_list error;
-            error.pos     = this->_previous_token()->start;
-            error.subject = last_opened_block;
-            throw errors::parse_exception(error);
-         }
-      };
       auto _open_next_branch = [this, &last_opened_block](condition_block::block_type b) -> condition_block* {
          last_opened_block->end = this->_previous_token()->end;
          last_opened_block = new condition_block;
@@ -420,8 +448,7 @@ namespace halo::reach::megalo::bolt {
          return last_opened_block;
       };
       
-      static_assert(false, "TODO: IMPLEMENT ME (PULL CONDITION LIST)");
-      _extract_keyword_then();
+      this->_try_rule_block_condition_list();
       //
       // We've extracted the conditions. Now, let's pull the contents.
       //
@@ -438,7 +465,6 @@ namespace halo::reach::megalo::bolt {
          // Next, we need to extract the condition list for this altif branch.
          //
          this->_try_rule_block_condition_list();
-         _extract_keyword_then();
          //
          // Finally, we can extract the altif branch's content.
          //
@@ -452,9 +478,9 @@ namespace halo::reach::megalo::bolt {
       // And finally, it's time to close the if-tree.
       //
       if (!this->_consume_token_if_present<token_type::keyword_end>()) {
-         errors::unterminated_block error;
-         error.pos     = this->_previous_token()->start;
-         error.subject = last_opened_block;
+         auto error = errors::missing_syntax_element(syntax_element::block_end);
+         error.fault_token = *this->_previous_token();
+         error.subject     = result;
          throw errors::parse_exception(error);
       }
       last_opened_block->end = this->_previous_token()->end;
@@ -462,11 +488,58 @@ namespace halo::reach::megalo::bolt {
       return result;
    }
    void parser::_try_rule_block_condition_list() {
-      static_assert(false, "TODO: IMPLEMENT ME");
+      auto* current_branch = dynamic_cast<condition_block*>(this->current_block);
+      assert(current_branch != nullptr);
+
+      bool found_any = false;
+      bool next_is_or = false;
+
+      do {
+         bool negate_current = false;
+         while (this->_consume_token_if_present<token_type::keyword_not>()) {
+            found_any |= true;
+            negate_current = !negate_current;
+         }
+         auto* expr = this->_try_rule_expression();
+         if (expr) {
+            found_any |= true;
+         }
+
+         auto& cnd = current_branch->conditions.emplace_back();
+         cnd.expr = expr;
+         cnd.negate = negate_current;
+         cnd.or_with_previous = next_is_or;
+
+         if (!this->_consume_any_token_of_types<token_type::keyword_and, token_type::keyword_or>()) {
+            if (!expr) {
+               auto* error = new errors::missing_syntax_element(syntax_element::condition_list_item);
+               error->fault_token = *this->_previous_token();
+               error->subject     = current_branch;
+               this->errors.push_back(error);
+            }
+            break;
+         }
+         if (!expr) {
+            auto* error = new errors::missing_syntax_element(syntax_element::condition_list_item);
+            error->fault_token = *this->_previous_token();
+            error->subject     = current_branch;
+            this->errors.push_back(error);
+         }
+         next_is_or = this->_previous_token()->type == token_type::keyword_or;
+      } while (true);
+
       if (!this->_consume_token_if_present<token_type::keyword_then>()) {
-         errors::unterminated_condition_list error;
-         error.pos = this->_previous_token()->start;
+         auto error = errors::missing_syntax_element(syntax_element::condition_list_terminator);
+         error.fault_token = *this->_previous_token();
+         error.subject     = current_branch;
          throw errors::parse_exception(error);
+      }
+
+      if (!found_any) {
+         auto* error = new errors::missing_syntax_element(syntax_element::condition_list_item);
+         error->fault_token = *this->_previous_token();
+         error->subject     = current_branch;
+         this->errors.push_back(error);
       }
    }
    void parser::_try_rule_block_body() {
@@ -574,8 +647,8 @@ namespace halo::reach::megalo::bolt {
                } while (this->_consume_token_if_present<token_type::comma>());
             }
             if (!this->_consume_token_if_present<token_type::paren_r>()) {
-               errors::unterminated_function_call_argument_list error;
-               error.pos = this->_previous_token()->start;
+               errors::missing_syntax_element error{syntax_element::function_call_argument_list_terminator};
+               error.fault_token = *this->_previous_token();
                throw errors::parse_exception(error);
             }
             //

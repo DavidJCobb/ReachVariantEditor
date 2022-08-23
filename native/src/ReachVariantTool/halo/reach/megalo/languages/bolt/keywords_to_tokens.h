@@ -24,6 +24,7 @@ namespace halo::reach::megalo::bolt {
       impl::keyword_to_token{ "for",      token_type::keyword_for },
       impl::keyword_to_token{ "function", token_type::keyword_function },
       impl::keyword_to_token{ "if",       token_type::keyword_if },
+      impl::keyword_to_token{ "not",      token_type::keyword_not },
       impl::keyword_to_token{ "on",       token_type::keyword_on },
       impl::keyword_to_token{ "or",       token_type::keyword_or },
       impl::keyword_to_token{ "pragma",   token_type::keyword_pragma },

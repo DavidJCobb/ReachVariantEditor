@@ -77,14 +77,33 @@ namespace cobb {
          constexpr pointer operator->() const noexcept { return this->_target; }
 
          explicit constexpr operator bool() const noexcept { return this->_target != nullptr; }
-         //constexpr operator pointer() const noexcept { return this->_target; }
-         template<typename Base> requires std::is_base_of_v<Base, value_type> constexpr operator Base*() const noexcept { return (Base*)this->_target; }
 
+         // Operator overloads for this are a bit weird due to the precise logic of how the language 
+         // works.
+         // 
+         //  - You need an overload for implicit conversions to the value type or any base classes. 
+         //    Okay, fine.
+         //
+         //  - Even with that overload, however, you need an overload to allow comparisons to the 
+         //    std::nullptr_t type, because the constant `nullptr` has no specific type otherwise 
+         //    and evidently doesn't implicitly convert to your own pointer types in these cases.
+         // 
+         //     - What the hell? Why not?!
+         //
+         //  - But if you have *both* overloads, then all pointer comparisons become ambiguous, 
+         //    unless your conversion excludes std::nullptr_t specifically.
+         //
+         //  - If you don't overload operator== for non-null pointers, then direct comparisons 
+         //    to `value_type*` or base classes fail. At one point, however, I was getting issues 
+         //    with ambiguous comparisons here, but these stopped after excluding conversions to 
+         //    std::nullptr_t.
+
+         template<typename Base> requires (std::is_base_of_v<Base, value_type> && !std::is_null_pointer<Base>) constexpr operator Base*() const noexcept { return (Base*)this->_target; }
+         //
          template<typename Other> bool operator==(const Other* o) {
             return o == get();
          }
-
-         bool operator==(std::nullptr_t) const {
+         constexpr bool operator==(std::nullptr_t) const { // this overload is still needed
             return get() == nullptr;
          }
 

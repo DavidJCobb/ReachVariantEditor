@@ -12,12 +12,12 @@ namespace halo::reach::megalo {
    class condition : public opcode {
       public:
          bitbool invert = false;
-         condition_index or_group = 0; // values are per-trigger. conditions with the same or-group value are treated as being OR'd with each other
+         condition_index or_group = 0; // see documentation ("how Megalo executes a trigger.txt"). WARNING: game truncates 9-bit value to 8 bits on load!
          mutable struct {
             //
             // Data used during serialization.
             //
-            action_index execute_before = 0; // trigger-relative action index. if exceeds the number of actions in the trigger, put the condition at the end?
+            action_index execute_before = 0; // see documentation ("how Megalo executes a trigger.txt"). WARNING: game truncates 10-bit value to 8 bits on load!
          } load_state;
 
          virtual void read(bitreader&) override;

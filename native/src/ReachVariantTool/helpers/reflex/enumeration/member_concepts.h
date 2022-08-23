@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 #include "../member.h"
 #include "../member_range.h"
 #include "../nested_enum.h"
