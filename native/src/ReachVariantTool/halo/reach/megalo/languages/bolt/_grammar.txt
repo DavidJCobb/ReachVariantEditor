@@ -209,6 +209,9 @@ statement → keyword | expression ;
 
 keyword → alias | variable-declaration | user-defined-enum | block | pragma ;
 
+identifier-part → WORD ( "[" expression "]")* ;
+identifier      → identifier-part ( "." identifier-part )* ;
+
 
 
 // Variable management:
@@ -216,17 +219,17 @@ keyword → alias | variable-declaration | user-defined-enum | block | pragma ;
 // VARIABLE_REGISTER refers to scope.type[index]; we avoid "REGISTER" as the name 
 // because that would technically include built-ins like "game.round_time_limit".
 
-alias → "alias" IDENTIFIER "=" ( IDENTIFIER | NUMBER | VARIABLE_REGISTER ) ;
+alias → "alias" identifier "=" ( identifier | NUMBER | VARIABLE_REGISTER ) ;
 
-variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priority" ( "local" | "low" | "high" ) )? ( "=" ( IDENTIFIER | NUMBER ) )? ;
+variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priority" ( "local" | "low" | "high" ) )? ( "=" ( identifier | NUMBER ) )? ;
    // the identifier must be an alias of an integer constant, but this is irrelevant to the grammar
 
 
 
 // Odds and ends:
 
-user-defined-enum-value → IDENTIFIER ( "=" ( NUMBER | IDENTIFIER ) )?
-user-defined-enum       → "enum" IDENTIFIER user-defined-enum-value* "end"
+user-defined-enum-value → identifier ( "=" ( NUMBER | identifier ) )?
+user-defined-enum       → "enum" identifier user-defined-enum-value* "end"
 
 
 
@@ -243,6 +246,8 @@ condition-blocks → "if" condition-list "then"
                    ( "alt" block-body )
                    "end" ;
 
+forge-label  → STRING | IDENTIFIER | NUMBER ;
+object-type  → IDENTIFIER | NUMBER;
 action-block → (
                   "do" |
                   ( "for each"
@@ -276,7 +281,7 @@ block-event-name → (
 // We have to allow VARIABLE_REGISTER here because some specific operands 
 // (and therefore arguments to specific built-in functions) need them, e.g. 
 // "apply_shape_color_from_player_member" wanting values like "object.player[3]".
-function-call-argument      → ( IDENTIFIER "=" )? expression | VARIABLE_REGISTER ;
+function-call-argument      → ( identifier "=" )? expression | VARIABLE_REGISTER ;
 function-call-argument-list → "(" (
                                  function-call-argument
                                  ( "," function-call-argument )*
@@ -292,7 +297,7 @@ comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term       → factor ( ( "-" | "+" ) factor )* ;
 factor     → unary ( ( "/" | "*" ) unary )* ;
 unary      → ( "!" | "-" ) unary | primary ;
-primary    → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER function-call-argument-list? ;
+primary    → NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | identifier function-call-argument-list? ;
 //
 // --- Notes on how individual rules behave ------------------------------------
 //

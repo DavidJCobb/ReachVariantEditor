@@ -19,10 +19,11 @@
       <DisplayString Condition="type == expression_type::unary &amp;&amp; op == token_type::minus">-({rhs,na})</DisplayString>
       <DisplayString Condition="type == expression_type::unary &amp;&amp; op == token_type::plus">+({rhs,na})</DisplayString>
       <DisplayString Condition="type == expression_type::unary">{op,view(operator)} ({rhs,na})</DisplayString>
-      
+
+      <DisplayString Condition="type == expression_type::literal &amp;&amp; ident._target != nullptr">{*ident._target,na}</DisplayString>
       <DisplayString Condition="type == expression_type::literal">{lit}</DisplayString>
       
-      <DisplayString Condition="type == expression_type::call">function call: {lit}(...)</DisplayString>
+      <DisplayString Condition="type == expression_type::call">function call: {*ident._target,na}(...)</DisplayString>
       
       <DisplayString Condition="type == expression_type::grouping">({lhs})</DisplayString>
       

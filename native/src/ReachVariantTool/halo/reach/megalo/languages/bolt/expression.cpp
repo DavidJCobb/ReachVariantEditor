@@ -9,10 +9,10 @@ namespace halo::reach::megalo::bolt {
       out->rhs  = rhs;
       return out;
    }
-   /*static*/ expression* expression::alloc_call(const literal_item& callee) {
-      auto* out = new expression;
-      out->type = expression_type::call;
-      out->lit  = callee;
+   /*static*/ expression* expression::alloc_call(identifier* callee) {
+      auto* out  = new expression;
+      out->type  = expression_type::call;
+      out->ident = callee;
       return out;
    }
    /*static*/ expression* expression::alloc_grouping(expression* content) {
@@ -25,6 +25,12 @@ namespace halo::reach::megalo::bolt {
       auto* out = new expression;
       out->type = expression_type::literal;
       out->lit  = content;
+      return out;
+   }
+   /*static*/ expression* expression::alloc_literal(identifier* content) {
+      auto* out  = new expression;
+      out->type  = expression_type::literal;
+      out->ident = content;
       return out;
    }
    /*static*/ expression* expression::alloc_unary(token_type op, expression* subject) {

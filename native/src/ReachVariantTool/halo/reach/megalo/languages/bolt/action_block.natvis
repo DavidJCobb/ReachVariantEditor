@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::action_block">
+      <DisplayString Condition="type == block_type::bare">do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_object">for each object do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_object_with_label">for each object with label {forge_label} do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_object_of_type">for each object with label {object_type} do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_player">for each player do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_player_randomly">for each player randomly do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::for_each_team">for each team do ... end</DisplayString>
+      <DisplayString Condition="type == block_type::function">function {*function_name._target}() ... end</DisplayString>
+
+      <DisplayString>{*this,!}</DisplayString>
+
+      <Expand>
+         <Item Name="[halo::reach::megalo::bolt::item_base]">*(item_base*)this,nd</Item>
+         <Item Name="parent">parent</Item>
+         <Synthetic Name="events">
+            <DisplayString Condition="events_mask == 0">&lt;none&gt;</DisplayString>
+            <DisplayString Condition="events_mask != 0">&lt;at least one&gt;</DisplayString>
+            <Expand>
+               <Item Name="init">(events_mask &amp; (1 &lt;&lt; (int)event_type::init)) != 0</Item>
+               <Item Name="local_init">(events_mask &amp; (1 &lt;&lt; (int)event_type::local_init)) != 0</Item>
+               <Item Name="host_migration">(events_mask &amp; (1 &lt;&lt; (int)event_type::host_migration)) != 0</Item>
+               <Item Name="double_host_migration">(events_mask &amp; (1 &lt;&lt; (int)event_type::double_host_migration)) != 0</Item>
+               <Item Name="object_death">(events_mask &amp; (1 &lt;&lt; (int)event_type::object_death)) != 0</Item>
+               <Item Name="local">(events_mask &amp; (1 &lt;&lt; (int)event_type::local)) != 0</Item>
+               <Item Name="pregame">(events_mask &amp; (1 &lt;&lt; (int)event_type::pregame)) != 0</Item>
+               <Item Name="[Raw View]">events_mask</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="type">type</Item>
+         <Item Condition="type == block_type::for_each_object_with_label" Name="forge_label">forge_label</Item>
+         <Item Condition="type == block_type::for_each_object_of_type" Name="object_type">object_type</Item>
+         <Item Condition="type == block_type::function" Name="function_name">function_name</Item>
+         <Item Condition="type == block_type::function" Name="caller_count">caller_count</Item>
+         <ArrayItems>
+            <Size>contents.size()</Size>
+            <ValuePointer>contents._Mypair._Myval2._Myfirst</ValuePointer>
+         </ArrayItems>
+      </Expand>
+   </Type>
+</AutoVisualizer>

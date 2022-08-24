@@ -12,6 +12,7 @@
 
 namespace halo::reach::megalo::bolt {
    class expression;
+   class identifier;
 
    class parser {
       public:
@@ -83,6 +84,7 @@ namespace halo::reach::megalo::bolt {
                expression* _try_rule_expression_unary();
                expression* _try_rule_expression_primary();
                   expression* _try_rule_expression_call_arguments();
+            identifier* _try_rule_identifier();
 
    };
 }

@@ -18,6 +18,11 @@ namespace halo::reach::megalo::bolt {
 
       function_call_argument_list_terminator, // closing ')'
 
+      identifier_part,           // e.g. `name.` where no subsequent name or index follows
+      identifier_part_name,      // e.g. `name.[5]`
+      identifier_part_index,     // e.g. `name[]`
+      identifier_part_index_end, // e.g. `name[`
+
       // Syntax elements for user-defined function definitions
       user_defined_function_definition_name,
       user_defined_function_definition_paren_l, // argument list start, except that we don't allow args in Bolt

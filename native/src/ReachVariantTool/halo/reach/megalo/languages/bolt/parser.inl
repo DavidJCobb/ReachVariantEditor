@@ -72,11 +72,10 @@ namespace halo::reach::megalo::bolt {
          item.clear();
       //
       size_t i = 0;
-      while (this->_peek_next_token().type == token_type::identifier_or_word) {
-         auto& token = this->_pull_next_token();
+      while (this->_peek_next_token().type == token_type::word) {
+         const auto& token = this->_pull_next_token();
 
-         assert(std::holds_alternative<literal_data_identifier_or_word>(token.literal.value));
-         QString word = std::get<literal_data_identifier_or_word>(token.literal.value).content.toLower();
+         QString word = token.word.toLower();
 
          out_phrase[i] = word;
          if (++i >= Size) {
@@ -115,12 +114,10 @@ namespace halo::reach::megalo::bolt {
       size_t word_count = 0;
       for (; word_count < max_count; ++word_count) {
          const auto& token = this->scanner.tokens[token_index + word_count];
-         if (token.type != token_type::identifier_or_word)
+         if (token.type != token_type::word)
             break;
 
-         assert(std::holds_alternative<literal_data_identifier_or_word>(token.literal.value));
-         QString word = std::get<literal_data_identifier_or_word>(token.literal.value).content.toLower();
-
+         QString word = token.word.toLower();
          for (size_t j = 0; j < List.size(); ++j) {
             auto mask = possibility_mask_type{ 1 } << j;
             if ((possibility_mask & mask) == 0)

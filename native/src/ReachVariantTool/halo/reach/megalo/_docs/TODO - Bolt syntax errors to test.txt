@@ -1,0 +1,14 @@
+
+== Alias ==
+
+```megalo-bolt
+-- [Non-Fatal] Assignment expressions are not allowed in alias value expressions.
+alias foo = a = b
+```
+
+```megalo-bolt
+-- [Non-Fatal] Assignment expressions are not allowed in alias value expressions.
+-- [Non-Fatal] Cannot assign a value to a literal.
+-- [Non-Fatal] Suspicious pair of errors: this may actually be a syntax error; error messages past this point may be incorrect.
+alias foo = 3 = b
+```

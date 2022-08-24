@@ -34,6 +34,8 @@ namespace halo::reach::megalo::bolt {
 
    void parser::parse() {
       this->scanner.scan_tokens();
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Running the scanner multiple times will add multiple EOF tokens; running the parser multiple times will therefore do the same.");
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: It'd be good to allow incremental (re)scanning and (re)parsing; could explore using the AST gen for a syntax highlighter then.");
 
       this->root = new action_block;
       this->current_block = this->root.get();
@@ -87,13 +89,13 @@ namespace halo::reach::megalo::bolt {
 
    bool parser::_consume_word_if_present(const char* word, Qt::CaseSensitivity cs) {
       const auto& next = this->_peek_next_token();
-      if (next.type != token_type::identifier_or_word)
+      if (next.type != token_type::word) {
          return false;
-      //
-      assert(std::holds_alternative<literal_data_identifier_or_word>(next.literal.value));
-      const auto& value = std::get<literal_data_identifier_or_word>(next.literal.value).content;
-      if (value.compare(word, cs) == 0)
+      }
+      if (next.word.compare(word, cs) == 0) {
+         ++this->next_token;
          return true;
+      }
       return false;
    }
 
@@ -188,21 +190,14 @@ namespace halo::reach::megalo::bolt {
          size_t word_count    = 0;
 
          token_pos name_start;
-         while (this->_consume_token_if_present<token_type::identifier_or_word>()) {
+         while (this->_consume_token_if_present<token_type::word>()) {
             any = true;
             ++word_count;
             if (word_count == 1) {
                name_start = this->_previous_token()->start;
             }
 
-            QString word;
-            {
-               auto* t = this->_previous_token();
-               assert(t->type == token_type::identifier_or_word);
-               assert(std::holds_alternative<literal_data_identifier_or_word>(t->literal.value));
-               word = std::get<literal_data_identifier_or_word>(t->literal.value).content;
-            }
-            word = word.toLower();
+            QString word = this->_previous_token()->word.toLower();
 
             for (size_t i = 0; i < event_type_phrases.size(); ++i) {
                auto mask = block::events_mask_type{1} << i;
@@ -240,10 +235,8 @@ namespace halo::reach::megalo::bolt {
             error->pos = name_start;
             for (size_t i = 0; i < word_count; ++i) {
                const auto& t = this->scanner.tokens[this->next_token - i];
-               assert(t.type == token_type::identifier_or_word);
-               assert(std::holds_alternative<literal_data_identifier_or_word>(t.literal.value));
-
-               const auto& word = std::get<literal_data_identifier_or_word>(t.literal.value).content;
+               assert(t.type == token_type::word);
+               const auto& word = t.word;
                if (i > 0) {
                   error->name += QChar(' ');
                }
@@ -322,8 +315,14 @@ namespace halo::reach::megalo::bolt {
                         constexpr size_t max_tokens_to_skip = 10;
 
                         size_t skipped = 0;
-                        for (; skipped < max_tokens_to_skip && this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>(); ++skipped) {
-                           ;
+                        for (; skipped < max_tokens_to_skip; ++skipped) {
+                           if (auto* ident = this->_try_rule_identifier()) {
+                              delete ident;
+                              continue;
+                           }
+                           if (!this->_consume_any_token_of_types<token_type::number, token_type::string>()) {
+                              break;
+                           }
                         }
                         if (skipped >= max_tokens_to_skip) {
                            errors::unknown_for_loop_type error;
@@ -339,27 +338,31 @@ namespace halo::reach::megalo::bolt {
                      }
                      break;
                   case bt::for_each_object_with_label:
-                     if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number, token_type::string>()) {
+                     if (auto* ident = this->_try_rule_identifier()) {
+                        result->forge_label = ident;
+                     } else if (this->_consume_any_token_of_types<token_type::number, token_type::string>()) {
+                        auto* t = this->_previous_token();
+                        result->forge_label = t->literal;
+                     } else {
                         auto* error = new errors::missing_syntax_element(syntax_element::for_loop_forge_label);
                         error->pos         = result->start;
                         error->fault_token = *this->_previous_token();
                         error->subject     = result;
                         this->errors.push_back(error);
-                     } else {
-                        auto* t = this->_previous_token();
-                        result->forge_label = t->literal;
                      }
                      break;
                   case bt::for_each_object_of_type:
-                     if (!this->_consume_any_token_of_types<token_type::identifier_or_word, token_type::number>()) {
+                     if (auto* ident = this->_try_rule_identifier()) {
+                        result->object_type = ident;
+                     } else if (this->_consume_token_if_present<token_type::number>()) {
+                        auto* t = this->_previous_token();
+                        result->object_type = t->literal;
+                     } else {
                         auto* error = new errors::missing_syntax_element(syntax_element::for_loop_object_type);
                         error->pos         = result->start;
                         error->fault_token = *this->_previous_token();
                         error->subject     = result;
                         this->errors.push_back(error);
-                     } else {
-                        auto* t = this->_previous_token();
-                        result->object_type = t->literal;
                      }
                      break;
                }
@@ -376,17 +379,17 @@ namespace halo::reach::megalo::bolt {
             {
                result->type = action_block::block_type::function;
 
-               const token* ident = nullptr;
-               if (this->_consume_token_if_present<token_type::identifier_or_word>()) {
-                  ident = this->_previous_token();
-               } else {
-                  auto* error = new errors::missing_syntax_element(syntax_element::user_defined_function_definition_name);
-                  error->pos         = this->_peek_next_token().start;
-                  error->fault_token = *this->_previous_token();
-                  error->subject     = result;
-                  this->errors.push_back(error);
+               {
+                  identifier* ident = this->_try_rule_identifier();
+                  if (!ident) {
+                     auto* error = new errors::missing_syntax_element(syntax_element::user_defined_function_definition_name);
+                     error->pos         = this->_peek_next_token().start;
+                     error->fault_token = *this->_previous_token();
+                     error->subject     = result;
+                     this->errors.push_back(error);
+                  }
+                  result->function_name = ident;
                }
-               result->function_name = ident->literal;
 
                if (!this->_consume_token_if_present<token_type::paren_l>()) {
                   auto error = errors::missing_syntax_element(syntax_element::user_defined_function_definition_paren_l);
@@ -568,8 +571,7 @@ namespace halo::reach::megalo::bolt {
       if (this->_consume_any_token_of_types<token_type::number, token_type::string>()) {
          return expression::alloc_literal(this->_previous_token()->literal);
       }
-      if (this->_consume_any_token_of_types<token_type::identifier_or_word>()) {
-         auto lit = this->_previous_token()->literal;
+      if (auto* ident = this->_try_rule_identifier()) {
          //
          // Check if this is a function call:
          //
@@ -586,12 +588,12 @@ namespace halo::reach::megalo::bolt {
                   //
                   bool    argument_is_named = false;
                   QString argument_name;
-                  if (this->_check_token_type_sequence_ahead<token_type::identifier_or_word, token_type::equal>()) {
+                  if (this->_check_token_type_sequence_ahead<token_type::word, token_type::equal>()) {
+                     argument_is_named = true;
                      {  // Consume argument name.
                         auto& next = this->_pull_next_token();
-                        assert(next.type == token_type::identifier_or_word);
-                        assert(std::holds_alternative<literal_data_identifier_or_word>(next.literal.value));
-                        argument_name = std::get<literal_data_identifier_or_word>(next.literal.value).content;
+                        assert(next.type == token_type::word);
+                        argument_name = next.word;
                      }
                      {  // Consume equal sign.
                         auto& next = this->_pull_next_token();
@@ -652,12 +654,12 @@ namespace halo::reach::megalo::bolt {
                throw errors::parse_exception(error);
             }
             //
-            auto* expr = expression::alloc_call(lit);
+            auto* expr = expression::alloc_call(ident);
             std::swap(expr->arguments, args);
             return expr;
          }
          // just an identifier
-         return expression::alloc_literal(lit);
+         return expression::alloc_literal(ident);
       }
       if (this->_consume_any_token_of_types<token_type::paren_l>()) {
          const auto start_at = this->_previous_token()->start;
@@ -672,6 +674,86 @@ namespace halo::reach::megalo::bolt {
          return expression::alloc_grouping(content);
       }
       return nullptr;
+   }
+
+   identifier* parser::_try_rule_identifier() {
+      if (!this->_consume_any_token_of_types<token_type::word>()) {
+         return nullptr;
+      }
+
+      cobb::owned_ptr<identifier> result = new identifier; // owned_ptr so that we destroy it properly if exceptions are thrown
+
+      auto _extract_part_index = [this, &result](identifier::part& part) -> bool {
+         if (!this->_consume_token_if_present<token_type::square_bracket_l>()) {
+            return false;
+         }
+         auto* expr = this->_try_rule_expression();
+         if (!expr) {
+            if (this->_consume_token_if_present<token_type::square_bracket_r>()) {
+               auto* error = new errors::missing_syntax_element(syntax_element::identifier_part_index);
+               error->fault_token = *this->_previous_token();
+               error->subject     = result.get();
+               this->errors.push_back(error);
+            } else {
+               auto error = errors::missing_syntax_element(syntax_element::identifier_part_index_end);
+               error.fault_token = this->_peek_next_token();
+               error.subject     = result.get();
+               throw errors::parse_exception(error);
+            }
+         } else {
+            part.index = expr;
+            if (!this->_consume_token_if_present<token_type::square_bracket_r>()) {
+               auto error = errors::missing_syntax_element(syntax_element::identifier_part_index_end);
+               error.fault_token = this->_peek_next_token();
+               error.subject     = result.get();
+               throw errors::parse_exception(error);
+            }
+         }
+         return true;
+      };
+
+      auto _extract_last_part = [this, &result, &_extract_part_index]() {
+         const auto& prev = *this->_previous_token();
+         auto&       part = result->parts.emplace_back();
+         part.start = prev.start;
+         part.end   = prev.end;
+         part.name  = prev.word;
+         //
+         while (_extract_part_index(part)) {
+            ;
+         }
+      };
+
+      _extract_last_part();
+      while (this->_consume_token_if_present<token_type::period>()) {
+         if (!this->_consume_any_token_of_types<token_type::word>()) {
+            auto* period_token = this->_previous_token();
+
+            identifier::part dummy;
+            
+            bool has_parts = false;
+            while (_extract_part_index(dummy)) {
+               has_parts = true;
+            }
+            if (has_parts) {
+               auto* error = new errors::missing_syntax_element(syntax_element::identifier_part_name);
+               error->fault_token = *period_token;
+               error->subject     = result.get();
+               this->errors.push_back(error);
+               //
+               result->parts.push_back(std::move(dummy));
+               continue;
+            }
+
+            auto error = errors::missing_syntax_element(syntax_element::identifier_part);
+            error.fault_token = this->_peek_next_token();
+            error.subject     = result.get();
+            throw errors::parse_exception(error);
+         }
+         _extract_last_part();
+      }
+
+      return result.release();
    }
 
 }

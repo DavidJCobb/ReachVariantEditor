@@ -1,8 +1,14 @@
 #pragma once
 #include <cstdint>
+#include <variant>
 #include <QString>
+#include "helpers/owned_ptr.h"
 #include "./block.h"
 #include "./literal.h"
+
+namespace halo::reach::megalo::bolt {
+   class identifier;
+}
 
 namespace halo::reach::megalo::bolt {
    class action_block : public block {
@@ -18,14 +24,16 @@ namespace halo::reach::megalo::bolt {
             function,
          };
 
+         using identifier_or_literal = std::variant<std::monostate, cobb::owned_ptr<identifier>, literal_item>;
+
       public:
          block_type type = block_type::bare;
 
-         literal_item forge_label; // for each object with label <literal>
-         literal_item object_type; // for each object of type <literal>
+         identifier_or_literal forge_label; // for each object with label <literal>
+         identifier_or_literal object_type; // for each object of type <literal>
 
          // user-defined functions
-         size_t       caller_count = 0;
-         literal_item function_name;
+         size_t caller_count = 0;
+         cobb::owned_ptr<identifier> function_name;
    };
 }

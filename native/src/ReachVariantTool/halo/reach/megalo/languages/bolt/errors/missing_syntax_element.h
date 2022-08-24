@@ -6,6 +6,7 @@
 
 namespace halo::reach::megalo::bolt {
    class block;
+   class identifier;
 }
 
 namespace halo::reach::megalo::bolt::errors {
@@ -13,7 +14,8 @@ namespace halo::reach::megalo::bolt::errors {
       public:
          using subject_variant_type = std::variant<
             std::nullptr_t,
-            block*
+            block*,
+            identifier*
          >;
 
       public:

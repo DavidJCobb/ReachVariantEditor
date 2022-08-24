@@ -1,7 +1,6 @@
 #pragma once
 #include <functional>
 #include <optional>
-#include <variant>
 #include <vector>
 #include <QString>
 #include "./character_scanner.h"
@@ -66,9 +65,6 @@ namespace halo::reach::megalo::bolt {
 
          void _add_token(token_type);
          void _add_token(token_type, literal_item);
-
-         // Returns either the token_type of a keyword, or an identifier/word literal, or an empty variant if no word is found immediately.
-         std::variant<std::monostate, token_type, literal_data_identifier_or_word> _try_extract_identifier_or_word();
 
          // Does not extract a number literal on its own; the caller needs to check for a sign and base.
          template<size_t Base = 10> requires (Base > 1 && Base <= 36)

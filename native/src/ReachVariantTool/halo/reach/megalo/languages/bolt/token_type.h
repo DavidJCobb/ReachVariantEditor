@@ -72,9 +72,10 @@ namespace halo::reach::megalo::bolt {
       operator_binary_shr, // ">>" // Megalo has no bitshifts, but we can do a division by a hardcoded power of 2
 
       // literals
-      identifier_or_word, // identifiers e.g. variables, or words e.g. subkeywords like "with" in "declare <variable> with network priority <priority> = <value>"
       number,
       string,
+
+      word,
 
       // keywords
       keyword_alias,

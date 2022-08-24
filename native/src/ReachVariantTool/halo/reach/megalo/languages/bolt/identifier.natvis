@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::identifier::part">
+      <Intrinsic Name="_nested_index_count" Expression="nested_indices.size()" />
+
+      <DisplayString Condition="index._target == nullptr &amp;&amp; _nested_index_count() == 0">{name}</DisplayString>
+      <DisplayString
+         Condition="
+                      index._target != nullptr &amp;&amp;
+                      index._target-&gt;type == expression_type::literal &amp;&amp;
+                      index._target-&gt;ident._target != nullptr &amp;&amp;
+                      _nested_index_count() == 0
+                   "
+      >{name}[{*index._target->ident._target,na}]</DisplayString> <!-- special-case: identifier index -->
+      <DisplayString
+         Condition="
+                      index._target != nullptr &amp;&amp;
+                      index._target-&gt;type == expression_type::literal &amp;&amp;
+                      index._target-&gt;lit.value.index() == 2 &amp;&amp;
+                      _nested_index_count() == 0
+                   "
+      >{name}[{index._target->lit.value._Tail._Tail._Head,d}]</DisplayString> <!-- special-case: integer constant index -->
+      <DisplayString
+         Condition="
+                      index._target != nullptr &amp;&amp;
+                      index._target-&gt;type == expression_type::literal &amp;&amp;
+                      _nested_index_count() == 0
+                   "
+      >{name}[{index._target->lit}]</DisplayString>
+      <DisplayString Condition="index._target != nullptr &amp;&amp; _nested_index_count() == 0">{name}[{*index._target}]</DisplayString>
+      <DisplayString Condition="index._target != nullptr &amp;&amp; _nested_index_count() != 0">{name}[{*index._target}][{_nested_index_count()}-dimensional access...]</DisplayString>
+      <!-- fallback for Qt; use this if the above line fails; note that this won't properly show escape sequences e.g. \n -->
+
+      <DisplayString>{*this,!}</DisplayString>
+   </Type>
+   <Type Name="halo::reach::megalo::bolt::identifier">
+      <Intrinsic Name="_part_count" Expression="parts.size()" />
+
+      <DisplayString Condition="_part_count() == 0">&lt;none&gt;</DisplayString>
+      <DisplayString Condition="_part_count() == 1">{parts[0]}</DisplayString>
+      <DisplayString Condition="_part_count() == 2">{parts[0]}.{parts[1]}</DisplayString>
+      <DisplayString Condition="_part_count() == 3">{parts[0]}.{parts[1]}.{parts[2]}</DisplayString>
+      <DisplayString Condition="_part_count() == 4">{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}</DisplayString>
+      <DisplayString Condition="_part_count() == 5">{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}</DisplayString>
+      <DisplayString Condition="_part_count() == 6">{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}.{parts[5]}</DisplayString>
+      <DisplayString Condition="_part_count() &gt; 6">{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}.{parts[5]}...</DisplayString>
+
+      <DisplayString>{*this,!}</DisplayString>
+   </Type>
+</AutoVisualizer>

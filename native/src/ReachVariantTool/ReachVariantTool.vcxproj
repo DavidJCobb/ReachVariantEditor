@@ -538,6 +538,7 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\event_type.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\expression.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\function_call_argument.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\identifier.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\keywords_to_tokens.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_number.h" />
@@ -939,6 +940,7 @@
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="halo\reach\megalo\languages\bolt\_grammar.txt" />
     <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
+    <Text Include="halo\reach\megalo\_docs\TODO - Bolt syntax errors to test.txt" />
     <Text Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -967,7 +969,9 @@
     <Natvis Include="halo\reach\megalo\forge_label.natvis" />
     <Natvis Include="halo\reach\megalo\game_option.natvis" />
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\action_block.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\expression.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\identifier.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal_data_number.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\token.natvis" />

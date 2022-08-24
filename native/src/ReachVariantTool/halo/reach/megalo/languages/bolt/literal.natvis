@@ -5,7 +5,7 @@
       <!-- For strings, it'll also depend on the Qt internals, so we need to check their natvis too! Great!! :D -->
       <DisplayString Condition="value.index() == 0">&lt;empty&gt;</DisplayString>
       <DisplayString Condition="value.index() == 1">identifier/word: {value._Tail._Head.content}</DisplayString>
-      <DisplayString Condition="value.index() == 2">number: {value._Tail._Tail._Head}</DisplayString>
+      <DisplayString Condition="value.index() == 2">number: {value._Tail._Tail._Head,d}</DisplayString>
       <DisplayString Condition="value.index() == 3">string: {((reinterpret_cast&lt;unsigned short*&gt;(value._Tail._Tail._Tail._Head.content.d)) + value._Tail._Tail._Tail._Head.content.d->offset / 2),su}</DisplayString>
       <DisplayString Condition="value.index() == 3">string: {value._Tail._Tail._Tail._Head.content}</DisplayString> <!-- fallback for Qt; use this if the above line fails; note that this won't properly show escape sequences e.g. \n -->
       <DisplayString>{*this,!}</DisplayString>

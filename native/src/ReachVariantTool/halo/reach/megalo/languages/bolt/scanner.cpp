@@ -429,16 +429,28 @@ namespace halo::reach::megalo::bolt {
          }
          #pragma endregion
          #pragma region Keywords and non-keyword identifiers/words
-         auto possible_word = this->_try_extract_identifier_or_word();
-         if (const auto* p = std::get_if<token_type>(&possible_word)) {
-            //
-            // Branch for keywords.
-            //
-            this->_add_token(*p);
-            return character_scan_result::proceed;
-         } else if (const auto* p = std::get_if<literal_data_identifier_or_word>(&possible_word)) {
-            this->_add_token(token_type::identifier_or_word, *p);
-            return character_scan_result::proceed;
+         {
+            auto word = this->_pull_next_word();
+            if (!word.isEmpty()) {
+               //
+               // Is it a keyword?
+               //
+               bool is_keyword = false;
+               for (const auto& definition : keywords_to_token_types) {
+                  if (word.compare(definition.keyword, Qt::CaseInsensitive) == 0) {
+                     is_keyword = true;
+                     this->_add_token(definition.token);
+                     break;
+                  }
+               }
+               //
+               if (!is_keyword) {
+                  this->_add_token(token_type::word);
+                  this->tokens.back().word = word;
+               }
+               //
+               return character_scan_result::proceed;
+            }
          }
          #pragma endregion
          //
@@ -503,26 +515,6 @@ namespace halo::reach::megalo::bolt {
       this->_add_token(type);
       auto& item = this->tokens.back();
       item.literal = lit;
-   }
-
-   std::variant<std::monostate, token_type, literal_data_identifier_or_word> scanner::_try_extract_identifier_or_word() {
-      auto word = this->_pull_next_word();
-      if (word.isEmpty())
-         return {};
-      //
-      // Is it a keyword?
-      //
-      for (const auto& definition : keywords_to_token_types) {
-         if (word.compare(definition.keyword, Qt::CaseInsensitive) == 0) {
-            return definition.token;
-         }
-      }
-      //
-      // Not a keyword.
-      //
-      return literal_data_identifier_or_word{
-         .content = word,
-      };
    }
 
    std::optional<literal_data_number> scanner::try_extract_number_literal() {

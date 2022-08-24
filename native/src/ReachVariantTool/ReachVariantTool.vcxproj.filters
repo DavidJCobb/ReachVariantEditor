@@ -2472,6 +2472,9 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_for_loop_type.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\identifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2483,6 +2486,7 @@
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="halo\reach\megalo\_docs\how Megalo executes a trigger.txt" />
     <Text Include="halo\reach\megalo\languages\bolt\_grammar.txt" />
+    <Text Include="halo\reach\megalo\_docs\TODO - Bolt syntax errors to test.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="halo\loc_string_table.inl">
@@ -2558,5 +2562,7 @@
     <Natvis Include="halo\reach\megalo\languages\bolt\literal_data_number.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\expression.natvis" />
     <Natvis Include="helpers\owned_ptr.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\action_block.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\identifier.natvis" />
   </ItemGroup>
 </Project>
