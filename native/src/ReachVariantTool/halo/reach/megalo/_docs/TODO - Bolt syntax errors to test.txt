@@ -12,3 +12,16 @@ alias foo = a = b
 -- [Non-Fatal] Suspicious pair of errors: this may actually be a syntax error; error messages past this point may be incorrect.
 alias foo = 3 = b
 ```
+
+
+== Function call ==
+
+```megalo-bolt
+-- [Non-Fatal] Function "game.not_send_incident" does not exist. Did you mean one of the following?
+--              - game.send_incident(incident, player-or-group, player-or-group)
+game.not_send_incident(respawn_beep, no_player, no_team)
+
+-- Unrecognized function identifiers should show suggestions that match the call signature used. 
+-- Given that we're adding named parameters and default parameters to Bolt, this may require 
+-- some "fuzzy" matching.
+```

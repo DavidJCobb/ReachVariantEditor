@@ -6,6 +6,7 @@
 
 namespace halo::reach::megalo::bolt {
    class expression;
+   class identifier;
 }
 
 namespace halo::reach::megalo::bolt {
@@ -16,8 +17,8 @@ namespace halo::reach::megalo::bolt {
    class declaration : public item_base {
       public:
          declaration_type type = declaration_type::variable;
-         QString name;
-         std::optional<variable_network_priority> network_priority;
+         cobb::owned_ptr<identifier> ident;
          cobb::owned_ptr<expression> initial_value;
+         std::optional<variable_network_priority> network_priority;
    };
 }

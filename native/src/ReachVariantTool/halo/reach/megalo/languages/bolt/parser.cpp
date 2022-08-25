@@ -18,6 +18,7 @@
 #include "./declaration.h"
 #include "./event_type.h"
 #include "./expression.h"
+#include "./user_defined_enum.h"
 
 namespace {
    constexpr bool just_let_me_compile_it_for_now_so_i_can_test = false ||
@@ -172,6 +173,11 @@ namespace halo::reach::megalo::bolt {
          error.fault_token = this->_peek_next_token();
          throw errors::parse_exception(error);
       }
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: For constant expressions, compute the integer result and store it directly.");
+      static_assert(just_let_me_compile_it_for_now_so_i_can_test,
+         "TODO: Validate expressions: they must produce a single value or a reference to a single variable. "
+         "This in turn requires that we implement the ability to compute an expression expecting it to return a reference."
+      );
 
       if (!valid_name) {
          return true;
@@ -194,19 +200,20 @@ namespace halo::reach::megalo::bolt {
          return false;
       }
 
-      cobb::owned_ptr<identifier> declared_var  = nullptr;
-      cobb::owned_ptr<expression> initial_value = nullptr;
-
-      declared_var = this->_try_rule_identifier();
-      if (!declared_var) {
-         auto error = errors::missing_syntax_element(syntax_element::variable_declaration_variable);
-         error.pos         = this->_peek_next_token().start;
-         error.fault_token = this->_peek_next_token();
-         throw errors::parse_exception(error);
+      declaration* decl = nullptr;
+      {
+         cobb::owned_ptr<identifier> declared_var = this->_try_rule_identifier();
+         if (!declared_var) {
+            auto error = errors::missing_syntax_element(syntax_element::variable_declaration_variable);
+            error.pos = this->_peek_next_token().start;
+            error.fault_token = this->_peek_next_token();
+            throw errors::parse_exception(error);
+         }
+         //
+         decl = new declaration;
+         decl->ident = std::move(declared_var);
+         this->variable_declarations.push_back(decl);
       }
-
-      auto* decl = new declaration;
-      this->variable_declarations.push_back(decl);
 
       if (this->_consume_phrase_if_present("with", "network", "priority")) {
          if (!this->_consume_token_if_present<token_type::word>()) {
@@ -237,8 +244,7 @@ namespace halo::reach::megalo::bolt {
          static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute the result of a constant expression, and store that directly, instead of storing the expression");
          //
          decl->initial_value = this->_try_rule_expression();
-         //
-         if (!initial_value) {
+         if (!decl->initial_value) {
             auto error = errors::missing_syntax_element(syntax_element::variable_declaration_default_value);
             error.pos         = this->_peek_next_token().start;
             error.fault_token = this->_peek_next_token();
@@ -282,11 +288,25 @@ namespace halo::reach::megalo::bolt {
          }
       }
 
-      static_assert(false, "TODO: Create and store enum object here");
+      auto* ude = new user_defined_enum;
+      ude->name     = name;
+      ude->name_pos = {
+         .start = name_start,
+         .end   = name_end,
+      };
+      this->current_block->append(*ude);
 
       cobb::owned_ptr<identifier> member_name_ident;
       while (member_name_ident = this->_try_rule_identifier()) {
-         static_assert(false, "TODO: Create enum member here");
+         bool discard = member_name_ident->has_member_access();
+         if (discard) {
+            auto* error = new errors::identifier_with_member_access_not_allowed_here(syntax_element::user_defined_enum_member_value);
+            error->pos = member_name_ident->start;
+            this->errors.push_back(error);
+         }
+         //
+         auto& member = ude->members.emplace_back();
+         member.name = member_name_ident->parts[0].name;
          if (this->_consume_token_if_present<token_type::equal>()) {
             auto* value = this->_try_rule_expression();
             if (!name_ident) {
@@ -295,8 +315,18 @@ namespace halo::reach::megalo::bolt {
                error.fault_token = this->_peek_next_token();
                throw errors::parse_exception(error);
             }
-            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute result of constant expression; store result directly");
-            static_assert(false, "TODO: Commit value here");
+            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute result of constant expression; store result directly as constant value");
+            member.value = value;
+         } else {
+            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Set constant value to previous value plus one, if not first element; else, set value to 0");
+         }
+         //
+         if (discard) {
+            //
+            // Enum member had an invalid name. Pop it.
+            //
+            ude->members.pop_back();
+            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Can we re-tool the code above to just never create the member if the name was bad?");
          }
       }
 

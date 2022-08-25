@@ -976,11 +976,14 @@
     <Natvis Include="halo\reach\megalo\game_option.natvis" />
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\action_block.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\alias.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\declaration.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\expression.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\identifier.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\literal_data_number.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\token.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\user_defined_enum.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\_base.natvis" />
     <Natvis Include="halo\reach\megalo\opcode.natvis" />
     <Natvis Include="halo\reach\megalo\opcodes\action.natvis" />

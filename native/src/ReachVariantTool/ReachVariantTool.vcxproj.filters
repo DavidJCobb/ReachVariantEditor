@@ -2582,5 +2582,8 @@
     <Natvis Include="helpers\owned_ptr.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\action_block.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\identifier.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\alias.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\declaration.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\user_defined_enum.natvis" />
   </ItemGroup>
 </Project>

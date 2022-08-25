@@ -61,7 +61,7 @@ namespace halo::reach::megalo::bolt {
 
          bool _consume_word_if_present(const char*, Qt::CaseSensitivity cs = Qt::CaseInsensitive);
 
-         template<typename... Args> requires (sizeof...(Args) > 0 && std::is_same_v<Args, const char*> && ...)
+         template<typename... Args> requires (sizeof...(Args) > 0 && (std::is_same_v<Args, const char*> && ...))
          bool _consume_phrase_if_present(Args... phrase);
 
          // Consumes up to `Size` following word/identifier tokens, and writes them to an input array. 

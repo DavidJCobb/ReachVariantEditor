@@ -4,6 +4,12 @@
 #include "type_traits/all_same.h"
 
 namespace cobb {
+   //
+   // Test all non-type template parameters (NTTP) in a parameter pack 
+   // against a specified functor. The NTTPs must all be of the same 
+   // type. Variant wherein the functor is called with the element to 
+   // match.
+   //
    template<typename Functor, typename... Args> requires (
       cobb::all_same<Args...>
    && std::is_same_v<
@@ -14,13 +20,18 @@ namespace cobb {
          >
       >
    )
-   void each_nttp_of_type_matches(Functor&& f, Args... args) {
+   bool each_nttp_of_pack_matches(Functor&& f, Args... args) {
       bool match = true;
       ((match ? match &= f(args) : false), ...);
       return match;
    }
-   
-   // Variant wherein the functor is called with the element index and the element to match.
+
+   //
+   // Test all non-type template parameters (NTTP) in a parameter pack 
+   // against a specified functor. The NTTPs must all be of the same 
+   // type. Variant wherein the functor is called with the element index 
+   // and the element to match.
+   // 
    template<typename Functor, typename... Args> requires (
       cobb::all_same<Args...>
    && std::is_same_v<
@@ -32,7 +43,7 @@ namespace cobb {
          >
       >
    )
-   void each_nttp_of_type_matches(Functor&& f, Args... args) {
+   bool each_nttp_of_pack_matches(Functor&& f, Args... args) {
       size_t which = 0;
       bool   match = true;
       ((match ? match &= f(which++, args) : false), ...);

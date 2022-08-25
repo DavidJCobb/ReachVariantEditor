@@ -1,6 +1,6 @@
 #pragma once
 #include "helpers/bitmask_t.h"
-#include "helpers/each_nttp_of_type_matches.h"
+#include "helpers/each_nttp_of_pack_matches.h"
 #include "./parser.h"
 
 namespace halo::reach::megalo::bolt {
@@ -67,14 +67,14 @@ namespace halo::reach::megalo::bolt {
       return false;
    }
 
-   template<typename... Args> requires (sizeof...(Args) > 0 && std::is_same_v<Args, const char*> && ...)
+   template<typename... Args> requires (sizeof...(Args) > 0 && (std::is_same_v<Args, const char*> && ...))
    bool parser::_consume_phrase_if_present(Args... phrase) {
       auto& list = this->scanner.tokens;
       if (this->next_token + sizeof...(Args) >= list.size()) {
          return false;
       }
 
-      bool match = cobb::each_nttp_of_type_matches(
+      bool match = cobb::each_nttp_of_pack_matches(
          [this, &list](size_t i, const char* word) -> bool {
             const auto& item = list[this->next_token + i];
             if (item.type != token_type::word)
