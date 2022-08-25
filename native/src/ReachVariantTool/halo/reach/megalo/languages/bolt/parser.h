@@ -11,6 +11,7 @@
 #include "./scanner.h"
 
 namespace halo::reach::megalo::bolt {
+   class declaration;
    class expression;
    class identifier;
 
@@ -22,6 +23,8 @@ namespace halo::reach::megalo::bolt {
       public:
          std::vector<errors::base*> errors;
          cobb::owned_ptr<action_block> root;
+
+         std::vector<cobb::owned_ptr<declaration>> variable_declarations;
 
          void parse();
 
@@ -57,6 +60,9 @@ namespace halo::reach::megalo::bolt {
          bool _consume_any_token_of_types();
 
          bool _consume_word_if_present(const char*, Qt::CaseSensitivity cs = Qt::CaseInsensitive);
+
+         template<typename... Args> requires (sizeof...(Args) > 0 && std::is_same_v<Args, const char*> && ...)
+         bool _consume_phrase_if_present(Args... phrase);
 
          // Consumes up to `Size` following word/identifier tokens, and writes them to an input array. 
          // Returned words are forced to lowercase.

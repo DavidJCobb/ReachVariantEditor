@@ -15,6 +15,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 #pragma once
+#include <exception>
 
 namespace cobb {
    //
@@ -51,6 +52,24 @@ namespace cobb {
 
          ~lambda_guard() {
             functor();
+         }
+   };
+   
+   // Analogue to std::scope_success.
+   template<typename Functor> class lambda_guard_on_success {
+      private:
+         Functor functor;
+         int     excepts = 0;
+      public:
+         lambda_guard_on_success(Functor&& f) noexcept : functor(std::move(f)), excepts(std::uncaught_exceptions()) {}
+         lambda_guard_on_success(const Functor&) = delete;
+
+         lambda_guard_on_success& operator=(const lambda_guard_on_success&) = delete;
+         lambda_guard_on_success& operator=(lambda_guard_on_success&&) = delete;
+
+         ~lambda_guard_on_success() {
+            if (std::uncaught_exceptions() == this->excepts)
+               functor();
          }
    };
 }

@@ -3,6 +3,7 @@
 #include <bitset>
 #include "halo/reach/bitstreams.h"
 #include "./static_team.h"
+#include "./variable_network_priority.h"
 #include "./variable_scope.h"
 #include "./variable_type.h"
 
@@ -12,11 +13,7 @@ namespace halo::reach::megalo {
    namespace impl {
       class variable_declaration {
          public:
-            enum class network_priority_type {
-               none, // offline
-               low,  // basic
-               high, // usable in UI
-            };
+            using network_priority_type = variable_network_priority;
 
             bitnumber<2, network_priority_type> network_priority = network_priority_type::low;
             struct {

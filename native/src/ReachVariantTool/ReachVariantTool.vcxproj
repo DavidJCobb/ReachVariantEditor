@@ -215,6 +215,7 @@
     <ClCompile Include="halo\reach\megalo\languages\bolt\block.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\expression.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\function_call_argument.cpp" />
+    <ClCompile Include="halo\reach\megalo\languages\bolt\identifier.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\literal_data_number.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\parser.cpp" />
     <ClCompile Include="halo\reach\megalo\languages\bolt\scanner.cpp" />
@@ -528,10 +529,12 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\block_event_names_not_found.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\block_event_not_followed_by_block.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\function_call_argument_parse_error.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\identifier_with_member_access_not_allowed_here.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\missing_syntax_element.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\token_matches_no_grammar_rule.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_block_event_name.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_for_loop_type.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_variable_network_priority.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_block_event_list.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_grouping_expression.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unterminated_string_literal.h" />
@@ -641,6 +644,7 @@
     <ClInclude Include="halo\reach\megalo\trigger_entry_type.h" />
     <ClInclude Include="halo\reach\megalo\tu1_data.h" />
     <ClInclude Include="halo\reach\megalo\variable_declarations.h" />
+    <ClInclude Include="halo\reach\megalo\variable_network_priority.h" />
     <ClInclude Include="halo\reach\megalo\variable_scope.h" />
     <ClInclude Include="halo\reach\megalo\strings.h" />
     <ClInclude Include="halo\reach\megalo\variable_type.h" />
@@ -713,7 +717,9 @@
     <ClInclude Include="helpers\cs_utils\count_char_in.h" />
     <ClInclude Include="helpers\cs_utils\all_indices_of_char.h" />
     <ClInclude Include="helpers\cs_utils\index_of.h" />
+    <ClInclude Include="helpers\each_nttp_of_pack_matches.h" />
     <ClInclude Include="helpers\eight_cc.h" />
+    <ClInclude Include="helpers\for_each_nttp_of_pack.h" />
     <ClInclude Include="helpers\hashing\sha1.h" />
     <ClInclude Include="helpers\integral_type_for_flag_count.h" />
     <ClInclude Include="helpers\lambda_guard.h" />
@@ -813,6 +819,7 @@
     <ClInclude Include="helpers\tuple_prepend.h" />
     <ClInclude Include="helpers\tuple_transform.h" />
     <ClInclude Include="helpers\tuple_unpack.h" />
+    <ClInclude Include="helpers\type_traits\all_same.h" />
     <ClInclude Include="helpers\type_traits\basic_indirect_types.h" />
     <ClInclude Include="helpers\type_traits\has_std_size_getter.h" />
     <ClInclude Include="helpers\type_traits\is_constexpr_default_constructible.h" />
@@ -908,7 +915,6 @@
     <ClInclude Include="helpers\sha1.h" />
     <ClInclude Include="helpers\stream.h" />
     <ClInclude Include="helpers\strings.h" />
-    <ClInclude Include="helpers\templating.h" />
     <ClInclude Include="helpers\type_traits.h" />
     <ClInclude Include="services\ini.h" />
     <QtMoc Include="ui\script_editor\page_req_obj_types.h" />

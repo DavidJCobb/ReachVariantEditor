@@ -209,7 +209,8 @@ statement → keyword | expression ;
 
 keyword → alias | variable-declaration | user-defined-enum | block | pragma ;
 
-identifier-part → WORD ( "[" expression "]")* ;
+identifier-name → WORD ;
+identifier-part → identifier-name ( "[" expression "]")* ;
 identifier      → identifier-part ( "." identifier-part )* ;
 
 
@@ -219,7 +220,7 @@ identifier      → identifier-part ( "." identifier-part )* ;
 // VARIABLE_REGISTER refers to scope.type[index]; we avoid "REGISTER" as the name 
 // because that would technically include built-ins like "game.round_time_limit".
 
-alias → "alias" identifier "=" ( identifier | NUMBER | VARIABLE_REGISTER ) ;
+alias → "alias" identifier-name "=" ( identifier | NUMBER | VARIABLE_REGISTER ) ;
 
 variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priority" ( "local" | "low" | "high" ) )? ( "=" ( identifier | NUMBER ) )? ;
    // the identifier must be an alias of an integer constant, but this is irrelevant to the grammar
@@ -228,8 +229,8 @@ variable-declaration → "declare" ( VARIABLE_REGISTER ) ( "with network priorit
 
 // Odds and ends:
 
-user-defined-enum-value → identifier ( "=" ( NUMBER | identifier ) )?
-user-defined-enum       → "enum" identifier user-defined-enum-value* "end"
+user-defined-enum-value → identifier-name ( "=" ( NUMBER | identifier ) )?
+user-defined-enum       → "enum" identifier-name user-defined-enum-value* "end"
 
 
 
@@ -255,7 +256,7 @@ action-block → (
                      ( "player" "randomly"? ) |
                      ( "object" ( "with label" forge-label | "of type" object-type )? "do" )
                   ) |
-                  ( "function" identifier "()" )
+                  ( "function" identifier-name "()" )
                ) block-body "end" ;
 
 // Bolt v1 only allowed a trigger to be the listneer for a signle event. This 

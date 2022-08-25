@@ -832,6 +832,9 @@
     <ClCompile Include="halo\reach\megalo\languages\bolt\block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="halo\reach\megalo\languages\bolt\identifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1189,9 +1192,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\strings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="helpers\templating.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\type_traits.h">
@@ -2473,6 +2473,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="halo\reach\megalo\languages\bolt\identifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\identifier_with_member_access_not_allowed_here.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\for_each_nttp_of_pack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\type_traits\all_same.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\each_nttp_of_pack_matches.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\variable_network_priority.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_variable_network_priority.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

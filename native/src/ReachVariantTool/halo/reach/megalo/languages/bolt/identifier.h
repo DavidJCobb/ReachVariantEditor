@@ -20,6 +20,6 @@ namespace halo::reach::megalo::bolt {
       public:
          std::vector<part> parts;
 
-         bool empty() const;
+         bool has_member_access() const;
    };
 }

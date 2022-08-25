@@ -4,14 +4,18 @@
 #include "./errors/block_event_names_not_found.h"
 #include "./errors/block_event_not_followed_by_block.h"
 #include "./errors/function_call_argument_parse_error.h"
+#include "./errors/identifier_with_member_access_not_allowed_here.h"
 #include "./errors/missing_syntax_element.h"
 #include "./errors/token_matches_no_grammar_rule.h"
 #include "./errors/unknown_block_event_name.h"
 #include "./errors/unknown_for_loop_type.h"
+#include "./errors/unknown_variable_network_priority.h"
 #include "./errors/unterminated_block_event_list.h"
 #include "./errors/unterminated_grouping_expression.h"
 #include "./action_block.h"
+#include "./alias.h"
 #include "./condition_block.h"
+#include "./declaration.h"
 #include "./event_type.h"
 #include "./expression.h"
 
@@ -126,26 +130,197 @@ namespace halo::reach::megalo::bolt {
    }
 
    bool parser::_try_rule_alias() {
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
-      return false;
+      if (!this->_consume_token_if_present<token_type::keyword_alias>()) {
+         return false;
+      }
+
+      bool      valid_name = true;
+      QString   name;
+      token_pos name_start;
+      token_pos name_end;
+
+      cobb::owned_ptr<identifier> name_ident = this->_try_rule_identifier();
+      if (!name_ident) {
+         valid_name = false;
+      } else {
+         if (name_ident->has_member_access()) {
+            valid_name = false;
+            //
+            auto* error = new errors::identifier_with_member_access_not_allowed_here(syntax_element::user_defined_function_definition_name);
+            error->pos = name_ident->start;
+            this->errors.push_back(error);
+         } else {
+            assert(name_ident->parts.size());
+            auto& part = name_ident->parts[0];
+            name       = part.name;
+            name_start = part.start;
+            name_end   = part.end;
+         }
+      }
+
+      if (!this->_consume_token_if_present<token_type::equal>()) {
+         auto error = errors::missing_syntax_element(syntax_element::alias_equal_sign);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = this->_peek_next_token();
+         throw errors::parse_exception(error);
+      }
+
+      auto* value = this->_try_rule_expression();
+      if (!value) {
+         auto error = errors::missing_syntax_element(syntax_element::alias_value);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = this->_peek_next_token();
+         throw errors::parse_exception(error);
+      }
+
+      if (!valid_name) {
+         return true;
+      }
+
+      auto* new_alias = new alias;
+      new_alias->name     = name;
+      new_alias->name_pos = {
+         .start = name_start,
+         .end   = name_end,
+      };
+      new_alias->value    = value;
+
+      this->current_block->append(*new_alias);
+
+      return true;
    }
    bool parser::_try_rule_declare() {
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
-      return false;
+      if (!this->_consume_token_if_present<token_type::keyword_declare>()) {
+         return false;
+      }
+
+      cobb::owned_ptr<identifier> declared_var  = nullptr;
+      cobb::owned_ptr<expression> initial_value = nullptr;
+
+      declared_var = this->_try_rule_identifier();
+      if (!declared_var) {
+         auto error = errors::missing_syntax_element(syntax_element::variable_declaration_variable);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = this->_peek_next_token();
+         throw errors::parse_exception(error);
+      }
+
+      auto* decl = new declaration;
+      this->variable_declarations.push_back(decl);
+
+      if (this->_consume_phrase_if_present("with", "network", "priority")) {
+         if (!this->_consume_token_if_present<token_type::word>()) {
+            auto error = errors::missing_syntax_element(syntax_element::variable_declaration_network_priority);
+            error.pos         = this->_peek_next_token().start;
+            error.fault_token = this->_peek_next_token();
+            throw errors::parse_exception(error);
+         }
+
+         const auto& pri = this->_previous_token()->word;
+         if (pri.compare("none", Qt::CaseInsensitive) == 0) {
+            decl->network_priority = variable_network_priority::none;
+         } else if (pri.compare("low", Qt::CaseInsensitive) == 0) {
+            decl->network_priority = variable_network_priority::low;
+         } else if (pri.compare("high", Qt::CaseInsensitive) == 0) {
+            decl->network_priority = variable_network_priority::high;
+         } else {
+            auto* error = new errors::unknown_variable_network_priority;
+            error->pos      = this->_previous_token()->start;
+            error->subject  = decl;
+            error->priority = pri;
+            this->errors.push_back(error);
+         }
+      }
+
+      if (this->_consume_token_if_present<token_type::equal>()) {
+
+         static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute the result of a constant expression, and store that directly, instead of storing the expression");
+         //
+         decl->initial_value = this->_try_rule_expression();
+         //
+         if (!initial_value) {
+            auto error = errors::missing_syntax_element(syntax_element::variable_declaration_default_value);
+            error.pos         = this->_peek_next_token().start;
+            error.fault_token = this->_peek_next_token();
+            throw errors::parse_exception(error);
+         }
+      }
+
+      return true;
    }
    bool parser::_try_rule_enum() {
       static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
-      return false;
+
+      if (!this->_consume_token_if_present<token_type::keyword_enum>()) {
+         return false;
+      }
+
+      bool      valid_name = true;
+      QString   name;
+      token_pos name_start;
+      token_pos name_end;
+
+      cobb::owned_ptr<identifier> name_ident = this->_try_rule_identifier();
+      if (!name_ident) {
+         auto error = errors::missing_syntax_element(syntax_element::user_defined_enum_name);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = this->_peek_next_token();
+         throw errors::parse_exception(error);
+      } else {
+         if (name_ident->has_member_access()) {
+            valid_name = false;
+            //
+            auto* error = new errors::identifier_with_member_access_not_allowed_here(syntax_element::user_defined_enum_name);
+            error->pos = name_ident->start;
+            this->errors.push_back(error);
+         } else {
+            assert(name_ident->parts.size());
+            auto& part = name_ident->parts[0];
+            name       = part.name;
+            name_start = part.start;
+            name_end   = part.end;
+         }
+      }
+
+      static_assert(false, "TODO: Create and store enum object here");
+
+      cobb::owned_ptr<identifier> member_name_ident;
+      while (member_name_ident = this->_try_rule_identifier()) {
+         static_assert(false, "TODO: Create enum member here");
+         if (this->_consume_token_if_present<token_type::equal>()) {
+            auto* value = this->_try_rule_expression();
+            if (!name_ident) {
+               auto error = errors::missing_syntax_element(syntax_element::user_defined_enum_member_value);
+               error.pos         = this->_peek_next_token().start;
+               error.fault_token = this->_peek_next_token();
+               throw errors::parse_exception(error);
+            }
+            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute result of constant expression; store result directly");
+            static_assert(false, "TODO: Commit value here");
+         }
+      }
+
+      if (!this->_consume_token_if_present<token_type::keyword_end>()) {
+         auto error = errors::missing_syntax_element(syntax_element::user_defined_enum_end);
+         error.pos         = this->_peek_next_token().start;
+         error.fault_token = this->_peek_next_token();
+         throw errors::parse_exception(error);
+      }
+
+      return true;
    }
    bool parser::_try_rule_block() {
       #if _DEBUG
          //
-         // The grammar is such that if the functions which handle a block should handle both 
-         // opening it and closing it; a block opened while this function runs should not still 
-         // be open by the time this function exits. Here, we assert that this is true.
+         // The grammar is such that the functions which handle a block should handle both 
+         // opening it and closing it; a block opened while this function runs should not 
+         // still be open by the time this function exits. Here, we assert that this is true.
+         // 
+         // We only assert if no (more) exceptions have been thrown, to ensure that we don't 
+         // fail the assertion if a fatal error occurs while parsing the block or its contents.
          //
          auto* current_block_prior = this->current_block;
-         auto  guard = cobb::lambda_guard([current_block_prior, this]() {
+         auto  guard = cobb::lambda_guard_on_success([current_block_prior, this]() {
             assert(this->current_block == current_block_prior);
          });
       #endif
@@ -387,6 +562,11 @@ namespace halo::reach::megalo::bolt {
                      error->fault_token = *this->_previous_token();
                      error->subject     = result;
                      this->errors.push_back(error);
+                  } else {
+                     if (ident->has_member_access()) {
+                        auto* error = new errors::identifier_with_member_access_not_allowed_here(syntax_element::user_defined_function_definition_name, *ident);
+                        this->errors.push_back(error);
+                     }
                   }
                   result->function_name = ident;
                }

@@ -6,6 +6,10 @@ namespace halo::reach::megalo::bolt {
    //
    enum class syntax_element {
 
+      alias_name,
+      alias_equal_sign,
+      alias_value,
+
       block_end, // "end" keyword; if missing, block is unterminated
 
       condition_list_item,       // a single condition; missing in cases like "if then", "if not then", "if and", "if or", etc.
@@ -23,9 +27,18 @@ namespace halo::reach::megalo::bolt {
       identifier_part_index,     // e.g. `name[]`
       identifier_part_index_end, // e.g. `name[`
 
+      user_defined_enum_name,
+      user_defined_enum_member_value,
+      user_defined_enum_end,
+
       // Syntax elements for user-defined function definitions
       user_defined_function_definition_name,
       user_defined_function_definition_paren_l, // argument list start, except that we don't allow args in Bolt
       user_defined_function_definition_paren_r, // argument list end, except that we don't allow args in Bolt
+
+      variable_declaration_variable,
+      variable_declaration_network_priority,
+      variable_declaration_default_value,
+
    };
 }
