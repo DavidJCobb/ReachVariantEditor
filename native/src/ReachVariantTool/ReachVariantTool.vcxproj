@@ -523,6 +523,8 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\action_block.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\alias.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\condition_block.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\config\constant_expression_evaluation_implemented.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\config\reference_expression_evaluation_implemented.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\declaration.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\base.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\base_exception.h" />
@@ -531,6 +533,9 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\function_call_argument_parse_error.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\identifier_with_member_access_not_allowed_here.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\missing_syntax_element.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_compiler_language_not_bolt.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_compiler_language_inconsistent.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_requires_data.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\token_matches_no_grammar_rule.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_block_event_name.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_for_loop_type.h" />
@@ -546,9 +551,10 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_number.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_string.h" />
-    <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_identifier_or_word.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\operator_metadata.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\parser.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\pragma_data\compiler_language.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\pragma_type.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\scanner.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\character_scanner.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\statement.h" />
@@ -977,6 +983,7 @@
     <Natvis Include="halo\reach\megalo\game_stat.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\action_block.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\alias.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\condition_block.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\declaration.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\expression.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\identifier.natvis" />

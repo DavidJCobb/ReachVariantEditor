@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+   <Type Name="halo::reach::megalo::bolt::condition_block">
+      <DisplayString Condition="type == block_type::if_block">if ... then ... end</DisplayString>
+      <DisplayString Condition="type == block_type::altif_block">altif ... then ... end</DisplayString>
+      <DisplayString Condition="type == block_type::alt_block">alt ... end</DisplayString>
+
+      <DisplayString>{*this,!}</DisplayString>
+
+      <Expand>
+         <Item Name="[halo::reach::megalo::bolt::item_base]">*(item_base*)this,nd</Item>
+         <Item Name="parent">parent</Item>
+         <Synthetic Name="events">
+            <DisplayString Condition="events_mask == 0">&lt;none&gt;</DisplayString>
+            <DisplayString Condition="events_mask != 0">&lt;at least one&gt;</DisplayString>
+            <Expand>
+               <Item Name="init">(events_mask &amp; (1 &lt;&lt; (int)event_type::init)) != 0</Item>
+               <Item Name="local_init">(events_mask &amp; (1 &lt;&lt; (int)event_type::local_init)) != 0</Item>
+               <Item Name="host_migration">(events_mask &amp; (1 &lt;&lt; (int)event_type::host_migration)) != 0</Item>
+               <Item Name="double_host_migration">(events_mask &amp; (1 &lt;&lt; (int)event_type::double_host_migration)) != 0</Item>
+               <Item Name="object_death">(events_mask &amp; (1 &lt;&lt; (int)event_type::object_death)) != 0</Item>
+               <Item Name="local">(events_mask &amp; (1 &lt;&lt; (int)event_type::local)) != 0</Item>
+               <Item Name="pregame">(events_mask &amp; (1 &lt;&lt; (int)event_type::pregame)) != 0</Item>
+               <Item Name="[Raw View]">events_mask</Item>
+            </Expand>
+         </Synthetic>
+         <Item Name="type">type</Item>
+         <Item Condition="type != block_type::alt_block || (conditions.size() &gt; 0)" Name="conditions">conditions</Item>
+         <ArrayItems>
+            <Size>contents.size()</Size>
+            <ValuePointer>contents._Mypair._Myval2._Myfirst</ValuePointer>
+         </ArrayItems>
+      </Expand>
+   </Type>
+   
+   <Type Name="halo::reach::megalo::bolt::condition">
+      <DisplayString Condition="negate &amp;&amp; or_with_previous">or not ({expr,na})</DisplayString>
+      <DisplayString Condition="or_with_previous">or ({expr,na})</DisplayString>
+      <DisplayString Condition="negate">and not ({expr,na})</DisplayString>
+      <DisplayString>and ({expr,na})</DisplayString>
+
+      <DisplayString>{*this,!}</DisplayString>
+   </Type>
+</AutoVisualizer>

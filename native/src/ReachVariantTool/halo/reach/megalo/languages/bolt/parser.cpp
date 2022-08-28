@@ -1,11 +1,16 @@
 #include "parser.h"
 #include "helpers/lambda_guard.h"
+#include "./config/constant_expression_evaluation_implemented.h"
+#include "./config/reference_expression_evaluation_implemented.h"
 #include "./errors/base_exception.h"
 #include "./errors/block_event_names_not_found.h"
 #include "./errors/block_event_not_followed_by_block.h"
 #include "./errors/function_call_argument_parse_error.h"
 #include "./errors/identifier_with_member_access_not_allowed_here.h"
 #include "./errors/missing_syntax_element.h"
+#include "./errors/pragma_compiler_language_not_bolt.h"
+#include "./errors/pragma_compiler_language_inconsistent.h"
+#include "./errors/pragma_requires_data.h"
 #include "./errors/token_matches_no_grammar_rule.h"
 #include "./errors/unknown_block_event_name.h"
 #include "./errors/unknown_for_loop_type.h"
@@ -18,6 +23,7 @@
 #include "./declaration.h"
 #include "./event_type.h"
 #include "./expression.h"
+#include "./pragma_type.h"
 #include "./user_defined_enum.h"
 
 namespace {
@@ -159,7 +165,7 @@ namespace halo::reach::megalo::bolt {
          }
       }
 
-      if (!this->_consume_token_if_present<token_type::equal>()) {
+      if (!this->_consume_token_if_present<token_type::equal>()) [[unlikely]] {
          auto error = errors::missing_syntax_element(syntax_element::alias_equal_sign);
          error.pos         = this->_peek_next_token().start;
          error.fault_token = this->_peek_next_token();
@@ -173,8 +179,8 @@ namespace halo::reach::megalo::bolt {
          error.fault_token = this->_peek_next_token();
          throw errors::parse_exception(error);
       }
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: For constant expressions, compute the integer result and store it directly.");
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test,
+      static_assert(config::code_needs_update_for_constant_expression_evaluation_implemented, "TODO: For constant expressions, compute the integer result and store it directly.");
+      static_assert(config::code_needs_update_for_reference_expression_evaluation_implemented,
          "TODO: Validate expressions: they must produce a single value or a reference to a single variable. "
          "This in turn requires that we implement the ability to compute an expression expecting it to return a reference."
       );
@@ -203,7 +209,7 @@ namespace halo::reach::megalo::bolt {
       declaration* decl = nullptr;
       {
          cobb::owned_ptr<identifier> declared_var = this->_try_rule_identifier();
-         if (!declared_var) {
+         if (!declared_var) [[unlikely]] {
             auto error = errors::missing_syntax_element(syntax_element::variable_declaration_variable);
             error.pos = this->_peek_next_token().start;
             error.fault_token = this->_peek_next_token();
@@ -241,7 +247,7 @@ namespace halo::reach::megalo::bolt {
 
       if (this->_consume_token_if_present<token_type::equal>()) {
 
-         static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute the result of a constant expression, and store that directly, instead of storing the expression");
+         static_assert(config::code_needs_update_for_constant_expression_evaluation_implemented, "TODO: Compute the result of a constant expression, and store that directly, instead of storing the expression");
          //
          decl->initial_value = this->_try_rule_expression();
          if (!decl->initial_value) {
@@ -255,8 +261,6 @@ namespace halo::reach::megalo::bolt {
       return true;
    }
    bool parser::_try_rule_enum() {
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
-
       if (!this->_consume_token_if_present<token_type::keyword_enum>()) {
          return false;
       }
@@ -267,7 +271,7 @@ namespace halo::reach::megalo::bolt {
       token_pos name_end;
 
       cobb::owned_ptr<identifier> name_ident = this->_try_rule_identifier();
-      if (!name_ident) {
+      if (!name_ident) [[unlikely]] {
          auto error = errors::missing_syntax_element(syntax_element::user_defined_enum_name);
          error.pos         = this->_peek_next_token().start;
          error.fault_token = this->_peek_next_token();
@@ -315,10 +319,10 @@ namespace halo::reach::megalo::bolt {
                error.fault_token = this->_peek_next_token();
                throw errors::parse_exception(error);
             }
-            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Compute result of constant expression; store result directly as constant value");
+            static_assert(config::code_needs_update_for_constant_expression_evaluation_implemented, "TODO: Compute result of constant expression; store result directly as constant value");
             member.value = value;
          } else {
-            static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: Set constant value to previous value plus one, if not first element; else, set value to 0");
+            static_assert(config::code_needs_update_for_constant_expression_evaluation_implemented, "TODO: Set constant value to previous value plus one, if not first element; else, set value to 0");
          }
          //
          if (discard) {
@@ -359,7 +363,7 @@ namespace halo::reach::megalo::bolt {
       if (!block) {
          block = this->_try_rule_block_actions();
          if (!block) {
-            if (events.has_value()) {
+            if (events.has_value()) [[unlikely]] {
                errors::block_event_not_followed_by_block error;
                error.pos = this->_previous_token()->start;
                throw errors::parse_exception(error);
@@ -515,7 +519,7 @@ namespace halo::reach::megalo::bolt {
 
                result->type = type;
                switch (type) {
-                  case bt::bare:
+                  [[unlikely]] case bt::bare:
                      {
                         constexpr size_t max_tokens_to_skip = 10;
 
@@ -586,14 +590,14 @@ namespace halo::reach::megalo::bolt {
 
                {
                   identifier* ident = this->_try_rule_identifier();
-                  if (!ident) {
+                  if (!ident) [[unlikely]] {
                      auto* error = new errors::missing_syntax_element(syntax_element::user_defined_function_definition_name);
                      error->pos         = this->_peek_next_token().start;
                      error->fault_token = *this->_previous_token();
                      error->subject     = result;
                      this->errors.push_back(error);
                   } else {
-                     if (ident->has_member_access()) {
+                     if (ident->has_member_access()) [[unlikely]] {
                         auto* error = new errors::identifier_with_member_access_not_allowed_here(syntax_element::user_defined_function_definition_name, *ident);
                         this->errors.push_back(error);
                      }
@@ -762,8 +766,77 @@ namespace halo::reach::megalo::bolt {
    }
 
    bool parser::_try_rule_pragma() {
-      static_assert(just_let_me_compile_it_for_now_so_i_can_test, "TODO: IMPLEMENT ME");
-      return false;
+      if (!this->_consume_token_if_present<token_type::keyword_pragma>()) {
+         return false;
+      }
+      token_pos start_pos = this->_previous_token()->start;
+
+      pragma_type type = pragma_type::unspecified;
+      QString     data;
+      {
+         QString name;
+         if (!this->_consume_token_if_present<token_type::word>()) {
+            errors::missing_syntax_element error{syntax_element::pragma_name};
+            error.fault_token = this->_peek_next_token();
+            throw errors::parse_exception(error);
+         }
+         name = this->_previous_token()->word;
+
+         type = pragma_type::unrecognized;
+
+         if (name.compare("compiler_language", Qt::CaseInsensitive) == 0) {
+            type = pragma_type::compiler_language;
+         }
+      }
+
+      if (this->_consume_token_if_present<token_type::string>()) {
+         auto& lit = this->_previous_token()->literal;
+         assert(std::holds_alternative<literal_data_string>(lit.value));
+         data = std::get<literal_data_string>(lit.value).content;
+      } else {
+         if (pragma_type_requires_data(type)) {
+            errors::pragma_requires_data error{ type };
+            error.pos = start_pos;
+            throw errors::parse_exception(error);
+         }
+      }
+
+      {
+         using namespace pragma_data;
+         switch (type) {
+            [[likely]] case pragma_type::unrecognized:
+               break;
+            case pragma_type::compiler_language:
+               {
+                  compiler_language value = compiler_language::unrecognized;
+
+                  if (data.compare("bolt", Qt::CaseInsensitive) == 0) {
+                     value = compiler_language::bolt;
+                  }
+
+                  auto& stored = this->pragma_data.language;
+                  if (stored.has_value()) {
+                     if (stored.value() != value) {
+                        errors::pragma_compiler_language_inconsistent error;
+                        error.prior = stored.value();
+                        error.here = value;
+                        error.pos = start_pos;
+                        throw errors::parse_exception(error);
+                     }
+                  }
+                  if (value == compiler_language::unrecognized) {
+                     errors::pragma_compiler_language_not_bolt error;
+                     error.specified = value;
+                     error.pos = start_pos;
+                     throw errors::parse_exception(error);
+                  }
+                  stored = value;
+               }
+               break;
+         }
+      }
+
+      return true;
    }
 
    expression* parser::_try_rule_expression() {
@@ -860,7 +933,7 @@ namespace halo::reach::megalo::bolt {
             }
             if (!this->_consume_token_if_present<token_type::paren_r>()) {
                errors::missing_syntax_element error{syntax_element::function_call_argument_list_terminator};
-               error.fault_token = *this->_previous_token();
+               error.fault_token = this->_peek_next_token();
                throw errors::parse_exception(error);
             }
             //

@@ -4,6 +4,7 @@
 #include <QString>
 #include "helpers/type_traits/is_std_array_of_type.h"
 #include "./errors/base.h"
+#include "./pragma_data/compiler_language.h"
 #include "./util/phrase.h"
 #include "./action_block.h"
 #include "./block.h"
@@ -24,6 +25,9 @@ namespace halo::reach::megalo::bolt {
          std::vector<errors::base*> errors;
          cobb::owned_ptr<action_block> root;
 
+         struct {
+            std::optional<pragma_data::compiler_language> language;
+         } pragma_data;
          std::vector<cobb::owned_ptr<declaration>> variable_declarations;
 
          void parse();

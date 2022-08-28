@@ -19,7 +19,7 @@ namespace halo::reach::megalo::bolt {
          format_type format = format_type::none;
          union {
             double  decimal;
-            int32_t integer = 0;
+            int32_t integer = 0; // NOTE: Megalo uses 16-bit values.
          } value;
 
          bool is_valid() const;

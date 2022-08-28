@@ -1,7 +1,6 @@
 #pragma once
 #include <variant>
 #include "./_base.h"
-#include "./literal_data_identifier_or_word.h"
 #include "./literal_data_number.h"
 #include "./literal_data_string.h"
 
@@ -16,7 +15,6 @@ namespace halo::reach::megalo::bolt {
       public:
          using variant_type = std::variant<
             std::monostate,
-            literal_data_identifier_or_word,
             literal_data_number,
             literal_data_string//,
          >;

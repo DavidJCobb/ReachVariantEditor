@@ -27,6 +27,8 @@ namespace halo::reach::megalo::bolt {
       identifier_part_index,     // e.g. `name[]`
       identifier_part_index_end, // e.g. `name[`
 
+      pragma_name,
+
       user_defined_enum_name,
       user_defined_enum_member_value,
       user_defined_enum_end,

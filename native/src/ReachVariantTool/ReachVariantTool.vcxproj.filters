@@ -2370,9 +2370,6 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="halo\reach\megalo\languages\bolt\literal_data_identifier_or_word.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="halo\reach\megalo\languages\bolt\action_block.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2493,6 +2490,27 @@
     <ClInclude Include="halo\reach\megalo\languages\bolt\errors\unknown_variable_network_priority.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\pragma_data\compiler_language.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_compiler_language_inconsistent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_compiler_language_not_bolt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\config\constant_expression_evaluation_implemented.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\config\reference_expression_evaluation_implemented.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\errors\pragma_requires_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="halo\reach\megalo\languages\bolt\pragma_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
@@ -2585,5 +2603,6 @@
     <Natvis Include="halo\reach\megalo\languages\bolt\alias.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\declaration.natvis" />
     <Natvis Include="halo\reach\megalo\languages\bolt\user_defined_enum.natvis" />
+    <Natvis Include="halo\reach\megalo\languages\bolt\condition_block.natvis" />
   </ItemGroup>
 </Project>
