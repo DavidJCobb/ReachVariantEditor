@@ -30,7 +30,7 @@ namespace cobb::reflex2::impl::enumeration {
 
             return out;
          }();
-
+         
          static constexpr auto all_underlying_values = [](){
             std::array<underlying_type, member_count> out = {};
 
@@ -46,6 +46,24 @@ namespace cobb::reflex2::impl::enumeration {
 
             return out;
          }();
+         
+
+         static constexpr bool any_values_unrepresentable = []() consteval -> bool {
+            member_value v = 0;
+            for (size_t i = 0; i < member_count; ++i) {
+               const auto& item = members[i];
+               if (item.value.has_value()) {
+                  v = item.value.value();
+                  if (static_cast<underlying_type>(v) != v)
+                     return true;
+               } else {
+                  if (static_cast<underlying_type>(v) != v)
+                     return true;
+               }
+               ++v;
+            }
+            return false;
+         }();
 
          // optimization for retrieving names
          static constexpr bool _strictly_ascending_order = []() consteval {
@@ -53,7 +71,7 @@ namespace cobb::reflex2::impl::enumeration {
             for (const auto& item : members) {
                if (item.value.has_value()) {
                   if (!last.has_value()) {
-                     last = item.value.value();
+                     last = (underlying_type)item.value.value();
                      continue;
                   }
                   if (item.value.value() < last.value()) {

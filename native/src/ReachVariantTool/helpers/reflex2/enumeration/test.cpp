@@ -21,6 +21,34 @@ namespace tests {
       using t = decltype(cobb__reflex2__enumeration_data<test_enum>::members);
    }
    //*/
+   /*
+   namespace invalid_enum_unrepresentable_values_basic {
+      class test_enum;
+      template<> struct cobb__reflex2__enumeration_data<test_enum> {
+         using underlying_type = int16_t;
+         static constexpr const std::array members = {
+            cobb::reflex2::member("a"),
+            cobb::reflex2::member("b", 999999),
+         };
+      };
+      class test_enum : public cobb::reflex2::enumeration<test_enum> {};
+
+      using t = decltype(cobb__reflex2__enumeration_data<test_enum>::members);
+   }
+   namespace invalid_enum_unrepresentable_values_complex {
+      class test_enum;
+      template<> struct cobb__reflex2__enumeration_data<test_enum> {
+         using underlying_type = int16_t;
+         inline static constexpr const auto members = std::make_tuple(
+            cobb::reflex2::member("a"),
+            cobb::reflex2::member("b", 999999)//,
+         );
+      };
+      class test_enum : public cobb::reflex2::enumeration<test_enum> {};
+
+      using t = decltype(cobb__reflex2__enumeration_data<test_enum>::members);
+   }
+   //*/
 
    namespace valid_enum_basic {
       class test_enum;
@@ -85,7 +113,7 @@ namespace tests {
          inline static constexpr const auto members = std::make_tuple(
             cobb::reflex2::member("a"),
             cobb::reflex2::member_gap{},
-            cobb::reflex2::member("b"),
+            cobb::reflex2::member("b", 3),
             cobb::reflex2::member_gap{},
             cobb::reflex2::member("c")//,
          );

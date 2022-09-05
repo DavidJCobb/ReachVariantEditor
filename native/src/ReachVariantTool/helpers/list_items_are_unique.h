@@ -59,7 +59,7 @@ namespace cobb {
    // Test whether two list items are unique. The functor should take as arguments 
    // two list items (by value or by reference), and return true if they are unique.
    template<typename List, typename Functor> requires impl::list_items_are_unique::is_compatible_list<List> && impl::list_items_are_unique::is_usable_functor<List, Functor>
-   constexpr bool list_items_are_unique(const List& list, Functor uniqueness_comparator) {
+   constexpr bool list_items_are_unique(const List& list, Functor&& uniqueness_comparator) {
       using namespace impl::list_items_are_unique;
 
       if constexpr (is_indexable_list<List>) {

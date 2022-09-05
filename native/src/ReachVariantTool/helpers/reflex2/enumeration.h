@@ -2,7 +2,8 @@
 #include <stdexcept>
 #include <utility>
 #include "helpers/type_traits/is_std_array.h"
-#include "../string/strcmp.h"
+#include "helpers/string/strcmp.h"
+#include "helpers/list_items_are_unique.h"
 #include "./member.h"
 #include "./member_range.h"
 #include "./enumeration/enumeration_data_forward_declare.h"
@@ -13,11 +14,38 @@
 namespace cobb::reflex2 {
    namespace impl::enumeration {
       template<class Enumeration, typename DefinitionListType> struct member_list;
+
+      template<class Enumeration> using member_list_helper_type = member_list<Enumeration, std::decay_t<decltype(enumeration_data<Enumeration>::members)>>;
+
+      template<class Enumeration> concept enum_defines_members = requires {
+         typename enumeration_data<Enumeration>;
+         enumeration_data<Enumeration>::members;
+
+         typename member_list_helper_type<Enumeration>;
+      };
+      template<class Enumeration> constexpr bool enum_has_no_duplicate_names = []() { // making this a concept fails silently; dunno why; MSVC issue with executing lambdas in concepts maybe?
+         using ml = member_list_helper_type<Enumeration>;
+         return cobb::list_items_are_unique(ml::all_names, [](const char* a, const char* b) { return (a != b) && cobb::strcmp(a, b) != 0; });
+      }();
+      template<class Enumeration>concept enum_has_no_unrepresentable_values = requires {
+         typename member_list_helper_type<Enumeration>;
+         requires (!member_list_helper_type<Enumeration>::any_values_unrepresentable);
+      };
+
+      // Pick your poison: static assertions allow you to know what's wrong, but not what template is affected; concepts 
+      //                   allow you to know what template (i.e. enum) is wrong, but not how. Fun.
+      template<class Enumeration> concept is_valid_enumeration = requires {
+         requires enum_defines_members<Enumeration>;
+         requires enum_has_no_duplicate_names<Enumeration>;
+         requires enum_has_no_unrepresentable_values<Enumeration>;
+      };
    }
 
-   template<class Subclass> class enumeration {
+   template<class Subclass> requires impl::enumeration::is_valid_enumeration<Subclass>//*/
+   class enumeration {
       using my_type     = Subclass;
 
+public:
       using member_definition_list_type = std::decay_t<decltype(enumeration_data<my_type>::members)>;
       using member_list = impl::enumeration::member_list<my_type, member_definition_list_type>;
 
@@ -32,18 +60,12 @@ namespace cobb::reflex2 {
          static constexpr size_t member_count          = member_list::member_count;
          
          static_assert(
-            []() -> bool {
-               for (size_t i = 0; i + 1 < all_names.size(); ++i) {
-                  for (size_t j = i + 1; j < all_names.size(); ++j) {
-                     if (all_names[i] == all_names[j]) // two string literals in the same TU will use the same pointer
-                        return false;
-                     if (cobb::strcmp(all_names[i], all_names[j]) == 0) // ...but string literals referenced from another TU may not
-                        return false;
-                  }
-               }
-               return true;
-            }(),
+            cobb::list_items_are_unique(all_names, [](const char* a, const char* b) { return (a != b) && cobb::strcmp(a, b) != 0; }),
             "No two enum members can have the same name."
+         );
+         static_assert(
+            !member_list::any_values_unrepresentable,
+            "This enum contains values that the underlying type cannot store."
          );
 
       protected:

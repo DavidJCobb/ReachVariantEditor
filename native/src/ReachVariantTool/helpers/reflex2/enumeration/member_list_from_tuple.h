@@ -111,7 +111,7 @@ namespace cobb::reflex2::impl::enumeration {
                //
                if constexpr (std::is_same_v<Current, member> || std::is_same_v<Current, member_range>) {
                   if (item.value.has_value())
-                     v = item.value.value();
+                     v = static_cast<underlying_type>(item.value.value());
                   else
                      ++v;
                   //
@@ -133,7 +133,7 @@ namespace cobb::reflex2::impl::enumeration {
                   }
                   return;
                } else
-               /*
+               /* // make sure to update `any_values_unrepresentable` too
                if constexpr (is_nested_enum<Current>) {
                   using nested = Current::enumeration;
                   constexpr auto nested_span = (nested::max_underlying_value - nested::min_underlying_value);
@@ -144,12 +144,12 @@ namespace cobb::reflex2::impl::enumeration {
                      auto item = nested_list[i];
                      //
                      out[++value_index] = {
-                        .value      = (v + (underlying_type)(item - nested::min_underlying_value)),
+                        .value      = (v + static_cast<underlying_type>(item - nested::min_underlying_value)),
                         .type_index = type_index,
                         .type_sub   = i,
                      };
                   }
-                  v += nested_span;
+                  v += static_cast<underlying_type>(nested_span);
                   return;
                } else
                //*/
@@ -159,6 +159,53 @@ namespace cobb::reflex2::impl::enumeration {
             });
             //
             return out;
+         }();
+
+         static constexpr bool any_values_unrepresentable = []() consteval -> bool {
+            bool clipped = false;
+            member_value v = 0;
+            cobb::tuple_for_each_value(members, [&clipped, &v]<typename Current>(const Current& item) {
+               auto _would_clip = [](member_value v) -> bool {
+                  return v != (underlying_type)v;
+               };
+
+               if constexpr (std::is_same_v<Current, member_gap>) {
+                  ++v;
+                  return;
+               }
+               if constexpr (std::is_same_v<Current, member> || std::is_same_v<Current, member_range>) {
+                  if (item.value.has_value())
+                     v = item.value.value();
+                  else
+                     ++v;
+                  if (_would_clip(v)) {
+                     clipped = true;
+                  }
+                  //
+                  if constexpr (std::is_same_v<Current, member_range>) {
+                     if (_would_clip(v + item.count - 2)) {
+                        clipped = true;
+                     }
+                  }
+                  return;
+               }
+               /*
+               if constexpr (is_nested_enum<Current>) {
+                  using nested = Current::enumeration;
+                  constexpr auto nested_span = (nested::max_underlying_value - nested::min_underlying_value);
+                  constexpr auto nested_list = nested::all_underlying_values;
+                  //
+                  if (_would_clip(v)) {
+                     clipped = true;
+                  }
+                  if (_would_clip(v + nested_span)) {
+                     clipped = true;
+                  }
+                  return;
+               }
+               //*/
+            });
+            return clipped;
          }();
          
          static consteval size_t index_of(const char* name) {
