@@ -67,7 +67,7 @@ namespace cobb::polyfills::msvc {
          constexpr consteval_compatible_optional(const consteval_compatible_optional& other) {
             *this = other;
          }
-         constexpr consteval_compatible_optional(consteval_compatible_optional&& other) {
+         constexpr consteval_compatible_optional(consteval_compatible_optional&& other) noexcept {
             *this = std::move(other);
          }
 
@@ -155,6 +155,19 @@ namespace cobb::polyfills::msvc {
             if (has_value())
                return value();
             return static_cast<value_type>(std::forward<U>(default_value));
+         }
+
+         template<std::copy_constructible U> requires std::is_convertible_v<U, value_type>
+         constexpr value_type value_or(U&& default_value) const& {
+            if (has_value())
+               return value();
+            return static_cast<value_type>(default_value);
+         }
+         template<std::move_constructible U> requires std::is_convertible_v<U, value_type>
+         constexpr value_type value_or(U&& default_value) && {
+            if (has_value())
+               return value();
+            return static_cast<value_type>(default_value);
          }
 
          constexpr void swap(consteval_compatible_optional& other)

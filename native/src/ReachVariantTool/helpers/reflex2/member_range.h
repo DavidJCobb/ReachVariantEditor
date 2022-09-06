@@ -4,6 +4,7 @@
 #include "./member.h"
 
 namespace cobb::reflex2 {
+   // Define a named enum member that represents multiple consecutive values.
    struct member_range {
       consteval member_range() {}
       consteval member_range(const char* n, size_t c) : name(n), count(c) {}

@@ -1,12 +1,7 @@
 #pragma once
 #include <type_traits>
-#include "../../member_enum.h"
+#include "../../member.h"
 
-namespace cobb::reflex2 {
-   class member;
-   class member_range;
-}
-
-namespace cobb::reflex2::impl::enumeration {
+namespace cobb::reflex3::impl::enumeration {
    template<typename T> concept is_named_member = std::is_same_v<T, member> || std::is_same_v<T, member_range> || is_member_enum<T>;
 }

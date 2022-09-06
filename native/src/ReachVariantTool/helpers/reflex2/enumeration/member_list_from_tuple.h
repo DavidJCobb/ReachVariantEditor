@@ -12,8 +12,8 @@
 #include "./concepts/is_real_member.h"
 #include "./concepts/is_valid_member_type.h"
 #include "../member.h"
+#include "../member_enum.h"
 #include "../member_range.h"
-//#include "../nested_enum.h"
 #include "./enumeration_data_forward_declare.h"
 #include "./extract_underlying_type.h"
 
@@ -66,13 +66,10 @@ namespace cobb::reflex2::impl::enumeration {
                } else if constexpr (std::is_same_v<Current, member_range>) {
                   count += item.count;
                   return;
-               } else
-               /*
-               if constexpr (std::is_same_v<Current, nested_enum>) {
-                  // TODO: count += (Current::max_underlying_value - Current::min_underlying_value) + 1;
+               } else if constexpr (is_member_enum<Current>) {
+                  count += std::tuple_size_v<std::decay_t<decltype(Current::enumeration::all_underlying_values)>>;
                   return;
-               } else
-               //*/ {
+               } else {
                   cobb::unreachable();
                }
             });
@@ -132,29 +129,25 @@ namespace cobb::reflex2::impl::enumeration {
                      --v;
                   }
                   return;
-               } else
-               /* // make sure to update `any_values_unrepresentable` too
-               if constexpr (is_nested_enum<Current>) {
-                  using nested = Current::enumeration;
-                  constexpr auto nested_span = (nested::max_underlying_value - nested::min_underlying_value);
-                  constexpr auto nested_list = nested::all_underlying_values;
+               }
+               if constexpr (is_member_enum<Current>) {
+                  using nested = typename Current::enumeration;
+                  auto  nested_span = (nested::max_underlying_value() - nested::min_underlying_value());
+                  auto& nested_list = nested::all_underlying_values;
                   //
                   ++v;
                   for (size_t i = 0; i < nested_list.size(); ++i) {
                      auto item = nested_list[i];
                      //
                      out[++value_index] = {
-                        .value      = (v + static_cast<underlying_type>(item - nested::min_underlying_value)),
-                        .type_index = type_index,
-                        .type_sub   = i,
+                        .value        = (v + static_cast<underlying_type>(item - nested::min_underlying_value())),
+                        .member_index = member_index,
+                        .member_sub   = i,
                      };
                   }
                   v += static_cast<underlying_type>(nested_span);
+                  v -= 1;
                   return;
-               } else
-               //*/
-               {
-                  cobb::unreachable();
                }
             });
             //
@@ -189,21 +182,17 @@ namespace cobb::reflex2::impl::enumeration {
                   }
                   return;
                }
-               /*
-               if constexpr (is_nested_enum<Current>) {
+               if constexpr (is_member_enum<Current>) {
                   using nested = Current::enumeration;
-                  constexpr auto nested_span = (nested::max_underlying_value - nested::min_underlying_value);
-                  constexpr auto nested_list = nested::all_underlying_values;
-                  //
-                  if (_would_clip(v)) {
+                  constexpr const auto nested_span = (nested::max_underlying_value() - nested::min_underlying_value());
+
+                  ++v;
+                  if (_would_clip(v) || _would_clip(v + nested_span)) {
                      clipped = true;
                   }
-                  if (_would_clip(v + nested_span)) {
-                     clipped = true;
-                  }
+                  v += nested_span - 1;
                   return;
                }
-               //*/
             });
             return clipped;
          }();

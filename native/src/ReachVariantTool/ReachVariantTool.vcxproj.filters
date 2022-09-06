@@ -841,6 +841,9 @@
     <ClCompile Include="helpers\tuple\test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="helpers\reflex3\enumeration\test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -2563,6 +2566,51 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="helpers\polyfills\msvc\consteval_compatible_optional.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex2\member_enum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\member.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\enumeration_data_forward_declare.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\extract_underlying_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\array\filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\array\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_tuple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_valid_member_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_named_member.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\reflex3\enumeration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\array\count_matching.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\array\copy_matching.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\polyfills\msvc\const_reference_nttp_decltype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="helpers\array\concat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

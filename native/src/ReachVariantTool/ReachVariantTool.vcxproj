@@ -285,6 +285,7 @@
     <ClCompile Include="helpers\hashing\sha1.cpp" />
     <ClCompile Include="helpers\qt\four_cc_to_string.cpp" />
     <ClCompile Include="helpers\reflex2\enumeration\test.cpp" />
+    <ClCompile Include="helpers\reflex3\enumeration\test.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test_constraints.cpp" />
     <ClCompile Include="helpers\reflex\flags_mask\test.cpp" />
@@ -717,6 +718,11 @@
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
     <ClInclude Include="halo\util\stream_position.h" />
+    <ClInclude Include="helpers\array\concat.h" />
+    <ClInclude Include="helpers\array\copy_matching.h" />
+    <ClInclude Include="helpers\array\count_matching.h" />
+    <ClInclude Include="helpers\array\filter.h" />
+    <ClInclude Include="helpers\array\map.h" />
     <ClInclude Include="helpers\bitmask_t.h" />
     <ClInclude Include="helpers\byteswap.h" />
     <ClInclude Include="helpers\constexpr_for_functor.h" />
@@ -737,6 +743,7 @@
     <ClInclude Include="helpers\numeric_min_max.h" />
     <ClInclude Include="helpers\owned_ptr.h" />
     <ClInclude Include="helpers\polyfills\msvc\consteval_compatible_optional.h" />
+    <ClInclude Include="helpers\polyfills\msvc\const_reference_nttp_decltype.h" />
     <ClInclude Include="helpers\qt\four_cc_to_string.h" />
     <ClInclude Include="helpers\qt\string\slice.h" />
     <ClInclude Include="helpers\reflex2\enumeration\concepts\is_named_member.h" />
@@ -747,7 +754,16 @@
     <ClInclude Include="helpers\reflex2\enumeration\member_list_from_array.h" />
     <ClInclude Include="helpers\reflex2\enumeration\member_list_from_tuple.h" />
     <ClInclude Include="helpers\reflex2\member.h" />
+    <ClInclude Include="helpers\reflex2\member_enum.h" />
     <ClInclude Include="helpers\reflex2\member_range.h" />
+    <ClInclude Include="helpers\reflex3\enumeration.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_named_member.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_valid_member_type.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\enumeration_data_forward_declare.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\extract_underlying_type.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_array.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_tuple.h" />
+    <ClInclude Include="helpers\reflex3\member.h" />
     <ClInclude Include="helpers\reflex\constants.h" />
     <ClInclude Include="helpers\reflex\enumeration.h" />
     <ClInclude Include="helpers\reflex2\enumeration.h" />
