@@ -3,10 +3,12 @@
 #include <type_traits>
 
 //
-// MSVC bug as of Sept. 2022: const reference NTTPs are lvalues but all type 
-// traits see their decltypes as pointers; compiler error messages in specific 
-// situations (involving tons of nearby templates) indicate that MSVC passes a 
-// pointer even when you don't use the address-of operator.
+// Workaround for: https://developercommunity.visualstudio.com/t/const-auto-template-parameters-NTTP-u/10139694
+// 
+// In short: the compiler passes const-reference NTTPs as pointers and simply 
+// pretends that they're references. This means you don't have to use pointer 
+// syntax in your code; however, type traits still treat the value as if it 
+// were a pointer.
 //
 
 namespace cobb::polyfills::msvc {

@@ -1,8 +1,9 @@
-#include "../enumeration.h"
 #include <array>
 #include <cstdint>
 #include <tuple>
 #include <type_traits>
+
+#include "../enumeration.h"
 
 namespace tests {
    /*
@@ -179,6 +180,7 @@ namespace tests {
       class inner_enum : public cobb::reflex3::enumeration<inner_enum> {};
 
       constexpr auto max_inner = inner_enum::max_underlying_value();
+      constexpr auto all_under_inner = inner_enum::all_underlying_values;
 
       class outer_enum;
       template<> struct cobb__reflex3__enumeration_data<outer_enum> {
@@ -187,14 +189,20 @@ namespace tests {
             cobb::reflex3::member("a"),
             cobb::reflex3::member("b"),
             cobb::reflex3::member("c"),
-            cobb::reflex3::member_enum<inner_enum>("d", 2)//,
+            cobb::reflex3::member_enum<inner_enum>("d")//,*/
          );
       };
       class outer_enum : public cobb::reflex3::enumeration<outer_enum> {};
 
+
+      // current status: compiles, but IntelliSense loses its mind
+      // strange thing is, SOMETIMES, editing the tuple above can briefly get IntelliSense to snap out of it and work properly
+      // but editing anywhere else will cause it to think the outer_enum's member list helper type is an incomplete type again
+
       constexpr auto outer_explicit = outer_enum::has_explicit_underlying_type;
 using inner_ml = inner_enum::member_list;
 using outer_ml = outer_enum::member_list;
+constexpr inner_ml bar{};
 constexpr outer_ml foo{};
 constexpr auto iml_count = inner_ml::value_count;
 constexpr auto oml_count = outer_ml::value_count;
@@ -213,7 +221,7 @@ constexpr auto oml_count = outer_ml::value_count;
          cobb::reflex3::member("c"),
          cobb::reflex3::member_enum<inner_enum>("d")//, // `template` keyword required to avoid confusing IntelliSense
       );
-
+      
       using x = cobb::reflex3::enumeration_data<outer_enum>;
       using y = decltype(x::members);
       constexpr const auto& m = x::members;

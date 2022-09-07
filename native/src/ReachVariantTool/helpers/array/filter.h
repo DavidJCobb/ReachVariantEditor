@@ -6,13 +6,7 @@
 #include "helpers/type_traits/is_std_array.h"
 
 namespace cobb::array {
-   template<const auto& Src, auto Functor> /*requires (
-      cobb::is_std_array<std::decay_t<decltype(Src)>>
-   && (
-         std::is_invocable_r<bool, decltype(Functor), const typename std::decay_t<decltype(Src)>::value_type&>::value
-      || std::is_invocable_r<bool, decltype(Functor), const typename std::decay_t<decltype(Src)>::value_type&, size_t>::value
-      )
-   )*/
+   template<const auto& Src, auto Functor>
    constexpr const auto filter = []() consteval {
       using value_type = typename std::decay_t<cobb::polyfills::msvc::nttp_decltype<Src>>::value_type;
 

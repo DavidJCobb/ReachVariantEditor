@@ -32,13 +32,7 @@ namespace cobb::array {
    #pragma endregion
 
    #pragma region compile-time
-      template<const auto& Array, auto Functor> /*requires (
-         cobb::is_std_array<std::decay_t<decltype(Src)>>
-      && (
-            std::is_invocable_r<bool, decltype(Functor), const typename std::decay_t<decltype(Array)>::value_type&>::value
-         || std::is_invocable_r<bool, decltype(Functor), const typename std::decay_t<decltype(Array)>::value_type&, size_t>::value
-         )
-      )*/
+      template<const auto& Array, auto Functor>
       constexpr const auto count_of_matching = []() consteval {
          using value_type = typename std::decay_t<cobb::polyfills::msvc::nttp_decltype<Array>>::value_type;
 

@@ -718,6 +718,7 @@
     <ClInclude Include="halo\util\load_process.h" />
     <ClInclude Include="halo\util\refcount.h" />
     <ClInclude Include="halo\util\stream_position.h" />
+    <ClInclude Include="helpers\array\cast.h" />
     <ClInclude Include="helpers\array\concat.h" />
     <ClInclude Include="helpers\array\copy_matching.h" />
     <ClInclude Include="helpers\array\count_matching.h" />
@@ -759,10 +760,12 @@
     <ClInclude Include="helpers\reflex3\enumeration.h" />
     <ClInclude Include="helpers\reflex3\enumeration\concepts\is_named_member.h" />
     <ClInclude Include="helpers\reflex3\enumeration\concepts\is_valid_member_type.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\cyclical_nesting_checker.h" />
     <ClInclude Include="helpers\reflex3\enumeration\enumeration_data_forward_declare.h" />
     <ClInclude Include="helpers\reflex3\enumeration\extract_underlying_type.h" />
     <ClInclude Include="helpers\reflex3\enumeration\member_list_from_array.h" />
     <ClInclude Include="helpers\reflex3\enumeration\member_list_from_tuple.h" />
+    <ClInclude Include="helpers\reflex3\enumeration\validity_checks.h" />
     <ClInclude Include="helpers\reflex3\member.h" />
     <ClInclude Include="helpers\reflex\constants.h" />
     <ClInclude Include="helpers\reflex\enumeration.h" />
@@ -848,6 +851,8 @@
     <ClInclude Include="helpers\string_scanner.h" />
     <ClInclude Include="helpers\template_parameters\optional.h" />
     <ClInclude Include="helpers\template_parameters\tuple.h" />
+    <ClInclude Include="helpers\tuple\concat.h" />
+    <ClInclude Include="helpers\tuple\contains_type.h" />
     <ClInclude Include="helpers\tuple\filter_types.h" />
     <ClInclude Include="helpers\tuple\filter_values_by_type.h" />
     <ClInclude Include="helpers\tuple\index_of_matching_value.h" />
@@ -867,6 +872,7 @@
     <ClInclude Include="helpers\type_traits\is_std_array.h" />
     <ClInclude Include="helpers\type_traits\is_std_array_of_type.h" />
     <ClInclude Include="helpers\type_traits\is_std_optional_type.h" />
+    <ClInclude Include="helpers\type_traits\is_std_tuple.h" />
     <ClInclude Include="helpers\type_traits\is_std_vector.h" />
     <ClInclude Include="helpers\type_traits\is_templated_lambda.h" />
     <ClInclude Include="helpers\type_traits\set_const.h" />

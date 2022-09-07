@@ -5,13 +5,13 @@
 namespace cobb {
    template<typename First, typename... Rest> requires (sizeof...(Rest) > 0)
    constexpr First min(First x, Rest... args) {
-      auto v = std::numeric_limits<First>::max();
+      auto v = x;
       ((v = args < v ? args : v), ...);
       return v;
    }
    template<typename First, typename... Rest> requires (sizeof...(Rest) > 0)
    constexpr First max(First x, Rest... args) {
-      auto v = std::numeric_limits<First>::lowest();
+      auto v = x;
       ((v = args > v ? args : v), ...);
       return v;
    }

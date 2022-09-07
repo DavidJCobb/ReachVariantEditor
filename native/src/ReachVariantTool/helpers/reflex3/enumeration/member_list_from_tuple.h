@@ -15,6 +15,7 @@
 #include "../member.h"
 #include "./enumeration_data_forward_declare.h"
 #include "./extract_underlying_type.h"
+#include "./validity_checks.h"
 
 namespace cobb::reflex3 {
    namespace impl::enumeration {
@@ -51,10 +52,7 @@ namespace cobb::reflex3::impl::enumeration {
       protected:
          static constexpr const size_t _raw_value_count = []() consteval {
             size_t count = 0;
-            cobb::tuple_for_each_value(members, [&count]<typename Current>(const Current& item) {
-               if constexpr (!is_named_member<Current>) {
-                  return;
-               }
+            cobb::tuple_for_each_value(named_members, [&count]<typename Current>(const Current& item) {
                if constexpr (std::is_same_v<Current, member>) {
                   ++count;
                   return;
@@ -64,7 +62,11 @@ namespace cobb::reflex3::impl::enumeration {
                   return;
                }
                if constexpr (is_member_enum<Current>) {
-                  count += std::tuple_size_v<std::decay_t<decltype(Current::enumeration::all_underlying_values)>>;
+                  if constexpr (Current::enumeration::value_count == 0) {
+                     ++count;
+                  } else {
+                     count += Current::enumeration::value_count;
+                  }
                   return;
                }
             });
@@ -109,27 +111,46 @@ namespace cobb::reflex3::impl::enumeration {
                   return;
                }
                if constexpr (is_member_enum<Current>) {
-                  using nested = typename Current::enumeration;
-                  auto  nested_span = (nested::max_underlying_value() - nested::min_underlying_value());
-                  auto& nested_list = nested::all_underlying_values;
+                  v = item.value.value_or(v + 1);
                   //
-                  ++v;
-                  for (size_t si = 0; si < nested_list.size(); ++si) {
-                     auto member = nested_list[si];
+                  using nested = typename Current::enumeration;
+                  if constexpr (nested::value_count > 0) {
+                     constexpr auto  nested_span = (nested::max_underlying_value() - nested::min_underlying_value());
+                     constexpr auto& nested_list = nested::all_underlying_values;
                      //
+                     ++v;
+                     for (size_t si = 0; si < nested_list.size(); ++si) {
+                        auto member = nested_list[si];
+                        //
+                        out[n] = {
+                           .primary_name = item.name,
+                           .index        = i,
+                           .subindex     = si,
+                           .value        = (v + static_cast<underlying_type>(si - nested::min_underlying_value())),
+                        };
+                        ++n;
+                     }
+                     v += nested_span;
+                     v -= 1; // at the end of handling any given member, v should equal the value of the last sub-member we processed, not the value that comes after it
+                  } else {
                      out[n] = {
                         .primary_name = item.name,
                         .index        = i,
-                        .subindex     = si,
-                        .value        = (v + static_cast<underlying_type>(si - nested::min_underlying_value())),
+                        .subindex     = 0,
+                        .value        = v,
                      };
                      ++n;
                   }
-                  v += nested_span;
-                  v -= 1;
+                  //
+                  ++i;
                   return;
                }
             });
+
+            if (i < std::tuple_size_v<decltype(named_members)>) // assert: we should have properly stored one or more value_infos for each named member
+               throw;
+            if (n < out.size()) // assert: we should have filled the output array
+               throw;
 
             return out;
          }();
@@ -142,34 +163,16 @@ namespace cobb::reflex3::impl::enumeration {
             return true;
          }>;
          
-         static constexpr const bool _valid() {
-            static_assert(
-               (cobb::tuple_indices_of_matching_types<tuple_type, []<typename T>(){ return !is_valid_member_type<T>; }>).size() == 0,
-               "The \"members\" tuple contains types unrelated to reflex enums."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            static_assert(
-               cobb::list_items_are_unique(_raw_value_info_list, [](const auto& a, const auto& b) { return cobb::strcmp(a.primary_name, b.primary_name) != 0; }),
-               "Name collision among this enum's members."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            static_assert(
-               []() {
+         static constexpr validity_check_results_t validity_check_results = {
+            .members_tuple_has_only_relevant_types = (cobb::tuple_indices_of_matching_types<tuple_type,[]<typename T>() { return !is_valid_member_type<T>; }>).size() == 0,
+            .names_are_not_blank =
+               []() consteval -> bool {
                   for (const auto& item : _raw_value_info_list)
                      if (cobb::strcmp(item.primary_name, ""))
                         return false;
                   return true;
                }(),
-               "Enum contains members with blank names."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            return true;
+            .names_are_unique = cobb::list_items_are_unique(_raw_value_info_list, [](const auto& a, const auto& b) { return cobb::strcmp(a.primary_name, b.primary_name) != 0; }),
          };
          
          static constexpr const auto _range_counts = []() consteval {

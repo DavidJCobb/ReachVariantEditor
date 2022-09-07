@@ -2,6 +2,7 @@
 #include <limits>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 
 namespace cobb {
    template<typename Tuple, typename Functor>

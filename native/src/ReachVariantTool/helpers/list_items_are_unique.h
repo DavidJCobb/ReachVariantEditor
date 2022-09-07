@@ -1,6 +1,8 @@
 #pragma once
 #include <concepts>
+#include <iterator>
 #include <type_traits>
+#include <utility>
 
 namespace cobb {
    namespace impl::list_items_are_unique {

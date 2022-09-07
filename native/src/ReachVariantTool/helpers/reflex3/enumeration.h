@@ -1,6 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include <utility>
+#include "helpers/array/cast.h"
 #include "helpers/type_traits/is_std_array.h"
 #include "helpers/string/strcmp.h"
 #include "helpers/list_items_are_unique.h"
@@ -23,14 +24,51 @@ public:
       using member_definition_list_type = std::decay_t<decltype(enumeration_data<my_type>::members)>;
       using member_list = impl::enumeration::member_list<my_type, member_definition_list_type>;
 
+      static constexpr bool _definition_is_valid() {
+         static_assert(
+            member_list::validity_check_results.members_tuple_has_only_relevant_types,
+            "The \"members\" tuple contains types unrelated to reflex enums."
+            #if defined(__FUNCTION__)
+               " (" __FUNCTION__ ")"
+            #endif
+         );
+         static_assert(
+            member_list::names_are_unique,
+            "Name collision among this enum's members."
+            #if defined(__FUNCTION__)
+               " (" __FUNCTION__ ")"
+            #endif
+         );
+         static_assert(
+            member_list::names_are_not_blank,
+            "Enum contains members with blank names."
+            #if defined(__FUNCTION__)
+               " (" __FUNCTION__ ")"
+            #endif
+         );
+         static_assert(
+            []() consteval -> bool {
+               for (const auto v : member_list::all_underlying_values)
+                  if (static_cast<underlying_type>(v) != v)
+                     return true;
+               return false;
+            }(),
+            "Enum contains members whose values are not representable (do not fit) in the underlying type."
+            #if defined(__FUNCTION__)
+               " (" __FUNCTION__ ")"
+            #endif
+         );
+         return true;
+      }
+
       public:
          using underlying_type = typename impl::enumeration::extract_underlying_type<my_type>::type;
 
          static constexpr bool has_explicit_underlying_type    = impl::enumeration::has_explicit_underlying_type<my_type>;
          static constexpr bool member_definition_list_is_array = cobb::is_std_array<member_definition_list_type>; // convenience value
 
-         static constexpr auto   all_names             = member_list::all_names;             // std::array<const char*, N>
-         static constexpr auto   all_underlying_values = member_list::all_underlying_values; // std::array<underlying_type, N>
+         static constexpr auto   all_names             = member_list::all_names; // std::array<const char*, N>
+         static constexpr auto   all_underlying_values = cobb::array::cast<underlying_type>(member_list::all_underlying_values); // std::array<underlying_type, N>
          static constexpr size_t value_count           = member_list::value_count;
          
       protected:

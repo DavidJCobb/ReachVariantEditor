@@ -10,6 +10,7 @@
 #include "../member.h"
 #include "./enumeration_data_forward_declare.h"
 #include "./extract_underlying_type.h"
+#include "./validity_checks.h"
 
 namespace cobb::reflex3 {
    namespace impl::enumeration {
@@ -52,7 +53,7 @@ namespace cobb::reflex3::impl::enumeration {
             return out;
          }();
          static constexpr const auto _raw_unique_value_list = cobb::array::filter<
-            (_raw_value_info_list),
+            _raw_value_info_list,
             [](const value_info& s, size_t i) -> bool {
                if (i == 0)
                   return true;
@@ -66,7 +67,7 @@ namespace cobb::reflex3::impl::enumeration {
       public:
          static constexpr const auto value_infos = []() consteval {
             auto unique = cobb::array::filter<
-               (_raw_value_info_list),
+               _raw_value_info_list,
                [](const value_info& item, size_t i) -> bool {
                   if (i == 0)
                      return true;
@@ -118,37 +119,17 @@ namespace cobb::reflex3::impl::enumeration {
          static consteval const underlying_type min_underlying_value() requires(value_count > 0) {
             return cobb::min(all_underlying_values);
          }
-         
-         static constexpr const bool any_values_unrepresentable = []() consteval -> bool {
-            for (const auto v : all_underlying_values)
-               if (static_cast<underlying_type>(v) != v)
+
+         static constexpr validity_check_results_t validity_check_results = {
+            .names_are_not_blank =
+               []() consteval -> bool {
+                  for (const auto& item : _raw_value_info_list)
+                     if (cobb::strcmp(item.primary_name, ""))
+                        return false;
                   return true;
-            return false;
-         }();
-         static constexpr const bool _valid = []() consteval -> bool {
-            static_assert(
-               cobb::list_items_are_unique(_raw_value_info_list, [](const auto& a, const auto& b) { return cobb::strcmp(a.primary_name, b.primary_name) != 0; }),
-               "Name collision among this enum's members."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            static_assert(
-               std::find_if(_raw_value_info_list.begin(), _raw_value_info_list.end(), [](const auto& a) { return cobb::strcmp(a.primary_name, "") == 0; }) == _raw_value_info_list.end(),
-               "Enum contains members with blank names."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            static_assert(
-               !any_values_unrepresentable,
-               "Enum contains members whose values are not representable (do not fit) in the underlying type."
-               #if defined(__FUNCTION__)
-                  " (" __FUNCTION__ ")"
-               #endif
-            );
-            return true;
-         }();
+               }(),
+            .names_are_unique = cobb::list_items_are_unique(_raw_value_info_list, [](const auto& a, const auto& b) { return cobb::strcmp(a.primary_name, b.primary_name) != 0; }),
+         };
          
       public:
          static consteval bool has(const char* name) {
