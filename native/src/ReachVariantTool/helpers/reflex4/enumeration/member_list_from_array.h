@@ -10,11 +10,9 @@
 #include "helpers/list_items_are_unique.h"
 #include "helpers/numeric_min_max.h"
 #include "../member.h"
-#include "./enumeration_data_forward_declare.h"
-#include "./extract_underlying_type.h"
 #include "./validity_checks.h"
 
-namespace cobb::reflex3::impl::enumeration {
+namespace cobb::reflex4::impl::enumeration {
    template<const auto& MemberDefinitionList> requires cobb::is_std_array_of_type<std::decay_t<cobb::polyfills::msvc::nttp_decltype<MemberDefinitionList>>, member>
    struct member_list_from_array {
       private:

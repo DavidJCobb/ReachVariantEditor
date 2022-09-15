@@ -284,8 +284,6 @@
     <ClCompile Include="helpers\cpuinfo.cpp" />
     <ClCompile Include="helpers\hashing\sha1.cpp" />
     <ClCompile Include="helpers\qt\four_cc_to_string.cpp" />
-    <ClCompile Include="helpers\reflex2\enumeration\test.cpp" />
-    <ClCompile Include="helpers\reflex3\enumeration\test.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test.cpp" />
     <ClCompile Include="helpers\reflex\enumeration\test_constraints.cpp" />
     <ClCompile Include="helpers\reflex\flags_mask\test.cpp" />
@@ -525,6 +523,8 @@
     <ClInclude Include="halo\reach\map_permissions.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\action_block.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\alias.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\built_in_identifier.h" />
+    <ClInclude Include="halo\reach\megalo\languages\bolt\built_In_identifiers\top_level.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\condition_block.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\config\constant_expression_evaluation_implemented.h" />
     <ClInclude Include="halo\reach\megalo\languages\bolt\config\reference_expression_evaluation_implemented.h" />
@@ -727,6 +727,7 @@
     <ClInclude Include="helpers\bitmask_t.h" />
     <ClInclude Include="helpers\byteswap.h" />
     <ClInclude Include="helpers\constexpr_for_functor.h" />
+    <ClInclude Include="helpers\constexpr_tree.h" />
     <ClInclude Include="helpers\cpuinfo.h" />
     <ClInclude Include="helpers\cs_utils\common_prefix_size.h" />
     <ClInclude Include="helpers\cs_utils\count_char_in.h" />
@@ -747,29 +748,8 @@
     <ClInclude Include="helpers\polyfills\msvc\const_reference_nttp_decltype.h" />
     <ClInclude Include="helpers\qt\four_cc_to_string.h" />
     <ClInclude Include="helpers\qt\string\slice.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\concepts\is_named_member.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\concepts\is_real_member.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\concepts\is_valid_member_type.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\enumeration_data_forward_declare.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\extract_underlying_type.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\member_list_from_array.h" />
-    <ClInclude Include="helpers\reflex2\enumeration\member_list_from_tuple.h" />
-    <ClInclude Include="helpers\reflex2\member.h" />
-    <ClInclude Include="helpers\reflex2\member_enum.h" />
-    <ClInclude Include="helpers\reflex2\member_range.h" />
-    <ClInclude Include="helpers\reflex3\enumeration.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_named_member.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\concepts\is_valid_member_type.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\cyclical_nesting_checker.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\enumeration_data_forward_declare.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\extract_underlying_type.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_array.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\member_list_from_tuple.h" />
-    <ClInclude Include="helpers\reflex3\enumeration\validity_checks.h" />
-    <ClInclude Include="helpers\reflex3\member.h" />
     <ClInclude Include="helpers\reflex\constants.h" />
     <ClInclude Include="helpers\reflex\enumeration.h" />
-    <ClInclude Include="helpers\reflex2\enumeration.h" />
     <ClInclude Include="helpers\reflex\enumeration\constraints.h" />
     <ClInclude Include="helpers\reflex\enumeration\member_concepts.h" />
     <ClInclude Include="helpers\reflex\enumeration\member_list.h" />
@@ -1009,7 +989,6 @@
     <None Include="halo\reach\trait_set.inl" />
     <None Include="halo\trait_information.inl" />
     <None Include="halo\bitnumber.inl" />
-    <None Include="helpers\reflex2\enumeration.inl" />
     <None Include="helpers\reflex\enumeration.md" />
     <None Include="helpers\reflex\flags_mask.md" />
   </ItemGroup>
@@ -1050,6 +1029,7 @@
     <Natvis Include="halo\util\four_cc.natvis" />
     <Natvis Include="halo\util\indexed_list.natvis" />
     <Natvis Include="halo\util\refcount.natvis" />
+    <Natvis Include="helpers\constexpr_tree.natvis" />
     <Natvis Include="helpers\cs.natvis" />
     <Natvis Include="helpers\eight_cc.natvis" />
     <Natvis Include="helpers\owned_ptr.natvis" />

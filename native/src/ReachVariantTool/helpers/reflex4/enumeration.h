@@ -7,13 +7,15 @@
 #include "helpers/string/strcmp.h"
 #include "helpers/list_items_are_unique.h"
 #include "./member.h"
-#include "./enumeration/enumeration_data_forward_declare.h"
-#include "./enumeration/extract_underlying_type.h"
 #include "./enumeration/member_list_from_array.h"
 #include "./enumeration/member_list_from_tuple.h"
 
-namespace cobb::reflex3 {
+namespace cobb::reflex4 {
    namespace impl::enumeration {
+      template<const auto& V> concept is_enumeration_member_list =
+            cobb::is_std_array_of_type<cobb::polyfills::msvc::nttp_decltype<V>, member>
+         || cobb::is_std_tuple<cobb::polyfills::msvc::nttp_decltype<V>>;
+
       template<typename T> struct member_list_type_resolver {
          template<const auto& Data> using type = void;
       };
@@ -29,18 +31,15 @@ namespace cobb::reflex3 {
          using type = typename member_list_type_resolver<data_type>::template type<Data>;
       };
 
-      template<typename Enumeration> concept _has_data = requires {
-         typename enumeration_data<Enumeration>;
-      };
-      template<typename T> consteval const auto& pass_through(const T& v) { return v; }
    }
 
-   template<class Subclass> //requires impl::enumeration::is_valid_enumeration<Subclass>//*/
+   template<class Subclass, typename Underlying, const auto& MemberDefinitions>
    class enumeration {
       using my_type = Subclass;
 
-      using member_definition_list_type = std::decay_t<decltype(enumeration_data<my_type>::members)>;
-      using member_list = impl::enumeration::member_list_helper<std::as_const(enumeration_data<my_type>::members)>::type;
+      static constexpr const auto& member_definitions = MemberDefinitions;
+      using member_definition_list_type = std::decay_t<cobb::polyfills::msvc::nttp_decltype<member_definitions>>;
+      using member_list = impl::enumeration::member_list_helper<MemberDefinitions>::type;
 
       static constexpr bool _definition_is_valid() {
          //
@@ -93,9 +92,9 @@ namespace cobb::reflex3 {
       }
 
       public:
-         using underlying_type = typename impl::enumeration::extract_underlying_type<my_type>::type;
+         using underlying_type = Underlying;
 
-         static constexpr bool has_explicit_underlying_type    = impl::enumeration::has_explicit_underlying_type<my_type>;
+         static constexpr bool has_explicit_underlying_type    = true;
          static constexpr bool member_definition_list_is_array = cobb::is_std_array<member_definition_list_type>; // convenience value
 
          static constexpr auto   all_names             = member_list::all_names; // std::array<const char*, N>

@@ -1,13 +1,18 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <stdexcept>
 #include <tuple>
+#include "helpers/array/filter.h"
+#include "helpers/array/map.h"
 #include "helpers/polyfills/msvc/const_reference_nttp_decltype.h"
 #include "helpers/string/strcmp.h"
 #include "helpers/tuple/filter_values_by_type.h"
 #include "helpers/tuple/indices_of_matching_types.h"
 #include "helpers/tuple/index_of_matching_value.h"
 #include "helpers/type_traits/is_std_tuple.h"
+#include "helpers/list_items_are_unique.h"
+#include "helpers/numeric_min_max.h"
 #include "helpers/tuple_filter.h"
 #include "helpers/tuple_foreach.h"
 #include "helpers/tuple_for_each_value.h"
@@ -15,11 +20,9 @@
 #include "./concepts/is_named_member.h"
 #include "./concepts/is_valid_member_type.h"
 #include "../member.h"
-#include "./enumeration_data_forward_declare.h"
-#include "./extract_underlying_type.h"
 #include "./validity_checks.h"
 
-namespace cobb::reflex3::impl::enumeration {
+namespace cobb::reflex4::impl::enumeration {
    template<const auto& MemberDefinitionList> requires cobb::is_std_tuple<std::decay_t<cobb::polyfills::msvc::nttp_decltype<MemberDefinitionList>>>
    struct member_list_from_tuple {
       private:
@@ -63,6 +66,15 @@ namespace cobb::reflex3::impl::enumeration {
                      count += Current::enumeration::value_count;
                   }
                   return;
+               }
+               if constexpr (is_member_enum_inline<Current>) {
+                  using nested_list = member_list_from_tuple<item.members>;
+                  static_assert(false,
+                     "This doesn't work. I think the only way we can do this is if the entire `member_list_from_tuple` is a value, and "
+                     "we just build that value from within consteval. Like, everything that's currently a static member would have to "
+                     "become an instance member. Really, member_list and member_enum_inline would have to become the same type: instances "
+                     "describing an input tuple."
+                  );
                }
             });
             return count;
@@ -159,7 +171,7 @@ namespace cobb::reflex3::impl::enumeration {
          }>;
          
          static constexpr validity_check_results_t validity_check_results = {
-            .members_tuple_has_only_relevant_types = (cobb::tuple_indices_of_matching_types<tuple_type,[]<typename T>() { return !is_valid_member_type<T>; }>).size() == 0,
+            .members_tuple_has_only_relevant_types = (cobb::tuple_indices_of_matching_types<tuple_type, []<typename T>() { return !is_valid_member_type<T>; }>).size() == 0,
             .names_are_not_blank =
                []() consteval -> bool {
                   for (const auto& item : _raw_value_info_list)

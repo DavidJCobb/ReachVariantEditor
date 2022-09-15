@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010"> 
+   <Type Name="cobb::constexpr_tree&lt;*,*&gt;::node">
+      <DisplayString>{{ data={wrapped.data}, children={wrapped.children.count} }}</DisplayString>
+      <Expand>
+         <ArrayItems>
+            <Size>wrapped.children.count</Size>
+            <ValuePointer>tree.nodes.data() + wrapped.children.start</ValuePointer>
+         </ArrayItems>
+      </Expand>
+   </Type>
+</AutoVisualizer>

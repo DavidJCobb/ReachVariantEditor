@@ -183,29 +183,24 @@ namespace tests {
       constexpr auto all_under_inner = inner_enum::all_underlying_values;
 
       class outer_enum;
+      static_assert(!std::is_same_v<outer_enum, inner_enum>);
       template<> struct cobb__reflex3__enumeration_data<outer_enum> {
          using underlying_type = int16_t;
-         inline static constexpr const auto members = std::make_tuple(
+         static constexpr const auto& members = std::make_tuple(
             cobb::reflex3::member("a"),
             cobb::reflex3::member("b"),
             cobb::reflex3::member("c"),
             cobb::reflex3::member_enum<inner_enum>("d")//,*/
          );
       };
+      static_assert(!std::is_same_v<cobb::reflex3::enumeration_data<outer_enum>, cobb::reflex3::enumeration_data<inner_enum>>);
       class outer_enum : public cobb::reflex3::enumeration<outer_enum> {};
-
 
       // current status: compiles, but IntelliSense loses its mind
       // strange thing is, SOMETIMES, editing the tuple above can briefly get IntelliSense to snap out of it and work properly
       // but editing anywhere else will cause it to think the outer_enum's member list helper type is an incomplete type again
 
       constexpr auto outer_explicit = outer_enum::has_explicit_underlying_type;
-using inner_ml = inner_enum::member_list;
-using outer_ml = outer_enum::member_list;
-constexpr inner_ml bar{};
-constexpr outer_ml foo{};
-constexpr auto iml_count = inner_ml::value_count;
-constexpr auto oml_count = outer_ml::value_count;
 
       constexpr auto outer_count = outer_enum::value_count + 0;
       constexpr auto max_outer = outer_enum::max_underlying_value();
@@ -222,12 +217,9 @@ constexpr auto oml_count = outer_ml::value_count;
          cobb::reflex3::member_enum<inner_enum>("d")//, // `template` keyword required to avoid confusing IntelliSense
       );
       
-      using x = cobb::reflex3::enumeration_data<outer_enum>;
-      using y = decltype(x::members);
-      constexpr const auto& m = x::members;
       static_assert(
          std::is_same_v<
-            typename std::tuple_element_t<3, std::decay_t<decltype(cobb::reflex3::enumeration_data<outer_enum>::members)>>::enumeration,
+            typename std::tuple_element<3, std::decay_t<decltype(cobb::reflex3::enumeration_data<outer_enum>::members)>>::type::enumeration,
             inner_enum
          >
       );

@@ -20,7 +20,7 @@ namespace cobb::polyfills::msvc {
       constexpr std::array<int, 5> foo = {};
    }
 
-   template<auto V> using nttp_decltype =
+   template<const auto& V> using nttp_decltype =
       #if !defined(__INTELLISENSE__) // IntelliSense is not bugged; only the compiler
       std::conditional_t<
          impl::nttp_decltype::is_broken<impl::nttp_decltype::foo>, // only tamper with the types if the bug still occurs
