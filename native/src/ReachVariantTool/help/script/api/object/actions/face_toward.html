@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>object.face_toward | ReachVariantTool Documentation</title>
@@ -9,7 +10,42 @@
         <link rel="stylesheet" href="resources/noscript.css" />
     </noscript>
     <script src="resources/head.js"></script>
+    <script>
+        function sincos_int(deg) {
+            let rad = deg * Math.PI / 180;
+            //
+            let list = [];
+            for (let i = 1; i <= 127; ++i) {
+                list.push({
+                    mult: i,
+                    x: Math.cos(rad) * i,
+                    y: Math.sin(rad) * i,
+                });
+            }
+            //
+            let least_error = 999999;
+            let least_error_item = list[1 - 1];
+            console.assert(least_error_item.mult == 1);
+            for (let item of list) {
+                const USE_AVG = false;
+                //
+                let error = Math.abs(Math.round(item.x) - item.x) + Math.abs(Math.round(item.y) - item.y);
+                if (USE_AVG)
+                    error /= 2;
+                if (error < least_error) {
+                    least_error = error;
+                    least_error_item = item;
+                }
+            }
+            return `Raw cos/sin: ${Math.cos(rad)}, ${Math.sin(rad)}
+
+Multiplier with least error: ${least_error_item.mult}
+Multiplied cos/sin:     ${least_error_item.x}, ${least_error_item.y}
+Multiplied int cos/sin: ${Math.round(least_error_item.x)}, ${Math.round(least_error_item.y)}`;
+        }
+    </script>
 </head>
+
 <body>
     <nav id="sidebar">
         <ul>
@@ -101,11 +137,12 @@
         </ul>
     </nav>
     <main>
-        <header><h1>object.face_toward</h1></header>
+        <header>
+            <h1>object.face_toward</h1>
+        </header>
 
         <p>
-            This function can be used to make one object face toward another. It only
-            affects the object's heading </span>(yaw), not its pitch or roll rotations.
+            This function can be used to make one object face toward another. It only affects the object's heading </span>(yaw), not its pitch or roll rotations.
         </p>
 
         <h2>Arguments</h2>
@@ -120,32 +157,28 @@
             <dd>
                 <p>
                     The X-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
-                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are
-                    integer constants between -128 and 127, inclusive, where 10 is equal to
-                    one Forge unit.
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                 </p>
             </dd>
             <dt>y</dt>
             <dd>
                 <p>
                     The Y-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
-                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are
-                    integer constants between -128 and 127, inclusive, where 10 is equal to
-                    one Forge unit.
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                 </p>
             </dd>
             <dt>z</dt>
             <dd>
                 <p>
                     The Z-coordinate of an <span class="variable">offset</span>-position. The object will rotate to face
-                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are
-                    integer constants between -128 and 127, inclusive, where 10 is equal to
-                    one Forge unit.
+                    <var>other</var>'s position plus the <span class="variable">offset</span> position. Allowed values are integer constants between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                 </p>
             </dd>
         </dl>
         <h2>Example</h2>
-<pre>
+        <div id="result"></div>
+        <input id="conversionBox" type="number" onchange="document.querySelector('#result').innerHTML = sincos_int(this.value)">
+        <pre>
 <span class="namespace">global</span>.<span class="variable">object</span>[0].<span class="function">copy_rotation_from</span>(<span class="namespace">global</span>.<span class="variable">object</span>[1]<span class="variable">, true</span>)</pre>
         <h2>Notes</h2>
         <ul>
@@ -156,8 +189,7 @@
             </li>
             <li>
                 <p>
-                    The object.face_toward function only affects the heading (yaw) by default, however you can adjust the pitch and roll of an object using clever placements and attachments.
-                    The following code will roll a warthog 45 degrees:
+                    The object.face_toward function only affects the heading (yaw) by default, however you can adjust the pitch and roll of an object using clever placements and attachments. The following code will roll a warthog 45 degrees:
                 </p>
                 <pre>
 
@@ -184,7 +216,8 @@
 <span class="keyword">end</span>
 </pre>
             </li>
-        </ul><h2>See also</h2>
+        </ul>
+        <h2>See also</h2>
         <ul>
             <li><a href="script/api/object/actions/attach_to.html">object.attach_to</a></li>
             <li><a href="script/api/object/actions/copy_rotation_from.html">object.copy_rotation_from</a></li>
@@ -197,4 +230,5 @@
     <script src="resources/sidebar.js"></script>
     <script src="resources/header-links.js"></script>
 </body>
+
 </html>
