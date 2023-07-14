@@ -185,7 +185,7 @@ namespace cobb::reflex::impl::enumeration {
       }
 
       using metadata_having_members = cobb::tuple_filter_t<
-         []<typename Current>() { return member_type_has_metadata<Current>; },
+         []<typename Current>() constexpr { return member_type_has_metadata<Current>; },
          as_tuple
       >;
       template<typename Tuple> struct extract_metadata_type {

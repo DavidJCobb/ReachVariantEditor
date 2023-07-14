@@ -6,7 +6,15 @@
 
 namespace halo {
    template<typename T> concept trait_can_be_unchanged = requires {
-      { T::unchanged } -> std::same_as<T>;
+      #if __INTELLISENSE__
+         //
+         // Intent is to check an enum member. IntelliSense doesn't treat decltype((Enum::member)) 
+         // as Enum& even though it should be an lvalue. 7/14/2023
+         //
+         { T::unchanged } -> std::same_as<T>;
+      #else
+         { T::unchanged } -> std::same_as<T&>;
+      #endif
    } || requires {
       typename T::underlying_type;
       { T::unchanged } -> std::same_as<const typename T::underlying_type&>;
@@ -49,6 +57,14 @@ namespace halo {
       // Specialize this struct for each trait, and define a static constexpr T member named "value". 
       // You can skip specializing this for any trait that has an "unchanged" value.
       template<typename T> struct default_trait_value;
+      //
+      template<typename T> requires trait_can_be_unchanged<T> struct default_trait_value<T> {
+         static constexpr const T value = T::unchanged;
+      };
+
+      template<typename T> concept trait_has_default_value = requires {
+         { default_trait_value<T>::value } -> std::same_as<const T&>;
+      };
 
       //
       // EXAMPLE OF A SIMPLE TRAIT:
@@ -169,17 +185,6 @@ namespace halo {
             static constexpr bare_trait_information::type_erased_enum from_integer(int v) {
                return (bare_trait_information::type_erased_enum)_from_integer(v);
             }
-      };
-   }
-
-   //
-   // Internal stuff:
-   //
-
-   // Auto-specialize default_trait_value for all traits with an "unchanged" value:
-   namespace impl {
-      template<typename T> requires trait_can_be_unchanged<T> struct default_trait_value<T> {
-         static constexpr T value = T::unchanged;
       };
    }
 }

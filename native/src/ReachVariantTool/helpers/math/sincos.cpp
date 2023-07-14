@@ -33,3 +33,23 @@ namespace cobb::tests {
       static_assert(range_consistent<std::make_index_sequence<360>>::result);
    }
 }
+
+#include <array>
+#include <utility>
+#include "./sincos_int.h"
+namespace cobb::tests {
+   namespace sincos {
+      constexpr auto list = []() {
+         std::array<std::pair<int8_t, int8_t>, 90> list = {};
+
+         for (auto deg = 0; deg < list.size(); ++deg) {
+            int8_t x = 0;
+            int8_t y = 0;
+            cobb::sincos_int<int8_t, 126>(deg, x, y);
+            list[deg] = { x, y };
+         }
+         
+         return list;
+      }();
+   }
+}

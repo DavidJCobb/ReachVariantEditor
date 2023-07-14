@@ -2,8 +2,8 @@
 #include <type_traits>
 #include "halo/reach/bitstreams.fwd.h"
 #include "halo/player_trait.h"
-#include "halo/trait_bitnumber.h"
 #include "traits/_all.h"
+#include "halo/trait_bitnumber.h"
 
 namespace halo::reach {
    struct trait_set {

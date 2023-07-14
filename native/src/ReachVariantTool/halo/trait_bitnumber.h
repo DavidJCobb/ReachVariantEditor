@@ -7,13 +7,14 @@
 namespace halo {
    namespace impl::trait_bitnumber {
       template<typename Trait> struct helper {
+         static_assert(impl::trait_has_default_value<Trait>, "The trait must have a default value set, or it must contain an 'unchanged' value.");
+
          static constexpr trait_information info = ::halo::trait_information_for<Trait>;
 
          using trait = Trait;
          static constexpr bitnumber_params<trait> params = ([]() {
-            auto v = bitnumber_params<trait>{
-               .initial = ::halo::default_trait_value<trait>,
-            };
+            bitnumber_params<trait> v;
+            v.initial = ::halo::default_trait_value<trait>;
             if (info.uses_presence_bit)
                v.presence = true;
             if (info.uses_sign_bit)
