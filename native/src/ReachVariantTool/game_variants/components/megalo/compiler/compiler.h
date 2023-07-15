@@ -144,7 +144,7 @@ namespace Megalo {
             size_t errors       = 0;
             size_t fatal_errors = 0;
          };
-         //
+         
          enum class unresolved_string_pending_action {
             create,
             use_existing,
@@ -193,17 +193,22 @@ namespace Megalo {
                unresolved_str(OpcodeArgValue& v, uint8_t p) : value(&v), part(p) {}
          };
          using unresolved_str_list = QMultiMap<QString, unresolved_str>;
-         //
+         
       protected:
          using keyword_handler_t = void (Compiler::*)(const pos);
-         //
+         
       protected:
          enum class c_joiner {
             none,
             c_and,
             c_or,
          };
-         //
+
+         struct UnresolvedTriggerForgeLabel {
+            Trigger* trigger = nullptr;
+            QString  label_name;
+         };
+         
          Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
          Script::Block* block = nullptr; // current block being parsed
          Script::Block::Event next_event = Script::Block::Event::none;
@@ -219,8 +224,10 @@ namespace Megalo {
          log_t errors;
          log_t fatal_errors;
          //
+         std::vector<UnresolvedTriggerForgeLabel> triggers_pending_forge_labels;
+         
          void _commit_unresolved_strings(unresolved_str_list&);
-         //
+         
       public:
          struct {
             bool success = false;
@@ -255,13 +262,15 @@ namespace Megalo {
          bool handle_unresolved_string_references(); // handles any strings with an action set; returns success bool (failure if any unresolved remain)
          inline unresolved_str_list& get_unresolved_string_references() noexcept { return this->results.unresolved_strings; }
          //
+         size_t get_new_forge_label_count() const;
+         
          inline bool has_errors() const noexcept { return !this->errors.empty() || !this->fatal_errors.empty(); }
          inline bool has_fatal() const noexcept { return !this->fatal_errors.empty(); }
          inline const log_t& get_notices() const noexcept { return this->notices; }
          inline const log_t& get_warnings() const noexcept { return this->warnings; }
          inline const log_t& get_non_fatal_errors() const noexcept { return this->errors; }
          inline const log_t& get_fatal_errors() const noexcept { return this->fatal_errors; }
-         //
+         
          [[nodiscard]] static bool is_keyword(QString word);
          [[nodiscard]] bool try_decode_enum_reference(QString word, int32_t& out) const;
          [[nodiscard]] bool try_get_integer(string_scanner&, int32_t& out) const;
@@ -279,15 +288,15 @@ namespace Megalo {
          [[nodiscard]] Script::Alias* lookup_absolute_alias(QString name) const;
          [[nodiscard]] Script::UserDefinedEnum* lookup_user_defined_enum(QString name) const;
          [[nodiscard]] Script::UserDefinedFunction* lookup_user_defined_function(QString name) const;
-         //
+         
          log_checkpoint create_log_checkpoint();
          void revert_to_log_checkpoint(log_checkpoint);
          bool checkpoint_has_errors(log_checkpoint) const noexcept;
-         //
+         
          Script::VariableReference* arg_to_variable(QString) noexcept; // caller is responsible for freeing the returned variable
          Script::VariableReference* arg_to_variable(string_scanner& arg) noexcept; // caller is responsible for freeing the returned variable // runs (arg.extract_word)
          void imply_variable(variable_scope, variable_type, uint8_t index) noexcept; // for OpcodeArgValueObjectPlayerVariable
-         //
+         
          enum class name_source {
             none,
             action,
@@ -299,12 +308,13 @@ namespace Megalo {
             variable_typename,
          };
          [[nodiscard]] static name_source check_name_is_taken(const QString& name, OpcodeArgTypeRegistry::type_list_t& name_is_imported_from);
-         //
-         int32_t _index_of_trigger(Trigger*) const noexcept; // is public for Block
-         //
+         
+         int32_t _index_of_trigger(const Trigger&) const noexcept; // is public for Block
+         void _trigger_needs_forge_label(Trigger&, QString name); // is public for Block
+         
       protected:
          VariableDeclarationSet* _get_variable_declaration_set(variable_scope) noexcept;
-         //
+         
          struct statement_side {
             statement_side() = delete;
             enum type : int {

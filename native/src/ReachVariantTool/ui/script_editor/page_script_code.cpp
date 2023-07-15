@@ -102,7 +102,7 @@ ScriptEditorPageScriptCode::ScriptEditorPageScriptCode(QWidget* parent) : QWidge
             }
          }
          compiler.apply();
-         ReachEditorState::get().variantRecompiled(variant);
+         emit ReachEditorState::get().variantRecompiled(variant);
          QMessageBox::information(this, tr("Compiled contents applied!"), tr("The compiled content has been applied."));
       }
    });

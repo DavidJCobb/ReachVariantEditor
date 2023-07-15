@@ -8,6 +8,7 @@
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
 #include "../helpers/format_strings.h"
+#include "../../../../editor_state.h"
 
 //
 // Attempt to emulate quirks in Bungie's compiler:
@@ -325,8 +326,11 @@ namespace Megalo {
                }
             }
             if (index == -1) {
-               QString lit = cobb::string_scanner::escape(this->label_name, '"');
-               compiler.raise_error(QString("The specified string literal (\"%1\") does not match any defined Forge label.").arg(lit));
+               compiler._trigger_needs_forge_label(*t, this->label_name);
+               compiler.raise_notice(
+                  QString("The specified Forge label (\"%1\") isn't defined in the game variant data. If compilation succeeds, a label with this name will be created for you.")
+                     .arg(this->label_name)
+               );
             } else
                t->forgeLabel = &list[index];
          }
@@ -582,7 +586,7 @@ namespace Megalo {
                   call->arguments.push_back(arg);
                   auto arg_c = dynamic_cast<OpcodeArgValueTrigger*>(arg);
                   assert(arg_c && "The argument to the ''run nested trigger'' opcode isn't OpcodeArgValueTrigger anymore? Did someone change the opcode-base?");
-                  arg_c->value = compiler._index_of_trigger(block_trigger);
+                  arg_c->value = compiler._index_of_trigger(*block_trigger);
                   assert(arg_c->value >= 0 && "Nested block trigger isn't in the Compiler's trigger list?!");
                }
                continue;
@@ -697,7 +701,18 @@ namespace Megalo {
       this->aliases_in_scope.clear(); // don't free contents; every Alias should have been inside of a Block and freed by that Block
       this->functions_in_scope.clear();
    }
-   //
+
+   size_t Compiler::get_new_forge_label_count() const {
+      size_t count = 0;
+      //
+      QVector<QString> seen;
+      for (auto& item : this->triggers_pending_forge_labels)
+         if (!seen.contains(item.label_name))
+            ++count;
+      //
+      return count;
+   }
+   
    bool Compiler::try_decode_enum_reference(QString word, int32_t& out) const {
       auto i = word.indexOf('.');
       if (i <= 0)
@@ -1232,6 +1247,18 @@ namespace Megalo {
             this->raise_fatal("The file ended with an \"on\" keyword but no following block.");
          this->root->set_end(this->state);
          //
+         {  // Ensure that we're under the limits for new Forge labels.
+            auto& mp     = this->variant;
+            auto& labels = mp.scriptContent.forgeLabels;
+            if (labels.size() + this->triggers_pending_forge_labels.size() > Megalo::Limits::max_script_labels) {
+               this->raise_error(
+                  QString("The existing game variant contains %1 Forge labels, and the compiled script contains %2 unrecognized Forge labels. We cannot create these labels, as only a total of %3 are allowed.")
+                     .arg(labels.size())
+                     .arg(this->triggers_pending_forge_labels.size())
+                     .arg(Limits::max_script_labels)
+               );
+            }
+         }
          {  // Ensure that we're under the count limits for triggers, conditions, and actions.
             size_t tc = this->results.triggers.size();
             size_t cc = 0;
@@ -1241,10 +1268,6 @@ namespace Megalo {
             bool    for_missing_label = false;
             for (auto trigger : this->results.triggers) {
                trigger->count_contents(cc, ac);
-               if (!for_missing_label) {
-                  if (trigger->blockType == block_type::for_each_object_with_label && !trigger->forgeLabel)
-                     for_missing_label = true;
-               }
                if (!incomplete) {
                   for (auto opcode : trigger->opcodes) {
                      if (!opcode->function) {
@@ -1277,8 +1300,6 @@ namespace Megalo {
                }
                this->raise_error(error);
             }
-            if (for_missing_label)
-               this->raise_error("At least one for-each-object-with-label loop failed to compile because its Forge label was unspecified. If no other errors relating to Forge labels were logged, then this may be the result of a bug in the compiler itself; consider reporting this issue and sending your script to this program's developer to test with.");
             if (tc > Limits::max_triggers)
                this->raise_error(QString("The compiled script contains %1 triggers, but only a maximum of %2 are allowed.").arg(tc).arg(Limits::max_triggers));
             if (cc > Limits::max_conditions)
@@ -1298,12 +1319,72 @@ namespace Megalo {
       assert(!this->has_errors() && !this->has_fatal() && "Do not attempt to apply compiled content when there were compiler errors. Do something with the logged errors!");
       assert(!this->get_unresolved_string_references().size() && "Do not attempt to apply compiled content when unresolved string references exist.");
       //
-      auto& mp       = this->variant;
+      auto& mp = this->variant;
       //
       auto& triggers = mp.scriptContent.triggers;
       triggers.clear(); // this isn't a vector; the list type owns its contents
       for (auto* trigger : this->results.triggers)
          triggers.push_back(trigger);
+      {  // Create Forge labels as appropriate. We should have already validated that there's room, in Compiler::parse.
+         //
+         // Missing Forge labels are identified as triggers are compiled, but can only be properly handled after 
+         // all other compilation tasks are complete and it's time to commit the new script. We verify that there 
+         // is enough room for the labels when parsing is complete (the end of Compiler::parse), and string table 
+         // limits are enforced during the "unreferenced string handling" stuff, so all we need to do here is 
+         // just create the missing strings and labels.
+         //
+         auto& labels = mp.scriptContent.forgeLabels;
+         auto& string_table = mp.scriptData.strings;
+         //
+         struct _HandledLabel {
+            QString name;
+            size_t  index;
+         };
+         std::vector<_HandledLabel> handled;
+         //
+         for (auto& item : this->triggers_pending_forge_labels) {
+            //
+            // If multiple triggers referred to the same not-yet-created label, then after we 
+            // create it for the first trigger, we should reuse it for subsequent triggers.
+            //
+            size_t existing = std::string::npos;
+            for (auto& prior : handled) {
+               if (prior.name == item.label_name) {
+                  existing = prior.index;
+                  break;
+               }
+            }
+            if (existing != std::string::npos) {
+               item.trigger->forgeLabel = labels[existing];
+               continue;
+            }
+            //
+            // Create the string, if no existing string is there:
+            //
+            ReachString* str = nullptr;
+            {
+               bool multiple;
+               str = string_table.lookup(item.label_name, multiple);
+               if (!str || multiple) {
+                  str = string_table.add_new();
+                  for (int i = 0; i < reach::language_count; ++i)
+                     str->get_write_access((reach::language)i) = item.label_name.toStdString();
+               }
+            }
+            //
+            // Create the label:
+            //
+            auto& label = *labels.emplace_back();
+            label.is_defined = true;
+            label.name = str;
+            handled.push_back({ item.label_name, labels.size() - 1 });
+            //
+            // Assign the label:
+            //
+            item.trigger->forgeLabel = &label;
+         }
+      }
+      this->triggers_pending_forge_labels.clear();
       this->results.triggers.clear();
       //
       mp.scriptContent.entryPoints = this->results.events;
@@ -2559,13 +2640,16 @@ namespace Megalo {
    }
    #pragma endregion
    //
-   int32_t Compiler::_index_of_trigger(Trigger* t) const noexcept {
+   int32_t Compiler::_index_of_trigger(const Trigger& t) const noexcept {
       auto&  list = this->results.triggers;
       size_t size = list.size();
       for (size_t i = 0; i < size; ++i)
-         if (list[i] == t)
+         if (list[i] == &t)
             return i;
       return -1;
+   }
+   void Compiler::_trigger_needs_forge_label(Trigger& t, QString name) {
+      this->triggers_pending_forge_labels.push_back({ &t, name });
    }
    VariableDeclarationSet* Compiler::_get_variable_declaration_set(variable_scope vs) noexcept {
       auto& sets = this->results.variables;

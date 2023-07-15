@@ -11,6 +11,7 @@ ScriptEditorPageForgeLabels::ScriptEditorPageForgeLabels(QWidget* parent) : QWid
    auto& editor = ReachEditorState::get();
    //
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageForgeLabels::updateListFromVariant);
+   QObject::connect(&editor, &ReachEditorState::variantRecompiled, this, [this]() { this->updateListFromVariant(nullptr); });
    QObject::connect(this->ui.list, &QListWidget::currentRowChanged, this, &ScriptEditorPageForgeLabels::selectLabel);
    QObject::connect(this->ui.name, &ReachStringPicker::selectedStringChanged, [this]() {
       this->updateListFromVariant();

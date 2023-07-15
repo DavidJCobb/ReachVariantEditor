@@ -51,6 +51,15 @@ ScriptEditorPageStringTable::ScriptEditorPageStringTable(QWidget* parent) : QWid
          //
          this->_selected = nullptr;
    });
+   QObject::connect(&editor, &ReachEditorState::variantRecompiled, [this]() {
+      this->updateFromVariant(nullptr);
+      if (!_selectByPointerData(this->ui.list, this->_selected))
+         //
+         // We failed to select anything, which means that the previously-selected string was 
+         // likely removed from the table altogether.
+         //
+         this->_selected = nullptr;
+   });
    QObject::connect(&editor, &ReachEditorState::variantAcquired, this, &ScriptEditorPageStringTable::updateFromVariant);
    //
    QObject::connect(this->ui.list, &QListWidget::currentItemChanged, [this](QListWidgetItem* current, QListWidgetItem* previous) {
