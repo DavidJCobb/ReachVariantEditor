@@ -58,7 +58,7 @@ PageMPTU1Config::PageMPTU1Config(QWidget* parent) : QWidget(parent) {
          auto data = ReachEditorState::get().multiplayerData();
          if (!data)
             return;
-         data->titleUpdateData.precisionBloom = value * 5.0F / 100.0F; // normalize from percentage of vanilla to internal format
+         data->titleUpdateData.precisionBloom = value / 100.0F; // normalize from percentage
       });
    }
    reach_main_window_setup_spinbox_dbl(multiplayerData, this->ui.fieldArmorLockDamageDrain,      titleUpdateData.armorLockDamageDrain);
@@ -83,7 +83,7 @@ void PageMPTU1Config::updateFromVariant(GameVariant* variant) {
    {  // Precision Bloom
       auto widget = this->ui.fieldPrecisionBloom;
       const QSignalBlocker blocker(widget);
-      widget->setValue(data->titleUpdateData.precisionBloom * 100.0F / 5.0F); // normalize to percentage of vanilla
+      widget->setValue(data->titleUpdateData.precisionBloom * 100.0F); // normalize to percentage
    }
    reach_main_window_update_spinbox_dbl(this->ui.fieldArmorLockDamageDrain,      titleUpdateData.armorLockDamageDrain);
    reach_main_window_update_spinbox_dbl(this->ui.fieldArmorLockDamageDrainLimit, titleUpdateData.armorLockDamageDrainLimit);
