@@ -9,18 +9,20 @@
       players="4"
       objects="4"
    >
-      Note that only 256 objects on the map can have variables at a time; if you try to 
-      set variables on objects past that limit, Megalo may fail to set variables on the 
+      Note that only 256 objects on the map can have variables at a time; if you try to
+      set variables on objects past that limit, Megalo may fail to set variables on the
       new objects, or it may clear variables off of the old objects.
    </scope>
    <description>
       <p>
-         Object variables refer to objects that are currently present on the map. Objects 
+         Object variables refer to objects that are currently present on the map. Objects
          that have not spawned do not count.
       </p>
       <p>
-         There are sixteen global object variables, numbered from 0 to 15, which can 
-         be accessed as <code>global.object[<var>n</var>]</code>.
+         There are sixteen global object variables, numbered from 0 to 15, which can
+         be accessed as <code>
+            global.object[<var>n</var>]
+         </code>.
       </p>
    </description>
    <methods>
@@ -33,15 +35,15 @@
             <blurb>Check whether this object's shape boundary contains another object.</blurb>
             <description>
                <p>
-                  This function checks whether the context object contains <var>other</var>'s 
-                  pivot point. An object's pivot point is usually its centerpoint or center of 
-                  mass, but there are exceptions; for example, a Sabre's pivot point is located 
-                  roughly at the bottom of its landing gear, while a Dice's pivot point is 
+                  This function checks whether the context object contains <var>other</var>'s
+                  pivot point. An object's pivot point is usually its centerpoint or center of
+                  mass, but there are exceptions; for example, a Sabre's pivot point is located
+                  roughly at the bottom of its landing gear, while a Dice's pivot point is
                   located very slightly off-center on the "six" face.
                </p>
                <p>
-                  If <var>other</var> is attached to some parent object, then this function 
-                  tests the parent object's pivot point rather than <var>other</var>'s pivot 
+                  If <var>other</var> is attached to some parent object, then this function
+                  tests the parent object's pivot point rather than <var>other</var>'s pivot
                   point.
                </p>
             </description>
@@ -50,9 +52,9 @@
                -- Drain the shields of all players in the hill.
                --
                for each player do
-                  if current_hill.shape_contains(current_player.biped) then
-                     current_player.biped.shields = 0
-                  end
+               if current_hill.shape_contains(current_player.biped) then
+               current_player.biped.shields = 0
+               end
                end
             </example>
             <category id="object-shape" />
@@ -72,13 +74,13 @@
                -- Do not allow Elites to pick up Assault Rifles.
                --
                for each player do
-                  if current_player.biped.is_of_type(elite) then
-                     for each object do
-                        if current_object.is_of_type(assault_rifle) then
-                           current_object.set_pickup_permissions(mod_player, current_player, 0)
-                        end
-                     end
-                  end
+               if current_player.biped.is_of_type(elite) then
+               for each object do
+               if current_object.is_of_type(assault_rifle) then
+               current_object.set_pickup_permissions(mod_player, current_player, 0)
+               end
+               end
+               end
                end
             </example>
             <note>
@@ -89,8 +91,8 @@
             <blurb>Check whether this object is out of bounds.</blurb>
             <description>
                <p>
-                  This condition function tests as true if the context object is outside of 
-                  the level's defined playable space, or if the context object is inside of 
+                  This condition function tests as true if the context object is outside of
+                  the level's defined playable space, or if the context object is inside of
                   a Forge-placed Kill Boundary or Soft Kill Boundary.
                </p>
             </description>
@@ -99,9 +101,9 @@
                -- Delete objects that fall out of bounds.
                --
                for each object do
-                  if current_object.is_out_of_bounds() then
-                     current_object.delete()
-                  end
+               if current_object.is_out_of_bounds() then
+               current_object.delete()
+               end
                end
             </example>
          </method>
@@ -112,10 +114,10 @@
             </args>
             <example>
                for each player do
-                  global.object[0] = current_player.get_weapon(primary)
-                  if global.object[0].has_forge_label("bad_weapon") then
-                     current_player.biped.kill(false)
-                  end
+               global.object[0] = current_player.get_weapon(primary)
+               if global.object[0].has_forge_label("bad_weapon") then
+               current_player.biped.kill(false)
+               end
                end
             </example>
          </method>
@@ -123,15 +125,15 @@
             <blurb>Check whether this object is an Armor Ability currently being used by a player.</blurb>
             <example>
                for each player do
-                  global.object[0] = current_player.get_armor_ability()
-                  if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
-                     global.object[0].delete()
-                     game.show_message_to(current_player, none, "don't do that")
-                  end
+               global.object[0] = current_player.get_armor_ability()
+               if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+               global.object[0].delete()
+               game.show_message_to(current_player, none, "don't do that")
+               end
                end
             </example>
             <note>
-               This function doesn't appear to ever actually return <code>true</code> when called 
+               This function doesn't appear to ever actually return <code>true</code> when called
                on the Hologram armor ability.
             </note>
             <category id="armor-abilities" />
@@ -151,27 +153,29 @@
                <arg name="type"  type="object-type" />
                <arg name="label" type="forge-label" />
                <arg name="flags">
-                  <p>The word <var>none</var>, or one or more of the following flags separated with 
-                  the <code>|</code> symbol:</p>
+                  <p>
+                     The word <var>none</var>, or one or more of the following flags separated with
+                     the <code>|</code> symbol:
+                  </p>
                   <dl>
                      <dt>never_garbage_collect</dt>
-                        <dd>Prevents the created object from being garbage-collected.</dd>
+                     <dd>Prevents the created object from being garbage-collected.</dd>
                      <dt>suppress_effect</dt>
-                        <dd>Unknown.</dd>
+                     <dd>Unknown.</dd>
                      <dt>absolute_orientation</dt>
-                        <dd>Unknown.</dd>
+                     <dd>Unknown.</dd>
                   </dl>
                </arg>
                <arg name="x" type="vector3:x">
-                  The X-coordinate of a position offset. Allowed values are integer constants 
+                  The X-coordinate of a position offset. Allowed values are integer constants
                   between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
-                  The Y-coordinate of a position offset. Allowed values are integer constants 
+                  The Y-coordinate of a position offset. Allowed values are integer constants
                   between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
-                  The Z-coordinate of a position offset. Allowed values are integer constants 
+                  The Z-coordinate of a position offset. Allowed values are integer constants
                   between -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg type="variant-string-id">
@@ -186,12 +190,12 @@
                global.object[0] = global.object[1].place_at_me(spartan, none, never_garbage_collect, 0, 0, 0, kat)
             </example>
             <note>
-               The new object will be created as close to the context object as possible. It may 
-               not be created exactly at the context object, even if one or both of the objects 
-               are non-solid. To create one object exactly at another object, 
-               <a href="script/api/object/actions/attach_to">attach</a> 
-               the created object to the basis object and then 
-               <a href="script/api/object/actions/detach">detach</a> 
+               The new object will be created as close to the context object as possible. It may
+               not be created exactly at the context object, even if one or both of the objects
+               are non-solid. To create one object exactly at another object,
+               <a href="script/api/object/actions/attach_to">attach</a>
+               the created object to the basis object and then
+               <a href="script/api/object/actions/detach">detach</a>
                it.
             </note>
             <category id="object-lifetime" />
@@ -200,25 +204,25 @@
             <blurb>Delete this object from the game world.</blurb>
             <example>
                for each object with label "team_only" do
-                  if game.teams_enabled == 0 then
-                     current_object.delete()
-                  end
+               if game.teams_enabled == 0 then
+               current_object.delete()
+               end
                end
                for each object with label "ffa_only" do
-                  if game.teams_enabled != 0 then
-                     current_object.delete()
-                  end
+               if game.teams_enabled != 0 then
+               current_object.delete()
+               end
                end
             </example>
             <note>
-               Deleting a player's current biped will cause them to instantaneously respawn, 
-               without deducting from their pool of lives in limited-life game variants. 
-               Continuously deleting their biped over a span of time will cause the screen 
-               to hard-cut to black for them, with no HUD widgets visible and no game sounds 
+               Deleting a player's current biped will cause them to instantaneously respawn,
+               without deducting from their pool of lives in limited-life game variants.
+               Continuously deleting their biped over a span of time will cause the screen
+               to hard-cut to black for them, with no HUD widgets visible and no game sounds
                audible besides some announcer voiceovers.
             </note>
             <note>
-               If one biped is assassinating another, deleting the victim will not interrupt 
+               If one biped is assassinating another, deleting the victim will not interrupt
                the killer's assassination animation.
             </note>
             <category id="object-lifetime" />
@@ -230,11 +234,11 @@
             <blurb>Adjust who can see this object's waypoint.</blurb>
             <example>
                for each object with label "race_flag" do
-                  current_object.set_waypoint_visibility(everyone)
+               current_object.set_waypoint_visibility(everyone)
                end
             </example>
             <note>
-               Testing suggests that weapons cannot show waypoints if they are being carried 
+               Testing suggests that weapons cannot show waypoints if they are being carried
                by bipeds.
             </note>
             <category id="object-waypoint" />
@@ -246,7 +250,7 @@
             <blurb>Change the icon that this waypoint displays.</blurb>
             <example>
                for each object with label "koth_hill" do
-                  current_object.set_waypoint_icon(defend)
+               current_object.set_waypoint_icon(defend)
                end
             </example>
             <category id="object-waypoint" />
@@ -257,20 +261,20 @@
                   <p>Any of the following values:</p>
                   <dl>
                      <dt>low</dt>
-                        <dd>The waypoint will be translucent &mdash; almost invisible, in fact.</dd>
+                     <dd>The waypoint will be translucent &mdash; almost invisible, in fact.</dd>
                      <dt>normal</dt>
-                        <dd>The waypoint will be normally visible.</dd>
+                     <dd>The waypoint will be normally visible.</dd>
                      <dt>high</dt>
-                        <dd>The waypoint is visible even when the object is off-screen?</dd>
+                     <dd>The waypoint is visible even when the object is off-screen?</dd>
                      <dt>blink</dt>
-                        <dd>The waypoint will blink rapidly. This is usually used for urgent waypoints, like a territory under attack in Invasion.</dd>
+                     <dd>The waypoint will blink rapidly. This is usually used for urgent waypoints, like a territory under attack in Invasion.</dd>
                   </dl>
                </arg>
             </args>
             <blurb>Change the waypoint's visual priority.</blurb>
             <example>
                for each object with label 2 do -- let's pretend this is all landmines
-                  current_object.set_waypoint_priority(low)
+               current_object.set_waypoint_priority(low)
                end
             </example>
             <category id="object-waypoint" />
@@ -278,24 +282,24 @@
          <method name="set_waypoint_timer" id="7">
             <args>
                <arg name="timer">
-                  The word <var>none</var>, or an integer constant indicating the index of an 
-                  object.timer variable, or a relative alias of an object-timer variable 
+                  The word <var>none</var>, or an integer constant indicating the index of an
+                  object.timer variable, or a relative alias of an object-timer variable
                   prefixed with <code>object.</code> i.e. <code>object.alias_name</code>.
                </arg>
             </args>
             <blurb>Change the timer that a waypoint displays.</blurb>
             <example>
                for each object with label "koth_hill" do
-                  current_object.set_waypoint_timer(3)
+               current_object.set_waypoint_timer(3)
                end
-               
+
                alias capture_timer = object.timer[0]
                for each object with label "territory" do
-                  current_object.set_waypoint_timer(object.capture_timer)
+               current_object.set_waypoint_timer(object.capture_timer)
                end
-               
+
                for each object with label "ignore_me" do
-                  current_object.set_waypoint_timer(none)
+               current_object.set_waypoint_timer(none)
                end
             </example>
             <category id="object-waypoint" />
@@ -303,26 +307,26 @@
          <method name="set_waypoint_range" id="8">
             <args>
                <arg name="min" type="number">
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
-                  unit. The player will not be able to see the waypoint unless they are 
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
+                  unit. The player will not be able to see the waypoint unless they are
                   further away than this distance.
                </arg>
                <arg name="max" type="number">
-                  A number between -1 and 100, inclusive. A value of 1 represents one Forge 
-                  unit. The player will not be able to see the waypoint unless they are 
+                  A number between -1 and 100, inclusive. A value of 1 represents one Forge
+                  unit. The player will not be able to see the waypoint unless they are
                   closer than this distance.
                </arg>
             </args>
             <blurb>Change the distances at which waypoints are visible.</blurb>
             <example>
                for each object with label "koth_hill" do
-                  current_object.set_waypoint_range(0, 50)
+               current_object.set_waypoint_range(0, 50)
                end
             </example>
             <note>
-               Most Megalo functions that work with distances use a value of 1 to represent 
-               <em>one tenth</em> of a Forge unit. However, this function uses a value of 1 
-               to represent <em>one entire</em> Forge unit. Be mindful of the difference 
+               Most Megalo functions that work with distances use a value of 1 to represent
+               <em>one tenth</em> of a Forge unit. However, this function uses a value of 1
+               to represent <em>one entire</em> Forge unit. Be mindful of the difference
                when using this function together with the others.
             </note>
             <category id="object-waypoint" />
@@ -333,41 +337,41 @@
                   <p>Any of the following values:</p>
                   <dl>
                      <dt>none</dt>
-                        <dd>The object will have no shape.</dd>
+                     <dd>The object will have no shape.</dd>
                      <dt>sphere</dt>
-                        <dd>The object will have a shape with one dimension: a radius.</dd>
+                     <dd>The object will have a shape with one dimension: a radius.</dd>
                      <dt>cylinder</dt>
-                        <dd>The object will have a shape with three dimensions: a radius, top, and bottom.</dd>
+                     <dd>The object will have a shape with three dimensions: a radius, top, and bottom.</dd>
                      <dt>box</dt>
-                        <dd>The object will have a shape with four dimensions: a width, length, top, and bottom.</dd>
+                     <dd>The object will have a shape with four dimensions: a width, length, top, and bottom.</dd>
                   </dl>
                </arg>
                <arg name="dimensions..." type="number">
-                  Zero or more dimensions for the shape, as appropriate for the given type. 
+                  Zero or more dimensions for the shape, as appropriate for the given type.
                   A value of 10 represents one Forge unit.
                </arg>
             </args>
             <blurb>Change an object's shape boundary.</blurb>
             <description>
                <p>
-                  This function allows you to change an object's shape boundary. Shape 
-                  boundaries can be set in Forge and changed at run-time by a gametype 
-                  script. Scripts can make boundaries visible to some or all players, 
+                  This function allows you to change an object's shape boundary. Shape
+                  boundaries can be set in Forge and changed at run-time by a gametype
+                  script. Scripts can make boundaries visible to some or all players,
                   and test whether objects or players are inside of the boundaries.
                </p>
             </description>
             <example>
                for each object with label "use_none" do
-                  current_object.set_shape(none)
+               current_object.set_shape(none)
                end
                for each object with label "use_sphere" do
-                  current_object.set_shape(sphere, 10)
+               current_object.set_shape(sphere, 10)
                end
                for each object with label "use_cylinder" do
-                  current_object.set_shape(cylinder, 10, 10, 10)
+               current_object.set_shape(cylinder, 10, 10, 10)
                end
                for each object with label "use_box" do
-                  current_object.set_shape(box, 10, 10, 10, 10)
+               current_object.set_shape(box, 10, 10, 10, 10)
                end
             </example>
             <category id="object-shape" />
@@ -379,14 +383,14 @@
             <blurb>Adjust which players can pick up a weapon.</blurb>
             <description>
                <p>
-                  This function allows you to control which players are allowed to pick up a 
-                  given weapon. It only works on weapons (including flags, bombs, and skulls) 
+                  This function allows you to control which players are allowed to pick up a
+                  given weapon. It only works on weapons (including flags, bombs, and skulls)
                   and does nothing when used on other objects, such as vehicles and grenades.
                </p>
                <p>
-                  The typical use case for this is to prevent teams from interacting with 
-                  objective weapons, e.g. preventing a team from moving their own flag in 
-                  Capture the Flag, or preventing a team from moving the enemy bomb in 
+                  The typical use case for this is to prevent teams from interacting with
+                  objective weapons, e.g. preventing a team from moving their own flag in
+                  Capture the Flag, or preventing a team from moving the enemy bomb in
                   Assault.
                </p>
             </description>
@@ -395,13 +399,13 @@
                -- Do not allow Elites to pick up Assault Rifles.
                --
                for each player do
-                  if current_player.biped.is_of_type(elite) then
-                     for each object do
-                        if current_object.is_of_type(assault_rifle) then
-                           current_object.set_pickup_permissions(mod_player, current_player, 0)
-                        end
-                     end
-                  end
+               if current_player.biped.is_of_type(elite) then
+               for each object do
+               if current_object.is_of_type(assault_rifle) then
+               current_object.set_pickup_permissions(mod_player, current_player, 0)
+               end
+               end
+               end
                end
             </example>
             <category id="objectives" />
@@ -415,18 +419,20 @@
             <blurb>Adjust which players can spawn at a location.</blurb>
             <description>
                <p>
-                  This function allows you to control which players are allowed to spawn at 
-                  the context object. This applies to players that have been 
-                  <a href="script/api/player/actions/set_co_op_spawning">set to use co-op 
-                  spawning</a>.
+                  This function allows you to control which players are allowed to spawn at
+                  the context object. This applies to players that have been
+                  <a href="script/api/player/actions/set_co_op_spawning">
+                     set to use co-op
+                     spawning
+                  </a>.
                </p>
             </description>
             <example>
                alias current_checkpoint = global.object[0]
                alias next_checkpoint    = global.object[1]
                --
-               -- Let's pretend that this is Race, and a player just reached next_checkpoint. 
-               -- We want the player to be able to respawn at the last checkpoint they've 
+               -- Let's pretend that this is Race, and a player just reached next_checkpoint.
+               -- We want the player to be able to respawn at the last checkpoint they've
                -- reached.
                --
                current_checkpoint.set_spawn_location_permissions(mod_player, current_player, 0)
@@ -436,23 +442,25 @@
          </method>
          <method name="set_spawn_location_fireteams" id="14">
             <args>
-               The word <var>none</var>, the word <var>all</var>, or a comma-separated 
-               list of fireteam indices (starting at 0) that should be able to use this 
+               The word <var>none</var>, the word <var>all</var>, or a comma-separated
+               list of fireteam indices (starting at 0) that should be able to use this
                object as a spawn location.
             </args>
             <blurb>Adjust which fireteam can spawn at a location.</blurb>
             <description>
                <p>
-                  This function allows you to limit a spawn location to a specific fireteam. 
-                  This applies to players that have been 
-                  <a href="script/api/player/actions/set_co_op_spawning">set to use co-op 
-                  spawning</a>.
+                  This function allows you to limit a spawn location to a specific fireteam.
+                  This applies to players that have been
+                  <a href="script/api/player/actions/set_co_op_spawning">
+                     set to use co-op
+                     spawning
+                  </a>.
                </p>
             </description>
             <example>
                for each object with label "fireteam_1_spawn" do
-                  current_object.set_spawn_location_fireteams(0)
-                  current_object.set_spawn_location_permissions(allies)
+               current_object.set_spawn_location_fireteams(0)
+               current_object.set_spawn_location_permissions(allies)
                end
             </example>
             <category id="spawning" />
@@ -460,8 +468,8 @@
          <method name="set_progress_bar" id="15">
             <args>
                <arg name="timer">
-                  The word <var>none</var>, or an integer constant indicating the index of an 
-                  object.timer variable, or a relative alias of an object-timer variable 
+                  The word <var>none</var>, or an integer constant indicating the index of an
+                  object.timer variable, or a relative alias of an object-timer variable
                   prefixed with <code>object.</code> i.e. <code>object.alias_name</code>.
                </arg>
                <arg name="who" type="player-set" />
@@ -469,18 +477,18 @@
             <blurb>Set whether an object displays a progress bar, and who should be able to see it.</blurb>
             <example>
                for each object with label "koth_hill" do
-                  current_object.set_progress_bar(3, everyone)
+               current_object.set_progress_bar(3, everyone)
                end
-               
+
                alias capture_timer = object.timer[0]
                for each object with label "territory" do
-                  for each player do
-                     current_object.set_progress_bar(object.capture_timer, mod_player, current_player, 1)
-                  end
+               for each player do
+               current_object.set_progress_bar(object.capture_timer, mod_player, current_player, 1)
                end
-               
+               end
+
                for each object with label "ignore_me" do
-                  current_object.set_progress_bar(none, everyone)
+               current_object.set_progress_bar(none, everyone)
                end
             </example>
             <category id="object-ui" />
@@ -489,24 +497,24 @@
             <blurb>Identify the player carrying a weapon or Armor Ability.</blurb>
             <description>
                <p>
-                  When called on a weapon or Armor Ability, this function returns the 
+                  When called on a weapon or Armor Ability, this function returns the
                   player carrying the item.
                </p>
                <p>
-                  When Bungie and 343i use this function, they often manually clear 
-                  the player variable they are assigning to before calling the function. 
-                  That functionality is automated in this Megalo dialect: calling the 
-                  function with the name <code>get_carrier</code> will compile in an 
-                  assignment to <var>no_player</var> before the call, while calling 
+                  When Bungie and 343i use this function, they often manually clear
+                  the player variable they are assigning to before calling the function.
+                  That functionality is automated in this Megalo dialect: calling the
+                  function with the name <code>get_carrier</code> will compile in an
+                  assignment to <var>no_player</var> before the call, while calling
                   the function with the name <code>try_get_carrier</code> will not.
                </p>
             </description>
             <example>
                for each object with label "awful_gun" do
-                  global.player[0] = current_object.get_carrier()
-                  if global.player[0] != no_player then
-                     global.player[0].kill(false)
-                  end
+               global.player[0] = current_object.get_carrier()
+               if global.player[0] != no_player then
+               global.player[0].kill(false)
+               end
                end
             </example>
             <category id="armor-abilities" />
@@ -520,12 +528,12 @@
             <blurb>Adjust which players can see an object's shape boundary.</blurb>
             <example>
                for each object with label "territory" do
-                  current_object.set_shape_visibility(everyone)
+               current_object.set_shape_visibility(everyone)
                end
             </example>
             <note>
-               You cannot make spherical shapes visible. Spherical shapes are only 
-               available via scripting, not in Forge, and the game apparently has no 
+               You cannot make spherical shapes visible. Spherical shapes are only
+               available via scripting, not in Forge, and the game apparently has no
                code to display them.
             </note>
             <category id="object-shape" />
@@ -540,11 +548,11 @@
             <blurb>Kill an object.</blurb>
             <example>
                for each object with label "avoid_me" do
-                  for each player do
-                     if current_object.shape_contains(current_player.biped) then
-                        current_player.biped.kill(false)
-                     end
-                  end
+               for each player do
+               if current_object.shape_contains(current_player.biped) then
+               current_player.biped.kill(false)
+               end
+               end
                end
             </example>
             <category id="object-lifetime" />
@@ -559,16 +567,16 @@
             <blurb>Make an object invincible.</blurb>
             <description>
                <p>
-                  This function makes an object invulnerable. Invulnerable objects cannot 
-                  be killed or destroyed by weapons, explosions, physics, Forge-placed level 
-                  boundaries, a map's built-in level boundaries, or (in the case of bipeds) 
-                  the destruction of the vehicle they are piloting, or any other form of 
+                  This function makes an object invulnerable. Invulnerable objects cannot
+                  be killed or destroyed by weapons, explosions, physics, Forge-placed level
+                  boundaries, a map's built-in level boundaries, or (in the case of bipeds)
+                  the destruction of the vehicle they are piloting, or any other form of
                   damage.
                </p>
             </description>
             <example>
                for each player do
-                  current_player.biped.set_invincibility(1)
+               current_player.biped.set_invincibility(1)
                end
             </example>
             <category id="object-stats" />
@@ -577,27 +585,27 @@
             <blurb>Returns a number representing the object's overall rotation.</blurb>
             <description>
                <p>
-                  This function returns a number between 1 and 6 representing an object's 
-                  overall rotation. The values seem to indicate which side of an object 
-                  is facing up, i.e. if you were to imagine a cube enclosing the object, 
+                  This function returns a number between 1 and 6 representing an object's
+                  overall rotation. The values seem to indicate which side of an object
+                  is facing up, i.e. if you were to imagine a cube enclosing the object,
                   the values would each correspond to one side of the cube.
                </p>
                <p>
-                  The different values are available in the 
+                  The different values are available in the
                   <a href="script/api/ns_enums/orientation">orientation enum</a>.
                </p>
             </description>
             <example>
                global.number[0] = current_object.get_orientation()
                if global.number[0] != 1 then
-                  --
-                  -- object isn't upright
-                  --
+               --
+               -- object isn't upright
+               --
                end
             </example>
             <note>
-               This function may not work on all object types, or its efficacy may depend 
-               on an object's physics. It works on vehicles, but phased-physics objects 
+               This function may not work on all object types, or its efficacy may depend
+               on an object's physics. It works on vehicles, but phased-physics objects
                that have been pre-rotated in Forge seem to always test as being upright.
             </note>
             <category id="positioning" />
@@ -607,8 +615,8 @@
             <blurb>Returns the object's speed in feet per second.</blurb>
             <description>
                <p>
-                  This function returns an object's speed, apparently measured in feet 
-                  per second. Race multiplies the value by 109 and then divides by 100 
+                  This function returns an object's speed, apparently measured in feet
+                  per second. Race multiplies the value by 109 and then divides by 100
                   to convert it to kilometers per hour.
                </p>
             </description>
@@ -624,43 +632,43 @@
                   The object to attach this one to.
                </arg>
                <arg name="x" type="vector3:x">
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
-                  The X-coordinate to anchor this object at, relative to the position 
-                  of the other object. Allowed values are integer constants between 
+                  The X-coordinate to anchor this object at, relative to the position
+                  of the other object. Allowed values are integer constants between
                   -128 and 127, inclusive, where 10 is equal to one Forge unit.
                </arg>
                <arg name="reference_frame">
-                  Either the word <var>relative</var>, indicating that the position 
-                  offset passed to this function is relative to the rotation of the 
-                  <var>basis</var> object, or the word <var>absolute</var>, indicating 
+                  Either the word <var>relative</var>, indicating that the position
+                  offset passed to this function is relative to the rotation of the
+                  <var>basis</var> object, or the word <var>absolute</var>, indicating
                   that the position offset passed to this function uses the world axes.
                </arg>
             </args>
             <blurb>Attaches this object to another one.</blurb>
             <description>
                <p>
-                  This function attaches the context object to a given basis object. 
-                  The context object will be moved to the basis object's position plus 
-                  the supplied offset before the attachment is performed; an argument 
-                  allows you to control whether the offset is relative to the rotation 
-                  of the basis object. Note that the context object will <em>not</em> 
+                  This function attaches the context object to a given basis object.
+                  The context object will be moved to the basis object's position plus
+                  the supplied offset before the attachment is performed; an argument
+                  allows you to control whether the offset is relative to the rotation
+                  of the basis object. Note that the context object will <em>not</em>
                   be rotated before the attachment is performed.
                </p>
                <p>
-                  Attached objects effectively take on Phased physics; their movement 
-                  cannot be impeded by other objects. Additionally, if objects are 
-                  attached to a non-solid basis, such as a Flag Stand, then they 
-                  themselves stop being solid; and if they are attached to an invisible 
-                  basis, such as a Hill Marker, then they stop being visible altogether. 
+                  Attached objects effectively take on Phased physics; their movement
+                  cannot be impeded by other objects. Additionally, if objects are
+                  attached to a non-solid basis, such as a Flag Stand, then they
+                  themselves stop being solid; and if they are attached to an invisible
+                  basis, such as a Hill Marker, then they stop being visible altogether.
                   Note that non-solid vehicles still offer entry prompts.
                </p>
             </description>
@@ -670,9 +678,9 @@
             </example>
             <note id="anchoring" title="Anchoring">
                <p>
-                  Objects appear to be attached to the nearest node on a basis object's 
-                  3D model, with no apparent distance limit. For example, this piece 
-                  of code would create a skull and anchor that skull to a Warthog's 
+                  Objects appear to be attached to the nearest node on a basis object's
+                  3D model, with no apparent distance limit. For example, this piece
+                  of code would create a skull and anchor that skull to a Warthog's
                   steering wheel:
                </p>
                <pre>
@@ -682,146 +690,146 @@
                   global.object[0].attach_to(some_warthog, 0, 0, 20, relative)
                </pre>
                <p>
-                  Even though the skull is attached to a point two full Forge units 
-                  above the Warthog, it still attaches to the nearest node in the 
-                  Warthog's 3D model, which happens to be the steering wheel. If a 
-                  player enters the driver's seat and turns to the left or right, 
-                  the skull will move and rotate in an arc above them, in synch with 
-                  the steering wheel. Different offsets would anchor the skull to 
+                  Even though the skull is attached to a point two full Forge units
+                  above the Warthog, it still attaches to the nearest node in the
+                  Warthog's 3D model, which happens to be the steering wheel. If a
+                  player enters the driver's seat and turns to the left or right,
+                  the skull will move and rotate in an arc above them, in synch with
+                  the steering wheel. Different offsets would anchor the skull to
                   other nodes in the Warthog's 3D model, such as its tires.
                </p>
                <p>
-                  Most objects have a node defined at their origins, and that can 
-                  be used to avoid this behavior: spawn an extra object, have it 
-                  copy the rotation of the basis, and then attach it to the basis 
-                  with offset (0, 0, 0); then, attach the rest of your objects to 
+                  Most objects have a node defined at their origins, and that can
+                  be used to avoid this behavior: spawn an extra object, have it
+                  copy the rotation of the basis, and then attach it to the basis
+                  with offset (0, 0, 0); then, attach the rest of your objects to
                   that extra object.
                </p>
             </note>
             <note id="vehicle-attachment" title="Effects of attaching vehicles to other objects">
                <p>
-                  Attaching a vehicle to an object will lock the vehicle in place. The 
-                  pilot will be able to look around at any angle, but the vehicle will 
-                  not turn, and the vehicle's weapons fire will be constrained to the 
+                  Attaching a vehicle to an object will lock the vehicle in place. The
+                  pilot will be able to look around at any angle, but the vehicle will
+                  not turn, and the vehicle's weapons fire will be constrained to the
                   weapon's turn radius.
                </p>
                <p>
-                  Attached vehicles will not play any entry/exit animations (e.g. a 
-                  Banshee's canopy opening and closing), but will instantaneously 
-                  update to any animations' end states when detached (e.g. a Banshee's 
+                  Attached vehicles will not play any entry/exit animations (e.g. a
+                  Banshee's canopy opening and closing), but will instantaneously
+                  update to any animations' end states when detached (e.g. a Banshee's
                   canopy will instantly snap open or closed as appropriate).
                </p>
                <p>
-                  Bipeds in an attached vehicle will lose most animations. Passengers' 
-                  hands may move slightly (and incorrectly) while reloading their weapon; 
-                  though they have no reloading or weapon swap animations, appropriate 
-                  sounds still play, and they cannot fire their animations while the 
-                  animations would be taking place. Some animations have player model 
-                  jiggle physics; these jiggle physics remain functional even though 
+                  Bipeds in an attached vehicle will lose most animations. Passengers'
+                  hands may move slightly (and incorrectly) while reloading their weapon;
+                  though they have no reloading or weapon swap animations, appropriate
+                  sounds still play, and they cannot fire their animations while the
+                  animations would be taking place. Some animations have player model
+                  jiggle physics; these jiggle physics remain functional even though
                   the rest of the animation does not. <!-- i swear to god i'm not making 
                   this up and i don't know why bungie put that in the game lol -->
                </p>
                <p>
-                  If a Banshee is performing an evasive maneuver at the moment it is 
-                  attached, the maneuver will end instantly; no such maneuvers can be 
+                  If a Banshee is performing an evasive maneuver at the moment it is
+                  attached, the maneuver will end instantly; no such maneuvers can be
                   performed once the vehicle is attached.
                </p>
             </note>
             <note>
-               Armor Abilities equipped by other players are an exception to normal 
-               attachment behaviors. If you detach an Armor Ability from a player's 
-               back, you can move it around or attach it without unequipping it from 
-               that player; however, the Armor Ability will automatically detach 
-               itself every frame. (Verified for Armor Abilities worn by Monitors, 
+               Armor Abilities equipped by other players are an exception to normal
+               attachment behaviors. If you detach an Armor Ability from a player's
+               back, you can move it around or attach it without unequipping it from
+               that player; however, the Armor Ability will automatically detach
+               itself every frame. (Verified for Armor Abilities worn by Monitors,
                but not tested for Armor Abilities worn by Spartans and Elites.)
             </note>
             <note>
-               Attaching a biped to an object will lock the biped in place. If the 
-               biped is controlled by the player, they will be able to turn but not 
-               to move, and their first-person legs will desynch from their upper 
+               Attaching a biped to an object will lock the biped in place. If the
+               biped is controlled by the player, they will be able to turn but not
+               to move, and their first-person legs will desynch from their upper
                body.
             </note>
             <note>
-               When a biped enters a vehicle, it is considered attached to that 
-               vehicle. Scripts cannot attach it to something else while it is in 
-               the vehicle. Weapons being carried by a biped are expected to behave 
+               When a biped enters a vehicle, it is considered attached to that
+               vehicle. Scripts cannot attach it to something else while it is in
+               the vehicle. Weapons being carried by a biped are expected to behave
                similarly.
             </note>
             <note>
-               If something is attached to a Monitor biped, it will bob up and down 
-               in synch with that biped's animation. All of a Monitor's nodes, 
-               including the one with the animation, are located at the same 
-               model-relative coordinate, and the one with the animation is the one 
+               If something is attached to a Monitor biped, it will bob up and down
+               in synch with that biped's animation. All of a Monitor's nodes,
+               including the one with the animation, are located at the same
+               model-relative coordinate, and the one with the animation is the one
                that is found by the game engine when performing an attachment.
             </note>
             <note>
-               It appears that attaching an object to <var>no_object</var> and then 
-               detaching it will teleport it to the world origin. On Forge World, 
+               It appears that attaching an object to <var>no_object</var> and then
+               detaching it will teleport it to the world origin. On Forge World,
                this is a point out by the canyon's beach.
             </note>
             <note>
                <p>
-                  If a player's biped is attached to an object that is destroyed on 
-                  contact with a player, such as a landmine or powerup, then that 
-                  player's camera will be locked to a consistent but unusual place; 
-                  on Boneyard, this is a point in space far outside the map. Using 
-                  Theater will show that the object appears to still exist, and that 
-                  the affected player's biped is frozen in place inside of the 
-                  object. The player's camera will remain fixed exactly in this 
-                  spot even if they were in third-person view at the time they were 
+                  If a player's biped is attached to an object that is destroyed on
+                  contact with a player, such as a landmine or powerup, then that
+                  player's camera will be locked to a consistent but unusual place;
+                  on Boneyard, this is a point in space far outside the map. Using
+                  Theater will show that the object appears to still exist, and that
+                  the affected player's biped is frozen in place inside of the
+                  object. The player's camera will remain fixed exactly in this
+                  spot even if they were in third-person view at the time they were
                   affected.
                </p>
                <p>
-                  In this state, the player can switch weapons, drop a detached 
-                  turret if they are carrying one, fire their weapons, and throw 
-                  grenades. All of these actions will occur relative to the player's 
-                  "true" position at the object they were attached to, rather than 
-                  at their camera position. Projectiles will fire roughly in the 
-                  direction that the player is looking, but the yaw angle may be 
-                  mismatched: it will be a combination of the direction that the 
-                  player was looking just prior to the attachment, and the amount 
-                  by which they have turned to the side after being attached, 
-                  rather than matching their current camera yaw angle. The player 
-                  will not be able to interact with objects near their "true" 
-                  position; a vehicle next to them, for example, will not show 
-                  button prompts for entry, and pressing the button to enter a 
+                  In this state, the player can switch weapons, drop a detached
+                  turret if they are carrying one, fire their weapons, and throw
+                  grenades. All of these actions will occur relative to the player's
+                  "true" position at the object they were attached to, rather than
+                  at their camera position. Projectiles will fire roughly in the
+                  direction that the player is looking, but the yaw angle may be
+                  mismatched: it will be a combination of the direction that the
+                  player was looking just prior to the attachment, and the amount
+                  by which they have turned to the side after being attached,
+                  rather than matching their current camera yaw angle. The player
+                  will not be able to interact with objects near their "true"
+                  position; a vehicle next to them, for example, will not show
+                  button prompts for entry, and pressing the button to enter a
                   vehicle anyway will not work.
                </p>
                <p>
-                  The object to which the player was attached may activate some 
-                  of its on-contact behaviors; landmines don't detonate, and 
-                  Active Camo Powerups aren't destroyed and don't give the 
-                  player camo, but the latter cause the player to constantly 
+                  The object to which the player was attached may activate some
+                  of its on-contact behaviors; landmines don't detonate, and
+                  Active Camo Powerups aren't destroyed and don't give the
+                  player camo, but the latter cause the player to constantly
                   experience the sound loop that plays when camo is active.
                </p>
                <p>
-                  These are the results of a local, single-player test. The 
+                  These are the results of a local, single-player test. The
                   networked behavior is not known.
                </p>
             </note>
             <note>
                <p>
-                  If the player is attached to an armor ability, and if this 
-                  would normally cause them to pick the armor ability up, then 
-                  they will experience the same anomalies as if they were 
-                  attached to a weapon that is destroyed on contact. They will 
+                  If the player is attached to an armor ability, and if this
+                  would normally cause them to pick the armor ability up, then
+                  they will experience the same anomalies as if they were
+                  attached to a weapon that is destroyed on contact. They will
                   not be able to use the armor ability during this time.
                </p>
             </note>
             <note>
                <p>
-                  If the player is attached to a weapon right as they equip it 
-                  (e.g. an unarmed player being attached to a weapon, such that 
-                  they touch the weapon and equip it as they are attached), 
-                  then they will equip the item normally rather than being 
-                  attached to it... but they will also be launched with 
-                  considerable force &mdash; possibly enough to break a map's 
+                  If the player is attached to a weapon right as they equip it
+                  (e.g. an unarmed player being attached to a weapon, such that
+                  they touch the weapon and equip it as they are attached),
+                  then they will equip the item normally rather than being
+                  attached to it... but they will also be launched with
+                  considerable force &mdash; possibly enough to break a map's
                   boundaries.
                </p>
                <p>
-                  If the player is attached to a grenade, and if this causes 
-                  them to pick the grenade up, then the player will be unable 
-                  to move, their animations will freeze, and their camera will 
+                  If the player is attached to a grenade, and if this causes
+                  them to pick the grenade up, then the player will be unable
+                  to move, their animations will freeze, and their camera will
                   be anchored to the spot the grenade used to be in.
                </p>
             </note>
@@ -832,7 +840,7 @@
             <blurb>Detaches this object from anything it is attached to.</blurb>
             <description>
                <p>
-                  This function detaches an object from anything it has been attached 
+                  This function detaches an object from anything it has been attached
                   to &mdash; even if that attachment wasn't set up by script.
                </p>
             </description>
@@ -840,41 +848,41 @@
                current_object.detach()
             </example>
             <note>
-               Detaching a player's carried weapons will cause those weapons to 
-               drop into the game world. Of course, it would probably be better to 
-               use <a href="script/api/object/actions/remove_weapon">object.remove_weapon</a> to achieve this 
+               Detaching a player's carried weapons will cause those weapons to
+               drop into the game world. Of course, it would probably be better to
+               use <a href="script/api/object/actions/remove_weapon">object.remove_weapon</a> to achieve this
                effect more directly.
             </note>
             <note>
-               If a player is occupying a vehicle, calling this function on their 
+               If a player is occupying a vehicle, calling this function on their
                biped will instantly force them out of the vehicle.
             </note>
             <note>
                <p>
-                  Detaching a player's equipped Armor Ability will not cause them to 
-                  drop it; however, the Armor Ability's 3D model (ordinarily visible 
-                  on the player's back) will detach and stop moving in synch with the 
-                  player. At this point, a script can move the ability independently 
-                  of the player without the player losing it (though the effects of 
-                  moving an equipped Armor Ability out of bounds have not been tested). 
-                  Armor Abilities in this state do not have physics and collision, and 
-                  will remain wherever a script places them until such time as the 
-                  player carrying them is killed: the ability will teleport back to 
+                  Detaching a player's equipped Armor Ability will not cause them to
+                  drop it; however, the Armor Ability's 3D model (ordinarily visible
+                  on the player's back) will detach and stop moving in synch with the
+                  player. At this point, a script can move the ability independently
+                  of the player without the player losing it (though the effects of
+                  moving an equipped Armor Ability out of bounds have not been tested).
+                  Armor Abilities in this state do not have physics and collision, and
+                  will remain wherever a script places them until such time as the
+                  player carrying them is killed: the ability will teleport back to
                   the player's body at that moment.
                </p>
                <p>
-                  A jetpack moved in this manner will show thruster animations without 
-                  moving whenever its carrier uses it. Other abilities have glowing 
-                  lights whose brightness indicates the player's ability energy (i.e. 
+                  A jetpack moved in this manner will show thruster animations without
+                  moving whenever its carrier uses it. Other abilities have glowing
+                  lights whose brightness indicates the player's ability energy (i.e.
                   cooldown).
                </p>
                <p>
-                  The most interesting side-effect of detaching an Armor Ability 
-                  occurs when Active Camo is used: the radar-jamming effect comes 
-                  from the Armor Ability's 3D model and remains centered on that, 
-                  not on the carrier. No other Armor Abilities have gameplay side-effects 
-                  from being detached, even when their visuals would imply it; Armor Lock, 
-                  for example, shows EMP surge graphics on the ability while it's held, 
+                  The most interesting side-effect of detaching an Armor Ability
+                  occurs when Active Camo is used: the radar-jamming effect comes
+                  from the Armor Ability's 3D model and remains centered on that,
+                  not on the carrier. No other Armor Abilities have gameplay side-effects
+                  from being detached, even when their visuals would imply it; Armor Lock,
+                  for example, shows EMP surge graphics on the ability while it's held,
                   but the EMP itself still comes from the player.
                </p>
             </note>
@@ -886,38 +894,40 @@
                   <p>One of the following values:</p>
                   <dl>
                      <dt>normal</dt>
-                        <dd>The weapon's pickup behavior is not modified.</dd>
+                     <dd>The weapon's pickup behavior is not modified.</dd>
                      <dt>high</dt>
-                        <dd>
-                           <p>
-                              If this weapon is lying in a pile of weapons, and the player
-                              attempts to pick up a weapon from the pile, the game will
-                              preferto have them pick up this weapon. Good for objective 
-                              items.
-                           </p>
-                           <p>
-                              In versions of ReachVariantTool before 2.1.7, this value was 
-                              called <code>hold_action</code>.
-                           </p>
-                        </dd>
+                     <dd>
+                        <p>
+                           If this weapon is lying in a pile of weapons, and the player
+                           attempts to pick up a weapon from the pile, the game will
+                           preferto have them pick up this weapon. Good for objective
+                           items.
+                        </p>
+                        <p>
+                           In versions of ReachVariantTool before 2.1.7, this value was
+                           called <code>hold_action</code>.
+                        </p>
+                     </dd>
                      <dt>automatic</dt>
-                        <dd>Players automatically pick up the weapon when they come into 
-                        contact with it.</dd>
+                     <dd>
+                        Players automatically pick up the weapon when they come into
+                        contact with it.
+                     </dd>
                   </dl>
                </arg>
             </args>
             <blurb>Set how a weapon is picked up.</blurb>
             <description>
                <p>
-                  If this function is called on a weapon, then it modifies how players 
-                  pick up the weapon: you can require that players hold a button down 
-                  to pick up the weapon (as is normal for most playable weapons), or 
-                  make them pick the weapon up automatically when they come into contact 
+                  If this function is called on a weapon, then it modifies how players
+                  pick up the weapon: you can require that players hold a button down
+                  to pick up the weapon (as is normal for most playable weapons), or
+                  make them pick the weapon up automatically when they come into contact
                   with it.
                </p>
                <p>
-                  This function does nothing when called on something that isn't a 
-                  weapon. Sadly, you can't make grenades hold-to-pick-up or anything 
+                  This function does nothing when called on something that isn't a
+                  weapon. Sadly, you can't make grenades hold-to-pick-up or anything
                   wacky like that.
                </p>
             </description>
@@ -925,8 +935,8 @@
                current_object.set_weapon_pickup_priority(automatic)
             </example>
             <note>
-               Flags, bombs, and skulls are weapons and so can be used with this member 
-               function. The data cores and power cores used in Invasion are similar 
+               Flags, bombs, and skulls are weapons and so can be used with this member
+               function. The data cores and power cores used in Invasion are similar
                weapons.
             </note>
             <category id="weapons" />
@@ -935,9 +945,9 @@
             <blurb>Apply a random mostly-upward force to the object.</blurb>
             <description>
                <p>
-                  This function pushes the context object upward with a random amount 
-                  of force, and a random offset to the force vector. Headhunter uses 
-                  it to push dropped skulls upward from a dying player in a somewhat 
+                  This function pushes the context object upward with a random amount
+                  of force, and a random offset to the force vector. Headhunter uses
+                  it to push dropped skulls upward from a dying player in a somewhat
                   random manner.
                </p>
             </description>
@@ -948,24 +958,26 @@
          </method>
          <method name="set_scale" id="52">
             <args>
-               <arg name="scale" type="number">The scale to apply to this object, with 
-               the value 100 representing normal (100%) size.</arg>
+               <arg name="scale" type="number">
+                  The scale to apply to this object, with
+                  the value 100 representing normal (100%) size.
+               </arg>
             </args>
             <blurb>Resize an object.</blurb>
             <description>
                <p>
-                  This function changes the size of the context object's visual model. 
+                  This function changes the size of the context object's visual model.
                   Objects can be made smaller or larger.
                </p>
                <p>
-                  This function applies to the object's visuals and to hit detection 
-                  against bullets, projectiles, and thrown grenades: an object that 
-                  is scaled up can be shot in any of the enlarged areas and register 
-                  damage normally, and it can also be stuck with grenades on the 
-                  enlarged areas. However, scaling does not apply to physical 
-                  collisions or splash damage processing. An object that is made 
-                  larger will not take splash damage from an explosion unless the 
-                  explosion would, at the same distance from the object's pivot 
+                  This function applies to the object's visuals and to hit detection
+                  against bullets, projectiles, and thrown grenades: an object that
+                  is scaled up can be shot in any of the enlarged areas and register
+                  damage normally, and it can also be stuck with grenades on the
+                  enlarged areas. However, scaling does not apply to physical
+                  collisions or splash damage processing. An object that is made
+                  larger will not take splash damage from an explosion unless the
+                  explosion would, at the same distance from the object's pivot
                   point, deal splash damage to a normally sized object of that type.
                </p>
             </description>
@@ -973,16 +985,16 @@
                current_object.set_scale(200) -- make the object twice as large
             </example>
             <note>
-               Rescaling a player's biped will not necessarily change their camera 
-               position. Scaling a player up, for example, will cause their first-person 
-               legs to appear much larger to them, but will not actually move the 
+               Rescaling a player's biped will not necessarily change their camera
+               position. Scaling a player up, for example, will cause their first-person
+               legs to appear much larger to them, but will not actually move the
                camera upward to match the rescaled head.
             </note>
             <note>
-               The <code>set_scale</code> function has been observed to fail under the 
-               following conditions: the context object was created and attached to 
-               another object during the same tick as the <code>set_scale</code> call 
-               and before the <code>set_scale</code> call; and the object to which it 
+               The <code>set_scale</code> function has been observed to fail under the
+               following conditions: the context object was created and attached to
+               another object during the same tick as the <code>set_scale</code> call
+               and before the <code>set_scale</code> call; and the object to which it
                was attached already existed before the tick on which the call was made.
             </note>
          </method>
@@ -1010,18 +1022,18 @@
             <blurb>Returns the distance between this object and another.</blurb>
             <description>
                <p>
-                  This function returns the distance between the context object and 
-                  the object supplied as an argument. The distance is measured in 
-                  tenths of Forge units, i.e. a value of 10 represents 1.0 units in 
+                  This function returns the distance between the context object and
+                  the object supplied as an argument. The distance is measured in
+                  tenths of Forge units, i.e. a value of 10 represents 1.0 units in
                   Forge.
                </p>
             </description>
             <example>
                global.number[0] = current_object.get_distance_to(global.object[0])
                if global.number[0] &lt; 10 then
-                  --
-                  -- The objects are close!
-                  --
+               --
+               -- The objects are close!
+               --
                end
             </example>
             <category id="positioning" />
@@ -1093,7 +1105,7 @@
          <method name="enable_spawn_zone" id="82">
             <args>
                <arg name="enable" type="number">
-                  If this argument is 1, the respawn zone will be enabled; if it 
+                  If this argument is 1, the respawn zone will be enabled; if it
                   is 0, the respawn zone will be disabled.
                </arg>
             </args>
@@ -1101,15 +1113,15 @@
             <example>
                alias flag    = team.object[0]
                alias is_away = object.number[0]
-               
+
                for each object with label "ctf_res_zone_away" do
-                  current_object.enable_spawn_zone(0)
-                  --
-                  global.team[0]   = current_object.team
-                  global.object[0] = global.team[0].flag
-                  if global.object[0].is_away == 1 then
-                     current_object.enable_spawn_zone(1)
-                  end
+               current_object.enable_spawn_zone(0)
+               --
+               global.team[0]   = current_object.team
+               global.object[0] = global.team[0].flag
+               if global.object[0].is_away == 1 then
+               current_object.enable_spawn_zone(1)
+               end
                end
             </example>
             <category id="spawning" />
@@ -1117,18 +1129,18 @@
          <method name="set_garbage_collection_disabled" id="85">
             <args>
                <arg name="disable" type="number">
-                  If this argument is 1, then garbage collection will be disabled; 
+                  If this argument is 1, then garbage collection will be disabled;
                   if it is 0, then garbage collection will be enabled.
                </arg>
             </args>
             <blurb>Disables garbage collection for objects.</blurb>
             <description>
                <p>
-                  This function can be used to enable and disable garbage collection for 
-                  individual objects after they have been created. However, it only works 
-                  if the object <em>was not</em> created with the 
-                  <var>never_garbage_collect</var> 
-                  flag set. Objects created with that flag cannot have garbage collection 
+                  This function can be used to enable and disable garbage collection for
+                  individual objects after they have been created. However, it only works
+                  if the object <em>was not</em> created with the
+                  <var>never_garbage_collect</var>
+                  flag set. Objects created with that flag cannot have garbage collection
                   re-enabled using this function.
                </p>
             </description>
@@ -1137,29 +1149,29 @@
                alias expire_timer     = object.timer[0]
                declare object.has_been_carried with network priority low = 0
                declare object.expire_timer = 60
-               
+
                -- pretend this is a Forge label with no name, targeted to Rocket Launchers:
                alias all_rockets  = 1
-               
-               -- Let's say we want to prevent dropped Rocket Launchers from 
+
+               -- Let's say we want to prevent dropped Rocket Launchers from
                -- despawning for a full minute.
-               
+
                for each object with label all_rockets do
-                  global.player[0] = current_object.get_carrier()
-                  if global.player[0] != no_player then
-                     current_object.set_garbage_collection_disabled(0)
-                     current_object.expire_timer.set_rate(0%)
-                     current_object.expire_timer.reset()
-                     current_object.has_been_carried = 1
-                  end
-                  if current_object.has_been_carried == 1 and global.player[0] == no_player then
-                     current_object.set_garbage_collection_disabled(1)
-                     current_object.expire_timer.set_rate(-100%)
-                     if current_object.expire_timer.is_zero() then
-                        current_object.set_garbage_collection_disabled(0)
-                        current_object.has_been_carried = 0
-                     end
-                  end
+               global.player[0] = current_object.get_carrier()
+               if global.player[0] != no_player then
+               current_object.set_garbage_collection_disabled(0)
+               current_object.expire_timer.set_rate(0%)
+               current_object.expire_timer.reset()
+               current_object.has_been_carried = 1
+               end
+               if current_object.has_been_carried == 1 and global.player[0] == no_player then
+               current_object.set_garbage_collection_disabled(1)
+               current_object.expire_timer.set_rate(-100%)
+               if current_object.expire_timer.is_zero() then
+               current_object.set_garbage_collection_disabled(0)
+               current_object.has_been_carried = 0
+               end
+               end
                end
             </example>
             <category id="object-lifetime" />
@@ -1170,17 +1182,25 @@
                   The other object to use as a basis.
                </arg>
                <arg name="type"  type="object-type" />
-               <arg name="radius" type="number">Unknown. Testing has not revealed any 
-               obvious effect. A value of 0 seems safe.</arg>
+               <arg name="radius" type="number">
+                  Unknown. Testing has not revealed any
+                  obvious effect. A value of 0 seems safe.
+               </arg>
             </args>
             <blurb>Spawn a new object between this object and another.</blurb>
             <example>
                global.object[0] = global.object[1].place_between_me_and(global.object[2], skull, 0)
             </example>
             <note>
-               Unlike <a href="script/api/object/actions/place_at_me">object.place_at_me</a>, 
-               this function appears to spawn objects exactly in place, provided they aren't 
+               Unlike <a href="script/api/object/actions/place_at_me">object.place_at_me</a>,
+               this function appears to spawn objects exactly in place, provided they aren't
                solid or obstructed.
+            </note>
+            <note>
+               If the same object is used as both basis objects &mdash; that is, if the object
+               that you call this function on is the same object that you pass as an argument
+               &mdash; then the created object will be rotated. Its rotation will be equivalent
+               to -90 pitch, 0 yaw, and 180 roll as shown in Forge.
             </note>
             <category id="object-lifetime" />
          </method>
@@ -1189,23 +1209,25 @@
                <arg name="other" type="object">
                   The object whose rotation should be copied.
                </arg>
-               <arg name="all_axes"  type="bool">A boolean indicating whether to copy all of 
-               the other object's axes of rotation (<var>true</var>) or just its heading 
-               (<var>false</var>).</arg>
+               <arg name="all_axes"  type="bool">
+                  A boolean indicating whether to copy all of
+                  the other object's axes of rotation (<var>true</var>) or just its heading
+                  (<var>false</var>).
+               </arg>
             </args>
             <blurb>Rotate one object to match another.</blurb>
             <example>
                global.object[0].copy_rotation_from(global.object[1], true)
             </example>
             <note>
-               Passing <var>true</var> as the boolean argument will perform the rotation without 
-               doing any further collision checking or physics. If the object being rotated is 
-               physics-simulated, and the rotation causes the object to clip into something else, 
-               then it may end up being launched away if something bumps it and updates its 
+               Passing <var>true</var> as the boolean argument will perform the rotation without
+               doing any further collision checking or physics. If the object being rotated is
+               physics-simulated, and the rotation causes the object to clip into something else,
+               then it may end up being launched away if something bumps it and updates its
                physics simulation.
             </note>
             <note>
-               This function can fail to do anything if it is called on an object that is attached 
+               This function can fail to do anything if it is called on an object that is attached
                to something else.
             </note>
             <category id="positioning" />
@@ -1216,28 +1238,28 @@
                   The object whose rotation should be copied.
                </arg>
                <arg name="x" type="vector3:x">
-                  The X-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The X-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </arg>
                <arg name="y" type="vector3:y">
-                  The Y-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The Y-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </arg>
                <arg name="z" type="vector3:z">
-                  The Z-coordinate of an offset-position. The object will rotate to face 
-                  <var>other</var>'s position plus the offset position. Allowed values are 
-                  integer constants between -128 and 127, inclusive, where 10 is equal to 
+                  The Z-coordinate of an offset-position. The object will rotate to face
+                  <var>other</var>'s position plus the offset position. Allowed values are
+                  integer constants between -128 and 127, inclusive, where 10 is equal to
                   one Forge unit.
                </arg>
             </args>
             <blurb>Rotate one object to face another.</blurb>
             <description>
                <p>
-                  This function can be used to make one object face toward another. It only 
+                  This function can be used to make one object face toward another. It only
                   affects the object's heading (yaw), not its pitch or roll rotations.
                </p>
             </description>
@@ -1245,7 +1267,38 @@
                global.object[0].copy_rotation_from(global.object[1], true)
             </example>
             <note>
-               If you face an object toward itself, you can use the position offset to rotate it.
+               <p>
+                  If you face an object toward itself, you can use the position offset to
+                  rotate it about its local yaw axis. The X-offset should be the sine of
+                  your desired yaw angle, and the Y-offset should be the cosine of your
+                  desired yaw angle.
+               </p>
+               <p>
+                  As a quick trigonometry overview: the sine and cosine functions take an
+                  angle (usually in radians) and give you a number between zero and one.
+                  If you treat the cosine as X and the sine as Y, and plot these numbers
+                  on a graph for every angle from 0 to 360, you'll end up drawing a
+                  circle. If you multiply the cosine and sine by the same number, then
+                  that number becomes the radius of the circle.
+               </p>
+               <p>
+                  You can only use integer offsets with the "face toward" function here,
+                  so cosine and sine values between 0 and 1 aren't useful except in the
+                  really basic cases (multiples of 90 degrees). However, if you multiply
+                  your cosine and sine &mdash; if you pick a large enough radius &mdash;
+                  then you'll end up with a cosine and sine that end up being <em>mostly</em>
+                  accurate when rounded to integers. Remember: all that matters is the
+                  underlying angle, so the radius is just a tool to smush the angle into
+                  something that <i>Halo: Reach</i> can understand.
+               </p>
+               <p>
+                  <i>Halo: Reach</i> follows the same conventions as a typical graphing
+                  calculator here. This means that the angle "zero" is an object's normal
+                  forward angle, and objects rotate counterclockwise as the angle increases.
+                  If you imagine yourself looking at an object from above, with the object
+                  pointing exactly to your right before you rotate it with this function,
+                  then this will exactly match what you see in a graphing calculator.
+               </p>
             </note>
             <category id="positioning" />
          </method>
@@ -1256,24 +1309,28 @@
                   <p>One of the following values:</p>
                   <dl>
                      <dt>primary</dt>
-                        <dd>Attempts to give the weapon to the biped. If successful, then any 
-                        weapon the biped was already holding will be holstered, and the new 
-                        weapon will be switched into their hands.</dd>
+                     <dd>
+                        Attempts to give the weapon to the biped. If successful, then any
+                        weapon the biped was already holding will be holstered, and the new
+                        weapon will be switched into their hands.
+                     </dd>
                      <dt>secondary</dt>
-                        <dd>Attempts to give the weapon to the biped.</dd>
+                     <dd>Attempts to give the weapon to the biped.</dd>
                      <dt>force</dt>
-                        <dd>Forcibly adds the weapon to the biped and switches them to use 
-                        it.</dd>
+                     <dd>
+                        Forcibly adds the weapon to the biped and switches them to use
+                        it.
+                     </dd>
                   </dl>
                </arg>
             </args>
             <blurb>Give a weapon to a biped, even if it isn't player-controlled.</blurb>
             <description>
                <p>
-                  This function attempts to create a new weapon of the desired type, and give 
-                  it to the biped that the function is called on. If that biped is already 
-                  carrying two weapons, then the function will fail, and no new weapon will 
-                  be created. Similarly, the function doesn't seem to do anything when called 
+                  This function attempts to create a new weapon of the desired type, and give
+                  it to the biped that the function is called on. If that biped is already
+                  carrying two weapons, then the function will fail, and no new weapon will
+                  be created. Similarly, the function doesn't seem to do anything when called
                   on something that is not a biped.
                </p>
             </description>
@@ -1281,12 +1338,12 @@
                global.object[0].add_weapon(assault_rifle, force)
             </example>
             <note>
-               If the biped is player-controlled and the player's Weapon Pickup trait is set to 
+               If the biped is player-controlled and the player's Weapon Pickup trait is set to
                Disabled, then you must use the "force" mode to add the weapon.
             </note>
             <note>
-               Remember that this function works differently from <code>player.add_weapon</code>: 
-               the object function takes an object type and spawns a new weapon; while the player 
+               Remember that this function works differently from <code>player.add_weapon</code>:
+               the object function takes an object type and spawns a new weapon; while the player
                function takes an existing weapon object.
             </note>
             <category id="biped-equipment" />
@@ -1298,13 +1355,15 @@
                   <p>One of the following values:</p>
                   <dl>
                      <dt>primary</dt>
-                        <dd>Remove the biped's primary weapon.</dd>
+                     <dd>Remove the biped's primary weapon.</dd>
                      <dt>secondary</dt>
-                        <dd>Remove the biped's secondary weapon.</dd>
+                     <dd>Remove the biped's secondary weapon.</dd>
                   </dl>
                </arg>
-               <arg name="delete" type="bool">A boolean indicating whether to delete the 
-               weapon (<var>true</var>) or merely drop it (<var>false</var>).</arg>
+               <arg name="delete" type="bool">
+                  A boolean indicating whether to delete the
+                  weapon (<var>true</var>) or merely drop it (<var>false</var>).
+               </arg>
             </args>
             <blurb>Remove a weapon from a biped.</blurb>
             <example>
@@ -1312,8 +1371,8 @@
                -- Fore all players to be unarmed:
                --
                for each player do
-                  current_player.biped.remove_weapon(secondary, true)
-                  current_player.biped.remove_weapon(primary, true)
+               current_player.biped.remove_weapon(secondary, true)
+               current_player.biped.remove_weapon(primary, true)
                end
             </example>
             <category id="biped-equipment" />
@@ -1321,33 +1380,35 @@
          </method>
          <method name="apply_shape_color_from_player_member" id="98">
             <args>
-               <arg name="member">An integer constant indicating the index of an object.player 
-               variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
-                  or an alias of such.</arg>
+               <arg name="member">
+                  An integer constant indicating the index of an object.player
+                  variable, or an object-relative player variable e.g. <code>object.player[0]</code>,
+                  or an alias of such.
+               </arg>
             </args>
             <blurb>Recolor an object's shape boundary based on a player variable.</blurb>
             <description>
                <p>
-                  This function recolors an object's shape boundary baesd on the armor color 
-                  of the player referred to by an <var>object.player</var> variable on the 
-                  object. The function's argument specifies which <var>object.player</var> 
+                  This function recolors an object's shape boundary baesd on the armor color
+                  of the player referred to by an <var>object.player</var> variable on the
+                  object. The function's argument specifies which <var>object.player</var>
                   variable to use.
                </p>
                <p>
-                  This function is used in King of the Hill FFA modes to recolor the hill to 
+                  This function is used in King of the Hill FFA modes to recolor the hill to
                   match the player currently controlling it.
                </p>
             </description>
             <example>
                alias owner = object.player[1]
-               
+
                for each object with label "koth_hill" do
-                  --
-                  -- The next three lines do the exact same thing:
-                  --
-                  current_object.apply_shape_color_from_player_member(1)
-                  current_object.apply_shape_color_from_player_member(object.player[1])
-                  current_object.apply_shape_color_from_player_member(object.owner)
+               --
+               -- The next three lines do the exact same thing:
+               --
+               current_object.apply_shape_color_from_player_member(1)
+               current_object.apply_shape_color_from_player_member(object.player[1])
+               current_object.apply_shape_color_from_player_member(object.owner)
                end
             </example>
             <category id="object-shape" />
@@ -1359,11 +1420,11 @@
          <blurb>The object's Spawn Sequence value set in Forge.</blurb>
          <example>
             for each object with label "koth_hill" do
-               if current_object.spawn_sequence == 1 then
-                  --
-                  -- ... do something ...
-                  --
-               end
+            if current_object.spawn_sequence == 1 then
+            --
+            -- ... do something ...
+            --
+            end
             end
          </example>
       </property>
@@ -1371,13 +1432,13 @@
          <blurb>The object's owner team.</blurb>
          <example>
             for each team do
-               for each object with label "ctf_res_zone" do
-                  if current_object.team == current_team then
-                     --
-                     -- do something
-                     --
-                  end
-               end
+            for each object with label "ctf_res_zone" do
+            if current_object.team == current_team then
+            --
+            -- do something
+            --
+            end
+            end
             end
          </example>
          <related context="player" type="property" name="team" />
@@ -1388,16 +1449,16 @@
          <blurb>The object's current shields.</blurb>
          <description>
             <p>
-               This accessor holds the object's current shields. A value of 100 
+               This accessor holds the object's current shields. A value of 100
                represents 100% shields.
             </p>
          </description>
          <example>
             for each player do
-               global.number[0] = current_player.biped.shields
-               if global.number[0] > 100 then -- the player has overshields
-                  current_player.biped.shields /= 2
-               end
+            global.number[0] = current_player.biped.shields
+            if global.number[0] > 100 then -- the player has overshields
+            current_player.biped.shields /= 2
+            end
             end
          </example>
          <category id="object-stats" />
@@ -1406,16 +1467,16 @@
          <blurb>The object's current health.</blurb>
          <description>
             <p>
-               This accessor holds the object's current health. A value of 100 
+               This accessor holds the object's current health. A value of 100
                represents 100% health.
             </p>
          </description>
          <example>
             for each player do
-               global.number[0] = current_player.biped.health
-               if global.number[0] &lt;= 50 then
-                  current_player.biped.health *= 2
-               end
+            global.number[0] = current_player.biped.health
+            if global.number[0] &lt;= 50 then
+            current_player.biped.health *= 2
+            end
             end
          </example>
          <category id="object-stats" />
@@ -1429,7 +1490,7 @@
          </description>
          <example>
             for each player do
-               current_player.biped.max_shields = 50
+            current_player.biped.max_shields = 50
             end
          </example>
          <category id="object-stats" />
@@ -1443,7 +1504,7 @@
          </description>
          <example>
             for each player do
-               current_player.biped.max_health = 50
+            current_player.biped.max_health = 50
             end
          </example>
          <category id="object-stats" />

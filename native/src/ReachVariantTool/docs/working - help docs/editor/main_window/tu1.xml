@@ -3,7 +3,7 @@
    <title>Title Update Settings</title>
    <body>
       <p>
-         The <b>title update settings</b> page allows you to edit configuration data 
+         The <b>title update settings</b> page allows you to edit configuration data
          made available in <i>Halo: Reach</i> Title Update 1.
       </p>
       <img src="tu1.png" />
@@ -12,48 +12,99 @@
       </p>
       <dl>
          <dt>Shield Bleedthrough</dt>
-            <dd>Determines whether damage "bleeds through" player shields. For example, 
-            if you have 5 points of shields and are hit with an attack that does 10 
-            points of damage, bleedthrough would result in you losing all of your 
-            shields as well as 5 points of health, while a lack of bleedthrough would 
-            result in you losing your shields but not losing any health (i.e. you 
-            receive 5 points of damage and the other 5 points are discarded).</dd>
+         <dd>
+            Determines whether damage "bleeds through" player shields. For example,
+            if you have 5 points of shields and are hit with an attack that does 10
+            points of damage, bleedthrough would result in you losing all of your
+            shields as well as 5 points of health, while a lack of bleedthrough would
+            result in you losing your shields but not losing any health (i.e. you
+            receive 5 points of damage and the other 5 points are discarded).
+         </dd>
          <dt>Activating Armor Lock doesn't shed stuck grenades</dt>
-            <dd>Determines whether activating Armor Lock will cause you to shed any 
-            grenades that have been stuck to you, preventing them from killing you.</dd>
+         <dd>
+            Determines whether activating Armor Lock will cause you to shed any
+            grenades that have been stuck to you, preventing them from killing you.
+         </dd>
          <dt>Armor Lock can be stuck with plasma grenades</dt>
-            <dd>Determines whether plasma grenades bounce off of a player that is 
-            currently using Armor Lock, instead of sticking to them and killing them.</dd>
+         <dd>
+            Determines whether plasma grenades bounce off of a player that is
+            currently using Armor Lock, instead of sticking to them and killing them.
+         </dd>
          <dt>Enable Active Camo modifiers</dt>
-            <dd>Determines whether the "Active Camo Energy Curve" values are used.</dd>
+         <dd>Determines whether the "Active Camo Energy Curve" values are used.</dd>
          <dt>Must have an Energy Sword to sword-block</dt>
-            <dd>Determines whether players can survive an Energy Sword attack by using 
-            a melee attack with any weapon.</dd>
+         <dd>
+            Determines whether players can survive an Energy Sword attack by using
+            a melee attack with any weapon.
+         </dd>
          <dt>Enable full-auto Magnum</dt>
-            <dd>Determines whether players can fire the Magnum full-auto by holding 
-            the trigger.</dd>
+         <dd>
+            Determines whether players can fire the Magnum full-auto by holding
+            the trigger.
+         </dd>
          <dt>Precision Weapon Bloom</dt>
-            <dd>Magnify or diminish the amount of bullet spread and reticle "bloom" 
-            applied to precision weapons when they are fired rapidly.</dd>
+         <dd>
+            Magnify or diminish the amount of bullet spread and reticle "bloom"
+            applied to precision weapons when they are fired rapidly.
+         </dd>
          <dt>Armor Lock Damage Drain</dt>
-            <dd>Taking damage while using Armor Lock can drain Armor Lock's remaining 
-            energy.</dd>
+         <dd>
+            Taking damage while using Armor Lock can drain Armor Lock's remaining
+            energy.
+         </dd>
          <dt>Armor Lock Damage Drain Limit</dt>
-            <dd>The maximum amount of Armor Lock energy that can be drained by 
-            incoming damage.</dd>
+         <dd>
+            The maximum amount of Armor Lock energy that can be drained by
+            incoming damage.
+         </dd>
          <dt>Active Camo Energy Curve Min</dt>
-            <dd>Scale Active Camo's energy usage.</dd>
+         <dd>Scale Active Camo's energy usage.</dd>
          <dt>Active Camo Energy Curve Max</dt>
-            <dd>Scale Active Camo's energy usage.</dd>
+         <dd>Scale Active Camo's energy usage.</dd>
          <dt>Magnum Damage</dt>
-            <dd>A multiplier applied to the Magnum's damage output.</dd>
+         <dd>A multiplier applied to the Magnum's damage output.</dd>
          <dt>Magnum Fire Delay Multiplier</dt>
-            <dd>A multiplier applied to the delay between firing consecutive shots 
-            with the Magnum.</dd>
+         <dd>
+            A multiplier applied to the delay between firing consecutive shots
+            with the Magnum.
+         </dd>
       </dl>
       <p>
-         Additionally, there are controls at the bottom of the page that can be used to 
+         Additionally, there are controls at the bottom of the page that can be used to
          rapidly apply values from official game variants.
+      </p>
+
+      <h2>Imprecision</h2>
+      <p>
+         Due to how these values are encoded in game variant files, there are precision
+         limits that come into play when saving and loading. This means that after saving
+         and reloading a game variant, you may not see the exact values that you originally
+         entered. The following technical details are provided for reference purposes, but
+         all that one really needs to understand is that there is a margin of error that
+         may range from 0.8% to 4% depending on the values one wishes to use.
+      </p>
+      <p>
+         The precision limit, or <dfn>interval</dfn>, for Magnum options is roughly
+         (10 &divide; 254), or about 0.04. The precision limit for all other options is
+         roughly (2 &divide; 254), or about 0.008. Some math is done during encoding and
+         decoding to ensure that the minimum and maximum values are always represented
+         with exact accuracy, and to "center" other values within their allowed ranges.
+         This means that the lowest non-zero value will be equal to half of the interval.
+      </p>
+      <p>
+         As an example, the lowest values that can be encoded for non-Magnum options are:
+      </p>
+      <ul>
+         <li>0.0000 (the minimum)</li>
+         <li>0.0039 (the interval times 0.5)</li>
+         <li>0.0118 (the interval times 1.5)</li>
+         <li>0.0197 (the interval times 2.5)</li>
+      </ul>
+      <p>
+         This also means that the value 1.0, used for vanilla settings, can't be represented
+         exactly. The closest you can get is 1.0039, or 100.4%. Coincidentally, the margin of
+         error in this case is identical for both Magnum and non-Magnum options despite the
+         different intervals.
       </p>
    </body>
 </article>

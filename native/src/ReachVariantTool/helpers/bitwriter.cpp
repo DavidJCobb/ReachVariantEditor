@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include "../formats/compressed_float.h"
 
 namespace cobb {
    bitwriter::~bitwriter() {
@@ -103,32 +104,15 @@ namespace cobb {
       if (remaining > 0)
          this->write(value, remaining, remaining);
    }
-   void bitwriter::write_compressed_float(float value, const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept {
-      assert(bitcount <= 8 && "bitwriter::write_compressed_float doesn't currently support compressed floats larger than one byte.");
-      float    range       = max - min;
-      uint32_t max_encoded = 1 << bitcount;
-      if (is_signed)
-         --max_encoded;
-      uint32_t result;
-      if (unknown) {
-         if (value == min)
-            result = 0;
-         else if (value == max)
-            result = max_encoded - 1; // encoding for max value
-         else {
-            result = (value - min) / (range / (float)(max_encoded - 2)) + 1;
-            if (result < 1)
-               result = 1;
-         }
-      } else {
-         --max_encoded;
-         result = (value - min) / (range / (float)max_encoded);
-         uint32_t sign_bit = (result >> 31); // sign bit
-         uint32_t r5       = sign_bit - 1; // 0xFFFFFFFF for unsigned; 0x00000000 for signed
-         result &= r5;
-      }
-      if (result > max_encoded)
-         result = max_encoded;
+   void bitwriter::write_compressed_float(float value, const int bitcount, float min, float max, bool is_signed, bool guarantee_exact_bounds) noexcept {
+      //
+      // This sort of breaks encapsulation -- the "helper" files are meant to work on their own -- but 
+      // frankly, I just need this done with. A lot of the "helper" files here in ReachVariantTool have 
+      // been superseded or improved upon in later projects, and may as well be considered deprecated 
+      // in the overall scheme of things. I've gotten considerably better at all this since RVT, so to 
+      // my thinking, the only way to make RVT's code clean would be to refactor it entirely.
+      //
+      auto result = reach::encode_compressed_float(value, bitcount, min, max, is_signed, guarantee_exact_bounds);
       this->write(result, bitcount);
    }
    void bitwriter::write_stream(const bitwriter& other) noexcept {

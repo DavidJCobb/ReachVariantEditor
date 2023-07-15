@@ -18,20 +18,21 @@ namespace ReachTU1Flags {
 }
 class ReachGameVariantTU1Options {
    public:
-      static constexpr float vanilla_precision_bloom = 5.01968479F; // 100%
-      static constexpr float patched_precision_bloom = 4.23228359F; //  85%
+      static constexpr float vanilla_precision_bloom = 1.00;
+      static constexpr float patched_precision_bloom = 0.85;
       //
-      static constexpr float vanilla_active_camo_energy_curve_min = 0.0669191317F; // TU doesn't change this
+      static constexpr float vanilla_active_camo_energy_curve_min = 0.07F;
+      static constexpr float patched_active_camo_energy_curve_min = vanilla_active_camo_energy_curve_min; // TU doesn't change this
       //
-      static constexpr float vanilla_active_camo_energy_curve_max = 0.0196850393F;
-      static constexpr float patched_active_camo_energy_curve_max = 0.0354330689F;
+      static constexpr float vanilla_active_camo_energy_curve_max = 0.02;
+      static constexpr float patched_active_camo_energy_curve_max = 0.035;
       //
       static constexpr float vanilla_armor_lock_damage_drain       = 0.0F;
       static constexpr float patched_armor_lock_damage_drain       = 0.3F;
       static constexpr float vanilla_armor_lock_damage_drain_limit = 0.0F;
       static constexpr float patched_armor_lock_damage_drain_limit = 0.4F;
       //
-      static constexpr float vanilla_magnum_damage     = 1.0F; // patched changes this to like 0.999 which is probably an unintentional side-effect of how floats are encoded
+      static constexpr float vanilla_magnum_damage     = 1.0F; // patched changes this to like 0.999 which is an unintentional side-effect of how floats are encoded
       static constexpr float vanilla_magnum_fire_delay = 1.0F; // TU doesn't change this
 
       cobb::bitnumber<32, uint32_t> flags;
@@ -53,14 +54,11 @@ class ReachGameVariantTU1Options {
          this->make_patched();
          this->precisionBloom = 0.0F;
       }
-      //
+
+      bool is_vanilla() const; // true if all values are within format margin of error of vanilla settings
+      
       static uint32_t bitcount() noexcept;
-      //
-      #if __cplusplus <= 201703L
-      bool operator==(const ReachGameVariantTU1Options&) const noexcept;
-      bool operator!=(const ReachGameVariantTU1Options& other) const noexcept { return !(*this == other); }
-      #else
+      
       bool operator==(const ReachGameVariantTU1Options&) const noexcept = default;
       bool operator!=(const ReachGameVariantTU1Options&) const noexcept = default;
-      #endif
 };

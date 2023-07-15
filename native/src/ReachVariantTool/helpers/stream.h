@@ -92,7 +92,7 @@ namespace cobb {
             out = value.f;
          }
          //
-         float read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool unknown) noexcept;
+         float read_compressed_float(const int bitcount, float min, float max, bool is_signed, bool guarantee_exact_bounds) noexcept;
          //
          void read_string(char* out, uint32_t maxlength) noexcept;
          void read_u16string(char16_t* out, uint32_t maxlength) noexcept;
