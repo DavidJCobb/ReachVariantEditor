@@ -55,9 +55,14 @@ namespace Megalo {
          //
          // Added in MCC:
          //
-         DetailedEnumValue("<<=",  DetailedEnumValueInfo::make_friendly_name("bitwise-left-shift by")), // acted like += pre-MCC
-         DetailedEnumValue(">>=",  DetailedEnumValueInfo::make_friendly_name("arithmetic-right-shift by")), // crashed pre-MCC // preserves/extends sign bit
-         DetailedEnumValue("abs",  DetailedEnumValueInfo::make_friendly_name("absolute-value")), // a @= b -> a = abs(b)
+         DetailedEnumValue("<<=", DetailedEnumValueInfo::make_friendly_name("bitwise-left-shift by")), // acted like += pre-MCC
+         DetailedEnumValue(">>=", DetailedEnumValueInfo::make_friendly_name("arithmetic-right-shift by")), // crashed pre-MCC // preserves/extends sign bit
+
+         // `a = abs(b)`
+         // This token is safe to use because the compiler doesn't blindly pass user input to this opcode; it 
+         // also verifies the opcode itself. It specifically checks for the `a = abs(b)` syntax and if it finds 
+         // that, it quietly swaps out "=" for "__abs_assign". It's a hack, but it should work well enough.
+         DetailedEnumValue("__abs_assign", DetailedEnumValueInfo::make_friendly_name("absolute-value")),
       });
       auto pickup_priority = DetailedEnum({
          DetailedEnumValue("normal"),    // MegaloEdit: normal
@@ -78,6 +83,27 @@ namespace Megalo {
       auto weapon_slot = DetailedEnum({
          DetailedEnumValue("secondary"),
          DetailedEnumValue("primary"),
+      });
+
+      //
+      // MCC extensions:
+      //
+      
+      auto mapped_control = DetailedEnum({
+         DetailedEnumValue("jump"),
+         DetailedEnumValue("switch_grenade"),
+         DetailedEnumValue("switch_weapon"),
+         DetailedEnumValue("context_primary"),
+         DetailedEnumValue("melee"),
+         DetailedEnumValue("equipment"),
+         DetailedEnumValue("throw_grenade"),
+         DetailedEnumValue("fire_primary"),
+         DetailedEnumValue("crouch"),
+         DetailedEnumValue("scope_zoom"),
+         DetailedEnumValue("night_vision"),
+         DetailedEnumValue("fire_secondary"),
+         DetailedEnumValue("fire_tertiary"),
+         DetailedEnumValue("vehicle_trick"),
       });
    }
 
@@ -275,6 +301,20 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueMathOperatorEnum>
       // DO NOT import any names, because all of the enum values are operators and the compiler has handling for them built-in
    );
+   //
+   void OpcodeArgValueMathOperatorEnum::decompile(Decompiler& out, Decompiler::flags_t flags) noexcept {
+      auto item = this->base.item(this->value);
+      std::string temp;
+      if (!item) {
+         cobb::sprintf(temp, "<operator#%u>", this->value);
+         out.write(temp);
+         return;
+      }
+      temp = item->name;
+      if (temp.empty())
+         cobb::sprintf(temp, "<operator#%u>", this->value);
+      out.write(temp);
+   }
 
    /*static*/ std::vector<OpcodeArgValuePickupPriorityEnum::deprecation> OpcodeArgValuePickupPriorityEnum::deprecations = {
       { "hold_action", 1 },
@@ -333,4 +373,26 @@ namespace Megalo {
       OpcodeArgTypeinfo::default_factory<OpcodeArgValueLoadoutPalette>,
       enums::loadout_palette
    );
+
+   //
+   // Added in MCC:
+   //
+
+   OpcodeArgValueMappedControl::OpcodeArgValueMappedControl() : OpcodeArgValueEnumSuperclass(enums::mapped_control) {}
+   OpcodeArgTypeinfo OpcodeArgValueMappedControl::typeinfo = OpcodeArgTypeinfo(
+      "_mapped_control",
+      "Mapped Control",
+      "A button -- not a specific hardware button, like Left Bumper, but rather the button to which a given gameplay function is currently mapped, like the Jump button.",
+      //
+      OpcodeArgTypeinfo::flags::none,
+      OpcodeArgTypeinfo::default_factory<OpcodeArgValueMappedControl>,
+      enums::mapped_control
+   );
+   bool OpcodeArgValueMappedControl::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
+      this->value = stream.read_bits(5);
+      return true;
+   }
+   void OpcodeArgValueMappedControl::write(cobb::bitwriter& stream) const noexcept {
+      stream.write(this->value, 5);
+   }
 }

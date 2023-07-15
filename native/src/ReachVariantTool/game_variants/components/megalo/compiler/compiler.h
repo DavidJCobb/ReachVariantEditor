@@ -319,6 +319,8 @@ namespace Megalo {
          //
          static keyword_handler_t __get_handler_for_keyword(QString) noexcept;
          //
+         Script::VariableReference* __parseActionLHS(const pos& prior);
+         Script::VariableReference* __parseActionRHS(QString& op, const pos& prior, Script::VariableReference* lhs, bool allow_abs_hack);
          void _parseAction();
          bool _parseCondition(); // return value = stop looking for more conditions
          bool __parseConditionEnding();

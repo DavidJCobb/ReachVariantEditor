@@ -27,3 +27,8 @@
 #include "vector3.h"
 #include "waypoint_icon.h"
 #include "widget_related.h"
+//
+// MCC extensions:
+//
+#include "haloscript_function_id.h"
+#include "megalo_scope.h"

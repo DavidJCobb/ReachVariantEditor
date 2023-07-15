@@ -111,6 +111,11 @@ namespace Megalo {
    };
 
    class OpcodeBase {
+      protected:
+         void _decompile_property_to_set(Decompiler& out, std::vector<OpcodeArgValue*>& args) const;
+         void _decompile_property_setter_value(Decompiler& out, std::vector<OpcodeArgValue*>& args) const;
+         bool _try_decompile_abs_assign(Decompiler& out, std::vector<OpcodeArgValue*>& args) const;
+
       public:
          const char* name;
          const char* desc = "";

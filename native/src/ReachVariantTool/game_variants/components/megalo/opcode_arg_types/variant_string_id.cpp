@@ -120,7 +120,7 @@ namespace Megalo {
          DetailedEnumValue("mp_spire_fp",
             DetailedEnumValueInfo::make_description("An animation name for Pelican models.")
          ),
-         DetailedEnumValue("none",
+         DetailedEnumValue("none_variant", // officially "none", but we use bare identifiers and we already reserve `none` for "don't use a variant string ID"
             DetailedEnumValueInfo::make_description("A variant name. When applied to a standard Warthog, produces a Warthog with no turret.")
          ),
          DetailedEnumValue("destroyed"),

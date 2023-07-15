@@ -37,7 +37,12 @@ namespace {
          "~=",
          "^=",
          "&=",
-         "|="
+         "|=",
+         //
+         // MCC extensions:
+         //
+         "<<=",
+         ">>=",
       };
       for (size_t i = 0; i < operators.size(); i++)
          if (s == operators[i])
@@ -1383,111 +1388,156 @@ namespace Megalo {
          return &Compiler::_handleKeyword_On;
       return nullptr;
    }
-   void Compiler::_parseAction() {
-      Script::VariableReference* lhs = nullptr;
-      Script::VariableReference* rhs = nullptr;
-      //
-      this->skip_whitespace();
-      auto prior = this->backup_stream_state();
-      //
-      #pragma region Parsing
-         QString word;
-         int32_t integer;
-         #pragma region Lefthand side
-            statement_side_t lhs_type = this->_extract_statement_side(word, integer);
-            if (lhs_type == statement_side::string) {
-               this->raise_error("You cannot assign to a string literal.");
-            } else if (lhs_type == statement_side::integer) {
-               lhs = new Script::VariableReference(integer);
-            } else if (lhs_type == statement_side::word) {
-               if (auto handler = Compiler::__get_handler_for_keyword(word)) {
-                  ((*this).*(handler))(prior);
-                  return;
-               }
-               if (word == "and" || word == "or" || word == "not" || word == "then") {
-                  this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
-                  return;
-               }
-               if (word == "else" || word == "elseif") {
-                  this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
-                  return;
-               }
-               if (this->extract_specific_char('(')) {
-                  this->_parseFunctionCall(prior, word, false);
-                  //
-                  // Assigning something to the result of a function call is an error. Let's check for that 
-                  // so we can give an intuitive error message.
-                  //
-                  auto    prior = this->backup_stream_state();
-                  QString op    = this->extract_operator();
-                  if (!op.isEmpty()) {
-                     this->restore_stream_state(prior);
-                     this->raise_fatal(QString("An operator such as %1 cannot appear after a function call; you cannot assign to or compare the return value of a function.").arg(op));
-                  }
-                  return;
-               }
-               //
-               // If we got here, then the parsed word must be the lefthand side of an assignment statement.
-               //
-               lhs = this->__parseVariable(word, false, true);
-            } else {
-               auto op = this->extract_operator();
-               if (!op.isEmpty())
-                  this->raise_fatal(QString("Statements cannot begin with an operator such as %1.").arg(op));
-               else
-                  this->raise_fatal("Expected the start of a new statement.");
-               return;
-            }
-         #pragma endregion
-         #pragma region Operator
-            auto op = this->extract_operator();
-            if (op.isEmpty()) {
-               this->raise_fatal("Expected an operator.");
-               return;
-            }
-            if (!::_is_assignment_operator(op))
-               this->raise_error(QString("Operator %1 is not an assignment operator.").arg(op));
-            //
-         #pragma endregion
-         #pragma region Righthand side
-            statement_side_t rhs_type = this->_extract_statement_side(word, integer);
-            if (rhs_type == statement_side::string) {
-               this->raise_error("You cannot assign a string literal to a variable.");
-            } else if (rhs_type == statement_side::integer) {
-               rhs = new Script::VariableReference(integer);
-            } else if (rhs_type == statement_side::word) {
-               if (Compiler::is_keyword(word)) {
-                  this->raise_fatal(QString("Keyword \"%1\" cannot appear here.").arg(word));
-                  return;
-               }
-               if (this->extract_specific_char('(')) {
-                  if (op != ce_assignment_operator) {
-                     this->raise_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator %2.").arg(op).arg(ce_assignment_operator));
-                  }
-                  this->_parseFunctionCall(prior, word, false, lhs);
-                  return;
-               }
-               rhs = this->__parseVariable(word);
-            } else {
-               this->raise_fatal("Expected the righthand side of an assignment statement.");
-               return;
-            }
-         #pragma endregion
-      #pragma endregion
-      if (!rhs || !lhs) {
-         //
-         // Statement was invalid but parseable.
-         //
-         return;
+
+   Script::VariableReference* Compiler::__parseActionRHS(QString& op, const pos& prior, Script::VariableReference* lhs, bool allow_abs_hack) {
+      QString word;
+      int32_t integer;
+
+      statement_side_t rhs_type = this->_extract_statement_side(word, integer);
+      if (rhs_type == statement_side::string) {
+         this->raise_error("You cannot assign a string literal to a variable.");
+         return nullptr;
       }
-      //
-      auto statement = new Script::Statement;
-      statement->set_start(prior);
-      statement->set_end(this->state);
-      this->block->insert_item(statement);
-      //
-      statement->lhs = lhs;
-      statement->rhs = rhs;
+      if (rhs_type == statement_side::integer) {
+         return new Script::VariableReference(integer);
+      }
+      if (rhs_type == statement_side::word) {
+         if (Compiler::is_keyword(word)) {
+            this->raise_fatal(QString("Keyword \"%1\" cannot appear here.").arg(word));
+            return nullptr;
+         }
+         if (this->extract_specific_char('(')) {
+            if (op != ce_assignment_operator) {
+               this->raise_error(QString("Operator %1 cannot be used to assign the result of a function call to a variable. Use operator %2.").arg(op).arg(ce_assignment_operator));
+            }
+
+            if (allow_abs_hack) {
+               //
+               // HACK HACK HACK DISGUSTING HACK
+               // MCC added an "absolute value" operator for all assignment-related opcodes
+               //
+               if (word.compare("abs", Qt::CaseInsensitive) == 0) {
+                  op = "__abs_assign";
+                  auto* rhs = this->__parseActionRHS(op, prior, lhs, false);
+                  if (rhs == nullptr) {
+                     //
+                     // Can happen if the "true" RHS is an invalid RHS (e.g. a string), or if it's a function call, etc..
+                     //
+                     this->raise_fatal(QString("Malformed `lhs = abs(rhs)` statement: contents of the abs call do not make sense for an absolute-value operation."));
+                     return nullptr;
+                  }
+                  if (!this->extract_specific_char(')')) {
+                     if (rhs)
+                        delete rhs;
+                     this->raise_fatal(QString("Malformed `lhs = abs(rhs)` statement: expected closing parenthesis."));
+                     return nullptr;
+                  }
+                  return rhs;
+               }
+            }
+
+            this->_parseFunctionCall(prior, word, false, lhs);
+            return nullptr;
+         }
+         return this->__parseVariable(word);
+      }
+
+      this->raise_fatal("Expected the righthand side of an assignment statement.");
+      return nullptr;
+   }
+   void Compiler::_parseAction() {
+      Script::Statement* statement;
+      QString op;
+      {
+         std::unique_ptr<Script::VariableReference> lhs;
+         std::unique_ptr<Script::VariableReference> rhs;
+         bool force_absolute_value_operator = false;
+         //
+         this->skip_whitespace();
+         auto prior = this->backup_stream_state();
+         //
+         #pragma region Parsing
+            QString word;
+            int32_t integer;
+            #pragma region Lefthand side
+               statement_side_t lhs_type = this->_extract_statement_side(word, integer);
+               if (lhs_type == statement_side::string) {
+                  this->raise_error("You cannot assign to a string literal.");
+               } else if (lhs_type == statement_side::integer) {
+                  lhs = std::make_unique<Script::VariableReference>(integer);
+               } else if (lhs_type == statement_side::word) {
+                  if (auto handler = Compiler::__get_handler_for_keyword(word)) {
+                     ((*this).*(handler))(prior);
+                     return;
+                  }
+                  if (word == "and" || word == "or" || word == "not" || word == "then") {
+                     this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+                     return;
+                  }
+                  if (word == "else" || word == "elseif") {
+                     this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
+                     return;
+                  }
+                  if (this->extract_specific_char('(')) {
+                     this->_parseFunctionCall(prior, word, false);
+                     //
+                     // Assigning something to the result of a function call is an error. Let's check for that 
+                     // so we can give an intuitive error message.
+                     //
+                     auto    prior = this->backup_stream_state();
+                     QString op    = this->extract_operator();
+                     if (!op.isEmpty()) {
+                        this->restore_stream_state(prior);
+                        this->raise_fatal(QString("An operator such as %1 cannot appear after a function call; you cannot assign to or compare the return value of a function.").arg(op));
+                     }
+                     return;
+                  }
+                  //
+                  // If we got here, then the parsed word must be the lefthand side of an assignment statement.
+                  //
+                  lhs.reset(this->__parseVariable(word, false, true));
+               } else {
+                  auto op = this->extract_operator();
+                  if (!op.isEmpty())
+                     this->raise_fatal(QString("Statements cannot begin with an operator such as %1.").arg(op));
+                  else
+                     this->raise_fatal("Expected the start of a new statement.");
+                  return;
+               }
+            #pragma endregion
+            #pragma region Operator
+               op = this->extract_operator();
+               if (op.isEmpty()) {
+                  this->raise_fatal("Expected an operator.");
+                  return;
+               }
+               if (!::_is_assignment_operator(op))
+                  this->raise_error(QString("Operator %1 is not an assignment operator.").arg(op));
+               //
+            #pragma endregion
+            #pragma region Righthand side
+               rhs.reset(this->__parseActionRHS(op, prior, lhs.get(), true));
+               if (!rhs)
+                  return;
+            #pragma endregion
+         #pragma endregion
+         if (!rhs || !lhs) {
+            //
+            // Statement was invalid but parseable.
+            //
+            return;
+         }
+         //
+         statement = new Script::Statement;
+         statement->set_start(prior);
+         statement->set_end(this->state);
+         this->block->insert_item(statement);
+         //
+         statement->lhs = lhs.release();
+         statement->rhs = rhs.release();
+      }
+      auto* lhs = statement->lhs;
+      auto* rhs = statement->rhs;
       lhs->owner = statement;
       rhs->owner = statement;
       //

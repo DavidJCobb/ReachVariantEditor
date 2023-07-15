@@ -25,7 +25,12 @@ PageFFScenario::PageFFScenario(QWidget* parent) : QWidget(parent) {
          return;
       cobb::modify_bit(data->scenarioFlags, GameVariantDataFirefight::scenario_flags::random_generator_spawns, value);
    });
-   reach_main_window_setup_spinbox(firefightData, this->ui.unkA, unkA);
+   reach_main_window_setup_flag_checkbox(
+      firefightData,
+      this->ui.forceNetworkTest1,
+      mccExtensionFlags,
+      GameVariantDataFirefight::mcc_extension_flags::network_test_1
+   );
    reach_main_window_setup_spinbox(firefightData, this->ui.unkB, unkB);
    reach_main_window_setup_spinbox(firefightData, this->ui.unkC, unkC);
    reach_main_window_setup_spinbox(firefightData, this->ui.unkD, unkD);
@@ -55,7 +60,11 @@ void PageFFScenario::updateFromVariant(GameVariant* variant) {
       const QSignalBlocker blocker(widget);
       widget->setCurrentIndex((data->scenarioFlags & GameVariantDataFirefight::scenario_flags::random_generator_spawns) ? 1 : 0);
    }
-   reach_main_window_update_spinbox(this->ui.unkA, unkA);
+   reach_main_window_update_flag_checkbox(
+      this->ui.forceNetworkTest1,
+      mccExtensionFlags,
+      GameVariantDataFirefight::mcc_extension_flags::network_test_1
+   );
    reach_main_window_update_spinbox(this->ui.unkB, unkB);
    reach_main_window_update_spinbox(this->ui.unkC, unkC);
    reach_main_window_update_spinbox(this->ui.unkD, unkD);

@@ -83,7 +83,7 @@ namespace Megalo {
          DetailedEnumValue("health_pack"),
          DetailedEnumValue("castle_defense"),
          DetailedEnumValue("return"),
-         DetailedEnumValue("shapes"),
+         DetailedEnumValue("shapes"), // "junk" officially; renamed/repurposed for Pre-Game in MCC CGB
          DetailedEnumValue("cartographer"),
          DetailedEnumValue("eight_ball"),
          DetailedEnumValue("noble"),

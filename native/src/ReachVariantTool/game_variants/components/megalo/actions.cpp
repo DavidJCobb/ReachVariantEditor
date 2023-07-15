@@ -2,14 +2,12 @@
 #include "opcode_arg_types/all.h"
 #include "../../errors.h"
 
-#define MEGALO_DISALLOW_NONE_ACTION 0
-#if _DEBUG
-   #undef  MEGALO_DISALLOW_NONE_ACTION
-   //#define MEGALO_DISALLOW_NONE_ACTION 1
-#endif
+namespace {
+   constexpr const bool fail_on_loading_none = false;
+}
 
 namespace Megalo {
-   extern std::array<ActionFunction, 99> actionFunctionList = {{
+   extern std::array<ActionFunction, 107> actionFunctionList = {{
       //
       // The double-curly-braces for this array are NOT a mistake; you should be able to 
       // use single braces but not every compiler handles that correctly.
@@ -1024,8 +1022,93 @@ namespace Megalo {
          },
          OpcodeFuncToScriptMapping::make_doubly_contextual_call("apply_shape_color_from_player_member", "", {0}, variable_scope::object, 0) // or perhaps "make_object_owner_property" if it lasts beyond one tick?
       ),
+
+      //
+      // MCC extensions:
+      //
+
+      ActionFunction( // 99
+         "Run Inline Nested Trigger",
+         "[MCC-only; backported from Halo 4.] Branches execution to another trigger. In this case, the trigger in question is embedded directly in this action, rather than being a \"real\" trigger.",
+         "Execute inline trigger...",
+         {
+            OpcodeArgBase("trigger", OpcodeArgValueMegaloScope::typeinfo),
+         },
+         OpcodeFuncToScriptMapping()
+      ),
+      ActionFunction( // 100
+         "Call HaloScript Function",
+         "[MCC-only; backported from Halo 4.] Calls a HaloScript function that the map has made available for use by Megalo. This appears to be intended mainly for *.MAP mod authors who are creating map-and-Megalo combo mods.",
+         "Invoke a HaloScript function: %1.",
+         {
+            OpcodeArgBase("function_id", OpcodeArgValueHaloscriptFunctionID::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("call_haloscript_function", "", { 0 })
+      ),
+      ActionFunction( // 101
+         "Get Button Press Duration",
+         "[MCC-only; backported from Halo 4.] A host-only action to retrieve how long (in milliseconds) a player has held a given button down. Intended for debugging purposes only; future MCC updates may change how this functions.",
+         "Set %3 to the number of milliseconds for which %1 has held the %2 button.",
+         {
+            OpcodeArgBase("player",  OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("button", OpcodeArgValueMappedControl::typeinfo),
+            OpcodeArgBase("milliseconds",  OpcodeArgValueScalar::typeinfo, true),
+         },
+         OpcodeFuncToScriptMapping::make_function("get_button_press_duration", "", {1}, 0)
+      ),
+      ActionFunction( // 102
+         "Toggle Vehicle Spawning for Team",
+         "[MCC-only; backported from Halo 4.] Enable or disable vehicle spawning for a team. When enabled, the team will spawn in whatever vehicle you've set.",
+         "Set whether vehicle spawning is enabled for %1: %2.",
+         {
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
+            OpcodeArgBase("weapon", OpcodeArgValueConstBool::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_vehicle_spawning_enabled", "", {1}, 0)
+      ),
+      ActionFunction( // 103
+         "Toggle Vehicle Spawning for Player",
+         "[MCC-only; backported from Halo 4.] Enable or disable vehicle spawning for a player. When enabled, the player will spawn in whatever vehicle you've set.",
+         "Set whether vehicle spawning is enabled for %1: %2.",
+         {
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("weapon", OpcodeArgValueConstBool::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_vehicle_spawning_enabled", "", {1}, 0)
+      ),
+      ActionFunction( // 104
+         "Set Respawn Vehicle for Team",
+         "[MCC-only; backported from Halo 4.] Set which vehicle, if any, a team's players will respawn in.",
+         "Set the respawn vehicle for %2 to %1.",
+         {
+            OpcodeArgBase("vehicle", OpcodeArgValueObjectType::typeinfo),
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_respawn_vehicle", "", {0}, 1)
+      ),
+      ActionFunction( // 105
+         "Set Respawn Vehicle for Player",
+         "[MCC-only; backported from Halo 4.] Set which vehicle, if any, a player will respawn in.",
+         "Set the respawn vehicle for %2 to %1.",
+         {
+            OpcodeArgBase("vehicle", OpcodeArgValueObjectType::typeinfo),
+            OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_respawn_vehicle", "", {0}, 1)
+      ),
+      ActionFunction( // 106
+         "Hide Object",
+         "[MCC-only; backported from Halo 4.] Set whether an object is made invisible.",
+         "Set whether %1 is hidden: %2.",
+         {
+            OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
+            OpcodeArgBase("should_hide", OpcodeArgValueConstBool::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_hidden", "", {1}, 0)
+      ),
    }};
    extern const ActionFunction& actionFunction_runNestedTrigger = actionFunctionList[20];
+   extern const ActionFunction& actionFunction_runInlineTrigger = actionFunctionList[99];
 
    bool Action::read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
       #ifdef _DEBUG
@@ -1044,13 +1127,13 @@ namespace Megalo {
          }
          this->function = &list[index];
          if (index == 0) { // The "None" condition loads no further data.
-            #if MEGALO_DISALLOW_NONE_ACTION == 1
+            if constexpr (fail_on_loading_none) {
                auto& error = GameEngineVariantLoadError::get();
                error.state         = GameEngineVariantLoadError::load_state::failure;
                error.failure_point = GameEngineVariantLoadError::load_failure_point::megalo_actions;
                error.reason        = GameEngineVariantLoadError::load_failure_reason::script_opcode_cannot_be_none;
                return false;
-            #endif
+            }
             return true;
          }
       }

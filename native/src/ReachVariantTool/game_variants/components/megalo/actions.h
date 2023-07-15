@@ -21,8 +21,9 @@ namespace Megalo {
             OpcodeFuncToScriptMapping mapping
          ) : OpcodeBase(n, d, f, a, mapping) {};
    };
-   extern std::array<ActionFunction, 99> actionFunctionList;
+   extern std::array<ActionFunction, 107> actionFunctionList;
    extern const ActionFunction& actionFunction_runNestedTrigger;
+   extern const ActionFunction& actionFunction_runInlineTrigger; // MCC-only
 
    class Action : public Opcode {
       public:

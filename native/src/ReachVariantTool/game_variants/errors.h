@@ -28,7 +28,7 @@ struct GameEngineVariantLoadError {
       none,
       zlib_decompress_error,
       invalid_script_opcode_function_index, // extra[0] is the function index
-      script_opcode_cannot_be_none, // should only appear during testing
+      script_opcode_cannot_be_none, // provided for debugging
       bad_script_opcode_argument, // can have load_failure_detail::failed_to_construct_script_opcode_arg
       early_eof,
       block_ended_early,
