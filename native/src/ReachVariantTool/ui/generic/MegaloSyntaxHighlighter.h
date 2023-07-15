@@ -93,7 +93,7 @@ class MegaloSyntaxHighlighter : public QSyntaxHighlighter {
       // highlighted text.
       //
       struct {
-         bool block_comments = false; // Megalo compiler doesn't support these yet
+         bool block_comments = true;
          bool block_strings  = false; // Megalo compiler doesn't support these
       } features;
       struct {
