@@ -41,7 +41,7 @@ namespace Megalo {
          const VariableScopeWhichValueList* owner = nullptr;
          //
       public:
-         std::string name  = nullptr;
+         std::string name;
          flags_t     flags = 0;
          //
          VariableScopeWhichValue(const char* c, flags_t f = 0) : name(c), flags(f) {}

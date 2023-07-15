@@ -22,6 +22,12 @@ class GameVariantDataFirefight : public GameVariantData {
             ammo_crates_enabled         = 0x10,
          };
       };
+      struct mcc_extension_flags {
+         mcc_extension_flags() = delete;
+         enum {
+            network_test_1 = 0b00000001,
+         };
+      };
       enum class predefined_wave_limit_values : uint8_t {
          no_limit   =   0,
          one_wave   =   1,
@@ -48,7 +54,12 @@ class GameVariantDataFirefight : public GameVariantData {
       cobb::bitbool  isBuiltIn;
       ReachCustomGameOptions options;
       cobb::bitnumber<5,  uint8_t> scenarioFlags;
-      cobb::bitnumber<3,  uint8_t> unkA;
+
+      // game executable used to retain this value as an unused Firefight setting, but no longer does.
+      // now it's used as a sentinel for new MCC features.
+      // values < 2 mean old versions; value 2 is current version and values >= 2 skip loading all FF data as of 7/14/2023.
+      cobb::bitnumber<3,  uint8_t> mccExtensionVersion;
+
       cobb::bitnumber<8,  uint8_t> waveLimit;
       cobb::bitnumber<4,  uint8_t> unkB;
       cobb::bitnumber<15, uint16_t> unkC; // a quantity of points; always 10000?
@@ -67,4 +78,5 @@ class GameVariantDataFirefight : public GameVariantData {
       cobb::bitnumber<12, uint16_t> bonusWaveDuration; // in seconds
       ReachFirefightRound::skull_list_t bonusWaveSkulls;
       ReachFirefightWave bonusWave;
+      cobb::bytenumber<uint8_t> mccExtensionFlags; // read only if unkA >= 2; value retained only if unkA == 2 (else forced to 0). new to MCC?
 };

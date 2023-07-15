@@ -49,7 +49,22 @@ namespace Megalo {
    //megalo_opcode_arg_value_enum(OpcodeArgValueCompareOperatorEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueDropWeaponEnum);
    megalo_opcode_arg_value_enum(OpcodeArgValueGrenadeTypeEnum);
-   megalo_opcode_arg_value_enum(OpcodeArgValueMathOperatorEnum);
+   class OpcodeArgValueMathOperatorEnum : public OpcodeArgValueEnumSuperclass {
+      public:
+         OpcodeArgValueMathOperatorEnum();
+         static OpcodeArgTypeinfo typeinfo;
+         megalo_opcode_arg_value_make_create_override;
+
+         virtual bool uses_mcc_exclusive_data() const {
+            switch (this->value) {
+               case 0b1010: // <<=
+               case 0b1011: // >>=
+               case 0b1100: // abs=
+                  return true;
+            }
+            return false;
+         }
+   };
    class OpcodeArgValuePickupPriorityEnum : public OpcodeArgValueEnumSuperclass {
       public:
          OpcodeArgValuePickupPriorityEnum();

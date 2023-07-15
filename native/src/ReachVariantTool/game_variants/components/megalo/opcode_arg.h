@@ -170,13 +170,13 @@ namespace Megalo {
             }
          #pragma endregion
          //
-         inline bool can_be_static() const noexcept {
+         constexpr bool can_be_static() const noexcept {
             return this->static_count > 0;
          }
-         inline bool is_variable() const noexcept {
+         constexpr bool is_variable() const noexcept {
             return (this->flags) & flags::is_variable;
          }
-         inline bool can_have_variables() const noexcept {
+         constexpr bool can_have_variables() const noexcept {
             return this->flags & flags::can_hold_variables;
          }
          const Script::Property* get_property_by_name(QString) const;
@@ -258,6 +258,8 @@ namespace Megalo {
          virtual variable_type get_variable_type() const noexcept {
             return variable_type::not_a_variable;
          }
+
+         virtual bool uses_mcc_exclusive_data() const { return false; }
    };
    #define megalo_opcode_arg_value_make_create_override virtual OpcodeArgValue* create_of_this_type() const noexcept override { return (typeinfo.factory)(); }
    //

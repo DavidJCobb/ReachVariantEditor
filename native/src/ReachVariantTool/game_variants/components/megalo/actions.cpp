@@ -45,7 +45,7 @@ namespace Megalo {
             OpcodeArgBase("offset", OpcodeArgValueVector3::typeinfo),
             OpcodeArgBase("name",   OpcodeArgValueVariantStringID::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("place_at_me", "", {0, 3, 4, 5, 6}, 2, OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded)
+         OpcodeFuncToScriptMapping::make_function("place_at_me", "create_object", {0, 3, 4, 5, 6}, 2, OpcodeFuncToScriptMapping::flags::return_value_can_be_discarded)
       ),
       ActionFunction( // 3
          "Delete Object",
@@ -126,7 +126,7 @@ namespace Megalo {
             OpcodeArgBase("object", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("shape",  OpcodeArgValueShape::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_shape", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_shape", "set_boundary", {1}, 0)
       ),
       ActionFunction( // 11
          "Apply Player Traits",
@@ -136,7 +136,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("apply_traits", "apply_player_traits", {1}, 0)
       ),
       ActionFunction( // 12
          "Set Weapon Pickup Permissions",
@@ -156,7 +156,7 @@ namespace Megalo {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("who", OpcodeArgValuePlayerSet::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_permissions", "set_respawn_filter", {1}, 0)
       ),
       ActionFunction( // 14
          "Set Spawn Location Fireteams",
@@ -166,7 +166,7 @@ namespace Megalo {
             OpcodeArgBase("spawn location", OpcodeArgValueObject::typeinfo),
             OpcodeArgBase("fireteams",      OpcodeArgValueFireteamList::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteams", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_spawn_location_fireteams", "set_fireteam_respawn_filter", {1}, 0)
       ),
       ActionFunction( // 15
          "Set Object Progress Bar",
@@ -280,7 +280,7 @@ namespace Megalo {
          "Does nothing in Halo: Reach's release build.",
          "If the game is running in a debug build of Halo: Reach, break into the debugger.",
          {},
-         OpcodeFuncToScriptMapping::make_function("debug_break", "", {})
+         OpcodeFuncToScriptMapping::make_function("debug_break", "break_into_debugger", {})
       ),
       ActionFunction( // 27
          "Get Object Orientation",
@@ -339,7 +339,7 @@ namespace Megalo {
          {
             OpcodeArgBase("bool", OpcodeArgValueConstBool::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("debug_set_tracing_enabled", "", {0})
+         OpcodeFuncToScriptMapping::make_function("debug_set_tracing_enabled", "debugging_enable_tracing", {0})
       ),
       ActionFunction( // 33
          "Attach Objects",
@@ -408,6 +408,7 @@ namespace Megalo {
          "Set the requisition purchase modes for %1 to %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+            OpcodeArgBase("enable", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("flags",  OpcodeArgValuePlayerReqPurchaseModes::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_req_purchase_modes", "", {1}, 0)
@@ -839,12 +840,12 @@ namespace Megalo {
       ActionFunction( // 81
          "Insert Theater Film Marker",
          "",
-         "Insert a marker into the saved Film of this match, with number %1 and text: %2.",
+         "Insert a marker into the saved Film of this match, with offset %1 and label: %2.",
          {
-            OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),
-            OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
+            OpcodeArgBase("offset", OpcodeArgValueScalar::typeinfo),
+            OpcodeArgBase("label",  OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("insert_theater_film_marker", "", {0, 1})
+         OpcodeFuncToScriptMapping::make_function("insert_theater_film_marker", "saved_film_insert_marker", {0, 1})
       ),
       ActionFunction( // 82
          "Enable/Disable Spawn Zone",
@@ -911,8 +912,8 @@ namespace Megalo {
          OpcodeFuncToScriptMapping::make_function("place_between_me_and", "", {1, 2, 3}, 0)
       ),
       ActionFunction( // 88
-         "Deprecated-88",
-         "A debug function that does nothing in Halo: Reach's release build.",
+         "Debug: Force Splitscreen Count",
+         "A debug function that does nothing in Halo: Reach's release build. Evidence suggests that in debug builds, it might have forcibly set the number of split-screen views to display.",
          "Do nothing. (Unused argument: %1)",
          {
             OpcodeArgBase("number", OpcodeArgValueScalar::typeinfo),

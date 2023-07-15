@@ -23,7 +23,15 @@ bool GameVariantDataFirefight::read(cobb::reader& reader) noexcept {
    }
    this->options.read(stream);
    this->scenarioFlags.read(stream);
-   this->unkA.read(stream);
+   this->mccExtensionVersion.read(stream);
+   if (this->mccExtensionVersion > 2) {
+      auto& log = GameEngineVariantLoadWarningLog::get();
+      log.push_back(QString(
+         "The Master Chief Collection repurposes a previously unused and hidden Firefight setting, and turns it into a Firefight settings "
+         "version number. If the version number is too high, the MCC skips loading all Firefight settings. As of this writing, the current "
+         "version is 2. This game variant uses version %1."
+      ).arg((int)this->mccExtensionVersion));
+   }
    this->waveLimit.read(stream);
    this->unkB.read(stream);
    this->unkC.read(stream);
@@ -44,6 +52,9 @@ bool GameVariantDataFirefight::read(cobb::reader& reader) noexcept {
    this->bonusWaveDuration.read(stream);
    this->bonusWaveSkulls.read(stream);
    this->bonusWave.read(stream);
+   if (this->mccExtensionVersion >= 2) {
+      this->mccExtensionFlags.read(stream);
+   }
    //
    if (stream.get_overshoot_bits() > 0) {
       error_report.state  = GameEngineVariantLoadError::load_state::failure;
@@ -63,7 +74,12 @@ void GameVariantDataFirefight::write(GameVariantSaveProcess& save_process) noexc
    this->isBuiltIn.write(stream);
    this->options.write(stream);
    this->scenarioFlags.write(stream);
-   this->unkA.write(stream);
+
+   if (this->mccExtensionFlags != 0 && this->mccExtensionVersion < 2) {
+      this->mccExtensionVersion = 2;
+   }
+   this->mccExtensionVersion.write(stream);
+
    this->waveLimit.write(stream);
    this->unkB.write(stream);
    this->unkC.write(stream);
@@ -84,6 +100,9 @@ void GameVariantDataFirefight::write(GameVariantSaveProcess& save_process) noexc
    this->bonusWaveDuration.write(stream);
    this->bonusWaveSkulls.write(stream);
    this->bonusWave.write(stream);
+   if (this->mccExtensionVersion >= 2) {
+      this->mccExtensionFlags.write(stream);
+   }
    //
    writer.synchronize();
 }

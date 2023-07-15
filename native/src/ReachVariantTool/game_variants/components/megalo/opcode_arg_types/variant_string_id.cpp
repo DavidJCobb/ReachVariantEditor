@@ -120,6 +120,41 @@ namespace Megalo {
          DetailedEnumValue("mp_spire_fp",
             DetailedEnumValueInfo::make_description("An animation name for Pelican models.")
          ),
+         DetailedEnumValue("none",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a standard Warthog, produces a Warthog with no turret.")
+         ),
+         DetailedEnumValue("destroyed"),
+         DetailedEnumValue("damaged"),
+         DetailedEnumValue("no_sideguns"),
+         DetailedEnumValue("grenade"),
+         DetailedEnumValue("multiplayer"),
+         DetailedEnumValue("no_side_turrets"),
+         DetailedEnumValue("no_turrets"),
+         DetailedEnumValue("no_chin_gun"),
+         DetailedEnumValue("bed_long",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with an attached truck bed.")
+         ),
+         DetailedEnumValue("bed_long_container",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with an attached trailer.")
+         ),
+         DetailedEnumValue("bed_long_tanker",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with an attached fuel tank.")
+         ),
+         DetailedEnumValue("bed_small",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with a small attached truck bed.")
+         ),
+         DetailedEnumValue("bed_small_container",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with a small attached trailer.")
+         ),
+         DetailedEnumValue("bed_small_tanker",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to a truck, spawns a truck with a small attached fuel tank.")
+         ),
+         DetailedEnumValue("plasma_cannon"),
+         DetailedEnumValue("flak_cannon"),
+         DetailedEnumValue("auto"),
+         DetailedEnumValue("noblade",
+            DetailedEnumValueInfo::make_description("A variant name. When applied to an Energy Sword, produces a hilt with no visible blade.")
+         ),
       });
    }
    

@@ -53,14 +53,16 @@ namespace Megalo {
          DetailedEnumValue("^=", DetailedEnumValueInfo::make_friendly_name("bitwise-XOR with")),
          DetailedEnumValue("~=", DetailedEnumValueInfo::make_friendly_name("bitwise-NOT with")), // (a ~= b) == (a &= ~b)
          //
-         DetailedEnumValue("+=",  DetailedEnumValueInfo::make_friendly_name("add(?)")), // KSoft calls this <<= but it acts like addition in MCC-Reach tests
-         //DetailedEnumValue("",  DetailedEnumValueInfo::make_friendly_name("crash the game with")), // KSoft calls this >>= but it crashes in tests
-         //DetailedEnumValue("<<<=", DetailedEnumValueInfo::make_friendly_name("untested-operation with")),
+         // Added in MCC:
+         //
+         DetailedEnumValue("<<=",  DetailedEnumValueInfo::make_friendly_name("bitwise-left-shift by")), // acted like += pre-MCC
+         DetailedEnumValue(">>=",  DetailedEnumValueInfo::make_friendly_name("arithmetic-right-shift by")), // crashed pre-MCC // preserves/extends sign bit
+         DetailedEnumValue("abs",  DetailedEnumValueInfo::make_friendly_name("absolute-value")), // a @= b -> a = abs(b)
       });
       auto pickup_priority = DetailedEnum({
-         DetailedEnumValue("normal"),
-         DetailedEnumValue("high"),
-         DetailedEnumValue("automatic"),
+         DetailedEnumValue("normal"),    // MegaloEdit: normal
+         DetailedEnumValue("high"),      // MegaloEdit: special
+         DetailedEnumValue("automatic"), // MegaloEdit: auto
       });
       auto team_alliance_status = DetailedEnum({
          DetailedEnumValue("neutral"),

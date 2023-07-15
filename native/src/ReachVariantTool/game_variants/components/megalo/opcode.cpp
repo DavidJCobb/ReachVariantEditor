@@ -1,5 +1,6 @@
 #include "opcode.h"
 #include <cassert>
+#include <memory>
 #include "actions.h"
 #include "opcode_arg_types/variables/base.h"
 
