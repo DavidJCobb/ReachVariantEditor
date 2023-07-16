@@ -238,6 +238,9 @@
                has any points. If you set each team's score to 1, and then set a Red Team 
                player's score to 1, then Red Team will be in the lead.
             </p>
+            <p>
+               Team scores cannot hold values outside the range [-32,768, 32,767].
+            </p>
          </description>
          <example>
             for each team do
@@ -268,6 +271,9 @@
                This member allows you to access the values of script-defined Post-Game Carnage 
                Report stats on a per-team basis. Stats can be read or modified. Their values 
                persist between rounds, making them a useful way to persist state between rounds.
+            </p>
+            <p>
+               Scripted stats cannot hold values outside the range [-32,768, 32,767].
             </p>
          </description>
          <example>

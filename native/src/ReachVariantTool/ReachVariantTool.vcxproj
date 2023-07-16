@@ -111,6 +111,7 @@
     <ClCompile Include="game_variants\components\firefight_wave_traits.cpp" />
     <ClCompile Include="game_variants\components\loadouts.cpp" />
     <ClCompile Include="game_variants\components\megalo\actions.cpp" />
+    <ClCompile Include="game_variants\components\megalo\code_block.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\compiler.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\enums.cpp" />
     <ClCompile Include="game_variants\components\megalo\compiler\namespaces.cpp" />
@@ -307,6 +308,7 @@
     <ClInclude Include="game_variants\components\firefight_custom_skull.h" />
     <ClInclude Include="game_variants\components\firefight_round.h" />
     <ClInclude Include="game_variants\components\firefight_wave_traits.h" />
+    <ClInclude Include="game_variants\components\megalo\code_block.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\compiler.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\enums.h" />
     <ClInclude Include="game_variants\components\megalo\compiler\namespaces.h" />

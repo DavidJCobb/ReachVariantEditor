@@ -4,6 +4,7 @@
 #include "namespaces.h"
 #include "../../../helpers/qt/string.h"
 #include "../opcode_arg_types/all_indices.h" // OpcodeArgValueTrigger
+#include "../opcode_arg_types/megalo_scope.h"
 #include "../opcode_arg_types/variables/all_core.h"
 #include "../opcode_arg_types/variables/any_variable.h"
 #include "../opcode_arg_types/variables/base.h"
@@ -144,6 +145,33 @@ namespace {
       }
       return entry_type::normal;
    }
+
+   constexpr const auto _block_independent_start_keywords = std::array{
+      "if",
+      "do",
+      "for",
+      "function",
+   };
+
+   bool _block_type_can_be_inline(Megalo::Script::Block::Type type) {
+      switch (type) {
+         using enum Megalo::Script::Block::Type;
+         case basic:
+         case if_block:
+         case alt_block:
+         case altif_block:
+            return true;
+         case function:
+            // NOTE: We may one day want to make it possible to define functions with 
+            // an inline specifier, so the function always gets inlined at every call 
+            // site. it'd mainly be useful if one's goal is to avoid burning trigger 
+            // indices -- especially if we implement them as `begin` opcodes and just 
+            // reuse the conditions and actions across all of them, though that's far 
+            // future ideas.
+            return false;
+      }
+      return false;
+   }
 }
 namespace Megalo {
    namespace Script {
@@ -186,7 +214,7 @@ namespace Megalo {
                return i;
          return -1;
       }
-      void Block::get_ifs_for_alt(std::vector<Block*>& out) {
+      void Block::get_ifs_for_alt(std::vector<Block*>& out) const {
          out.clear();
          auto parent = dynamic_cast<Block*>(this->parent);
          if (!parent)
@@ -510,13 +538,22 @@ namespace Megalo {
             return;
          }
          //
-         this->_make_trigger(compiler);
+         CodeBlock* body      = nullptr;
+         bool       is_inline = this->is_inline_trigger();
+         if (!is_inline) {
+            this->_make_trigger(compiler);
+            assert(this->trigger != nullptr);
+            body = this->trigger;
+         } else {
+            this->inlined_trigger = new OpcodeArgValueMegaloScope;
+            body = &this->inlined_trigger->data;
+         }
          {  // Conditions on "if" blocks
-            auto& count = this->trigger->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
+            auto& count = body->raw.conditionCount; // multiple Blocks can share one Trigger, so let's co-opt this field to keep track of the or-group. it'll be reset when we save the variant anyway
             for (auto item : this->conditions_alt) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
-                  this->trigger->opcodes.push_back(cnd);
+                  body->opcodes.push_back(cnd);
                   cnd->or_group = count;
                   item->opcode = nullptr;
                }
@@ -526,7 +563,7 @@ namespace Megalo {
             for (auto item : this->conditions) {
                auto cnd = dynamic_cast<Condition*>(item->opcode);
                if (cnd) {
-                  this->trigger->opcodes.push_back(cnd);
+                  body->opcodes.push_back(cnd);
                   cnd->or_group = count;
                   item->opcode = nullptr;
                }
@@ -539,11 +576,26 @@ namespace Megalo {
             auto item    = items[i];
             auto block   = dynamic_cast<Block*>(item);
             if (block) {
-               if (is_last && !block->is_event_trigger() && block->_is_if_block())
-                  block->trigger = this->trigger;
+               auto child_is_inline = block->is_inline_trigger();
+               if (!child_is_inline) {
+                  if (is_last && !block->is_event_trigger() && block->_is_if_block())
+                     block->trigger = this->trigger;
+               }
+
                block->compile(compiler);
-               if (!block->trigger) // empty blocks get skipped
+
+               if (child_is_inline) {
+                  auto* call = new Action;
+                  body->opcodes.push_back(call);
+                  call->function = &actionFunction_runInlineTrigger;
+                  call->arguments.push_back(block->inlined_trigger);
                   continue;
+               }
+               assert(!block->inlined_trigger);
+
+               if (!block->trigger)  // empty blocks get skipped
+                  continue;
+
                if (block->type == Block::Type::function) {
                   //
                   // We don't want to mis-compile function definitions as function calls. Additionally, we should 
@@ -574,13 +626,14 @@ namespace Megalo {
                   //
                   continue;
                }
+
                auto* block_trigger = block->tr_wrap ? block->tr_wrap : block->trigger; // needed for the on:for workaround
                if (block_trigger != this->trigger) {
                   //
                   // Create a "call nested trigger" opcode.
                   //
                   auto call = new Action;
-                  this->trigger->opcodes.push_back(call);
+                  body->opcodes.push_back(call);
                   call->function = &actionFunction_runNestedTrigger;
                   auto arg = (call->function->arguments[0].typeinfo.factory)();
                   call->arguments.push_back(arg);
@@ -594,7 +647,7 @@ namespace Megalo {
             auto statement = dynamic_cast<Statement*>(item);
             if (statement) {
                if (auto opcode = statement->opcode) {
-                  this->trigger->opcodes.push_back(opcode);
+                  body->opcodes.push_back(opcode);
                   statement->opcode = nullptr;
                }
                continue;
@@ -896,6 +949,8 @@ namespace Megalo {
       if (s == "function") // open a function block
          return true;
       if (s == "if") // open a new block with conditions
+         return true;
+      if (s == "inline") // inline specifier for blocks
          return true;
       if (s == "not") // indicate that the next condition should be negated
          return true;
@@ -1465,6 +1520,8 @@ namespace Megalo {
          return &Compiler::_handleKeyword_Function;
       else if (word == "if")
          return &Compiler::_handleKeyword_If;
+      else if (word == "inline")
+         return &Compiler::_handleKeyword_Inline;
       else if (word == "on")
          return &Compiler::_handleKeyword_On;
       return nullptr;
@@ -2639,7 +2696,7 @@ namespace Megalo {
       return statement;
    }
    #pragma endregion
-   //
+   
    int32_t Compiler::_index_of_trigger(const Trigger& t) const noexcept {
       auto&  list = this->results.triggers;
       size_t size = list.size();
@@ -2671,9 +2728,25 @@ namespace Megalo {
          return;
       set->imply(vt, index);
    }
-   //
+   
    void Compiler::_openBlock(Script::Block* block) { // (block) should already have been appended to its parent
       this->block = block;
+      if (this->inline_next_block) {
+         this->inline_next_block = false;
+         block->has_inline_specifier = true;
+         
+         if (!_block_type_can_be_inline(block->type)) {
+            this->raise_error("Blocks of this type cannot be inlined.");
+         }
+         if (block->event != Script::Block::Event::none) {
+            this->raise_error("Event handlers cannot be inlined.");
+         }
+         /*// error is already reported by the keyword
+         if (!block->parent) {
+            this->raise_error("Top-level (non-nested) blocks cannot be inlined. (Where would they be inlined into?)");
+         }
+         //*/
+      }
       auto root = this->root;
       if (block->parent == root) {
          //
@@ -2758,7 +2831,7 @@ namespace Megalo {
       this->block = parent;
       return true;
    }
-   //
+   
    #pragma region keyword handlers
    void Compiler::_handleKeyword_Alias(const pos start) {
       auto name = this->extract_word();
@@ -3516,6 +3589,124 @@ namespace Megalo {
          }
       } else {
          this->raise_error(prior, QString("Invalid event name: \"%s\".").arg(words));
+      }
+
+      //
+      // Lookahead: Ensure that what comes next is a block.
+      //
+      auto after_on = this->backup_stream_state();
+      {
+         QString word;
+         int32_t integer;
+         auto type = this->_extract_statement_side(word, integer);
+         switch (type) {
+            case statement_side_t::integer:
+               this->raise_fatal(
+                  after_on,
+                  QString("'On' specifiers are only allowed before blocks. Expected to find the start of a new block; found an integer (%1) instead.")
+                     .arg(integer)
+               );
+               return;
+            case statement_side_t::string:
+               this->raise_fatal(
+                  after_on,
+                  QString("'On' specifiers are only allowed before blocks. Expected to find the start of a new block; found a string literal instead.")
+               );
+               return;
+         }
+
+         for (const char* block_keyword : _block_independent_start_keywords) {
+            if (word == block_keyword) {
+               this->restore_stream_state(after_on);
+               return;
+            }
+         }
+         //
+         // Invalid word.
+         //
+         if (word == "else" || word == "elseif") {
+            this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
+            return;
+         }
+         if (word == "inline") {
+            this->raise_error(QString("Event triggers cannot be inlined."));
+            this->restore_stream_state(after_on);
+            return;
+         }
+         if (word == "and" || word == "or" || word == "not" || word == "then" || __get_handler_for_keyword(word)) {
+            this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+            return;
+         }
+         this->raise_fatal(
+            after_on,
+            QString("'On' specifiers are only allowed before blocks. Expected to find the start of a new block; found `%1` instead.")
+               .arg(word)
+         );
+      }
+   }
+   void Compiler::_handleKeyword_Inline(const pos start) {
+      if (this->block == this->root) {
+         this->raise_error("Top-level (non-nested) blocks cannot be inlined. (Where would they be inlined into?)");
+      }
+      if (!this->skip_to(':'))
+         this->raise_fatal("Unable to locate the nearest ':' glyph. Parsing cannot continue.");
+
+      if (this->inline_next_block) {
+         this->raise_warning("A block appears to have been marked as 'inline' multiple times.");
+      }
+      this->inline_next_block = true;
+
+      //
+      // Lookahead: Ensure that what comes next is a block.
+      //
+      auto after_inline = this->backup_stream_state();
+      {
+         QString word;
+         int32_t integer;
+         auto type = this->_extract_statement_side(word, integer);
+         switch (type) {
+            case statement_side_t::integer:
+               this->raise_fatal(
+                  after_inline,
+                  QString("'Inline' specifiers are only allowed before blocks. Expected to find the start of a new block; found an integer (%1) instead.")
+                     .arg(integer)
+               );
+               return;
+            case statement_side_t::string:
+               this->raise_fatal(
+                  after_inline,
+                  QString("'Inline' specifiers are only allowed before blocks. Expected to find the start of a new block; found a string literal instead.")
+               );
+               return;
+         }
+
+         for (const char* block_keyword : _block_independent_start_keywords) {
+            if (word == block_keyword) {
+               this->restore_stream_state(after_inline);
+               return;
+            }
+         }
+         //
+         // Invalid word.
+         //
+         if (word == "else" || word == "elseif") {
+            this->raise_fatal(QString("Word \"%1\" is reserved for potential future use as a keyword. It cannot appear here.").arg(word));
+            return;
+         }
+         if (word == "on") {
+            this->raise_error(QString("Event triggers cannot be inlined."));
+            this->restore_stream_state(after_inline);
+            return;
+         }
+         if (word == "and" || word == "or" || word == "not" || word == "then" || __get_handler_for_keyword(word)) {
+            this->raise_fatal(QString("The \"%1\" keyword cannot appear here.").arg(word));
+            return;
+         }
+         this->raise_fatal(
+            after_inline,
+            QString("'Inline' specifiers are only allowed before blocks. Expected to find the start of a new block; found `%1` instead.")
+               .arg(word)
+         );
       }
    }
    #pragma endregion

@@ -4,13 +4,18 @@
    <blurb>A numeric constant or variable.</blurb>
    <description>
       <p>
-         Number variables can be integer constants or numeric variables. The 
-         numbers in question are signed with allowed values ranging from -32768 
-         to 32767.
+         Numbers can be integer constants or numeric variables. There are twelve global 
+         number variables, numbered from 0 to 11, which can be accessed as <code>global.number[<var>n</var>]</code>.
       </p>
       <p>
-         There are twelve global number variables, numbered from 0 to 11, which can 
-         be accessed as <code>global.number[<var>n</var>]</code>.
+         Integer constants can be any number between -32,768 and 32,767, inclusive. In 
+         the original version of <i>Halo: Reach</i>, the values of number variables are 
+         also limited to this range during play.
+      </p>
+      <p>
+         In the <i>Halo: The Master Chief Collection</i> version of <i>Halo: Reach</i>, 
+         as of July 15, 2023, number variables can hold values between -2,147,483,648 and 
+         2,147,483,647 during play.
       </p>
    </description>
 </script-type>

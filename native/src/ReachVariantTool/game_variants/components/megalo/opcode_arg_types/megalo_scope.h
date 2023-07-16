@@ -1,5 +1,6 @@
 #pragma once
 #include "../opcode_arg.h"
+#include "../code_block.h"
 #include "../limits.h"
 #include "../limits_bitnumbers.h"
 
@@ -10,10 +11,7 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
       public:
-         condition_index conditionStart = -1;
-         condition_count conditionCount =  0;
-         action_index    actionStart    = -1;
-         action_count    actionCount    =  0;
+         CodeBlock data;
          //
          virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;

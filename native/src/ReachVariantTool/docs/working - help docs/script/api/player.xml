@@ -1025,7 +1025,11 @@
          </method>
          <method name="record_griefer_penalty" id="97">
             <args>
-               <arg name="unknown"  type="number" />
+               <arg name="penalty amount" type="number">
+                  The penalty amount to add to the player. The precise scale is not known, but 
+                  the values that you specify are divided by 100 when the game engine runs this 
+                  function.
+               </arg>
             </args>
             <blurb>The specific function of this action is not known. Presumably it has something 
             to do with keeping track of bad behavior in-game.</blurb>
@@ -1210,6 +1214,9 @@
                The player's current score. The value is capped at 30,000; attempting to 
                increase it past 30,000 will simply set it to 30,000.
             </p>
+            <p>
+               Player scores cannot hold values outside the range [-32,768, 32,767].
+            </p>
          </description>
          <example>
             --
@@ -1234,6 +1241,9 @@
                This member allows you to access the values of script-defined Post-Game Carnage 
                Report stats on a per-player basis. Stats can be read or modified. Their values 
                persist between rounds, making them a useful way to persist state between rounds.
+            </p>
+            <p>
+               Scripted stats cannot hold values outside the range [-32,768, 32,767].
             </p>
          </description>
          <example>
@@ -1271,6 +1281,14 @@
       </property>
       <property name="unknown_09" type="number">
          <blurb>Unknown. Possibly the player's requisition money.</blurb>
+         <description>
+            <p>
+               Unknown. Possibly the player's requisition money.
+            </p>
+            <p>
+               This property cannot hold values outside the range [-32,768, 32,767].
+            </p>
+         </description>
       </property>
    </properties>
    <accessors>

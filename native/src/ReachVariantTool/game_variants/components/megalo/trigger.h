@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "actions.h"
+#include "code_block.h"
 #include "conditions.h"
 #include "limits.h"
 #include "limits_bitnumbers.h"
@@ -60,44 +61,20 @@ namespace Megalo {
          bool is_downstream_from(const TriggerDecompileState* subject, const TriggerDecompileState* _checkStart = nullptr) const noexcept;
    };
 
-   class Trigger {
+   class Trigger : public CodeBlock {
       public:
          ~Trigger();
          //
          cobb::bitnumber<3, block_type> blockType = block_type::normal;
          cobb::bitnumber<3, entry_type> entryType = entry_type::normal;
          cobb::refcount_ptr<ReachForgeLabel> forgeLabel;
-         struct {
-            //
-            // Raw data loaded from a game variant file. Reach uses a struct-of-arrays approach to 
-            // serialize trigger data, writing all conditions followed by all actions and then headers 
-            // for triggers, with each header identifying the start index and count of each opcode type. 
-            // This represents raw struct-of-arrays data; the (opcodes) vector is generated post-load by 
-            // the (postprocess_opcodes) member function.
-            //
-            // The "raw" data is generally only meaningful during the load and save processes, and should 
-            // not be checked at any other time. The compiler co-opts the (conditionCount) value here to 
-            // handle (Condition::or_group) when compiling new triggers.
-            //
-            condition_index conditionStart = -1;
-            condition_count conditionCount =  0;
-            action_index    actionStart    = -1;
-            action_count    actionCount    =  0;
-            bool            serialized     = false;
-         } raw;
-         //
-         std::vector<Opcode*> opcodes; // set up by postprocess_opcodes after read; trigger owns the opcodes and deletes them in its destructor
          #if _DEBUG
             uint32_t bit_offset = 0;
          #endif
          TriggerDecompileState decompile_state;
          //
          bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept;
-         void postprocess_opcodes(const std::vector<Condition>& allConditions, const std::vector<Action>& allActions) noexcept;
          void write(cobb::bitwriter& stream) const noexcept;
-         //
-         void prep_for_flat_opcode_lists(); // call this on ALL triggers before calling (generate_flat_opcode_lists) on ANY of them
-         void generate_flat_opcode_lists(GameVariantDataMultiplayer& mp, std::vector<Condition*>& allConditions, std::vector<Action*>& allActions);
          //
          void to_string(const std::vector<Trigger*>& allTriggers, std::string& out, std::string& indent) const noexcept; // need the list of all triggers so we can see into Run Nested Trigger actions
          inline void to_string(const std::vector<Trigger*>& allTriggers, std::string& out) const noexcept {
@@ -106,8 +83,6 @@ namespace Megalo {
             this->to_string(allTriggers, out, indent);
          }
          void decompile(Decompiler& out) noexcept;
-         //
-         void count_contents(size_t& conditions, size_t& actions) const noexcept;
    };
 
    class TriggerEntryPoints {

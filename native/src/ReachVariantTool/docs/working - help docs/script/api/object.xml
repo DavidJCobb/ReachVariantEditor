@@ -20,9 +20,7 @@
       </p>
       <p>
          There are sixteen global object variables, numbered from 0 to 15, which can
-         be accessed as <code>
-            global.object[<var>n</var>]
-         </code>.
+         be accessed as <code>global.object[<var>n</var>]</code>.
       </p>
    </description>
    <methods>
@@ -52,9 +50,9 @@
                -- Drain the shields of all players in the hill.
                --
                for each player do
-               if current_hill.shape_contains(current_player.biped) then
-               current_player.biped.shields = 0
-               end
+                  if current_hill.shape_contains(current_player.biped) then
+                     current_player.biped.shields = 0
+                  end
                end
             </example>
             <category id="object-shape" />
@@ -74,13 +72,13 @@
                -- Do not allow Elites to pick up Assault Rifles.
                --
                for each player do
-               if current_player.biped.is_of_type(elite) then
-               for each object do
-               if current_object.is_of_type(assault_rifle) then
-               current_object.set_pickup_permissions(mod_player, current_player, 0)
-               end
-               end
-               end
+                  if current_player.biped.is_of_type(elite) then
+                     for each object do
+                        if current_object.is_of_type(assault_rifle) then
+                           current_object.set_pickup_permissions(mod_player, current_player, 0)
+                        end
+                     end
+                  end
                end
             </example>
             <note>
@@ -101,9 +99,9 @@
                -- Delete objects that fall out of bounds.
                --
                for each object do
-               if current_object.is_out_of_bounds() then
-               current_object.delete()
-               end
+                  if current_object.is_out_of_bounds() then
+                     current_object.delete()
+                  end
                end
             </example>
          </method>
@@ -114,10 +112,10 @@
             </args>
             <example>
                for each player do
-               global.object[0] = current_player.get_weapon(primary)
-               if global.object[0].has_forge_label("bad_weapon") then
-               current_player.biped.kill(false)
-               end
+                  global.object[0] = current_player.get_weapon(primary)
+                  if global.object[0].has_forge_label("bad_weapon") then
+                     current_player.biped.kill(false)
+                  end
                end
             </example>
          </method>
@@ -125,11 +123,11 @@
             <blurb>Check whether this object is an Armor Ability currently being used by a player.</blurb>
             <example>
                for each player do
-               global.object[0] = current_player.get_armor_ability()
-               if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
-               global.object[0].delete()
-               game.show_message_to(current_player, none, "don't do that")
-               end
+                  global.object[0] = current_player.get_armor_ability()
+                  if global.object[0].is_of_type(armor_lock) and global.object[0].is_in_use() then
+                     global.object[0].delete()
+                     game.show_message_to(current_player, none, "don't do that")
+                  end
                end
             </example>
             <note>
@@ -204,14 +202,14 @@
             <blurb>Delete this object from the game world.</blurb>
             <example>
                for each object with label "team_only" do
-               if game.teams_enabled == 0 then
-               current_object.delete()
-               end
+                  if game.teams_enabled == 0 then
+                     current_object.delete()
+                  end
                end
                for each object with label "ffa_only" do
-               if game.teams_enabled != 0 then
-               current_object.delete()
-               end
+                  if game.teams_enabled != 0 then
+                     current_object.delete()
+                  end
                end
             </example>
             <note>
@@ -250,7 +248,7 @@
             <blurb>Change the icon that this waypoint displays.</blurb>
             <example>
                for each object with label "koth_hill" do
-               current_object.set_waypoint_icon(defend)
+                  current_object.set_waypoint_icon(defend)
                end
             </example>
             <category id="object-waypoint" />
@@ -274,7 +272,7 @@
             <blurb>Change the waypoint's visual priority.</blurb>
             <example>
                for each object with label 2 do -- let's pretend this is all landmines
-               current_object.set_waypoint_priority(low)
+                  current_object.set_waypoint_priority(low)
                end
             </example>
             <category id="object-waypoint" />
@@ -290,16 +288,16 @@
             <blurb>Change the timer that a waypoint displays.</blurb>
             <example>
                for each object with label "koth_hill" do
-               current_object.set_waypoint_timer(3)
+                  current_object.set_waypoint_timer(3)
                end
 
                alias capture_timer = object.timer[0]
                for each object with label "territory" do
-               current_object.set_waypoint_timer(object.capture_timer)
+                  current_object.set_waypoint_timer(object.capture_timer)
                end
 
                for each object with label "ignore_me" do
-               current_object.set_waypoint_timer(none)
+                  current_object.set_waypoint_timer(none)
                end
             </example>
             <category id="object-waypoint" />
@@ -320,7 +318,7 @@
             <blurb>Change the distances at which waypoints are visible.</blurb>
             <example>
                for each object with label "koth_hill" do
-               current_object.set_waypoint_range(0, 50)
+                  current_object.set_waypoint_range(0, 50)
                end
             </example>
             <note>
@@ -348,7 +346,8 @@
                </arg>
                <arg name="dimensions..." type="number">
                   Zero or more dimensions for the shape, as appropriate for the given type.
-                  A value of 10 represents one Forge unit.
+                  A value of 10 represents one Forge unit. <!-- All values are clamped to the 
+                  range [0, 200]. --><!-- TODO: CONFIRM by testing -->
                </arg>
             </args>
             <blurb>Change an object's shape boundary.</blurb>
@@ -362,16 +361,16 @@
             </description>
             <example>
                for each object with label "use_none" do
-               current_object.set_shape(none)
+                  current_object.set_shape(none)
                end
                for each object with label "use_sphere" do
-               current_object.set_shape(sphere, 10)
+                  current_object.set_shape(sphere, 10)
                end
                for each object with label "use_cylinder" do
-               current_object.set_shape(cylinder, 10, 10, 10)
+                  current_object.set_shape(cylinder, 10, 10, 10)
                end
                for each object with label "use_box" do
-               current_object.set_shape(box, 10, 10, 10, 10)
+                  current_object.set_shape(box, 10, 10, 10, 10)
                end
             </example>
             <category id="object-shape" />
@@ -399,13 +398,13 @@
                -- Do not allow Elites to pick up Assault Rifles.
                --
                for each player do
-               if current_player.biped.is_of_type(elite) then
-               for each object do
-               if current_object.is_of_type(assault_rifle) then
-               current_object.set_pickup_permissions(mod_player, current_player, 0)
-               end
-               end
-               end
+                  if current_player.biped.is_of_type(elite) then
+                     for each object do
+                        if current_object.is_of_type(assault_rifle) then
+                           current_object.set_pickup_permissions(mod_player, current_player, 0)
+                        end
+                     end
+                  end
                end
             </example>
             <category id="objectives" />
@@ -459,8 +458,8 @@
             </description>
             <example>
                for each object with label "fireteam_1_spawn" do
-               current_object.set_spawn_location_fireteams(0)
-               current_object.set_spawn_location_permissions(allies)
+                  current_object.set_spawn_location_fireteams(0)
+                  current_object.set_spawn_location_permissions(allies)
                end
             </example>
             <category id="spawning" />
@@ -477,18 +476,18 @@
             <blurb>Set whether an object displays a progress bar, and who should be able to see it.</blurb>
             <example>
                for each object with label "koth_hill" do
-               current_object.set_progress_bar(3, everyone)
+                  current_object.set_progress_bar(3, everyone)
                end
 
                alias capture_timer = object.timer[0]
                for each object with label "territory" do
-               for each player do
-               current_object.set_progress_bar(object.capture_timer, mod_player, current_player, 1)
-               end
+                  for each player do
+                     current_object.set_progress_bar(object.capture_timer, mod_player, current_player, 1)
+                  end
                end
 
                for each object with label "ignore_me" do
-               current_object.set_progress_bar(none, everyone)
+                  current_object.set_progress_bar(none, everyone)
                end
             </example>
             <category id="object-ui" />
@@ -511,10 +510,10 @@
             </description>
             <example>
                for each object with label "awful_gun" do
-               global.player[0] = current_object.get_carrier()
-               if global.player[0] != no_player then
-               global.player[0].kill(false)
-               end
+                  global.player[0] = current_object.get_carrier()
+                  if global.player[0] != no_player then
+                     global.player[0].kill(false)
+                  end
                end
             </example>
             <category id="armor-abilities" />
@@ -548,11 +547,11 @@
             <blurb>Kill an object.</blurb>
             <example>
                for each object with label "avoid_me" do
-               for each player do
-               if current_object.shape_contains(current_player.biped) then
-               current_player.biped.kill(false)
-               end
-               end
+                  for each player do
+                     if current_object.shape_contains(current_player.biped) then
+                        current_player.biped.kill(false)
+                     end
+                  end
                end
             </example>
             <category id="object-lifetime" />
@@ -576,7 +575,7 @@
             </description>
             <example>
                for each player do
-               current_player.biped.set_invincibility(1)
+                  current_player.biped.set_invincibility(1)
                end
             </example>
             <category id="object-stats" />
@@ -598,9 +597,9 @@
             <example>
                global.number[0] = current_object.get_orientation()
                if global.number[0] != 1 then
-               --
-               -- object isn't upright
-               --
+                  --
+                  -- object isn't upright
+                  --
                end
             </example>
             <note>
@@ -959,8 +958,8 @@
          <method name="set_scale" id="52">
             <args>
                <arg name="scale" type="number">
-                  The scale to apply to this object, with
-                  the value 100 representing normal (100%) size.
+                  The scale to apply to this object, with the value 100 representing normal (100%) size. 
+                  Values must be greater than zero to have any effect.
                </arg>
             </args>
             <blurb>Resize an object.</blurb>
@@ -1031,9 +1030,9 @@
             <example>
                global.number[0] = current_object.get_distance_to(global.object[0])
                if global.number[0] &lt; 10 then
-               --
-               -- The objects are close!
-               --
+                  --
+                  -- The objects are close!
+                  --
                end
             </example>
             <category id="positioning" />
@@ -1115,13 +1114,13 @@
                alias is_away = object.number[0]
 
                for each object with label "ctf_res_zone_away" do
-               current_object.enable_spawn_zone(0)
-               --
-               global.team[0]   = current_object.team
-               global.object[0] = global.team[0].flag
-               if global.object[0].is_away == 1 then
-               current_object.enable_spawn_zone(1)
-               end
+                  current_object.enable_spawn_zone(0)
+                  --
+                  global.team[0]   = current_object.team
+                  global.object[0] = global.team[0].flag
+                  if global.object[0].is_away == 1 then
+                     current_object.enable_spawn_zone(1)
+                  end
                end
             </example>
             <category id="spawning" />
@@ -1157,21 +1156,21 @@
                -- despawning for a full minute.
 
                for each object with label all_rockets do
-               global.player[0] = current_object.get_carrier()
-               if global.player[0] != no_player then
-               current_object.set_garbage_collection_disabled(0)
-               current_object.expire_timer.set_rate(0%)
-               current_object.expire_timer.reset()
-               current_object.has_been_carried = 1
-               end
-               if current_object.has_been_carried == 1 and global.player[0] == no_player then
-               current_object.set_garbage_collection_disabled(1)
-               current_object.expire_timer.set_rate(-100%)
-               if current_object.expire_timer.is_zero() then
-               current_object.set_garbage_collection_disabled(0)
-               current_object.has_been_carried = 0
-               end
-               end
+                  global.player[0] = current_object.get_carrier()
+                  if global.player[0] != no_player then
+                     current_object.set_garbage_collection_disabled(0)
+                     current_object.expire_timer.set_rate(0%)
+                     current_object.expire_timer.reset()
+                     current_object.has_been_carried = 1
+                  end
+                  if current_object.has_been_carried == 1 and global.player[0] == no_player then
+                     current_object.set_garbage_collection_disabled(1)
+                     current_object.expire_timer.set_rate(-100%)
+                     if current_object.expire_timer.is_zero() then
+                        current_object.set_garbage_collection_disabled(0)
+                        current_object.has_been_carried = 0
+                     end
+                  end
                end
             </example>
             <category id="object-lifetime" />
@@ -1183,7 +1182,7 @@
                </arg>
                <arg name="type"  type="object-type" />
                <arg name="radius" type="number">
-                  Unknown. Testing has not revealed any
+                  Unknown. A value of 10 is equal to 1 Forge unit. Testing has not revealed any
                   obvious effect. A value of 0 seems safe.
                </arg>
             </args>
@@ -1371,8 +1370,8 @@
                -- Fore all players to be unarmed:
                --
                for each player do
-               current_player.biped.remove_weapon(secondary, true)
-               current_player.biped.remove_weapon(primary, true)
+                  current_player.biped.remove_weapon(secondary, true)
+                  current_player.biped.remove_weapon(primary, true)
                end
             </example>
             <category id="biped-equipment" />
@@ -1403,12 +1402,12 @@
                alias owner = object.player[1]
 
                for each object with label "koth_hill" do
-               --
-               -- The next three lines do the exact same thing:
-               --
-               current_object.apply_shape_color_from_player_member(1)
-               current_object.apply_shape_color_from_player_member(object.player[1])
-               current_object.apply_shape_color_from_player_member(object.owner)
+                  --
+                  -- The next three lines do the exact same thing:
+                  --
+                  current_object.apply_shape_color_from_player_member(1)
+                  current_object.apply_shape_color_from_player_member(object.player[1])
+                  current_object.apply_shape_color_from_player_member(object.owner)
                end
             </example>
             <category id="object-shape" />

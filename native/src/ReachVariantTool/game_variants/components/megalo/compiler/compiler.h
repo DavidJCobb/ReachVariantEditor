@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <optional>
 #include <vector>
 #include <QMultiMap>
 #include <QString>
@@ -13,6 +14,7 @@
 #include "../../../types/multiplayer.h"
 
 namespace Megalo {
+   class OpcodeArgValueMegaloScope;
    class Compiler;
    //
    namespace Script {
@@ -47,9 +49,11 @@ namespace Megalo {
             };
             //
          public:
+            OpcodeArgValueMegaloScope* inlined_trigger = nullptr;
             Trigger* trigger = nullptr;
-            Trigger* tr_wrap = nullptr; // wrapper trigger; use to fix (on event: for ... do end) so that it compiles properly
+            Trigger* tr_wrap = nullptr; // wrapper trigger; use to fix (on event: for ... do end) so that it compiles properly (since the game doesn't allow event types on loop triggers)
             QString  name; // only for functions
+            bool     has_inline_specifier = false;
             QString  label_name;
             int32_t  label_index  = -1;
             size_t   caller_count = 0; // for functions
@@ -58,7 +62,7 @@ namespace Megalo {
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions_alt; // only for alt(if) blocks // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions; // only for if blocks // contents are owned by this Block and deleted in the destructor
-            //
+            
             ~Block();
             void insert_condition(Comparison*);
             void insert_item(ParsedItem*);
@@ -66,7 +70,7 @@ namespace Megalo {
             void remove_item(ParsedItem*);
             int32_t index_of_item(const ParsedItem*) const noexcept;
             //
-            void get_ifs_for_alt(std::vector<Block*>& out);
+            void get_ifs_for_alt(std::vector<Block*>& out) const;
             void make_alt_of(const Block& other);
             //
             void clear(bool deleting = false);
@@ -74,8 +78,45 @@ namespace Megalo {
             //
             void for_each_function(std::function<void(Block*)>);
             //
-            inline bool is_event_trigger() const noexcept { return this->event != Event::none; }
-            //
+            constexpr bool is_event_trigger() const noexcept { return this->event != Event::none; }
+            constexpr bool is_inline_trigger() const noexcept {
+               if (!this->has_inline_specifier)
+                  return false;
+               if (this->event != Event::none)
+                  return false;
+               if (this->parent == nullptr) {
+                  //
+                  // Top-level triggers cannot be inlined. An inlined trigger is an action; 
+                  // actions must exist somewhere inside of a non-inlined trigger (including 
+                  // inside of an inlined descendant trigger).
+                  //
+                  return false;
+               }
+               switch (this->type) {
+                  case Type::basic:
+                  case Type::if_block:
+                     return true;
+                  case Type::altif_block:
+                  case Type::alt_block:
+                     /*//
+                     {
+                        std::vector<Block*> ifs;
+                        this->get_ifs_for_alt(ifs);
+                        if (ifs.empty())
+                           break;
+                        auto* base = ifs.back();
+                        assert(base != nullptr);
+                        assert(base->type == Type::if_block);
+                        if (base->is_inline_trigger())
+                           return true;
+                     }
+                     return false;
+                     //*/
+                     return true;
+               }
+               return false;
+            }
+            
          protected:
             void _get_effective_items(std::vector<ParsedItem*>& out, bool include_functions = true); // returns the list of items with only Statements and Blocks, i.e. only things that generate compiled output
             bool _is_if_block() const noexcept;
@@ -212,6 +253,7 @@ namespace Megalo {
          Script::Block* root  = nullptr; // Compiler has ownership of all Blocks, Statements, etc., and will delete them when it is destroyed.
          Script::Block* block = nullptr; // current block being parsed
          Script::Block::Event next_event = Script::Block::Event::none;
+         bool     inline_next_block     = false;
          bool     negate_next_condition = false;
          c_joiner next_condition_joiner = c_joiner::none;
          std::vector<Script::Alias*> aliases_in_scope;
@@ -342,7 +384,7 @@ namespace Megalo {
          //
          void __parseFunctionArgs(const OpcodeBase&, Opcode&, unresolved_str_list&);
          Script::Statement* _parseFunctionCall(const pos& pos, QString stem, bool is_condition, Script::VariableReference* assign_to = nullptr);
-         //
+         
          void _openBlock(Script::Block*);
          bool _closeCurrentBlock();
          //
@@ -371,6 +413,7 @@ namespace Megalo {
          void _handleKeyword_End(const pos start);
          void _handleKeyword_Enum(const pos start);
          void _handleKeyword_If(const pos start);
+         void _handleKeyword_Inline(const pos start);
          void _handleKeyword_For(const pos start);
          void _handleKeyword_Function(const pos start);
          void _handleKeyword_On(const pos start);
