@@ -406,6 +406,8 @@
                         <dd>Unknown.</dd>
                   </dl>
                </arg>
+               <arg name="enable" type="number">A value controlling whether to enable or disable 
+                these purchases.</arg>
             </args>
             <blurb>A development leftover related to a scrapped Requisition system.</blurb>
             <description>
@@ -417,7 +419,7 @@
             </description>
             <example>
                for each player do
-                  current_player.set_req_purchase_modes(alive_weapons | alive_equipment | alive_vehicles | dead_weapons | dead_equipment)
+                  current_player.set_req_purchase_modes(alive_weapons | alive_equipment | alive_vehicles | dead_weapons | dead_equipment, 1)
                end
             </example>
             <!-- relationships only need to be specified on one end -->
@@ -1027,6 +1029,157 @@
             </args>
             <blurb>The specific function of this action is not known. Presumably it has something 
             to do with keeping track of bad behavior in-game.</blurb>
+         </method>
+         <method name="get_button_press_duration" id="101" returns="number">
+            <args>
+               <arg name="button">
+                  <p>
+                     The name of a gameplay function to which a button can be mapped. In the following 
+                     list, title-cased names (e.g. "Gameplay Function Name") refer to options in the 
+                     MCC's gamepad control scheme editor.
+                  </p>
+                  <dl>
+                     <dt>jump</dt>
+                        <dd>The button that's currently mapped to Jump.</dd>
+                     <dt>switch_grenade</dt>
+                        <dd>The button that's mapped to cycling through your grenades. This matches MCC's 
+                        "Switch Grenades" function, but <em>not</em> "Select Next Grenade" or "Select 
+                        Previous Grenade."</dd>
+                     <dt>context_primary</dt>
+                        <dd>The button that's currently mapped to Action.</dd>
+                     <dt>melee_attack</dt>
+                        <dd>The button that's currently mapped to meleeing.</dd>
+                     <dt>equipment</dt>
+                        <dd>The button that's currently mapped to Use Armor Ability.</dd>
+                     <dt>throw_grenade</dt>
+                        <dd>The button that's currently mapped to throwing a grenade.</dd>
+                     <dt>fire_primary</dt>
+                        <dd>The button that's currently mapped to Fire.</dd>
+                     <dt>crouch</dt>
+                        <dd>The button that's currently mapped to crouching.</dd>
+                     <dt>scope_zoom</dt>
+                        <dd>The button that's currently mapped to toggling your scope/zoom.</dd>
+                     <dt>night_vision</dt>
+                        <dd>The button that's currently mapped to Toggle Night Vision.</dd>
+                     <dt>fire_secondary</dt>
+                        <dd>The button that's currently mapped to Vehicle Function 1.</dd>
+                     <dt>fire_tertiary</dt>
+                        <dd>Unknown. This appears to always react to the B button; it doesn't correspond 
+                        to any of the controls that MCC allows players to rebind in custom control schemes, 
+                        and it doesn't differ between any of the built-in control schemes.</dd>
+                     <dt>vehicle_trick</dt>
+                        <dd>Either of the buttons mapped to Vehicle Function 2 and Vehicle Function 3.</dd>
+                  </dl>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Detect whether a player is holding a given button down. Intended for 
+            debugging purposes only.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function checks whether a specified gameplay-related button is being held down on 
+                  the gamepad; if so, it returns the number of milliseconds for which the button has been 
+                  held down. This function does not react to the keyboard, only works on host, and per 
+                  statements by 343i developers is intended for debugging purposes only.
+               </p>
+               <p>
+                  When multiple functions are mapped to the same button, they do not block each other; 
+                  this function will return the same time in milliseconds for both of them. Although 
+                  buttons are identified by their mapped function (i.e. "the Jump button" instead of "A"), 
+                  this function will return the correct duration even if the player is unable to trigger 
+                  the mapped function. Players that are on the respawn screen, or out of grenades, for 
+                  example, can still be detected as pressing the "throw grenades" button.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  global.number[0] = current_player.get_button_press_duration(jump)
+               end
+            </example>
+         </method>
+         <method name="set_vehicle_spawning_enabled" id="103">
+            <args>
+               <arg name="enable" type="bool">
+                  <p>
+                     Control whether this player spawns in a vehicle (true) or not (false).
+                  </p>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Although intended to let you control whether players spawn in vehicles 
+            or not, this function doesn't appear to actually do anything.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function was intended to let you control whether players spawn in a vehicle or not; 
+                  it would allow you to set a spawn vehicle via <a href="script/api/player/actions/set_respawn_vehicle">set_respawn_vehicle</a>, 
+                  without having to set the spawn vehicle type to none in order to disable vehicle spawning.
+               </p>
+               <p>
+                  In tests, this function doesn't actually do anything. Disassembly of haloreach.dll 
+                  shows that it is, as of this writing, a no-op: it contains no code and has no effect.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.set_respawn_vehicle(warthog)
+                  current_player.set_vehicle_spawning_enabled(false)
+               end
+            </example>
+            <related context="team" type="method" name="set_vehicle_spawning_enabled" />
+            <related context="player" type="method" name="set_respawn_vehicle" />
+            <related context="team" type="method" name="set_respawn_vehicle" />
+         </method>
+         <method name="set_respawn_vehicle" id="104">
+            <args>
+               <arg name="vehicle type" type="object_type">
+                  <p>
+                     The vehicle type that this player should respawn in.
+                  </p>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Automatically spawn players inside of vehicles, without having to manually 
+            create vehicles and force players into them.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function allows you to set the respawn vehicle type for a player: when the player
+                  respawns, the game engine will automatically create a vehicle of this type and then
+                  force the player into one of its seats, preferring the driver's seat if accessible
+                  (and if compatible with the player's biped). In essence, this automates the task of
+                  using <a href="script/api/object/actions/place_at_me">player.biped.place_at_me</a>
+                  and <a href="script/api/player/actions/force_into_vehicle">player.force_into_vehicle</a> 
+                  in tandem.
+               </p>
+            </description>
+            <example>
+               for each player do
+                  current_player.set_respawn_vehicle(warthog)
+               end
+            </example>
+            <note>
+               If you specify an object type that is not defined on the current map, then the game will stop 
+               spawning the target player in a vehicle. However, if you specify an object type that isn't a 
+               vehicle and is defined on the current map, then this function will have no effect, and the 
+               player's respawn vehicle will remain unchanged.
+            </note>
+            <related context="team" type="method" name="set_respawn_vehicle" />
+            <related context="player" type="method" name="set_vehicle_spawning_enabled" />
+            <related context="team" type="method" name="set_vehicle_spawning_enabled" />
          </method>
       </actions>
    </methods>

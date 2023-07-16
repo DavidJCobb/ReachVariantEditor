@@ -9,7 +9,7 @@ namespace Megalo {
          static OpcodeArgTypeinfo typeinfo;
          //
       public:
-         cobb::bitnumber<7, int32_t, true> id = -1;
+         cobb::bitnumber<8, int32_t, true> id = -1;
          //
          virtual bool read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept override;
          virtual void write(cobb::bitwriter& stream) const noexcept override;

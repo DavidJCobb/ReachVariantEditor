@@ -502,6 +502,30 @@
                game.play_sound_for(all_players, timer_beep, true)
             </example>
          </method>
+         <method name="call_haloscript_function" id="100">
+            <args>
+               <arg name="function ID" type="number">
+                  <p>
+                     The word <var>none</var>, or the numeric ID of a HaloScript function defined in the 
+                     current map.
+                  </p>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Call HaloScript functions made available by the current map; intended 
+            for mods that rely on map-and-Megalo pairs.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function allows you to invoke HaloScript functions defined and made available to Megalo 
+                  on the current map.
+               </p>
+            </description>
+         </method>
       </actions>
    </methods>
 </script-namespace>

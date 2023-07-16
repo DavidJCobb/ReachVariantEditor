@@ -142,6 +142,86 @@
             </example>
             <category id="spawning" />
          </method>
+         <method name="set_vehicle_spawning_enabled" id="102">
+            <args>
+               <arg name="enable" type="bool">
+                  <p>
+                     Control whether players on this team respawn in a vehicle (true) or not (false).
+                  </p>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Although intended to let you control whether players spawn in vehicles 
+            or not, this function doesn't appear to actually do anything.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function was intended to let you control whether players on a given team spawn in a 
+                  vehicle or not; it would allow you to set a spawn vehicle via 
+                  <a href="script/api/player/actions/set_respawn_vehicle">set_respawn_vehicle</a>, 
+                  without having to set the spawn vehicle type to none in order to disable vehicle spawning.
+               </p>
+               <p>
+                  In tests, this function doesn't actually do anything. Disassembly of haloreach.dll 
+                  shows that it is, as of this writing, a no-op: it contains no code and has no effect.
+               </p>
+            </description>
+            <example>
+               for each team do
+                  current_team.set_respawn_vehicle(warthog)
+                  current_team.set_vehicle_spawning_enabled(false)
+               end
+            </example>
+            <related context="player" type="method" name="set_vehicle_spawning_enabled" />
+            <related context="player" type="method" name="set_respawn_vehicle" />
+            <related context="team" type="method" name="set_respawn_vehicle" />
+         </method>
+         <method name="set_respawn_vehicle" id="105">
+            <args>
+               <arg name="vehicle type" type="object_type">
+                  <p>
+                     The vehicle type that players on this team should respawn in.
+                  </p>
+               </arg>
+            </args>
+            <blurb>MCC-exclusive: Automatically spawn players inside of vehicles, without having to manually 
+            create vehicles and force players into them.</blurb>
+            <description>
+               <p>
+                  This function was added to the <i>Halo: The Master Chief Collection</i> build of <i>Halo: Reach</i> 
+                  in mid-July 2023, being backported from <i>Halo 4</i>'s Megalo engine. Gametypes that 
+                  use this function will likely fail to load on Xbox 360 builds of <i>Halo: Reach</i> 
+                  (even when played via Xbox One backward compatibility).
+               </p>
+               <p>
+                  This function allows you to set the respawn vehicle type for players on a given team: when one of those players 
+                  respawns, the game engine will automatically create a vehicle of this type and then
+                  force the player into one of its seats, preferring the driver's seat if accessible
+                  (and if compatible with the player's biped). In essence, this automates the task of
+                  using <a href="script/api/object/actions/place_at_me">player.biped.place_at_me</a>
+                  and <a href="script/api/player/actions/force_into_vehicle">player.force_into_vehicle</a> 
+                  in tandem.
+               </p>
+            </description>
+            <example>
+               for each team do
+                  current_team.set_respawn_vehicle(warthog)
+               end
+            </example>
+            <note>
+               If you specify an object type that is not defined on the current map, then the game will stop 
+               spawning the target players in vehicles. However, if you specify an object type that isn't a 
+               vehicle and is defined on the current map, then this function will have no effect, and the 
+               team's respawn vehicle will remain unchanged.
+            </note>
+            <related context="player" type="method" name="set_respawn_vehicle" />
+            <related context="player" type="method" name="set_vehicle_spawning_enabled" />
+            <related context="team" type="method" name="set_vehicle_spawning_enabled" />
+         </method>
       </actions>
    </methods>
    <properties>

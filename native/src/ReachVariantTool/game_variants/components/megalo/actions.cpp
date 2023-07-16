@@ -409,7 +409,7 @@ namespace Megalo {
             OpcodeArgBase("enable", OpcodeArgValueScalar::typeinfo),
             OpcodeArgBase("flags",  OpcodeArgValuePlayerReqPurchaseModes::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_req_purchase_modes", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_req_purchase_modes", "", {2, 1}, 0)
       ),
       ActionFunction( // 40
          "Get Player Vehicle",
@@ -1043,7 +1043,7 @@ namespace Megalo {
          {
             OpcodeArgBase("function_id", OpcodeArgValueHaloscriptFunctionID::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("call_haloscript_function", "", { 0 })
+         OpcodeFuncToScriptMapping::make_function("call_haloscript_function", "", {0}, OpcodeFuncToScriptMapping::game_namespace)
       ),
       ActionFunction( // 101
          "Get Button Press Duration",
@@ -1062,7 +1062,7 @@ namespace Megalo {
          "Set whether vehicle spawning is enabled for %1: %2.",
          {
             OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
-            OpcodeArgBase("weapon", OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("enable", OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_vehicle_spawning_enabled", "", {1}, 0)
       ),
@@ -1072,27 +1072,27 @@ namespace Megalo {
          "Set whether vehicle spawning is enabled for %1: %2.",
          {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
-            OpcodeArgBase("weapon", OpcodeArgValueConstBool::typeinfo),
+            OpcodeArgBase("enable", OpcodeArgValueConstBool::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_vehicle_spawning_enabled", "", {1}, 0)
       ),
       ActionFunction( // 104
-         "Set Respawn Vehicle for Team",
-         "[MCC-only; backported from Halo 4.] Set which vehicle, if any, a team's players will respawn in.",
-         "Set the respawn vehicle for %2 to %1.",
-         {
-            OpcodeArgBase("vehicle", OpcodeArgValueObjectType::typeinfo),
-            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
-         },
-         OpcodeFuncToScriptMapping::make_function("set_respawn_vehicle", "", {0}, 1)
-      ),
-      ActionFunction( // 105
          "Set Respawn Vehicle for Player",
          "[MCC-only; backported from Halo 4.] Set which vehicle, if any, a player will respawn in.",
          "Set the respawn vehicle for %2 to %1.",
          {
             OpcodeArgBase("vehicle", OpcodeArgValueObjectType::typeinfo),
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
+         },
+         OpcodeFuncToScriptMapping::make_function("set_respawn_vehicle", "", {0}, 1)
+      ),
+      ActionFunction( // 105
+         "Set Respawn Vehicle for Team",
+         "[MCC-only; backported from Halo 4.] Set which vehicle, if any, a team's players will respawn in.",
+         "Set the respawn vehicle for %2 to %1.",
+         {
+            OpcodeArgBase("vehicle", OpcodeArgValueObjectType::typeinfo),
+            OpcodeArgBase("team", OpcodeArgValueTeam::typeinfo),
          },
          OpcodeFuncToScriptMapping::make_function("set_respawn_vehicle", "", {0}, 1)
       ),

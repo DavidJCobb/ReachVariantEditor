@@ -65,6 +65,16 @@
             <dd><dfn>Binary-NOT-assign.</dfn> Modifies each bit in the variable on the lefthand 
             side: bits will be set to zero if the corresponding bit in the righthand value is 
             one, or left unchanged otherwise. This is equivalent to <code>a &amp;= ~b</code>.</dd>
+         <dt>&lt;&lt;=</dt>
+            <dd><dfn>Binary left shift.</dfn> Shifts the bits of the lefthand operand to the left; 
+            the righthand operand controls the number of bits to shift by.</dd>
+         <dt>&gt;&gt;=</dt>
+            <dd><dfn>Arithmetic right shift.</dfn> Shifts the bits of the lefthand operand to the right; 
+            the righthand operand controls the number of bits to shift by. If the lefthand operand is 
+            negative, its sign bit is extended.</dd>
+         <dt><var>lhs</var> = abs(<var>rhs</var>)</dt>
+            <dd><dfn>Absolute value assignment.</dfn> Sets the lefthand variable to the absolute 
+            value of the righthand value.</dd>
       </dl>
    </body>
 </article>
