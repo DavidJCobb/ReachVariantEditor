@@ -1301,7 +1301,7 @@ namespace Megalo {
          if (this->next_event != Script::Block::Event::none)
             this->raise_fatal("The file ended with an \"on\" keyword but no following block.");
          this->root->set_end(this->state);
-         //
+
          {  // Ensure that we're under the limits for new Forge labels.
             auto& mp     = this->variant;
             auto& labels = mp.scriptContent.forgeLabels;
@@ -2099,7 +2099,7 @@ namespace Megalo {
       if (this->has_fatal()) // fatal error occurred while parsing the text
          return var;
       var->resolve(*this, is_alias_definition, is_write_access);
-      if (!var->is_invalid) {
+      if (!var->is_invalid && !var->resolved.top_level.is_temporary) {
          //
          // Implicitly declare the variable:
          //
@@ -2948,6 +2948,15 @@ namespace Megalo {
       }
       if (type_v == variable_type::not_a_variable) {
          this->raise_error("Encountered a problem when trying to interpret this variable declaration: bad variable type.");
+         return;
+      }
+      //
+      if (scope_v == variable_scope::temporary) {
+         if (initial || network_specified) {
+            this->raise_error("Variables that use temporary storage do not need to be declared, and cannot have an initial value or a network priority set set.");
+            return;
+         }
+         this->raise_notice("Variables that use temporary storage do not need to be declared.");
          return;
       }
       //

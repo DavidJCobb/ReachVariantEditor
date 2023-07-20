@@ -28,13 +28,13 @@ namespace Megalo {
          extern VariableScopeIndicatorValue spawn_sequence;
          extern VariableScopeIndicatorValue team_score;
          extern VariableScopeIndicatorValue player_score;
-         extern VariableScopeIndicatorValue player_unk09;
+         extern VariableScopeIndicatorValue player_money;
          extern VariableScopeIndicatorValue player_rating;
          extern VariableScopeIndicatorValue player_stat;
          extern VariableScopeIndicatorValue team_stat;
          extern VariableScopeIndicatorValue current_round;
-         extern VariableScopeIndicatorValue symmetry_get;
          extern VariableScopeIndicatorValue symmetry;
+         extern VariableScopeIndicatorValue symmetry_pregame;
          extern VariableScopeIndicatorValue score_to_win;
          extern VariableScopeIndicatorValue fireteams_enabled;
          extern VariableScopeIndicatorValue teams_enabled;
@@ -63,6 +63,7 @@ namespace Megalo {
          extern VariableScopeIndicatorValue powerup_duration_b;
          extern VariableScopeIndicatorValue powerup_duration_y;
          extern VariableScopeIndicatorValue death_event_damage_type;
+         extern VariableScopeIndicatorValue temporary_number; // added with MCC (backported from H4)
       }
    }
 }

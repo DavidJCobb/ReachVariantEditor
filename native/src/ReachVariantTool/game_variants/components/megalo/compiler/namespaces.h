@@ -69,7 +69,7 @@ namespace Megalo {
          public:
             std::string name;
             bool can_have_statics   = false; // only true for unnamed namespace; determines whether you can refer to absolute players/teams e.g. player[2]
-            bool can_have_variables = false; // only true for global namespace
+            bool can_have_variables = false; // only true for global and temporaries namespaces
             std::vector<NamespaceMember> members;
             //
             Namespace() {}
@@ -86,8 +86,9 @@ namespace Megalo {
          extern Namespace global;
          extern Namespace game;
          extern Namespace enums;
+         extern Namespace temporaries; // added in MCC (backported from H4)
          //
-         extern std::array<Namespace*, 4> list;
+         extern std::array<Namespace*, 5> list;
          extern Namespace* get_by_name(const QString&);
       }
    }

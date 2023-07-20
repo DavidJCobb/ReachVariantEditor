@@ -134,7 +134,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("traits", OpcodeArgValuePlayerTraits::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("apply_traits", "apply_player_traits", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("apply_traits", "", {1}, 0)
       ),
       ActionFunction( // 12
          "Set Weapon Pickup Permissions",
@@ -579,7 +579,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_round_card_title", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_text", "set_round_card_title", {1}, 0)
       ),
       ActionFunction( // 57
          "Set Objective Icon Caption for Player",
@@ -589,7 +589,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("text",   OpcodeArgValueStringTokens2::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_round_card_text", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_name", "set_round_card_text", {1}, 0)
       ),
       ActionFunction( // 58
          "Set Objective Icon for Player",
@@ -599,7 +599,7 @@ namespace Megalo {
             OpcodeArgBase("player", OpcodeArgValuePlayer::typeinfo),
             OpcodeArgBase("icon",   OpcodeArgValueEngineIcon::typeinfo),
          },
-         OpcodeFuncToScriptMapping::make_function("set_round_card_icon", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("set_objective_allegiance_icon", "set_round_card_icon", {1}, 0)
       ),
       ActionFunction( // 59
          "Enable/Disable Co-Op Spawning",
@@ -1054,7 +1054,7 @@ namespace Megalo {
             OpcodeArgBase("button", OpcodeArgValueMappedControl::typeinfo),
             OpcodeArgBase("milliseconds",  OpcodeArgValueScalar::typeinfo, true),
          },
-         OpcodeFuncToScriptMapping::make_function("get_button_press_duration", "", {1}, 0)
+         OpcodeFuncToScriptMapping::make_function("get_button_press_duration", "get_button_time", {1}, 0)
       ),
       ActionFunction( // 102
          "Toggle Vehicle Spawning for Team",

@@ -120,6 +120,17 @@ namespace Megalo {
          //
          void clear() noexcept;
          void adopt(VariableDeclarationList& other) noexcept;
+
+         void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp, const Megalo::VariableScope& scope) noexcept {
+            this->resize(stream.read_bits(scope.count_bits(this->type)));
+            for (auto* var : this->list)
+               var->read(stream, mp);
+         }
+         void write(cobb::bitwriter& stream, const Megalo::VariableScope& scope) const noexcept {
+            stream.write(this->list.size(), scope.count_bits(this->type));
+            for (auto* var : this->list)
+               var->write(stream);
+         }
    };
 
    class VariableDeclarationSet {
@@ -138,31 +149,19 @@ namespace Megalo {
          
          void read(cobb::ibitreader& stream, GameVariantDataMultiplayer& mp) noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
-            //
-            #define megalo_variable_declaration_set_read_type(name) \
-               this->##name##s.resize(stream.read_bits(scope.count_bits(variable_type::##name##))); \
-               for (auto& var : this->##name##s) \
-                  var->read(stream, mp);
-            megalo_variable_declaration_set_read_type(scalar);
-            megalo_variable_declaration_set_read_type(timer);
-            megalo_variable_declaration_set_read_type(team);
-            megalo_variable_declaration_set_read_type(player);
-            megalo_variable_declaration_set_read_type(object);
-            #undef megalo_variable_declaration_set_read_type
+            this->scalars.read(stream, mp, scope);
+            this->timers .read(stream, mp, scope);
+            this->teams  .read(stream, mp, scope);
+            this->players.read(stream, mp, scope);
+            this->objects.read(stream, mp, scope);
          }
          void write(cobb::bitwriter& stream) const noexcept {
             auto& scope = getScopeObjectForConstant(this->type);
-            //
-            #define megalo_variable_declaration_set_write_type(name) \
-               stream.write(this->##name##s.size(), scope.count_bits(variable_type::##name##)); \
-               for (auto& var : this->##name##s) \
-                  var->write(stream);
-            megalo_variable_declaration_set_write_type(scalar);
-            megalo_variable_declaration_set_write_type(timer);
-            megalo_variable_declaration_set_write_type(team);
-            megalo_variable_declaration_set_write_type(player);
-            megalo_variable_declaration_set_write_type(object);
-            #undef megalo_variable_declaration_set_write_type
+            this->scalars.write(stream, scope);
+            this->timers .write(stream, scope);
+            this->teams  .write(stream, scope);
+            this->players.write(stream, scope);
+            this->objects.write(stream, scope);
          }
          void decompile(Decompiler& out, uint32_t flags = 0) noexcept;
          

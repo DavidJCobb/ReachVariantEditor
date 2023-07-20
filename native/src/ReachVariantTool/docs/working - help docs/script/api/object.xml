@@ -139,7 +139,7 @@
          </method>
       </conditions>
       <actions>
-         <method name="place_at_me" id="2" returns="object" nodiscard="false">
+         <method name="place_at_me" name2="create_object" id="2" returns="object" nodiscard="false">
             <!--
                The default value of the "nodiscard" argument is "true" for any 
                opcode with a return value. If an opcode is nodiscard, then the 
@@ -259,13 +259,13 @@
                   <p>Any of the following values:</p>
                   <dl>
                      <dt>low</dt>
-                     <dd>The waypoint will be translucent &mdash; almost invisible, in fact.</dd>
+                        <dd>The waypoint will be translucent &mdash; almost invisible, in fact.</dd>
                      <dt>normal</dt>
-                     <dd>The waypoint will be normally visible.</dd>
+                        <dd>The waypoint will be normally visible.</dd>
                      <dt>high</dt>
-                     <dd>The waypoint is visible even when the object is off-screen?</dd>
+                        <dd>The waypoint is visible even when the object is off-screen?</dd>
                      <dt>blink</dt>
-                     <dd>The waypoint will blink rapidly. This is usually used for urgent waypoints, like a territory under attack in Invasion.</dd>
+                        <dd>The waypoint will blink rapidly. This is usually used for urgent waypoints, like a territory under attack in Invasion.</dd>
                   </dl>
                </arg>
             </args>
@@ -329,19 +329,19 @@
             </note>
             <category id="object-waypoint" />
          </method>
-         <method name="set_shape" id="10">
+         <method name="set_shape" name2="set_boundary" id="10">
             <args>
                <arg name="type">
                   <p>Any of the following values:</p>
                   <dl>
                      <dt>none</dt>
-                     <dd>The object will have no shape.</dd>
+                        <dd>The object will have no shape.</dd>
                      <dt>sphere</dt>
-                     <dd>The object will have a shape with one dimension: a radius.</dd>
+                        <dd>The object will have a shape with one dimension: a radius.</dd>
                      <dt>cylinder</dt>
-                     <dd>The object will have a shape with three dimensions: a radius, top, and bottom.</dd>
+                        <dd>The object will have a shape with three dimensions: a radius, top, and bottom.</dd>
                      <dt>box</dt>
-                     <dd>The object will have a shape with four dimensions: a width, length, top, and bottom.</dd>
+                        <dd>The object will have a shape with four dimensions: a width, length, top, and bottom.</dd>
                   </dl>
                </arg>
                <arg name="dimensions..." type="number">
@@ -411,7 +411,7 @@
             <category id="weapon-configuration" />
             <category id="weapons" />
          </method>
-         <method name="set_spawn_location_permissions" id="13">
+         <method name="set_spawn_location_permissions" name2="set_respawn_filter" id="13">
             <args>
                <arg name="who" type="player-set" />
             </args>
@@ -439,7 +439,7 @@
             </example>
             <category id="spawning" />
          </method>
-         <method name="set_spawn_location_fireteams" id="14">
+         <method name="set_spawn_location_fireteams" name2="set_fireteam_respawn_filter" id="14">
             <args>
                The word <var>none</var>, the word <var>all</var>, or a comma-separated
                list of fireteam indices (starting at 0) that should be able to use this

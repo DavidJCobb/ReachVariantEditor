@@ -157,6 +157,12 @@ class ReachCGMapOptions {
 
 class ReachCGTeamOptions {
    public:
+      enum class scoring_modes : uint8_t {
+         sum,
+         minimum,
+         maximum,
+      };
+
       struct species {
          species() = delete;
          enum type : uint8_t {
@@ -167,9 +173,9 @@ class ReachCGTeamOptions {
             spartans_vs_elites = 4,
          };
       };
-      //
+      
    public:
-      cobb::bitnumber<3, uint8_t> scoring; // values above 3 are treated as 0
+      cobb::bitnumber<3, scoring_modes> scoring = scoring_modes::sum; // values above 3 are treated as 0
       cobb::bitnumber<3, species::type> species;
       cobb::bitnumber<2, uint8_t> designatorSwitchType;
       ReachTeamData teams[8];

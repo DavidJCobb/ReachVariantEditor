@@ -86,9 +86,11 @@ namespace Megalo {
          std::vector<const char*> elements; // unscoped words that the compiler should be aware of, e.g. flag/enum value names
          factory_t                factory = nullptr;
          std::vector<Script::Property> properties; // for the compiler; do not list abstract properties here
-         uint8_t static_count = 0; // e.g. 8 for player[7]
-         const VariableScopeWhichValue* first_global = nullptr;
-         const VariableScopeWhichValue* first_static = nullptr;
+         uint8_t static_count    = 0; // e.g. 8 for player[7]
+         uint8_t temporary_count = 0;
+         const VariableScopeWhichValue* first_global    = nullptr;
+         const VariableScopeWhichValue* first_static    = nullptr;
+         const VariableScopeWhichValue* first_temporary = nullptr;
          std::vector<const OpcodeArgTypeinfo*> accessor_proxy_types; // the listed types can use this type's accessors and member functions; needed for OpcodeArgValuePlayerOrGroup, etc.
          //
          OpcodeArgTypeinfo() {}
@@ -106,7 +108,8 @@ namespace Megalo {
             flags_type f,
             factory_t fac,
             std::initializer_list<Script::Property> pr,
-            uint8_t sc = 0
+            uint8_t sc = 0,
+            uint8_t tc = 0
          ) :
             internal_name(in),
             friendly_name(fn),
@@ -114,7 +117,8 @@ namespace Megalo {
             flags(f),
             factory(fac),
             properties(pr),
-            static_count(sc)
+            static_count(sc),
+            temporary_count(tc)
          {}
          //
          #pragma region Decorator methods
@@ -163,9 +167,14 @@ namespace Megalo {
                this->accessor_proxy_types = types;
                return *this;
             }
-            OpcodeArgTypeinfo& set_variable_which_values(const VariableScopeWhichValue* first_global, const VariableScopeWhichValue* first_static = nullptr) {
+            OpcodeArgTypeinfo& set_variable_which_values(
+               const VariableScopeWhichValue* first_global,
+               const VariableScopeWhichValue* first_static    = nullptr,
+               const VariableScopeWhichValue* first_temporary = nullptr
+            ) {
                this->first_global = first_global;
                this->first_static = first_static;
+               this->first_temporary = first_temporary;
                return *this;
             }
          #pragma endregion

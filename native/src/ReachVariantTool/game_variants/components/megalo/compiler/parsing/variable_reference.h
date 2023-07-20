@@ -62,9 +62,10 @@ namespace Megalo {
                   const VariableScopeWhichValue*     which = nullptr; // needed for namespace members
                   const OpcodeArgTypeinfo* type = nullptr;
                   const Enum* enumeration = nullptr;
-                  int32_t index       = 0;     // always present for global variables and static variables; used to hold integer constants; for scopes, used to hold the index if the scope has an index
-                  bool    is_static   = false; // if false, then we're accessing a global variable
-                  bool    is_constant = false; // true if this is an integer constant
+                  int32_t index        = 0;     // always present for global variables and static variables; used to hold integer constants; for scopes, used to hold the index if the scope has an index
+                  bool    is_static    = false; // if false, then we're accessing a global variable
+                  bool    is_constant  = false; // true if this is an integer constant
+                  bool    is_temporary = false; // disambiguates global.type[n] from temporaries.type[n]
                } top_level;
                struct {
                   const OpcodeArgTypeinfo* type = nullptr;
@@ -104,7 +105,12 @@ namespace Megalo {
             [[nodiscard]] const_team to_const_team(bool* success) const noexcept; // only valid if the variable reference refers to a statically-indexable team, or neutral/none
             //
             void strip_accessor() noexcept;
-            //
+            
+            // MegaloEdit uses the term "transient" for any variable that doesn't exist across time, e.g. `current_player` or `temporaries.number[0]`
+            bool is_transient() const;
+
+            bool is_usable_in_pregame() const;
+
          protected:
             bool _resolve_aliases_from(Compiler&, size_t raw_index, const OpcodeArgTypeinfo* basis = nullptr); // replaces the raw part with the content of a found alias, unless it's an absolute alias that resolves to a constant integer, in which case: sets resolved.top_level
             //

@@ -35,7 +35,7 @@ namespace Megalo {
       }
 
       namespace namespaces {
-         std::array<Namespace*, 4> list = { &unnamed, &global, &game, &enums };
+         std::array<Namespace*, 5> list = { &unnamed, &global, &game, &enums, &temporaries };
          Namespace* get_by_name(const QString& name) {
             for (auto& ns : namespaces::list)
                if (cobb::qt::stricmp(name, ns->name) == 0)
@@ -53,14 +53,14 @@ namespace Megalo {
             NamespaceMember::make_which_member("neutral_team",      OpcodeArgValueTeam::typeinfo,   variable_which_values::team::neutral_team),
             NamespaceMember::make_which_member("hud_target_object", OpcodeArgValueObject::typeinfo, variable_which_values::object::hud_target),
             NamespaceMember::make_which_member("hud_target_player", OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud_target),
-            NamespaceMember::make_which_member("hud_player",        OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud),
-            NamespaceMember::make_which_member("hud_player_team",   OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_player_owner_team),
+            NamespaceMember::make_which_member("hud_player",        OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud), // old/incorrect name, retained for backward-compatibility
+            NamespaceMember::make_which_member("hud_player_team",   OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_player_owner_team), // old/incorrect name, retained for backward-compatibility
             NamespaceMember::make_which_member("hud_target_player_team", OpcodeArgValueTeam::typeinfo, variable_which_values::team::hud_target_player_owner_team),
             NamespaceMember::make_which_member("killed_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killed),
             NamespaceMember::make_which_member("killer_object",     OpcodeArgValueObject::typeinfo, variable_which_values::object::killer),
             NamespaceMember::make_which_member("killer_player",     OpcodeArgValuePlayer::typeinfo, variable_which_values::player::killer),
-            NamespaceMember::make_which_member("hud_target_object_team", OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_target_object_owner_team),
-            NamespaceMember::make_which_member("unk_15_team",       OpcodeArgValueTeam::typeinfo,   variable_which_values::team::unk_15),
+            NamespaceMember::make_which_member("local_player",      OpcodeArgValuePlayer::typeinfo, variable_which_values::player::hud),
+            NamespaceMember::make_which_member("local_team",        OpcodeArgValueTeam::typeinfo,   variable_which_values::team::hud_player_owner_team),
             //
             NamespaceMember::make_scope_member("script_option", OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::option),
             //
@@ -96,8 +96,8 @@ namespace Megalo {
             NamespaceMember::make_scope_member("dead_players_can_talk",   OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::dead_players_can_talk),
             NamespaceMember::make_scope_member("sudden_death_time",       OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::sudden_death_time),
             NamespaceMember::make_scope_member("suicide_penalty",         OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::suicide_penalty),
-            NamespaceMember::make_scope_member("symmetry",                OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::symmetry),
-            NamespaceMember::make_scope_member("symmetry_getter",         OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::symmetry_get),
+            NamespaceMember::make_scope_member("symmetry",                OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::symmetry_pregame),
+            NamespaceMember::make_scope_member("symmetry_getter",         OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::symmetry),
             NamespaceMember::make_scope_member("team_lives_per_round",    OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::team_lives_per_round),
             NamespaceMember::make_scope_member("teams_enabled",           OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::teams_enabled),
             NamespaceMember::make_scope_member("fireteams_enabled",       OpcodeArgValueScalar::typeinfo, Megalo::variable_scope_indicators::number::fireteams_enabled),
@@ -224,6 +224,7 @@ namespace Megalo {
             NamespaceMember::make_enum_member(enums, _enum_definitions::damage_reporting_type),
             NamespaceMember::make_enum_member(enums, _enum_definitions::orientation),
          });
+         Namespace temporaries = Namespace("temporaries", false, true);
       }
    }
 }

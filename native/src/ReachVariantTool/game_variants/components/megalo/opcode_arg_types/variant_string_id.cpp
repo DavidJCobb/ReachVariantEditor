@@ -153,7 +153,7 @@ namespace Megalo {
          DetailedEnumValue("flak_cannon"),
          DetailedEnumValue("auto"),
          DetailedEnumValue("noblade",
-            DetailedEnumValueInfo::make_description("A variant name. When applied to an Energy Sword, produces a hilt with no visible blade.")
+            DetailedEnumValueInfo::make_description("A variant name. When applied to an Energy Sword, produces a hilt with no visible blade. Does not affect gameplay.")
          ),
       });
    }

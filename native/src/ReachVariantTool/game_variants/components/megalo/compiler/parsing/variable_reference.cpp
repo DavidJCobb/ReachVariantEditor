@@ -255,8 +255,13 @@ namespace Megalo::Script {
       if (top_level.which) {
          result = top_level.which->name.c_str();
       } else if (top_level.type) {
-         if (!top_level.is_static)
-            result = "global.";
+         if (!top_level.is_static) {
+            if (top_level.is_temporary) {
+               result = "temporaries.";
+            } else {
+               result = "global.";
+            }
+         }
          result += top_level.type->internal_name.c_str();
          result += '[';
          result += QString("%1").arg(top_level.index);
@@ -264,8 +269,11 @@ namespace Megalo::Script {
       } else {
          auto top_type = this->resolved.alias_basis;
          //
-         if (!top_level.is_static)
+         if (top_level.is_temporary) {
+            result = "temporaries.";
+         } else {
             result = "global.";
+         }
          if (top_type) {
             result += top_type->internal_name.c_str();
          } else {
@@ -386,8 +394,11 @@ namespace Megalo::Script {
       auto& nest = this->resolved.nested;
       if (!top.type || !top.type->is_variable())
          return variable_scope::not_a_scope;
-      if (!nest.type)
+      if (!nest.type) {
+         if (top.is_temporary)
+            return variable_scope::temporary;
          return variable_scope::global;
+      }
       if (top.type == &OpcodeArgValueObject::typeinfo)
          return variable_scope::object;
       if (top.type == &OpcodeArgValuePlayer::typeinfo)
@@ -422,7 +433,37 @@ namespace Megalo::Script {
       res.accessor = nullptr;
       res.accessor_name.clear();
    }
-   //
+
+   bool VariableReference::is_transient() const {
+      if (this->is_invalid)
+         return false;
+      {
+         auto* scope = this->resolved.top_level.scope;
+         auto* which = this->resolved.top_level.which;
+         if (which)
+            if (which->flags & VariableScopeWhichValue::flag::is_transient)
+               return true;
+      }
+      return false;
+   }
+
+   bool VariableReference::is_usable_in_pregame() const {
+      if (this->is_invalid)
+         return true;
+      auto* type = this->get_type();
+      if (type != &OpcodeArgValueScalar::typeinfo)
+         //
+         // MegaloEdit only seems to enforce pre-game limits on number variables. I can't 
+         // imagine it'd make much sense to screw around with objects and players during 
+         // pre-game. Teams? Timers? Maybe.
+         //
+         return true;
+      
+      auto* scope = this->resolved.top_level.scope;
+      assert(scope != nullptr);
+      return (scope->flags & VariableScopeIndicatorValue::flags::allowed_in_pregame) != 0;
+   }
+
    #pragma region Variable reference resolution code
    void VariableReference::__transclude_alias(uint32_t raw_index, Alias& alias) {
       #if _DEBUG
@@ -595,13 +636,14 @@ namespace Megalo::Script {
          //
          // Let's check to see if we're looking at a global variable.
          //
-         #if _DEBUG
-            assert(ns == &namespaces::global && "Only the global namespace can have variables, and some of the code here is written on the assumption that that will not change in the future.");
-         #endif
          auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
          if (type) {
             if (!part->has_index()) {
-               compiler.raise_error(QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".").arg(type->internal_name.c_str()));
+               compiler.raise_error(
+                  QString("You must indicate which variable you are referring to, using an index, e.g. \"%2.%1[0]\" instead of \"%2.%1\".")
+                     .arg(type->internal_name.c_str())
+                     .arg(ns->name.c_str())
+               );
                this->is_invalid = true;
                return 0;
             }
@@ -612,7 +654,20 @@ namespace Megalo::Script {
             }
             {
                Megalo::variable_type vt = _var_type_constant_for_type(*type);
-               auto max = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
+               int max;
+               if (ns == &namespaces::global) {
+                  max = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
+               } else if (ns == &namespaces::temporaries) {
+                  this->resolved.top_level.is_temporary = true;
+                  if (vt == Megalo::variable_type::timer) {
+                     compiler.raise_error(QString("Temporary timers cannot exist. (How would a timer keep track of time if it only exists during a single instant?)"));
+                     this->is_invalid = true;
+                     return 0;
+                  }
+                  max = Megalo::MegaloVariableScopeTemporary.max_variables_of_type(vt);
+               } else {
+                  assert(false && "Unhandled namespace type!");
+               }
                if (part->index >= max) {
                   compiler.raise_error(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));
                   this->is_invalid = true;

@@ -129,7 +129,7 @@
          <category id="unscoped-hud" />
          <category id="unscoped-player" />
       </member>
-      <member name="hud_player" type="player" read-only="true">
+      <member name="local_player" name2="hud_player" type="player" read-only="true">
          <blurb>This value can be used with HUD widgets and object waypoints to display 
          different information for each player. It refers to the player that the widget 
          or waypoint is being shown to.</blurb>
@@ -154,7 +154,7 @@
          <category id="unscoped-hud" />
          <category id="unscoped-player" />
       </member>
-      <member name="hud_player_team" type="team" read-only="true">
+      <member name="local_team" name2="hud_player_team" type="team" read-only="true">
          <blurb>This value's precise meaning is unknown, but it can presumably be used 
          with HUD widgets and object waypoints to display different information for each 
          player.</blurb>
@@ -297,7 +297,7 @@
                global.number[0] = rand(7)
             </example>
          </method>
-         <method name="debug_break" id="28">
+         <method name="debug_break" name2="break_into_debugger" id="28">
             <blurb>A non-functional debugging tool. In Halo: Reach's debug builds, 
             this probably broke into a debugger.</blurb>
             <example>
@@ -309,7 +309,7 @@
             </example>
             <category id="debug" />
          </method>
-         <method name="debug_set_tracing_enabled" id="32">
+         <method name="debug_set_tracing_enabled" name2="debugging_enable_tracing" id="32">
             <args>
                <arg name="enable" type="bool">A <var>true</var> or <var>false</var> value 
                indicating whether to enable or disable tracing.</arg>
@@ -406,10 +406,10 @@
                end
             </example>
          </method>
-         <method name="insert_theater_film_marker" id="81">
+         <method name="insert_theater_film_marker" name2="saved_film_insert_marker" id="81">
             <args>
-               <arg name="number" type="number">Unknown.</arg>
-               <arg name="text" type="format-string">Unknown.</arg>
+               <arg name="offset" type="number">Unknown.</arg>
+               <arg name="label" type="format-string">Unknown.</arg>
             </args>
             <blurb>Unknown.</blurb>
          </method>

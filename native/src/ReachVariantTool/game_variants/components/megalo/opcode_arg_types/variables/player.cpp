@@ -40,12 +40,14 @@ namespace Megalo {
          Script::Property("score",       OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_score),
          Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_stat),
          Script::Property("team",        OpcodeArgValueTeam::typeinfo,   &Megalo::variable_scope_indicators::team::player_owner_team),
-         Script::Property("unknown_09",  OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_unk09),
+         Script::Property("money",       OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::player_money),
       },
-      16 // static count
+      16, // static count
+       3  // temporary count
    ).set_variable_which_values(
       &variable_which_values::player::global_0,
-      &variable_which_values::player::player_0
+      &variable_which_values::player::player_0,
+      &variable_which_values::player::temporary_0
    );
    //
    Variable* OpcodeArgValuePlayer::create_zero_or_none() const noexcept {

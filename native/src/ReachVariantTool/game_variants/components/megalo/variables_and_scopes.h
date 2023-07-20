@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <string>
 #include <vector>
 #include "../../../formats/detailed_enum.h"
 
@@ -9,6 +10,7 @@ namespace Megalo {
       player,
       object,
       team,
+      temporary, // added in MCC (backported from H4)
       //
       not_a_scope = -1,
    };
@@ -33,6 +35,7 @@ namespace Megalo {
             enum type : uint8_t {
                is_read_only = 0x01,
                is_none      = 0x02,
+               is_transient = 0x04,
             };
          };
          using flags_t = std::underlying_type_t<flag::type>;
@@ -108,6 +111,14 @@ namespace Megalo {
          extern VariableScopeWhichValue hud_target;
          extern VariableScopeWhichValue killed;
          extern VariableScopeWhichValue killer;
+         extern VariableScopeWhichValue temporary_0;
+         extern VariableScopeWhichValue temporary_1;
+         extern VariableScopeWhichValue temporary_2;
+         extern VariableScopeWhichValue temporary_3;
+         extern VariableScopeWhichValue temporary_4;
+         extern VariableScopeWhichValue temporary_5;
+         extern VariableScopeWhichValue temporary_6;
+         extern VariableScopeWhichValue temporary_7;
       }
       namespace player {
          extern const VariableScopeWhichValueList list;
@@ -141,6 +152,9 @@ namespace Megalo {
          extern VariableScopeWhichValue hud;
          extern VariableScopeWhichValue hud_target;
          extern VariableScopeWhichValue killer;
+         extern VariableScopeWhichValue temporary_0; // added in MCC (backported from H4)
+         extern VariableScopeWhichValue temporary_1; // added in MCC (backported from H4)
+         extern VariableScopeWhichValue temporary_2; // added in MCC (backported from H4)
       }
       namespace team {
          extern const VariableScopeWhichValueList list;
@@ -166,8 +180,12 @@ namespace Megalo {
          extern VariableScopeWhichValue current;
          extern VariableScopeWhichValue hud_player_owner_team;
          extern VariableScopeWhichValue hud_target_player_owner_team;
-         extern VariableScopeWhichValue hud_target_object_owner_team;
-         extern VariableScopeWhichValue unk_15;
+         extern VariableScopeWhichValue temporary_0;
+         extern VariableScopeWhichValue temporary_1;
+         extern VariableScopeWhichValue temporary_2;
+         extern VariableScopeWhichValue temporary_3;
+         extern VariableScopeWhichValue temporary_4;
+         extern VariableScopeWhichValue temporary_5;
       }
    }
    extern const VariableScopeWhichValueList megalo_scope_does_not_have_specifier; // there is only one Global scope; you don't need to specify "which Global scope" a variable is in
@@ -220,6 +238,7 @@ namespace Megalo {
    extern const VariableScope MegaloVariableScopePlayer;
    extern const VariableScope MegaloVariableScopeObject;
    extern const VariableScope MegaloVariableScopeTeam;
+   extern const VariableScope MegaloVariableScopeTemporary;
 
    extern const VariableScope& getScopeObjectForConstant(variable_scope) noexcept;
    extern const VariableScope* getScopeObjectForConstant(variable_type) noexcept;

@@ -46,9 +46,13 @@ namespace Megalo {
       {
          Script::Property("spawn_sequence", OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::spawn_sequence),
          Script::Property("team",           OpcodeArgValueTeam::typeinfo,   &Megalo::variable_scope_indicators::team::object_owner_team),
-      }
+      },
+      0, // static count
+      8  // temporary count
    ).set_variable_which_values(
-      &variable_which_values::object::global_0
+      &variable_which_values::object::global_0,
+      nullptr,
+      &variable_which_values::object::temporary_0
    );
    //
    arg_compile_result OpcodeArgValueObject::compile(Compiler& compiler, Script::VariableReference& arg, uint8_t part) noexcept {

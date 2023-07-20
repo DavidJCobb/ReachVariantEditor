@@ -46,13 +46,6 @@ namespace Megalo {
       // know that the game uses printf directly as opposed to a custom format inspired 
       // by it).
       //
-      // Format specifiers seen:
-      //    %n    Prints a game state value (e.g. Round Limit) as a number.
-      //    %s    Not yet known. "Safe Haven - %s"
-      //
-      // TODO: Does the game do a raw printf? If so, can we cause crashes using bad 
-      //       parameters? If so, any script editor will need to validate parameters.
-      //
       public:
          static OpcodeArgTypeinfo typeinfo;
          static constexpr int max_token_count = 2;

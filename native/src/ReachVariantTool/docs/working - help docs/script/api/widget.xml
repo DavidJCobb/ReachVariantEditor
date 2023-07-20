@@ -32,6 +32,11 @@
                   such parameter.
                </p>
             </note>
+            <note>
+               Only the first 116 characters of the specified string will be displayed; this limitation 
+               applies after all format string parameters are substituted in. It seems that the UI 
+               reserves room for 117 characters, including an invisible "end of text" marker.
+            </note>
          </method>
          <method name="set_value_text" id="47">
             <args>

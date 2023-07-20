@@ -36,10 +36,18 @@ namespace Megalo {
          extern VariableScopeWhichValue global_13  = VariableScopeWhichValue("global.object[13]");
          extern VariableScopeWhichValue global_14  = VariableScopeWhichValue("global.object[14]");
          extern VariableScopeWhichValue global_15  = VariableScopeWhichValue("global.object[15]");
-         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_object", flags::is_read_only);
+         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_object", flags::is_read_only | flags::is_transient);
          extern VariableScopeWhichValue hud_target = VariableScopeWhichValue("hud_target_object", flags::is_read_only);
-         extern VariableScopeWhichValue killed     = VariableScopeWhichValue("killed_object", flags::is_read_only);
-         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_object", flags::is_read_only);
+         extern VariableScopeWhichValue killed     = VariableScopeWhichValue("killed_object", flags::is_read_only | flags::is_transient);
+         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_object", flags::is_read_only | flags::is_transient);
+         extern VariableScopeWhichValue temporary_0 = VariableScopeWhichValue("temporaries.object[0]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_1 = VariableScopeWhichValue("temporaries.object[1]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_2 = VariableScopeWhichValue("temporaries.object[2]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_3 = VariableScopeWhichValue("temporaries.object[3]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_4 = VariableScopeWhichValue("temporaries.object[4]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_5 = VariableScopeWhichValue("temporaries.object[5]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_6 = VariableScopeWhichValue("temporaries.object[6]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_7 = VariableScopeWhichValue("temporaries.object[7]", flags::is_transient);
          //
          extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
             &no_object,
@@ -63,6 +71,14 @@ namespace Megalo {
             &hud_target,
             &killed,
             &killer,
+            &temporary_0,
+            &temporary_1,
+            &temporary_2,
+            &temporary_3,
+            &temporary_4,
+            &temporary_5,
+            &temporary_6,
+            &temporary_7,
          });
       }
       namespace player {
@@ -91,10 +107,13 @@ namespace Megalo {
          extern VariableScopeWhichValue global_5   = VariableScopeWhichValue("global.player[5]");
          extern VariableScopeWhichValue global_6   = VariableScopeWhichValue("global.player[6]");
          extern VariableScopeWhichValue global_7   = VariableScopeWhichValue("global.player[7]");
-         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_player", flags::is_read_only);
+         extern VariableScopeWhichValue current    = VariableScopeWhichValue("current_player", flags::is_read_only | flags::is_transient);
          extern VariableScopeWhichValue hud        = VariableScopeWhichValue("hud_player", flags::is_read_only);
          extern VariableScopeWhichValue hud_target = VariableScopeWhichValue("hud_target_player", flags::is_read_only);
-         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_player", flags::is_read_only);
+         extern VariableScopeWhichValue killer     = VariableScopeWhichValue("killer_player", flags::is_read_only | flags::is_transient);
+         extern VariableScopeWhichValue temporary_0 = VariableScopeWhichValue("temporaries.player[0]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_1 = VariableScopeWhichValue("temporaries.player[1]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_2 = VariableScopeWhichValue("temporaries.player[2]", flags::is_transient);
          //
          extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
             &no_player,
@@ -123,9 +142,12 @@ namespace Megalo {
             &global_6,
             &global_7,
             &current,
-            &hud,
-            &hud_target,
+            &hud, // local_player
+            &hud_target, // target_player
             &killer,
+            &temporary_0,
+            &temporary_1,
+            &temporary_2,
          });
       }
       namespace team {
@@ -147,16 +169,20 @@ namespace Megalo {
          extern VariableScopeWhichValue global_5 = VariableScopeWhichValue("global.team[5]");
          extern VariableScopeWhichValue global_6 = VariableScopeWhichValue("global.team[6]");
          extern VariableScopeWhichValue global_7 = VariableScopeWhichValue("global.team[7]");
-         extern VariableScopeWhichValue current  = VariableScopeWhichValue("current_team", flags::is_read_only);
+         extern VariableScopeWhichValue current  = VariableScopeWhichValue("current_team", flags::is_read_only | flags::is_transient);
          extern VariableScopeWhichValue hud_player_owner_team        = VariableScopeWhichValue("hud_player_team", flags::is_read_only);
-         extern VariableScopeWhichValue hud_target_player_owner_team = VariableScopeWhichValue("hud_target_player_team", flags::is_read_only);
-         extern VariableScopeWhichValue hud_target_object_owner_team = VariableScopeWhichValue("hud_target_object_team", flags::is_read_only);
-         extern VariableScopeWhichValue unk_15   = VariableScopeWhichValue("unk_15_team");
+         extern VariableScopeWhichValue hud_target_player_owner_team = VariableScopeWhichValue("hud_target_team", flags::is_read_only);
+         extern VariableScopeWhichValue temporary_0 = VariableScopeWhichValue("temporaries.team[0]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_1 = VariableScopeWhichValue("temporaries.team[1]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_2 = VariableScopeWhichValue("temporaries.team[2]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_3 = VariableScopeWhichValue("temporaries.team[3]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_4 = VariableScopeWhichValue("temporaries.team[4]", flags::is_transient);
+         extern VariableScopeWhichValue temporary_5 = VariableScopeWhichValue("temporaries.team[5]", flags::is_transient);
          //
          extern const VariableScopeWhichValueList list = VariableScopeWhichValueList({
             &no_team,
-            &team_0,
-            &team_1,
+            &team_0, // defenders
+            &team_1, // attackers
             &team_2,
             &team_3,
             &team_4,
@@ -173,10 +199,14 @@ namespace Megalo {
             &global_6,
             &global_7,
             &current,
-            &hud_player_owner_team,
-            &hud_target_player_owner_team,
-            &hud_target_object_owner_team,
-            &unk_15,
+            &hud_player_owner_team, // local_team
+            &hud_target_player_owner_team, // target_team: the team designator for `current_target_player` if it exists or `current_target_object` otherwise, per 343i
+            &temporary_0,
+            &temporary_1,
+            &temporary_2,
+            &temporary_3,
+            &temporary_4,
+            &temporary_5,
          });
       }
    }
@@ -186,6 +216,7 @@ namespace Megalo {
    extern const VariableScope MegaloVariableScopePlayer = VariableScope(variable_which_values::player::list, 8, 4, 4, 4, 4);
    extern const VariableScope MegaloVariableScopeObject = VariableScope(variable_which_values::object::list, 8, 4, 2, 4, 4);
    extern const VariableScope MegaloVariableScopeTeam   = VariableScope(variable_which_values::team::list,   8, 4, 4, 4, 6);
+   extern const VariableScope MegaloVariableScopeTemporary = VariableScope(megalo_scope_does_not_have_specifier, 10, 0, 6, 3, 8);
 
    extern const VariableScope& getScopeObjectForConstant(variable_scope s) noexcept {
       switch (s) {
@@ -197,6 +228,8 @@ namespace Megalo {
             return MegaloVariableScopeObject;
          case variable_scope::team:
             return MegaloVariableScopeTeam;
+         case variable_scope::temporary:
+            return MegaloVariableScopeTemporary;
       }
       assert(false && "Unknown variable scope!");
       __assume(0); // suppress "not all paths return a value" by telling MSVC this is unreachable
@@ -221,6 +254,8 @@ namespace Megalo {
          return variable_scope::object;
       if (&s == &MegaloVariableScopeTeam)
          return variable_scope::team;
+      if (&s == &MegaloVariableScopeTemporary)
+         return variable_scope::temporary;
       return variable_scope::not_a_scope;
    }
    extern variable_scope getVariableScopeForTypeinfo(const OpcodeArgTypeinfo* t) noexcept {

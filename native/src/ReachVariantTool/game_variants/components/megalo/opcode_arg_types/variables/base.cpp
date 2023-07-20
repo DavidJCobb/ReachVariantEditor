@@ -27,6 +27,8 @@ namespace {
       }
       if (which_type == &MegaloVariableScopeGlobal)
          return "global";
+      if (which_type == &MegaloVariableScopeTemporary)
+         return "temporaries";
       return nullptr;
    }
    void _default_stringify(const char* format, const Variable& v, std::string& out) {
@@ -293,7 +295,13 @@ namespace Megalo {
          if (top.which) {
             this->which = top.which->as_integer(); // if we're accessing a property on a NamespaceMember
          } else {
-            this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static); // if we're accessing a property on a static or global variable
+            if (top.is_temporary) {
+               auto& typeinfo = *top.type;
+               assert(typeinfo.first_temporary);
+               this->which = typeinfo.first_temporary->as_integer() + top.index;
+            } else {
+               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static); // if we're accessing a property on a static or global variable
+            }
          }
          if (prop->has_index()) {
             this->index = arg.resolved.property.index;
@@ -350,13 +358,24 @@ namespace Megalo {
          // This is a global variable, not a nested variable. If we are an object, player, or team variable, 
          // then we need to set (scope) and (which); otherwise, we need to set (scope) and (index).
          //
-         this->scope = this->type.get_variable_scope(variable_scope::global);
+         if (top.is_temporary) {
+            this->scope = this->type.get_variable_scope(variable_scope::temporary);
+         } else {
+            this->scope = this->type.get_variable_scope(variable_scope::global);
+         }
          assert(this->scope);
          if (this_type_is_a_scope) {
             if (top.which)
                this->which = top.which->as_integer();
-            else
-               this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
+            else {
+               if (top.is_temporary) {
+                  auto& typeinfo = *top.type;
+                  assert(typeinfo.first_temporary);
+                  this->which = typeinfo.first_temporary->as_integer() + top.index;
+               } else {
+                  this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static); // if we're accessing a property on a static or global variable
+               }
+            }
          } else {
             this->index = top.index;
             if (!this->_update_object_pointer_from_index(compiler))

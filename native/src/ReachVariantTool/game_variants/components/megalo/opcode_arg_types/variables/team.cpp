@@ -40,10 +40,12 @@ namespace Megalo {
          Script::Property("score",       OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::team_score),
          Script::Property("script_stat", OpcodeArgValueScalar::typeinfo, &Megalo::variable_scope_indicators::number::team_stat),
       },
-      8 // static count
+      8, // static count
+      6  // temporary count
    ).set_variable_which_values(
       &variable_which_values::team::global_0,
-      &variable_which_values::team::team_0
+      &variable_which_values::team::team_0,
+      &variable_which_values::team::temporary_0
    );
    //
    Variable* OpcodeArgValueTeam::create_zero_or_none() const noexcept {

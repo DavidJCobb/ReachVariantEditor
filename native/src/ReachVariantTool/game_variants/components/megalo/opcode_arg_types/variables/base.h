@@ -64,8 +64,9 @@ namespace Megalo {
             flags() = delete;
             enum type : uint8_t {
                none = 0,
-               is_readonly  = 0x01, // for the compiler; indicates that values in this scope-indicator cannot be written to at run-time
-               is_var_scope = 0x02,
+               is_readonly        = 0x01, // for the compiler; indicates that values in this scope-indicator cannot be written to at run-time
+               is_var_scope       = 0x02,
+               allowed_in_pregame = 0x04,
             };
          };
          using flags_t = std::underlying_type_t<flags::type>;
@@ -166,9 +167,10 @@ namespace Megalo {
       //
       protected:
          static uint32_t _global_index_to_which(const OpcodeArgTypeinfo&, uint32_t index, bool is_static) noexcept;
+         static uint32_t _temporary_index_to_which(const OpcodeArgTypeinfo&, uint32_t index) noexcept;
          //
          bool _update_object_pointer_from_index(Compiler& compiler) noexcept; // used by the compile process
-         //
+         
       public:
          const VariableScopeIndicatorValueList& type;
          //

@@ -9,8 +9,8 @@ namespace Megalo {
    namespace Script {
       class ParsedItem {
          public:
-            virtual ~ParsedItem() {} // need virtual methods to allow dynamic_cast
-            //
+            virtual ~ParsedItem() {}
+            
             ParsedItem* parent = nullptr;
             ParsedItem* owner  = nullptr; // for conditions
             int32_t line = -1;
@@ -19,7 +19,7 @@ namespace Megalo {
                int32_t start = -1;
                int32_t end   = -1;
             } range;
-            //
+            
             void set_start(const cobb::string_scanner::pos&);
             void set_end(const cobb::string_scanner::pos&);
       };

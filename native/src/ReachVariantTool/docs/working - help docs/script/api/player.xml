@@ -385,8 +385,7 @@
                   current_player.increment_req_money_by(9001)
                end
             </example>
-            <related context="player" type="action" name="set_req_purchase_modes" />
-            <related context="player" type="action" name="set_requisition_palette" />
+            <category id="player-money" />
          </method>
          <method name="set_req_purchase_modes" id="39">
             <args>
@@ -422,7 +421,7 @@
                   current_player.set_req_purchase_modes(alive_weapons | alive_equipment | alive_vehicles | dead_weapons | dead_equipment, 1)
                end
             </example>
-            <!-- relationships only need to be specified on one end -->
+            <category id="player-money" />
          </method>
          <method name="try_get_vehicle" name2="get_vehicle" id="40" returns="object">
             <blurb>Identify the vehicle that a player is in.</blurb>
@@ -627,16 +626,20 @@
             </note>
             <category id="bipeds" />
          </method>
-         <method name="set_round_card_title" id="56">
+         <method name="set_objective_text" name2="set_round_card_title" id="56">
             <args>
                <arg name="text" type="format-string" />
             </args>
             <blurb>Change the round card's description text.</blurb>
             <description>
                <p>
-                  This function sets the text of the round card. If the text passed in differs from 
-                  that used in the previous frame, then this function will also trigger display of the 
-                  round card.
+                  Typically, at the start of a round in most game modes, the player sees a small informational 
+                  popup with a brief blurb describing their objective; this is unofficially called the "round 
+                  card." This function sets the body text for the round card.
+               </p>
+               <p>
+                  If the text passed in differs from that used in the previous frame, then this function will 
+                  also trigger display of the round card.
                </p>
             </description>
             <example>
@@ -659,6 +662,11 @@
                end
             </example>
             <note>
+               The alternate name for this function, <code>set_round_card_title</code>, originates 
+               from the oldest versions of ReachVariantTool. It is unintuitive and considered 
+               deprecated.
+            </note>
+            <note>
                Only the first 116 characters of the specified string will be displayed; this limitation 
                applies after all format string parameters are substituted in. It seems that the UI 
                reserves room for 117 characters, including an invisible "end of text" marker.
@@ -670,16 +678,21 @@
             </note>
             <category id="round-card" />
          </method>
-         <method name="set_round_card_text" id="57">
+         <method name="set_objective_allegiance_name" name2="set_round_card_text" id="57">
             <args>
                <arg name="text" type="format-string" />
             </args>
             <blurb>Change the round card's icon caption.</blurb>
             <description>
                <p>
-                  This function sets the text of the caption below the round card's icon. If the 
-                  text passed in differs from that used in the previous frame, then this function 
-                  will also trigger display of the round card.
+                  Typically, at the start of a round in most game modes, the player sees a small informational 
+                  popup with a brief blurb describing their objective; this is unofficially called the "round 
+                  card." The round card can also display an icon and name, usually used if the player is 
+                  allied with some in-game faction; this function changes that name.
+               </p>
+               <p>
+                  If the text passed in differs from that used in the previous frame, then this function will 
+                  also trigger display of the round card.
                </p>
             </description>
             <example>
@@ -699,18 +712,24 @@
                   end
                end
             </example>
+            <note>
+               The alternate name for this function, <code>set_round_card_text</code>, originates 
+               from the oldest versions of ReachVariantTool. It is unintuitive and considered 
+               deprecated.
+            </note>
             <category id="round-card" />
          </method>
-         <method name="set_round_card_icon" id="58">
+         <method name="set_objective_allegiance_icon" name2="set_round_card_icon" id="58">
             <args>
                <arg name="icon" type="engine-icon" />
             </args>
             <blurb>Change the round card's icon.</blurb>
             <description>
                <p>
-                  This function sets the round card's icon. If the text passed in differs from 
-                  that used in the previous frame, then this function will also trigger display 
-                  of the round card.
+                  Typically, at the start of a round in most game modes, the player sees a small informational 
+                  popup with a brief blurb describing their objective; this is unofficially called the "round 
+                  card." The round card can also display an icon and name, usually used if the player is 
+                  allied with some in-game faction; this function changes that icon.
                </p>
                <p>
                   The default icon is the game variant file's icon.
@@ -872,7 +891,7 @@
                   appears to be a development leftover for a scrapped design idea.
                </p>
             </description>
-            <!-- relationships only need to be specified on one end -->
+            <category id="player-money" />
          </method>
          <method name="set_loadout_palette" id="77">
             <args>
@@ -1034,7 +1053,7 @@
             <blurb>The specific function of this action is not known. Presumably it has something 
             to do with keeping track of bad behavior in-game.</blurb>
          </method>
-         <method name="get_button_press_duration" id="101" returns="number">
+         <method name="get_button_press_duration" name2="get_button_time" id="101" returns="number">
             <args>
                <arg name="button">
                   <p>
@@ -1087,17 +1106,25 @@
                </p>
                <p>
                   This function checks whether a specified gameplay-related button is being held down on 
-                  the gamepad; if so, it returns the number of milliseconds for which the button has been 
+                  the gamepad; if so, it returns the number of script ticks for which the button has been 
                   held down. This function does not react to the keyboard, only works on host, and per 
                   statements by 343i developers is intended for debugging purposes only.
                </p>
                <p>
                   When multiple functions are mapped to the same button, they do not block each other; 
-                  this function will return the same time in milliseconds for both of them. Although 
+                  this function will return the same time in script ticks for both of them. Although 
                   buttons are identified by their mapped function (i.e. "the Jump button" instead of "A"), 
                   this function will return the correct duration even if the player is unable to trigger 
                   the mapped function. Players that are on the respawn screen, or out of grenades, for 
                   example, can still be detected as pressing the "throw grenades" button.
+               </p>
+               <p>
+                  Per a 343i employee, this function is not "deterministic." It doesn't synch across the 
+                  network or in Theater. If a gametype ever actually reacts to this function in any way 
+                  that affects game or map state, then a Theater film of that play session will immediately 
+                  desynch at that point in the match, rendering playback past that point impossible (Theater 
+                  will show an error message and then forcibly return you to the lobby). To paraphrase the 
+                  employee: "You should only use it for debugging, as a last resort."
                </p>
             </description>
             <example>
@@ -1105,6 +1132,9 @@
                   global.number[0] = current_player.get_button_press_duration(jump)
                end
             </example>
+            <note>
+               This function will never return a value higher than 255 (equivalent to 4.25 seconds).
+            </note>
          </method>
          <method name="set_vehicle_spawning_enabled" id="103">
             <args>
@@ -1279,16 +1309,15 @@
          </example>
          <related context="object" type="property" name="team" />
       </property>
-      <property name="unknown_09" type="number">
-         <blurb>Unknown. Possibly the player's requisition money.</blurb>
+      <property name="money" type="number">
+         <blurb>The player's money, to spend on requisitings as part of an unimplemented gameplay system.</blurb>
          <description>
             <p>
-               Unknown. Possibly the player's requisition money.
-            </p>
-            <p>
-               This property cannot hold values outside the range [-32,768, 32,767].
+               This value is limited to the range [-32,768, 32,767] and represents how much 
+               money the player has on hand to spend on requisitions.
             </p>
          </description>
+         <category id="player-money" />
       </property>
    </properties>
    <accessors>
