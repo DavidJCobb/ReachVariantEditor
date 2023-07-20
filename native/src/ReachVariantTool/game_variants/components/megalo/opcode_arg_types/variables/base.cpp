@@ -124,9 +124,11 @@ namespace Megalo {
    const VariableScopeIndicatorValue* VariableScopeIndicatorValueList::get_variable_scope(variable_scope vs) const noexcept {
       auto this_type_as_scope = getScopeObjectForConstant(this->var_type);
       //
-      if (vs == variable_scope::global && this_type_as_scope) {
+      if ((vs == variable_scope::global || vs == variable_scope::temporary) && this_type_as_scope) {
          for (auto entry : this->scopes) {
             if (!entry->is_variable_scope())
+               continue;
+            if (entry->index_type != VariableScopeIndicatorValue::index_type::none) // disambiguates global.player from player.player, etc.
                continue;
             if (entry->base == this_type_as_scope)
                return entry;

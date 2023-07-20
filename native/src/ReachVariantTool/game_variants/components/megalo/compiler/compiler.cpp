@@ -2099,7 +2099,12 @@ namespace Megalo {
       if (this->has_fatal()) // fatal error occurred while parsing the text
          return var;
       var->resolve(*this, is_alias_definition, is_write_access);
-      if (!var->is_invalid && !var->resolved.top_level.is_temporary) {
+      if (
+         !var->is_invalid &&
+         !var->resolved.top_level.is_temporary &&
+         !var->is_none() &&
+         !var->is_statically_indexable_value()
+      ) {
          //
          // Implicitly declare the variable:
          //
