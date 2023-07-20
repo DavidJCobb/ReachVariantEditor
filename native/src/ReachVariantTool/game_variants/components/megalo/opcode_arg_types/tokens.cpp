@@ -191,9 +191,35 @@ namespace Megalo {
       //
       // All subsequent arguments are format string parameters, which must be variables.
       //
-      auto arg = compiler.arg_to_variable(arg_text);
+      auto* arg = compiler.arg_to_variable(arg_text);
       if (!arg)
          return arg_compile_result::failure("This argument is not a variable.");
+      if (arg->is_transient()) {
+         bool is_current_player      = false;
+         bool is_current_player_team = false;
+
+         auto* transient_which = arg->resolved.top_level.which;
+         if (transient_which == &variable_which_values::player::current) {
+            is_current_player = true;
+            if (auto* prop = arg->resolved.property.definition) {
+               if (prop->name == "team") {
+                  is_current_player      = false;
+                  is_current_player_team = true;
+               }
+            }
+         }
+
+         QString warning;
+         if (is_current_player) {
+            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player, try using `local_player` (and variables nested under it e.g. `local_player.number[0]`) instead of `current_player`.";
+         } else if (is_current_player_team) {
+            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. If you wish to display different values to each player based on their team, try using `local_team` (and variables nested under it e.g. `local_team.number[0]`) instead of `current_player.team`.";
+         } else {
+            warning = "`%1` is a transient value; that is: its value will likely be cleared before the game ever actually displays this text. You'll need to store the value into a normal variable and refer to that instead.";
+         }
+         warning = warning.arg(arg->to_string());
+         compiler.raise_warning(warning);
+      }
       auto result = this->compile(compiler, *arg, part);
       delete arg;
       return result;

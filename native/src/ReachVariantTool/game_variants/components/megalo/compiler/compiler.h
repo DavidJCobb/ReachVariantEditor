@@ -402,6 +402,8 @@ namespace Megalo {
          QString extract_operator();
          //
          #pragma region Variable declaration helpers
+            Script::Alias* _allocate_alias(QString name, QString member_type);
+            Script::Alias* _allocate_alias(QString name, const OpcodeArgTypeinfo& temporary_type);
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
          #pragma endregion
          //

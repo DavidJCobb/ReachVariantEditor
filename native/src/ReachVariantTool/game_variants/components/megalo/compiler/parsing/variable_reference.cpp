@@ -22,19 +22,6 @@ namespace {
          return &Megalo::MegaloVariableScopeTeam;
       return nullptr;
    }
-   Megalo::variable_type _var_type_constant_for_type(const Megalo::OpcodeArgTypeinfo& type) {
-      if (&type == &Megalo::OpcodeArgValueScalar::typeinfo)
-         return Megalo::variable_type::scalar;
-      if (&type == &Megalo::OpcodeArgValueObject::typeinfo)
-         return Megalo::variable_type::object;
-      if (&type == &Megalo::OpcodeArgValuePlayer::typeinfo)
-         return Megalo::variable_type::player;
-      if (&type == &Megalo::OpcodeArgValueTeam::typeinfo)
-         return Megalo::variable_type::team;
-      if (&type == &Megalo::OpcodeArgValueTimer::typeinfo)
-         return Megalo::variable_type::timer;
-      return Megalo::variable_type::not_a_variable;
-   }
 }
 
 namespace Megalo::Script {
@@ -653,7 +640,7 @@ namespace Megalo::Script {
                return 0;
             }
             {
-               Megalo::variable_type vt = _var_type_constant_for_type(*type);
+               Megalo::variable_type vt = getVariableTypeForTypeinfo(type);
                int max;
                if (ns == &namespaces::global) {
                   max = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
@@ -794,7 +781,7 @@ namespace Megalo::Script {
             return false;
          }
          {
-            Megalo::variable_type vt = _var_type_constant_for_type(*type);
+            Megalo::variable_type vt = getVariableTypeForTypeinfo(type);
             auto max = prev_scope->max_variables_of_type(vt);
             if (part->index >= max) {
                compiler.raise_error(QString("You specified \"%1[%2]\", but the maximum allowed index is %3.").arg(type->internal_name.c_str()).arg(part->index).arg(max - 1));

@@ -36,7 +36,7 @@ namespace Megalo::Script {
          compiler.raise_error("An alias's name cannot begin with a number.");
          return false;
       }
-      if (Compiler::is_keyword(name)) {
+      if (Compiler::is_keyword(name) || name.compare("allocate", Qt::CaseInsensitive) == 0) {
          compiler.raise_fatal(QString("Keyword \"%1\" cannot be used as the name of an alias.").arg(this->name));
          return false;
       }
@@ -148,6 +148,14 @@ namespace Megalo::Script {
          }
       }
       return true;
+   }
+   Alias::Alias(Compiler& compiler, QString name, VariableReference& vr) {
+      this->name = name;
+      this->_validate_name_initial(compiler);
+      this->target = &vr;
+      if (!this->_validate_name_final(compiler))
+         return;
+      this->invalid = this->target->is_invalid;
    }
    Alias::Alias(Compiler& compiler, QString name, QString target) {
       this->name = name;
