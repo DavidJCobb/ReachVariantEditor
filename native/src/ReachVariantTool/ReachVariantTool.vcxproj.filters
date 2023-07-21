@@ -463,6 +463,15 @@
     <ClCompile Include="game_variants\components\megalo\helpers\format_strings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\code_block.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\haloscript_function_id.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="ui\generic\PlayerTraitWidgets.h">
@@ -1140,14 +1149,89 @@
     <ClInclude Include="game_variants\components\megalo\helpers\format_strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\code_block.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\haloscript_function_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_variants\components\megalo\opcode_arg_types\megalo_scope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="ReachVariantTool.ico" />
+    <Image Include="Resources\compiler_log\error.png" />
+    <Image Include="Resources\compiler_log\fatal.png" />
+    <Image Include="Resources\compiler_log\success.png" />
+    <Image Include="Resources\compiler_log\warning.png" />
+    <Image Include="Resources\gametype_icons\-1.png" />
+    <Image Include="Resources\gametype_icons\0.png" />
+    <Image Include="Resources\gametype_icons\1.png" />
+    <Image Include="Resources\gametype_icons\10.png" />
+    <Image Include="Resources\gametype_icons\11.png" />
+    <Image Include="Resources\gametype_icons\12.png" />
+    <Image Include="Resources\gametype_icons\13.png" />
+    <Image Include="Resources\gametype_icons\14.png" />
+    <Image Include="Resources\gametype_icons\15.png" />
+    <Image Include="Resources\gametype_icons\16.png" />
+    <Image Include="Resources\gametype_icons\17.png" />
+    <Image Include="Resources\gametype_icons\18.png" />
+    <Image Include="Resources\gametype_icons\19.png" />
+    <Image Include="Resources\gametype_icons\2.png" />
+    <Image Include="Resources\gametype_icons\20.png" />
+    <Image Include="Resources\gametype_icons\21.png" />
+    <Image Include="Resources\gametype_icons\22.png" />
+    <Image Include="Resources\gametype_icons\23.png" />
+    <Image Include="Resources\gametype_icons\24.png" />
+    <Image Include="Resources\gametype_icons\25.png" />
+    <Image Include="Resources\gametype_icons\25_MCC.png" />
+    <Image Include="Resources\gametype_icons\26.png" />
+    <Image Include="Resources\gametype_icons\27.png" />
+    <Image Include="Resources\gametype_icons\28.png" />
+    <Image Include="Resources\gametype_icons\29.png" />
+    <Image Include="Resources\gametype_icons\3.png" />
+    <Image Include="Resources\gametype_icons\30.png" />
+    <Image Include="Resources\gametype_icons\4.png" />
+    <Image Include="Resources\gametype_icons\5.png" />
+    <Image Include="Resources\gametype_icons\6.png" />
+    <Image Include="Resources\gametype_icons\7.png" />
+    <Image Include="Resources\gametype_icons\8.png" />
+    <Image Include="Resources\gametype_icons\9.png" />
+    <Image Include="Resources\hud_widget_preview\0.png" />
+    <Image Include="Resources\hud_widget_preview\1.png" />
+    <Image Include="Resources\hud_widget_preview\10.png" />
+    <Image Include="Resources\hud_widget_preview\2.png" />
+    <Image Include="Resources\hud_widget_preview\3.png" />
+    <Image Include="Resources\hud_widget_preview\4.png" />
+    <Image Include="Resources\hud_widget_preview\5.png" />
+    <Image Include="Resources\hud_widget_preview\6.png" />
+    <Image Include="Resources\hud_widget_preview\7.png" />
+    <Image Include="Resources\hud_widget_preview\8.png" />
+    <Image Include="Resources\hud_widget_preview\9.png" />
+    <Image Include="Resources\hud_widget_preview\base_hud.png" />
+    <Image Include="Resources\icon_128px.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
     <Text Include="docs\plans - true else(if) statements.txt" />
+    <Text Include="docs\temporary variables.txt" />
+    <Text Include="Resources\localized_string_library\campaign.txt" />
+    <Text Include="Resources\localized_string_library\generic.txt" />
+    <Text Include="Resources\localized_string_library\invasion_slayer.txt" />
+    <Text Include="Resources\localized_string_library\items.txt" />
+    <Text Include="Resources\localized_string_library\vehicles.txt" />
+    <Text Include="Resources\localized_string_library\vip.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\gametype_files\blank_forge.bin" />
+    <None Include="Resources\gametype_files\blank_mp.bin" />
+    <None Include="Resources\gametype_files\blank_ff.bin" />
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.inl.bak" />
+    <None Include="game_variants\components\megalo\opcode_arg_types\references\README.md" />
   </ItemGroup>
 </Project>

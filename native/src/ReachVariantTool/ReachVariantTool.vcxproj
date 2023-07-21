@@ -547,6 +547,7 @@
   <ItemGroup>
     <Text Include="docs\plans - true else(if) statements.txt" />
     <Text Include="docs\saving files that exceed file format limits.txt" />
+    <Text Include="docs\temporary variables.txt" />
     <Text Include="game_variants\components\megalo\compiler\notes.txt" />
     <Text Include="README.txt" />
     <Text Include="Resources\localized_string_library\campaign.txt" />
@@ -557,6 +558,10 @@
     <Text Include="Resources\localized_string_library\vip.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.cpp.bak" />
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.h.bak" />
+    <None Include="game_variants\components\megalo\compiler\parsing\variable_reference_rewrite_2.inl.bak" />
+    <None Include="game_variants\components\megalo\opcode_arg_types\references\README.md" />
     <None Include="Resources\gametype_files\blank_forge.bin" />
     <None Include="Resources\gametype_files\blank_mp.bin" />
     <None Include="Resources\gametype_files\blank_ff.bin" />

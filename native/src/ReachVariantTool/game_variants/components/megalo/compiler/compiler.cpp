@@ -2924,7 +2924,7 @@ namespace Megalo {
          if (existing_info.top_level.is_static)
             continue;
 
-         if (existing->target->is_namespace_member())
+         if (existing_info.top_level.namespace_member.scope || existing_info.top_level.namespace_member.which)
             continue;
 
          if (context_namespace) {
@@ -3012,7 +3012,7 @@ namespace Megalo {
          if (existing_info.top_level.is_static)
             continue;
 
-         if (existing->target->is_namespace_member())
+         if (existing_info.top_level.namespace_member.scope || existing_info.top_level.namespace_member.which)
             //
             // Seems like these only get set for namespace members, not top-level globals/temporaries, 
             // even when the latter are of types that use which-values for their globals.
@@ -3047,12 +3047,24 @@ namespace Megalo {
    bool Compiler::_alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias) {
       if (!new_alias.target)
          return false;
+      if (new_alias.via_allocate)
+         //
+         // You should never pass `allocate` aliases to this, but I've added this as a precaution 
+         // against maintenance mistakes (see below comment).
+         //
+         return false;
       auto& nt = *new_alias.target;
+      if (nt.is_invalid)
+         return false;
+      if (nt.resolved.top_level.is_constant)
+         return false;
       if (nt.resolved.top_level.is_static)
          return false;
       if (nt.resolved.top_level.enumeration)
          return false;
-      if (new_alias.target->is_namespace_member())
+      if (nt.resolved.top_level.namespace_member.scope || nt.resolved.top_level.namespace_member.which)
+         return false;
+      if (nt.resolution_involved_aliases.top_level)
          return false;
 
       for (const auto* existing : this->aliases_in_scope) {
@@ -3071,11 +3083,23 @@ namespace Megalo {
          auto* et = existing->target;
          if (!et)
             continue;
-
-         if (et->resolved.top_level.is_temporary != nt.resolved.top_level.is_temporary)
+         if (et->is_invalid)
             continue;
-         
 
+         if (nt.resolved.top_level.is_temporary != et->resolved.top_level.is_temporary)
+            continue;
+         if (nt.resolved.alias_basis != et->resolved.alias_basis)
+            continue;
+         if (nt.resolved.top_level.type != et->resolved.top_level.type)
+            continue;
+         if (nt.resolved.top_level.index != et->resolved.top_level.index)
+            continue;
+         if (nt.resolved.nested.type == et->resolved.nested.type && nt.resolved.nested.index == et->resolved.nested.index) {
+            if (nt.resolution_involved_aliases.nested) {
+               continue;
+            }
+         }
+         return true;
       }
       return false;
    }
@@ -3178,12 +3202,20 @@ namespace Megalo {
       item->set_start(start);
       item->set_end(this->state);
       this->block->insert_item(item);
-      if (!item->invalid) // aliases can also run into non-fatal errors
+      if (!item->invalid) { // aliases can also run into non-fatal errors
          //
          // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
          // spurious errors? (Be sure to update the `allocate` code, too.)
          //
          this->aliases_in_scope.push_back(item);
+
+         if (this->_alias_is_explicit_reference_to_allocated(*item)) {
+            //
+            // TODO: Can we improve the error messaging on this, e.g. show the names of the colliding aliases?
+            //
+            this->raise_warning(start, "You've pointed this alias at a specific variable, but that variable has already been assigned to another (still in-scope) alias using the `alias <name> = allocate ...` syntax. Did you intend for both of these aliases to refer to the same variable?");
+         }
+      }
    }
 
    void Compiler::_handleKeyword_Alt(const pos start) {

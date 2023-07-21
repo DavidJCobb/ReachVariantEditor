@@ -59,10 +59,10 @@ namespace Megalo {
             static NamespaceMember make_enum_member(Namespace&, Enum& e); // passing the containing namespace is an unfortunate necessity here
             //
             bool has_index() const noexcept;
-            inline bool is_which_member() const noexcept { return this->which != no_which; }
-            inline bool is_scope_member() const noexcept { return this->scope != no_scope; }
-            inline bool is_bare_member() const noexcept { return !this->is_which_member() && !this->is_scope_member(); }
-            inline bool is_enum_member() const noexcept { return this->enumeration != nullptr; }
+            constexpr bool is_which_member() const noexcept { return this->which != no_which; }
+            constexpr bool is_scope_member() const noexcept { return this->scope != no_scope; }
+            constexpr bool is_bare_member() const noexcept { return !this->is_which_member() && !this->is_scope_member(); }
+            constexpr bool is_enum_member() const noexcept { return this->enumeration != nullptr; }
             bool is_read_only() const noexcept;
       };
       class Namespace {

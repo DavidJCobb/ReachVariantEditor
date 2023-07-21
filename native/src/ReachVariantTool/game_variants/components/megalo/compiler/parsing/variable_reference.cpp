@@ -1,5 +1,4 @@
 #include "variable_reference.h"
-#include <cassert>
 #include "../compiler.h"
 #include "../enums.h"
 #include "../namespaces.h"
@@ -225,12 +224,13 @@ namespace Megalo::Script {
       auto& nested    = resolved.nested;
       if (top_level.is_constant)
          return QString("%1").arg(top_level.index);
-      if (auto* scope = top_level.namespace_member.scope) {
+      if (top_level.namespace_member.scope) {
          //
          // If the (scope) is set, then we're dealing with a dead-end value that has no 
          // which. If it also lacks an index, then we can just use its decompile format 
          // string; there's nothing we need to pass to it.
          //
+         auto    scope  = top_level.namespace_member.scope;
          QString result = scope->format;
          if (!scope->has_index())
             return result;
@@ -305,7 +305,7 @@ namespace Megalo::Script {
          if (part.has_index()) {
             result += '[';
             if (part.index_is_numeric)
-               result += QString::number(part.index);
+               result += part.index;
             else
                result += part.index_str;
             result += ']';
@@ -326,12 +326,16 @@ namespace Megalo::Script {
          return resolved.top_level.type;
       return resolved.alias_basis;
    }
-
+   bool VariableReference::is_none() const noexcept {
+      auto which = this->resolved.top_level.namespace_member.which;
+      return which ? which->is_none() : false;
+   }
+   bool VariableReference::is_property() const noexcept { return this->resolved.property.definition && !this->is_accessor(); }
    bool VariableReference::is_read_only() const noexcept {
       auto& resolved = this->resolved;
       if (!resolved.top_level.type)
          return false;
-      if (auto* scope = resolved.top_level.namespace_member.scope)
+      if (auto scope = resolved.top_level.namespace_member.scope)
          return scope->flags & VariableScopeIndicatorValue::flags::is_readonly;
       if (resolved.accessor)
          return resolved.accessor->setter == nullptr;
@@ -349,7 +353,29 @@ namespace Megalo::Script {
          return resolved.top_level.namespace_member.which->is_read_only();
       return !resolved.top_level.type->is_variable(); // only variables can be assigned to
    }
-   
+   bool VariableReference::is_statically_indexable_value() const noexcept {
+      if (this->is_accessor())
+         return false;
+      if (this->is_property())
+         return false;
+      if (this->resolved.nested.type)
+         return false;
+      return this->resolved.top_level.is_static;
+   }
+   bool VariableReference::is_variable() const noexcept {
+      if (this->is_accessor())
+         return false;
+      if (this->is_property())
+         return false;
+      if (this->is_constant_integer())
+         return false;
+      if (auto type = this->resolved.nested.type)
+         return type->is_variable();
+      if (auto type = this->resolved.top_level.type)
+         return type->is_variable();
+      return false;
+   }
+   //
    variable_scope VariableReference::get_containing_scope() const noexcept {
       auto& top  = this->resolved.top_level;
       auto& nest = this->resolved.nested;
@@ -445,7 +471,7 @@ namespace Megalo::Script {
          int32_t index = top_level.index;
          bool    has_index = false;
          //
-         if (auto* scope = top_level.namespace_member.scope) {
+         if (auto scope = top_level.namespace_member.scope) {
             name      = scope->format;
             has_index = scope->has_index();
             if (has_index) {
@@ -675,7 +701,7 @@ namespace Megalo::Script {
          res.enumeration = member->enumeration;
          return ++i;
       }
-      res.type  = &member->type;
+      res.type = &member->type;
       res.namespace_member.which = member->which;
       res.namespace_member.scope = member->scope;
       {
@@ -730,7 +756,9 @@ namespace Megalo::Script {
       }
       if (!prev->can_have_variables())
          return false;
-      this->_resolve_aliases_from(compiler, raw_index, prev); // handle relative aliases, if any are present
+      if (this->_resolve_aliases_from(compiler, raw_index, prev)) { // handle relative aliases, if any are present
+         this->resolution_involved_aliases.nested = true;
+      }
       auto part = this->_get_raw_part(raw_index);
       auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
       if (type) {
@@ -815,11 +843,6 @@ namespace Megalo::Script {
    void VariableReference::resolve(Compiler& compiler, bool is_alias_definition, bool is_write_access) {
       if (this->is_resolved)
          return;
-
-      #if _DEBUG
-         this->_resolve_new(compiler, is_alias_definition, is_write_access); // test new stuff so we can breakpoint and step through
-      #endif
-
       //
       // All variable references take one of the two following forms:
       //
@@ -843,10 +866,14 @@ namespace Megalo::Script {
       }
       if (this->is_invalid)
          return;
-      //
-      if (this->_resolve_aliases_from(compiler, 0)) { // absolute aliases need to be handled here so we can handle the case of them resolving to an integer, etc..
-         this->resolved.top_level.via_alias = true;
-
+      
+      if (this->_resolve_aliases_from(compiler, 0)) {
+         //
+         // We normally call `_resolve_aliases_from` inside of the code that handles each 
+         // part of the variable-reference. However, absolute aliases need to be handled 
+         // here, so we can handle the case of them resolving to an integer, etc..
+         //
+         this->resolution_involved_aliases.top_level = true;
          bool has_more = this->raw.size() > 1;
          if (this->is_constant_integer()) {
             if (has_more) {
@@ -987,7 +1014,7 @@ namespace Megalo::Script {
             auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
             if (type) {
                compiler.raise_error(
-                  QString("Variable access can only go two levels deep; references of the form (var.var.var) are not possible. Copy the %1 value into an intermediate %2 variable first, and then access the data you want through that.")
+                  QString("Variable access can only go two levels deep; references of the form (var.var.var) are not possible. Copy the target variable (%1) into an intermediate %2 variable first.")
                      .arg(this->to_string_from_raw(0, i))
                      .arg(prev->internal_name.c_str())
                );
@@ -1017,669 +1044,6 @@ namespace Megalo::Script {
       else
          compiler.raise_error(QString("Unable to identify the member \"%1\".").arg(part->name));
       return;
-   }
-   #pragma endregion
-
-
-   #pragma region REWRITE 7-21-2023
-   /*static*/ VariableReference::try_resolve_result<VariableReference::static_variable_reference>
-   VariableReference::static_variable_reference::try_resolve(const RawPart& part) {
-      auto* type = OpcodeArgTypeRegistry::get().get_static_indexable_type(part.name);
-      if (!type)
-         return {};
-
-      if (!part.has_index()) {
-         return QString("You cannot use a typename such as \"%1\" as a value. If you meant to refer to a specific instance of that type, e.g. player[0], then specify an index in square brackets.")
-            .arg(type->internal_name.c_str());
-      }
-      if (part.index < 0) {
-         return QString("Typename indices cannot be negative.");
-      }
-      if (part.index >= type->static_count) {
-         return QString("You specified \"%1[%2]\", but the maximum allowed index is %3.")
-            .arg(type->internal_name.c_str())
-            .arg(part.index)
-            .arg(type->static_count - 1);
-      }
-
-      return static_variable_reference{
-         .type  = type,
-         .index = part.index,
-      };
-   }
-
-   /*static*/ VariableReference::try_resolve_result<VariableReference::non_member_indexed_variable_reference>
-   VariableReference::non_member_indexed_variable_reference::try_resolve(const RawPart& part, const Namespace& ns) {
-      const auto* type = OpcodeArgTypeRegistry::get().get_variable_type(part.name);
-      if (!type)
-         return {};
-
-      VariableReference::try_resolve_result<VariableReference::non_member_indexed_variable_reference> out;
-      out.data = non_member_indexed_variable_reference{
-         .containing_namespace = &ns,
-         .type = type
-      };
-
-      if (!part.has_index()) {
-         out.errors.push_back(
-            QString("You must indicate which variable you are referring to, using an index, e.g. \"%2.%1[0]\" instead of \"%2.%1\".")
-               .arg(type->internal_name.c_str())
-               .arg(ns.name.c_str())
-         );
-      } else {
-         out.data.value().index = part.index;
-         if (part.index < 0)
-            out.errors.push_back("Typename indices cannot be negative.");
-      }
-      {
-         Megalo::variable_type vt = getVariableTypeForTypeinfo(type);
-         int max;
-         if (&ns == &namespaces::global) {
-            max = Megalo::MegaloVariableScopeGlobal.max_variables_of_type(vt);
-         } else if (&ns == &namespaces::temporaries) {
-            if (vt == Megalo::variable_type::timer) {
-               out.errors.push_back("Temporary timers cannot exist. (How would a timer keep track of time if it only exists during a single instant?)");
-            }
-            max = Megalo::MegaloVariableScopeTemporary.max_variables_of_type(vt);
-         } else {
-            assert(false && "Unhandled namespace type!");
-         }
-         if (max > 0 && part.index >= max) {
-            out.errors.push_back(
-               QString("You specified \"%1[%2]\", but the maximum allowed index is %3.")
-                  .arg(type->internal_name.c_str())
-                  .arg(part.index)
-                  .arg(max - 1)
-            );
-         }
-      }
-      return out;
-   }
-
-   /*static*/ VariableReference::try_resolve_result<VariableReference::nested_variable_reference>
-   VariableReference::nested_variable_reference::try_resolve(const RawPart& part, const OpcodeArgTypeinfo& member_of) {
-      if (!member_of.can_have_variables())
-         return {};
-
-      const auto* type = OpcodeArgTypeRegistry::get().get_variable_type(part.name);
-      if (!type)
-         return {};
-
-      try_resolve_result<nested_variable_reference> out = nested_variable_reference{
-         .type = type,
-      };
-
-      auto* context_scope = _var_scope_for_type(member_of);
-      assert(context_scope && "If a variable type doesn't have a VariableScope object, then it shouldn't claim to be able to hold variables.");
-
-      if (!part.has_index()) {
-         if (member_of.get_property_by_name(part.name)) {
-            //
-            // There is a property with this name, so if we're not using an index here, then assume 
-            // we're referring to the property.
-            //
-            return out;
-         }
-         out.errors.push_back(
-            QString("You must indicate which variable you are referring to, using an index, e.g. \"global.%1[0]\" instead of \"global.%1\".")
-               .arg(type->internal_name.c_str())
-         );
-         return out;
-      }
-
-      out.data.value().index = part.index;
-
-      if (part.index < 0) {
-         out.errors.push_back("Typename indices cannot be negative.");
-      } else {
-         Megalo::variable_type vt = getVariableTypeForTypeinfo(type);
-         auto max = context_scope->max_variables_of_type(vt);
-         if (part.index >= max) {
-            out.errors.push_back(
-               QString("You specified \"%1[%2]\", but the maximum allowed index is %3.")
-                  .arg(type->internal_name.c_str())
-                  .arg(part.index)
-                  .arg(max - 1)
-            );
-         }
-      }
-
-      return out;
-   }
-
-   /*static*/ VariableReference::try_resolve_result<VariableReference::variable_property_reference>
-   VariableReference::variable_property_reference::try_resolve(const RawPart& part, const OpcodeArgTypeinfo& member_of) {
-      try_resolve_result<variable_property_reference> out;
-
-      auto* prop = member_of.get_property_by_name(part.name);
-      if (!prop)
-         return {};
-
-      out.data = variable_property_reference{
-         .definition = prop,
-      };
-
-      if (part.has_index()) {
-         out.data.value().index = part.index;
-      }
-
-      bool should_have_index = prop->has_index();
-      if (part.has_index() != should_have_index) {
-         const char* pn = prop->name.c_str();
-         const char* tn = member_of.internal_name.c_str();
-         if (should_have_index)
-            out.errors.push_back(QString("The \"%1\" property on the %2 type must be indexed.").arg(pn).arg(tn));
-         else
-            out.errors.push_back(QString("The \"%1\" property on the %2 type cannot be indexed.").arg(pn).arg(tn));
-         return out;
-      }
-      return out;
-   }
-
-   /*static*/ std::optional<VariableReference::variable_accessor_reference>
-   VariableReference::variable_accessor_reference::try_resolve(const RawPart& part, const OpcodeArgTypeinfo& member_of) {
-      const auto& manager = AccessorRegistry::get();
-      const auto* entry   = manager.get_by_name(part.name.toStdString().c_str(), member_of);
-      if (!entry) {
-         assert(&member_of && "Problem in VariableReference::_resolve_accessor; somehow we do not have an identifiable type.");
-         entry = manager.get_variably_named_accessor(part.name, member_of);
-      }
-      if (entry) {
-         return variable_accessor_reference{
-            .definition    = entry,
-            .accessor_name = part.name,
-         };
-      }
-      return {};
-   }
-
-   bool VariableReference::_resolve_new_aliases_from(Compiler& compiler, size_t raw_index, const OpcodeArgTypeinfo* basis) {
-      auto   part  = this->_get_raw_part(raw_index);
-      Alias* alias = nullptr;
-      if (basis)
-         alias = compiler.lookup_relative_alias(part->name, basis);
-      else {
-         alias = compiler.lookup_absolute_alias(part->name);
-         if (alias && alias->is_imported_name()) {
-            compiler.raise_error(QString("Alias \"%1\" refers to imported name \"%2\" and cannot appear where a variable can.").arg(alias->name).arg(alias->target_imported_name));
-            this->invalidity.type_not_identifiable   = true;
-            this->invalidity.target_not_identifiable = true;
-            return false;
-         }
-      }
-      if (!alias)
-         return false;
-      if (part->has_index()) {
-         compiler.raise_error(QString("Aliases such as \"%1\" can refer to indexed data but cannot themselves be indexed.").arg(alias->name));
-         this->invalidity.type_not_identifiable   = true;
-         this->invalidity.target_not_identifiable = true;
-         return false;
-      }
-      if (!basis) {
-         if (alias->is_integer_constant()) {
-            this->new_resolved_data = integer_constant{
-               .value = (int16_t)alias->get_integer_constant()
-            };
-            return true;
-         }
-         if (alias->is_enumeration()) {
-            this->new_resolved_data = enumeration{
-               .built_in = alias->get_enumeration()
-            };
-            return true;
-         }
-      }
-      this->__transclude_alias(raw_index, *alias);
-      return true;
-   }
-   size_t VariableReference::_resolve_new_top_level(Compiler& compiler, bool is_alias_definition) {
-      assert(std::holds_alternative<std::monostate>(this->new_resolved_data));
-
-      size_t i    = 0;
-      auto*  part = this->_get_raw_part(i);
-      if (is_alias_definition && !part->has_index()) {
-         auto type = OpcodeArgTypeRegistry::get().get_variable_type(part->name);
-         if (type && type->can_have_variables()) {
-            this->new_resolved_data = relative_alias{
-               .alias_basis = type
-            };
-            return ++i;
-         }
-      }
-
-      const Namespace* ns = nullptr;
-
-      if (!part->has_index()) {
-         ns = namespaces::get_by_name(part->name);
-         if (ns) {
-            //
-            // The part is the name of a namespace, so move onto the next part.
-            //
-            part = this->_get_raw_part(++i);
-            if (!part) {
-               compiler.raise_error(QString("You cannot use a namespace such as \"%1\" as a value.").arg(ns->name.c_str()));
-               this->invalidity.type_not_identifiable   = true;
-               this->invalidity.target_not_identifiable = true;
-               return 0;
-            }
-         }
-      }
-      if (!ns) {
-         auto svr = static_variable_reference::try_resolve(*part);
-         if (svr.data.has_value()) {
-            this->new_resolved_data = variable{
-               .top_level = svr.data.value()
-            };
-            return ++i;
-         }
-         if (!svr.errors.empty()) {
-            this->invalidity.target_not_identifiable = true;
-            for(const auto& e : svr.errors)
-               compiler.raise_error(e);
-            return 0;
-         }
-         if (svr.data.has_value()) {
-            return ++i;
-         }
-
-         ns = &namespaces::unnamed;
-      }
-
-      if (ns->can_have_variables) {
-         //
-         // Let's check to see if we're looking at a global variable.
-         //
-         auto result = VariableReference::non_member_indexed_variable_reference::try_resolve(*part, *ns);
-         if (result.data.has_value()) {
-            this->new_resolved_data = variable{
-               .top_level = result.data.value()
-            };
-         }
-         if (!result.errors.empty()) {
-            this->invalidity.target_not_identifiable = true;
-            for (const auto& e : result.errors)
-               compiler.raise_error(e);
-            return 0;
-         }
-         if (result.data.has_value()) {
-            return ++i;
-         }
-      }
-
-      //
-      // The first part(s) of the VariableReference were not a statically-indexable type e.g. player[0], nor were 
-      // they a global variable e.g. global.player[0], so they must instead be a namespace member.
-      //
-
-      auto member = ns->get_member(part->name);
-      if (!member) {
-         //
-         // Real quick: could this be a user-defined enum?
-         //
-         auto ude = compiler.lookup_user_defined_enum(part->name);
-         if (ude) {
-            this->new_resolved_data = enumeration{
-               .built_in = ude->definition,
-            };
-            return ++i;
-         }
-         //
-         // Guess not. Error time! :)
-         //
-         if (ns == &namespaces::unnamed)
-            compiler.raise_error(QString("There are no unscoped values named \"%1\".").arg(part->name));
-         else
-            compiler.raise_error(QString("Namespace \"%1\" does not have a member named \"%2\".").arg(ns->name.c_str()).arg(part->name));
-         this->invalidity.type_not_identifiable   = true;
-         this->invalidity.target_not_identifiable = true;
-         return 0;
-      }
-      auto& res = this->resolved.top_level;
-      if (member->is_enum_member()) {
-         this->new_resolved_data = enumeration{
-            .built_in = member->enumeration,
-         };
-         return ++i;
-      }
-      if (member->which && member->which->is_none()) {
-         if (part->has_index()) {
-            compiler.raise_error(QString("The \"%1.%2\" value cannot be indexed.").arg(ns->name.c_str()).arg(member->name.c_str()));
-            this->invalidity.target_not_identifiable = true;
-         }
-         this->new_resolved_data = none{
-            .type = &member->type,
-         };
-         return ++i;
-      }
-
-      namespace_member* resolved_nsm = nullptr;
-      if (!member->scope && getVariableTypeForTypeinfo(&member->type) != variable_type::not_a_variable) {
-         this->new_resolved_data = variable{
-            .top_level = namespace_member{
-               .type   = &member->type,
-               .target = member,
-            }
-         };
-         resolved_nsm = &std::get<namespace_member>(std::get<variable>(this->new_resolved_data).top_level);
-      } else {
-         this->new_resolved_data = namespace_member{
-            .type   = &member->type,
-            .target = member,
-         };
-         resolved_nsm = &std::get<namespace_member>(this->new_resolved_data);
-      }
-      {
-         //
-         // Validate the presence or absence of an index.
-         //
-         bool should_have_index = member->has_index();
-         if (part->has_index() != should_have_index) {
-            if (should_have_index)
-               compiler.raise_error(QString("The \"%1.%2\" value must be indexed.").arg(ns->name.c_str()).arg(member->name.c_str()));
-            else
-               compiler.raise_error(QString("The \"%1.%2\" value cannot be indexed.").arg(ns->name.c_str()).arg(member->name.c_str()));
-            this->invalidity.target_not_identifiable = true;
-            return ++i;
-         }
-         if (should_have_index)
-            resolved_nsm->index = part->index;
-      }
-      return ++i;
-   }
-   void VariableReference::_resolve_new(Compiler& compiler, bool is_alias_definition, bool is_write_access) {
-      if (!std::holds_alternative<std::monostate>(this->new_resolved_data)) // already resolved?
-         return;
-
-      if (!this->raw.size()) {
-         this->invalidity.type_not_identifiable = true;
-         this->invalidity.target_not_identifiable = true;
-         return;
-      }
-
-      for (auto& part : this->raw) {
-         //
-         // Let's resolve raw part indices first: if any of them are still strings, then we 
-         // need to either resolve them (if they are absolute integer aliases) or error.
-         //
-         if (!part.resolve_index(compiler))
-            this->invalidity.target_not_identifiable = true;
-      }
-
-      size_t i = 0;
-      if (this->_resolve_new_aliases_from(compiler, 0)) { // absolute aliases need to be handled here so we can handle the case of them resolving to an integer, etc..
-         bool has_more = this->raw.size() > 1;
-         if (this->is_constant_integer()) {
-            if (has_more) {
-               compiler.raise_error(QString("Alias \"%1\" resolved to a constant integer. You cannot access members on an integer.").arg(this->raw[0].name));
-               this->is_invalid = true;
-               return;
-            }
-            this->is_resolved = true;
-            return;
-         }
-         if (std::holds_alternative<enumeration>(this->new_resolved_data)) {
-            i = 1;
-         }
-      }
-      if (std::holds_alternative<std::monostate>(this->new_resolved_data)) {
-         i = this->_resolve_new_top_level(compiler, is_alias_definition);
-         if (this->invalidity.type_not_identifiable)
-            return;
-         if (i >= this->raw.size()) {
-            if (!is_alias_definition) {
-               if (std::holds_alternative<enumeration>(this->new_resolved_data)) {
-                  compiler.raise_error("The names of enums cannot be used as values.");
-                  this->invalidity.type_not_identifiable   = true;
-                  this->invalidity.target_not_identifiable = true;
-                  return;
-               }
-            }
-            this->fully_resolved = true;
-            return;
-         }
-      }
-
-
-      // Top-level references that don't allow member access:
-      if (std::holds_alternative<integer_constant>(this->new_resolved_data)) {
-         compiler.raise_error("You cannot access members on an integer constant.");
-         this->invalidity.type_not_identifiable   = true;
-         this->invalidity.target_not_identifiable = true;
-         return;
-      }
-      if (std::holds_alternative<none>(this->new_resolved_data)) {
-         compiler.raise_error("You cannot access the members of a none value.");
-         this->invalidity.type_not_identifiable   = true;
-         this->invalidity.target_not_identifiable = true;
-         return;
-      }
-      if (std::holds_alternative<namespace_member>(this->new_resolved_data)) {
-         auto& info = std::get<namespace_member>(this->new_resolved_data);
-         assert(info.target);
-         assert(info.target->owner);
-         compiler.raise_error(
-            QString("The %1 value does not have any member variables, properties, or accessors for you to access.")
-               .arg(this->to_string_from_raw(0, i))
-         );
-         this->invalidity.type_not_identifiable   = true;
-         this->invalidity.target_not_identifiable = true;
-         return;
-      }
-
-      if (std::holds_alternative<enumeration>(this->new_resolved_data)) {
-         auto& info = std::get<enumeration>(this->new_resolved_data);
-         assert(info.built_in);
-         auto  part = this->_get_raw_part(i);
-         auto& name = part->name;
-
-         auto* definition = info.built_in;
-         info.built_in  = nullptr; // do not retain references to enums, as user-defined enums may be deleted when they go out of scope (the exception is aliases of enums, which would also go out of scope)
-
-         int32_t value;
-         if (!definition->lookup(part->name, value)) {
-            this->invalidity.target_not_identifiable = true;
-            compiler.raise_error(
-               QString("Enumeration %1 does not have a value named \"%2\".")
-                  .arg(this->to_string_from_raw(0, i))
-                  .arg(name)
-            );
-         } else {
-            info.value = value;
-         }
-
-         bool has_more = this->raw.size() > i + 1;
-         if (has_more) {
-            this->invalidity.type_not_identifiable   = true;
-            this->invalidity.target_not_identifiable = true;
-            compiler.raise_error("You cannot access members of a constant integer.");
-            return;
-         }
-         this->fully_resolved = true;
-         return;
-      }
-      if (
-         std::holds_alternative<variable>(this->new_resolved_data) ||
-         std::holds_alternative<relative_alias>(this->new_resolved_data)
-      ) {
-         const OpcodeArgTypeinfo*   top_level_type = nullptr;
-         const OpcodeArgTypeinfo*   member_of      = nullptr;
-         member_reference_details*  member_info    = nullptr;
-         if (auto* casted = std::get_if<variable>(&this->new_resolved_data)) {
-            member_of   = casted->top_level.megalo_type();
-            member_info = casted;
-         } else if (auto* casted = std::get_if<relative_alias>(&this->new_resolved_data)) {
-            member_of   = casted->alias_basis;
-            member_info = casted;
-         }
-         top_level_type = member_of;
-         assert(member_of);
-
-         this->_resolve_new_aliases_from(compiler, i, member_of); // handle relative aliases, if any are present
-
-         {
-            auto result = nested_variable_reference::try_resolve(*this->_get_raw_part(i), *member_of);
-            if (!result.errors.empty()) {
-               this->invalidity.target_not_identifiable = true;
-               for (const auto& e : result.errors)
-                  compiler.raise_error(e);
-            }
-            if (result.data.has_value()) {
-               member_info->nested = result.data.value();
-               if (++i >= this->raw.size()) {
-                  this->fully_resolved = true;
-                  return;
-               }
-            }
-         }
-         this->_resolve_new_aliases_from(compiler, i, member_of); // handle relative aliases, if any are present
-         {
-            auto result = variable_property_reference::try_resolve(*this->_get_raw_part(i), *member_of);
-            if (!result.errors.empty()) {
-               this->invalidity.target_not_identifiable = true;
-               for (const auto& e : result.errors)
-                  compiler.raise_error(e);
-            }
-            if (result.data.has_value()) {
-               auto* dfn = result.data.value().definition;
-               assert(dfn);
-               if (is_write_access && !dfn->has_index()) {
-                  //
-                  // It's possible for a read-only property to have a setter-accessor. The main example of this 
-                  // is the "score" property on players and teams; Bungie and 343i never write to it, preferring 
-                  // instead to use a setter-accessor to change player and team scores.
-                  //
-                  if (auto* scope = dfn->scope) {
-                     if (scope->is_readonly()) {
-                        auto result = variable_accessor_reference::try_resolve(*this->_get_raw_part(i), *member_of);
-                        if (result.has_value()) {
-                           if (++i < this->raw.size()) {
-                              compiler.raise_error("Attempted to access a member of an accessor.");
-                              this->invalidity.type_not_identifiable   = true;
-                              this->invalidity.target_not_identifiable = true;
-                              return;
-                           }
-                           this->fully_resolved = true;
-                           return;
-                        }
-                     }
-                  }
-               }
-
-               member_info->property = result.data.value();
-               member_of = &dfn->type;
-
-               if (auto* nested_type = member_info->nested.type) {
-                  //
-                  // Not all properties can be accessed as (var.var.property). Enforce this.
-                  //
-                  if (dfn && !dfn->allow_from_nested) {
-                     compiler.raise_error(
-                        QString("The %1 property can only be accessed from a top-level %2 variable. Copy the %3 value into an intermediate %2 variable first, and then access the data you want through that.")
-                        .arg(dfn->name.c_str())
-                        .arg(nested_type->internal_name.c_str())
-                        .arg(this->to_string_from_raw(0, i))
-                     );
-                     this->invalidity.target_not_identifiable = true;
-                     if (i + 1 < this->raw.size()) {
-                        //
-                        // If there are parts even further past this one, don't even try to resolve them; 
-                        // just give up on identifying the type.
-                        //
-                        this->invalidity.type_not_identifiable = true;
-                     }
-                     return;
-                  }
-               }
-
-               if (++i >= this->raw.size()) {
-                  if (!this->is_invalid)
-                     this->fully_resolved = true;
-                  return;
-               }
-               this->_resolve_new_aliases_from(compiler, i, member_of); // handle relative aliases, if any are present
-            }
-         }
-         {
-            const auto& part = *this->_get_raw_part(i);
-            auto result = variable_accessor_reference::try_resolve(part, *member_of);
-            if (result.has_value()) {
-               member_info->accessor = result.value();
-               if (++i < this->raw.size()) {
-                  compiler.raise_error("Attempted to access a member of an accessor.");
-                  this->invalidity.type_not_identifiable   = true;
-                  this->invalidity.target_not_identifiable = true;
-                  return;
-               }
-            } else {
-               this->invalidity.target_not_identifiable = true;
-
-               if (auto* type = OpcodeArgTypeRegistry::get().get_variable_type(part.name)) {
-                  if (!member_of->can_have_variables()) {
-                     compiler.raise_error(
-                        QString("Values of type %1 do not have nested variables.")
-                           .arg(member_of->internal_name.c_str())
-                     );
-                     this->invalidity.type_not_identifiable = true;
-                     return;
-                  }
-
-                  QString format;
-                  if (member_info->property.definition) {
-                     format = "You can't access variables through properties (i.e. var.prop.var). Copy the %1 value into an intermediate %2 variable first, and then access the data you want through that.";
-                  } else {
-                     format = "Variable access can only go two levels deep; references of the form (var.var.var) are not possible. Copy the %1 value into an intermediate %2 variable first, and then access the data you want through that.";
-                  }
-                  compiler.raise_error(
-                     QString(format)
-                        .arg(this->to_string_from_raw(0, i))
-                        .arg(type->internal_name.c_str())
-                  );
-                  if (i + 1 < this->raw.size()) {
-                     //
-                     // If there are parts even further past this one, don't even try to resolve them; 
-                     // just give up on identifying the type.
-                     //
-                     this->invalidity.type_not_identifiable = true;
-                  }
-                  return;
-               }
-
-               this->invalidity.type_not_identifiable = true;
-               compiler.raise_error(
-                  QString("The %1 type does not have a member named \"%2\".")
-                     .arg(member_of->internal_name.c_str())
-                     .arg(part.name)
-               );
-               return;
-            }
-         }
-         this->fully_resolved = true;
-         return;
-      }
-      //
-      // If we reach this point, then the raw part that we're currently looking at is unrecognized. That's 
-      // an error, but let's do some work and see if we can't display a good error message to the script 
-      // author.
-      //
-      this->invalidity.type_not_identifiable   = true;
-      this->invalidity.target_not_identifiable = true;
-      //
-      if (this->raw.size() == 1) {
-         auto& first = this->raw[0];
-         if (!first.has_index()) {
-            //
-            // Let's check for an attempt to use an imported name where a variable was expected.
-            //
-            OpcodeArgTypeRegistry::type_list_t types;
-            OpcodeArgTypeRegistry::get().lookup_imported_name(first.name, types);
-            if (types.size()) {
-               compiler.raise_error(QString("The \"%1\" value cannot appear here.").arg(first.name));
-               return;
-            }
-         }
-      }
-
-      compiler.raise_error(QString("Unable to identify the syntax or type of \"%1\".").arg(this->to_string_from_raw()));
    }
    #pragma endregion
 }

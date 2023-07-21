@@ -1,0 +1,226 @@
+#pragma once
+#include "./variable_reference.h"
+#include "../../opcode_arg_types/variables/base.h"
+
+#include "../namespaces.h"
+#include "../../opcode_arg_types/widget_related.h"
+
+namespace Megalo::Script {
+   constexpr uint32_t VariableReference::parsed_path_segment::allowed_next_segment_types() const noexcept {
+
+      constexpr const auto allowed_next_after_variable = (1 << (int)segment_type::variable) | (1 << (int)segment_type::property) | (1 << (int)segment_type::accessor);
+
+      switch (this->type) {
+         case segment_type::enumeration:
+            return 1 << (int)segment_type::integer_constant;
+
+         case segment_type::namespace_access:
+            return 1 << (int)segment_type::namespace_member;
+
+         case segment_type::namespace_member:
+            {
+               if (!this->namespace_member)
+                  break;
+               if (this->namespace_member->is_enum_member())
+                  return 1 << (int)segment_type::integer_constant;
+               if (this->namespace_member->type.is_variable())
+                  return allowed_next_after_variable;
+            }
+            break;
+
+         case segment_type::variable:
+            return allowed_next_after_variable;
+
+         case segment_type::property:
+            return 1 << (int)segment_type::accessor;
+            break;
+      }
+      return 0;
+   }
+
+   constexpr VariableReference::parsed_path_segment::segment_type VariableReference::last_segment_type() const noexcept {
+      if (this->parsed_path_segments.empty())
+         return parsed_path_segment::segment_type::undefined;
+      return this->parsed_path_segments.back().type;
+   }
+
+   constexpr bool VariableReference::is_accessor() const noexcept {
+      return this->last_segment_type() == parsed_path_segment::segment_type::accessor;
+   }
+   constexpr bool VariableReference::is_constant_integer() const noexcept {
+      return this->last_segment_type() == parsed_path_segment::segment_type::integer_constant;
+   }
+   constexpr bool VariableReference::is_none() const noexcept {
+      if (this->parsed_path_segments.size() != 1)
+         //
+         // NOTE: This assumes that "none" values will never be inside of any namespace 
+         // except for the unnamed namespace.
+         //
+         return false;
+      auto& segment = this->parsed_path_segments[0];
+      switch (segment.type) {
+         case parsed_path_segment::segment_type::none:
+            return true;
+         case parsed_path_segment::segment_type::namespace_member:
+            {
+               auto* nsm = segment.namespace_member;
+               assert(nsm);
+               if (nsm->which) {
+                  if (nsm->which->is_none())
+                     return true;
+                  return false;
+               }
+               if (&nsm->type == &OpcodeArgValueWidget::typeinfo) // HACK HACK HACK
+                  return true;
+            }
+            return false;
+      }
+      return false;
+   }
+   constexpr bool VariableReference::is_property() const noexcept {
+      return this->last_segment_type() == parsed_path_segment::segment_type::property;
+   }
+
+   constexpr bool VariableReference::is_variable() const noexcept {
+      switch (this->last_segment_type()) {
+         case parsed_path_segment::segment_type::variable:
+            return true;
+         case parsed_path_segment::segment_type::namespace_member:
+            {
+               auto& item = this->parsed_path_segments.back();
+               auto* nsm  = item.namespace_member;
+               assert(nsm);
+               if (!nsm->type.is_variable())
+                  return false;
+               if (nsm->which) {
+                  if (nsm->which->is_none())
+                     return false;
+               }
+            }
+            return true;
+      }
+      return false;
+   }
+
+   constexpr bool VariableReference::is_compilable_reference() const noexcept {
+      if (this->is_invalid || !this->is_fully_resolved)
+         return false;
+      switch (this->last_segment_type()) {
+         case parsed_path_segment::segment_type::undefined:
+         case parsed_path_segment::segment_type::unidentified:
+         case parsed_path_segment::segment_type::enumeration:
+         case parsed_path_segment::segment_type::namespace_access:
+            return false;
+      }
+      const auto& list = this->parsed_path_segments;
+      assert(!list.empty());
+
+      if (this->is_constant_integer()) {
+         if (list.back().index.has_value() == true) // reject indexed constant integers e.g. `3[1]`
+            return false;
+         return true;
+      }
+      if (this->is_none()) {
+         if (list.back().index.has_value() == true) // reject indexed nones e.g. `no_player[3]`
+            return false;
+         return true;
+      }
+
+      const OpcodeArgTypeinfo* variable_type = nullptr;
+
+      size_t variable_count = 0;
+      bool   seen_namespace = false;
+      bool   seen_property  = false;
+
+      for (size_t i = 0; i < list.size(); ++i) {
+         auto& item = list[i];
+         auto  type = item.type;
+         if (type == parsed_path_segment::segment_type::namespace_member) {
+            auto nsm = item.namespace_member;
+            if (nsm->has_index() != item.index.has_value())
+               return false;
+            if (nsm->type.is_variable()) {
+               type = parsed_path_segment::segment_type::variable;
+               variable_type = &nsm->type;
+            }
+         } else if (type == parsed_path_segment::segment_type::variable) {
+            if (!item.index.has_value()) {
+               return false;
+            }
+            variable_type = item.variable.type;
+         }
+
+         if (i > 0) {
+            auto allowed = list[i - 1].allowed_next_segment_types();
+            if ((allowed & (1 << (unsigned int)type)) == 0) {
+               return false;
+            }
+         }
+         switch (type) {
+            case parsed_path_segment::segment_type::variable:
+               ++variable_count;
+               if (variable_count > 2)
+                  //
+                  // Can't go deeper than two variables; var.var.var is not allowed.
+                  //
+                  return false;
+               break;
+            case parsed_path_segment::segment_type::property:
+               if (variable_count == 0)
+                  return false;
+               if (variable_count > 1) {
+                  const auto* dfn = item.property.definition;
+                  assert(dfn);
+                  if (!dfn->allow_from_nested)
+                     //
+                     // Most properties can't be accessed via nested variables; var.prop is allowed but var.var.prop is not.
+                     //
+                     return false;
+               }
+               if (seen_property)
+                  //
+                  // References like var.prop.prop are not allowed.
+                  //
+                  return false;
+               seen_property = true;
+               break;
+            case parsed_path_segment::segment_type::accessor:
+               if (variable_count == 0)
+                  return false;
+               break;
+         }
+      }
+      return variable_count > 0 && variable_count <= 2;
+   }
+
+   constexpr const AccessorRegistry::Definition* VariableReference::get_accessor_definition() const noexcept { return this->resolved.accessor; }
+   constexpr const OpcodeArgTypeinfo* VariableReference::get_alias_basis_type() const noexcept { return this->resolved.alias_basis; }
+   constexpr int32_t VariableReference::get_constant_integer() const noexcept { return this->resolved.top_level.index; }
+   constexpr bool VariableReference::is_constant_integer() const noexcept { return this->resolved.top_level.is_constant; }
+
+   constexpr bool VariableReference::is_namespace_member() const noexcept {
+      if (!this->is_resolved)
+         return false;
+
+      auto& tns = this->resolved.top_level.namespace_member;
+      if (tns.scope) {
+         if (tns.scope->is_variable_scope())
+            return false;
+         return true;
+      }
+      if (tns.which)
+         return true;
+
+      return false;
+   }
+
+   constexpr bool VariableReference::is_statically_indexable_value() const noexcept {
+      if (this->is_accessor())
+         return false;
+      if (this->is_property())
+         return false;
+      if (this->resolved.nested.type)
+         return false;
+      return this->resolved.top_level.is_static;
+   }
+}
