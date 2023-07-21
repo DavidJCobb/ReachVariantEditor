@@ -1,4 +1,0 @@
-
-This folder consisted of experiments at trying to reimplement how RVT handles references [1]. However, I don't think I can easily write new code that fits cleanly into RVT's very old codebase. Frankly, I've gotten a lot better as a coder since I built, like, *any* of this, and the old code's design is such that it's extremely difficult to rewrite any one component in isolation.
-
-This entire folder has been Excluded From Project so that the program can still build. Nothing inside of it ever got off the ground, and I'll likely delete it in a future commit once I've created at least some record of it. Code like this could be useful if I just... straight-up rewrite RVT's entire backend *and* compiler from scratch.
