@@ -62,6 +62,15 @@ namespace Megalo {
             std::vector<ParsedItem*> items; // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions_alt; // only for alt(if) blocks // contents are owned by this Block and deleted in the destructor
             std::vector<Comparison*> conditions; // only for if blocks // contents are owned by this Block and deleted in the destructor
+
+            Block* get_nearest_function() {
+               if (this->type == Type::function)
+                  return this;
+               auto* bp = dynamic_cast<Block*>(this->parent);
+               if (!bp)
+                  return nullptr;
+               return bp->get_nearest_function();
+            }
             
             ~Block();
             void insert_condition(Comparison*);
@@ -404,6 +413,7 @@ namespace Megalo {
          #pragma region Variable declaration helpers
             Script::Alias* _allocate_alias(QString name, QString member_type);
             Script::Alias* _allocate_alias(QString name, const OpcodeArgTypeinfo& temporary_type);
+            bool _alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias);
             void _declare_variable(Script::VariableReference& variable, Script::VariableReference* initial, VariableDeclaration::network_enum networking, bool network_specified);
          #pragma endregion
          //

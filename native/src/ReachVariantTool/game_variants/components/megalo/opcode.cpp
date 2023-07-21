@@ -313,6 +313,8 @@ namespace Megalo {
       }
       return nullptr;
    }
+
+   // TODO: Deprecate this in favor of the non-compiler overload, once we confirm that that's working.
    const AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(Compiler& compiler, const QString& name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
       //
       // If a property-getter or property-setter has no defined primary name, then one of the opcode arguments 
@@ -339,6 +341,27 @@ namespace Megalo {
          arg.reset((type->factory)());
          auto scan = cobb::string_scanner(name);
          if (arg->compile(compiler, scan, 0).is_success())
+            return &entry;
+      }
+      return nullptr;
+   }
+
+   const AccessorRegistry::Definition* AccessorRegistry::get_variably_named_accessor(const QString& name, const OpcodeArgTypeinfo& property_is_on) const noexcept {
+      for (auto& entry : this->definitions) {
+         if (!entry.is_variably_named())
+            continue;
+         const OpcodeBase* function = entry.get_opcode_base();
+         #if _DEBUG
+            assert(function && "An entry for a variably-named accessor should not exist unless we've identified at least one of its opcodes.");
+         #endif
+         
+         auto type = function->get_name_type();
+         if (!type)
+            continue;
+         if (!function->context_is(property_is_on))
+            continue;
+         
+         if (type->has_imported_name(name))
             return &entry;
       }
       return nullptr;

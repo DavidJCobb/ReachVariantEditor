@@ -176,6 +176,9 @@ namespace Megalo::Script {
       //
       auto check = compiler.create_log_checkpoint();
       this->target->resolve(compiler, true);
+      if (compiler.has_fatal()) {
+         return;
+      }
       if (this->target->is_invalid) {
          delete this->target;
          this->target = nullptr;

@@ -198,7 +198,7 @@ namespace Megalo {
          bool is_current_player      = false;
          bool is_current_player_team = false;
 
-         auto* transient_which = arg->resolved.top_level.which;
+         auto* transient_which = arg->resolved.top_level.namespace_member.which;
          if (transient_which == &variable_which_values::player::current) {
             is_current_player = true;
             if (auto* prop = arg->resolved.property.definition) {

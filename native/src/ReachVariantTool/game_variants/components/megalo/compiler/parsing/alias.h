@@ -18,6 +18,7 @@ namespace Megalo {
             QString target_imported_name; // for imported names only
             VariableReference* target = nullptr; // for variable-references only, including relative aliases; owned by this Alias and deleted in its destructor
             bool invalid = true;
+            bool via_allocate = false;
             
             Alias(Compiler&, QString name, VariableReference&);
             Alias(Compiler&, QString name, QString target);

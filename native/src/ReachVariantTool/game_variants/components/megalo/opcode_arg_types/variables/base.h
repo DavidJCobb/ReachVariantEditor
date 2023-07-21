@@ -63,7 +63,6 @@ namespace Megalo {
          struct flags {
             flags() = delete;
             enum type : uint8_t {
-               none = 0,
                is_readonly        = 0x01, // for the compiler; indicates that values in this scope-indicator cannot be written to at run-time
                is_var_scope       = 0x02,
                allowed_in_pregame = 0x04,
@@ -85,7 +84,7 @@ namespace Megalo {
          };
          using index_t = index_type;
          //
-         flags_t        flags          = flags::none;
+         flags_t        flags          = {};
          index_type     index_type     = index_type::none;
          uint8_t        index_bitcount = 0; // use non-zero values for index_type::indexed_data and index_type::generic
          const VariableScope* base     = nullptr; // used to deduce whether a value's (which) is from megalo_objects, megalo_players, or megalo_teams

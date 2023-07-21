@@ -78,8 +78,8 @@ namespace Megalo {
                      return arg_compile_result::failure();
                   //
                   auto type = top.type;
-                  if (top.which)
-                     this->which = top.which->as_integer();
+                  if (top.namespace_member.which)
+                     this->which = top.namespace_member.which->as_integer();
                   else
                      this->which = Variable::_global_index_to_which(*type, top.index, top.is_static);
                   this->index = res.nested.index;
@@ -103,8 +103,8 @@ namespace Megalo {
                if (top.type != &OpcodeArgValuePlayer::typeinfo)
                   return arg_compile_result::failure();
                this->scope = &variable_scope_indicators::object::player_biped;
-               if (top.which)
-                  this->which = top.which->as_integer();
+               if (top.namespace_member.which)
+                  this->which = top.namespace_member.which->as_integer();
                else
                   this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
                return arg_compile_result::success();

@@ -25,6 +25,17 @@
 #define MEGALO_COMPILE_MIMIC_BUNGIE_ARTIFACTS 1
 
 namespace {
+   //
+   // Control whether `alias <name> = allocate temporary <type>` statements are allowed 
+   // inside of user-defined functions. As of this writing, the compiler, as currently 
+   // designed, has no way to ensure that a function doesn't clobber the temporary 
+   // variables of its caller (particularly when that caller is another function), so 
+   // we do not allow this syntax in there.
+   //
+   constexpr const bool allow_allocate_temporary_inside_of_functions = false;
+}
+
+namespace {
    constexpr const char* ce_assignment_operator = "=";
    bool _is_assignment_operator(QString s) {
       constexpr std::array operators = {
@@ -2913,11 +2924,7 @@ namespace Megalo {
          if (existing_info.top_level.is_static)
             continue;
 
-         if (existing_info.top_level.scope || existing_info.top_level.which)
-            //
-            // Seems like these only get set for namespace members, not top-level globals/temporaries, 
-            // even when the latter are of types that use which-values for their globals.
-            //
+         if (existing->target->is_namespace_member())
             continue;
 
          if (context_namespace) {
@@ -3005,7 +3012,7 @@ namespace Megalo {
          if (existing_info.top_level.is_static)
             continue;
 
-         if (existing_info.top_level.scope || existing_info.top_level.which)
+         if (existing->target->is_namespace_member())
             //
             // Seems like these only get set for namespace members, not top-level globals/temporaries, 
             // even when the latter are of types that use which-values for their globals.
@@ -3036,6 +3043,41 @@ namespace Megalo {
             .arg(temporary_type.internal_name.c_str())
       );
       return nullptr;
+   }
+   bool Compiler::_alias_is_explicit_reference_to_allocated(const Script::Alias& new_alias) {
+      if (!new_alias.target)
+         return false;
+      auto& nt = *new_alias.target;
+      if (nt.resolved.top_level.is_static)
+         return false;
+      if (nt.resolved.top_level.enumeration)
+         return false;
+      if (new_alias.target->is_namespace_member())
+         return false;
+
+      for (const auto* existing : this->aliases_in_scope) {
+         if (existing == &new_alias)
+            //
+            // You *should* call this function *before* adding `new_alias` to the in-scope list, 
+            // but this compiler's code is... messy... compared to my newer work. Feels safer to 
+            // just add this check rather than rely on this program, in its current incarnation, 
+            // being easy to maintain. :(
+            //
+            continue;
+
+         if (!existing->via_allocate)
+            continue;
+
+         auto* et = existing->target;
+         if (!et)
+            continue;
+
+         if (et->resolved.top_level.is_temporary != nt.resolved.top_level.is_temporary)
+            continue;
+         
+
+      }
+      return false;
    }
    void Compiler::_handleKeyword_Alias(const pos start) {
       auto name = this->extract_word();
@@ -3078,6 +3120,7 @@ namespace Megalo {
             item = this->_allocate_alias(name, member_name);
          }
          if (item) {
+            item->via_allocate = true;
             if (this->has_fatal()) { // the alias name had a fatal error e.g. using a keyword as a name
                delete item;
                return;
@@ -3085,6 +3128,12 @@ namespace Megalo {
             item->set_start(start);
             item->set_end(this->state);
             this->block->insert_item(item);
+            if constexpr (allow_allocate_temporary_inside_of_functions == false) {
+               if (this->block->get_nearest_function()) {
+                  this->raise_error(start, "Due to technical limitations in how ReachVariantTool's compiler works, temporary variables cannot be safely allocated while inside of a user-defined function. Temporary variables allocated outside of a function (i.e. by a function's containing block) can still be used from inside of the function, however.");
+                  item->invalid = true;
+               }
+            }
             if (!item->invalid) {
                //
                // TODO: Should we add invalid aliases to `aliases_in_scope` so that references to them don't throw 
@@ -3439,7 +3488,7 @@ namespace Megalo {
             auto& res = initial->resolved;
             auto& top = res.top_level;
             if (top.type && top.type->is_variable() && !top.is_static && !top.is_constant) {
-               auto scope = top.scope;
+               auto scope = top.namespace_member.scope;
                if (!scope || scope->is_variable_scope()) {
                   this->raise_error("When declaring one variable, you cannot use another variable as the initial value.");
                   return;

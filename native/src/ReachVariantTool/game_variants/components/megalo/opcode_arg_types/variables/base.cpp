@@ -275,6 +275,31 @@ namespace Megalo {
       auto& res = arg.resolved;
       auto& top = res.top_level;
       bool  is_nested = res.nested.type != nullptr;
+      if (top.is_constant) {
+         //
+         // The subclass needs to handle this. (Constant integers are currently only used by the "number" 
+         // variable type, and should be handled there only.)
+         //
+         // When writing an override of this function, have your override call super and keep the result. If 
+         // the result code is (base_class_is_expecting_override_behavior), then check for a case that your 
+         // subclass needs to handle; return a success code if you handle it or a failure code if you don't. 
+         // If the result code was not (base_class_is_expecting_override_behavior), then return the result 
+         // object verbatim.
+         //
+         // If an override is not defined, then this code will test as a failure code when the compiler sees 
+         // it.
+         //
+         return arg_compile_result(arg_compile_result::code_t::base_class_is_expecting_override_behavior);
+      }
+      if (top.namespace_member.scope) { // namespace scope-member
+         this->scope = top.namespace_member.scope;
+         if (this->scope->has_index()) {
+            this->index = top.index;
+            if (!this->_update_object_pointer_from_index(compiler))
+               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
+         }
+         return arg_compile_result::success();
+      }
       if (arg.is_property()) {
          auto prop = arg.resolved.property.definition;
          if (is_nested || !prop->scope) {
@@ -294,8 +319,8 @@ namespace Megalo {
             return arg_compile_result(arg_compile_result::code_t::base_class_is_expecting_override_behavior);
          }
          this->scope = prop->scope;
-         if (top.which) {
-            this->which = top.which->as_integer(); // if we're accessing a property on a NamespaceMember
+         if (top.namespace_member.which) {
+            this->which = top.namespace_member.which->as_integer(); // if we're accessing a property on a NamespaceMember
          } else {
             if (top.is_temporary) {
                auto& typeinfo = *top.type;
@@ -312,31 +337,6 @@ namespace Megalo {
          }
          return arg_compile_result::success();
       }
-      if (top.is_constant) {
-         //
-         // The subclass needs to handle this. (Constant integers are currently only used by the "number" 
-         // variable type, and should be handled there only.)
-         //
-         // When writing an override of this function, have your override call super and keep the result. If 
-         // the result code is (base_class_is_expecting_override_behavior), then check for a case that your 
-         // subclass needs to handle; return a success code if you handle it or a failure code if you don't. 
-         // If the result code was not (base_class_is_expecting_override_behavior), then return the result 
-         // object verbatim.
-         //
-         // If an override is not defined, then this code will test as a failure code when the compiler sees 
-         // it.
-         //
-         return arg_compile_result(arg_compile_result::code_t::base_class_is_expecting_override_behavior);
-      }
-      if (top.scope) { // namespace scope-member
-         this->scope = top.scope;
-         if (this->scope->has_index()) {
-            this->index = top.index;
-            if (!this->_update_object_pointer_from_index(compiler))
-               return arg_compile_result::failure(QString("Index %1 is out of bounds.").arg(this->index));
-         }
-         return arg_compile_result::success();
-      }
       if (top.type) {
          if (is_nested) {
             //
@@ -346,8 +346,8 @@ namespace Megalo {
             auto vs = getVariableScopeForTypeinfo(top.type);
             this->scope = this->type.get_variable_scope(vs);
             assert(this->scope);
-            if (top.which) {
-               this->which = top.which->as_integer(); // if we're accessing a variable nested under a NamespaceMember
+            if (top.namespace_member.which) {
+               this->which = top.namespace_member.which->as_integer(); // if we're accessing a variable nested under a NamespaceMember
             } else {
                this->which = Variable::_global_index_to_which(*top.type, top.index, top.is_static);
             }
@@ -367,8 +367,8 @@ namespace Megalo {
          }
          assert(this->scope);
          if (this_type_is_a_scope) {
-            if (top.which)
-               this->which = top.which->as_integer();
+            if (top.namespace_member.which)
+               this->which = top.namespace_member.which->as_integer();
             else {
                if (top.is_temporary) {
                   auto& typeinfo = *top.type;

@@ -191,6 +191,7 @@ namespace Megalo {
          Definition* get_by_name(const char*, const OpcodeArgTypeinfo& base) const noexcept;
          Definition* get_variably_named_accessor(const OpcodeArgTypeinfo& property_name_type, const OpcodeArgTypeinfo& base) const noexcept;
          const Definition* get_variably_named_accessor(Compiler&, const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
+         const Definition* get_variably_named_accessor(const QString& name, const OpcodeArgTypeinfo& base) const noexcept;
          //
       protected:
          AccessorRegistry();
