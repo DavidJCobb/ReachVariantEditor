@@ -17,7 +17,7 @@ defaults:
     shell: cmd
 
 env:
-  SOURCE_DIR:   ${{ github.workspace }}/native/src/ReachVariantTool
+  SOURCE_DIR:   ${{ github.workspace }/native/src/ReachVariantTool}
   QT_VERSION:   5.15.2
   ARTIFACT:     ReachVariantEditor.zip
 
@@ -80,7 +80,7 @@ jobs:
       - name: (9) Zip build
         working-directory: ${{ runner.temp }}
         run:  |
-              7z a ReachVariantEditor.zip ${{ runner.temp }}\build\* -r
+              7z a ReachVariantEditor ${{ runner.temp }}\build\* -r
               
       - name: (10) Save build artifact
         uses: actions/upload-artifact@master
