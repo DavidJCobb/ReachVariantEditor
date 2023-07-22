@@ -17,9 +17,9 @@ defaults:
     shell: cmd
 
 env:
-  SOURCE_DIR:   ${{ github.workspace }}
+  SOURCE_DIR:   ${{ github.workspace }}/native/src
   QT_VERSION:   5.15.2
-  ARTIFACT:     qt-planets-build.zip
+  ARTIFACT:     ReachVariantEditor.zip
 
 jobs:
   build:
