@@ -10,9 +10,9 @@ env:
 
 jobs:
   build:
-      name: ${{ matrix.config.name }}
-      runs-on: ${{ matrix.config.os }}
-      config:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    config:
         - {
             name: "Windows Latest x64", artifact: "Windows-x64.zip",
             os: windows-latest,
