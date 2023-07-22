@@ -17,7 +17,7 @@ defaults:
     shell: cmd
 
 env:
-  SOURCE_DIR:   ${{ github.workspace }/native/src/ReachVariantTool}
+  SOURCE_DIR:   ${{ github.workspace }}/native/src/ReachVariantTool
   QT_VERSION:   5.15.2
   ARTIFACT:     ReachVariantEditor.zip
 
